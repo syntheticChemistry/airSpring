@@ -1,0 +1,17 @@
+# airSpring Phase 0 — Python baseline dependencies
+# Install: pip install -r control/requirements.txt
+
+# FAO-56 Penman-Monteith (Exp 001)
+# pyeto no longer on PyPI; pyet provides FAO-56 PM + 19 other methods
+pyet>=1.4
+
+# Scientific computing (all experiments)
+numpy>=1.24
+scipy>=1.10
+pandas>=2.0
+
+# Visualization (optional, for figures)
+matplotlib>=3.7
+
+# Data download (Enviro-weather API, NOAA CDO)
+requests>=2.28

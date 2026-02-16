@@ -19,9 +19,8 @@ venv/
 .venv/
 env/
 
-# Data (downloaded, not tracked)
-data/raw/
-data/cache/
+# Data (downloaded from APIs, computed — not tracked)
+data/
 *.csv.gz
 *.nc
 

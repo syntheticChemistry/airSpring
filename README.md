@@ -2,188 +2,154 @@
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
 
-airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **wetSpring** validates *points in a system* (microbiome samples, water analytes, PFAS data), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
-
-The evolution path:
+airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
 
 ```
-Python/MATLAB baselines → Rust validation (BarraCUDA) → GPU acceleration (ToadStool) → sovereign pipeline
+Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCUDA) → GPU (ToadStool) → Penny Irrigation
 ```
+
+## Current Status
+
+| Phase | Status | Key Metric |
+|-------|--------|------------|
+| Phase 0: Paper baselines (Python) | **142/142 PASS** | FAO-56, soil, IoT, water balance |
+| Phase 0+: Real data pipeline | **918 station-days** | ET₀ R²=0.967 vs Open-Meteo |
+| Phase 1: Rust validation | **70/70 PASS** | BarraCUDA: ET₀, soil, IoT, water balance |
+| Phase 2: Real data → Rust | Planned | Cross-validate Python vs Rust |
+| Phase 3: GPU acceleration | Planned | Spatial kriging, real-time IoT |
+| Phase 4: Penny Irrigation | Vision | Sovereign, consumer hardware |
+
+## Quick Start
+
+```bash
+# 1. Install Python dependencies
+pip install -r control/requirements.txt
+
+# 2. Download REAL weather data (Open-Meteo — free, no key)
+python scripts/download_open_meteo.py --all-stations --growing-season 2023
+
+# 3. Run full validation suite (paper benchmarks + real data pipeline)
+bash scripts/run_all_baselines.sh
+
+# 4. Run Rust validation (requires barracuda dependency)
+cd barracuda && cargo run --release --bin validate_et0
+```
+
+No institutional access required. Zero synthetic data in the default pipeline.
+
+## Data Strategy
+
+Paper data validates our methods. Open data is what we compute on.
+
+| Layer | Source | Purpose | API Key |
+|-------|--------|---------|---------|
+| **Benchmark** | FAO-56 tables, Dong 2020/2024 | Ground truth (digitized) | None |
+| **Open Data** | Open-Meteo archive | 80+ yr Michigan weather | **None (free)** |
+| **Open Data** | OpenWeatherMap | Current + 5-day forecast | `testing-secrets/` |
+| **Open Data** | NOAA CDO (GHCND) | Historical daily | `testing-secrets/` |
+| **Open Data** | USDA Web Soil Survey | Soil properties | None |
+| **Fallback** | Synthetic generation | Only if API unreachable | N/A |
 
 ## Research Context
 
 ### Track 1: Precision Irrigation & Soil Science
 
-**Younsuk Dong, PhD** — Assistant Professor & Irrigation Specialist, Biosystems
-and Agricultural Engineering, Michigan State University. PhD Biosystems
-Engineering, MSU 2018. Research: precision irrigation IoT, soil moisture sensing,
-evapotranspiration modeling, agricultural water management. Published in
-Computers and Electronics in Agriculture, Frontiers in Water, Agricultural Water
-Management, Smart Agricultural Technology.
+**Younsuk Dong, PhD** — Assistant Professor & Irrigation Specialist, Biosystems and Agricultural Engineering, Michigan State University.
 
-#### The Problem
+**The Problem**: Agricultural irrigation consumes ~70% of global freshwater withdrawals. Inefficient scheduling wastes 30-50% of applied water. Current precision irrigation relies on proprietary sensor systems ($500-$5000/field) and vendor-locked software. Small-to-medium farms cannot afford the instrumentation or expertise.
 
-Agricultural irrigation consumes ~70% of global freshwater withdrawals.
-Inefficient scheduling wastes 30-50% of applied water while simultaneously
-degrading soil health through over- or under-watering. Current precision
-irrigation relies on proprietary sensor systems ($500-$5000/field), commercial
-scheduling software (vendor-locked to specific sensor brands), and institutional
-weather station networks with limited spatial resolution. Small-to-medium farms
-cannot afford the instrumentation or expertise.
+**Computational Methods**:
 
-#### Computational Methods
-
-1. **Evapotranspiration modeling (FAO-56)** — Reference ET₀ and crop ET using
-   the Penman-Monteith equation. The foundational calculation for all
-   irrigation scheduling. Current: FAO paper tables + Excel/Python scripts.
-
-2. **Soil moisture sensor calibration** — Dielectric permittivity → volumetric
-   water content using Topp equation and soil-specific calibration curves.
-   Current: manufacturer curves + field calibration (Python/R).
-
-3. **IoT field monitoring** — Real-time soil moisture, PAR (photosynthetically
-   active radiation), leaf wetness, and weather data from distributed sensor
-   networks. Current: Arduino/ESP32 + MQTT + Python/Node-RED dashboards.
-
-4. **Irrigation scheduling algorithms** — Water balance methods (checkbook),
-   soil moisture threshold-based, and model-predictive approaches.
-   Current: spreadsheet models + commercial software.
-
-5. **Weighing lysimeter design** — Direct measurement of evapotranspiration
-   from load cell data. Current: microcontroller-based (Dong & Hansen, 2023,
-   Smart Agricultural Technology).
+1. **Evapotranspiration (FAO-56)** — Penman-Monteith reference ET₀. The foundational calculation for all irrigation scheduling.
+2. **Soil moisture calibration** — Dielectric permittivity → VWC using Topp equation and soil-specific corrections.
+3. **IoT field monitoring** — Real-time soil moisture, weather, PAR from distributed sensor networks.
+4. **Water balance scheduling** — FAO-56 Chapter 8 daily root zone depletion tracking.
+5. **Weighing lysimeter** — Direct ET measurement from load cell data (Dong & Hansen, 2023).
 
 ### Track 2: Environmental Systems & Land Treatment
 
-#### The Problem
+1. **Richards equation** — Unsaturated flow in soils (open-source alternative to HYDRUS).
+2. **Biochar adsorption** — Langmuir/Freundlich isotherms (Kumari, Dong & Safferman, 2025).
+3. **Agrivoltaics** — PAR interception modeling under solar panel arrays.
 
-Wastewater land application, contaminant transport through soils, and PFAS
-remediation via biochar require numerical modeling that currently depends on
-proprietary software (HYDRUS, MODFLOW) or fragile Python/Fortran wrappers.
-Agrivoltaics (dual-use solar + agriculture) is an emerging field requiring
-microclimate modeling that current tools cannot perform at field scale in
-real time.
+## Key Publications
 
-#### Computational Methods
+- Dong et al. (2020) "Soil moisture sensor evaluation in Michigan soils" *Agriculture* 10(12), 598
+- Dong & Hansen (2023) "Affordable weighing lysimeter design" *Smart Ag Tech* 4, 100147
+- Dong et al. (2024) "In-field IoT for precision irrigation" *Frontiers in Water* 6, 1353597
+- Ali, Dong & Lavely (2024) "Irrigation scheduling vs yield" *Ag Water Mgmt* 306, 109148
+- Dong et al. (2019) "Land-based wastewater modeling using HYDRUS CW2D" *J. SWBE* 5(4)
+- Kumari, Dong & Safferman (2025) "Phosphorus adsorption using biochar" *Applied Water Sci* 15(7)
 
-1. **Contaminant transport modeling** — Richards equation for unsaturated flow,
-   advection-dispersion for solute transport. Current: HYDRUS CW2D
-   (Fortran + Python wrapper). Dong et al., 2019, J. Environ. Sci. Health.
+## Directory Structure
 
-2. **Biochar adsorption modeling** — Heavy metal and phosphorus adsorption
-   isotherms (Langmuir, Freundlich, BET). Current: scipy curve_fit +
-   custom Python scripts. Kumari, Dong & Safferman, 2025, Applied Water Sci.
-
-3. **Agrivoltaics microclimate** — Coupling solar panel shading geometry with
-   crop growth models (PAR interception, soil temperature, ET modification).
-   Current: empirical + MATLAB/Python models.
-
-4. **Agricultural LPWAN/backscatter** — Signal propagation modeling for
-   underground (cross-soil) and aerial agricultural IoT networks.
-   Current: MATLAB + ray tracing. Ren, Dong, Cao et al., MobiCom 2024.
-
-5. **Meta-analysis** — Systematic review and meta-regression of irrigation
-   scheduling effects on crop yield. Ali, Dong & Lavely, 2024,
-   Agricultural Water Management.
+```
+airSpring/
+├── control/                     # Phase 0: Python/R baselines
+│   ├── fao56/                   # FAO-56 Penman-Monteith ET₀
+│   │   ├── penman_monteith.py   #   Paper benchmark validation (64/64)
+│   │   ├── compute_et0_real_data.py  # ET₀ on real Michigan data
+│   │   └── benchmark_fao56.json #   Digitized FAO-56 examples
+│   ├── soil_sensors/            # Soil moisture calibration
+│   │   ├── calibration_dong2020.py   # Topp eq + corrections (36/36)
+│   │   └── benchmark_dong2020.json
+│   ├── iot_irrigation/          # IoT irrigation pipeline
+│   │   ├── calibration_dong2024.py   # SoilWatch 10 + scheduling (24/24)
+│   │   ├── anova_irrigation.R        # R ANOVA (paper used R v4.3.1)
+│   │   └── benchmark_dong2024.json
+│   ├── water_balance/           # FAO-56 soil water balance
+│   │   ├── fao56_water_balance.py    # Mass-conserving model (18/18)
+│   │   ├── simulate_real_data.py     # 4 crops on real weather
+│   │   └── benchmark_water_balance.json
+│   └── requirements.txt
+├── barracuda/                   # Phase 1: Rust validation (70/70)
+│   ├── src/
+│   │   ├── eco/                 # evapotranspiration, soil_moisture, water_balance
+│   │   ├── io/                  # csv_ts (IoT time series parser)
+│   │   └── bin/                 # validate_et0, validate_soil, validate_iot, validate_water_balance
+│   └── Cargo.toml
+├── scripts/                     # Data download + orchestration
+│   ├── download_open_meteo.py   # Open-Meteo (free, no key, 80+ yr)
+│   ├── download_enviroweather.py # OpenWeatherMap (current + forecast)
+│   ├── download_noaa.py         # NOAA CDO (GHCND historical)
+│   └── run_all_baselines.sh     # Full validation suite
+├── data/                        # Downloaded real data (not committed)
+│   ├── open_meteo/              # 918 station-days, 6 Michigan stations
+│   ├── enviroweather/           # OpenWeatherMap current weather
+│   ├── noaa/                    # NOAA CDO GHCND data
+│   ├── et0_results/             # Computed ET₀ on real data
+│   └── water_balance_results/   # Water balance simulations
+├── whitePaper/                  # Methodology and study documentation
+├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
+└── LICENSE                      # AGPL-3.0-or-later
+```
 
 ## Relationship to Other Springs
 
-| | hotSpring | wetSpring T1 | wetSpring T2 | **airSpring T1** | **airSpring T2** |
-|--|-----------|-------------|--------------|-----------------|-----------------|
-| Domain | Nuclear physics | Life science | Analytical chem | Precision agriculture | Environmental systems |
-| Scale | Nucleus (fm) | Cell/organism | Molecule | Field/watershed | Soil profile |
-| Validation | Binding energies | Organism ID | PFAS ID | ET₀ / yield | Contaminant flux |
-| Baseline | Python scipy | Galaxy/QIIME2 | asari/PFΔScreen | FAO-56/Python | HYDRUS/scipy |
-| Evolution | Rust BarraCUDA | Rust BarraCUDA | Rust BarraCUDA | Rust BarraCUDA | Rust BarraCUDA |
-| GPU layer | ToadStool (wgpu) | ToadStool | ToadStool | ToadStool | ToadStool |
-| Success metric | chi² match | Same taxonomy | Same PFAS detected | Same ET₀/yield | Same transport |
-| Ultimate goal | Sovereign nuclear | Sovereign metagenomics | Penny water monitoring | **Penny irrigation** | **Sovereign remediation** |
+| | hotSpring | wetSpring | **airSpring** |
+|--|-----------|-----------|---------------|
+| Domain | Nuclear physics | Life/analytical science | Ecological systems |
+| Scale | Nucleus (fm) | Cell/molecule | Field/watershed |
+| Validation | Binding energies | Organism/PFAS ID | ET₀, yield, water balance |
+| Baseline | Python/scipy | Galaxy/QIIME2/asari | **FAO-56/Python/R** |
+| Data | AME2020 (IAEA) | GenBank, MassBank | **Open-Meteo, NOAA, FAO** |
+| Evolution | Rust BarraCUDA | Rust BarraCUDA | **Rust BarraCUDA** |
+| GPU layer | ToadStool (wgpu) | ToadStool | **ToadStool** |
+| Success metric | chi² match | Same taxonomy/PFAS | **Same ET₀/yield** |
+| Ultimate goal | Sovereign nuclear | Penny water monitoring | **Penny irrigation** |
 
-### The Three Springs
-
-- **hotSpring** proved BarraCUDA/ToadStool can replicate institutional physics
-  (clean math, f64, nuclear binding energies)
-- **wetSpring** expands to messy biological data (sequences, mass spectra,
-  chemical fingerprints) — *points in a system*
-- **airSpring** expands to field-scale ecological systems (time series, spatial
-  data, IoT streams, coupled PDE solvers) — *the system itself*
-
-### Cross-Spring Kernels
+### Cross-Spring GPU Kernels
 
 | Kernel | hotSpring | wetSpring | airSpring |
 |--------|-----------|-----------|-----------|
-| ODE/PDE solvers | HFB solver | — | Richards eq, advection-dispersion |
-| Time series processing | — | LC-MS chromatograms | IoT sensor streams |
-| Statistical fitting | SEMF optimization | Peak fitting (Gaussian) | Calibration curves, meta-regression |
-| Spatial interpolation | — | — | Soil moisture kriging, PAR mapping |
-| Signal processing | — | Peak detection (asari) | Sensor filtering, leaf wetness |
-| Monte Carlo | Nuclear matter EOS | Rarefaction (ecology) | Uncertainty quantification |
-| Distance matrices | — | Bray-Curtis (diversity) | Spatial autocorrelation |
-
-## Datasets
-
-### Track 1: Precision Agriculture — Public Sources
-
-| ID | Dataset | Source | Size | Notes |
-|----|---------|--------|------|-------|
-| D1 | FAO-56 reference tables | FAO Paper 56 | ~1 MB | ET₀ validation (Penman-Monteith) |
-| D2 | Michigan AgWeather stations | MSU Enviro-weather | ~50 MB | Hourly weather (temp, humidity, wind, solar) |
-| D3 | Soil moisture sensor benchmarks | Dong et al. 2020 | ~5 MB | Coarse/fine-textured Michigan soils |
-| D4 | USDA Web Soil Survey | NRCS/USDA | ~10 MB | Soil hydraulic properties (Ksat, FC, WP) |
-| D5 | Lysimeter ET measurements | Dong & Hansen 2023 | ~2 MB | Direct ET from weighing lysimeter |
-| D6 | Irrigation meta-analysis | Ali, Dong & Lavely 2024 | ~1 MB | Global crop yield vs irrigation schedule |
-
-### Track 2: Environmental Systems — Public Sources
-
-| ID | Dataset | Source | Size | Notes |
-|----|---------|--------|------|-------|
-| D7 | HYDRUS CW2D examples | PC-Progress | ~5 MB | Constructed wetland test cases |
-| D8 | Biochar adsorption isotherms | Kumari et al. 2025 | ~1 MB | Heavy metals + phosphorus |
-| D9 | NOAA Climate Data Online | NOAA CDO | ~20 MB | Historical weather for Michigan |
-| D10 | Agrivoltaic PAR measurements | MSU Solar Farm | ~5 MB | Sub-panel PAR and temperature |
-| D11 | EPA PFAS soil remediation | EPA ORD | ~2 MB | Soil PFAS concentrations |
-
-## Experiments
-
-### Track 1: Precision Agriculture
-
-| Exp | Name | Goal | Status |
-|-----|------|------|--------|
-| 001 | FAO-56 Bootstrap | Validate Penman-Monteith ET₀ against FAO paper tables | Planned |
-| 002 | Soil Sensor Calibration | Reproduce Topp equation + Michigan soil calibration | Planned |
-| 003 | IoT Data Pipeline | Parse real IoT sensor time series (soil moisture, PAR, weather) | Planned |
-| 004 | Irrigation Scheduling | Implement water balance + threshold scheduling | Planned |
-| 005 | Lysimeter Validation | Reproduce ET from lysimeter load cell data | Planned |
-
-### Track 2: Environmental Systems
-
-| Exp | Name | Goal | Status |
-|-----|------|------|--------|
-| 006 | HYDRUS Benchmark | Reproduce 1D Richards equation solution against HYDRUS | Planned |
-| 007 | Biochar Isotherms | Fit Langmuir/Freundlich curves, validate against published data | Planned |
-| 008 | Agrivoltaics PAR | Model PAR interception under solar panels | Planned |
-
-## Evolution Roadmap
-
-```
-Track 1 (Precision Agriculture):
-  Phase 0:      FAO-56 + sensor calibration validation (Python baselines)
-  Phase 1:      IoT pipeline + irrigation scheduling (Python/R)
-  Phase 2:      Rust ports (BarraCUDA: ET₀, calibration, water balance)
-  Phase 3:      GPU acceleration (real-time IoT, spatial interpolation)
-  Phase 4:      Penny irrigation (sovereign, low-cost sensor + GPU)
-
-Track 2 (Environmental Systems):
-  Phase B0:     HYDRUS benchmarks + biochar fitting (Python baselines)
-  Phase B1:     Contaminant transport + adsorption (Python/scipy)
-  Phase B2:     Rust ports (BarraCUDA: Richards solver, isotherm fitting)
-  Phase B3:     GPU acceleration (field-scale PDE solver, Monte Carlo)
-  Phase B4:     Sovereign remediation monitoring
-```
+| ODE/PDE solver | HFB eigensolve | — | Richards equation |
+| Time series filter | — | LC-MS chromatogram | IoT sensor streams |
+| Nonlinear fitting | SEMF optimization | Peak fitting | Calibration curves |
+| Spatial interpolation | — | — | Soil moisture kriging |
+| Monte Carlo | Nuclear EOS | Rarefaction | Uncertainty quantification |
+| Reduction | Binding energy sums | Peak areas | Temporal aggregation |
 
 ## Hardware Gate
-
-Same gate as wetSpring/hotSpring — all ecoPrimals springs validate on:
 
 | Component | Specification |
 |-----------|--------------|
@@ -200,3 +166,7 @@ AGPL-3.0-or-later
 ---
 
 *Initialized: February 16, 2026*
+*Phase 0 Python baselines: 142/142 PASS*
+*Real data pipeline: 918 station-days, ET₀ R²=0.97, 4 crop water balance*
+*BarraCUDA Rust validation: 70/70 PASS*
+*NOAA CDO: live with real token*

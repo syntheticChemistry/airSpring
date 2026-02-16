@@ -1,0 +1,98 @@
+{
+  "_source": "Dong, Werling, Cao, Li (2024) Implementation of an In-Field IoT System for Precision Irrigation Management. Frontiers in Water 6, 1353597",
+  "_doi": "10.3389/frwa.2024.1353597",
+  "_note": "Values digitized from published tables, equations, and text",
+
+  "soilwatch10_calibration": {
+    "_description": "Eq. 5: VWC = 2E-13(RC)³ - 4E-9(RC)² + 4E-5(RC) - 0.0677",
+    "equation_coefficients": {
+      "a3": 2e-13,
+      "a2": -4e-9,
+      "a1": 4e-5,
+      "a0": -0.0677
+    },
+    "vwc_calibration_range": {
+      "min_cm3_cm3": 0.04,
+      "max_cm3_cm3": 0.40
+    },
+    "power_voltage": 3.3
+  },
+
+  "sensor_performance_table2": {
+    "_description": "Table 2: Statistical analysis comparing measured to calibrated sensor values",
+    "sand": {
+      "rmse_cm3_cm3": 0.01,
+      "ia": 0.97,
+      "mbe_cm3_cm3": 0.01
+    },
+    "loamy_sand": {
+      "rmse_cm3_cm3": 0.023,
+      "ia": 0.98,
+      "mbe_cm3_cm3": -0.02
+    }
+  },
+
+  "irrigation_recommendation": {
+    "_description": "Eq. 1: IR = (FC_i - θv_i) × D_i",
+    "equation": "IR_cm = (FC_layer_i - theta_v_layer_i) * D_layer_i",
+    "example_sandy_soil": {
+      "field_capacity_cm_cm": 0.12,
+      "current_vwc_cm_cm": 0.08,
+      "depth_cm": 30,
+      "expected_ir_cm": 1.2
+    }
+  },
+
+  "blueberry_demonstration": {
+    "_description": "West Olive, MI — blueberry yield comparison",
+    "treatment_farmer": {
+      "irrigation": "60 min drip",
+      "yield_per_plant_g": 552,
+      "fifty_berry_weight_g": 87.7
+    },
+    "treatment_recommended": {
+      "irrigation": "40 min drip",
+      "yield_per_plant_g": 722,
+      "fifty_berry_weight_g": 93.7
+    },
+    "anova_results": {
+      "yield_p_value": 0.025,
+      "berry_weight_p_value": 0.013
+    },
+    "replications": 4,
+    "significance_level": 0.05
+  },
+
+  "tomato_demonstration": {
+    "_description": "Hart, MI — automation irrigation vs farmer practice",
+    "treatment_farmer": {
+      "method": "1hr/day Jun, 2x1hr/day Jul-Aug"
+    },
+    "treatment_sensor": {
+      "method": "soil moisture trigger-based"
+    },
+    "anova_results": {
+      "marketable_count_p_value": 0.382,
+      "weight_p_value": 0.756
+    },
+    "water_savings_pct": 30,
+    "replications": 4,
+    "plants_per_replication": 8,
+    "significance_level": 0.05,
+    "statistical_software": "R v4.3.1"
+  },
+
+  "criteria": {
+    "mbe_threshold_cm3_cm3": 0.02,
+    "rmse_threshold_cm3_cm3": 0.035
+  },
+
+  "corn_demonstration": {
+    "_description": "Manchester, MI — corn irrigation evaluation",
+    "sensor_depths_cm": [15, 60, 90],
+    "irrigation_per_event_cm": [2.50, 3.20],
+    "root_depth_cm": 90,
+    "irrigation_system": "center pivot",
+    "overirrigation_events": 2
+  }
+}
