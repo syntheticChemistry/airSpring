@@ -1,59 +1,103 @@
-//! CSV time series parser for IoT sensor data.
+//! Streaming CSV time series parser for `IoT` sensor data.
 //!
 //! Parses timestamped sensor data (soil moisture, temperature, PAR, weather)
-//! from standard CSV files as produced by agricultural IoT systems.
+//! from standard CSV files as produced by agricultural `IoT` systems.
+//!
+//! # Design
+//!
+//! - **Streaming**: Uses `BufReader` — never buffers entire file in memory.
+//! - **Columnar**: Data stored as one `Vec<f64>` per column, not per-record
+//!   `HashMap`. This is cache-friendly for column-wise statistical operations.
+//! - **Zero-copy column access**: `column()` returns `&[f64]` slice, no allocation.
 
+use crate::error::{AirSpringError, Result};
 use std::collections::HashMap;
+use std::io::{self, BufRead};
 use std::path::Path;
 
-/// A single timestamped record from a sensor CSV.
-#[derive(Debug, Clone)]
-pub struct TimeseriesRecord {
-    /// Timestamp as string (ISO 8601 or custom)
-    pub timestamp: String,
-    /// Named fields: column_name -> value
-    pub fields: HashMap<String, f64>,
-}
-
-/// Parsed time series dataset.
+/// Columnar time series dataset.
+///
+/// Stores data in column-major order for efficient statistical operations.
 #[derive(Debug, Clone)]
 pub struct TimeseriesData {
-    /// Column headers (excluding timestamp)
-    pub columns: Vec<String>,
-    /// All records in chronological order
-    pub records: Vec<TimeseriesRecord>,
-    /// Name of the timestamp column
+    /// Column names (excluding timestamp)
+    column_names: Vec<String>,
+    /// Column name → index mapping for O(1) lookup
+    column_index: HashMap<String, usize>,
+    /// Timestamp strings in chronological order
+    timestamps: Vec<String>,
+    /// Column data: `columns[col_idx][row_idx]` = value.
+    /// `NaN` for missing values.
+    columns: Vec<Vec<f64>>,
+    /// Name of the timestamp column.
     pub timestamp_column: String,
 }
 
 impl TimeseriesData {
-    /// Number of records.
-    pub fn len(&self) -> usize {
-        self.records.len()
+    /// Construct a `TimeseriesData` from pre-built columns.
+    ///
+    /// Used by [`crate::testutil`] for synthetic data generation.
+    /// For parsing CSV files, use [`parse_csv`] or [`parse_csv_reader`].
+    #[must_use]
+    pub fn new(column_names: Vec<String>, timestamps: Vec<String>, columns: Vec<Vec<f64>>) -> Self {
+        let column_index: HashMap<String, usize> = column_names
+            .iter()
+            .enumerate()
+            .map(|(i, name)| (name.clone(), i))
+            .collect();
+        Self {
+            column_names,
+            column_index,
+            timestamps,
+            columns,
+            timestamp_column: "timestamp".to_string(),
+        }
+    }
+
+    /// Number of records (rows).
+    #[must_use]
+    pub const fn len(&self) -> usize {
+        self.timestamps.len()
     }
 
     /// Whether the dataset is empty.
-    pub fn is_empty(&self) -> bool {
-        self.records.is_empty()
+    #[must_use]
+    pub const fn is_empty(&self) -> bool {
+        self.timestamps.is_empty()
     }
 
-    /// Extract a single column as a Vec<f64>.
-    pub fn column(&self, name: &str) -> Option<Vec<f64>> {
-        if !self.columns.contains(&name.to_string()) {
-            return None;
-        }
-        Some(
-            self.records
-                .iter()
-                .map(|r| *r.fields.get(name).unwrap_or(&f64::NAN))
-                .collect(),
-        )
+    /// Column names (excluding timestamp).
+    #[must_use]
+    pub fn column_names(&self) -> &[String] {
+        &self.column_names
+    }
+
+    /// Number of data columns (excluding timestamp).
+    #[must_use]
+    pub const fn num_columns(&self) -> usize {
+        self.column_names.len()
+    }
+
+    /// Zero-copy column access by name. Returns `None` if column not found.
+    #[must_use]
+    pub fn column(&self, name: &str) -> Option<&[f64]> {
+        self.column_index
+            .get(name)
+            .map(|&idx| self.columns[idx].as_slice())
+    }
+
+    /// All timestamps.
+    #[must_use]
+    pub fn timestamps(&self) -> &[String] {
+        &self.timestamps
     }
 
     /// Compute basic statistics for a column.
+    #[must_use]
+    #[allow(clippy::cast_precision_loss)]
     pub fn column_stats(&self, name: &str) -> Option<ColumnStats> {
         let values = self.column(name)?;
-        let valid: Vec<f64> = values.iter().filter(|v| !v.is_nan()).copied().collect();
+        let valid: Vec<f64> = values.iter().copied().filter(|v| !v.is_nan()).collect();
         if valid.is_empty() {
             return None;
         }
@@ -62,8 +106,8 @@ impl TimeseriesData {
         let sum: f64 = valid.iter().sum();
         let mean = sum / n as f64;
         let variance = valid.iter().map(|v| (v - mean).powi(2)).sum::<f64>() / n as f64;
-        let min = valid.iter().cloned().fold(f64::MAX, f64::min);
-        let max = valid.iter().cloned().fold(f64::MIN, f64::max);
+        let min = valid.iter().copied().fold(f64::MAX, f64::min);
+        let max = valid.iter().copied().fold(f64::MIN, f64::max);
 
         Some(ColumnStats {
             count: n,
@@ -79,149 +123,219 @@ impl TimeseriesData {
 /// Basic statistics for a data column.
 #[derive(Debug, Clone)]
 pub struct ColumnStats {
+    /// Number of non-NaN values
     pub count: usize,
+    /// Arithmetic mean
     pub mean: f64,
+    /// Population standard deviation
     pub std_dev: f64,
+    /// Minimum value
     pub min: f64,
+    /// Maximum value
     pub max: f64,
+    /// Number of missing (NaN) values
     pub missing: usize,
 }
 
-/// Parse a CSV file with a header row.
+/// Parse a CSV file with streaming `BufReader`.
+///
 /// First column is assumed to be the timestamp unless `timestamp_col` is specified.
-pub fn parse_csv(path: &Path, timestamp_col: Option<&str>) -> Result<TimeseriesData, String> {
-    let content = std::fs::read_to_string(path)
-        .map_err(|e| format!("Read error {}: {}", path.display(), e))?;
+/// Data is stored in columnar format for efficient statistical access.
+///
+/// # Errors
+///
+/// Returns [`AirSpringError::Io`] if the file cannot be opened,
+/// [`AirSpringError::CsvParse`] if the input is empty or has no columns.
+#[must_use = "parsed timeseries should be used"]
+pub fn parse_csv(path: &Path, timestamp_col: Option<&str>) -> Result<TimeseriesData> {
+    let file = std::fs::File::open(path)?;
+    let reader = io::BufReader::new(file);
+    parse_csv_reader(reader, timestamp_col)
+}
 
-    let mut lines = content.lines();
+/// Parse CSV from any `BufRead` source (file, stdin, network stream, bytes).
+///
+/// # Errors
+///
+/// Returns [`AirSpringError::CsvParse`] if the input is empty or has no columns.
+#[must_use = "parsed timeseries should be used"]
+pub fn parse_csv_reader<R: BufRead>(
+    reader: R,
+    timestamp_col: Option<&str>,
+) -> Result<TimeseriesData> {
+    let mut lines = reader.lines();
 
     // Parse header
     let header_line = lines
         .next()
-        .ok_or_else(|| "Empty CSV file".to_string())?;
-    let headers: Vec<String> = header_line.split(',').map(|s| s.trim().to_string()).collect();
+        .ok_or_else(|| AirSpringError::CsvParse("Empty CSV input".to_string()))?
+        .map_err(AirSpringError::Io)?;
+    let headers: Vec<String> = header_line
+        .split(',')
+        .map(|s| s.trim().to_string())
+        .collect();
 
     if headers.is_empty() {
-        return Err("No columns in CSV".to_string());
+        return Err(AirSpringError::CsvParse("No columns in CSV".to_string()));
     }
 
     let ts_col = timestamp_col.unwrap_or(&headers[0]);
-    let ts_idx = headers
-        .iter()
-        .position(|h| h == ts_col)
-        .ok_or_else(|| format!("Timestamp column '{}' not found", ts_col))?;
+    let ts_idx = headers.iter().position(|h| h == ts_col).ok_or_else(|| {
+        AirSpringError::CsvParse(format!("Timestamp column '{ts_col}' not found"))
+    })?;
 
-    let data_columns: Vec<String> = headers
+    // Build column name list and index map (excluding timestamp)
+    let column_names: Vec<String> = headers
         .iter()
         .enumerate()
         .filter(|(i, _)| *i != ts_idx)
         .map(|(_, h)| h.clone())
         .collect();
 
-    let mut records = Vec::new();
-    for line in lines {
+    let column_index: HashMap<String, usize> = column_names
+        .iter()
+        .enumerate()
+        .map(|(i, name)| (name.clone(), i))
+        .collect();
+
+    let num_cols = column_names.len();
+    let mut columns: Vec<Vec<f64>> = vec![Vec::new(); num_cols];
+    let mut timestamps = Vec::new();
+
+    // Stream rows — never buffer entire file
+    for line_result in lines {
+        let line = line_result.map_err(AirSpringError::Io)?;
         let line = line.trim();
         if line.is_empty() || line.starts_with('#') {
             continue;
         }
+
         let parts: Vec<&str> = line.split(',').collect();
         if parts.len() != headers.len() {
             continue; // Skip malformed rows
         }
 
-        let timestamp = parts[ts_idx].trim().to_string();
-        let mut fields = HashMap::new();
+        timestamps.push(parts[ts_idx].trim().to_string());
 
-        for (i, col_name) in headers.iter().enumerate() {
+        let mut col_idx = 0;
+        for (i, _) in headers.iter().enumerate() {
             if i == ts_idx {
                 continue;
             }
-            if let Ok(val) = parts[i].trim().parse::<f64>() {
-                fields.insert(col_name.clone(), val);
-            }
+            let value = parts[i].trim().parse::<f64>().unwrap_or(f64::NAN);
+            columns[col_idx].push(value);
+            col_idx += 1;
         }
-
-        records.push(TimeseriesRecord { timestamp, fields });
     }
 
     Ok(TimeseriesData {
-        columns: data_columns,
-        records,
+        column_names,
+        column_index,
+        timestamps,
+        columns,
         timestamp_column: ts_col.to_string(),
     })
 }
 
-/// Generate a synthetic IoT sensor CSV dataset for testing.
-pub fn generate_synthetic_data(n_records: usize) -> TimeseriesData {
-    let columns = vec![
-        "soil_moisture_1".to_string(),
-        "soil_moisture_2".to_string(),
-        "temperature".to_string(),
-        "humidity".to_string(),
-        "par".to_string(),
-    ];
-
-    let mut records = Vec::with_capacity(n_records);
-    for i in 0..n_records {
-        let hour = i % 24;
-        let day = i / 24;
-        let timestamp = format!("2024-07-{:02}T{:02}:00:00", day + 1, hour);
-
-        let mut fields = HashMap::new();
-        // Soil moisture: slowly decreasing with daily ET, recharge events
-        let base_sm = 0.28 - 0.002 * (i as f64);
-        let sm1 = (base_sm + 0.02 * ((i as f64 * 0.1).sin())).clamp(0.10, 0.40);
-        let sm2 = (base_sm - 0.01 + 0.015 * ((i as f64 * 0.1 + 1.0).sin())).clamp(0.10, 0.40);
-        fields.insert("soil_moisture_1".to_string(), sm1);
-        fields.insert("soil_moisture_2".to_string(), sm2);
-
-        // Temperature: diurnal cycle
-        let temp = 25.0 + 8.0 * ((hour as f64 - 14.0) * PI / 12.0).cos();
-        fields.insert("temperature".to_string(), temp);
-
-        // Humidity: inverse of temperature
-        let rh = 70.0 - 15.0 * ((hour as f64 - 14.0) * PI / 12.0).cos();
-        fields.insert("humidity".to_string(), rh);
-
-        // PAR: bell curve centered at noon
-        let par = if hour >= 6 && hour <= 20 {
-            1800.0 * (-(((hour as f64 - 13.0) / 3.5).powi(2))).exp()
-        } else {
-            0.0
-        };
-        fields.insert("par".to_string(), par);
-
-        records.push(TimeseriesRecord { timestamp, fields });
-    }
-
-    TimeseriesData {
-        columns,
-        records,
-        timestamp_column: "timestamp".to_string(),
-    }
-}
-
-use std::f64::consts::PI;
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::testutil::generate_synthetic_iot_data;
 
     #[test]
-    fn test_synthetic_data() {
-        let data = generate_synthetic_data(48); // 2 days
+    fn test_synthetic_data_structure() {
+        let data = generate_synthetic_iot_data(48);
         assert_eq!(data.len(), 48);
-        assert_eq!(data.columns.len(), 5);
-
-        let stats = data.column_stats("temperature").unwrap();
-        assert!(stats.mean > 20.0 && stats.mean < 30.0);
+        assert_eq!(data.num_columns(), 5);
+        assert!(!data.is_empty());
     }
 
     #[test]
-    fn test_column_extraction() {
-        let data = generate_synthetic_data(24);
+    fn test_synthetic_temperature_stats() {
+        let data = generate_synthetic_iot_data(48);
+        let stats = data.column_stats("temperature").unwrap();
+        assert!(stats.mean > 20.0 && stats.mean < 30.0);
+        assert!(stats.min > 15.0);
+        assert!(stats.max < 35.0);
+    }
+
+    #[test]
+    fn test_column_access_zero_copy() {
+        let data = generate_synthetic_iot_data(24);
         let temps = data.column("temperature").unwrap();
         assert_eq!(temps.len(), 24);
-        assert!(temps.iter().all(|t| *t > 10.0 && *t < 40.0));
+        assert!(temps.iter().all(|&t| t > 10.0 && t < 40.0));
+    }
+
+    #[test]
+    fn test_column_not_found() {
+        let data = generate_synthetic_iot_data(24);
+        assert!(data.column("nonexistent").is_none());
+    }
+
+    #[test]
+    fn test_csv_round_trip() {
+        use std::io::Write;
+
+        let data = generate_synthetic_iot_data(48);
+        let mut buf = Vec::new();
+        writeln!(
+            buf,
+            "timestamp,soil_moisture_1,soil_moisture_2,temperature,humidity,par"
+        )
+        .unwrap();
+        for i in 0..data.len() {
+            writeln!(
+                buf,
+                "{},{:.4},{:.4},{:.2},{:.2},{:.1}",
+                data.timestamps()[i],
+                data.column("soil_moisture_1").unwrap()[i],
+                data.column("soil_moisture_2").unwrap()[i],
+                data.column("temperature").unwrap()[i],
+                data.column("humidity").unwrap()[i],
+                data.column("par").unwrap()[i],
+            )
+            .unwrap();
+        }
+
+        let cursor = io::Cursor::new(buf);
+        let parsed = parse_csv_reader(cursor, Some("timestamp")).unwrap();
+        assert_eq!(parsed.len(), 48);
+        assert_eq!(parsed.num_columns(), 5);
+
+        // Values survive round-trip within formatting precision
+        let orig_stats = data.column_stats("temperature").unwrap();
+        let parsed_stats = parsed.column_stats("temperature").unwrap();
+        assert!((orig_stats.mean - parsed_stats.mean).abs() < 0.1);
+    }
+
+    #[test]
+    fn test_parse_empty_input() {
+        let cursor = io::Cursor::new(b"" as &[u8]);
+        assert!(parse_csv_reader(cursor, None).is_err());
+    }
+
+    #[test]
+    fn test_parse_header_only() {
+        let cursor = io::Cursor::new(b"time,temp,rh\n" as &[u8]);
+        let data = parse_csv_reader(cursor, Some("time")).unwrap();
+        assert_eq!(data.len(), 0);
+        assert_eq!(data.num_columns(), 2);
+    }
+
+    #[test]
+    fn test_parse_skips_malformed_rows() {
+        let input = b"time,temp\n2024-01-01,20.0\n2024-01-02\n2024-01-03,22.0\n";
+        let cursor = io::Cursor::new(input as &[u8]);
+        let data = parse_csv_reader(cursor, Some("time")).unwrap();
+        assert_eq!(data.len(), 2); // malformed row skipped
+    }
+
+    #[test]
+    fn test_parse_handles_comments() {
+        let input = b"time,temp\n# comment\n2024-01-01,20.0\n";
+        let cursor = io::Cursor::new(input as &[u8]);
+        let data = parse_csv_reader(cursor, Some("time")).unwrap();
+        assert_eq!(data.len(), 1);
     }
 }

@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
@@ -9,12 +9,20 @@ description = "Ecological & agricultural science pipelines — Rust + GPU via Ba
 [workspace]
 
 [dependencies]
+# BarraCUDA: GPU-promotion target. airSpring validates that Rust baselines
+# can be faithfully ported to BarraCUDA shaders. Used for stats primitives.
 barracuda = { path = "../../phase1/toadstool/crates/barracuda" }
+
+# Serialization: loads benchmark JSON files (control/fao56/*.json, etc.)
+# with full provenance for validation fidelity.
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-rayon = "1.10"
 
-# ── Track 1 validation binaries ──────────────────────────────────
+[dev-dependencies]
+# Async runtime for WgpuDevice initialisation in integration tests.
+pollster = "0.3"
+
+# ── Validation binaries ────────────────────────────────────────────
 [[bin]]
 name = "validate_et0"
 path = "src/bin/validate_et0.rs"

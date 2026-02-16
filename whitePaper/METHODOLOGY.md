@@ -32,12 +32,21 @@ Phase 0+ uses zero synthetic data. Three open data sources:
 
 ### Phase 1: BarraCUDA Execution (Rust Evolution)
 
-Re-implement the same computations in Pure Rust using BarraCUDA. Compare:
+Re-implement the same computations in pure Rust using BarraCUDA. Compare:
 - **Accuracy**: Same ET₀, soil moisture, water balance outputs as Python
 - **Throughput**: Evaluations per second
-- **Dependencies**: BarraCUDA target is minimal external dependencies
+- **Dependencies**: BarraCUDA target is minimal external dependencies (barracuda, serde, serde_json)
 - **Reproducibility**: Deterministic results
 - **GPU readiness**: Architecture suitable for ToadStool GPU acceleration
+- **Code quality**: Zero clippy pedantic/nursery warnings, proper error types, idiomatic Rust
+
+### Phase 2: Cross-Validation (Python↔Rust)
+
+Verify that Python and Rust produce identical results for identical inputs:
+- Structured harness computes values from fixed inputs in both languages
+- JSON output enables automated comparison
+- Tolerance: 1e-5 for all floating-point values
+- Covers: atmospheric, solar, radiation, ET₀, Topp, SoilWatch 10, irrigation, statistics, Hargreaves, sunshine Rs, monthly G
 
 ---
 
@@ -151,20 +160,22 @@ All experiments run on a single consumer workstation:
 
 ## 6. Acceptance Criteria Summary
 
-| Experiment | Phase 0 Target | Phase 0+ Target | Phase 1 Target |
-|------------|---------------|-----------------|----------------|
-| FAO-56 ET₀ | ET₀ ±0.15 mm/d of FAO examples | R² > 0.95 vs Open-Meteo | Match Python outputs |
-| Soil Sensors | Topp ±0.005 m³/m³; stats exact | — | Match Python outputs |
-| IoT Pipeline | SoilWatch 10 + irrigation model correct | — | CSV stats match Python |
-| Water Balance | Mass balance < 0.001 mm | Savings consistent with Dong (2024) | Mass balance match Python |
+| Experiment | Phase 0 Target | Phase 0+ Target | Phase 1 Target | Phase 2 Target |
+|------------|---------------|-----------------|----------------|----------------|
+| FAO-56 ET₀ | ET₀ ±0.15 mm/d of FAO examples | R² > 0.95 vs Open-Meteo | Match Python outputs | ≤1e-5 tolerance |
+| Soil Sensors | Topp ±0.005 m³/m³; stats exact | — | Match Python outputs | ≤1e-5 tolerance |
+| IoT Pipeline | SoilWatch 10 + irrigation correct | — | CSV stats + calibration match | ≤1e-5 tolerance |
+| Water Balance | Mass balance < 0.001 mm | Savings per Dong (2024) | Mass balance match Python | ≤1e-5 tolerance |
 
-### Grand Total: 212/212 Quantitative Checks Pass + 918 Real Data Points
+### Grand Total: 334 Quantitative Checks Pass + 918 Real Data Points
 
 | Phase | Checks | Description |
 |-------|:------:|-------------|
 | Phase 0 (Python control) | 142 | 64 ET₀ + 36 soil + 24 IoT + 18 water balance |
-| Phase 1 (Rust BarraCUDA) | 70 | 22 ET₀ + 25 soil + 11 IoT + 12 water balance |
-| **Total** | **212** | **All pass** |
+| Phase 1 (Rust BarraCUDA) | 101 | 31 ET₀ + 25 soil + 11 IoT + 13 water balance + 21 sensor calibration |
+| Phase 1 (Rust tests) | 106 | 70 unit + 36 integration (determinism, error paths, crop, cross-module) |
+| Phase 2 (Cross-validation) | 53 | Python↔Rust identical outputs (tol=1e-5) |
+| **Total** | **334** | **All pass** |
 | Phase 0+ (Real data) | 918 station-days | R²=0.967, 4 crop water balance, zero synthetic |
 
 ---
@@ -179,7 +190,7 @@ All experiments run on a single consumer workstation:
 | pandas | 2.0+ | Data handling |
 | pyet | 1.4+ | FAO-56 PM cross-reference |
 | R | 4.3.1 (paper match) | One-way ANOVA (planned) |
-| Rust | stable (1.77+) | BarraCUDA |
+| Rust | stable (1.77+) | BarraCUDA, zero unsafe |
 | serde | 1.x | Rust serialization |
-| rayon | 1.10 | Rust parallelism |
+| serde_json | 1.x | Benchmark JSON + cross-validation |
 | OS | Pop!_OS 22.04 | Linux 6.17 |

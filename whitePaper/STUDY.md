@@ -8,7 +8,7 @@
 
 ## Abstract
 
-We independently replicate four precision agriculture computational methods — FAO-56 Penman-Monteith evapotranspiration, dielectric soil moisture calibration, IoT-based irrigation scheduling, and daily soil water balance — using only open-source tools and publicly available data. The Python/R baselines (142/142 checks) validate against digitized paper benchmarks. A real data pipeline using Open-Meteo historical weather (918 station-days, 6 Michigan agricultural stations, 2023 growing season) produces ET₀ with R²=0.967 against an independent computation. Water balance simulations on real data show 53-72% water savings with smart scheduling — consistent with published results. A Rust implementation via BarraCUDA passes 70/70 validation checks, establishing the foundation for GPU-accelerated precision irrigation on consumer hardware.
+We independently replicate four precision agriculture computational methods — FAO-56 Penman-Monteith evapotranspiration, dielectric soil moisture calibration, IoT-based irrigation scheduling, and daily soil water balance — using only open-source tools and publicly available data. The Python/R baselines (142/142 checks) validate against digitized paper benchmarks. A real data pipeline using Open-Meteo historical weather (918 station-days, 6 Michigan agricultural stations, 2023 growing season) produces ET₀ with R²=0.967 against an independent computation. Water balance simulations on real data show 53-72% water savings with smart scheduling — consistent with published results. A Rust implementation via BarraCUDA passes 101/101 validation checks across 5 binaries with 106 tests, and a cross-validation harness confirms 53/53 Python-Rust value matches within 1e-5 tolerance — establishing the foundation for GPU-accelerated precision irrigation on consumer hardware.
 
 ---
 
@@ -117,40 +117,58 @@ All mass balances close to 0.0000 mm. Water savings of 53-72% are consistent wit
 
 ---
 
-## 4. Phase 1: Rust BarraCUDA (70/70 PASS)
+## 4. Phase 1: Rust BarraCUDA (101/101 PASS, 106 tests)
 
 ### 4.1 Module Structure
 
-| Module | Functions | Tests |
-|--------|----------|:-----:|
-| `eco::evapotranspiration` | 17 FAO-56 functions + DailyEt0Input struct | 22 |
-| `eco::soil_moisture` | Topp eq, inverse, PAW, SoilTexture enum | 25 |
-| `eco::water_balance` | WaterBalanceState, simulate_season, mass_balance | 12 |
-| `io::csv_ts` | TimeseriesData parser, ColumnStats | 11 |
+| Module | Functions | Validation Checks | Unit Tests |
+|--------|----------|:-----------------:|:----------:|
+| `eco::evapotranspiration` | 22 FAO-56 functions + Hargreaves, sunshine Rs, monthly G | 31 | 25 |
+| `eco::crop` | CropType enum (10 crops), FAO-56 Table 12 Kc, Eq. 62 climate adj. | — | 7 |
+| `eco::sensor_calibration` | SoilWatch 10 VWC, irrigation recommendation, multi-layer | 21 | 8 |
+| `eco::soil_moisture` | Topp eq, inverse, PAW, SoilTexture, SoilHydraulicProps | 25 | 10 |
+| `eco::water_balance` | WaterBalanceState, RunoffModel, simulate_season | 13 | 8 |
+| `io::csv_ts` | TimeseriesData columnar parser, streaming BufReader | 11 | 6 |
+| `error` | AirSpringError enum (Io, CsvParse, JsonParse, InvalidInput, Barracuda) | — | — |
+| `testutil` | RMSE, MBE, R², IA, NSE, synthetic data generators | — | 6 |
+| **Integration tests** | Cross-module pipelines, determinism, error paths, crop↔balance | — | 36 |
 
-### 4.2 Current Gaps (Python → Rust)
+### 4.2 Python-Rust Parity
 
-| Capability | Python | Rust | Gap |
-|-----------|:------:|:----:|-----|
-| FAO-56 ET₀ (full chain) | Yes | Yes | None — full implementation |
-| Sunshine hours Rs estimate | Yes | No | Rust expects Rs directly |
-| Hargreaves Rs from temp | Yes | No | Missing data pathway |
-| RMSE/IA/MBE statistics | Yes | No | Rust has Topp only, not stats |
-| Correction equation fitting | Yes | No | scipy curve_fit not ported |
-| SoilWatch 10 calibration | Yes | No | Rust does CSV parsing only |
-| Irrigation recommendation | Yes | No | Not yet in Rust |
+| Capability | Python | Rust | Status |
+|-----------|:------:|:----:|--------|
+| FAO-56 ET₀ (full chain) | Yes | Yes | **Complete** |
+| Sunshine hours Rs (Eq. 35) | Yes | Yes | **Complete** |
+| Temperature Rs / Hargreaves (Eq. 50, 52) | Yes | Yes | **Complete** |
+| Monthly soil heat flux (Eq. 43) | Yes | Yes | **Complete** |
+| RMSE/IA/MBE/R²/NSE statistics | Yes | Yes | **Complete** |
+| SoilWatch 10 calibration | Yes | Yes | **Complete** |
+| Irrigation recommendation (single + multi-layer) | Yes | Yes | **Complete** |
+| Crop Kc database (FAO-56 Table 12) | Yes | Yes | **Complete** (10 crops) |
+| Kc climate adjustment (Eq. 62) | No | Yes | **Rust only** |
+| Correction equation fitting | Yes | No | Needs nonlinear solver |
 | R ANOVA | R script | No | Statistical test |
 | Real data download | Yes | No | Python scripts handle APIs |
-| Runoff model | RO=0 (FAO) | Simple rule | Minor difference |
 
 ### 4.3 Rust Validation Results
 
 | Binary | Checks | Key Results |
 |--------|:------:|-------------|
-| validate_et0 | 22/22 | FAO-56 tables (10 es, 5 Delta), Uccle/Bangkok ET₀ |
+| validate_et0 | 31/31 | FAO-56 Tables 2.3/2.4, Example 18 Uccle within 0.0005 mm/day |
 | validate_soil | 25/25 | Topp (7 points), inverse round-trip, 5 USDA textures, PAW |
-| validate_iot | 11/11 | 168 records, 5 columns, CSV round-trip |
-| validate_water_balance | 12/12 | Mass balance 0.0000 (3 scenarios), Ks bounds |
+| validate_iot | 11/11 | 168 records, 5 columns, CSV round-trip, diurnal statistics |
+| validate_water_balance | 13/13 | Mass balance 0.0000 (3 scenarios), Ks bounds, MI summer |
+| validate_sensor_calibration | 21/21 | SoilWatch 10 VWC, irrigation model, Dong 2024 field results |
+
+### 4.4 Phase 2: Cross-Validation (53/53 MATCH)
+
+A structured cross-validation harness computes 53 values from identical inputs
+in both Python (`scripts/cross_validate.py`) and Rust (`cross_validate` binary),
+outputting JSON for automated comparison. All 53 values match within 1e-5
+tolerance across: atmospheric parameters, solar geometry, radiation, ET₀, Topp
+equation, SoilWatch 10 calibration, irrigation recommendation, statistical
+measures (RMSE, MBE, IA, R²), sunshine-based radiation, Hargreaves ET₀, and
+monthly soil heat flux.
 
 ---
 
@@ -184,17 +202,20 @@ The same BarraCUDA/ToadStool infrastructure supports both domains. The key share
 
 ## 6. Evolution Path
 
-### Near Term (Phase 2)
-- Cross-validate Python vs Rust: identical ET₀ outputs for same weather inputs
-- Port RMSE/IA/MBE statistics to Rust
-- Port SoilWatch 10 calibration to Rust
-- Benchmark: Rust vs Python throughput on 918 station-days
+### Completed (Phase 2)
+- ~~Cross-validate Python vs Rust~~ — **53/53 MATCH** within 1e-5 tolerance
+- ~~Port RMSE/IA/MBE/NSE statistics to Rust~~ — **Done** (`testutil`)
+- ~~Port SoilWatch 10 calibration to Rust~~ — **Done** (`eco::sensor_calibration`)
+- ~~Port Hargreaves ET₀, sunshine/temp Rs, monthly G~~ — **Done** (`eco::evapotranspiration`)
+- ~~Build crop Kc database~~ — **Done** (`eco::crop`, 10 crops, FAO-56 Table 12)
+- ~~Full pipeline demonstration~~ — **Done** (`simulate_season` binary)
 
-### Medium Term (Phase 3)
+### Near Term (Phase 3)
 - GPU acceleration via ToadStool for ET₀ computation across spatial grids
 - Spatial interpolation (kriging) for soil moisture mapping
 - Real-time IoT stream processing on GPU
 - Richards equation solver (1D unsaturated flow)
+- Benchmark: Rust vs Python throughput on 918 station-days
 
 ### Long Term (Phase 4: Penny Irrigation)
 - Sovereign irrigation scheduling on consumer hardware ($600 GPU)
@@ -204,4 +225,5 @@ The same BarraCUDA/ToadStool infrastructure supports both domains. The key share
 
 ---
 
-*February 2026 — 212/212 checks pass, 918 station-days real data, zero synthetic*
+*February 2026 — 334 checks pass, 106 Rust tests, 918 station-days real data,
+53/53 cross-validation match, zero synthetic*

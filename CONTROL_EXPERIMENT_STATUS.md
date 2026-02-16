@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-02-16 (Real data pipeline live — 918 station-days, ET₀ R²=0.97)
+**Updated**: 2026-02-16 (Phase 2 complete — 334 checks, 106 tests, 53/53 cross-validation)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -54,8 +54,18 @@ bash scripts/run_all_baselines.sh
 # 5. Optionally run R ANOVA (requires R >= 4.0)
 # Rscript control/iot_irrigation/anova_irrigation.R
 
-# 6. Run Rust validation binaries (70 checks)
-cd barracuda && cargo run --release --bin validate_et0
+# 6. Run Rust validation binaries (101 checks across 5 binaries)
+cd barracuda
+for bin in validate_et0 validate_soil validate_iot validate_water_balance validate_sensor_calibration; do
+  cargo run --release --bin $bin
+done
+
+# 7. Run Phase 2 cross-validation (53 values, Python vs Rust)
+cd .. && python3 scripts/cross_validate.py > /tmp/py.json
+cd barracuda && cargo run --release --bin cross_validate > /tmp/rs.json
+
+# 8. Run full season simulation demo
+cargo run --release --bin simulate_season
 ```
 
 No institutional access required. All data is from public open APIs
@@ -73,7 +83,6 @@ All tools are open source. Zero synthetic data in the default pipeline.
 | GPU | NVIDIA GeForce RTX 4070 (12 GB VRAM) |
 | Storage | 1 TB NVMe SSD |
 | OS | Pop!_OS 22.04 (Ubuntu-based) |
-| Docker | 24.x with Compose v2 |
 
 ---
 
@@ -213,24 +222,29 @@ Tools used: numpy, scipy (curve_fit), json (benchmarks), base Python math.
 All benchmark data digitized directly from published papers (FAO-56 tables,
 Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2 + yield data).
 
-### 2026-02-16: Project Initialization (Rust — 70/70 PASS)
+### 2026-02-16: Project Initialization → Phase 2 Complete (Rust — 101/101 PASS, 106 tests)
 
 - Created airSpring repository
 - Scaffolded Track 1 (Precision Agriculture) and Track 2 (Environmental Systems)
 - Identified Dr. Younsuk Dong (MSU BAE) as principal investigator
 - Defined 8 experiments across both tracks
-- Created airspring-barracuda Rust crate (4 modules, 4 validation binaries, 15 unit tests)
-- Dependencies: barracuda (phase1/toadstool), serde, rayon
+- Created airspring-barracuda Rust crate v0.2.0 (6 eco modules, 5 validation binaries, 7 binaries total)
+- Dependencies: barracuda (phase1/toadstool), serde, serde_json
+- Comprehensive audit and evolution to modern idiomatic Rust (zero clippy pedantic/nursery warnings)
+- `AirSpringError` unified error type replaces ad-hoc `String` errors
+- Phase 2 cross-validation harness: 53/53 values match Python within 1e-5
 - **All validation binaries PASS:**
 
 | Binary | Track | Checks | Key validations |
 |--------|-------|--------|----------------|
-| validate_et0 | T1 | 22/22 | FAO-56 tables (10 es, 5 Δ), Uccle ET₀ 3.33 mm/day, Bangkok 3.53 mm/day |
-| validate_soil | T1 | 25/25 | Topp equation (7 points), inverse round-trip, 5 USDA textures, PAW, triggers |
+| validate_et0 | T1 | 31/31 | FAO-56 Tables 2.3/2.4, Example 18 Uccle within 0.0005 mm/day |
+| validate_soil | T1 | 25/25 | Topp equation (7 points), inverse round-trip, 5 USDA textures, PAW |
 | validate_iot | T1 | 11/11 | 168 records, 5 columns, CSV round-trip, diurnal statistics |
-| validate_water_balance | T1 | 12/12 | Mass balance 0.0000 (3 scenarios), Ks bounds, MI summer 485mm ET |
+| validate_water_balance | T1 | 13/13 | Mass balance 0.0000 (3 scenarios), Ks bounds, MI summer |
+| validate_sensor_calibration | T1 | 21/21 | SoilWatch 10 VWC, irrigation model, Dong 2024 field results |
 
-**Total Rust: 70/70 checks PASS, 15/15 unit tests PASS**
+**Total Rust: 101/101 validation checks PASS, 106 tests (70 unit + 36 integration) PASS**
+**Phase 2 cross-validation: 53/53 MATCH (Python↔Rust, tol=1e-5)**
 
 ---
 
@@ -263,10 +277,10 @@ ET₀ = [0.408 Δ(Rn - G) + γ (900/(T+273)) u₂ (es - ea)] / [Δ + γ(1 + 0.34
 - [x] Cross-check vs Open-Meteo's own ET₀: RMSE=0.267 mm/d, R²=0.967
 - [x] Confirmed positive bias (+0.076 mm/d) from ERA5 reanalysis differences
 
-**Rust (Phase 1 — 22/22 PASS):**
-- [x] Implement in Rust (`eco::evapotranspiration`)
-- [x] Validate against FAO Paper 56 tables
-- [ ] Cross-validate: Python vs Rust identical outputs
+**Rust (Phase 1 — 31/31 PASS, Phase 2 — 53/53 MATCH):**
+- [x] Implement in Rust (`eco::evapotranspiration`) — 22 FAO-56 functions + Hargreaves, sunshine Rs, temp Rs, monthly G
+- [x] Validate against FAO Paper 56 tables (31 checks in `validate_et0`)
+- [x] Cross-validate: Python vs Rust identical outputs — 53/53 values match within 1e-5
 - [ ] Benchmark: Rust vs Python throughput
 
 ### Experiment 002: Soil Sensor Calibration — PHASE 0 COMPLETE
@@ -283,10 +297,10 @@ calibration curves against Dong et al. (2020) Michigan soil data.
 - [x] Verify paper's conclusion: quadratic best for all soils
 - [x] Confirm field RMSE improvements from Table 3 → corrected
 
-**Rust (Phase 1 — 25/25 PASS):**
-- [x] Implement Topp equation in Rust
-- [x] Validate against published values
-- [ ] Cross-validate: Python vs Rust identical outputs
+**Rust (Phase 1 — 25/25 PASS, Phase 2 — cross-validated):**
+- [x] Implement Topp equation in Rust (`eco::soil_moisture`)
+- [x] Validate against published values (25 checks in `validate_soil`)
+- [x] Cross-validate: Python vs Rust identical outputs — Topp values match within 1e-5
 
 ### Experiment 003: IoT Irrigation Pipeline — PHASE 0 COMPLETE
 
@@ -303,9 +317,12 @@ Dong et al. (2024) Frontiers in Water 6, 1353597.
 - [x] Write R ANOVA script matching paper's R v4.3.1 (`anova_irrigation.R`)
 - [ ] Run R ANOVA when R installed
 
-**Rust (Phase 1 — 11/11 PASS):**
-- [x] CSV time series parser in Rust
-- [ ] Cross-validate: Python vs Rust identical statistics
+**Rust (Phase 1 — 11/11 PASS + 21/21 sensor calibration):**
+- [x] CSV time series parser in Rust (`io::csv_ts`)
+- [x] SoilWatch 10 calibration in Rust (`eco::sensor_calibration`)
+- [x] Irrigation recommendation model in Rust (`eco::sensor_calibration`)
+- [x] `validate_sensor_calibration` binary: 21 checks against `benchmark_dong2024.json`
+- [x] Cross-validate: Python vs Rust SoilWatch 10 + irrigation values match within 1e-5
 
 ### Experiment 004: Water Balance — PHASE 0 COMPLETE
 
@@ -319,10 +336,12 @@ following FAO-56 Chapter 8.
 - [x] Validate mass balance closure: dry-down, irrigated, heavy rain (all 0.000000)
 - [x] Michigan summer: 90 days, 535 mm ET, 11 irrigation events
 
-**Rust (Phase 1 — 12/12 PASS):**
-- [x] Implement water balance in Rust
-- [x] Validate mass conservation
-- [ ] Cross-validate: Python vs Rust identical outputs
+**Rust (Phase 1 — 13/13 PASS, Phase 2 — cross-validated):**
+- [x] Implement water balance in Rust (`eco::water_balance`)
+- [x] Validate mass conservation (13 checks in `validate_water_balance`)
+- [x] Crop coefficient database (`eco::crop`) — FAO-56 Table 12, 10 crops
+- [x] Full pipeline demo: `simulate_season` binary (crop Kc → soil → ET₀ → water balance → scheduling)
+- [x] Cross-validate: Python vs Rust identical outputs for water balance computations
 
 ### Experiment 005: Lysimeter Validation — NOT STARTED (DEFERRED)
 
@@ -351,12 +370,12 @@ panel arrays for dual-use agriculture. Deferred until MSU Solar Farm data identi
 
 ```
 Track 1 (Precision Agriculture):
-  Phase 0 [COMPLETE]: Python baselines — 142/142 PASS (FAO-56, soil, IoT, water balance)
+  Phase 0  [COMPLETE]: Python baselines — 142/142 PASS (FAO-56, soil, IoT, water balance)
   Phase 0+ [COMPLETE]: Real data pipeline — 918 station-days, ET₀ R²=0.97, water balance
-  Phase 1 [ACTIVE]:   Rust validation — 70/70 PASS (cross-validate vs Python baselines)
-  Phase 2:            IoT pipeline + irrigation scheduling (real data → Rust)
-  Phase 3:            GPU acceleration (real-time IoT, spatial kriging)
-  Phase 4:            Penny irrigation (sovereign, consumer hardware)
+  Phase 1  [COMPLETE]: Rust validation — 101/101 PASS (5 binaries), 106 tests, 0 clippy warnings
+  Phase 2  [COMPLETE]: Cross-validation — 53/53 MATCH (Python↔Rust, tol=1e-5)
+  Phase 3:             GPU acceleration (real-time IoT, spatial kriging via ToadStool)
+  Phase 4:             Penny irrigation (sovereign, consumer hardware)
 
 Track 2 (Environmental Systems):
   Phase B0:           HYDRUS benchmarks + biochar fitting (Python baselines)
@@ -420,6 +439,8 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 ---
 
 *Initialized: February 16, 2026*
-*Phase 0 Python baselines — 142/142 PASS (Exps 001-004): February 16, 2026*
-*Real data pipeline — 918 station-days, ET₀ R²=0.97, 4 crop water balance: February 16, 2026*
-*BarraCUDA Rust validation — 70/70 PASS (ET₀, soil, IoT, water balance): February 16, 2026*
+*Phase 0 Python baselines: 142/142 PASS (Exps 001-004)*
+*Phase 0+ Real data pipeline: 918 station-days, ET₀ R²=0.97, 4 crop water balance*
+*Phase 1 BarraCUDA Rust validation: 101/101 PASS (5 binaries), 106 tests*
+*Phase 2 Cross-validation: 53/53 MATCH (Python↔Rust, tol=1e-5)*
+*Total: 334 quantitative checks + 918 real data station-days*

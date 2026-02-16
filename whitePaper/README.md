@@ -10,7 +10,7 @@
 
 | Document | Description | Audience |
 |----------|-------------|----------|
-| [METHODOLOGY.md](METHODOLOGY.md) | Two-phase validation protocol (Python control → Rust evolution) | Methodology review |
+| [METHODOLOGY.md](METHODOLOGY.md) | Multi-phase validation protocol (Python control → Rust evolution → cross-validation) | Methodology review |
 | [STUDY.md](STUDY.md) | Full results: paper benchmarks, real data pipeline, Rust validation | Reviewers, collaborators |
 
 ---
@@ -28,7 +28,7 @@ The study answers three questions:
    Answer: yes — Open-Meteo (free, no key, 80+ years) provides real historical Michigan weather at 10km resolution. Our FAO-56 ET₀ matches Open-Meteo's independent computation with R²=0.967 across 918 station-days. NOAA CDO and OpenWeatherMap supplement with GHCND daily records and real-time forecasts.
 
 3. **Can Rust + WebGPU replace Python/Excel for precision agriculture?**
-   Answer: in progress — Rust BarraCUDA passes 70/70 validation checks (ET₀, soil moisture, water balance, IoT parsing). Cross-validation with Python baselines and GPU acceleration are the next phases.
+   Answer: yes (validation complete) — Rust BarraCUDA passes 101/101 validation checks across 5 binaries with 106 tests. A cross-validation harness confirms 53/53 Python-Rust value matches within 1e-5 tolerance. The Rust crate now includes Hargreaves ET₀, crop Kc database (10 crops), sensor calibration, and a full growing-season pipeline demonstration. GPU acceleration is the next phase.
 
 ---
 
@@ -55,14 +55,21 @@ The study answers three questions:
 
 Water balance simulations on real data: 53-72% water savings with smart scheduling vs naive irrigation — consistent with Dong et al. (2024) published results.
 
-### Phase 1 (Rust BarraCUDA): 70/70 checks pass
+### Phase 1 (Rust BarraCUDA): 101/101 checks pass, 106 tests
 
 | Binary | Checks | Key Validation |
 |--------|:------:|----------------|
-| validate_et0 | 22/22 | FAO-56 tables, Bangkok/Uccle ET₀ |
+| validate_et0 | 31/31 | FAO-56 Tables 2.3/2.4, Example 18 within 0.0005 mm/day |
 | validate_soil | 25/25 | Topp equation, 5 USDA textures, PAW |
 | validate_iot | 11/11 | CSV time series, column statistics |
-| validate_water_balance | 12/12 | Mass balance, Ks bounds, MI summer |
+| validate_water_balance | 13/13 | Mass balance, Ks bounds, MI summer |
+| validate_sensor_calibration | 21/21 | SoilWatch 10, irrigation model, Dong 2024 |
+
+### Phase 2 (Cross-validation): 53/53 MATCH
+
+Python and Rust produce identical results (within 1e-5 tolerance) for 53 values
+across atmospheric, solar, radiation, ET₀, Topp, SoilWatch 10, irrigation,
+statistics, Hargreaves, sunshine Rs, and monthly soil heat flux.
 
 ---
 

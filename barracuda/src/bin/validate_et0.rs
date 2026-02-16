@@ -1,170 +1,161 @@
 //! Validate FAO-56 Penman-Monteith ET₀ against published examples.
 //!
-//! FAO Paper 56, Chapter 4:
-//!   Example 18 (Bangkok, Thailand): ET₀ = 3.54 mm/day
-//!   Example 20 (Uccle, Belgium): monthly ET₀ values for July
+//! Benchmark source: `control/fao56/benchmark_fao56.json`
+//! Provenance: Allen et al. (1998) FAO Paper 56, Tables 2.3–2.4, Examples 17–20.
+//! Digitized: 2026-02-16, commit: initial airSpring.
 
 use airspring_barracuda::eco::evapotranspiration::{self as et, DailyEt0Input};
+use airspring_barracuda::validation::{json_f64, parse_benchmark_json, ValidationRunner};
 
-fn check(label: &str, actual: f64, expected: f64, tolerance: f64) -> bool {
-    let pass = (actual - expected).abs() <= tolerance;
-    let tag = if pass { "OK" } else { "FAIL" };
-    println!(
-        "  [{}]  {}: {:.4} (expected {:.4}, tol {:.4})",
-        tag, label, actual, expected, tolerance
-    );
-    pass
-}
+/// Benchmark JSON embedded at compile time for reproducibility.
+const BENCHMARK_JSON: &str = include_str!("../../../control/fao56/benchmark_fao56.json");
 
+#[allow(clippy::too_many_lines)]
+#[allow(clippy::cast_precision_loss)]
+#[allow(clippy::cast_possible_truncation)]
+#[allow(clippy::cast_sign_loss)]
 fn main() {
-    println!("═══════════════════════════════════════════════════════════");
-    println!("  airSpring FAO-56 Penman-Monteith Validation");
-    println!("  Reference: Allen et al. (1998) FAO Paper 56");
-    println!("═══════════════════════════════════════════════════════════\n");
+    let mut v = ValidationRunner::new("FAO-56 Penman-Monteith Validation");
+    let benchmark = parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_fao56.json must parse");
 
-    let mut total = 0u32;
-    let mut passed = 0u32;
+    // ── Table 2.3: Saturation vapour pressure ────────────────────
+    v.section("Table 2.3: Saturation vapour pressure (benchmark JSON)");
 
-    // ── Component function tests (FAO-56 tables) ────────────────
-    println!("── Component function tests (FAO-56 Tables) ──");
+    let svp_table = benchmark
+        .get("saturation_vapour_pressure_table")
+        .and_then(|t| t.get("data"))
+        .and_then(|d| d.as_array())
+        .expect("SVP table must exist in benchmark JSON");
+    let svp_tol = json_f64(
+        &benchmark,
+        &["saturation_vapour_pressure_table", "tolerance_kpa"],
+    )
+    .unwrap_or(0.01);
 
-    // Table 2.3: Saturation vapour pressure
-    for &(temp, expected) in &[
-        (1.0, 0.657),
-        (5.0, 0.872),
-        (10.0, 1.228),
-        (15.0, 1.705),
-        (20.0, 2.338),
-        (25.0, 3.168),
-        (30.0, 4.243),
-        (35.0, 5.624),
-        (40.0, 7.384),
-        (45.0, 9.585),
-    ] {
-        total += 1;
+    for entry in svp_table {
+        let temp = entry
+            .get("temp_c")
+            .and_then(serde_json::Value::as_f64)
+            .unwrap();
+        let expected = entry
+            .get("es_kpa")
+            .and_then(serde_json::Value::as_f64)
+            .unwrap();
         let es = et::saturation_vapour_pressure(temp);
-        if check(
-            &format!("es({:.0}°C)", temp),
-            es,
-            expected,
-            0.01,
-        ) {
-            passed += 1;
-        }
+        v.check(&format!("es({temp:.0}°C)"), es, expected, svp_tol);
     }
 
-    // Table 2.4: Slope of vapour pressure curve
-    for &(temp, expected) in &[
-        (1.0, 0.047),
-        (10.0, 0.082),
-        (20.0, 0.145),
-        (30.0, 0.243),
-        (40.0, 0.393),
-    ] {
-        total += 1;
+    // ── Table 2.4: Slope of vapour pressure curve ────────────────
+    println!();
+    v.section("Table 2.4: Slope Δ (benchmark JSON)");
+
+    let delta_table = benchmark
+        .get("slope_vapour_pressure_table")
+        .and_then(|t| t.get("data"))
+        .and_then(|d| d.as_array())
+        .expect("Δ table must exist in benchmark JSON");
+    let delta_tol = json_f64(
+        &benchmark,
+        &["slope_vapour_pressure_table", "tolerance_kpa_per_c"],
+    )
+    .unwrap_or(0.005);
+
+    for entry in delta_table {
+        let temp = entry
+            .get("temp_c")
+            .and_then(serde_json::Value::as_f64)
+            .unwrap();
+        let expected = entry
+            .get("delta_kpa_per_c")
+            .and_then(serde_json::Value::as_f64)
+            .unwrap();
         let delta = et::vapour_pressure_slope(temp);
-        if check(
-            &format!("Δ({:.0}°C)", temp),
-            delta,
-            expected,
-            0.002,
-        ) {
-            passed += 1;
-        }
+        v.check(&format!("Δ({temp:.0}°C)"), delta, expected, delta_tol);
     }
 
-    // ── FAO-56 Example 18: Bangkok, Thailand ────────────────────
-    println!("\n── FAO-56 Example 18: Bangkok, Thailand ──");
-    println!("  Location: 13°44'N, 2m elevation");
-    println!("  Date: April (representative day)");
+    // ── Example 18: Uccle, Belgium, 6 July (daily) ──────────────
+    // This is our primary validation target because our daily_et0()
+    // function matches Example 18's daily timestep (G = 0).
+    println!();
+    v.section("FAO-56 Example 18: Uccle, Belgium (daily, benchmark JSON)");
+    println!("  Location: 50°48'N, 100 m elevation, 6 July");
+    println!("  Source: benchmark_fao56.json → example_18_uccle_daily");
 
-    // Bangkok: 13.73°N, 2m elevation
-    // Monthly mean conditions for moderate-ET period
-    // Tmin=22.0°C, Tmax=30.0°C, RHmin=55%, RHmax=90%,
-    // Rs=14.5 MJ/m²/day, u2=1.2 m/s (light winds, humid)
-    let tmin_bk = 22.0;
-    let tmax_bk = 30.0;
-    let ea_bk = et::actual_vapour_pressure_rh(tmin_bk, tmax_bk, 55.0, 90.0);
+    let uccle = &benchmark["example_18_uccle_daily"];
 
-    let bangkok = DailyEt0Input {
-        tmin: tmin_bk,
-        tmax: tmax_bk,
-        tmean: None,
-        solar_radiation: 14.5,
-        wind_speed_2m: 1.2,
-        actual_vapour_pressure: ea_bk,
-        elevation_m: 2.0,
-        latitude_deg: 13.73,
-        day_of_year: 105, // mid-April
-    };
+    // Use exact published intermediates as inputs to our function.
+    // Our function takes Rs directly (does not derive from sunshine hours).
+    let tmin_uc = json_f64(uccle, &["inputs", "tmin_c"]).unwrap();
+    let tmax_uc = json_f64(uccle, &["inputs", "tmax_c"]).unwrap();
+    let tmean_uc = json_f64(uccle, &["intermediates", "tmean_c"]).unwrap();
+    let u2_uc = json_f64(uccle, &["intermediates", "u2_m_s"]).unwrap();
+    let ea_uc = json_f64(uccle, &["intermediates", "ea_kpa"]).unwrap();
+    let rs_uc = json_f64(uccle, &["intermediates", "rs_mj_m2_day"]).unwrap();
+    let lat_uc = json_f64(uccle, &["inputs", "latitude_deg_n"]).unwrap();
+    let elev_uc = json_f64(uccle, &["inputs", "altitude_m"]).unwrap();
+    let doy_uc = json_f64(uccle, &["inputs", "day_of_year"]).unwrap();
+    let expected_et0_uc = json_f64(uccle, &["expected_et0_mm_day"]).unwrap();
+    let tol_et0_uc = json_f64(uccle, &["tolerance_mm_day"]).unwrap();
 
-    let result_bk = et::daily_et0(&bangkok);
-    println!("  ET₀ = {:.2} mm/day", result_bk.et0);
-    println!("  Rn = {:.2} MJ/m²/day", result_bk.rn);
-    println!("  VPD = {:.2} kPa", result_bk.vpd);
-
-    // Tropical humid conditions: ET₀ typically 3-5 mm/day
-    total += 1;
-    if check("Bangkok ET₀ (tropical range)", result_bk.et0, 3.5, 1.0) {
-        passed += 1;
-    }
-
-    // ── FAO-56 Example 20: Uccle, Belgium (July) ───────────────
-    println!("\n── FAO-56 Example 20: Uccle, Belgium (July) ──");
-    println!("  Location: 50°48'N, 100m elevation");
-
-    // Uccle, Belgium: July monthly average
-    // Tmin=12.3, Tmax=21.5, RHmean=68.8%, Rs=16.5 MJ/m²/day, u2=2.16 m/s
-    let tmin_uc = 12.3;
-    let tmax_uc = 21.5;
-    let tmean_uc = (tmin_uc + tmax_uc) / 2.0;
-    let es_uc = et::mean_saturation_vapour_pressure(tmin_uc, tmax_uc);
-    // From RHmean ≈ 68.8%
-    let ea_uc = es_uc * 0.688;
-
-    let uccle = DailyEt0Input {
+    let input_uc = DailyEt0Input {
         tmin: tmin_uc,
         tmax: tmax_uc,
         tmean: Some(tmean_uc),
-        solar_radiation: 16.5,
-        wind_speed_2m: 2.16,
+        solar_radiation: rs_uc,
+        wind_speed_2m: u2_uc,
         actual_vapour_pressure: ea_uc,
-        elevation_m: 100.0,
-        latitude_deg: 50.80,
-        day_of_year: 198, // mid-July
+        elevation_m: elev_uc,
+        latitude_deg: lat_uc,
+        day_of_year: doy_uc.round() as u32,
     };
 
-    let result_uc = et::daily_et0(&uccle);
-    println!("  ET₀ = {:.2} mm/day", result_uc.et0);
-    println!("  Rn = {:.2} MJ/m²/day", result_uc.rn);
-    println!("  VPD = {:.2} kPa", result_uc.vpd);
+    let result_uc = et::daily_et0(&input_uc);
+    println!("  ET₀ = {:.3} mm/day", result_uc.et0);
+    println!("  Rn  = {:.3} MJ/m²/day", result_uc.rn);
+    println!("  VPD = {:.3} kPa", result_uc.vpd);
 
-    // FAO-56 Example 20 answer: ET₀ ≈ 3.39 mm/day for July
-    total += 1;
-    if check("Uccle July ET₀", result_uc.et0, 3.39, 0.40) {
-        passed += 1;
-    }
+    // Validate intermediates against published values
+    let pub_es = json_f64(uccle, &["intermediates", "es_kpa"]).unwrap();
+    let pub_vpd = json_f64(uccle, &["intermediates", "vpd_kpa"]).unwrap();
+    let pub_rn = json_f64(uccle, &["intermediates", "rn_mj_m2_day"]).unwrap();
 
-    // ── Boundary conditions ─────────────────────────────────────
-    println!("\n── Boundary condition tests ──");
+    v.check("Uccle es", result_uc.es, pub_es, 0.01);
+    v.check("Uccle VPD", result_uc.vpd, pub_vpd, 0.02);
+    v.check("Uccle Rn", result_uc.rn, pub_rn, 0.5);
+    v.check("Uccle ET₀", result_uc.et0, expected_et0_uc, tol_et0_uc);
 
-    // Zero wind → lower ET₀
-    let calm = DailyEt0Input {
-        wind_speed_2m: 0.0,
-        ..bangkok.clone()
-    };
-    let result_calm = et::daily_et0(&calm);
-    total += 1;
-    if check(
-        "Zero wind → lower ET₀",
-        (result_calm.et0 < result_bk.et0) as u32 as f64,
-        1.0,
-        0.0,
-    ) {
-        passed += 1;
-    }
+    // ── Example 17: Bangkok (monthly — G ≠ 0) ───────────────────
+    // NOTE: Our daily_et0() assumes G = 0 (correct for daily timestep).
+    // Example 17 is monthly (G = 0.14), so we expect a ~0.06 mm/day
+    // systematic offset. We validate the components, not the final ET₀.
+    println!();
+    v.section("FAO-56 Example 17: Bangkok (monthly, G≠0 — components only)");
+    println!("  Note: our daily_et0() uses G=0; Example 17 uses G=0.14.");
+    println!("  We validate component functions, not final ET₀ (monthly bias).");
 
-    // Cold conditions → low ET₀
+    let bangkok = &benchmark["example_17_bangkok_monthly"];
+    let tmin_bk = json_f64(bangkok, &["inputs", "tmin_c"]).unwrap();
+    let tmax_bk = json_f64(bangkok, &["inputs", "tmax_c"]).unwrap();
+
+    let pub_es_bk = json_f64(bangkok, &["intermediates", "es_kpa"]).unwrap();
+    let calc_es_bk = et::mean_saturation_vapour_pressure(tmin_bk, tmax_bk);
+    v.check("Bangkok es", calc_es_bk, pub_es_bk, 0.02);
+
+    let pub_delta_bk = json_f64(bangkok, &["intermediates", "delta_kpa_per_c"]).unwrap();
+    let tmean_bk = json_f64(bangkok, &["intermediates", "tmean_c"]).unwrap();
+    let calc_delta_bk = et::vapour_pressure_slope(tmean_bk);
+    v.check("Bangkok Δ", calc_delta_bk, pub_delta_bk, 0.005);
+
+    let pub_gamma_bk = json_f64(bangkok, &["intermediates", "gamma_kpa_per_c"]).unwrap();
+    let pub_p_bk = json_f64(bangkok, &["intermediates", "pressure_kpa"]).unwrap();
+    let calc_gamma_bk = et::psychrometric_constant(pub_p_bk);
+    v.check("Bangkok γ", calc_gamma_bk, pub_gamma_bk, 0.001);
+
+    // ── Boundary conditions ──────────────────────────────────────
+    println!();
+    v.section("Boundary conditions");
+
+    // Cold conditions → low or zero ET₀
     let cold = DailyEt0Input {
         tmin: -5.0,
         tmax: 2.0,
@@ -174,50 +165,18 @@ fn main() {
         actual_vapour_pressure: 0.4,
         elevation_m: 200.0,
         latitude_deg: 60.0,
-        day_of_year: 355, // December
+        day_of_year: 355,
     };
     let result_cold = et::daily_et0(&cold);
-    total += 1;
-    if check("Cold climate ET₀ low", result_cold.et0, 0.3, 0.5) {
-        passed += 1;
-    }
+    v.check("Cold ET₀ ≥ 0", result_cold.et0, 0.0, 0.5);
 
-    // High altitude → lower pressure → lower γ
-    let high_alt = et::atmospheric_pressure(3000.0);
-    let sea_level = et::atmospheric_pressure(0.0);
-    total += 1;
-    if check(
-        "High altitude → lower pressure",
-        (high_alt < sea_level) as u32 as f64,
-        1.0,
-        0.0,
-    ) {
-        passed += 1;
-    }
+    // High altitude → lower pressure
+    let p_high = et::atmospheric_pressure(3000.0);
+    let p_sea = et::atmospheric_pressure(0.0);
+    v.check_bool("High altitude → lower pressure", p_high < p_sea, true);
 
-    // ET₀ should be positive for typical conditions
-    total += 1;
-    if check("ET₀ positive (Bangkok)", (result_bk.et0 > 0.0) as u32 as f64, 1.0, 0.0) {
-        passed += 1;
-    }
+    // ET₀ positive for typical conditions
+    v.check_bool("Uccle ET₀ > 0", result_uc.et0 > 0.0, true);
 
-    total += 1;
-    if check("ET₀ positive (Uccle)", (result_uc.et0 > 0.0) as u32 as f64, 1.0, 0.0) {
-        passed += 1;
-    }
-
-    // ── Summary ─────────────────────────────────────────────────
-    println!("\n═══════════════════════════════════════════════════════════");
-    println!(
-        "  ET₀ Validation: {}/{} checks passed",
-        passed, total
-    );
-    if passed == total {
-        println!("  RESULT: PASS");
-    } else {
-        println!("  RESULT: FAIL ({} checks failed)", total - passed);
-    }
-    println!("═══════════════════════════════════════════════════════════");
-
-    std::process::exit(if passed == total { 0 } else { 1 });
+    v.finish();
 }

@@ -14,9 +14,9 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCUDA) 
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **142/142 PASS** | FAO-56, soil, IoT, water balance |
 | Phase 0+: Real data pipeline | **918 station-days** | ET₀ R²=0.967 vs Open-Meteo |
-| Phase 1: Rust validation | **70/70 PASS** | BarraCUDA: ET₀, soil, IoT, water balance |
-| Phase 2: Real data → Rust | Planned | Cross-validate Python vs Rust |
-| Phase 3: GPU acceleration | Planned | Spatial kriging, real-time IoT |
+| Phase 1: Rust validation | **119/119 PASS** | 8 binaries, 162 tests |
+| Phase 2: Cross-validation | **65/65 MATCH** | Python↔Rust identical (tol=1e-5) |
+| Phase 3: GPU bridge | **Integrated** | 4 orchestrators, 4 ToadStool issues filed |
 | Phase 4: Penny Irrigation | Vision | Sovereign, consumer hardware |
 
 ## Quick Start
@@ -102,16 +102,30 @@ airSpring/
 │   │   ├── simulate_real_data.py     # 4 crops on real weather
 │   │   └── benchmark_water_balance.json
 │   └── requirements.txt
-├── barracuda/                   # Phase 1: Rust validation (70/70)
+├── barracuda/                   # Phase 1: Rust validation (119/119)
 │   ├── src/
-│   │   ├── eco/                 # evapotranspiration, soil_moisture, water_balance
-│   │   ├── io/                  # csv_ts (IoT time series parser)
-│   │   └── bin/                 # validate_et0, validate_soil, validate_iot, validate_water_balance
+│   │   ├── eco/                 # correction, crop, evapotranspiration, sensor_calibration,
+│   │   │                        #   soil_moisture, water_balance
+│   │   ├── io/                  # csv_ts (streaming columnar IoT parser)
+│   │   ├── gpu/                 # ToadStool/BarraCUDA GPU bridge
+│   │   │   ├── et0.rs           #   BatchedEt0 (CPU fallback — TS-001)
+│   │   │   ├── water_balance.rs #   BatchedWaterBalance (CPU path)
+│   │   │   ├── kriging.rs       #   KrigingInterpolator ↔ barracuda::ops::kriging_f64
+│   │   │   ├── reduce.rs        #   SeasonalReducer ↔ barracuda::ops::fused_map_reduce_f64
+│   │   │   └── evolution_gaps.rs#   11 gaps + 4 ToadStool issues (TS-001/002/003/004)
+│   │   ├── error.rs             # AirSpringError enum (proper error types)
+│   │   ├── validation.rs        # Shared validation runner (hotSpring pattern)
+│   │   ├── testutil.rs          # IA, NSE, RMSE, MBE, R², Spearman, bootstrap CI
+│   │   └── bin/                 # validate_*, cross_validate, simulate_season,
+│   │                            #   validate_real_data
+│   ├── tests/
+│   │   └── integration.rs       # 68 integration tests
 │   └── Cargo.toml
 ├── scripts/                     # Data download + orchestration
 │   ├── download_open_meteo.py   # Open-Meteo (free, no key, 80+ yr)
 │   ├── download_enviroweather.py # OpenWeatherMap (current + forecast)
 │   ├── download_noaa.py         # NOAA CDO (GHCND historical)
+│   ├── cross_validate.py        # Phase 2 Python side (65 values → JSON)
 │   └── run_all_baselines.sh     # Full validation suite
 ├── data/                        # Downloaded real data (not committed)
 │   ├── open_meteo/              # 918 station-days, 6 Michigan stations
@@ -120,7 +134,9 @@ airSpring/
 │   ├── et0_results/             # Computed ET₀ on real data
 │   └── water_balance_results/   # Water balance simulations
 ├── whitePaper/                  # Methodology and study documentation
+├── CHANGELOG.md                # Keep-a-Changelog versioned history
 ├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
+├── HANDOFF_AIRSPRING_TO_TOADSTOOL_FEB_16_2026.md  # GPU evolution handoff
 └── LICENSE                      # AGPL-3.0-or-later
 ```
 
@@ -165,8 +181,9 @@ AGPL-3.0-or-later
 
 ---
 
-*Initialized: February 16, 2026*
-*Phase 0 Python baselines: 142/142 PASS*
-*Real data pipeline: 918 station-days, ET₀ R²=0.97, 4 crop water balance*
-*BarraCUDA Rust validation: 70/70 PASS*
-*NOAA CDO: live with real token*
+*February 16, 2026 — 119 validation checks (8 binaries), 162 Rust tests (94 unit +
+68 integration), 918 real station-days, 65/65 Python-Rust cross-validation match.
+`KrigingInterpolator` wired to `barracuda::ops::kriging_f64` (proper ordinary kriging).
+`SeasonalReducer` wired to `barracuda::ops::fused_map_reduce_f64` (GPU for N≥1024).
+4 ToadStool issues filed (TS-001 pow_f64, TS-004 buffer conflict). 4 crop scenarios
+on real weather, rainfed+irrigated. Pure Rust correction curve fitting. AGPL-3.0.*
