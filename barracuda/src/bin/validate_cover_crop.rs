@@ -12,7 +12,9 @@
 use airspring_barracuda::eco::dual_kc::{
     self, CoverCropType, DualKcInput, EvaporationLayerState, ResidueLevel,
 };
-use airspring_barracuda::validation::{self, json_f64, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{
+    self, json_array, json_f64, json_field, json_str, parse_benchmark_json, ValidationHarness,
+};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/dual_kc/benchmark_cover_crop_kc.json");
@@ -49,21 +51,15 @@ fn validate_mulch_ke(v: &mut ValidationHarness, bench: &serde_json::Value) {
     println!();
     validation::section("Mulch reduces Ke proportionally");
 
-    let cases = bench["validation_checks"]["mulch_reduces_evaporation"]["test_cases"]
-        .as_array()
-        .expect("mulch test_cases");
-
-    for tc in cases {
-        let label = tc["label"].as_str().unwrap();
-        let kr = tc["kr"].as_f64().unwrap();
-        let kcb = tc["kcb"].as_f64().unwrap();
-        let kc_max_val = tc["kc_max"].as_f64().unwrap();
-        let few = tc["few"].as_f64().unwrap();
-        let mf = tc["mulch_factor"].as_f64().unwrap();
-        let expected = tc["expected_ke"].as_f64().unwrap();
-
-        let result = dual_kc::mulched_ke(kr, kcb, kc_max_val, few, mf);
-        v.check_abs(label, result, expected, 1e-6);
+    for tc in json_array(bench, &["validation_checks", "mulch_reduces_evaporation", "test_cases"]) {
+        let result = dual_kc::mulched_ke(
+            json_field(tc, "kr"),
+            json_field(tc, "kcb"),
+            json_field(tc, "kc_max"),
+            json_field(tc, "few"),
+            json_field(tc, "mulch_factor"),
+        );
+        v.check_abs(json_str(tc, "label"), result, json_field(tc, "expected_ke"), 1e-6);
     }
 }
 
@@ -127,8 +123,8 @@ fn validate_notill_vs_conventional(v: &mut ValidationHarness, bench: &serde_json
 
     let savings_pct = 100.0 * (1.0 - notill_et / conv_et);
     let expected_range = &bench["validation_checks"]["no_till_conserves_water"]["expected_et_reduction_pct"];
-    let min_pct = json_f64(expected_range, &["min"]).unwrap();
-    let max_pct = json_f64(expected_range, &["max"]).unwrap();
+    let min_pct = json_f64(expected_range, &["min"]).expect("expected_et_reduction_pct.min");
+    let max_pct = json_f64(expected_range, &["max"]).expect("expected_et_reduction_pct.max");
 
     v.check_bool(
         &format!("ET savings {savings_pct:.1}% in [{min_pct}, {max_pct}]"),
@@ -150,14 +146,10 @@ fn validate_transition_phases(v: &mut ValidationHarness, bench: &serde_json::Val
     println!();
     validation::section("Rye→corn transition phases");
 
-    let phases = bench["transition_scenarios"]["rye_to_corn"]["phases"]
-        .as_array()
-        .expect("phases");
-
-    for phase in phases {
-        let period = phase["period"].as_str().unwrap();
-        let kcb = phase["kcb"].as_f64().unwrap();
-        let mf = phase["mulch_factor"].as_f64().unwrap();
+    for phase in json_array(bench, &["transition_scenarios", "rye_to_corn", "phases"]) {
+        let period = json_str(phase, "period");
+        let kcb = json_field(phase, "kcb");
+        let mf = json_field(phase, "mulch_factor");
 
         v.check_bool(&format!("{period}: Kcb={kcb} in [0, 1.5]"), (0.0..=1.5).contains(&kcb));
         v.check_bool(&format!("{period}: mf={mf} in [0, 1]"), (0.0..=1.0).contains(&mf));
@@ -170,23 +162,27 @@ fn validate_islam_observations(v: &mut ValidationHarness, bench: &serde_json::Va
 
     let obs = &bench["no_till_soil_moisture"]["observations"];
 
-    let nt_soc = json_f64(obs, &["soil_organic_carbon_pct", "no_till"]).unwrap();
-    let cv_soc = json_f64(obs, &["soil_organic_carbon_pct", "conventional"]).unwrap();
+    let f = |metric: &str, variant: &str| -> f64 {
+        json_f64(obs, &[metric, variant]).expect("Islam et al. benchmark value")
+    };
+
+    let nt_soc = f("soil_organic_carbon_pct", "no_till");
+    let cv_soc = f("soil_organic_carbon_pct", "conventional");
     v.check_bool(&format!("SOC: no-till ({nt_soc}%) > conventional ({cv_soc}%)"), nt_soc > cv_soc);
 
-    let nt_bd = json_f64(obs, &["bulk_density_g_cm3", "no_till"]).unwrap();
-    let cv_bd = json_f64(obs, &["bulk_density_g_cm3", "conventional"]).unwrap();
+    let nt_bd = f("bulk_density_g_cm3", "no_till");
+    let cv_bd = f("bulk_density_g_cm3", "conventional");
     v.check_bool(&format!("BD: no-till ({nt_bd}) < conventional ({cv_bd})"), nt_bd < cv_bd);
 
-    let nt_inf = json_f64(obs, &["infiltration_rate_mm_hr", "no_till"]).unwrap();
-    let cv_inf = json_f64(obs, &["infiltration_rate_mm_hr", "conventional"]).unwrap();
+    let nt_inf = f("infiltration_rate_mm_hr", "no_till");
+    let cv_inf = f("infiltration_rate_mm_hr", "conventional");
     v.check_bool(
         &format!("Infiltration: no-till ({nt_inf}) > conventional ({cv_inf})"),
         nt_inf > cv_inf,
     );
 
-    let nt_awc = json_f64(obs, &["available_water_capacity_mm", "no_till"]).unwrap();
-    let cv_awc = json_f64(obs, &["available_water_capacity_mm", "conventional"]).unwrap();
+    let nt_awc = f("available_water_capacity_mm", "no_till");
+    let cv_awc = f("available_water_capacity_mm", "conventional");
     v.check_bool(&format!("AWC: no-till ({nt_awc}) > conventional ({cv_awc})"), nt_awc > cv_awc);
 }
 

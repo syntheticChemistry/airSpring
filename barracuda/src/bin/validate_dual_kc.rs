@@ -16,27 +16,24 @@
 use airspring_barracuda::eco::crop::CropType;
 use airspring_barracuda::eco::dual_kc::{self, DualKcInput, EvaporationLayerState};
 use airspring_barracuda::eco::soil_moisture::SoilTexture;
-use airspring_barracuda::validation::{self, json_f64, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{
+    self, json_array, json_f64, json_field, json_str, parse_benchmark_json, ValidationHarness,
+};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/dual_kc/benchmark_dual_kc.json");
 
 fn validate_eq69(v: &mut ValidationHarness, bench: &serde_json::Value) {
     validation::section("Eq. 69: ETc = (Kcb × Ks + Ke) × ET₀");
 
-    let cases = bench["equations"]["eq_69"]["test_cases"]
-        .as_array()
-        .expect("eq_69 test_cases");
-
-    for tc in cases {
-        let label = tc["label"].as_str().unwrap();
-        let kcb = tc["kcb"].as_f64().unwrap();
-        let ks = tc["ks"].as_f64().unwrap();
-        let ke = tc["ke"].as_f64().unwrap();
-        let et0 = tc["et0"].as_f64().unwrap();
-        let expected = tc["expected_etc"].as_f64().unwrap();
-
-        let result = dual_kc::etc_dual(kcb, ks, ke, et0);
-        v.check_abs(label, result, expected, 1e-6);
+    for tc in json_array(bench, &["equations", "eq_69", "test_cases"]) {
+        let label = json_str(tc, "label");
+        let result = dual_kc::etc_dual(
+            json_field(tc, "kcb"),
+            json_field(tc, "ks"),
+            json_field(tc, "ke"),
+            json_field(tc, "et0"),
+        );
+        v.check_abs(label, result, json_field(tc, "expected_etc"), 1e-6);
     }
 }
 
@@ -44,20 +41,14 @@ fn validate_kc_max(v: &mut ValidationHarness, bench: &serde_json::Value) {
     println!();
     validation::section("Eq. 72: Kc_max");
 
-    let cases = bench["equations"]["eq_71_kc_max"]["test_cases"]
-        .as_array()
-        .expect("kc_max test_cases");
-
-    for tc in cases {
-        let label = tc["label"].as_str().unwrap();
-        let u2 = tc["u2"].as_f64().unwrap();
-        let rh_min = tc["rh_min"].as_f64().unwrap();
-        let h = tc["h"].as_f64().unwrap();
-        let kcb = tc["kcb"].as_f64().unwrap();
-        let expected = tc["expected_kc_max"].as_f64().unwrap();
-
-        let result = dual_kc::kc_max(u2, rh_min, h, kcb);
-        v.check_abs(label, result, expected, 0.01);
+    for tc in json_array(bench, &["equations", "eq_71_kc_max", "test_cases"]) {
+        let result = dual_kc::kc_max(
+            json_field(tc, "u2"),
+            json_field(tc, "rh_min"),
+            json_field(tc, "h"),
+            json_field(tc, "kcb"),
+        );
+        v.check_abs(json_str(tc, "label"), result, json_field(tc, "expected_kc_max"), 0.01);
     }
 }
 
@@ -65,19 +56,13 @@ fn validate_tew(v: &mut ValidationHarness, bench: &serde_json::Value) {
     println!();
     validation::section("Eq. 73: TEW = 1000 × (θFC − 0.5×θWP) × Ze");
 
-    let cases = bench["equations"]["eq_73_tew"]["test_cases"]
-        .as_array()
-        .expect("tew test_cases");
-
-    for tc in cases {
-        let label = tc["label"].as_str().unwrap();
-        let theta_fc = tc["theta_fc"].as_f64().unwrap();
-        let theta_wp = tc["theta_wp"].as_f64().unwrap();
-        let ze = tc["ze_m"].as_f64().unwrap();
-        let expected = tc["expected_tew"].as_f64().unwrap();
-
-        let result = dual_kc::total_evaporable_water(theta_fc, theta_wp, ze);
-        v.check_abs(label, result, expected, 1e-6);
+    for tc in json_array(bench, &["equations", "eq_73_tew", "test_cases"]) {
+        let result = dual_kc::total_evaporable_water(
+            json_field(tc, "theta_fc"),
+            json_field(tc, "theta_wp"),
+            json_field(tc, "ze_m"),
+        );
+        v.check_abs(json_str(tc, "label"), result, json_field(tc, "expected_tew"), 1e-6);
     }
 }
 
@@ -85,19 +70,13 @@ fn validate_kr(v: &mut ValidationHarness, bench: &serde_json::Value) {
     println!();
     validation::section("Eq. 72: Kr evaporation reduction");
 
-    let cases = bench["equations"]["eq_72_kr"]["test_cases"]
-        .as_array()
-        .expect("kr test_cases");
-
-    for tc in cases {
-        let label = tc["label"].as_str().unwrap();
-        let tew = tc["tew"].as_f64().unwrap();
-        let rew = tc["rew"].as_f64().unwrap();
-        let de = tc["de"].as_f64().unwrap();
-        let expected = tc["expected_kr"].as_f64().unwrap();
-
-        let result = dual_kc::evaporation_reduction(tew, rew, de);
-        v.check_abs(label, result, expected, 1e-6);
+    for tc in json_array(bench, &["equations", "eq_72_kr", "test_cases"]) {
+        let result = dual_kc::evaporation_reduction(
+            json_field(tc, "tew"),
+            json_field(tc, "rew"),
+            json_field(tc, "de"),
+        );
+        v.check_abs(json_str(tc, "label"), result, json_field(tc, "expected_kr"), 1e-6);
     }
 }
 
@@ -189,29 +168,27 @@ fn validate_tew_vs_rew(v: &mut ValidationHarness) {
     }
 }
 
+fn f64_vec(arr: &serde_json::Value) -> Vec<f64> {
+    arr.as_array()
+        .expect("expected JSON array")
+        .iter()
+        .map(|v| v.as_f64().expect("expected f64 in array"))
+        .collect()
+}
+
 fn validate_bare_soil_drydown(v: &mut ValidationHarness, bench: &serde_json::Value) {
     println!();
     validation::section("Scenario: Bare soil drydown (7 days)");
 
     let scenario = &bench["validation_scenarios"]["bare_soil_drydown"];
-    let et0_daily: Vec<f64> = scenario["et0_daily"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|v| v.as_f64().unwrap())
-        .collect();
-    let precip_daily: Vec<f64> = scenario["precip_daily"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|v| v.as_f64().unwrap())
-        .collect();
+    let et0_daily = f64_vec(&scenario["et0_daily"]);
+    let precip_daily = f64_vec(&scenario["precip_daily"]);
 
-    let kcb = json_f64(scenario, &["kcb"]).unwrap();
-    let kc_max_val = json_f64(scenario, &["kc_max"]).unwrap();
-    let few = json_f64(scenario, &["few"]).unwrap();
-    let tew = json_f64(scenario, &["tew"]).unwrap();
-    let rew = json_f64(scenario, &["rew"]).unwrap();
+    let kcb = json_field(scenario, "kcb");
+    let kc_max_val = json_field(scenario, "kc_max");
+    let few = json_field(scenario, "few");
+    let tew = json_field(scenario, "tew");
+    let rew = json_field(scenario, "rew");
 
     let inputs: Vec<DualKcInput> = et0_daily
         .iter()
@@ -250,24 +227,14 @@ fn validate_corn_mid_season(v: &mut ValidationHarness, bench: &serde_json::Value
     validation::section("Scenario: Corn mid-season (5 days, full cover)");
 
     let scenario = &bench["validation_scenarios"]["corn_mid_season"];
-    let et0_daily: Vec<f64> = scenario["et0_daily"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|v| v.as_f64().unwrap())
-        .collect();
-    let precip_daily: Vec<f64> = scenario["precip_daily"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|v| v.as_f64().unwrap())
-        .collect();
+    let et0_daily = f64_vec(&scenario["et0_daily"]);
+    let precip_daily = f64_vec(&scenario["precip_daily"]);
 
-    let kcb = json_f64(scenario, &["kcb"]).unwrap();
-    let kc_max_val = json_f64(scenario, &["kc_max"]).unwrap();
-    let few = json_f64(scenario, &["few"]).unwrap();
-    let tew = json_f64(scenario, &["tew"]).unwrap();
-    let rew = json_f64(scenario, &["rew"]).unwrap();
+    let kcb = json_field(scenario, "kcb");
+    let kc_max_val = json_field(scenario, "kc_max");
+    let few = json_field(scenario, "few");
+    let tew = json_field(scenario, "tew");
+    let rew = json_field(scenario, "rew");
 
     let inputs: Vec<DualKcInput> = et0_daily
         .iter()

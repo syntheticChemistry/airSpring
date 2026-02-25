@@ -64,6 +64,41 @@ pub fn json_f64(value: &serde_json::Value, path: &[&str]) -> Option<f64> {
     current.as_f64()
 }
 
+/// Extract a string from a JSON value with path context for error messages.
+///
+/// Panics with a descriptive message if the key is missing — intended for
+/// compile-time embedded benchmark JSON where the schema is known.
+#[must_use]
+pub fn json_str<'a>(tc: &'a serde_json::Value, key: &str) -> &'a str {
+    tc[key]
+        .as_str()
+        .unwrap_or_else(|| panic!("benchmark JSON missing string key '{key}'"))
+}
+
+/// Extract an f64 from a JSON test case with descriptive panic.
+///
+/// Intended for compile-time embedded benchmark JSON.
+#[must_use]
+pub fn json_field(tc: &serde_json::Value, key: &str) -> f64 {
+    tc[key]
+        .as_f64()
+        .unwrap_or_else(|| panic!("benchmark JSON missing f64 key '{key}'"))
+}
+
+/// Extract a JSON array with descriptive panic.
+#[must_use]
+pub fn json_array<'a>(value: &'a serde_json::Value, path: &[&str]) -> &'a Vec<serde_json::Value> {
+    let mut current = value;
+    for &key in path {
+        current = current
+            .get(key)
+            .unwrap_or_else(|| panic!("benchmark JSON missing key '{key}'"));
+    }
+    current
+        .as_array()
+        .unwrap_or_else(|| panic!("benchmark JSON: expected array at {:?}", path))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
