@@ -2,6 +2,387 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.3.7] - 2026-02-25
+
+### metalForge Evolution — Absorption-Ready Extensions
+
+Evolved `airspring-forge` from v0.1.0 (2 modules, 18 tests) to v0.2.0
+(4 modules, 40 tests), following hotSpring's Write → Validate → Handoff →
+Absorb → Lean pattern for upstream barracuda absorption.
+
+**New forge modules:**
+- **`moving_window_f64`**: CPU f64 sliding window statistics (mean, variance,
+  min, max). Complements upstream f32 GPU path (wetSpring S28+). 7 tests
+  including diurnal temperature smoothing.
+- **`hydrology`**: Pure-Rust Hargreaves ET₀, batched ET₀, crop coefficient
+  interpolation (FAO-56 Ch. 6), soil water balance (FAO-56 Ch. 8).
+  Validated against FAO-56 reference data. 13 tests.
+- **`regression` evolved**: Added `FitResult::predict()` and `predict_one()`
+  following `RidgeResult::predict()` from `barracuda::linalg::ridge`. Added
+  `model` field for self-describing results. 2 new predict tests.
+- **`fit_all` evolved**: Now returns `Vec<FitResult>` (was `Vec<(&str, FitResult)>`),
+  since `FitResult` carries its own `model` name.
+
+Updated `ABSORPTION_MANIFEST.md` with full signatures, validation provenance,
+post-absorption rewiring plan, and absorption procedure matching hotSpring's
+format.  Updated root docs, whitePaper, and HANDOFF.
+
+**293 tests** (253 barracuda + 40 forge), **123 validation checks** across 8 binaries.
+
+## [0.3.6] - 2026-02-24
+
+### ToadStool Sync + Validation Rewire + Cross-Spring Evolution
+
+Synced to ToadStool HEAD `02207c4a` (S62+, 50 commits since handoff).
+Rewired all 6 validation binaries from local `ValidationRunner` to upstream
+`barracuda::validation::ValidationHarness` (absorbed from neuralSpring S59).
+Renamed BarraCUDA → BarraCuda throughout (matching ToadStool S42 rename).
+
+**New wiring (cross-spring evolution):**
+- `gpu::stream::StreamSmoother` — wraps `MovingWindowStats` (wetSpring S28+) for
+  IoT sensor stream smoothing. f64→f32→f64 bridge with CPU fallback.
+- `eco::correction::fit_ridge` — wraps `barracuda::linalg::ridge::ridge_regression`
+  (wetSpring ESN calibration) for regularized sensor calibration.
+- `bench_airspring_gpu` — benchmark binary measuring CPU throughput for all 6 GPU
+  orchestrators with cross-spring provenance annotations.
+- `specs/CROSS_SPRING_EVOLUTION.md` — full provenance story documenting 608 WGSL
+  shaders across 4 Springs (hotSpring 56, wetSpring 25, neuralSpring 20, shared 507).
+
+Evolution gaps updated: `moving_window_stats` and `ridge_regression` promoted from
+Tier B to Tier A (wired). 15 total (8 Tier A, 5 Tier B, 2 Tier C).
+
+Deduplicated `len_f64` utility (was copied 4×), evolved stringly-typed
+`model_type: &'static str` to `ModelType` enum, delegated duplicated
+`stress_coefficient` logic, added 4 GPU determinism tests (bit-identical
+verification), and filled coverage gaps. Library coverage: **97.2%** (target 90%).
+Added `Copy` to 8 small value types. Fixed wind speed unit bug in
+cross-validation. Started **metalForge** — `airspring-forge` crate with
+statistical metrics and regression primitives staged for upstream absorption.
+
+**293 tests** (253 barracuda + 40 forge), **123 validation checks** across 8 binaries.
+Synced evolution gaps: 15 total (8 Tier A, 5 Tier B, 2 Tier C).
+
+### Added
+
+- **`gpu::stream`** module: `StreamSmoother` wraps ToadStool's `MovingWindowStats`
+  (wetSpring S28+ environmental monitoring shader) with f64↔f32 bridge for IoT
+  sensor stream smoothing. `smooth_cpu()` CPU fallback. 6 unit tests.
+- **`eco::correction::fit_ridge`**: Ridge regression via `barracuda::linalg::ridge`
+  (wetSpring ESN calibration). Regularized linear calibration with design matrix
+  construction and goodness-of-fit reporting. 3 unit tests.
+- **`bench_airspring_gpu`** binary: Benchmarks all GPU orchestrators (ET₀, reduce,
+  stream, kriging, ridge) with cross-spring provenance annotations and throughput
+  reporting. Measures CPU baselines at multiple problem sizes.
+- **`specs/CROSS_SPRING_EVOLUTION.md`**: Full cross-spring shader provenance
+  documenting 608 WGSL shaders, 46 absorptions, 4 Spring contributions, and the
+  timeline of how hotSpring precision shaders, wetSpring bio/environmental shaders,
+  and neuralSpring ML shaders evolved to benefit airSpring's agriculture pipeline.
+- **4 GPU determinism tests** in `gpu_integration.rs`:
+  `test_gpu_batched_et0_deterministic`, `test_gpu_water_balance_deterministic`,
+  `test_gpu_reducer_deterministic`, `test_gpu_kriging_deterministic` — each runs
+  identical inputs twice and asserts bit-identical results (`< f64::EPSILON`).
+- **6 coverage-filling tests** in `eco/correction.rs`:
+  `test_model_type_as_str_and_display`, `test_evaluate_all_model_types`,
+  `test_fit_linear_insufficient_points`, `test_fit_quadratic_insufficient_points`,
+  `test_fit_exponential_all_negative_y`, `test_fit_logarithmic_all_negative_x`,
+  `test_fit_linear_singular`.
+- **`metalForge/forge/`**: `airspring-forge` v0.1.0 crate with 18 tests:
+  - `metrics` module: `rmse`, `mbe`, `nash_sutcliffe`, `index_of_agreement`,
+    `coefficient_of_determination` — absorption target `barracuda::stats::metrics`.
+  - `regression` module: `fit_linear`, `fit_quadratic`, `fit_exponential`,
+    `fit_logarithmic`, `fit_all` — absorption target `barracuda::stats::regression`.
+  - `ABSORPTION_MANIFEST.md` documenting upstream integration procedure.
+
+### Changed
+
+- **`validation.rs`**: Replaced local `ValidationRunner` with re-export of
+  `barracuda::validation::ValidationHarness`. Added `banner()` and `section()`
+  free functions for airSpring-specific output formatting. JSON utilities
+  (`parse_benchmark_json`, `json_f64`) retained as airSpring-specific.
+- **All 6 validation binaries** rewired: `check()` → `check_abs()`,
+  `check_bool(label, cond, expected)` → `check_bool(label, cond)`,
+  `v.section()` → `validation::section()`. Zero-tolerance checks use
+  `f64::EPSILON` (upstream `check_abs` uses strict `<` not `<=`).
+- **`evolution_gaps.rs`**: Updated to ToadStool HEAD `02207c4a`. Moving window
+  stats, Nelder-Mead, ridge regression promoted Tier C → Tier B. Validation
+  harness added as Tier A absorbed. Richards PDE upgraded (upstream CN +
+  tridiagonal now available). 11 → 13 gaps (6A + 5B + 2C).
+- **BarraCUDA → BarraCuda** naming across all docs and code (49 replacements,
+  matching ToadStool S42 rename).
+- **`lib.rs`**: Added crate-level `pub(crate) const fn len_f64<T>()`.
+  Four local copies in `correction.rs`, `csv_ts.rs`, `reduce.rs`, `testutil.rs`
+  replaced with `use crate::len_f64`.
+- **`eco/correction.rs`**: `model_type: &'static str` evolved to
+  `ModelType` enum (`Linear`, `Quadratic`, `Exponential`, `Logarithmic`) with
+  `as_str()` and `Display`. `evaluate()` match is now exhaustive (no `_ => NAN`
+  dead arm).
+- **`eco/water_balance.rs`**: `WaterBalanceState::stress_coefficient()` now
+  delegates to the standalone `stress_coefficient()` function, eliminating
+  duplicated logic.
+- **`Copy` derive** added to 8 small value types: `DailyInput`, `DailyOutput`,
+  `Et0Result`, `SoilHydraulicProps`, `SeasonalStats`, `ColumnStats`,
+  `SensorReading`, `TargetPoint`. Enables pass-by-value and eliminates
+  unnecessary clones.
+- **`tests/eco_integration.rs`**: Updated `ModelType` comparison from string
+  to enum variant.
+- **`Cargo.toml`**: Version `0.3.4` → `0.3.6`.
+
+### Fixed
+
+- **`cross_validate.rs`**: Wind speed was passed as km/h directly to
+  `wind_speed_at_2m()` which expects m/s, causing u2 = 7.48 instead of 2.08.
+  Added `/ 3.6` conversion. All 65/65 cross-validation values now match Python.
+- **`scripts/cross_validate.py`**: Hardcoded inputs replaced with loading from
+  `benchmark_fao56.json` (single source of truth), eliminating pre-rounded
+  values that caused 1.7e-3 drift.
+
+### Documentation
+
+- **All root docs** updated to v0.3.6: README.md, CONTROL_EXPERIMENT_STATUS.md,
+  HANDOFF, CHANGELOG.
+- **whitePaper/** updated: README (Phase 3 GPU-FIRST), METHODOLOGY (330 checks),
+  STUDY (123/123, 65/65, Phase 3 section).
+- **specs/** updated: README (Phase 0-3 complete), BARRACUDA_REQUIREMENTS (correct
+  module names, GPU DONE), PAPER_REVIEW_QUEUE (date).
+- **`evolution_gaps.rs`**: Updated to v0.3.6, 123/123 checks, GPU determinism note.
+
+### Quality Gates
+
+| Check | Before | After |
+|-------|--------|-------|
+| `cargo test` | 235 (161+74) | **244** (166+76+2) |
+| Library coverage (`llvm-cov`) | ~88% (unit only) | **97.2%** (all tests) |
+| GPU determinism | Implicit (GPU vs CPU) | **Explicit** (same input → bit-identical) |
+| `len_f64` copies | 4 | **1** (crate-level) |
+| `model_type` typing | `&'static str` | **`ModelType` enum** |
+| `stress_coefficient` duplication | 2 impls | **1 + delegation** |
+
+## [0.3.4] - 2026-02-17
+
+### Coverage Push & Code Hygiene
+
+Library test coverage raised from 78.3% to 88.2% (56 new unit tests, 105 → 161).
+Remaining gap is GPU device-backed paths testable only via integration tests.
+
+Magic numbers extracted to named constants: Topp equation coefficients
+(`TOPP_A0`–`TOPP_A3`), Newton-Raphson parameters (`INVERSE_TOPP_MAX_ITER`,
+`INVERSE_TOPP_CONVERGENCE`), and kriging distance threshold
+(`COLLOCATED_DIST_SQ`). Remaining `#[allow]` in binaries narrowed to inline
+per-cast annotations with justification comments. Avoidable `.clone()` calls
+eliminated in `validate_real_data.rs`. Test paths migrated from hardcoded
+`/tmp/` to `std::env::temp_dir()`. Benchmark JSON files enriched with
+`_provenance` metadata blocks. `validate_iot.rs` refactored from monolithic
+`main()` into `validate_sensor_stats()` + `validate_csv_round_trip()`.
+
+### Changed
+
+- **`eco/soil_moisture.rs`**: Topp coefficients, Newton-Raphson iteration
+  params, and epsilon bounds extracted to 8 named constants with provenance.
+- **`gpu/kriging.rs`**: IDW collocated-distance threshold extracted to
+  `COLLOCATED_DIST_SQ` constant.
+- **`gpu/reduce.rs`**: Added 9 unit tests (empty/single/large/constant
+  values, sentinel checks).
+- **`gpu/kriging.rs`**: Added 7 unit tests (exponential variogram, closer-
+  sensor dominance, multiple targets, variance-at-sensor).
+- **`gpu/et0.rs`**: Added 5 unit tests (toadstool conversion, debug format,
+  empty GPU, seasonal variation).
+- **`gpu/water_balance.rs`**: Added 4 unit tests (to_toadstool, from_state,
+  empty step, deep percolation, TAW clamp).
+- **`eco/soil_moisture.rs`**: Added 6 unit tests (all textures, Ksat
+  ordering, monotonicity, boundary behaviour, clay PAW).
+- **`eco/water_balance.rs`**: Added 8 unit tests (runoff model, theta,
+  deep percolation, irrigation trigger, standalone functions).
+- **`error.rs`**: Added 11 unit tests (Display, Debug, source, From impls).
+- **`validation.rs`**: Added 4 unit tests (section, counters, root-level
+  JSON, tolerance boundary).
+- **`validate_iot.rs`**: Refactored into `validate_sensor_stats()` and
+  `validate_csv_round_trip()` helpers; narrowed `#[allow]` to per-cast.
+- **`simulate_season.rs`**: Eliminated function-level `#[allow]`;
+  `usize→u32` casts now use `u32::try_from().expect()`, `usize→f64` via
+  inline `#[allow]` with justification.
+- **`validate_real_data.rs`**: Replaced `.clone()` with separate
+  `irr_inputs`/`irr_outputs` Vecs built during loop.
+- **`tests/io_and_errors.rs`**: `/tmp/` paths replaced with
+  `std::env::temp_dir()` for portability.
+- **Benchmark JSONs**: All 4 benchmark files (`benchmark_fao56.json`,
+  `benchmark_dong2020.json`, `benchmark_dong2024.json`,
+  `benchmark_water_balance.json`) enriched with `_provenance` block
+  (method, digitized_by, created, validated_by, repository).
+- **`Cargo.toml`**: Version `0.3.3` → `0.3.4`.
+
+## [0.3.3] - 2026-02-17
+
+### Lint Hygiene & Structural Refactoring
+
+Centralised `usize → f64` casts behind `len_f64()` helpers, eliminating 13
+`#[allow(clippy::cast_precision_loss)]` annotations across `testutil`, `correction`,
+`gpu/reduce`, and `csv_ts`. Refactored `cross_validate.rs` from a 226-line `main()`
+into 5 focused functions, removing `#[allow(too_many_lines)]`. Refactored
+`correction.rs`: renamed single-character variables to descriptive names
+(`sx` → `s_x`, `sxy` → `s_cross`), extracted 3×3 Cramer solve into `det3()` +
+`cramer_3x3()`, removing all 5 `#[allow]` annotations from `fit_quadratic`.
+Removed 3 stale `#[allow(cast_precision_loss)]` from binaries that no longer
+had any `as f64` casts. Documented `.unwrap_or()` fallbacks with named constants
+(`DEFAULT_TOPP_TOL`, `ES_TOL`, `BANGKOK_DELTA_TOL`).
+
+### Changed
+
+- **`testutil.rs`**: Added `const fn len_f64<T>()` helper; removed 6
+  `#[allow(cast_precision_loss)]` from `rmse`, `mbe`, `index_of_agreement`,
+  `nash_sutcliffe`, `coefficient_of_determination`, `bootstrap_rmse`.
+- **`eco/correction.rs`**: Added `const fn len_f64<T>()`; extracted `det3()` and
+  `cramer_3x3()` helpers; renamed variables in `fit_linear` and `fit_quadratic`;
+  removed all `#[allow]` from `fit_linear`, `fit_quadratic`, and `goodness_of_fit`.
+- **`gpu/reduce.rs`**: Added `const fn len_f64<T>()`; removed 4
+  `#[allow(cast_precision_loss)]` from `compute_stats`, `seasonal_mean`,
+  `sum_of_squares_from_mean`, `sample_variance`.
+- **`io/csv_ts.rs`**: Added `const fn len_f64<T>()`; removed
+  `#[allow(cast_precision_loss)]` from `column_stats`.
+- **`cross_validate.rs`**: Split monolithic `main()` into `uccle_core()`,
+  `uccle_extended()`, `soil_and_sensor_values()`, `water_balance_and_correction()`,
+  `merge_into()` — main now 10 lines. Removed dead `UccleInputs` struct.
+- **`validate_real_data.rs`**: Removed stale `#[allow(cast_precision_loss)]`.
+- **`validate_water_balance.rs`**: Removed stale `#[allow(cast_precision_loss)]`.
+- **`validate_et0.rs`**: Narrowed allow from 3 lints to 2 (removed `cast_precision_loss`).
+- **`validate_soil.rs`**: Added `DEFAULT_TOPP_TOL` constant for `.unwrap_or()` fallback.
+- **`validate_et0.rs`**: `.unwrap_or()` fallbacks now use named constants (`ES_TOL`,
+  `BANGKOK_DELTA_TOL`).
+- **`Cargo.toml`**: Version `0.3.1` → `0.3.3`.
+
+## [0.3.2] - 2026-02-17
+
+### Hardcoding Elimination & Binary Refactoring
+
+All bare numeric literals in validation binaries evolved to named `const` declarations
+with provenance comments. Remaining `panic!()` calls in production code replaced with
+`.expect()`. Binary `main()` functions refactored into focused helper functions, removing
+all `#[allow(clippy::too_many_lines)]` annotations except where `cast_` lints still apply.
+Cargo.toml version synchronized with CHANGELOG. HANDOFF doc updated for 177 tests, 8
+binaries, and refactored test layout.
+
+### Changed
+
+- **`validate_sensor_calibration.rs`**: Extracted `validate_soilwatch10()`,
+  `validate_irrigation()`, `validate_performance_and_demos()` — removed
+  `#[allow(too_many_lines)]` from `main()`. All tolerances named: `EXACT_TOL`,
+  `IR_TOL`, `IA_CRITERION`, `P_SIGNIFICANT`, `SAVINGS_TOL`.
+- **`validate_real_data.rs`**: Extracted `validate_station_et0()`,
+  `validate_scenario()`, `run_irrigated()` — removed `#[allow(too_many_lines)]`
+  from `main()`. `panic!()` replaced with `.expect()`.
+- **`simulate_season.rs`**: Extracted `SimResult` struct, `simulate_rainfed()`,
+  `simulate_smart()`, `generate_weather()` — removed `#[allow(too_many_lines)]`.
+  Named constants: `LN_GUARD`, `RAIN_PROBABILITY`, `RAIN_MEAN_MM`, `RAIN_CAP_MM`,
+  `MAX_IRRIGATION_MM`.
+- **`validate_iot.rs`**: Named constants: `TEMP_MEAN_TOL`, `TEMP_EXTREMES_TOL`,
+  `SM1_VALID_MIN/MAX`, `PAR_MAX_TOL`, `ROUNDTRIP_TEMP_TOL`.
+- **`validate_et0.rs`**: Named constants: `ES_TOL`, `VPD_TOL`, `RN_TOL`,
+  `BANGKOK_ES_TOL`, `BANGKOK_DELTA_TOL`, `BANGKOK_GAMMA_TOL`, `COLD_ET0_TOL`.
+- **`validate_water_balance.rs`**: Named constants: `PER_STEP_STRICT`,
+  `SIM_MASS_BALANCE_TOL`, `KS_MIDPOINT_TOL`. Removed local `sim_mass_balance_tol`
+  variable in favor of module-level `const`.
+- **`Cargo.toml`**: Version `0.2.0` → `0.3.1` (synchronized with CHANGELOG).
+- **HANDOFF doc**: Updated test counts (177), binary count (8), crate version
+  (v0.3.1), and test module layout (4 files replacing `integration.rs`).
+
+### Removed
+
+- 2 `panic!()` calls in production binaries.
+- `#[allow(clippy::too_many_lines)]` from `validate_sensor_calibration`, `validate_real_data`,
+  and `simulate_season` `main()` functions (moved logic to helper functions).
+
+## [0.3.1] - 2026-02-16
+
+### Deep Debt Resolution & Modern Idiomatic Rust
+
+Comprehensive audit and evolution. All production `.unwrap()` eliminated. Monolithic
+integration test (1726 lines) smart-refactored into 4 domain-focused test modules.
+Validation binaries evolved to load thresholds from benchmark JSON. Coverage measured
+and gaps filled.
+
+**177 tests** (105 unit + 72 integration), **119 validation checks** across 8 binaries.
+Library coverage: 90%+ (all eco modules >95%, all GPU modules >90%).
+
+### Added
+
+- **7 unit tests** for `ValidationRunner` (check, check_bool, JSON parsing, path traversal).
+- **2 integration tests**: exhaustive soil texture coverage, Ksat ordering.
+- **`validate_soil.rs`**: Now loads `benchmark_dong2020.json` for Topp published points
+  and tolerance (was hardcoded inline).
+- **`validate_water_balance.rs`**: Now loads `benchmark_water_balance.json` for mass
+  balance tolerance and Michigan ET range (was hardcoded inline).
+
+### Changed
+
+- **`tests/integration.rs`** (1726 lines) refactored into 4 domain-focused modules:
+  - `eco_integration.rs` (534 lines) — FAO-56, water balance, soil, crop, sensors
+  - `gpu_integration.rs` (701 lines) — GPU orchestrators, evolution gaps, ToadStool
+  - `io_and_errors.rs` (169 lines) — CSV parsing, round-trips, error types
+  - `stats_integration.rs` (216 lines) — BarraCuda cross-validation, Spearman, bootstrap
+- **`validate_real_data.rs`**: Evolved to use `ValidationRunner` with proper exit codes.
+  All `.unwrap()` replaced with `.expect()` with descriptive messages. Thresholds
+  extracted to named constants with documented justification.
+- **`validate_et0.rs`**: All `json_f64(...).unwrap()` → `.expect("path description")`.
+- **`validate_iot.rs`**: All `.unwrap()` → `.expect()` with context.
+- **`csv_ts::column_stats`**: Documentation clarifies population statistics (N divisor)
+  choice and points to `barracuda::stats` for sample statistics (N−1).
+- All binary `const` declarations moved to module level (clippy `items_after_statements`).
+
+### Fixed
+
+- Zero clippy pedantic/nursery warnings.
+- No bare `.unwrap()` in any production (non-test) code.
+- All validation thresholds sourced from benchmark JSON or named constants.
+
+## [0.3.0] - 2026-02-16
+
+### GPU-First Evolution
+
+Rewired all GPU orchestrators to use resolved `ToadStool` primitives. All four
+`ToadStool` issues (TS-001 through TS-004) are **RESOLVED** as of `ToadStool`
+commit `0c477306`. airSpring is now GPU-first with CPU fallback.
+
+**168 tests** (98 unit + 70 integration), **119 validation checks** across 8 binaries.
+
+### Added
+
+- **`BatchedEt0::gpu(device)`**: GPU-first ET₀ via `BatchedElementwiseF64::fao56_et0_batch()`.
+  `StationDay` input type maps directly to ToadStool shader layout (rh_max/rh_min).
+  CPU fallback via `compute()` still available for pre-computed `ea` inputs.
+- **`BatchedWaterBalance::with_gpu(device)`**: GPU-backed constructor.
+  `gpu_step()` dispatches one timestep across M fields in parallel via
+  `BatchedElementwiseF64::water_balance_batch()`. Applies Ks stress coefficient.
+- **`FieldDayInput`**: New type for GPU water balance step inputs matching ToadStool layout.
+- **`StationDay`**: New type for GPU ET₀ inputs matching ToadStool `StationDayInput`.
+- **`IssueStatus` enum**: Tracks resolved/open status of ToadStool issues.
+- **2 new GPU-matches-CPU integration tests**: `test_gpu_batched_et0_station_day_gpu_dispatch`,
+  `test_gpu_water_balance_gpu_step_dispatch`.
+- **4 new unit tests**: `test_station_day_cpu_fallback`, `test_station_day_multiple`,
+  `test_gpu_step_cpu_fallback`, `test_gpu_step_clamp`.
+
+### Changed
+
+- **`BatchedEt0`**: Now holds optional `BatchedElementwiseF64` engine. `Backend::Gpu`
+  is the new default. Old `compute()` CPU path unchanged.
+- **`BatchedWaterBalance`**: Now holds optional `BatchedElementwiseF64` engine.
+  CPU season simulation via `simulate_season()` unchanged.
+- **`SeasonalReducer`**: TS-004 resolved — GPU dispatch for N≥1024 works without panic.
+  Removed `catch_unwind` workaround from large array integration test.
+- **`evolution_gaps`**: All 4 ToadStool issues marked RESOLVED with `IssueStatus::Resolved`.
+  Evolution gaps updated: 5 Tier A integrated, 3 Tier B, 3 Tier C.
+- **Integration tests**: Updated TS issue tests to verify all 4 resolved. Large array
+  GPU test now directly asserts (no `catch_unwind`).
+
+### Quality Gates
+
+| Check | Before | After |
+|-------|--------|-------|
+| `cargo test` | 162 (94+68) | **168** (98+70) |
+| GPU orchestrators | 4 (CPU fallback) | **4 GPU-first** |
+| ToadStool issues | 4 open | **4/4 resolved** |
+| GPU N≥1024 reduce | Panics (TS-004) | **Works** |
+| GPU ET₀ | CPU only (TS-001/002) | **GPU dispatch** |
+| GPU water balance | CPU only (TS-002) | **GPU step** |
+
 ## [0.2.0] - 2026-02-16
 
 ### Deep Debt Elimination
@@ -39,7 +420,7 @@ integrated with CPU fallback, 4 ToadStool issues filed (TS-001/002/003/004),
   from production library code. Includes `r_squared()` (backed by
   `barracuda::stats::pearson_correlation`), `rmse()`, and `mbe()` for
   cross-validation. Mocks no longer pollute the production API.
-- **BarraCUDA cross-validation**: Integration tests verify airSpring
+- **BarraCuda cross-validation**: Integration tests verify airSpring
   computations against `barracuda::stats` primitives (Pearson correlation,
   population vs sample std_dev ratio). Proves the Spring thesis.
 - **GPU evolution mapping**: Added Rust Module → WGSL Shader → Pipeline Stage
@@ -106,7 +487,7 @@ integrated with CPU fallback, 4 ToadStool issues filed (TS-001/002/003/004),
   non-negative).
 - **4 new integration tests**: crop Kc → water balance pipeline, tomato vs corn
   depletion rate, Hargreaves vs PM cross-check, sunshine radiation → ET₀.
-- **GPU acceleration bridge** (`src/gpu/`): ToadStool/BarraCUDA GPU bridge module
+- **GPU acceleration bridge** (`src/gpu/`): ToadStool/BarraCuda GPU bridge module
   documenting the architecture (eco→gpu→ops→shaders) and exposing evolution gaps.
 - **`gpu::evolution_gaps`**: 11 structured `EvolutionGap` entries covering Tier A
   (kriging, fused reduce, batched ET₀, batched water balance, bootstrap CI),

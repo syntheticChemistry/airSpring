@@ -26,8 +26,12 @@
 //! dispatch for large kriging systems, the [`KrigingInterpolator`] wrapper will
 //! automatically benefit.
 
+/// Squared-distance threshold below which a target is considered collocated
+/// with a sensor (i.e. "exact match"). Prevents division by zero in IDW.
+const COLLOCATED_DIST_SQ: f64 = 1e-10;
+
 /// A soil moisture sensor reading with spatial coordinates.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct SensorReading {
     /// Easting or longitude (m or degrees).
     pub x: f64,
@@ -38,7 +42,7 @@ pub struct SensorReading {
 }
 
 /// A target point for interpolation.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct TargetPoint {
     /// Easting or longitude.
     pub x: f64,
@@ -236,7 +240,7 @@ pub fn interpolate_soil_moisture(
             let dy = sensor.y - target.y;
             let dist_sq = dy.mul_add(dy, dx * dx);
 
-            if dist_sq < 1e-10 {
+            if dist_sq < COLLOCATED_DIST_SQ {
                 // Exact sensor location
                 weight_sum = 1.0;
                 weighted_vwc = sensor.vwc;
@@ -257,7 +261,7 @@ pub fn interpolate_soil_moisture(
         };
 
         // Approximate variance from distance and variogram
-        let variance = if min_dist_sq < 1e-10 {
+        let variance = if min_dist_sq < COLLOCATED_DIST_SQ {
             nugget
         } else {
             sill.mul_add(1.0 - (-min_dist_sq.sqrt()).exp(), nugget)
@@ -349,5 +353,158 @@ mod tests {
         );
         assert_eq!(result.vwc_values.len(), 1);
         assert!(result.variances[0].is_infinite());
+    }
+
+    #[test]
+    fn test_interpolate_empty_targets() {
+        let sensors = vec![SensorReading {
+            x: 0.0,
+            y: 0.0,
+            vwc: 0.20,
+        }];
+        let result = interpolate_soil_moisture(
+            &sensors,
+            &[],
+            SoilVariogram::Spherical {
+                nugget: 0.001,
+                sill: 0.01,
+                range: 15.0,
+            },
+        );
+        assert!(result.vwc_values.is_empty());
+        assert!(result.variances.is_empty());
+    }
+
+    #[test]
+    fn test_interpolate_exponential_variogram() {
+        let sensors = vec![
+            SensorReading {
+                x: 0.0,
+                y: 0.0,
+                vwc: 0.15,
+            },
+            SensorReading {
+                x: 10.0,
+                y: 0.0,
+                vwc: 0.25,
+            },
+            SensorReading {
+                x: 0.0,
+                y: 10.0,
+                vwc: 0.20,
+            },
+        ];
+        let targets = vec![TargetPoint { x: 5.0, y: 5.0 }];
+        let variogram = SoilVariogram::Exponential {
+            nugget: 0.001,
+            sill: 0.01,
+            range: 20.0,
+        };
+        let result = interpolate_soil_moisture(&sensors, &targets, variogram);
+        assert_eq!(result.vwc_values.len(), 1);
+        assert!(
+            result.vwc_values[0] > 0.10 && result.vwc_values[0] < 0.30,
+            "VWC={} out of range",
+            result.vwc_values[0]
+        );
+        assert!(result.variances[0] > 0.0, "Variance should be positive");
+    }
+
+    #[test]
+    fn test_interpolate_closer_sensor_dominates() {
+        let sensors = vec![
+            SensorReading {
+                x: 0.0,
+                y: 0.0,
+                vwc: 0.10,
+            },
+            SensorReading {
+                x: 100.0,
+                y: 0.0,
+                vwc: 0.40,
+            },
+        ];
+        let targets = vec![TargetPoint { x: 1.0, y: 0.0 }];
+        let variogram = SoilVariogram::Spherical {
+            nugget: 0.001,
+            sill: 0.01,
+            range: 50.0,
+        };
+        let result = interpolate_soil_moisture(&sensors, &targets, variogram);
+        assert!(
+            result.vwc_values[0] < 0.15,
+            "Closer sensor (0.10) should dominate: {}",
+            result.vwc_values[0]
+        );
+    }
+
+    #[test]
+    fn test_interpolate_multiple_targets() {
+        let sensors = vec![
+            SensorReading {
+                x: 0.0,
+                y: 0.0,
+                vwc: 0.20,
+            },
+            SensorReading {
+                x: 10.0,
+                y: 0.0,
+                vwc: 0.30,
+            },
+        ];
+        let targets = vec![
+            TargetPoint { x: 2.0, y: 0.0 },
+            TargetPoint { x: 5.0, y: 0.0 },
+            TargetPoint { x: 8.0, y: 0.0 },
+        ];
+        let variogram = SoilVariogram::Spherical {
+            nugget: 0.001,
+            sill: 0.01,
+            range: 15.0,
+        };
+        let result = interpolate_soil_moisture(&sensors, &targets, variogram);
+        assert_eq!(result.vwc_values.len(), 3);
+        // Values should increase from sensor 1 (0.20) toward sensor 2 (0.30)
+        assert!(result.vwc_values[0] < result.vwc_values[1]);
+        assert!(result.vwc_values[1] < result.vwc_values[2]);
+    }
+
+    #[test]
+    fn test_variogram_to_barracuda_conversion() {
+        let sph = SoilVariogram::Spherical {
+            nugget: 0.001,
+            sill: 0.01,
+            range: 15.0,
+        };
+        let exp = SoilVariogram::Exponential {
+            nugget: 0.002,
+            sill: 0.02,
+            range: 30.0,
+        };
+        // Just ensure conversion doesn't panic
+        let _b1 = to_barracuda_variogram(sph);
+        let _b2 = to_barracuda_variogram(exp);
+    }
+
+    #[test]
+    fn test_variance_at_sensor_is_nugget() {
+        let sensors = vec![SensorReading {
+            x: 0.0,
+            y: 0.0,
+            vwc: 0.20,
+        }];
+        let targets = vec![TargetPoint { x: 0.0, y: 0.0 }];
+        let nugget = 0.005;
+        let variogram = SoilVariogram::Spherical {
+            nugget,
+            sill: 0.01,
+            range: 15.0,
+        };
+        let result = interpolate_soil_moisture(&sensors, &targets, variogram);
+        assert!(
+            (result.variances[0] - nugget).abs() < 1e-10,
+            "Variance at sensor should be nugget: {}",
+            result.variances[0]
+        );
     }
 }

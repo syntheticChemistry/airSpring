@@ -56,20 +56,28 @@ from calibration_dong2024 import (
 )
 import numpy as np
 
-# ── Fixed inputs (identical in Rust binary) ─────────────────────────
+# ── Fixed inputs loaded from benchmark JSON (single source of truth) ─
 
-# FAO-56 Example 18: Uccle, Belgium, 6 July (DOY 187)
+import os as _os
+
+_benchmark_path = _os.path.join(
+    _os.path.dirname(__file__), "..", "control", "fao56", "benchmark_fao56.json"
+)
+with open(_benchmark_path) as _f:
+    _bm = json.load(_f)
+_uccle_json = _bm["example_18_uccle_daily"]
+
 UCCLE = {
-    "tmin": 12.3,
-    "tmax": 21.5,
-    "tmean": 16.9,
-    "rs": 22.07,
-    "wind_10m": 2.78,
-    "rh_min": 63.0,
-    "rh_max": 84.0,
-    "elevation_m": 100.0,
-    "latitude_deg": 50.80,
-    "doy": 187,
+    "tmin": _uccle_json["inputs"]["tmin_c"],
+    "tmax": _uccle_json["inputs"]["tmax_c"],
+    "tmean": _uccle_json["intermediates"]["tmean_c"],
+    "rs": _uccle_json["intermediates"]["rs_mj_m2_day"],
+    "wind_10m": _uccle_json["inputs"]["wind_speed_10m_km_h"] / 3.6,
+    "rh_min": _uccle_json["inputs"]["rhmin_pct"],
+    "rh_max": _uccle_json["inputs"]["rhmax_pct"],
+    "elevation_m": _uccle_json["inputs"]["altitude_m"],
+    "latitude_deg": _uccle_json["inputs"]["latitude_deg_n"],
+    "doy": _uccle_json["inputs"]["day_of_year"],
 }
 
 # Soil dielectric values for Topp equation

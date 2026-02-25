@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-02-16 (Phase 2 complete — 334 checks, 106 tests, 53/53 cross-validation)
+**Updated**: 2026-02-25 (v0.3.7 — metalForge evolution, doc cleanup)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -54,13 +54,13 @@ bash scripts/run_all_baselines.sh
 # 5. Optionally run R ANOVA (requires R >= 4.0)
 # Rscript control/iot_irrigation/anova_irrigation.R
 
-# 6. Run Rust validation binaries (101 checks across 5 binaries)
+# 6. Run Rust validation binaries (119 checks across 8 binaries)
 cd barracuda
-for bin in validate_et0 validate_soil validate_iot validate_water_balance validate_sensor_calibration; do
+for bin in validate_et0 validate_soil validate_iot validate_water_balance validate_sensor_calibration validate_real_data cross_validate simulate_season; do
   cargo run --release --bin $bin
 done
 
-# 7. Run Phase 2 cross-validation (53 values, Python vs Rust)
+# 7. Run Phase 2 cross-validation (65 values, Python vs Rust)
 cd .. && python3 scripts/cross_validate.py > /tmp/py.json
 cd barracuda && cargo run --release --bin cross_validate > /tmp/rs.json
 
@@ -205,7 +205,7 @@ papers used. Each experiment has digitized benchmark data from the published
 papers and a Python (or R) validation script in `control/`.
 
 **Principle**: Validate the science with open tools the way the papers did,
-BEFORE evolving to Rust/BarraCUDA.
+BEFORE evolving to Rust/BarraCuda.
 
 | Baseline Script | Paper | Checks | Key Validations |
 |----------------|-------|--------|-----------------|
@@ -222,7 +222,7 @@ Tools used: numpy, scipy (curve_fit), json (benchmarks), base Python math.
 All benchmark data digitized directly from published papers (FAO-56 tables,
 Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2 + yield data).
 
-### 2026-02-16: Project Initialization → Phase 2 Complete (Rust — 101/101 PASS, 106 tests)
+### 2026-02-16: Project Initialization → Phase 2 Complete (Rust — 123/123 PASS, 253 tests)
 
 - Created airSpring repository
 - Scaffolded Track 1 (Precision Agriculture) and Track 2 (Environmental Systems)
@@ -238,13 +238,15 @@ Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2 + yield data).
 | Binary | Track | Checks | Key validations |
 |--------|-------|--------|----------------|
 | validate_et0 | T1 | 31/31 | FAO-56 Tables 2.3/2.4, Example 18 Uccle within 0.0005 mm/day |
-| validate_soil | T1 | 25/25 | Topp equation (7 points), inverse round-trip, 5 USDA textures, PAW |
+| validate_soil | T1 | 26/26 | Topp equation (7 points), inverse round-trip, 5 USDA textures, PAW |
 | validate_iot | T1 | 11/11 | 168 records, 5 columns, CSV round-trip, diurnal statistics |
 | validate_water_balance | T1 | 13/13 | Mass balance 0.0000 (3 scenarios), Ks bounds, MI summer |
 | validate_sensor_calibration | T1 | 21/21 | SoilWatch 10 VWC, irrigation model, Dong 2024 field results |
 
-**Total Rust: 101/101 validation checks PASS, 106 tests (70 unit + 36 integration) PASS**
-**Phase 2 cross-validation: 53/53 MATCH (Python↔Rust, tol=1e-5)**
+**Total Rust: 119/119 validation checks PASS, 233 tests (161 unit + 72 integration) PASS**
+**Phase 2 cross-validation: 65/65 MATCH (Python↔Rust, tol=1e-5)**
+**Phase 3 GPU-first: 4/4 ToadStool issues RESOLVED, library coverage 97.2%**
+**Quality: zero `.unwrap()`, zero `panic!()`, zero `unsafe`, zero clippy pedantic warnings, all tolerances named `const`**
 
 ---
 
@@ -277,10 +279,10 @@ ET₀ = [0.408 Δ(Rn - G) + γ (900/(T+273)) u₂ (es - ea)] / [Δ + γ(1 + 0.34
 - [x] Cross-check vs Open-Meteo's own ET₀: RMSE=0.267 mm/d, R²=0.967
 - [x] Confirmed positive bias (+0.076 mm/d) from ERA5 reanalysis differences
 
-**Rust (Phase 1 — 31/31 PASS, Phase 2 — 53/53 MATCH):**
+**Rust (Phase 1 — 31/31 PASS, Phase 2 — 65/65 MATCH):**
 - [x] Implement in Rust (`eco::evapotranspiration`) — 22 FAO-56 functions + Hargreaves, sunshine Rs, temp Rs, monthly G
 - [x] Validate against FAO Paper 56 tables (31 checks in `validate_et0`)
-- [x] Cross-validate: Python vs Rust identical outputs — 53/53 values match within 1e-5
+- [x] Cross-validate: Python vs Rust identical outputs — 65/65 values match within 1e-5
 - [ ] Benchmark: Rust vs Python throughput
 
 ### Experiment 002: Soil Sensor Calibration — PHASE 0 COMPLETE
@@ -297,9 +299,9 @@ calibration curves against Dong et al. (2020) Michigan soil data.
 - [x] Verify paper's conclusion: quadratic best for all soils
 - [x] Confirm field RMSE improvements from Table 3 → corrected
 
-**Rust (Phase 1 — 25/25 PASS, Phase 2 — cross-validated):**
+**Rust (Phase 1 — 26/26 PASS, Phase 2 — cross-validated):**
 - [x] Implement Topp equation in Rust (`eco::soil_moisture`)
-- [x] Validate against published values (25 checks in `validate_soil`)
+- [x] Validate against published values (26 checks in `validate_soil`)
 - [x] Cross-validate: Python vs Rust identical outputs — Topp values match within 1e-5
 
 ### Experiment 003: IoT Irrigation Pipeline — PHASE 0 COMPLETE
@@ -372,15 +374,15 @@ panel arrays for dual-use agriculture. Deferred until MSU Solar Farm data identi
 Track 1 (Precision Agriculture):
   Phase 0  [COMPLETE]: Python baselines — 142/142 PASS (FAO-56, soil, IoT, water balance)
   Phase 0+ [COMPLETE]: Real data pipeline — 918 station-days, ET₀ R²=0.97, water balance
-  Phase 1  [COMPLETE]: Rust validation — 101/101 PASS (5 binaries), 106 tests, 0 clippy warnings
-  Phase 2  [COMPLETE]: Cross-validation — 53/53 MATCH (Python↔Rust, tol=1e-5)
-  Phase 3:             GPU acceleration (real-time IoT, spatial kriging via ToadStool)
+  Phase 1  [COMPLETE]: Rust validation — 123/123 PASS (8 binaries), 253 tests, 0 clippy warnings
+  Phase 2  [COMPLETE]: Cross-validation — 65/65 MATCH (Python↔Rust, tol=1e-5)
+  Phase 3  [COMPLETE]: GPU-first — 4/4 ToadStool issues resolved, 253 tests, 97.2% lib coverage
   Phase 4:             Penny irrigation (sovereign, consumer hardware)
 
 Track 2 (Environmental Systems):
   Phase B0:           HYDRUS benchmarks + biochar fitting (Python baselines)
   Phase B1:           Contaminant transport + adsorption (scipy validation)
-  Phase B2:           Rust ports (BarraCUDA: Richards solver, isotherm fitting)
+  Phase B2:           Rust ports (BarraCuda: Richards solver, isotherm fitting)
   Phase B3:           GPU acceleration (field-scale PDE, Monte Carlo)
   Phase B4:           Sovereign remediation monitoring
 ```
@@ -438,9 +440,11 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026*
+*Initialized: February 16, 2026 — Updated: February 25, 2026 (v0.3.7)*
 *Phase 0 Python baselines: 142/142 PASS (Exps 001-004)*
 *Phase 0+ Real data pipeline: 918 station-days, ET₀ R²=0.97, 4 crop water balance*
-*Phase 1 BarraCUDA Rust validation: 101/101 PASS (5 binaries), 106 tests*
-*Phase 2 Cross-validation: 53/53 MATCH (Python↔Rust, tol=1e-5)*
-*Total: 334 quantitative checks + 918 real data station-days*
+*Phase 1 BarraCuda Rust validation: 123/123 PASS (8 binaries), 253 tests (175 unit + 76 integration + 2 doc-tests)*
+*Phase 2 Cross-validation: 65/65 MATCH (Python↔Rust, tol=1e-5)*
+*Phase 3 GPU-first: 4/4 ToadStool issues RESOLVED, 88% library coverage*
+*Quality: zero .unwrap() in production, zero unsafe, zero clippy pedantic/nursery warnings*
+*Total: 330 validation checks + 918 real data station-days*

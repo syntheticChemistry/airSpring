@@ -20,6 +20,22 @@ use airspring_barracuda::eco::{
     water_balance::{DailyInput, WaterBalanceState},
 };
 
+/// Guard against `ln(0)` in Box-Muller transform.
+const LN_GUARD: f64 = 1e-15;
+
+/// Probability of rain on any given day (Michigan summer climatology).
+const RAIN_PROBABILITY: f64 = 0.30;
+
+/// Mean rainfall per rainy event (mm), exponential distribution parameter.
+const RAIN_MEAN_MM: f64 = 12.0;
+
+/// Maximum rainfall cap per day (mm) to prevent unrealistic extremes.
+const RAIN_CAP_MM: f64 = 80.0;
+
+/// Maximum irrigation applied per event (mm). Reflects typical drip/sprinkler
+/// capacity: enough to refill depleted root zone without runoff.
+const MAX_IRRIGATION_MM: f64 = 25.0;
+
 /// Simple deterministic pseudo-random number generator (Xorshift64).
 /// Produces the same sequence on every platform — no external dependency.
 struct Rng(u64);
@@ -44,71 +60,144 @@ impl Rng {
 
     /// Normal (Box-Muller, deterministic).
     fn normal(&mut self, mean: f64, std: f64) -> f64 {
-        let u1 = self.uniform().max(1e-15);
+        let u1 = self.uniform().max(LN_GUARD);
         let u2 = self.uniform();
         let z = (-2.0 * u1.ln()).sqrt() * (2.0 * std::f64::consts::PI * u2).cos();
         z.mul_add(std, mean)
     }
 }
 
-#[allow(
-    clippy::too_many_lines,
-    clippy::cast_possible_truncation,
-    clippy::cast_precision_loss
-)]
-fn main() {
-    println!("═══════════════════════════════════════════════════════════");
-    println!("  airSpring — Michigan Growing Season Simulation");
-    println!("═══════════════════════════════════════════════════════════\n");
+/// Simulation results for one management strategy.
+struct SimResult {
+    total_et: f64,
+    stress_days: u32,
+    final_depletion: f64,
+    total_irrigation: f64,
+    irrigation_events: u32,
+}
 
-    // ── Configuration ───────────────────────────────────────────────
-    let crop = CropType::Corn.coefficients();
-    let soil = SoilTexture::SandyLoam.hydraulic_properties();
-    let n_days: usize = 90; // June–August growing season
-    let latitude_deg: f64 = 42.77; // Lansing, MI
-    let elevation_m = 256.0;
-    let doy_start: u32 = 152; // June 1
-
-    println!("  Crop:      {} (Kc_mid = {:.2})", crop.name, crop.kc_mid);
-    println!(
-        "  Soil:      SandyLoam (FC={:.2}, WP={:.2})",
-        soil.field_capacity, soil.wilting_point
+/// Run rainfed simulation (no irrigation).
+fn simulate_rainfed(
+    soil: &airspring_barracuda::eco::soil_moisture::SoilHydraulicProps,
+    crop: &airspring_barracuda::eco::crop::CropCoefficients,
+    root_zone_mm: f64,
+    et0: &[f64],
+    precip: &[f64],
+) -> SimResult {
+    let mut state = WaterBalanceState::new(
+        soil.field_capacity,
+        soil.wilting_point,
+        root_zone_mm,
+        crop.depletion_fraction,
     );
-    println!("  Root zone: {:.0} mm", crop.root_depth_m * 1000.0);
-    println!(
-        "  Season:    {n_days} days (DOY {doy_start}–{})",
-        doy_start + n_days as u32 - 1
+    let mut total_et = 0.0;
+    let mut stress_days = 0u32;
+
+    for (day_idx, (&e, &p)) in et0.iter().zip(precip).enumerate() {
+        let _ = day_idx;
+        let output = state.step(&DailyInput {
+            precipitation: p,
+            irrigation: 0.0,
+            et0: e,
+            kc: crop.kc_mid,
+        });
+        total_et += output.actual_et;
+        if output.ks < 1.0 {
+            stress_days += 1;
+        }
+    }
+
+    SimResult {
+        total_et,
+        stress_days,
+        final_depletion: state.depletion,
+        total_irrigation: 0.0,
+        irrigation_events: 0,
+    }
+}
+
+/// Run smart-irrigation simulation (trigger at RAW).
+fn simulate_smart(
+    soil: &airspring_barracuda::eco::soil_moisture::SoilHydraulicProps,
+    crop: &airspring_barracuda::eco::crop::CropCoefficients,
+    root_zone_mm: f64,
+    et0: &[f64],
+    precip: &[f64],
+) -> SimResult {
+    let mut state = WaterBalanceState::new(
+        soil.field_capacity,
+        soil.wilting_point,
+        root_zone_mm,
+        crop.depletion_fraction,
     );
-    println!("  Location:  Lansing MI ({latitude_deg}°N, {elevation_m}m)\n");
+    let raw = state.taw * crop.depletion_fraction;
+    let mut total_et = 0.0;
+    let mut total_irrig = 0.0;
+    let mut irrig_events = 0u32;
+    let mut stress_days = 0u32;
 
-    // ── Generate deterministic weather ──────────────────────────────
-    let mut rng = Rng::new(42);
+    for (&e, &p) in et0.iter().zip(precip) {
+        let irrigation = if state.depletion > raw {
+            let amount = state.depletion.min(MAX_IRRIGATION_MM);
+            total_irrig += amount;
+            irrig_events += 1;
+            amount
+        } else {
+            0.0
+        };
 
-    // Compute ET₀ for each day using Hargreaves (simplified, no wind/humidity data)
+        let output = state.step(&DailyInput {
+            precipitation: p,
+            irrigation,
+            et0: e,
+            kc: crop.kc_mid,
+        });
+        total_et += output.actual_et;
+        if output.ks < 1.0 {
+            stress_days += 1;
+        }
+    }
+
+    SimResult {
+        total_et,
+        stress_days,
+        final_depletion: state.depletion,
+        total_irrigation: total_irrig,
+        irrigation_events: irrig_events,
+    }
+}
+
+/// Generate deterministic daily weather series (ET₀ + precipitation).
+fn generate_weather(
+    n_days: usize,
+    doy_start: u32,
+    latitude_deg: f64,
+    elevation_m: f64,
+    rng: &mut Rng,
+) -> (Vec<f64>, Vec<f64>) {
     let mut et0_series = Vec::with_capacity(n_days);
     let mut precip_series = Vec::with_capacity(n_days);
 
     for day_idx in 0..n_days {
-        let doy = doy_start + day_idx as u32;
+        let day_idx_u32 = u32::try_from(day_idx).expect("season length fits u32");
+        #[allow(clippy::cast_precision_loss)] // exact: day_idx < 365 << 2^53
+        let day_idx_f = day_idx as f64;
+        let doy = doy_start + day_idx_u32;
 
-        // Temperature: diurnal seasonal pattern + noise
         let t_base = 4.0f64.mul_add(
-            ((day_idx as f64 - 45.0) * std::f64::consts::PI / 90.0).sin(),
+            ((day_idx_f - 45.0) * std::f64::consts::PI / 90.0).sin(),
             22.0,
         );
         let tmax = t_base + rng.normal(5.0, 1.5);
         let tmin = t_base - rng.normal(5.0, 1.5);
 
-        // ET₀ from Penman-Monteith with estimated inputs
         let lat_rad = latitude_deg.to_radians();
         let ra = et::extraterrestrial_radiation(lat_rad, doy);
         let n_hours = et::daylight_hours(lat_rad, doy);
 
-        // Sunshine hours: ~60-70% of possible
         let sunshine = n_hours * rng.normal(0.65, 0.10).clamp(0.2, 0.95);
         let rs = et::solar_radiation_from_sunshine(sunshine, n_hours, ra);
 
-        // Humidity and wind (typical Michigan summer)
         let rh_min = rng.normal(55.0, 8.0).clamp(30.0, 80.0);
         let rh_max = rng.normal(85.0, 5.0).clamp(rh_min + 10.0, 100.0);
         let ea = et::actual_vapour_pressure_rh(tmin, tmax, rh_min, rh_max);
@@ -125,82 +214,56 @@ fn main() {
             latitude_deg,
             day_of_year: doy,
         };
-        let result = et::daily_et0(&input);
-        et0_series.push(result.et0);
+        et0_series.push(et::daily_et0(&input).et0);
 
-        // Precipitation: 30% chance of rain, exponential(12mm)
-        let p = if rng.uniform() < 0.30 {
-            (-12.0 * rng.uniform().max(1e-15).ln()).min(80.0) // exponential, capped
+        let p = if rng.uniform() < RAIN_PROBABILITY {
+            (-RAIN_MEAN_MM * rng.uniform().max(LN_GUARD).ln()).min(RAIN_CAP_MM)
         } else {
             0.0
         };
         precip_series.push(p);
     }
 
-    // ── Simulate: No irrigation (rainfed) ───────────────────────────
+    (et0_series, precip_series)
+}
+
+fn main() {
+    println!("═══════════════════════════════════════════════════════════");
+    println!("  airSpring — Michigan Growing Season Simulation");
+    println!("═══════════════════════════════════════════════════════════\n");
+
+    let crop = CropType::Corn.coefficients();
+    let soil = SoilTexture::SandyLoam.hydraulic_properties();
+    let n_days: usize = 90;
+    let n_days_u32 = u32::try_from(n_days).expect("season length fits u32");
+    #[allow(clippy::cast_precision_loss)] // exact: n_days = 90 << 2^53
+    let n_days_f = n_days as f64;
+    let latitude_deg: f64 = 42.77;
+    let elevation_m = 256.0;
+    let doy_start: u32 = 152;
     let root_zone_mm = crop.root_depth_m * 1000.0;
-    let mut state_rainfed = WaterBalanceState::new(
-        soil.field_capacity,
-        soil.wilting_point,
-        root_zone_mm,
-        crop.depletion_fraction,
+
+    println!("  Crop:      {} (Kc_mid = {:.2})", crop.name, crop.kc_mid);
+    println!(
+        "  Soil:      SandyLoam (FC={:.2}, WP={:.2})",
+        soil.field_capacity, soil.wilting_point
     );
-
-    let mut total_et_rainfed = 0.0;
-    let mut stress_days_rainfed = 0u32;
-    for day_idx in 0..n_days {
-        let output = state_rainfed.step(&DailyInput {
-            precipitation: precip_series[day_idx],
-            irrigation: 0.0,
-            et0: et0_series[day_idx],
-            kc: crop.kc_mid,
-        });
-        total_et_rainfed += output.actual_et;
-        if output.ks < 1.0 {
-            stress_days_rainfed += 1;
-        }
-    }
-
-    // ── Simulate: Smart irrigation (trigger at RAW) ─────────────────
-    let mut state_smart = WaterBalanceState::new(
-        soil.field_capacity,
-        soil.wilting_point,
-        root_zone_mm,
-        crop.depletion_fraction,
+    println!("  Root zone: {root_zone_mm:.0} mm");
+    println!(
+        "  Season:    {n_days} days (DOY {doy_start}–{})",
+        doy_start + n_days_u32 - 1
     );
+    println!("  Location:  Lansing MI ({latitude_deg}°N, {elevation_m}m)\n");
 
-    let raw = state_smart.taw * crop.depletion_fraction;
-    let mut total_et_smart = 0.0;
-    let mut total_irrig = 0.0;
-    let mut irrig_events = 0u32;
-    let mut stress_days_smart = 0u32;
+    let mut rng = Rng::new(42);
+    let (et0_series, precip_series) =
+        generate_weather(n_days, doy_start, latitude_deg, elevation_m, &mut rng);
 
-    for day_idx in 0..n_days {
-        // Irrigate when depletion exceeds RAW
-        let irrigation = if state_smart.depletion > raw {
-            let amount = state_smart.depletion.min(25.0);
-            total_irrig += amount;
-            irrig_events += 1;
-            amount
-        } else {
-            0.0
-        };
+    let rf = simulate_rainfed(&soil, &crop, root_zone_mm, &et0_series, &precip_series);
+    let sm = simulate_smart(&soil, &crop, root_zone_mm, &et0_series, &precip_series);
 
-        let output = state_smart.step(&DailyInput {
-            precipitation: precip_series[day_idx],
-            irrigation,
-            et0: et0_series[day_idx],
-            kc: crop.kc_mid,
-        });
-        total_et_smart += output.actual_et;
-        if output.ks < 1.0 {
-            stress_days_smart += 1;
-        }
-    }
-
-    // ── Results ─────────────────────────────────────────────────────
     let total_precip: f64 = precip_series.iter().sum();
-    let mean_et0: f64 = et0_series.iter().sum::<f64>() / n_days as f64;
+    let mean_et0: f64 = et0_series.iter().sum::<f64>() / n_days_f;
 
     println!("── Weather Summary ─────────────────────────────────");
     println!("  Mean ET₀:       {mean_et0:.2} mm/day");
@@ -211,29 +274,30 @@ fn main() {
     );
 
     println!("\n── Rainfed (no irrigation) ─────────────────────────");
-    println!("  Total ET:       {total_et_rainfed:.0} mm");
-    println!("  Stress days:    {stress_days_rainfed}/{n_days}");
-    println!("  Final depletion: {:.1} mm", state_rainfed.depletion);
+    println!("  Total ET:       {:.0} mm", rf.total_et);
+    println!("  Stress days:    {}/{n_days}", rf.stress_days);
+    println!("  Final depletion: {:.1} mm", rf.final_depletion);
 
     println!("\n── Smart irrigation (trigger at RAW) ───────────────");
-    println!("  Total ET:       {total_et_smart:.0} mm");
-    println!("  Stress days:    {stress_days_smart}/{n_days}");
-    println!("  Irrigation:     {total_irrig:.0} mm ({irrig_events} events)");
-    println!("  Final depletion: {:.1} mm", state_smart.depletion);
+    println!("  Total ET:       {:.0} mm", sm.total_et);
+    println!("  Stress days:    {}/{n_days}", sm.stress_days);
+    println!(
+        "  Irrigation:     {:.0} mm ({} events)",
+        sm.total_irrigation, sm.irrigation_events
+    );
+    println!("  Final depletion: {:.1} mm", sm.final_depletion);
 
-    let water_savings_pct = if total_irrig > 0.0 {
-        let naive_irrig = total_et_smart; // naive = replace all ET
-        (1.0 - total_irrig / naive_irrig) * 100.0
+    let water_savings_pct = if sm.total_irrigation > 0.0 {
+        (1.0 - sm.total_irrigation / sm.total_et) * 100.0
     } else {
         100.0
     };
     println!("  Water savings:  {water_savings_pct:.0}% vs naive replacement");
 
-    // ── Verification ────────────────────────────────────────────────
     println!("\n── Verification ───────────────────────────────────");
     println!(
         "  [{}] Smart irrigation reduces stress days",
-        if stress_days_smart < stress_days_rainfed {
+        if sm.stress_days < rf.stress_days {
             "OK"
         } else {
             "!!"
@@ -241,7 +305,7 @@ fn main() {
     );
     println!(
         "  [{}] Smart irrigation increases ET",
-        if total_et_smart > total_et_rainfed {
+        if sm.total_et > rf.total_et {
             "OK"
         } else {
             "!!"
@@ -249,7 +313,7 @@ fn main() {
     );
     println!(
         "  [{}] Irrigation less than total ET (efficient)",
-        if total_irrig < total_et_smart {
+        if sm.total_irrigation < sm.total_et {
             "OK"
         } else {
             "!!"

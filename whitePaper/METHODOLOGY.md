@@ -30,15 +30,16 @@ Phase 0+ uses zero synthetic data. Three open data sources:
 2. **OpenWeatherMap** (free key): Real-time current + 5-day forecasts
 3. **NOAA CDO** (free token): GHCND daily observations from US weather stations
 
-### Phase 1: BarraCUDA Execution (Rust Evolution)
+### Phase 1: BarraCuda Execution (Rust Evolution)
 
-Re-implement the same computations in pure Rust using BarraCUDA. Compare:
+Re-implement the same computations in pure Rust using BarraCuda. Compare:
 - **Accuracy**: Same ET₀, soil moisture, water balance outputs as Python
 - **Throughput**: Evaluations per second
-- **Dependencies**: BarraCUDA target is minimal external dependencies (barracuda, serde, serde_json)
+- **Dependencies**: BarraCuda target is minimal external dependencies (barracuda, serde, serde_json)
 - **Reproducibility**: Deterministic results
 - **GPU readiness**: Architecture suitable for ToadStool GPU acceleration
 - **Code quality**: Zero clippy pedantic/nursery warnings, proper error types, idiomatic Rust
+- **Binaries**: 8 validation binaries (validate_et0, validate_soil, validate_iot, validate_water_balance, validate_sensor_calibration, validate_real_data, cross_validate, simulate_season)
 
 ### Phase 2: Cross-Validation (Python↔Rust)
 
@@ -142,7 +143,7 @@ All experiments run on a single consumer workstation:
 | Python | 3.x (numpy, scipy, pandas, requests) |
 | R | 4.x (planned — for ANOVA matching paper) |
 | Rust | stable (rustc) |
-| GPU | RTX 4070 (SHADER_F64 confirmed) — planned for Phase 3 |
+| GPU | RTX 4070 (SHADER_F64 confirmed) — Phase 3 LIVE (4 orchestrators) |
 
 ---
 
@@ -167,15 +168,15 @@ All experiments run on a single consumer workstation:
 | IoT Pipeline | SoilWatch 10 + irrigation correct | — | CSV stats + calibration match | ≤1e-5 tolerance |
 | Water Balance | Mass balance < 0.001 mm | Savings per Dong (2024) | Mass balance match Python | ≤1e-5 tolerance |
 
-### Grand Total: 334 Quantitative Checks Pass + 918 Real Data Points
+### Grand Total: 330 Validation Checks Pass + 253 Rust Tests + 918 Real Data Points
 
 | Phase | Checks | Description |
 |-------|:------:|-------------|
 | Phase 0 (Python control) | 142 | 64 ET₀ + 36 soil + 24 IoT + 18 water balance |
-| Phase 1 (Rust BarraCUDA) | 101 | 31 ET₀ + 25 soil + 11 IoT + 13 water balance + 21 sensor calibration |
-| Phase 1 (Rust tests) | 106 | 70 unit + 36 integration (determinism, error paths, crop, cross-module) |
-| Phase 2 (Cross-validation) | 53 | Python↔Rust identical outputs (tol=1e-5) |
-| **Total** | **334** | **All pass** |
+| Phase 1 (Rust BarraCuda) | 123 | 31 ET₀ + 25 soil + 11 IoT + 13 water balance + 21 sensor calibration + 21 real data |
+| Phase 1 (Rust tests) | 253 | 175 unit + 76 integration + 2 doc-tests |
+| Phase 2 (Cross-validation) | 65 | Python↔Rust identical outputs (tol=1e-5), loads from benchmark JSON |
+| **Total** | **330** | **All pass** |
 | Phase 0+ (Real data) | 918 station-days | R²=0.967, 4 crop water balance, zero synthetic |
 
 ---
@@ -190,7 +191,7 @@ All experiments run on a single consumer workstation:
 | pandas | 2.0+ | Data handling |
 | pyet | 1.4+ | FAO-56 PM cross-reference |
 | R | 4.3.1 (paper match) | One-way ANOVA (planned) |
-| Rust | stable (1.77+) | BarraCUDA, zero unsafe |
+| Rust | stable (1.77+) | BarraCuda, zero unsafe |
 | serde | 1.x | Rust serialization |
 | serde_json | 1.x | Benchmark JSON + cross-validation |
 | OS | Pop!_OS 22.04 | Linux 6.17 |

@@ -122,7 +122,7 @@ impl RunoffModel {
 }
 
 /// Daily water balance input.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct DailyInput {
     /// Precipitation (mm)
     pub precipitation: f64,
@@ -156,7 +156,7 @@ pub struct WaterBalanceState {
 }
 
 /// Daily water balance output.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct DailyOutput {
     /// Root zone depletion at end of day (mm)
     pub depletion: f64,
@@ -203,16 +203,10 @@ impl WaterBalanceState {
 
     /// Compute water stress coefficient Ks (FAO-56 Eq. 84).
     ///
-    /// Ks = (TAW − Dr) / (TAW − RAW) when Dr > RAW, else Ks = 1.0
+    /// Delegates to the standalone [`stress_coefficient`] function.
     #[must_use]
     pub fn stress_coefficient(&self) -> f64 {
-        if self.depletion <= self.raw {
-            1.0
-        } else if self.depletion >= self.taw {
-            0.0
-        } else {
-            (self.taw - self.depletion) / (self.taw - self.raw)
-        }
+        stress_coefficient(self.depletion, self.taw, self.raw)
     }
 
     /// Step the water balance forward one day.
@@ -412,5 +406,108 @@ mod tests {
         for (a, b) in out1.iter().zip(out2.iter()) {
             assert!((a.actual_et - b.actual_et).abs() < f64::EPSILON);
         }
+    }
+
+    #[test]
+    fn test_with_runoff_model() {
+        let state = WaterBalanceState::new(0.30, 0.10, 500.0, 0.5).with_runoff_model(
+            RunoffModel::SimpleThreshold {
+                threshold_mm: 20.0,
+                fraction: 0.3,
+            },
+        );
+        let inputs = vec![DailyInput {
+            precipitation: 50.0,
+            irrigation: 0.0,
+            et0: 3.0,
+            kc: 1.0,
+        }];
+        let (_, outputs) = simulate_season(&state, &inputs);
+        // Runoff = (50 - 20) * 0.3 = 9.0
+        assert!(
+            (outputs[0].runoff - 9.0).abs() < 1e-10,
+            "runoff={}",
+            outputs[0].runoff
+        );
+    }
+
+    #[test]
+    fn test_current_theta_depleted() {
+        let mut state = WaterBalanceState::new(0.30, 0.10, 500.0, 0.5);
+        state.depletion = 50.0;
+        // θ = FC - Dr/Z = 0.30 - 50/500 = 0.30 - 0.10 = 0.20
+        assert!((state.current_theta() - 0.20).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_step_deep_percolation() {
+        let mut state = WaterBalanceState::new(0.30, 0.10, 500.0, 0.5);
+        // Heavy rain should cause deep percolation (depletion goes negative → clamp to 0)
+        let output = state.step(&DailyInput {
+            precipitation: 200.0,
+            irrigation: 0.0,
+            et0: 3.0,
+            kc: 1.0,
+        });
+        assert!(
+            output.deep_percolation > 0.0,
+            "Should have deep percolation"
+        );
+        assert!((state.depletion).abs() < 1e-10, "Depletion clamped to 0");
+    }
+
+    #[test]
+    fn test_step_irrigation_trigger() {
+        let mut state = WaterBalanceState::new(0.30, 0.10, 500.0, 0.5);
+        // Dry-down until irrigation is triggered
+        for _ in 0..30 {
+            let output = state.step(&DailyInput {
+                precipitation: 0.0,
+                irrigation: 0.0,
+                et0: 5.0,
+                kc: 1.0,
+            });
+            if output.needs_irrigation {
+                assert!(state.depletion > state.raw);
+                return;
+            }
+        }
+        panic!("Should have triggered irrigation during 30-day dry-down");
+    }
+
+    #[test]
+    fn test_standalone_daily_water_balance_step() {
+        // Known-value: no stress, no precipitation → depletion increases by ETa
+        let (new_dr, actual_et, dp) =
+            daily_water_balance_step(10.0, 0.0, 0.0, 5.0, 1.0, 1.0, 100.0);
+        assert!((actual_et - 5.0).abs() < 1e-10);
+        assert!((new_dr - 15.0).abs() < 1e-10);
+        assert!((dp).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_standalone_daily_deep_percolation() {
+        let (new_dr, _, dp) = daily_water_balance_step(5.0, 50.0, 0.0, 3.0, 1.0, 1.0, 100.0);
+        // dr_new = 5 - 50 + 3 = -42 → dp = 42, dr_new = 0
+        assert!((dp - 42.0).abs() < 1e-10, "dp={dp}");
+        assert!((new_dr).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_stress_coefficient_standalone() {
+        // Below RAW → Ks = 1.0
+        assert!((stress_coefficient(30.0, 100.0, 50.0) - 1.0).abs() < 1e-10);
+        // At TAW → Ks = 0.0
+        assert!((stress_coefficient(100.0, 100.0, 50.0)).abs() < 1e-10);
+        // Midpoint between RAW and TAW → Ks = 0.5
+        assert!((stress_coefficient(75.0, 100.0, 50.0) - 0.5).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_total_and_readily_available_water() {
+        let taw = total_available_water(0.30, 0.10, 500.0);
+        assert!((taw - 100.0).abs() < 1e-10);
+        let raw = readily_available_water(taw, 0.5);
+        assert!((raw - 50.0).abs() < 1e-10);
     }
 }

@@ -1,106 +1,33 @@
 //! Shared validation infrastructure for hotSpring-pattern binaries.
 //!
-//! Implements the validation pattern established by hotSpring:
-//! - Hardcoded expected values with published provenance
-//! - Explicit pass/fail per check
-//! - Exit code 0 (all pass) or 1 (any fail)
-//! - Benchmark JSON loading for validation fidelity
+//! Leans on [`barracuda::validation::ValidationHarness`] (absorbed upstream
+//! from `neuralSpring` → `ToadStool` Feb 2026) for structured pass/fail checks
+//! with exit codes. airSpring adds JSON benchmark loading utilities on top.
 //!
 //! # Usage
 //!
-//! ```rust,ignore
-//! use airspring_barracuda::validation::ValidationRunner;
+//! ```
+//! use airspring_barracuda::validation::ValidationHarness;
 //!
-//! let mut v = ValidationRunner::new("ET₀ Validation");
-//! v.section("Component functions");
-//! v.check("es(20°C)", computed, 2.338, 0.001);
-//! v.finish();  // exits with code 0 or 1
+//! let mut v = ValidationHarness::new("ET₀ Validation");
+//! v.check_abs("es(20°C)", 2.338, 2.338, 0.001);
+//! assert_eq!(v.passed_count(), 1);
+//! assert_eq!(v.total_count(), 1);
+//! // v.finish() exits the process — call only in validation binaries
 //! ```
 
-/// Accumulates validation checks and reports pass/fail summary.
-pub struct ValidationRunner {
-    name: String,
-    total: u32,
-    passed: u32,
+pub use barracuda::validation::ValidationHarness;
+
+/// Print a section header for visual grouping in validation output.
+pub fn section(name: &str) {
+    println!("── {name} ──");
 }
 
-impl ValidationRunner {
-    /// Create a new validation runner.
-    #[must_use]
-    pub fn new(name: &str) -> Self {
-        println!("═══════════════════════════════════════════════════════════");
-        println!("  airSpring {name}");
-        println!("═══════════════════════════════════════════════════════════\n");
-        Self {
-            name: name.to_string(),
-            total: 0,
-            passed: 0,
-        }
-    }
-
-    /// Print a section header.
-    pub fn section(&self, name: &str) {
-        println!("── {name} ──");
-    }
-
-    /// Check a floating-point value against an expected value with tolerance.
-    ///
-    /// Returns `true` if the check passes.
-    pub fn check(&mut self, label: &str, actual: f64, expected: f64, tolerance: f64) -> bool {
-        let pass = (actual - expected).abs() <= tolerance;
-        let tag = if pass { "OK" } else { "FAIL" };
-        println!("  [{tag}]  {label}: {actual:.4} (expected {expected:.4}, tol {tolerance:.4})");
-        self.total += 1;
-        if pass {
-            self.passed += 1;
-        }
-        pass
-    }
-
-    /// Check a boolean condition.
-    pub fn check_bool(&mut self, label: &str, actual: bool, expected: bool) -> bool {
-        let pass = actual == expected;
-        let tag = if pass { "OK" } else { "FAIL" };
-        println!("  [{tag}]  {label}: {actual} (expected {expected})");
-        self.total += 1;
-        if pass {
-            self.passed += 1;
-        }
-        pass
-    }
-
-    /// Print summary and exit with appropriate code.
-    ///
-    /// Exit code 0 if all checks passed, 1 otherwise.
-    pub fn finish(&self) -> ! {
-        println!("\n═══════════════════════════════════════════════════════════");
-        println!(
-            "  {}: {}/{} checks passed",
-            self.name, self.passed, self.total
-        );
-        if self.passed == self.total {
-            println!("  RESULT: PASS");
-        } else {
-            println!(
-                "  RESULT: FAIL ({} checks failed)",
-                self.total - self.passed
-            );
-        }
-        println!("═══════════════════════════════════════════════════════════");
-        std::process::exit(i32::from(self.passed != self.total));
-    }
-
-    /// Current pass count.
-    #[must_use]
-    pub const fn passed(&self) -> u32 {
-        self.passed
-    }
-
-    /// Current total count.
-    #[must_use]
-    pub const fn total(&self) -> u32 {
-        self.total
-    }
+/// Print an airSpring validation banner.
+pub fn banner(name: &str) {
+    println!("═══════════════════════════════════════════════════════════");
+    println!("  airSpring {name}");
+    println!("═══════════════════════════════════════════════════════════\n");
 }
 
 /// Load a benchmark JSON file embedded at compile time.
@@ -119,8 +46,14 @@ pub fn parse_benchmark_json(json_str: &str) -> crate::error::Result<serde_json::
 ///
 /// # Examples
 ///
-/// ```rust,ignore
-/// let val = json_f64(&benchmark, &["example_18", "expected_et0_mm_day"]);
+/// ```
+/// use airspring_barracuda::validation::json_f64;
+///
+/// let json: serde_json::Value = serde_json::from_str(
+///     r#"{"example_18": {"expected_et0_mm_day": 3.88}}"#,
+/// ).unwrap();
+/// let val = json_f64(&json, &["example_18", "expected_et0_mm_day"]);
+/// assert!((val.unwrap() - 3.88).abs() < f64::EPSILON);
 /// ```
 #[must_use]
 pub fn json_f64(value: &serde_json::Value, path: &[&str]) -> Option<f64> {
@@ -129,4 +62,83 @@ pub fn json_f64(value: &serde_json::Value, path: &[&str]) -> Option<f64> {
         current = current.get(key)?;
     }
     current.as_f64()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_harness_check_pass() {
+        let mut v = ValidationHarness::new("Unit Test Suite");
+        v.check_abs("pass check", 1.0, 1.0, 0.01);
+        assert_eq!(v.passed_count(), 1);
+        assert_eq!(v.total_count(), 1);
+    }
+
+    #[test]
+    fn test_harness_check_fail() {
+        let mut v = ValidationHarness::new("Unit Test Suite");
+        v.check_abs("fail check", 1.0, 2.0, 0.01);
+        assert_eq!(v.passed_count(), 0);
+        assert_eq!(v.total_count(), 1);
+    }
+
+    #[test]
+    fn test_harness_check_bool() {
+        let mut v = ValidationHarness::new("Unit Test Suite");
+        v.check_bool("true check", true);
+        v.check_bool("false check", false);
+        assert_eq!(v.passed_count(), 1);
+        assert_eq!(v.total_count(), 2);
+    }
+
+    #[test]
+    fn test_parse_benchmark_json_valid() {
+        let json = r#"{"key": 42.0}"#;
+        let result = parse_benchmark_json(json);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_parse_benchmark_json_invalid() {
+        let result = parse_benchmark_json("{{not json");
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_json_f64_nested() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"a": {"b": {"c": 42.5}}}"#).unwrap();
+        assert!((json_f64(&json, &["a", "b", "c"]).unwrap() - 42.5).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_json_f64_missing_path() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"a": 1}"#).unwrap();
+        assert!(json_f64(&json, &["a", "b"]).is_none());
+    }
+
+    #[test]
+    fn test_json_f64_root_level() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"val": 98.76543}"#).unwrap();
+        let v = json_f64(&json, &["val"]).unwrap();
+        assert!((v - 98.765_43).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_json_f64_empty_path() {
+        let json: serde_json::Value = serde_json::from_str("42.0").unwrap();
+        let v = json_f64(&json, &[]);
+        assert!(v.is_some());
+        assert!((v.unwrap() - 42.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_check_tolerance_boundary() {
+        let mut v = ValidationHarness::new("Boundary Test");
+        v.check_abs("within", 1.005, 1.0, 0.01);
+        v.check_abs("beyond", 1.02, 1.0, 0.01);
+        assert_eq!(v.passed_count(), 1);
+        assert_eq!(v.total_count(), 2);
+    }
 }

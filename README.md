@@ -5,19 +5,36 @@
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
 
 ```
-Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCUDA) → GPU (ToadStool) → Penny Irrigation
+Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda CPU)
+     → GPU (ToadStool shaders) → metalForge (mixed hardware) → Penny Irrigation
 ```
 
-## Current Status
+## Current Status (v0.3.7, 2026-02-25)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **142/142 PASS** | FAO-56, soil, IoT, water balance |
 | Phase 0+: Real data pipeline | **918 station-days** | ET₀ R²=0.967 vs Open-Meteo |
-| Phase 1: Rust validation | **119/119 PASS** | 8 binaries, 162 tests |
+| Phase 1: Rust validation | **123/123 PASS** | 8 binaries, 253 tests, 97% coverage |
 | Phase 2: Cross-validation | **65/65 MATCH** | Python↔Rust identical (tol=1e-5) |
-| Phase 3: GPU bridge | **Integrated** | 4 orchestrators, 4 ToadStool issues filed |
+| Phase 3: GPU bridge | **GPU-FIRST** | 6 orchestrators, 4/4 ToadStool issues resolved |
 | Phase 4: Penny Irrigation | Vision | Sovereign, consumer hardware |
+
+### BarraCuda Integration
+
+| airSpring Module | BarraCuda Primitive | Origin | Status |
+|-----------------|--------------------|----|---|
+| `gpu::et0` | `ops::batched_elementwise_f64` (op=0) | Multi-spring | **GPU-FIRST** |
+| `gpu::water_balance` | `ops::batched_elementwise_f64` (op=1) | Multi-spring | **GPU-STEP** |
+| `gpu::kriging` | `ops::kriging_f64::KrigingF64` | wetSpring | **Integrated** |
+| `gpu::reduce` | `ops::fused_map_reduce_f64` | wetSpring | **GPU N≥1024** |
+| `gpu::stream` | `ops::moving_window_stats` | wetSpring S28+ | **Wired** |
+| `eco::correction::fit_ridge` | `linalg::ridge::ridge_regression` | wetSpring ESN | **Wired** |
+| `validation` | `validation::ValidationHarness` | neuralSpring | **Absorbed** |
+| `testutil` | `stats::pearson`, `spearman`, `bootstrap_ci` | Shared | **Wired** |
+
+Evolution gaps: 15 total (8 Tier A integrated, 5 Tier B, 2 Tier C).
+See `barracuda/src/gpu/evolution_gaps.rs` for the full roadmap.
 
 ## Quick Start
 
@@ -33,6 +50,9 @@ bash scripts/run_all_baselines.sh
 
 # 4. Run Rust validation (requires barracuda dependency)
 cd barracuda && cargo run --release --bin validate_et0
+
+# 5. Run benchmark (CPU baselines with cross-spring provenance)
+cd barracuda && cargo run --release --bin bench_airspring_gpu
 ```
 
 No institutional access required. Zero synthetic data in the default pipeline.
@@ -85,60 +105,77 @@ Paper data validates our methods. Open data is what we compute on.
 
 ```
 airSpring/
-├── control/                     # Phase 0: Python/R baselines
-│   ├── fao56/                   # FAO-56 Penman-Monteith ET₀
-│   │   ├── penman_monteith.py   #   Paper benchmark validation (64/64)
-│   │   ├── compute_et0_real_data.py  # ET₀ on real Michigan data
-│   │   └── benchmark_fao56.json #   Digitized FAO-56 examples
-│   ├── soil_sensors/            # Soil moisture calibration
-│   │   ├── calibration_dong2020.py   # Topp eq + corrections (36/36)
-│   │   └── benchmark_dong2020.json
-│   ├── iot_irrigation/          # IoT irrigation pipeline
-│   │   ├── calibration_dong2024.py   # SoilWatch 10 + scheduling (24/24)
-│   │   ├── anova_irrigation.R        # R ANOVA (paper used R v4.3.1)
-│   │   └── benchmark_dong2024.json
-│   ├── water_balance/           # FAO-56 soil water balance
-│   │   ├── fao56_water_balance.py    # Mass-conserving model (18/18)
-│   │   ├── simulate_real_data.py     # 4 crops on real weather
-│   │   └── benchmark_water_balance.json
+├── control/                     # Phase 0: Python/R baselines (142/142)
+│   ├── fao56/                   # FAO-56 Penman-Monteith ET₀ (64/64)
+│   ├── soil_sensors/            # Soil moisture calibration (36/36)
+│   ├── iot_irrigation/          # IoT irrigation pipeline (24/24)
+│   ├── water_balance/           # FAO-56 soil water balance (18/18)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1: Rust validation (119/119)
+├── barracuda/                   # Phase 1: Rust validation (123/123, 253 tests)
 │   ├── src/
 │   │   ├── eco/                 # correction, crop, evapotranspiration, sensor_calibration,
 │   │   │                        #   soil_moisture, water_balance
 │   │   ├── io/                  # csv_ts (streaming columnar IoT parser)
-│   │   ├── gpu/                 # ToadStool/BarraCUDA GPU bridge
-│   │   │   ├── et0.rs           #   BatchedEt0 (CPU fallback — TS-001)
-│   │   │   ├── water_balance.rs #   BatchedWaterBalance (CPU path)
-│   │   │   ├── kriging.rs       #   KrigingInterpolator ↔ barracuda::ops::kriging_f64
-│   │   │   ├── reduce.rs        #   SeasonalReducer ↔ barracuda::ops::fused_map_reduce_f64
-│   │   │   └── evolution_gaps.rs#   11 gaps + 4 ToadStool issues (TS-001/002/003/004)
+│   │   ├── gpu/                 # ToadStool/BarraCuda GPU bridge (GPU-FIRST)
+│   │   │   ├── et0.rs           #   BatchedEt0 GPU-first (BatchedElementwiseF64)
+│   │   │   ├── water_balance.rs #   BatchedWaterBalance GPU-step + CPU season
+│   │   │   ├── kriging.rs       #   KrigingInterpolator (barracuda::ops::kriging_f64)
+│   │   │   ├── reduce.rs        #   SeasonalReducer (barracuda::ops::fused_map_reduce_f64)
+│   │   │   ├── stream.rs        #   StreamSmoother (barracuda::ops::moving_window_stats)
+│   │   │   └── evolution_gaps.rs#   15 gaps (8A+5B+2C), 4/4 ToadStool issues RESOLVED
 │   │   ├── error.rs             # AirSpringError enum (proper error types)
-│   │   ├── validation.rs        # Shared validation runner (hotSpring pattern)
+│   │   ├── validation.rs        # Re-exports barracuda::validation::ValidationHarness
 │   │   ├── testutil.rs          # IA, NSE, RMSE, MBE, R², Spearman, bootstrap CI
 │   │   └── bin/                 # validate_*, cross_validate, simulate_season,
-│   │                            #   validate_real_data
-│   ├── tests/
-│   │   └── integration.rs       # 68 integration tests
+│   │                            #   bench_airspring_gpu
+│   ├── tests/                   # 76 integration tests across 4 files
 │   └── Cargo.toml
 ├── scripts/                     # Data download + orchestration
-│   ├── download_open_meteo.py   # Open-Meteo (free, no key, 80+ yr)
-│   ├── download_enviroweather.py # OpenWeatherMap (current + forecast)
-│   ├── download_noaa.py         # NOAA CDO (GHCND historical)
-│   ├── cross_validate.py        # Phase 2 Python side (65 values → JSON)
-│   └── run_all_baselines.sh     # Full validation suite
 ├── data/                        # Downloaded real data (not committed)
-│   ├── open_meteo/              # 918 station-days, 6 Michigan stations
-│   ├── enviroweather/           # OpenWeatherMap current weather
-│   ├── noaa/                    # NOAA CDO GHCND data
-│   ├── et0_results/             # Computed ET₀ on real data
-│   └── water_balance_results/   # Water balance simulations
+├── metalForge/                  # Upstream absorption staging (→ barracuda)
+│   └── forge/                   # airspring-forge v0.2.0 (40 tests, 4 modules)
+├── specs/                       # Specifications and requirements
+│   ├── PAPER_REVIEW_QUEUE.md    #   Paper reproduction queue
+│   ├── BARRACUDA_REQUIREMENTS.md#   GPU kernel requirements
+│   └── CROSS_SPRING_EVOLUTION.md#   Cross-spring shader provenance (608 shaders)
 ├── whitePaper/                  # Methodology and study documentation
-├── CHANGELOG.md                # Keep-a-Changelog versioned history
+│   ├── baseCamp/                #   Per-faculty research briefings
+│   ├── METHODOLOGY.md           #   Multi-phase validation protocol
+│   └── STUDY.md                 #   Full results narrative
+├── experiments/                 # Experiment protocols and results
+├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
+│   └── handoffs/                #   Versioned handoff documents
+├── CHANGELOG.md                 # Keep-a-Changelog versioned history
 ├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
-├── HANDOFF_AIRSPRING_TO_TOADSTOOL_FEB_16_2026.md  # GPU evolution handoff
+├── HANDOFF_AIRSPRING_TO_TOADSTOOL_FEB_16_2026.md  # Original GPU handoff
 └── LICENSE                      # AGPL-3.0-or-later
 ```
+
+## Evolution Architecture
+
+```
+Write → Absorb → Lean
+
+  airSpring eco:: (CPU, validated against FAO-56 papers)
+       │
+       ▼
+  airSpring gpu:: wrappers (domain-specific batched API)
+       │
+       ▼
+  barracuda::ops/linalg/stats primitives (GPU dispatch + CPU fallback)
+       │
+       ▼
+  ToadStool WGSL shaders (f64 precision on GPU)
+       │
+       ▼
+  metalForge (mixed CPU + GPU + future NPU)
+```
+
+**Cross-spring evolution**: ToadStool contains 608 WGSL shaders across 41
+categories. airSpring uses 5 shared shaders and contributed 3 upstream fixes
+(TS-001/003/004). 46 cross-spring absorptions (S51-S57) unite hotSpring
+precision physics, wetSpring bio/environmental, and neuralSpring ML shaders
+into a shared compute foundation. See `specs/CROSS_SPRING_EVOLUTION.md`.
 
 ## Relationship to Other Springs
 
@@ -149,21 +186,10 @@ airSpring/
 | Validation | Binding energies | Organism/PFAS ID | ET₀, yield, water balance |
 | Baseline | Python/scipy | Galaxy/QIIME2/asari | **FAO-56/Python/R** |
 | Data | AME2020 (IAEA) | GenBank, MassBank | **Open-Meteo, NOAA, FAO** |
-| Evolution | Rust BarraCUDA | Rust BarraCUDA | **Rust BarraCUDA** |
+| Evolution | Rust BarraCuda | Rust BarraCuda | **Rust BarraCuda** |
 | GPU layer | ToadStool (wgpu) | ToadStool | **ToadStool** |
 | Success metric | chi² match | Same taxonomy/PFAS | **Same ET₀/yield** |
 | Ultimate goal | Sovereign nuclear | Penny water monitoring | **Penny irrigation** |
-
-### Cross-Spring GPU Kernels
-
-| Kernel | hotSpring | wetSpring | airSpring |
-|--------|-----------|-----------|-----------|
-| ODE/PDE solver | HFB eigensolve | — | Richards equation |
-| Time series filter | — | LC-MS chromatogram | IoT sensor streams |
-| Nonlinear fitting | SEMF optimization | Peak fitting | Calibration curves |
-| Spatial interpolation | — | — | Soil moisture kriging |
-| Monte Carlo | Nuclear EOS | Rarefaction | Uncertainty quantification |
-| Reduction | Binding energy sums | Peak areas | Temporal aggregation |
 
 ## Hardware Gate
 
@@ -181,9 +207,11 @@ AGPL-3.0-or-later
 
 ---
 
-*February 16, 2026 — 119 validation checks (8 binaries), 162 Rust tests (94 unit +
-68 integration), 918 real station-days, 65/65 Python-Rust cross-validation match.
-`KrigingInterpolator` wired to `barracuda::ops::kriging_f64` (proper ordinary kriging).
-`SeasonalReducer` wired to `barracuda::ops::fused_map_reduce_f64` (GPU for N≥1024).
-4 ToadStool issues filed (TS-001 pow_f64, TS-004 buffer conflict). 4 crop scenarios
-on real weather, rainfed+irrigated. Pure Rust correction curve fitting. AGPL-3.0.*
+*February 25, 2026 — v0.3.7. 123 validation checks (8 binaries), 293 Rust tests
+(253 barracuda + 40 forge), 918 real station-days, 65/65 Python-Rust cross-validation
+match. 97.2% library test coverage. GPU-FIRST with 6 orchestrators (BatchedEt0,
+BatchedWaterBalance, KrigingInterpolator, SeasonalReducer, StreamSmoother, fit_ridge).
+metalForge v0.2.0: 4 absorption-ready modules (metrics, regression, moving_window_f64,
+hydrology) following hotSpring's Write → Absorb → Lean pattern. Cross-spring shader
+evolution: 608 WGSL shaders, 46 absorptions, 3 airSpring fixes contributed upstream.
+15 evolution gaps (8A+5B+2C). Pure Rust + BarraCuda GPU pipeline. AGPL-3.0.*

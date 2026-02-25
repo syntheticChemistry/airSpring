@@ -13,6 +13,8 @@
 
 use crate::io::csv_ts::TimeseriesData;
 
+use crate::len_f64;
+
 /// Generate a synthetic `IoT` sensor CSV dataset for validation and testing.
 ///
 /// Produces deterministic data with known statistical properties:
@@ -99,14 +101,13 @@ pub fn r_squared(observed: &[f64], simulated: &[f64]) -> crate::error::Result<f6
 ///
 /// Panics if `observed` and `simulated` have different lengths.
 #[must_use]
-#[allow(clippy::cast_precision_loss)]
 pub fn rmse(observed: &[f64], simulated: &[f64]) -> f64 {
     assert_eq!(
         observed.len(),
         simulated.len(),
         "Vectors must be same length"
     );
-    let n = observed.len() as f64;
+    let n = len_f64(observed);
     let sum_sq: f64 = observed
         .iter()
         .zip(simulated.iter())
@@ -123,14 +124,13 @@ pub fn rmse(observed: &[f64], simulated: &[f64]) -> f64 {
 ///
 /// Panics if `observed` and `simulated` have different lengths.
 #[must_use]
-#[allow(clippy::cast_precision_loss)]
 pub fn mbe(observed: &[f64], simulated: &[f64]) -> f64 {
     assert_eq!(
         observed.len(),
         simulated.len(),
         "Vectors must be same length"
     );
-    let n = observed.len() as f64;
+    let n = len_f64(observed);
     let sum_bias: f64 = observed
         .iter()
         .zip(simulated.iter())
@@ -150,7 +150,6 @@ pub fn mbe(observed: &[f64], simulated: &[f64]) -> f64 {
 ///
 /// Panics if `observed` and `simulated` have different lengths or are empty.
 #[must_use]
-#[allow(clippy::cast_precision_loss)]
 pub fn index_of_agreement(observed: &[f64], simulated: &[f64]) -> f64 {
     assert_eq!(
         observed.len(),
@@ -159,7 +158,7 @@ pub fn index_of_agreement(observed: &[f64], simulated: &[f64]) -> f64 {
     );
     assert!(!observed.is_empty(), "Vectors must not be empty");
 
-    let n = observed.len() as f64;
+    let n = len_f64(observed);
     let mean_obs: f64 = observed.iter().sum::<f64>() / n;
 
     let numerator: f64 = observed
@@ -191,7 +190,6 @@ pub fn index_of_agreement(observed: &[f64], simulated: &[f64]) -> f64 {
 ///
 /// Panics if `observed` and `simulated` have different lengths or are empty.
 #[must_use]
-#[allow(clippy::cast_precision_loss)]
 pub fn nash_sutcliffe(observed: &[f64], simulated: &[f64]) -> f64 {
     assert_eq!(
         observed.len(),
@@ -200,7 +198,7 @@ pub fn nash_sutcliffe(observed: &[f64], simulated: &[f64]) -> f64 {
     );
     assert!(!observed.is_empty(), "Vectors must not be empty");
 
-    let n = observed.len() as f64;
+    let n = len_f64(observed);
     let mean_obs: f64 = observed.iter().sum::<f64>() / n;
 
     let ss_res: f64 = observed
@@ -228,12 +226,11 @@ pub fn nash_sutcliffe(observed: &[f64], simulated: &[f64]) -> f64 {
 ///
 /// Panics if `observed` and `simulated` have different lengths or are empty.
 #[must_use]
-#[allow(clippy::cast_precision_loss)]
 pub fn coefficient_of_determination(observed: &[f64], simulated: &[f64]) -> f64 {
     nash_sutcliffe(observed, simulated)
 }
 
-// ── BarraCUDA stats integration ─────────────────────────────────────
+// ── BarraCuda stats integration ─────────────────────────────────────
 
 /// Spearman rank correlation coefficient.
 ///
@@ -267,7 +264,6 @@ pub fn spearman_r(observed: &[f64], simulated: &[f64]) -> crate::error::Result<f
 /// # Errors
 ///
 /// Returns [`crate::error::AirSpringError::Barracuda`] on failure.
-#[allow(clippy::cast_precision_loss)]
 #[must_use = "bootstrap CI should be checked"]
 pub fn bootstrap_rmse(
     observed: &[f64],
@@ -286,7 +282,7 @@ pub fn bootstrap_rmse(
     let ci = barracuda::stats::bootstrap_ci(
         &residuals,
         |data| {
-            let n = data.len() as f64;
+            let n = len_f64(data);
             if n == 0.0 {
                 return 0.0;
             }

@@ -1,4 +1,11 @@
-//! airSpring `BarraCUDA` — Ecological & Agricultural Science Pipelines
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::module_name_repetitions,
+    clippy::must_use_candidate,
+    clippy::return_self_not_must_use
+)]
+
+//! airSpring `BarraCuda` — Ecological & Agricultural Science Pipelines
 //!
 //! Rust implementations validated against FAO-56, HYDRUS, and published
 //! field data from Dr. Younsuk Dong (MSU Biosystems & Agricultural Engineering).
@@ -11,12 +18,13 @@
 //! - [`eco::soil_moisture`] — Dielectric sensor calibration (Topp equation)
 //! - [`eco::water_balance`] — Field-scale water budget (standalone + stateful APIs)
 //!
-//! # GPU Acceleration
-//! - [`gpu::et0`] — Batched ET₀ orchestrator (CPU fallback, GPU blocked on `ToadStool` `pow_f64`)
-//! - [`gpu::water_balance`] — Batched season simulation with mass balance tracking
+//! # GPU Acceleration (all `ToadStool` issues RESOLVED — `0c477306`)
+//! - [`gpu::et0`] — **GPU-first** batched ET₀ via `BatchedElementwiseF64::fao56_et0_batch()`
+//! - [`gpu::water_balance`] — **GPU-step** + CPU season via `BatchedElementwiseF64::water_balance_batch()`
 //! - [`gpu::kriging`] — Soil moisture spatial interpolation (`KrigingInterpolator` ↔ `KrigingF64`)
-//! - [`gpu::reduce`] — Seasonal aggregation statistics (`SeasonalReducer` ↔ `FusedMapReduceF64`)
-//! - [`gpu::evolution_gaps`] — Living roadmap + `ToadStool` issue tracker (TS-001/002/003/004)
+//! - [`gpu::reduce`] — **GPU** for N≥1024 (`SeasonalReducer` ↔ `FusedMapReduceF64`, TS-004 resolved)
+//! - [`gpu::stream`] — `IoT` stream smoothing (`StreamSmoother` ↔ `MovingWindowStats`, wetSpring S28+)
+//! - [`gpu::evolution_gaps`] — Living roadmap, 4/4 `ToadStool` issues resolved
 //!
 //! # I/O
 //! - [`io::csv_ts`] — Time series CSV streaming parser for `IoT` sensor data
@@ -28,13 +36,16 @@
 //! - [`validation`] — Shared infrastructure for hotSpring-pattern validation binaries
 //! - [`testutil`] — Synthetic data generators, `IA`, `NSE`, `RMSE`, `MBE`, R², Spearman, bootstrap CI
 //!
-//! # `BarraCUDA` Stats Integration
+//! # `BarraCuda` Integration
 //!
-//! Directly uses [`barracuda::stats`] for:
-//! - `pearson_correlation` → R² in [`testutil::r_squared`]
-//! - `spearman_correlation` → nonparametric validation in [`testutil::spearman_r`]
-//! - `bootstrap_ci` → uncertainty quantification in [`testutil::bootstrap_rmse`]
-//! - `std_dev` → cross-validation in integration tests
+//! Directly uses `barracuda` primitives for:
+//! - `stats::pearson_correlation` → R² in [`testutil::r_squared`]
+//! - `stats::spearman_correlation` → nonparametric validation in [`testutil::spearman_r`]
+//! - `stats::bootstrap_ci` → uncertainty quantification in [`testutil::bootstrap_rmse`]
+//! - `stats::std_dev` → cross-validation in integration tests
+//! - `linalg::ridge::ridge_regression` → calibration regression in [`eco::correction::fit_ridge`]
+//! - `ops::moving_window_stats` → `IoT` stream smoothing in [`gpu::stream::StreamSmoother`]
+//! - `validation::ValidationHarness` → validation binaries
 
 pub mod eco;
 pub mod error;
@@ -42,3 +53,14 @@ pub mod gpu;
 pub mod io;
 pub mod testutil;
 pub mod validation;
+
+/// Convert a slice length to `f64` for use in statistical denominators.
+///
+/// For typical sample sizes (< 2^53 elements), the cast from `usize` to `f64`
+/// is exact. This centralises the `as f64` cast so individual call sites
+/// do not need `#[allow(clippy::cast_precision_loss)]`.
+#[inline]
+#[allow(clippy::cast_precision_loss)]
+pub(crate) const fn len_f64<T>(slice: &[T]) -> f64 {
+    slice.len() as f64
+}

@@ -1,16 +1,16 @@
 [package]
 name = "airspring-barracuda"
-version = "0.2.0"
+version = "0.3.6"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
-description = "Ecological & agricultural science pipelines — Rust + GPU via BarraCUDA/ToadStool"
+description = "Ecological & agricultural science pipelines — Rust + GPU via BarraCuda/ToadStool"
 
 [workspace]
 
 [dependencies]
-# BarraCUDA: GPU-promotion target. airSpring validates that Rust baselines
-# can be faithfully ported to BarraCUDA shaders. Used for stats primitives.
+# BarraCuda: GPU-promotion target. airSpring validates that Rust baselines
+# can be faithfully ported to BarraCuda shaders. Used for stats + validation primitives.
 barracuda = { path = "../../phase1/toadstool/crates/barracuda" }
 
 # Serialization: loads benchmark JSON files (control/fao56/*.json, etc.)
@@ -38,3 +38,23 @@ path = "src/bin/validate_iot.rs"
 [[bin]]
 name = "validate_water_balance"
 path = "src/bin/validate_water_balance.rs"
+
+[[bin]]
+name = "validate_sensor_calibration"
+path = "src/bin/validate_sensor_calibration.rs"
+
+[[bin]]
+name = "validate_real_data"
+path = "src/bin/validate_real_data.rs"
+
+[[bin]]
+name = "cross_validate"
+path = "src/bin/cross_validate.rs"
+
+[[bin]]
+name = "simulate_season"
+path = "src/bin/simulate_season.rs"
+
+[[bin]]
+name = "bench_airspring_gpu"
+path = "src/bin/bench_airspring_gpu.rs"

@@ -1,4 +1,4 @@
-//! Seasonal statistics via `ToadStool` fused map-reduce.
+//! Seasonal statistics via `ToadStool` fused map-reduce — GPU-accelerated.
 //!
 //! Wraps [`barracuda::ops::fused_map_reduce_f64::FusedMapReduceF64`] for
 //! precision agriculture aggregate statistics: seasonal ET₀ totals,
@@ -17,11 +17,16 @@
 //! to GPU for N ≥ 1024 elements and CPU for smaller arrays. The fused kernel
 //! applies a map function (identity, square, abs, log, etc.) and reduces
 //! (sum, max, min, product) in a single pass.
+//!
+//! **TS-004 resolved** (commit `0c477306`): buffer usage conflict in the
+//! partials pipeline is fixed. GPU dispatch for N ≥ 1024 now works correctly.
 
 use std::sync::Arc;
 
 use barracuda::device::WgpuDevice;
 use barracuda::ops::fused_map_reduce_f64::FusedMapReduceF64;
+
+use crate::len_f64;
 
 // ── Device-backed reducer (wraps barracuda::ops::fused_map_reduce_f64) ──
 
@@ -103,7 +108,6 @@ impl SeasonalReducer {
     /// # Errors
     ///
     /// Returns an error if any GPU dispatch fails.
-    #[allow(clippy::cast_precision_loss)]
     pub fn compute_stats(&self, values: &[f64]) -> crate::error::Result<SeasonalStats> {
         if values.is_empty() {
             return Ok(SeasonalStats {
@@ -119,7 +123,7 @@ impl SeasonalReducer {
         let total = self.sum(values)?;
         let max = self.max(values)?;
         let min = self.min(values)?;
-        let n = values.len() as f64;
+        let n = len_f64(values);
         let mean = total / n;
 
         // Variance: E[X²] - E[X]² (computational formula)
@@ -154,12 +158,11 @@ pub fn seasonal_sum(values: &[f64]) -> f64 {
 ///
 /// Returns 0.0 for empty slices.
 #[must_use]
-#[allow(clippy::cast_precision_loss)]
 pub fn seasonal_mean(values: &[f64]) -> f64 {
     if values.is_empty() {
         return 0.0;
     }
-    seasonal_sum(values) / values.len() as f64
+    seasonal_sum(values) / len_f64(values)
 }
 
 /// Compute seasonal maximum.
@@ -183,7 +186,6 @@ pub fn seasonal_min(values: &[f64]) -> f64 {
 /// When `ToadStool` `FusedMapReduceF64` is wired, this dispatches to
 /// `MapOp::Square` + `ReduceOp::Sum` on centered data.
 #[must_use]
-#[allow(clippy::cast_precision_loss)]
 pub fn sum_of_squares_from_mean(values: &[f64]) -> f64 {
     if values.is_empty() {
         return 0.0;
@@ -194,12 +196,12 @@ pub fn sum_of_squares_from_mean(values: &[f64]) -> f64 {
 
 /// Compute sample variance.
 #[must_use]
-#[allow(clippy::cast_precision_loss)]
 pub fn sample_variance(values: &[f64]) -> f64 {
     if values.len() < 2 {
         return 0.0;
     }
-    sum_of_squares_from_mean(values) / (values.len() - 1) as f64
+    // Bessel correction: divide by (n − 1)
+    sum_of_squares_from_mean(values) / (len_f64(values) - 1.0)
 }
 
 /// Compute sample standard deviation.
@@ -209,7 +211,7 @@ pub fn sample_std_dev(values: &[f64]) -> f64 {
 }
 
 /// Seasonal summary statistics for a time series.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct SeasonalStats {
     /// Total (sum).
     pub total: f64,
@@ -284,5 +286,75 @@ mod tests {
         assert!((seasonal_sum(vals)).abs() < 1e-10);
         assert!((seasonal_mean(vals)).abs() < 1e-10);
         assert!((sample_variance(vals)).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_single_element() {
+        let vals = [7.0];
+        assert!((seasonal_sum(&vals) - 7.0).abs() < 1e-10);
+        assert!((seasonal_mean(&vals) - 7.0).abs() < 1e-10);
+        assert!((seasonal_max(&vals) - 7.0).abs() < 1e-10);
+        assert!((seasonal_min(&vals) - 7.0).abs() < 1e-10);
+        assert!((sample_variance(&vals)).abs() < 1e-10);
+        assert!((sample_std_dev(&vals)).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_sample_std_dev() {
+        let vals = [2.0, 4.0, 6.0, 8.0, 10.0];
+        let sd = sample_std_dev(&vals);
+        assert!((sd - 10.0_f64.sqrt()).abs() < 1e-10, "std_dev={sd}");
+    }
+
+    #[test]
+    fn test_sum_of_squares_from_mean() {
+        // [1, 2, 3] → mean=2, ss = 1+0+1 = 2
+        let vals = [1.0, 2.0, 3.0];
+        assert!((sum_of_squares_from_mean(&vals) - 2.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_sum_of_squares_empty() {
+        assert!((sum_of_squares_from_mean(&[])).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_compute_seasonal_stats_empty() {
+        let stats = compute_seasonal_stats(&[]);
+        assert_eq!(stats.count, 0);
+        assert!((stats.total).abs() < 1e-10);
+        assert!((stats.mean).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_compute_seasonal_stats_large() {
+        let vals: Vec<f64> = (1..=100).map(f64::from).collect();
+        let stats = compute_seasonal_stats(&vals);
+        assert_eq!(stats.count, 100);
+        assert!((stats.total - 5050.0).abs() < 1e-10);
+        assert!((stats.mean - 50.5).abs() < 1e-10);
+        assert!((stats.max - 100.0).abs() < 1e-10);
+        assert!((stats.min - 1.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_seasonal_max_min_negative() {
+        let vals = [-5.0, -1.0, -3.0, -7.0];
+        assert!((seasonal_max(&vals) - (-1.0)).abs() < 1e-10);
+        assert!((seasonal_min(&vals) - (-7.0)).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_empty_max_min_sentinels() {
+        let vals: &[f64] = &[];
+        assert!(seasonal_max(vals) == f64::NEG_INFINITY);
+        assert!(seasonal_min(vals) == f64::INFINITY);
+    }
+
+    #[test]
+    fn test_constant_values_zero_variance() {
+        let vals = [3.0; 10];
+        assert!((sample_variance(&vals)).abs() < 1e-10);
+        assert!((sample_std_dev(&vals)).abs() < 1e-10);
     }
 }

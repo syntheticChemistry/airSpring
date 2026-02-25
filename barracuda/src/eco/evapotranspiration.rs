@@ -283,7 +283,7 @@ pub struct DailyEt0Input {
 }
 
 /// Result of ET₀ calculation.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Et0Result {
     /// Reference evapotranspiration (mm/day)
     pub et0: f64,

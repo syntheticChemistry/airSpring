@@ -1,0 +1,16 @@
+[package]
+name = "airspring-forge"
+version = "0.2.0"
+edition = "2021"
+license = "AGPL-3.0-or-later"
+description = "Domain primitives for upstream absorption into barracuda — metrics, regression, hydrology, signal processing"
+
+[workspace]
+
+[lints.clippy]
+pedantic = { level = "deny", priority = -1 }
+cast_precision_loss = "allow"
+many_single_char_names = "allow"
+similar_names = "allow"
+
+[dev-dependencies]

@@ -1,30 +1,80 @@
-//! Batched ET₀ GPU orchestrator with CPU fallback.
+//! Batched ET₀ GPU orchestrator — GPU-first via `ToadStool` `BatchedElementwiseF64`.
 //!
-//! Dispatches N station-day ET₀ computations. Currently uses the validated
-//! CPU path because the `ToadStool` `batched_elementwise_f64.wgsl` shader's
-//! `pow_f64` function returns 0.0 for non-integer exponents (the atmospheric
-//! pressure calculation requires exponent 5.26).
+//! Dispatches N station-day ET₀ computations to the GPU via
+//! [`barracuda::ops::batched_elementwise_f64::BatchedElementwiseF64`].
+//! All four `ToadStool` issues (TS-001 through TS-004) are **resolved** as of
+//! commit `0c477306`.
 //!
-//! # `ToadStool` Issue: `pow_f64` Non-Integer Exponents
+//! # Two API Levels
 //!
-//! **Shader**: `batched_elementwise_f64.wgsl`, lines 113–139
-//! **Bug**: `pow_f64(base, 5.26)` returns 0.0 (hits the placeholder branch)
-//! **Impact**: Atmospheric pressure P = 101.3 × ((293 − 0.0065z)/293)^5.26
-//!            silently computes P = 0.0, cascading γ = 0.0 and wrong ET₀
-//! **Fix**: Replace the placeholder at line 138 with `exp_f64(exp * log_f64(base))`
-//!          when `base > 0`. The shader already has working `exp_f64` and `log_f64`.
+//! | API | Device? | Backend |
+//! |-----|:-------:|---------|
+//! | [`BatchedEt0::compute`] | No | CPU via `eco::evapotranspiration` |
+//! | [`BatchedEt0::compute_gpu`] | Yes | GPU via `BatchedElementwiseF64` |
 //!
-//! Once `ToadStool` ships the fix, flip [`Backend::Gpu`] to default.
+//! # GPU Input
+//!
+//! The GPU shader accepts raw humidity data (`rh_max`, `rh_min`) and computes
+//! actual vapour pressure internally. Use [`StationDay`] for the GPU path.
+//! The CPU path still accepts [`DailyEt0Input`] with pre-computed `ea`.
+
+use std::sync::Arc;
+
+use barracuda::device::WgpuDevice;
+use barracuda::ops::batched_elementwise_f64::{self as bef64, BatchedElementwiseF64};
 
 use crate::eco::evapotranspiration::{self as et, DailyEt0Input};
+
+/// Station-day input matching `ToadStool` shader layout.
+///
+/// `(tmax, tmin, rh_max, rh_min, wind_2m, rs, elevation, latitude, doy)`
+#[derive(Debug, Clone, Copy)]
+pub struct StationDay {
+    /// Maximum temperature (°C).
+    pub tmax: f64,
+    /// Minimum temperature (°C).
+    pub tmin: f64,
+    /// Maximum relative humidity (%).
+    pub rh_max: f64,
+    /// Minimum relative humidity (%).
+    pub rh_min: f64,
+    /// Wind speed at 2 m (m/s).
+    pub wind_2m: f64,
+    /// Solar radiation Rs (MJ/m²/day).
+    pub rs: f64,
+    /// Elevation (m).
+    pub elevation: f64,
+    /// Latitude (decimal degrees).
+    pub latitude: f64,
+    /// Day of year (1–366).
+    pub doy: u32,
+}
+
+impl StationDay {
+    /// Convert to `ToadStool` `StationDayInput` tuple.
+    #[must_use]
+    pub const fn to_toadstool(self) -> bef64::StationDayInput {
+        (
+            self.tmax,
+            self.tmin,
+            self.rh_max,
+            self.rh_min,
+            self.wind_2m,
+            self.rs,
+            self.elevation,
+            self.latitude,
+            self.doy,
+        )
+    }
+}
 
 /// Backend selection for batched ET₀.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum Backend {
-    /// Validated CPU path — current default.
-    #[default]
+    /// Validated CPU path.
     Cpu,
-    /// GPU path via `ToadStool` (blocked on `pow_f64` fix).
+    /// GPU path via `ToadStool` `BatchedElementwiseF64` — **default** (all TS issues resolved).
+    #[default]
     Gpu,
 }
 
@@ -37,46 +87,103 @@ pub struct BatchedEt0Result {
     pub backend_used: Backend,
 }
 
-/// Batched ET₀ orchestrator.
+/// Batched ET₀ orchestrator — GPU-first.
 ///
 /// Computes FAO-56 Penman-Monteith ET₀ for N station-days in a single call.
-/// Designed for the GPU hot path once `ToadStool` fixes `pow_f64`.
-#[derive(Debug)]
+/// With a `WgpuDevice`, dispatches to the `BatchedElementwiseF64` GPU shader.
+/// Without a device, falls back to the validated CPU path.
 pub struct BatchedEt0 {
     backend: Backend,
+    gpu_engine: Option<BatchedElementwiseF64>,
+}
+
+impl std::fmt::Debug for BatchedEt0 {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("BatchedEt0")
+            .field("backend", &self.backend)
+            .field("gpu_engine", &self.gpu_engine.is_some())
+            .finish()
+    }
 }
 
 impl BatchedEt0 {
-    /// Create a new batched ET₀ orchestrator.
-    #[must_use]
-    pub const fn new(backend: Backend) -> Self {
-        Self { backend }
+    /// Create a GPU-backed batched ET₀ orchestrator.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `BatchedElementwiseF64` cannot be initialised.
+    pub fn gpu(device: Arc<WgpuDevice>) -> crate::error::Result<Self> {
+        let engine = BatchedElementwiseF64::new(device)
+            .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
+        Ok(Self {
+            backend: Backend::Gpu,
+            gpu_engine: Some(engine),
+        })
     }
 
-    /// Create with CPU fallback (always safe).
+    /// Create with CPU fallback (always safe, no device needed).
     #[must_use]
     pub const fn cpu() -> Self {
         Self {
             backend: Backend::Cpu,
+            gpu_engine: None,
         }
     }
 
-    /// Compute ET₀ for a batch of station-days.
+    /// Compute ET₀ for a batch of station-days on the GPU.
     ///
-    /// Each input is a `DailyEt0Input` from the validated CPU module.
+    /// This is the primary GPU path. Accepts [`StationDay`] inputs which
+    /// include raw humidity data (`rh_max`, `rh_min`) as required by the shader.
+    ///
+    /// Falls back to CPU if no GPU engine is available.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the GPU dispatch fails.
+    pub fn compute_gpu(&self, inputs: &[StationDay]) -> crate::error::Result<BatchedEt0Result> {
+        if let Some(engine) = &self.gpu_engine {
+            let station_days: Vec<bef64::StationDayInput> =
+                inputs.iter().map(|s| s.to_toadstool()).collect();
+            let et0_values = engine
+                .fao56_et0_batch(&station_days)
+                .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
+            Ok(BatchedEt0Result {
+                et0_values,
+                backend_used: Backend::Gpu,
+            })
+        } else {
+            // CPU fallback: compute ea from rh_max/rh_min, then use validated path
+            let et0_values: Vec<f64> = inputs
+                .iter()
+                .map(|s| {
+                    let ea = et::actual_vapour_pressure_rh(s.tmin, s.tmax, s.rh_min, s.rh_max);
+                    let input = DailyEt0Input {
+                        tmin: s.tmin,
+                        tmax: s.tmax,
+                        tmean: None,
+                        solar_radiation: s.rs,
+                        wind_speed_2m: s.wind_2m,
+                        actual_vapour_pressure: ea,
+                        elevation_m: s.elevation,
+                        latitude_deg: s.latitude,
+                        day_of_year: s.doy,
+                    };
+                    et::daily_et0(&input).et0
+                })
+                .collect();
+            Ok(BatchedEt0Result {
+                et0_values,
+                backend_used: Backend::Cpu,
+            })
+        }
+    }
+
+    /// Compute ET₀ using the validated CPU path (pre-computed `ea`).
+    ///
+    /// Each input is a [`DailyEt0Input`] from the validated CPU module.
     /// Returns one ET₀ value per input.
     #[must_use]
     pub fn compute(&self, inputs: &[DailyEt0Input]) -> BatchedEt0Result {
-        match self.backend {
-            Backend::Cpu => Self::compute_cpu(inputs),
-            Backend::Gpu => {
-                // GPU path blocked — fall back to CPU with a note
-                Self::compute_cpu(inputs)
-            }
-        }
-    }
-
-    fn compute_cpu(inputs: &[DailyEt0Input]) -> BatchedEt0Result {
         let et0_values: Vec<f64> = inputs
             .iter()
             .map(|input| et::daily_et0(input).et0)
@@ -103,6 +210,20 @@ mod tests {
             elevation_m: 100.0,
             latitude_deg: 50.80,
             day_of_year: 187,
+        }
+    }
+
+    fn sample_station_day() -> StationDay {
+        StationDay {
+            tmax: 21.5,
+            tmin: 12.3,
+            rh_max: 84.0,
+            rh_min: 63.0,
+            wind_2m: 2.078,
+            rs: 22.07,
+            elevation: 100.0,
+            latitude: 50.80,
+            doy: 187,
         }
     }
 
@@ -160,5 +281,83 @@ mod tests {
         for (a, b) in r1.et0_values.iter().zip(&r2.et0_values) {
             assert!((a - b).abs() < f64::EPSILON);
         }
+    }
+
+    #[test]
+    fn test_station_day_cpu_fallback() {
+        let engine = BatchedEt0::cpu();
+        let result = engine.compute_gpu(&[sample_station_day()]).unwrap();
+        assert_eq!(result.et0_values.len(), 1);
+        assert!(result.et0_values[0] > 2.0 && result.et0_values[0] < 6.0);
+        assert_eq!(result.backend_used, Backend::Cpu);
+    }
+
+    #[test]
+    fn test_station_day_multiple() {
+        let engine = BatchedEt0::cpu();
+        let inputs: Vec<StationDay> = (0..100)
+            .map(|i| StationDay {
+                doy: 150 + i,
+                ..sample_station_day()
+            })
+            .collect();
+        let result = engine.compute_gpu(&inputs).unwrap();
+        assert_eq!(result.et0_values.len(), 100);
+        for &val in &result.et0_values {
+            assert!(val > 0.0, "ET₀ should be positive: {val}");
+        }
+    }
+
+    #[test]
+    fn test_station_day_to_toadstool() {
+        let sd = sample_station_day();
+        let tt = sd.to_toadstool();
+        assert!((tt.0 - sd.tmax).abs() < f64::EPSILON);
+        assert!((tt.1 - sd.tmin).abs() < f64::EPSILON);
+        assert_eq!(tt.8, sd.doy);
+    }
+
+    #[test]
+    fn test_backend_default_is_gpu() {
+        assert_eq!(Backend::default(), Backend::Gpu);
+    }
+
+    #[test]
+    fn test_cpu_debug_format() {
+        let engine = BatchedEt0::cpu();
+        let dbg = format!("{engine:?}");
+        assert!(dbg.contains("Cpu"));
+        assert!(dbg.contains("false"));
+    }
+
+    #[test]
+    fn test_compute_gpu_empty() {
+        let engine = BatchedEt0::cpu();
+        let result = engine.compute_gpu(&[]).unwrap();
+        assert!(result.et0_values.is_empty());
+    }
+
+    #[test]
+    fn test_et0_seasonal_variation() {
+        let engine = BatchedEt0::cpu();
+        let winter = DailyEt0Input {
+            tmin: -5.0,
+            tmax: 5.0,
+            tmean: Some(0.0),
+            solar_radiation: 6.0,
+            wind_speed_2m: 2.0,
+            actual_vapour_pressure: 0.4,
+            elevation_m: 100.0,
+            latitude_deg: 50.80,
+            day_of_year: 15,
+        };
+        let summer = sample_input();
+        let r = engine.compute(&[winter, summer]);
+        assert!(
+            r.et0_values[0] < r.et0_values[1],
+            "Winter ET₀ ({}) should be less than summer ({})",
+            r.et0_values[0],
+            r.et0_values[1]
+        );
     }
 }

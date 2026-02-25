@@ -16,6 +16,29 @@
 
 // ── Topp equation ────────────────────────────────────────────────────
 
+/// Topp (1980) polynomial coefficients: θv = A₀ + A₁·ε + A₂·ε² + A₃·ε³.
+/// Source: Topp GC et al. (1980), Water Resources Research 16(3), Table 1.
+const TOPP_A0: f64 = -5.3e-2;
+const TOPP_A1: f64 = 2.92e-2;
+const TOPP_A2: f64 = -5.5e-4;
+const TOPP_A3: f64 = 4.3e-6;
+
+/// Valid dielectric range for the Topp equation (air to saturated).
+const TOPP_EPSILON_MIN: f64 = 1.0;
+const TOPP_EPSILON_MAX: f64 = 80.0;
+
+/// Newton-Raphson initial guess for inverse Topp (mid-range ε ≈ 10).
+const INVERSE_TOPP_INITIAL_GUESS: f64 = 10.0;
+
+/// Maximum Newton-Raphson iterations for inverse Topp.
+const INVERSE_TOPP_MAX_ITER: usize = 50;
+
+/// Newton-Raphson convergence tolerance for inverse Topp (ε change < this).
+const INVERSE_TOPP_CONVERGENCE: f64 = 1e-8;
+
+/// Derivative guard: stop if |f'(ε)| drops below this to avoid division by zero.
+const INVERSE_TOPP_DERIV_GUARD: f64 = 1e-15;
+
 /// Topp equation: dielectric permittivity → volumetric water content.
 ///
 /// θv = −5.3 × 10⁻² + 2.92 × 10⁻² ε − 5.5 × 10⁻⁴ ε² + 4.3 × 10⁻⁶ ε³
@@ -24,11 +47,11 @@
 #[must_use]
 pub fn topp_equation(dielectric: f64) -> f64 {
     let e = dielectric;
-    // Horner's method: ((4.3e-6 × e − 5.5e-4) × e + 2.92e-2) × e − 5.3e-2
-    4.3e-6f64
-        .mul_add(e, -5.5e-4)
-        .mul_add(e, 2.92e-2)
-        .mul_add(e, -5.3e-2)
+    // Horner's method: ((A₃·e + A₂)·e + A₁)·e + A₀
+    TOPP_A3
+        .mul_add(e, TOPP_A2)
+        .mul_add(e, TOPP_A1)
+        .mul_add(e, TOPP_A0)
 }
 
 /// Inverse Topp: volumetric water content → approximate dielectric.
@@ -37,19 +60,19 @@ pub fn topp_equation(dielectric: f64) -> f64 {
 /// for θv ∈ \[0, 0.5\] (valid range of Topp equation).
 #[must_use]
 pub fn inverse_topp(theta_v: f64) -> f64 {
-    let mut e = 10.0; // initial guess
-    for _ in 0..50 {
+    let mut e = INVERSE_TOPP_INITIAL_GUESS;
+    for _ in 0..INVERSE_TOPP_MAX_ITER {
         let f = topp_equation(e) - theta_v;
-        // Derivative: 2.92e-2 − 2 × 5.5e-4 × e + 3 × 4.3e-6 × e²
-        let df = (3.0 * 4.3e-6_f64).mul_add(e.powi(2), (-(2.0 * 5.5e-4_f64)).mul_add(e, 2.92e-2));
-        if df.abs() < 1e-15 {
+        // Derivative: A₁ + 2·A₂·e + 3·A₃·e²
+        let df = (3.0 * TOPP_A3).mul_add(e.powi(2), (2.0 * TOPP_A2).mul_add(e, TOPP_A1));
+        if df.abs() < INVERSE_TOPP_DERIV_GUARD {
             break;
         }
         let e_new = e - f / df;
-        if (e_new - e).abs() < 1e-8 {
+        if (e_new - e).abs() < INVERSE_TOPP_CONVERGENCE {
             break;
         }
-        e = e_new.clamp(1.0, 80.0);
+        e = e_new.clamp(TOPP_EPSILON_MIN, TOPP_EPSILON_MAX);
     }
     e
 }
@@ -76,7 +99,7 @@ pub enum SoilTexture {
 }
 
 /// Hydraulic properties for a soil texture class.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct SoilHydraulicProps {
     /// Field capacity (m³/m³) at −33 kPa
     pub field_capacity: f64,
@@ -291,5 +314,90 @@ mod tests {
         let props = SoilTexture::SandyClay.hydraulic_properties();
         assert!((props.field_capacity - 0.30).abs() < f64::EPSILON);
         assert!((props.wilting_point - 0.21).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_all_textures_have_valid_properties() {
+        let textures = [
+            SoilTexture::Sand,
+            SoilTexture::LoamySand,
+            SoilTexture::SandyLoam,
+            SoilTexture::Loam,
+            SoilTexture::SiltLoam,
+            SoilTexture::Silt,
+            SoilTexture::SandyClayLoam,
+            SoilTexture::ClayLoam,
+            SoilTexture::SiltyClayLoam,
+            SoilTexture::SandyClay,
+            SoilTexture::SiltyClay,
+            SoilTexture::Clay,
+        ];
+        for texture in &textures {
+            let p = texture.hydraulic_properties();
+            assert!(p.field_capacity > p.wilting_point, "{texture:?}: FC > WP");
+            assert!(p.porosity > p.field_capacity, "{texture:?}: porosity > FC");
+            assert!(p.ksat_mm_hr > 0.0, "{texture:?}: Ksat > 0");
+            assert!(p.wilting_point >= 0.0, "{texture:?}: WP >= 0");
+        }
+    }
+
+    #[test]
+    fn test_ksat_ordering_sand_to_clay() {
+        // Sand should have highest Ksat, clay lowest
+        let sand_ksat = SoilTexture::Sand.hydraulic_properties().ksat_mm_hr;
+        let clay_ksat = SoilTexture::Clay.hydraulic_properties().ksat_mm_hr;
+        assert!(
+            sand_ksat > clay_ksat,
+            "Sand Ksat {sand_ksat} > Clay Ksat {clay_ksat}"
+        );
+    }
+
+    #[test]
+    fn test_topp_monotonic_increasing() {
+        let eps_values = [3.0, 5.0, 10.0, 15.0, 20.0, 25.0, 30.0];
+        let thetas: Vec<f64> = eps_values.iter().map(|&e| topp_equation(e)).collect();
+        for w in thetas.windows(2) {
+            assert!(w[1] > w[0], "Topp should be monotonically increasing");
+        }
+    }
+
+    #[test]
+    fn test_inverse_topp_boundary() {
+        // Very dry (low θv) and very wet (high θv)
+        let eps_dry = inverse_topp(0.05);
+        let eps_wet = inverse_topp(0.45);
+        assert!(
+            eps_dry < eps_wet,
+            "Drier soil → lower ε: dry={eps_dry}, wet={eps_wet}"
+        );
+        assert!(eps_dry >= 1.0, "ε must be ≥ 1 (air): {eps_dry}");
+    }
+
+    #[test]
+    fn test_irrigation_trigger_at_boundaries() {
+        // Exactly at MAD boundary
+        let fc = 0.30;
+        let wp = 0.10;
+        let paw = fc - wp; // 0.20
+        let mad = 0.5;
+        let mad_depletion = mad * paw; // 0.10
+        let theta_at_mad = fc - mad_depletion; // 0.20
+                                               // At MAD boundary, depletion == MAD×PAW → not triggered (<=)
+        assert!(!irrigation_trigger(fc, wp, theta_at_mad, mad));
+        // Slightly below triggers
+        assert!(irrigation_trigger(fc, wp, theta_at_mad - 0.001, mad));
+    }
+
+    #[test]
+    fn test_soil_water_deficit_zero_depth() {
+        assert!((soil_water_deficit(0.33, 0.25, 0.0)).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_plant_available_water_clay() {
+        let p = SoilTexture::Clay.hydraulic_properties();
+        let paw = plant_available_water(p.field_capacity, p.wilting_point, 500.0);
+        // Clay: FC=0.36, WP=0.25 → PAW = 0.11 × 500 = 55 mm
+        assert!((paw - 55.0).abs() < 0.1, "PAW={paw}");
     }
 }

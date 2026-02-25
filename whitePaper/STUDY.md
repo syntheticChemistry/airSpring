@@ -8,7 +8,7 @@
 
 ## Abstract
 
-We independently replicate four precision agriculture computational methods — FAO-56 Penman-Monteith evapotranspiration, dielectric soil moisture calibration, IoT-based irrigation scheduling, and daily soil water balance — using only open-source tools and publicly available data. The Python/R baselines (142/142 checks) validate against digitized paper benchmarks. A real data pipeline using Open-Meteo historical weather (918 station-days, 6 Michigan agricultural stations, 2023 growing season) produces ET₀ with R²=0.967 against an independent computation. Water balance simulations on real data show 53-72% water savings with smart scheduling — consistent with published results. A Rust implementation via BarraCUDA passes 101/101 validation checks across 5 binaries with 106 tests, and a cross-validation harness confirms 53/53 Python-Rust value matches within 1e-5 tolerance — establishing the foundation for GPU-accelerated precision irrigation on consumer hardware.
+We independently replicate four precision agriculture computational methods — FAO-56 Penman-Monteith evapotranspiration, dielectric soil moisture calibration, IoT-based irrigation scheduling, and daily soil water balance — using only open-source tools and publicly available data. The Python/R baselines (142/142 checks) validate against digitized paper benchmarks. A real data pipeline using Open-Meteo historical weather (918 station-days, 6 Michigan agricultural stations, 2023 growing season) produces ET₀ with R²=0.967 against an independent computation. Water balance simulations on real data show 53-72% water savings with smart scheduling — consistent with published results. A Rust implementation via BarraCuda passes 123/123 validation checks across 8 binaries with 253 tests, and a cross-validation harness confirms 65/65 Python-Rust value matches within 1e-5 tolerance — establishing the foundation for GPU-accelerated precision irrigation on consumer hardware.
 
 ---
 
@@ -29,7 +29,7 @@ We replicate the computational methods published by Dr. Younsuk Dong (Michigan S
 ### 1.3 Evolution Path
 
 ```
-Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCUDA) → GPU (ToadStool) → Penny Irrigation
+Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda) → GPU (ToadStool) → Penny Irrigation
 ```
 
 ---
@@ -117,7 +117,7 @@ All mass balances close to 0.0000 mm. Water savings of 53-72% are consistent wit
 
 ---
 
-## 4. Phase 1: Rust BarraCUDA (101/101 PASS, 106 tests)
+## 4. Phase 1: Rust BarraCuda (123/123 PASS, 253 tests)
 
 ### 4.1 Module Structure
 
@@ -131,7 +131,9 @@ All mass balances close to 0.0000 mm. Water savings of 53-72% are consistent wit
 | `io::csv_ts` | TimeseriesData columnar parser, streaming BufReader | 11 | 6 |
 | `error` | AirSpringError enum (Io, CsvParse, JsonParse, InvalidInput, Barracuda) | — | — |
 | `testutil` | RMSE, MBE, R², IA, NSE, synthetic data generators | — | 6 |
-| **Integration tests** | Cross-module pipelines, determinism, error paths, crop↔balance | — | 36 |
+| **Integration tests** | Cross-module pipelines, determinism, error paths, crop↔balance | — | 76 |
+| **Doc-tests** | Inline documentation examples | — | 2 |
+| **Total** | 175 unit + 76 integration + 2 doc-tests | 123 | 253 |
 
 ### 4.2 Python-Rust Parity
 
@@ -146,7 +148,7 @@ All mass balances close to 0.0000 mm. Water savings of 53-72% are consistent wit
 | Irrigation recommendation (single + multi-layer) | Yes | Yes | **Complete** |
 | Crop Kc database (FAO-56 Table 12) | Yes | Yes | **Complete** (10 crops) |
 | Kc climate adjustment (Eq. 62) | No | Yes | **Rust only** |
-| Correction equation fitting | Yes | No | Needs nonlinear solver |
+| Correction equation fitting | Yes | Yes | Complete (pure Rust, eco::correction) |
 | R ANOVA | R script | No | Statistical test |
 | Real data download | Yes | No | Python scripts handle APIs |
 
@@ -155,20 +157,27 @@ All mass balances close to 0.0000 mm. Water savings of 53-72% are consistent wit
 | Binary | Checks | Key Results |
 |--------|:------:|-------------|
 | validate_et0 | 31/31 | FAO-56 Tables 2.3/2.4, Example 18 Uccle within 0.0005 mm/day |
-| validate_soil | 25/25 | Topp (7 points), inverse round-trip, 5 USDA textures, PAW |
+| validate_soil | 26/26 | Topp (7 points), inverse round-trip, 5 USDA textures, PAW |
 | validate_iot | 11/11 | 168 records, 5 columns, CSV round-trip, diurnal statistics |
 | validate_water_balance | 13/13 | Mass balance 0.0000 (3 scenarios), Ks bounds, MI summer |
 | validate_sensor_calibration | 21/21 | SoilWatch 10 VWC, irrigation model, Dong 2024 field results |
+| validate_real_data | 21/21 | Real data pipeline, Open-Meteo ET₀ |
+| cross_validate | 65 values | Python↔Rust JSON harness (benchmark JSON) |
+| simulate_season | — | Full growing-season pipeline |
 
-### 4.4 Phase 2: Cross-Validation (53/53 MATCH)
+### 4.4 Phase 2: Cross-Validation (65/65 MATCH)
 
-A structured cross-validation harness computes 53 values from identical inputs
+A structured cross-validation harness computes 65 values from identical inputs
 in both Python (`scripts/cross_validate.py`) and Rust (`cross_validate` binary),
-outputting JSON for automated comparison. All 53 values match within 1e-5
+outputting JSON for automated comparison (single source of truth: benchmark JSON). All 65 values match within 1e-5
 tolerance across: atmospheric parameters, solar geometry, radiation, ET₀, Topp
 equation, SoilWatch 10 calibration, irrigation recommendation, statistical
 measures (RMSE, MBE, IA, R²), sunshine-based radiation, Hargreaves ET₀, and
 monthly soil heat flux.
+
+### 4.5 Phase 3: GPU-FIRST (LIVE)
+
+GPU acceleration is operational. Four orchestrators run on ToadStool: BatchedEt0, BatchedWaterBalance, KrigingInterpolator, SeasonalReducer. All 4/4 ToadStool issues are resolved; GPU determinism has been verified. Cross-validation now loads from benchmark JSON as the single source of truth.
 
 ---
 
@@ -196,23 +205,24 @@ airSpring's validation methodology mirrors hotSpring's two-phase approach:
 - **hotSpring**: Python plasma physics → Rust nuclear EOS → GPU HFB
 - **airSpring**: Python agricultural science → Rust ET₀/soil/water → GPU irrigation
 
-The same BarraCUDA/ToadStool infrastructure supports both domains. The key shared abstractions are: ODE/PDE solvers, nonlinear fitting, time series processing, and spatial interpolation.
+The same BarraCuda/ToadStool infrastructure supports both domains. The key shared abstractions are: ODE/PDE solvers, nonlinear fitting, time series processing, and spatial interpolation.
 
 ---
 
 ## 6. Evolution Path
 
-### Completed (Phase 2)
-- ~~Cross-validate Python vs Rust~~ — **53/53 MATCH** within 1e-5 tolerance
+### Completed (Phase 2 & 3)
+- ~~Cross-validate Python vs Rust~~ — **65/65 MATCH** within 1e-5 tolerance
 - ~~Port RMSE/IA/MBE/NSE statistics to Rust~~ — **Done** (`testutil`)
 - ~~Port SoilWatch 10 calibration to Rust~~ — **Done** (`eco::sensor_calibration`)
 - ~~Port Hargreaves ET₀, sunshine/temp Rs, monthly G~~ — **Done** (`eco::evapotranspiration`)
 - ~~Build crop Kc database~~ — **Done** (`eco::crop`, 10 crops, FAO-56 Table 12)
 - ~~Full pipeline demonstration~~ — **Done** (`simulate_season` binary)
+- ~~GPU acceleration via ToadStool~~ — **Done** (4 orchestrators: BatchedEt0, BatchedWaterBalance, KrigingInterpolator, SeasonalReducer)
+- ~~4/4 ToadStool issues resolved, GPU determinism verified~~ — **Done**
+- ~~Spatial interpolation (kriging)~~ — **Done** (KrigingInterpolator)
 
-### Near Term (Phase 3)
-- GPU acceleration via ToadStool for ET₀ computation across spatial grids
-- Spatial interpolation (kriging) for soil moisture mapping
+### Near Term (Phase 3 continued)
 - Real-time IoT stream processing on GPU
 - Richards equation solver (1D unsaturated flow)
 - Benchmark: Rust vs Python throughput on 918 station-days
@@ -225,5 +235,5 @@ The same BarraCUDA/ToadStool infrastructure supports both domains. The key share
 
 ---
 
-*February 2026 — 334 checks pass, 106 Rust tests, 918 station-days real data,
-53/53 cross-validation match, zero synthetic*
+*February 2026 — 330 validation checks, 253 Rust tests, 918 station-days real data,
+65/65 cross-validation match, zero synthetic*

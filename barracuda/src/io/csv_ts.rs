@@ -15,6 +15,8 @@ use std::collections::HashMap;
 use std::io::{self, BufRead};
 use std::path::Path;
 
+use crate::len_f64;
+
 /// Columnar time series dataset.
 ///
 /// Stores data in column-major order for efficient statistical operations.
@@ -92,9 +94,17 @@ impl TimeseriesData {
         &self.timestamps
     }
 
-    /// Compute basic statistics for a column.
+    /// Compute basic statistics for a column using **population** statistics.
+    ///
+    /// Uses the population variance (N divisor) for `std_dev`, which is correct
+    /// when the data represents the complete population of interest (e.g., all
+    /// sensor readings in a time window). For sample-based inference, use
+    /// `barracuda::stats::correlation::std_dev` which uses the Bessel-corrected
+    /// sample variance (N−1 divisor).
+    ///
+    /// The population vs sample distinction is verified in
+    /// `tests/stats_integration.rs::test_barracuda_stats_vs_airspring_stats`.
     #[must_use]
-    #[allow(clippy::cast_precision_loss)]
     pub fn column_stats(&self, name: &str) -> Option<ColumnStats> {
         let values = self.column(name)?;
         let valid: Vec<f64> = values.iter().copied().filter(|v| !v.is_nan()).collect();
@@ -103,9 +113,10 @@ impl TimeseriesData {
         }
 
         let n = valid.len();
+        let count_f = len_f64(&valid);
         let sum: f64 = valid.iter().sum();
-        let mean = sum / n as f64;
-        let variance = valid.iter().map(|v| (v - mean).powi(2)).sum::<f64>() / n as f64;
+        let mean = sum / count_f;
+        let variance = valid.iter().map(|v| (v - mean).powi(2)).sum::<f64>() / count_f;
         let min = valid.iter().copied().fold(f64::MAX, f64::min);
         let max = valid.iter().copied().fold(f64::MIN, f64::max);
 
@@ -121,7 +132,7 @@ impl TimeseriesData {
 }
 
 /// Basic statistics for a data column.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct ColumnStats {
     /// Number of non-NaN values
     pub count: usize,
