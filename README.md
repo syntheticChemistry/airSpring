@@ -34,8 +34,8 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | `validation` | `validation::ValidationHarness` | neuralSpring | **Absorbed** |
 | `testutil` | `stats::pearson`, `spearman`, `bootstrap_ci` | Shared | **Wired** |
 
-Evolution gaps: 17 total (8 Tier A integrated, 8 Tier B, 1 Tier C).
-Richards PDE promoted C→B — upstream `pde::richards::solve_richards` now available.
+Evolution gaps: 18 total (8 Tier A integrated, 9 Tier B, 1 Tier C).
+Richards PDE promoted C→B; dual Kc batch added as Tier B (GPU orchestrator wired, pending shader).
 See `barracuda/src/gpu/evolution_gaps.rs` for the full roadmap.
 
 ## Quick Start
@@ -107,30 +107,32 @@ Paper data validates our methods. Open data is what we compute on.
 
 ```
 airSpring/
-├── control/                     # Phase 0: Python/R baselines (142/142)
+├── control/                     # Phase 0: Python/R baselines (306/306)
 │   ├── fao56/                   # FAO-56 Penman-Monteith ET₀ (64/64)
 │   ├── soil_sensors/            # Soil moisture calibration (36/36)
 │   ├── iot_irrigation/          # IoT irrigation pipeline (24/24)
 │   ├── water_balance/           # FAO-56 soil water balance (18/18)
+│   ├── dual_kc/                 # Dual Kc + cover crops + no-till (63+40)
+│   ├── regional_et0/            # Regional ET₀ intercomparison (61/61)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1: Rust validation (123/123, 253 tests)
+├── barracuda/                   # Phase 1: Rust validation (287/287, 279 tests)
 │   ├── src/
-│   │   ├── eco/                 # correction, crop, evapotranspiration, sensor_calibration,
-│   │   │                        #   soil_moisture, water_balance
+│   │   ├── eco/                 # correction, crop, dual_kc, evapotranspiration,
+│   │   │                        #   sensor_calibration, soil_moisture, water_balance
 │   │   ├── io/                  # csv_ts (streaming columnar IoT parser)
 │   │   ├── gpu/                 # ToadStool/BarraCuda GPU bridge (GPU-FIRST)
 │   │   │   ├── et0.rs           #   BatchedEt0 GPU-first (BatchedElementwiseF64)
 │   │   │   ├── water_balance.rs #   BatchedWaterBalance GPU-step + CPU season
+│   │   │   ├── dual_kc.rs       #   BatchedDualKc M-field batching (Tier B)
 │   │   │   ├── kriging.rs       #   KrigingInterpolator (barracuda::ops::kriging_f64)
 │   │   │   ├── reduce.rs        #   SeasonalReducer (barracuda::ops::fused_map_reduce_f64)
 │   │   │   ├── stream.rs        #   StreamSmoother (barracuda::ops::moving_window_stats)
-│   │   │   └── evolution_gaps.rs#   15 gaps (8A+5B+2C), 4/4 ToadStool issues RESOLVED
+│   │   │   └── evolution_gaps.rs#   18 gaps (8A+9B+1C), 4/4 ToadStool issues RESOLVED
 │   │   ├── error.rs             # AirSpringError enum (proper error types)
 │   │   ├── validation.rs        # Re-exports barracuda::validation::ValidationHarness
-│   │   ├── testutil.rs          # IA, NSE, RMSE, MBE, R², Spearman, bootstrap CI
-│   │   └── bin/                 # validate_*, cross_validate, simulate_season,
-│   │                            #   bench_airspring_gpu
-│   ├── tests/                   # 76 integration tests across 4 files
+│   │   ├── testutil.rs          # IA, NSE, RMSE, MBE, R², Pearson r, Spearman, bootstrap CI
+│   │   └── bin/                 # 10 validate_*, bench_*, cross_validate, simulate_season
+│   ├── tests/                   # 78 integration tests across 4 files
 │   └── Cargo.toml
 ├── scripts/                     # Data download + orchestration
 ├── data/                        # Downloaded real data (not committed)
@@ -208,12 +210,12 @@ AGPL-3.0-or-later
 
 ---
 
-*February 25, 2026 — v0.3.8. 123 validation checks (8 binaries), 293 Rust tests
-(253 barracuda + 40 forge), 918 real station-days, 65/65 Python-Rust cross-validation
-match. 97.2% library test coverage. GPU-FIRST with 6 orchestrators (BatchedEt0,
-BatchedWaterBalance, KrigingInterpolator, SeasonalReducer, StreamSmoother, fit_ridge).
-metalForge v0.2.0: 4 absorption-ready modules (metrics, regression, moving_window_f64,
-hydrology) following hotSpring's Write → Absorb → Lean pattern. Cross-spring shader
-evolution: 608 WGSL shaders, 46 absorptions, 3 airSpring fixes contributed upstream.
-17 evolution gaps (8A+8B+1C) — Richards PDE promoted C→B (upstream solver available).
+*February 25, 2026 — v0.3.10. 287 validation checks (10 binaries), 279 Rust tests
++ 40 forge = 319 tests total. 918 real station-days, 65/65 Python-Rust cross-validation
+match. GPU-FIRST with 7 orchestrators (BatchedEt0, BatchedWaterBalance,
+BatchedDualKc, KrigingInterpolator, SeasonalReducer, StreamSmoother, fit_ridge).
+CPU benchmarks: 12.7M ET₀/s, 59M dual Kc/s, 64M mulched Kc/s. Cover crops (5 species)
+and no-till mulch reduction (FAO-56 Ch 11). Regional ET₀ intercomparison (6 stations).
+metalForge v0.2.0: 4 absorption-ready modules following Write → Absorb → Lean.
+18 evolution gaps (8A+9B+1C) — dual Kc batch added as Tier B, Richards PDE C→B.
 Pure Rust + BarraCuda GPU pipeline. AGPL-3.0.*

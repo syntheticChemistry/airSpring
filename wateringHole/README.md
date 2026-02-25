@@ -9,7 +9,7 @@
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| V001 | [AIRSPRING_V001_BARRACUDA_ABSORPTION_HANDOFF_FEB25_2026.md](handoffs/AIRSPRING_V001_BARRACUDA_ABSORPTION_HANDOFF_FEB25_2026.md) | 2026-02-25 | BarraCuda evolution + absorption targets |
+| V002 | [AIRSPRING_V002_BARRACUDA_EVOLUTION_HANDOFF_FEB25_2026.md](handoffs/AIRSPRING_V002_BARRACUDA_EVOLUTION_HANDOFF_FEB25_2026.md) | 2026-02-25 | v0.3.10: dual Kc, cover crops, deep debt, GPU evolution |
 
 ## Cross-Spring Documents
 
@@ -21,6 +21,7 @@
 
 | File | Purpose |
 |------|---------|
+| `handoffs/archive/AIRSPRING_V001_BARRACUDA_ABSORPTION_HANDOFF_FEB25_2026.md` | V001 handoff (v0.3.8, superseded by V002) |
 | `handoffs/archive/HANDOFF_AIRSPRING_TO_TOADSTOOL_FEB_16_2026.md` | Original Phase 3 GPU handoff (superseded by V001, kept as fossil record) |
 
 ## Convention

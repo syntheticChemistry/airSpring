@@ -63,7 +63,7 @@ fn bench_reduce_cpu(data: &[f64]) -> f64 {
 }
 
 fn bench_stream_cpu(data: &[f64], window: usize) -> f64 {
-    let result = stream::smooth_cpu(data, window).unwrap();
+    let result = stream::smooth_cpu(data, window).expect("smooth_cpu: valid window and data");
     result.mean[0]
 }
 
@@ -194,7 +194,8 @@ fn main() {
         let mut r2_val = 0.0;
         let (cpu_us, _) = time_fn(
             || {
-                let m = airspring_barracuda::eco::correction::fit_ridge(&x, &y, 1e-6).unwrap();
+                let m = airspring_barracuda::eco::correction::fit_ridge(&x, &y, 1e-6)
+                    .expect("fit_ridge: sufficient data for regression");
                 r2_val = m.r_squared;
                 m.r_squared
             },

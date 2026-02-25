@@ -227,20 +227,46 @@ fn generate_weather(
     (et0_series, precip_series)
 }
 
+fn env_f64(key: &str, default: f64) -> f64 {
+    std::env::var(key)
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(default)
+}
+
+fn env_u32(key: &str, default: u32) -> u32 {
+    std::env::var(key)
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(default)
+}
+
+fn env_usize(key: &str, default: usize) -> usize {
+    std::env::var(key)
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(default)
+}
+
 fn main() {
     println!("═══════════════════════════════════════════════════════════");
-    println!("  airSpring — Michigan Growing Season Simulation");
+    println!("  airSpring — Growing Season Simulation");
     println!("═══════════════════════════════════════════════════════════\n");
 
     let crop = CropType::Corn.coefficients();
     let soil = SoilTexture::SandyLoam.hydraulic_properties();
-    let n_days: usize = 90;
+    let n_days: usize = env_usize("AIRSPRING_SEASON_DAYS", 90);
     let n_days_u32 = u32::try_from(n_days).expect("season length fits u32");
-    #[allow(clippy::cast_precision_loss)] // exact: n_days = 90 << 2^53
+    #[allow(clippy::cast_precision_loss)]
     let n_days_f = n_days as f64;
-    let latitude_deg: f64 = 42.77;
-    let elevation_m = 256.0;
-    let doy_start: u32 = 152;
+    let latitude_deg: f64 = env_f64("AIRSPRING_LATITUDE", 42.77);
+    let elevation_m = env_f64("AIRSPRING_ELEVATION", 256.0);
+    let doy_start: u32 = env_u32("AIRSPRING_DOY_START", 152);
+    let seed: u64 = std::env::var("AIRSPRING_SEED")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(42);
+    let location_name = std::env::var("AIRSPRING_LOCATION").unwrap_or_else(|_| "Lansing MI".into());
     let root_zone_mm = crop.root_depth_m * 1000.0;
 
     println!("  Crop:      {} (Kc_mid = {:.2})", crop.name, crop.kc_mid);
@@ -253,9 +279,11 @@ fn main() {
         "  Season:    {n_days} days (DOY {doy_start}–{})",
         doy_start + n_days_u32 - 1
     );
-    println!("  Location:  Lansing MI ({latitude_deg}°N, {elevation_m}m)\n");
+    println!("  Location:  {location_name} ({latitude_deg}°N, {elevation_m}m)");
+    println!("  Config:    AIRSPRING_LATITUDE, AIRSPRING_ELEVATION, AIRSPRING_DOY_START,");
+    println!("             AIRSPRING_SEASON_DAYS, AIRSPRING_SEED, AIRSPRING_LOCATION\n");
 
-    let mut rng = Rng::new(42);
+    let mut rng = Rng::new(seed);
     let (et0_series, precip_series) =
         generate_weather(n_days, doy_start, latitude_deg, elevation_m, &mut rng);
 
@@ -321,6 +349,6 @@ fn main() {
     );
 
     println!("\n═══════════════════════════════════════════════════════════");
-    println!("  Simulation complete. All values deterministic (seed=42).");
+    println!("  Simulation complete. All values deterministic (seed={seed}).");
     println!("═══════════════════════════════════════════════════════════");
 }

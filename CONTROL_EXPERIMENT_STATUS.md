@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-02-25 (v0.3.7 — metalForge evolution, doc cleanup)
+**Updated**: 2026-02-25 (v0.3.10 — dual Kc, cover crops, regional ET₀, deep debt, GPU wiring)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 

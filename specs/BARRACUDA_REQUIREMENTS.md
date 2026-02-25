@@ -1,6 +1,6 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: February 25, 2026 (v0.3.8 — Richards PDE promoted C→B)
+**Last Updated**: February 25, 2026 (v0.3.10 — dual Kc batch added, cover crops, CPU benchmarks)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
 **ToadStool HEAD**: `02207c4a` (S62+, 608 WGSL shaders)
 
@@ -19,6 +19,10 @@
 | IoT pipeline | `io::csv_ts` | 11/11 | CSV time series streaming parser |
 | Water balance | `eco::water_balance` | 13/13 | Mass balance exact (< 1e-10 mm) |
 | Sensor calibration | `eco::sensor_calibration` | 21/21 | SoilWatch 10 VWC + irrigation |
+| Dual Kc (Kcb+Ke) | `eco::dual_kc` | 61/61 | FAO-56 Ch 7, Tables 17/19, all crop groups |
+| Cover crops + mulch | `eco::dual_kc` (cover_crop, mulched_ke) | 40/40 | 5 species, Islam et al., no-till |
+| Regional ET₀ | `eco::evapotranspiration` | 61/61 | 6 Michigan stations, Pearson r, CV |
+| Real data (capability) | `eco::*` + `io::csv_ts` | 23/23 | Dynamic station discovery |
 | Cross-validation harness | `validation` | 65/65 | Python↔Rust match (tol=1e-5) |
 
 ### Phase 2: GPU Orchestrators Wired
@@ -31,6 +35,7 @@
 | `gpu::reduce::SeasonalReducer` | `ops::fused_map_reduce_f64` | **GPU N≥1024** | wetSpring, TS-004 fix |
 | `gpu::stream::StreamSmoother` | `ops::moving_window_stats` | **Wired** | wetSpring S28+ |
 | `eco::correction::fit_ridge` | `linalg::ridge::ridge_regression` | **Wired** | wetSpring ESN |
+| `gpu::dual_kc::BatchedDualKc` | CPU path (Tier B → GPU pending) | **CPU-STEP** | airSpring v0.3.10 |
 
 ### Phase 2: Stats & Validation
 
@@ -48,13 +53,15 @@
 
 ### Layer 1: BarraCuda CPU (validated, complete)
 
-All algorithms implemented in pure Rust. 253 tests, 123 validation checks.
+All algorithms implemented in pure Rust. 279 tests, 287 validation checks.
 This is the baseline for correctness — GPU and metalForge results must match.
+CPU benchmarks: 12.7M ET₀/s, 59M dual Kc/s, 64M mulched Kc/s.
 
 ```
 eco::evapotranspiration → validated daily_et0()
 eco::soil_moisture      → validated topp_equation(), inverse_topp()
 eco::water_balance      → validated simulate_season()
+eco::dual_kc            → validated simulate_dual_kc(), cover crops, mulched_ke()
 eco::correction         → validated fit_linear/quadratic/exponential/logarithmic/ridge()
 eco::sensor_calibration → validated soilwatch10_calibrate()
 io::csv_ts              → validated parse(), TimeseriesData
@@ -100,6 +107,7 @@ Future metalForge extensions:
 | Sensor batch calibration | `batched_elementwise_f64` (op=5) | Batch SoilWatch 10 VWC | Low |
 | Hargreaves ET₀ batch | `batched_elementwise_f64` (op=6) | Simpler ET₀ | Low |
 | Kc climate adjustment | `batched_elementwise_f64` (op=7) | FAO-56 Eq. 62 | Low |
+| Dual Kc batch (Ke) | `batched_elementwise_f64` (op=8) | GPU Ke for M-field batching | Low — orchestrator wired |
 | Nonlinear curve fitting | `optimize::nelder_mead`, `NelderMeadGpu` | Correction equations | Medium |
 | Tridiagonal solve | `linalg::tridiagonal_solve_f64` | Implicit PDE steps | Low |
 | Adaptive ODE (RK45) | `numerical::rk45_solve` | Dynamic soil models | Low |
@@ -111,11 +119,15 @@ Future metalForge extensions:
 |------|-------------|:---------:|------------------|
 | HTTP/JSON client | Open-Meteo, NOAA CDO APIs | Low | Not GPU |
 
-**Note (v0.3.8):** Richards equation promoted from Tier C to Tier B. ToadStool now
+**Note (v0.3.10):** Richards equation promoted from Tier C to Tier B. ToadStool now
 provides `pde::richards::solve_richards` with van Genuchten-Mualem constitutive
 relations, Picard iteration, Crank-Nicolson time-stepping, and Thomas (tridiagonal)
 spatial solver. airSpring needs to wire this with domain-specific soil parameters
 from `eco::soil_moisture` and validate against HYDRUS benchmarks.
+
+Dual Kc batch (op=8) added. The GPU orchestrator `gpu::dual_kc::BatchedDualKc` is
+wired with CPU fallback and M-field batching. Pending: ToadStool shader for GPU Ke
+computation. Cover crop species (5) and no-till mulch reduction are CPU-validated.
 
 ---
 
@@ -142,4 +154,4 @@ Run `cargo run --release --bin bench_airspring_gpu` for current numbers.
 | TS-003 | `acos`/`sin` precision drift in f64 WGSL shaders | **RESOLVED** |
 | TS-004 | `FusedMapReduceF64` buffer conflict for N≥1024 | **RESOLVED** |
 
-See `barracuda/src/gpu/evolution_gaps.rs` for the full 15-gap roadmap.
+See `barracuda/src/gpu/evolution_gaps.rs` for the full 18-gap roadmap.

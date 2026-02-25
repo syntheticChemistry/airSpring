@@ -8,7 +8,6 @@ version = "0.3.10"
 dependencies = [
  "barracuda",
  "pollster",
- "serde",
  "serde_json",
 ]
 

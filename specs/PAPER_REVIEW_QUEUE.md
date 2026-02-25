@@ -2,7 +2,7 @@
 
 **Last Updated**: February 25, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 9 completed (369/369 Python), 4 queued. All completed papers use open data and systems.
+**Status**: 8 completed (306/306 Python + 287/287 Rust CPU), 4 queued. All completed papers use open data and systems.
 
 ---
 
@@ -21,12 +21,13 @@
 
 ### Controls Audit
 
-All 6 completed papers have:
+All 8 completed papers have:
 - **Digitized benchmarks** in `control/*/benchmark_*.json`
 - **Python control scripts** that validate against benchmarks
-- **Rust validation binaries** that load the same benchmarks
+- **Rust validation binaries** (10 binaries) that load the same benchmarks
 - **Open or published data** (no institutional access required)
 - **Cross-validation** (65/65 Python↔Rust match at 1e-5)
+- **CPU benchmarks**: 12.7M ET₀/s, 59M dual Kc/s, 64M mulched Kc/s
 
 ### Compute Pipeline Per Paper
 
@@ -36,10 +37,10 @@ All 6 completed papers have:
 | 2 | 36/36 | 26/26 (`validate_soil`) | `fit_ridge` (ridge regression) | — |
 | 3 | 24/24 | 11/11 (`validate_iot`) | `StreamSmoother` (moving window) | — |
 | 4 | 18/18 | 13/13 (`validate_water_balance`) | `BatchedWaterBalance` GPU-STEP | — |
-| 5 | R²=0.967 | 21/21 (`validate_real_data`) | All 6 orchestrators | Future |
-| 6 | 63/63 | — (next: BarraCuda CPU) | Batch Kc (op=7) | Future |
-| 7 | 61/61 | — (next: BarraCuda CPU) | `BatchedEt0` at scale | Future |
-| 8 | 40/40 | — (next: BarraCuda CPU) | Batch Kc (op=7) + mulch | Future |
+| 5 | R²=0.967 | 23/23 (`validate_real_data`) | All 7 orchestrators | Future |
+| 6 | 63/63 | 61/61 (`validate_dual_kc`) | `BatchedDualKc` (Tier B) | Future |
+| 7 | 61/61 | 61/61 (`validate_regional_et0`) | `BatchedEt0` at scale | Future |
+| 8 | 40/40 | 40/40 (`validate_cover_crop`) | `BatchedDualKc` + mulch | Future |
 
 ---
 
@@ -51,7 +52,7 @@ All 6 completed papers have:
 |---|-------------------|------|---------|:----------:|:--------------:|----------|
 | 6 | Dong et al. — Multi-sensor calibration network | 2024+ | Dong | Awaiting field data | None | Batch calibration (op=5) |
 | 7 | Dong et al. — Full IoT irrigation + forecast | 2024+ | Dong | Awaiting field data | None | Forecast integration |
-| 8 | Allen et al. (1998) FAO-56 Ch 7 — Dual Kc | 1998 | Standard | **Yes** (open literature) | **63/63 PASS** (Phase 0) | Batch Kc (op=7) |
+| 8 | Allen et al. (1998) FAO-56 Ch 7 — Dual Kc | 1998 | Standard | **Yes** (open literature) | **63/63 PASS** (Phase 0), **61/61** (Rust) | `BatchedDualKc` (Tier B) |
 
 ### Tier 2 — Cross-spring extensions
 

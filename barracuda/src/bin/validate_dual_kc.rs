@@ -17,7 +17,7 @@ use airspring_barracuda::eco::crop::CropType;
 use airspring_barracuda::eco::dual_kc::{self, DualKcInput, EvaporationLayerState};
 use airspring_barracuda::eco::soil_moisture::SoilTexture;
 use airspring_barracuda::validation::{
-    self, json_array, json_f64, json_field, json_str, parse_benchmark_json, ValidationHarness,
+    self, json_array, json_field, json_str, parse_benchmark_json, ValidationHarness,
 };
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/dual_kc/benchmark_dual_kc.json");

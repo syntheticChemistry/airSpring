@@ -13,9 +13,9 @@ description = "Ecological & agricultural science pipelines — Rust + GPU via Ba
 # can be faithfully ported to BarraCuda shaders. Used for stats + validation primitives.
 barracuda = { path = "../../phase1/toadstool/crates/barracuda" }
 
-# Serialization: loads benchmark JSON files (control/fao56/*.json, etc.)
+# JSON parsing: loads benchmark JSON files (control/fao56/*.json, etc.)
 # with full provenance for validation fidelity.
-serde = { version = "1", features = ["derive"] }
+# serde derive feature unused — only serde_json::Value API needed.
 serde_json = "1"
 
 [dev-dependencies]

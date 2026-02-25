@@ -105,7 +105,7 @@ Each experiment follows the same multi-phase protocol:
 
 **Validation**: R²=0.967 against Open-Meteo's independent ET₀ computation. RMSE 0.295 mm/day (East Lansing).
 
-**Rust**: `validate_real_data` binary — 21/21 checks. 4 crops (blueberry, tomato, corn, reference grass) × rainfed + irrigated scenarios. Mass balance verified for all scenarios.
+**Rust**: `validate_real_data` binary — 23/23 checks. 4 crops × rainfed + irrigated scenarios. Capability-based station discovery (filesystem/env var). Mass balance verified for all scenarios.
 
 ---
 
@@ -167,7 +167,8 @@ Spatial CV = 2.0% (tight clustering expected for Lower Michigan stations).
 ## Naming Convention
 
 Experiments follow `NNN_name` format:
-- `001`–`005`: Completed baseline reproduction
+- `001`–`005`: Baseline reproduction (FAO-56, soil, IoT, water balance, real data)
+- `009`–`011`: Dual Kc, regional ET₀, cover crops + no-till
 - `006`+: Future experiments (see `specs/PAPER_REVIEW_QUEUE.md`)
 
 ## Results

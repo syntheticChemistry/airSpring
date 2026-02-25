@@ -1,6 +1,6 @@
 # Cross-Spring Shader Evolution — airSpring Provenance
 
-**Updated**: February 25, 2026 (v0.3.7, ToadStool HEAD `02207c4a`)
+**Updated**: February 25, 2026 (v0.3.10, ToadStool HEAD `02207c4a`)
 
 ## Summary
 
@@ -123,6 +123,7 @@ for nonlinear curve fitting (currently Tier B in evolution gaps).
 | `gpu::reduce::SeasonalReducer` | `ops::fused_map_reduce_f64` | wetSpring | GPU N≥1024 |
 | `gpu::stream::StreamSmoother` | `ops::moving_window_stats` | wetSpring S28+ | **WIRED** (new) |
 | `eco::correction::fit_ridge` | `linalg::ridge::ridge_regression` | wetSpring ESN | **WIRED** (new) |
+| `gpu::dual_kc::BatchedDualKc` | CPU path (Tier B → GPU pending) | airSpring | **CPU-STEP** (new) |
 | `validation` | `validation::ValidationHarness` | neuralSpring | ABSORBED |
 | `testutil::r_squared` | `stats::pearson_correlation` | Shared | WIRED |
 | `testutil::spearman_r` | `stats::spearman_correlation` | Shared | WIRED |
@@ -144,6 +145,8 @@ for nonlinear curve fitting (currently Tier B in evolution gaps).
 | Feb 24 | airSpring v0.3.6+: MovingWindow + Ridge wired | Stream smoothing + calibration pipeline |
 | Feb 25 | airSpring v0.3.7: metalForge v0.2.0 evolution | 4 absorption-ready modules (metrics, regression, moving_window_f64, hydrology) |
 | Feb 25 | airSpring v0.3.8: ToadStool deep audit | Richards PDE promoted C→B (upstream solver available), +2 Tier B gaps (tridiag, RK45) |
+| Feb 25 | airSpring v0.3.9: Dual Kc + cover crops | FAO-56 Ch 7/11 CPU-validated, 5 cover crop species, no-till mulch |
+| Feb 25 | airSpring v0.3.10: GPU dual Kc + benchmarks | BatchedDualKc orchestrator, CPU benchmarks 12.7M ET₀/s, 287 validation checks |
 
 ---
 
@@ -161,8 +164,9 @@ for nonlinear curve fitting (currently Tier B in evolution gaps).
 
 ## Remaining Evolution Gaps
 
-**Tier B (8 items):** 1D Richards equation (PROMOTED from Tier C — upstream
+**Tier B (9 items):** 1D Richards equation (PROMOTED from Tier C — upstream
 `pde::richards::solve_richards` now available with van Genuchten-Mualem),
+dual Kc batch (op=8, GPU orchestrator wired, pending shader),
 sensor calibration batch, Hargreaves batch, Kc climate adjustment,
 nonlinear solver (Nelder-Mead), tridiagonal solve, adaptive RK45 ODE,
 m/z tolerance search.
