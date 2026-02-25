@@ -16,10 +16,10 @@
 | 005 | Real data pipeline (918 station-days) | Integration | **Complete** | Python + Open-Meteo API | All modules | R²=0.967+21 |
 
 | 009 | FAO-56 Dual Kc (Allen 1998 Ch 7) | Irrigation | **Complete** | Python + Rust CPU | `eco::dual_kc` | 63+61 |
-| 010 | Regional ET₀ Intercomparison (6 MI stations) | Precision Ag | **Phase 0** | Python (Open-Meteo) | — | 61 |
+| 010 | Regional ET₀ Intercomparison (6 MI stations) | Precision Ag | **Complete** | Python + Rust CPU | `eco::evapotranspiration` | 61+61 |
 | 011 | Cover Crop Dual Kc + No-Till (FAO-56 Ch 11) | Irrigation | **Complete** | Python + Rust CPU | `eco::dual_kc` (mulch) | 40+40 |
 
-**Total**: 306 Python checks + 224 Rust validation checks + 279 Rust tests + 65 cross-validation values
+**Total**: 306 Python checks + 287 Rust validation checks + 279 Rust tests + 65 cross-validation values
 
 ---
 

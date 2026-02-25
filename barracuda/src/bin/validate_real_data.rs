@@ -59,8 +59,8 @@ fn load_scenarios() -> Vec<Scenario> {
         .collect()
 }
 
-/// Stations whose data we validate.
-const STATIONS: &[&str] = &[
+/// Fallback station list when filesystem discovery finds nothing.
+const DEFAULT_STATIONS: &[&str] = &[
     "east_lansing",
     "grand_junction",
     "hart",
@@ -92,6 +92,7 @@ struct RuntimeConfig {
     min_r2: f64,
     max_rmse: f64,
     data_dir: std::path::PathBuf,
+    stations: Vec<String>,
 }
 
 impl RuntimeConfig {
@@ -117,12 +118,41 @@ impl RuntimeConfig {
                     .join("data")
                     .join("open_meteo")
             });
+        let stations = std::env::var("AIRSPRING_STATIONS")
+            .map(|s| s.split(',').map(|s| s.trim().to_string()).collect())
+            .unwrap_or_else(|_| Self::discover_stations(&data_dir, &season_start, &season_end));
+
         Self {
             season_start,
             season_end,
             min_r2,
             max_rmse,
             data_dir,
+            stations,
+        }
+    }
+
+    /// Discover station names from CSV files in the data directory.
+    ///
+    /// Looks for files matching `{station}_{start}_{end}_daily.csv` and extracts
+    /// station names. Falls back to `DEFAULT_STATIONS` if none found.
+    fn discover_stations(data_dir: &Path, start: &str, end: &str) -> Vec<String> {
+        let suffix = format!("_{start}_{end}_daily.csv");
+        let mut stations: Vec<String> = std::fs::read_dir(data_dir)
+            .ok()
+            .into_iter()
+            .flatten()
+            .filter_map(|entry| {
+                let name = entry.ok()?.file_name().into_string().ok()?;
+                name.strip_suffix(&suffix).map(|s| s.to_string())
+            })
+            .collect();
+        stations.sort();
+
+        if stations.is_empty() {
+            DEFAULT_STATIONS.iter().map(|s| (*s).to_string()).collect()
+        } else {
+            stations
         }
     }
 
@@ -444,8 +474,19 @@ fn main() {
     let mut all_rust_et0 = Vec::new();
     let mut all_om_et0 = Vec::new();
 
+    println!("  Stations: {} ({})\n",
+        config.stations.len(),
+        if std::env::var("AIRSPRING_STATIONS").is_ok() {
+            "from AIRSPRING_STATIONS"
+        } else if config.stations.iter().any(|s| !DEFAULT_STATIONS.contains(&s.as_str())) {
+            "discovered from filesystem"
+        } else {
+            "defaults"
+        }
+    );
+
     validation::section("Per-Station ET₀ (Rust vs Open-Meteo)");
-    for station in STATIONS {
+    for station in &config.stations {
         validate_station_et0(station, &config, &mut v, &mut all_rust_et0, &mut all_om_et0);
     }
 

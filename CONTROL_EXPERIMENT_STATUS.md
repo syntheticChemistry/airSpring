@@ -54,11 +54,11 @@ bash scripts/run_all_baselines.sh
 # 5. Optionally run R ANOVA (requires R >= 4.0)
 # Rscript control/iot_irrigation/anova_irrigation.R
 
-# 6. Run Rust validation binaries (224 checks across 9 binaries)
+# 6. Run Rust validation binaries (287 checks across 10 binaries)
 cd barracuda
 for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   validate_sensor_calibration validate_real_data cross_validate \
-  validate_dual_kc validate_cover_crop; do
+  validate_dual_kc validate_cover_crop validate_regional_et0; do
   cargo run --release --bin $bin
 done
 
@@ -248,8 +248,9 @@ Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2 + yield data).
 | cross_validate | T1/T2 | — | 65/65 Python↔Rust parity at 1e-5 |
 | validate_dual_kc | T1 | 61/61 | FAO-56 Ch 7 Eqs 69/71-73/77, Table 17+19, multi-day sims |
 | validate_cover_crop | T1 | 40/40 | FAO-56 Ch 11 mulch, 5 cover crops, no-till vs conventional |
+| validate_regional_et0 | T1 | 61/61 | 6 MI stations, spatial CV, cross-station r, geographic consistency |
 
-**Total Rust: 224/224 validation checks PASS, 279 tests (201 unit + 78 integration) PASS**
+**Total Rust: 287/287 validation checks PASS, 279 tests (201 unit + 78 integration) PASS**
 **Phase 2 cross-validation: 65/65 MATCH (Python↔Rust, tol=1e-5)**
 **Phase 3 GPU-first: 4/4 ToadStool issues RESOLVED, library coverage 97.2%**
 **CPU benchmarks: ET₀ 12.7M station-days/s, dual Kc 59M days/s, mulched Kc 64M days/s**

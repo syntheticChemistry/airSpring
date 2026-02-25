@@ -25,11 +25,17 @@ CPU benchmarking proving Rust advantage, and GPU orchestrator for M-field batchi
   mulch Ke at 3 levels, no-till vs conventional water savings.
 - **6 new unit tests** in `gpu::dual_kc`: single-field parity, mulch savings,
   field independence, season simulation, empty input.
+- **`validate_regional_et0` binary**: 61/61 PASS — Exp 010 Rust CPU, cross-station
+  statistics (CV, spread, pairwise r), geographic consistency, spatial variability.
+- **`testutil::pearson_r`**: Raw Pearson correlation (not squared) for validation.
 
 #### Changed
+- **`validate_real_data`**: Station list evolved from hardcoded array to filesystem
+  discovery. Override via `AIRSPRING_STATIONS` env var. Discovered 7th station.
+  Now 23/23 PASS (up from 21/21).
 - **Evolution gaps**: 18 entries (8A + 9B + 1C). Dual Kc batch added as Tier B.
-- **Test count**: 279 Rust tests (201 unit + 78 integration), 224 validation checks.
-  Total: 503 Rust checks, all PASS. 306 Python checks, all PASS.
+- **Test count**: 279 Rust tests (201 unit + 78 integration), 287 validation checks
+  across 10 binaries. Total: 566 Rust checks, all PASS. 306 Python checks, all PASS.
 
 ## [0.3.9] - 2026-02-25
 

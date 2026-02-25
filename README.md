@@ -15,7 +15,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **306/306 PASS** | FAO-56, soil, IoT, water balance, dual Kc, cover crops |
 | Phase 0+: Real data pipeline | **918 station-days** | ET₀ R²=0.967 vs Open-Meteo |
-| Phase 1: Rust validation | **224/224 PASS** | 9 binaries, 279 tests |
+| Phase 1: Rust validation | **287/287 PASS** | 10 binaries, 279 tests |
 | Phase 2: Cross-validation | **65/65 MATCH** | Python↔Rust identical (tol=1e-5) |
 | Phase 3: GPU bridge | **GPU-FIRST** | 7 orchestrators, 4/4 ToadStool issues resolved |
 | CPU benchmarks | **12.7M ET₀/s** | 59M Kc days/s, 64M mulch Kc days/s |

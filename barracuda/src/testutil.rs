@@ -78,6 +78,16 @@ pub fn generate_synthetic_iot_data(n_records: usize) -> TimeseriesData {
     TimeseriesData::new(column_names, timestamps, cols)
 }
 
+/// Compute Pearson correlation coefficient r.
+///
+/// Uses barracuda's `pearson_correlation` primitive. Returns 0.0
+/// on degenerate data (constant series, length mismatch) rather than
+/// propagating errors — suitable for validation binaries.
+#[must_use]
+pub fn pearson_r(x: &[f64], y: &[f64]) -> f64 {
+    barracuda::stats::pearson_correlation(x, y).unwrap_or(0.0)
+}
+
 /// Compute Pearson R² between observed and simulated data.
 ///
 /// Uses barracuda's `pearson_correlation` primitive for cross-validation.

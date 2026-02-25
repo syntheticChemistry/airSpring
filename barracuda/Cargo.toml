@@ -64,6 +64,10 @@ name = "validate_cover_crop"
 path = "src/bin/validate_cover_crop.rs"
 
 [[bin]]
+name = "validate_regional_et0"
+path = "src/bin/validate_regional_et0.rs"
+
+[[bin]]
 name = "bench_cpu_vs_python"
 path = "src/bin/bench_cpu_vs_python.rs"
 
