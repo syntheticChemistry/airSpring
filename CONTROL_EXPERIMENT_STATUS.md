@@ -361,6 +361,19 @@ Using open-source alternative to closed HYDRUS software.
 **Goal**: Fit Langmuir/Freundlich adsorption isotherms to published biochar
 data (Kumari, Dong & Safferman, 2025) using scipy curve_fit.
 
+### Experiment 011: Cover Crop Dual Kc + No-Till — PHASE 0 COMPLETE
+
+**Goal**: Extend dual Kc with cover crop coefficients and no-till mulch reduction
+from FAO-56 Chapter 11. Digitize Islam et al. (2014) Brandt farm observations.
+
+**Phase 0 (Python baseline — 40/40 PASS):**
+- [x] 5 cover crop Kcb values (cereal rye, crimson clover, winter wheat, hairy vetch, radish)
+- [x] 5 no-till mulch reduction levels (0.25–1.0)
+- [x] Islam et al. (2014) observations: SOC, bulk density, infiltration, AWC
+- [x] Rye→corn transition: 5-phase seasonal Kcb + mulch factor progression
+- [x] No-till ET savings: 39.6% during initial stage (evaporation-dominated)
+- [x] Mulch factor ordering and proportionality validated
+
 ### Experiment 010: Regional ET₀ Intercomparison — PHASE 0 COMPLETE
 
 **Goal**: Validate FAO-56 PM ET₀ across Michigan microclimates using Open-Meteo ERA5
