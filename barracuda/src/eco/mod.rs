@@ -2,6 +2,7 @@
 
 pub mod correction;
 pub mod crop;
+pub mod dual_kc;
 pub mod evapotranspiration;
 pub mod sensor_calibration;
 pub mod soil_moisture;

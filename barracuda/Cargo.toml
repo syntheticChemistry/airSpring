@@ -56,5 +56,9 @@ name = "simulate_season"
 path = "src/bin/simulate_season.rs"
 
 [[bin]]
+name = "validate_dual_kc"
+path = "src/bin/validate_dual_kc.rs"
+
+[[bin]]
 name = "bench_airspring_gpu"
 path = "src/bin/bench_airspring_gpu.rs"

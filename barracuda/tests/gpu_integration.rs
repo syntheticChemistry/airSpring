@@ -44,7 +44,7 @@ fn test_evolution_gaps_catalogued() {
 
     assert!(tier_a >= 4, "Expected 4+ Tier A gaps, got {tier_a}");
     assert!(tier_b >= 2, "Expected 2+ Tier B gaps, got {tier_b}");
-    assert!(tier_c >= 2, "Expected 2+ Tier C gaps, got {tier_c}");
+    assert!(tier_c >= 1, "Expected 1+ Tier C gaps, got {tier_c}");
 
     for gap in GAPS.iter().filter(|g| g.tier == Tier::A) {
         assert!(

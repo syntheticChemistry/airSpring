@@ -13,6 +13,7 @@
 //! # Track 1: Precision Agriculture
 //! - [`eco::correction`] — Sensor correction curve fitting (linear, quadratic, exponential, logarithmic)
 //! - [`eco::crop`] — FAO-56 Table 12 crop coefficient (`Kc`) database (10 crops) + climate adjustment
+//! - [`eco::dual_kc`] — FAO-56 Ch 7 dual Kc (Kcb + Ke): transpiration/evaporation separation
 //! - [`eco::evapotranspiration`] — FAO-56 Penman-Monteith (low-level + high-level) + Hargreaves ET₀
 //! - [`eco::sensor_calibration`] — `SoilWatch` 10 VWC calibration + irrigation recommendation
 //! - [`eco::soil_moisture`] — Dielectric sensor calibration (Topp equation)
