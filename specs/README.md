@@ -35,7 +35,7 @@
 | Document | Location | Description |
 |----------|----------|-------------|
 | CONTROL_EXPERIMENT_STATUS.md | `../` | Detailed experiment logs and check counts |
-| CHANGELOG.md | `../` | Evolution history |
+| CHANGELOG.md | `../` | Evolution history (Keep a Changelog format) |
 | experiments/README.md | `../experiments/` | Experiment index (5 completed) |
 | whitePaper/baseCamp/README.md | `../whitePaper/baseCamp/` | Per-faculty research briefings |
 | whitePaper/STUDY.md | `../whitePaper/` | Full study results |

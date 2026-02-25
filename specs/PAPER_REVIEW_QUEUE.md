@@ -55,12 +55,35 @@ All 5 completed papers have:
 | 10 | neuralSpring Exp 004 — Transfer learning MI→NM/CA | — | Cross-spring | Yes | Already validated | N/A (reference) |
 | 11 | groundSpring Exp 003 — Error propagation through FAO-56 | — | Cross-spring | Yes | Already validated | N/A (reference) |
 
-### Tier 3 — Longer horizon
+### Tier 3 — No-Till Soil Moisture & Anderson Geometry (baseCamp Sub-thesis 06)
+
+baseCamp Sub-thesis 06 couples airSpring's soil moisture computation to the
+Anderson localization model for QS prediction in no-till vs tilled soil.
+Soil moisture θ(t) determines pore connectivity, which determines the effective
+dimension of the Anderson lattice, which determines whether QS signals propagate.
 
 | # | Paper / Direction | Year | Faculty | Open Data? | Control Status | GPU Path |
 |---|-------------------|------|---------|:----------:|:--------------:|----------|
-| 12 | Dolson — Evolutionary optimization of sensor placement | — | Dolson | N/A | Future | `NelderMeadGpu` |
-| 13 | Waters — Soil microbiome ↔ plant water dynamics | — | Waters | N/A | Future | N/A |
+| 12 | Islam et al. "No-till and conservation agriculture: David Brandt farm" | 2014 | — | **Yes** (ISWCR) | Ready to create | N/A (data extraction) |
+| 13 | Allen et al. (1998) FAO-56 Ch 7 — Dual Kc for cover crops | 1998 | Standard | **Yes** (open literature) | Ready to create | Batch Kc (op=7) |
+| 14 | Soil moisture → Anderson d_eff coupling model | — | Cross-spring | **Yes** (USDA + Open-Meteo) | Future | `BatchedWaterBalance` → Anderson |
+| 15 | OSU Triplett-Van Doren 60-year water balance reconstruction | — | Cross-spring | **Yes** (Open-Meteo 80-yr, USDA soils) | Future | `BatchedEt0` at scale |
+| 16 | Cover crop water use & seasonal diversity dynamics | — | Dong | Awaiting field data | Future | Batch ET₀ with Kc schedule |
+
+**Connection to wetSpring**: airSpring computes θ(t); wetSpring computes
+Anderson r(t) from θ(t)-derived geometry. The cross-spring pipeline is:
+`Open-Meteo weather → FAO-56 ET₀ → water balance θ(t) → pore_connectivity(t) → d_eff(t) → Anderson r(t) → QS_regime(t)`.
+
+**Connection to groundSpring**: groundSpring Exp 003 already showed humidity
+dominates ET₀ uncertainty at 66%. This propagates into the Anderson coupling:
+moisture uncertainty → geometry uncertainty → QS prediction uncertainty.
+
+### Tier 4 — Longer horizon
+
+| # | Paper / Direction | Year | Faculty | Open Data? | Control Status | GPU Path |
+|---|-------------------|------|---------|:----------:|:--------------:|----------|
+| 17 | Dolson — Evolutionary optimization of sensor placement | — | Dolson | N/A | Future | `NelderMeadGpu` |
+| 18 | Waters — Soil microbiome ↔ plant water dynamics | — | Waters | N/A | Future | N/A |
 
 ---
 
@@ -95,4 +118,7 @@ All 5 completed papers have:
 - Paper 8 (dual Kc) is a pure literature reproduction — all data in FAO-56 Chapter 7
 - Paper 9 would use the 80-year Open-Meteo archive — massive open dataset, no key
 - Papers 10-11 are cross-spring references — already validated in their respective springs
+- Papers 12-16 (Tier 3) support baseCamp Sub-thesis 06 (no-till Anderson QS)
+- Paper 12 (Brandt farm) and Paper 15 (OSU 60-year reconstruction) use only open data
+- Paper 13 (dual Kc) is needed for cover crop water balance in the Anderson coupling
 - Every completed paper has been validated through the full pipeline: Python → Rust CPU → GPU

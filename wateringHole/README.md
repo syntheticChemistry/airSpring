@@ -16,7 +16,12 @@
 | File | Purpose |
 |------|---------|
 | `../specs/CROSS_SPRING_EVOLUTION.md` | 608 WGSL shader provenance (hotSpring/wetSpring/neuralSpring/airSpring) |
-| `../HANDOFF_AIRSPRING_TO_TOADSTOOL_FEB_16_2026.md` | Original Phase 3 GPU handoff (historical, now superseded by V001) |
+
+## Archive
+
+| File | Purpose |
+|------|---------|
+| `handoffs/archive/HANDOFF_AIRSPRING_TO_TOADSTOOL_FEB_16_2026.md` | Original Phase 3 GPU handoff (superseded by V001, kept as fossil record) |
 
 ## Convention
 
@@ -26,6 +31,4 @@ Direction: airSpring → ToadStool (unidirectional). airSpring is a consumer of
 BarraCuda primitives; handoffs communicate what we learned, what we need, and
 what we can contribute back.
 
-## Archive
-
-Superseded handoffs move to `handoffs/archive/`.
+Superseded handoffs move to `handoffs/archive/` (kept as fossil record).

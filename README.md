@@ -147,7 +147,6 @@ airSpring/
 │   └── handoffs/                #   Versioned handoff documents
 ├── CHANGELOG.md                 # Keep-a-Changelog versioned history
 ├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
-├── HANDOFF_AIRSPRING_TO_TOADSTOOL_FEB_16_2026.md  # Original GPU handoff
 └── LICENSE                      # AGPL-3.0-or-later
 ```
 

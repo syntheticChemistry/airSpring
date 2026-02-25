@@ -113,5 +113,7 @@ Experiments follow `NNN_name` format:
 
 ## Results
 
-Experiment outputs are stored in `results/` (JSON format) and are used by
-the Rust validation binaries as ground truth benchmarks.
+Benchmark data is stored in `control/*/benchmark_*.json` (digitized paper values)
+and used by both Python control scripts and Rust validation binaries as ground
+truth. Cross-validation outputs are produced by `cross_validate` (Rust) and
+`scripts/cross_validate.py` (Python).

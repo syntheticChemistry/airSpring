@@ -222,7 +222,7 @@ Tools used: numpy, scipy (curve_fit), json (benchmarks), base Python math.
 All benchmark data digitized directly from published papers (FAO-56 tables,
 Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2 + yield data).
 
-### 2026-02-16: Project Initialization → Phase 2 Complete (Rust — 123/123 PASS, 253 tests)
+### 2026-02-16 → 2026-02-25: Project Initialization → v0.3.7 (Rust — 123/123 PASS, 293 tests)
 
 - Created airSpring repository
 - Scaffolded Track 1 (Precision Agriculture) and Track 2 (Environmental Systems)
@@ -243,7 +243,7 @@ Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2 + yield data).
 | validate_water_balance | T1 | 13/13 | Mass balance 0.0000 (3 scenarios), Ks bounds, MI summer |
 | validate_sensor_calibration | T1 | 21/21 | SoilWatch 10 VWC, irrigation model, Dong 2024 field results |
 
-**Total Rust: 119/119 validation checks PASS, 233 tests (161 unit + 72 integration) PASS**
+**Total Rust: 123/123 validation checks PASS, 293 tests (253 barracuda + 40 forge) PASS**
 **Phase 2 cross-validation: 65/65 MATCH (Python↔Rust, tol=1e-5)**
 **Phase 3 GPU-first: 4/4 ToadStool issues RESOLVED, library coverage 97.2%**
 **Quality: zero `.unwrap()`, zero `panic!()`, zero `unsafe`, zero clippy pedantic warnings, all tolerances named `const`**
@@ -374,7 +374,7 @@ panel arrays for dual-use agriculture. Deferred until MSU Solar Farm data identi
 Track 1 (Precision Agriculture):
   Phase 0  [COMPLETE]: Python baselines — 142/142 PASS (FAO-56, soil, IoT, water balance)
   Phase 0+ [COMPLETE]: Real data pipeline — 918 station-days, ET₀ R²=0.97, water balance
-  Phase 1  [COMPLETE]: Rust validation — 123/123 PASS (8 binaries), 253 tests, 0 clippy warnings
+  Phase 1  [COMPLETE]: Rust validation — 123/123 PASS (8 binaries), 293 tests (253+40 forge), 0 clippy warnings
   Phase 2  [COMPLETE]: Cross-validation — 65/65 MATCH (Python↔Rust, tol=1e-5)
   Phase 3  [COMPLETE]: GPU-first — 4/4 ToadStool issues resolved, 253 tests, 97.2% lib coverage
   Phase 4:             Penny irrigation (sovereign, consumer hardware)
@@ -443,8 +443,8 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 *Initialized: February 16, 2026 — Updated: February 25, 2026 (v0.3.7)*
 *Phase 0 Python baselines: 142/142 PASS (Exps 001-004)*
 *Phase 0+ Real data pipeline: 918 station-days, ET₀ R²=0.97, 4 crop water balance*
-*Phase 1 BarraCuda Rust validation: 123/123 PASS (8 binaries), 253 tests (175 unit + 76 integration + 2 doc-tests)*
+*Phase 1 BarraCuda Rust validation: 123/123 PASS (8 binaries), 293 tests (253 barracuda + 40 forge)*
 *Phase 2 Cross-validation: 65/65 MATCH (Python↔Rust, tol=1e-5)*
-*Phase 3 GPU-first: 4/4 ToadStool issues RESOLVED, 88% library coverage*
+*Phase 3 GPU-first: 4/4 ToadStool issues RESOLVED, 97.2% library coverage (llvm-cov)*
 *Quality: zero .unwrap() in production, zero unsafe, zero clippy pedantic/nursery warnings*
 *Total: 330 validation checks + 918 real data station-days*
