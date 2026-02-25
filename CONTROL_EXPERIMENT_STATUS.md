@@ -54,9 +54,11 @@ bash scripts/run_all_baselines.sh
 # 5. Optionally run R ANOVA (requires R >= 4.0)
 # Rscript control/iot_irrigation/anova_irrigation.R
 
-# 6. Run Rust validation binaries (119 checks across 8 binaries)
+# 6. Run Rust validation binaries (224 checks across 9 binaries)
 cd barracuda
-for bin in validate_et0 validate_soil validate_iot validate_water_balance validate_sensor_calibration validate_real_data cross_validate simulate_season; do
+for bin in validate_et0 validate_soil validate_iot validate_water_balance \
+  validate_sensor_calibration validate_real_data cross_validate \
+  validate_dual_kc validate_cover_crop; do
   cargo run --release --bin $bin
 done
 
@@ -242,10 +244,15 @@ Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2 + yield data).
 | validate_iot | T1 | 11/11 | 168 records, 5 columns, CSV round-trip, diurnal statistics |
 | validate_water_balance | T1 | 13/13 | Mass balance 0.0000 (3 scenarios), Ks bounds, MI summer |
 | validate_sensor_calibration | T1 | 21/21 | SoilWatch 10 VWC, irrigation model, Dong 2024 field results |
+| validate_real_data | T1 | 21/21 | Open-Meteo ERA5, 6 MI stations, R²>0.85, capability-based config |
+| cross_validate | T1/T2 | — | 65/65 Python↔Rust parity at 1e-5 |
+| validate_dual_kc | T1 | 61/61 | FAO-56 Ch 7 Eqs 69/71-73/77, Table 17+19, multi-day sims |
+| validate_cover_crop | T1 | 40/40 | FAO-56 Ch 11 mulch, 5 cover crops, no-till vs conventional |
 
-**Total Rust: 123/123 validation checks PASS, 293 tests (253 barracuda + 40 forge) PASS**
+**Total Rust: 224/224 validation checks PASS, 279 tests (201 unit + 78 integration) PASS**
 **Phase 2 cross-validation: 65/65 MATCH (Python↔Rust, tol=1e-5)**
 **Phase 3 GPU-first: 4/4 ToadStool issues RESOLVED, library coverage 97.2%**
+**CPU benchmarks: ET₀ 12.7M station-days/s, dual Kc 59M days/s, mulched Kc 64M days/s**
 **Quality: zero `.unwrap()`, zero `panic!()`, zero `unsafe`, zero clippy pedantic warnings, all tolerances named `const`**
 
 ---

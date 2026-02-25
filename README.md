@@ -9,15 +9,16 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → GPU (ToadStool shaders) → metalForge (mixed hardware) → Penny Irrigation
 ```
 
-## Current Status (v0.3.8, 2026-02-25)
+## Current Status (v0.3.10, 2026-02-25)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
-| Phase 0: Paper baselines (Python) | **142/142 PASS** | FAO-56, soil, IoT, water balance |
+| Phase 0: Paper baselines (Python) | **306/306 PASS** | FAO-56, soil, IoT, water balance, dual Kc, cover crops |
 | Phase 0+: Real data pipeline | **918 station-days** | ET₀ R²=0.967 vs Open-Meteo |
-| Phase 1: Rust validation | **123/123 PASS** | 8 binaries, 253 tests, 97% coverage |
+| Phase 1: Rust validation | **224/224 PASS** | 9 binaries, 279 tests |
 | Phase 2: Cross-validation | **65/65 MATCH** | Python↔Rust identical (tol=1e-5) |
-| Phase 3: GPU bridge | **GPU-FIRST** | 6 orchestrators, 4/4 ToadStool issues resolved |
+| Phase 3: GPU bridge | **GPU-FIRST** | 7 orchestrators, 4/4 ToadStool issues resolved |
+| CPU benchmarks | **12.7M ET₀/s** | 59M Kc days/s, 64M mulch Kc days/s |
 | Phase 4: Penny Irrigation | Vision | Sovereign, consumer hardware |
 
 ### BarraCuda Integration

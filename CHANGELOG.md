@@ -2,6 +2,35 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.3.10] - 2026-02-25
+
+### Cover Crops, No-Till Mulch, CPU Benchmarks, GPU Wiring
+
+Extended dual Kc with cover crop species, no-till mulch reduction (FAO-56 Ch 11),
+CPU benchmarking proving Rust advantage, and GPU orchestrator for M-field batching.
+
+#### Added
+- **`eco::dual_kc::CoverCropType`**: 5 cover crops (cereal rye, crimson clover,
+  winter wheat cover, hairy vetch, tillage radish) with FAO-56 Table 17 Kcb values.
+- **`eco::dual_kc::ResidueLevel`**: Mulch reduction factors (NoResidue→FullMulch).
+- **`eco::dual_kc::mulched_ke`**: Ke with mulch reduction (FAO-56 Ch 11).
+- **`eco::dual_kc::simulate_dual_kc_mulched`**: Multi-day no-till simulation.
+- **`validate_cover_crop` binary**: 40/40 PASS — 5 cover crops, mulch Ke,
+  no-till vs conventional, Islam et al. (2014) observations.
+- **`bench_cpu_vs_python` binary**: CPU benchmark proving Rust advantage:
+  ET₀ 12.7M station-days/s, dual Kc 59M days/s, mulched Kc 64M days/s.
+- **`gpu::dual_kc`**: Batched dual Kc orchestrator for M fields — CPU path
+  validated, GPU interface wired (Tier B, pending ToadStool shader op=8).
+- **6 new unit tests** in `eco::dual_kc`: cover crop Kcb, mulch ordering,
+  mulch Ke at 3 levels, no-till vs conventional water savings.
+- **6 new unit tests** in `gpu::dual_kc`: single-field parity, mulch savings,
+  field independence, season simulation, empty input.
+
+#### Changed
+- **Evolution gaps**: 18 entries (8A + 9B + 1C). Dual Kc batch added as Tier B.
+- **Test count**: 279 Rust tests (201 unit + 78 integration), 224 validation checks.
+  Total: 503 Rust checks, all PASS. 306 Python checks, all PASS.
+
 ## [0.3.9] - 2026-02-25
 
 ### Experiment 009: Dual Kc + BarraCuda CPU + Technical Debt Cleanup

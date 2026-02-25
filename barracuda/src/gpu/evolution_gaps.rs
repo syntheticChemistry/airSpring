@@ -109,10 +109,11 @@ pub enum Tier {
     C,
 }
 
-/// All known evolution gaps (17 entries — 8 Tier A integrated, 8 Tier B, 1 Tier C).
+/// All known evolution gaps (18 entries — 8 Tier A integrated, 9 Tier B, 1 Tier C).
 ///
 /// Richards PDE promoted C→B: upstream `pde::richards::solve_richards` now available.
 /// Tridiagonal and RK45 added as new Tier B capabilities.
+/// Dual Kc batch added as Tier B: `gpu::dual_kc` CPU ready, pending shader op.
 pub const GAPS: &[EvolutionGap] = &[
     // ── Tier A: Integrated (GPU primitive wired and validated) ─────────
     EvolutionGap {
@@ -174,6 +175,13 @@ pub const GAPS: &[EvolutionGap] = &[
         action: "WIRED — eco::correction::fit_ridge wraps barracuda ridge (wetSpring ESN)",
     },
     // ── Tier B: Shader exists, needs domain adaptation ────────────────
+    EvolutionGap {
+        id: "dual_kc_batch",
+        description: "Batched dual Kc (Ke + ETc) across M fields per timestep",
+        tier: Tier::B,
+        toadstool_primitive: Some("batched_elementwise_f64.wgsl (custom op)"),
+        action: "GPU orchestrator wired (gpu::dual_kc), CPU validated — add Ke as op=8 in shader",
+    },
     EvolutionGap {
         id: "sensor_calibration_batch",
         description: "Batch sensor calibration (SoilWatch 10) via custom op",

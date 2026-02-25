@@ -1,4 +1,4 @@
-//! Dual crop coefficient (Kcb + Ke) — FAO-56 Chapter 7.
+//! Dual crop coefficient (Kcb + Ke) — FAO-56 Chapters 7 + 11.
 //!
 //! Separates crop evapotranspiration into transpiration (Kcb) and soil
 //! evaporation (Ke) for precision irrigation scheduling:
@@ -9,14 +9,19 @@
 //!
 //! This module provides:
 //! - [`BasalCropCoefficients`] — Table 17 Kcb values per crop
+//! - [`CoverCropType`] — Cover crop Kcb values for no-till systems
 //! - [`EvaporationParams`] — Table 19 REW/TEW soil parameters
 //! - Pure functions matching every FAO-56 equation (69, 71–73, 77)
-//! - [`EvaporationLayerState`] — stateful daily simulation
+//! - [`mulched_ke`] — FAO-56 Ch 11 mulch reduction on soil evaporation
+//! - [`EvaporationLayerState`] — stateful daily simulation (with/without mulch)
 //!
-//! # Reference
+//! # References
 //!
 //! Allen RG, Pereira LS, Raes D, Smith M (1998)
-//! FAO Irrigation and Drainage Paper 56, Chapter 7.
+//! FAO Irrigation and Drainage Paper 56, Chapters 7 + 11.
+//!
+//! Islam R, Reeder R (2014) No-till and conservation agriculture.
+//! ISWCR 2(3): 176-186.
 
 use crate::eco::crop::CropType;
 use crate::eco::soil_moisture::SoilTexture;
@@ -323,6 +328,143 @@ pub fn simulate_dual_kc(
     (outputs, EvaporationLayerState { de, tew, rew })
 }
 
+// ── Cover crops (FAO-56 Ch 11 + literature) ─────────────────────────
+
+/// Cover crop types for no-till systems.
+///
+/// Kcb values adapted from FAO-56 Table 17 and cover crop literature.
+#[derive(Debug, Clone, Copy)]
+pub enum CoverCropType {
+    /// Winter cereal rye — dominant Midwest cover crop.
+    CerealRye,
+    /// Crimson clover — legume cover with moderate transpiration.
+    CrimsonClover,
+    /// Winter wheat used as cover crop (terminated early).
+    WinterWheatCover,
+    /// Hairy vetch — vining legume, good ground cover.
+    HairyVetch,
+    /// Daikon/tillage radish — winterkills, acts as green mulch.
+    TillageRadish,
+}
+
+impl CoverCropType {
+    /// Basal crop coefficients for cover crops.
+    #[must_use]
+    pub const fn basal_coefficients(self) -> BasalCropCoefficients {
+        match self {
+            Self::CerealRye => BasalCropCoefficients {
+                kcb_ini: 0.15,
+                kcb_mid: 1.10,
+                kcb_end: 0.25,
+                max_height_m: 1.2,
+            },
+            Self::CrimsonClover => BasalCropCoefficients {
+                kcb_ini: 0.15,
+                kcb_mid: 0.95,
+                kcb_end: 0.30,
+                max_height_m: 0.5,
+            },
+            Self::WinterWheatCover => BasalCropCoefficients {
+                kcb_ini: 0.15,
+                kcb_mid: 1.10,
+                kcb_end: 0.25,
+                max_height_m: 1.0,
+            },
+            Self::HairyVetch => BasalCropCoefficients {
+                kcb_ini: 0.15,
+                kcb_mid: 0.90,
+                kcb_end: 0.25,
+                max_height_m: 0.4,
+            },
+            Self::TillageRadish => BasalCropCoefficients {
+                kcb_ini: 0.15,
+                kcb_mid: 0.85,
+                kcb_end: 0.20,
+                max_height_m: 0.3,
+            },
+        }
+    }
+}
+
+// ── Mulch reduction (FAO-56 Ch 11) ──────────────────────────────────
+
+/// No-till residue coverage levels and their mulch reduction factors.
+///
+/// The mulch factor reduces Ke: `Ke_mulch = Ke × mulch_factor`.
+/// This accounts for surface residue blocking radiation from reaching
+/// the soil, reducing stage 1 and stage 2 evaporation.
+#[derive(Debug, Clone, Copy)]
+pub enum ResidueLevel {
+    /// Conventional tillage, bare soil.
+    NoResidue,
+    /// Light residue (<30% ground cover).
+    Light,
+    /// Moderate residue (30–60% ground cover).
+    Moderate,
+    /// Heavy residue (>60%, typical no-till).
+    Heavy,
+    /// Nearly complete cover (thick mulch).
+    FullMulch,
+}
+
+impl ResidueLevel {
+    /// Mulch reduction factor for soil evaporation.
+    ///
+    /// FAO-56 Chapter 11: surface residue reduces energy reaching the soil
+    /// surface, reducing both stage 1 and stage 2 evaporation rates.
+    #[must_use]
+    pub const fn mulch_factor(self) -> f64 {
+        match self {
+            Self::NoResidue => 1.00,
+            Self::Light => 0.80,
+            Self::Moderate => 0.60,
+            Self::Heavy => 0.40,
+            Self::FullMulch => 0.25,
+        }
+    }
+}
+
+/// Soil evaporation with mulch reduction (FAO-56 Ch 11).
+///
+/// Ke_mulch = Ke × mulch_factor
+#[must_use]
+pub fn mulched_ke(kr: f64, kcb: f64, kc_max_val: f64, few: f64, mulch_factor: f64) -> f64 {
+    soil_evaporation_ke(kr, kcb, kc_max_val, few) * mulch_factor
+}
+
+/// Run a multi-day dual Kc simulation with mulch reduction on Ke.
+///
+/// Identical to [`simulate_dual_kc`] but applies `mulch_factor` to reduce
+/// soil evaporation, modeling no-till residue effects.
+#[must_use]
+pub fn simulate_dual_kc_mulched(
+    inputs: &[DualKcInput],
+    kcb: f64,
+    kc_max_val: f64,
+    few: f64,
+    mulch_factor: f64,
+    state: &EvaporationLayerState,
+) -> (Vec<DualKcOutput>, EvaporationLayerState) {
+    let mut de = state.de;
+    let tew = state.tew;
+    let rew = state.rew;
+    let mut outputs = Vec::with_capacity(inputs.len());
+
+    for inp in inputs {
+        de = (de - inp.precipitation - inp.irrigation).clamp(0.0, tew);
+
+        let kr = evaporation_reduction(tew, rew, de);
+        let ke = mulched_ke(kr, kcb, kc_max_val, few, mulch_factor);
+        let etc = etc_dual(kcb, 1.0, ke, inp.et0);
+
+        outputs.push(DualKcOutput { de, kr, ke, etc });
+
+        de = evaporation_layer_balance(de, 0.0, 0.0, ke, inp.et0, few, tew);
+    }
+
+    (outputs, EvaporationLayerState { de, tew, rew })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -535,5 +677,101 @@ mod tests {
                 i + 1
             );
         }
+    }
+
+    // ── Cover crop tests ────────────────────────────────────────
+
+    #[test]
+    fn test_cover_crop_kcb_reasonable() {
+        let crops = [
+            CoverCropType::CerealRye,
+            CoverCropType::CrimsonClover,
+            CoverCropType::WinterWheatCover,
+            CoverCropType::HairyVetch,
+            CoverCropType::TillageRadish,
+        ];
+        for crop in crops {
+            let kcb = crop.basal_coefficients();
+            assert!(kcb.kcb_ini < kcb.kcb_mid, "{crop:?}: ini < mid");
+            assert!(kcb.kcb_mid >= 0.5 && kcb.kcb_mid <= 1.3, "{crop:?}: mid range");
+            assert!(kcb.max_height_m > 0.0, "{crop:?}: height > 0");
+        }
+    }
+
+    // ── Mulch tests ─────────────────────────────────────────────
+
+    #[test]
+    fn test_mulch_factor_ordering() {
+        let levels = [
+            ResidueLevel::NoResidue,
+            ResidueLevel::Light,
+            ResidueLevel::Moderate,
+            ResidueLevel::Heavy,
+            ResidueLevel::FullMulch,
+        ];
+        for pair in levels.windows(2) {
+            assert!(
+                pair[0].mulch_factor() > pair[1].mulch_factor(),
+                "{:?} ({}) > {:?} ({})",
+                pair[0],
+                pair[0].mulch_factor(),
+                pair[1],
+                pair[1].mulch_factor()
+            );
+        }
+    }
+
+    #[test]
+    fn test_mulched_ke_bare_soil() {
+        let ke = mulched_ke(1.0, 0.15, 1.20, 1.0, 1.0);
+        assert!((ke - 1.05).abs() < TOL, "no mulch = bare soil: {ke}");
+    }
+
+    #[test]
+    fn test_mulched_ke_heavy_residue() {
+        let ke = mulched_ke(1.0, 0.15, 1.20, 1.0, 0.40);
+        assert!((ke - 0.42).abs() < TOL, "heavy residue: {ke}");
+    }
+
+    #[test]
+    fn test_mulched_ke_full_mulch() {
+        let ke = mulched_ke(1.0, 0.15, 1.20, 1.0, 0.25);
+        assert!((ke - 0.2625).abs() < TOL, "full mulch: {ke}");
+    }
+
+    #[test]
+    fn test_notill_saves_water_vs_conventional() {
+        let state = EvaporationLayerState {
+            de: 0.0,
+            tew: 22.5,
+            rew: 9.0,
+        };
+        let inputs: Vec<DualKcInput> = [4.0, 4.5, 4.2, 5.0, 5.5, 5.0, 4.8]
+            .iter()
+            .enumerate()
+            .map(|(i, &et0)| DualKcInput {
+                et0,
+                precipitation: if i == 0 { 10.0 } else if i == 5 { 8.0 } else { 0.0 },
+                irrigation: 0.0,
+            })
+            .collect();
+
+        let (conv, _) = simulate_dual_kc(&inputs, 0.15, 1.20, 1.0, &state);
+        let (notill, _) =
+            simulate_dual_kc_mulched(&inputs, 0.15, 1.20, 1.0, 0.40, &state);
+
+        let conv_et: f64 = conv.iter().map(|o| o.etc).sum();
+        let notill_et: f64 = notill.iter().map(|o| o.etc).sum();
+
+        assert!(
+            notill_et < conv_et,
+            "no-till ({notill_et:.2}) < conventional ({conv_et:.2})"
+        );
+
+        let savings_pct = 100.0 * (1.0 - notill_et / conv_et);
+        assert!(
+            (5.0..=50.0).contains(&savings_pct),
+            "ET savings {savings_pct:.1}% in [5, 50]"
+        );
     }
 }

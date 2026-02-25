@@ -10,6 +10,7 @@
 //! |--------|---------|---------|
 //! | [`et0`] | Batched FAO-56 ET₀ for N station-days | **GPU-first** (`BatchedElementwiseF64`) |
 //! | [`water_balance`] | Batched season simulation + GPU step | **GPU-step** + CPU season |
+//! | [`dual_kc`] | Batched dual Kc (Ke + ETc) for M fields | **CPU** (Tier B → GPU pending) |
 //! | [`kriging`] | Soil moisture spatial interpolation | **Integrated** (`KrigingF64`) |
 //! | [`reduce`] | Seasonal aggregation statistics | **GPU** for N≥1024 (`FusedMapReduceF64`) |
 //! | [`stream`] | `IoT` stream smoothing (sliding window) | **GPU** (`MovingWindowStats`, wetSpring) |
@@ -42,6 +43,7 @@
 //! ToadStool WGSL shaders (f64 precision on GPU)
 //! ```
 
+pub mod dual_kc;
 pub mod et0;
 pub mod evolution_gaps;
 pub mod kriging;

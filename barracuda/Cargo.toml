@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.3.9"
+version = "0.3.10"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
@@ -58,6 +58,14 @@ path = "src/bin/simulate_season.rs"
 [[bin]]
 name = "validate_dual_kc"
 path = "src/bin/validate_dual_kc.rs"
+
+[[bin]]
+name = "validate_cover_crop"
+path = "src/bin/validate_cover_crop.rs"
+
+[[bin]]
+name = "bench_cpu_vs_python"
+path = "src/bin/bench_cpu_vs_python.rs"
 
 [[bin]]
 name = "bench_airspring_gpu"
