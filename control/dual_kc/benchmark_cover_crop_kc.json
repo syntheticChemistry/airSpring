@@ -1,0 +1,116 @@
+{
+  "_provenance": {
+    "method": "FAO-56 Chapter 7 + Chapter 11 — Cover crop and no-till Kc adaptation",
+    "digitized_by": "airSpring Phase 0 control (Exp 011)",
+    "created": "2026-02-25",
+    "references": [
+      "Allen et al. (1998) FAO-56 Table 17 + Ch 11: Kc for non-pristine conditions",
+      "Islam et al. (2014) No-till and conservation agriculture: David Brandt farm, ISWCR",
+      "USDA NRCS Cover Crop Termination Guidelines"
+    ]
+  },
+  "cover_crop_kcb": {
+    "_description": "Basal Kc for common cover crops in no-till systems. Based on FAO-56 Table 17 + literature adjustments for cover crop growth habits.",
+    "crops": {
+      "cereal_rye": {
+        "kcb_ini": 0.15,
+        "kcb_mid": 1.10,
+        "kcb_end": 0.25,
+        "max_height_m": 1.2,
+        "_note": "Winter cereal rye — dominant Midwest cover crop. Kcb_mid reflects full cover before spring termination."
+      },
+      "crimson_clover": {
+        "kcb_ini": 0.15,
+        "kcb_mid": 0.95,
+        "kcb_end": 0.30,
+        "max_height_m": 0.5,
+        "_note": "Legume cover — lower max height, moderate transpiration."
+      },
+      "winter_wheat_cover": {
+        "kcb_ini": 0.15,
+        "kcb_mid": 1.10,
+        "kcb_end": 0.25,
+        "max_height_m": 1.0,
+        "_note": "Same as winter wheat but terminated early for cover crop use."
+      },
+      "hairy_vetch": {
+        "kcb_ini": 0.15,
+        "kcb_mid": 0.90,
+        "kcb_end": 0.25,
+        "max_height_m": 0.4,
+        "_note": "Vining legume — moderate transpiration, good ground cover."
+      },
+      "radish_tillage": {
+        "kcb_ini": 0.15,
+        "kcb_mid": 0.85,
+        "kcb_end": 0.20,
+        "max_height_m": 0.3,
+        "_note": "Daikon/tillage radish — winterkills, acts as green mulch."
+      }
+    }
+  },
+  "no_till_mulch_effects": {
+    "_description": "No-till surface residue reduces soil evaporation by limiting energy reaching the soil surface. This reduces Ke and can reduce Kc_ini by 25-50%.",
+    "_reference": "FAO-56 Chapter 11; Allen et al. (1998)",
+    "residue_fractions": {
+      "no_residue": { "mulch_factor": 1.00, "_note": "Conventional tillage, bare soil" },
+      "light_residue": { "mulch_factor": 0.80, "_note": "<30% ground cover" },
+      "moderate_residue": { "mulch_factor": 0.60, "_note": "30-60% ground cover" },
+      "heavy_residue": { "mulch_factor": 0.40, "_note": ">60% ground cover (no-till)" },
+      "full_mulch": { "mulch_factor": 0.25, "_note": "Nearly complete cover (thick mulch)" }
+    },
+    "_equation": "Ke_mulch = Ke × mulch_factor; net effect: Kc_ini_adj ≈ Kcb_ini + Ke × mulch_factor"
+  },
+  "no_till_soil_moisture": {
+    "_description": "No-till soil moisture observations from Islam et al. (2014) — David Brandt farm, Central Ohio. 40+ years of no-till conservation agriculture.",
+    "_reference": "Islam, R., Reeder, R. (2014). ISWCR 2(3): 176-186",
+    "observations": {
+      "soil_organic_carbon_pct": { "no_till": 3.2, "conventional": 1.5, "_note": "0-20 cm depth" },
+      "bulk_density_g_cm3": { "no_till": 1.25, "conventional": 1.45, "_note": "0-20 cm depth" },
+      "infiltration_rate_mm_hr": { "no_till": 76, "conventional": 25, "_note": "Double-ring infiltrometer" },
+      "available_water_capacity_mm": { "no_till": 72, "conventional": 48, "_note": "Per 30 cm soil depth" }
+    }
+  },
+  "transition_scenarios": {
+    "_description": "Growing season transition: cover crop → cash crop in no-till system",
+    "rye_to_corn": {
+      "_note": "Cereal rye terminated at corn planting (early May), corn planted into rye mulch",
+      "phases": [
+        { "period": "Apr 1-30", "kcb": 0.80, "mulch_factor": 0.40, "_note": "Rye mid-season before termination" },
+        { "period": "May 1-15", "kcb": 0.15, "mulch_factor": 0.30, "_note": "Rye terminated, corn just planted, heavy residue" },
+        { "period": "May 16-Jun 15", "kcb": 0.40, "mulch_factor": 0.45, "_note": "Corn initial, residue decomposing" },
+        { "period": "Jun 16-Aug 31", "kcb": 1.15, "mulch_factor": 0.80, "_note": "Corn mid-season, less residue effect" },
+        { "period": "Sep 1-30", "kcb": 0.50, "mulch_factor": 0.60, "_note": "Corn late season" }
+      ]
+    }
+  },
+  "validation_checks": {
+    "mulch_reduces_evaporation": {
+      "_description": "No-till residue should reduce Ke and thus reduce total ET during initial growth",
+      "test_cases": [
+        {
+          "label": "bare_soil_kc_max_1.20",
+          "kcb": 0.15, "kc_max": 1.20, "few": 1.0, "kr": 1.0,
+          "mulch_factor": 1.0,
+          "expected_ke": 1.05
+        },
+        {
+          "label": "heavy_residue_reduces_ke",
+          "kcb": 0.15, "kc_max": 1.20, "few": 1.0, "kr": 1.0,
+          "mulch_factor": 0.40,
+          "expected_ke": 0.42
+        },
+        {
+          "label": "full_mulch_minimal_evap",
+          "kcb": 0.15, "kc_max": 1.20, "few": 1.0, "kr": 1.0,
+          "mulch_factor": 0.25,
+          "expected_ke": 0.2625
+        }
+      ]
+    },
+    "no_till_conserves_water": {
+      "_description": "No-till should result in lower seasonal ET (due to reduced evaporation) and higher soil moisture",
+      "expected_et_reduction_pct": { "min": 5, "max": 50, "_note": "5-15% full season; up to 50% during initial stage when Ke dominates" }
+    }
+  }
+}

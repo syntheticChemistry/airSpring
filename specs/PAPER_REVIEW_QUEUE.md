@@ -2,7 +2,7 @@
 
 **Last Updated**: February 25, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 7 completed (266/266 Python), 6 queued. All completed papers use open data and systems.
+**Status**: 9 completed (369/369 Python), 4 queued. All completed papers use open data and systems.
 
 ---
 
@@ -17,6 +17,7 @@
 | 5 | Real data pipeline — 6 Michigan stations, 918 days | 0+ | R²=0.967 | Dong | Python scripts | Open-Meteo ERA5 (free) |
 | 6 | Allen et al. (1998) FAO-56 Ch 7 — Dual Kc (Kcb+Ke) | 0 | 63/63 | Standard | `benchmark_dual_kc.json` | FAO-56 Tables 17, 19 (open literature) |
 | 7 | Regional ET₀ intercomparison — 6 Michigan stations | 0 | 61/61 | Dong | `regional_et0_intercomparison.py` | Open-Meteo ERA5 (free) |
+| 8 | Islam et al. (2014) No-till + Allen FAO-56 Ch 11 cover crops | 0 | 40/40 | Standard | `benchmark_cover_crop_kc.json` | ISWCR + FAO-56 (open) |
 
 ### Controls Audit
 
@@ -38,6 +39,7 @@ All 6 completed papers have:
 | 5 | R²=0.967 | 21/21 (`validate_real_data`) | All 6 orchestrators | Future |
 | 6 | 63/63 | — (next: BarraCuda CPU) | Batch Kc (op=7) | Future |
 | 7 | 61/61 | — (next: BarraCuda CPU) | `BatchedEt0` at scale | Future |
+| 8 | 40/40 | — (next: BarraCuda CPU) | Batch Kc (op=7) + mulch | Future |
 
 ---
 
@@ -68,8 +70,8 @@ dimension of the Anderson lattice, which determines whether QS signals propagate
 
 | # | Paper / Direction | Year | Faculty | Open Data? | Control Status | GPU Path |
 |---|-------------------|------|---------|:----------:|:--------------:|----------|
-| 12 | Islam et al. "No-till and conservation agriculture: David Brandt farm" | 2014 | — | **Yes** (ISWCR) | Ready to create | N/A (data extraction) |
-| 13 | Allen et al. (1998) FAO-56 Ch 7 — Dual Kc for cover crops | 1998 | Standard | **Yes** (open literature) | Ready to create | Batch Kc (op=7) |
+| 12 | Islam et al. "No-till and conservation agriculture: David Brandt farm" | 2014 | — | **Yes** (ISWCR) | **In Exp 011** (data digitized) | N/A (data extraction) |
+| 13 | Allen et al. (1998) FAO-56 Ch 7 — Dual Kc for cover crops | 1998 | Standard | **Yes** (open literature) | **40/40 PASS** (Phase 0) | Batch Kc (op=7) |
 | 14 | Soil moisture → Anderson d_eff coupling model | — | Cross-spring | **Yes** (USDA + Open-Meteo) | Future | `BatchedWaterBalance` → Anderson |
 | 15 | OSU Triplett-Van Doren 60-year water balance reconstruction | — | Cross-spring | **Yes** (Open-Meteo 80-yr, USDA soils) | Future | `BatchedEt0` at scale |
 | 16 | Cover crop water use & seasonal diversity dynamics | — | Dong | Awaiting field data | Future | Batch ET₀ with Kc schedule |

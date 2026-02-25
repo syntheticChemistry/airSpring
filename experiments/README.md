@@ -19,7 +19,9 @@
 
 | 010 | Regional ET₀ Intercomparison (6 MI stations) | Precision Ag | **Complete (Phase 0)** | Python (Open-Meteo) | — | 61 |
 
-**Total**: 266 Python checks + 123 Rust checks + 65 cross-validation values
+| 011 | Cover Crop Dual Kc + No-Till (FAO-56 Ch 11) | Irrigation | **Complete (Phase 0)** | Python (FAO-56 + ISWCR) | — | 40 |
+
+**Total**: 306 Python checks + 123 Rust checks + 65 cross-validation values
 
 ---
 
@@ -123,6 +125,26 @@ soil types REW/TEW, equation test vectors, integration scenarios.
 **Key Result**: Dual Kc separates transpiration (Kcb) from soil evaporation (Ke).
 Under full canopy cover (corn mid-season), ETc/ET₀ ≈ Kcb because Ke → 0. Under
 bare soil, Ke dominates and declines as surface dries (stage 1 → stage 2).
+
+---
+
+### Exp 011: Cover Crop Dual Kc + No-Till Mulch Effects
+
+**Papers**: Allen et al. (1998) *FAO-56 Ch 7 + Ch 11*; Islam & Reeder (2014) *ISWCR*.
+
+**Control**: `control/dual_kc/cover_crop_dual_kc.py` — 40/40 checks. Cover crop Kcb
+values (5 crops), no-till mulch reduction (5 residue levels), Islam et al. soil
+observations (SOC, bulk density, infiltration, AWC), rye→corn transition simulation,
+no-till ET savings (39.6% during initial stage).
+
+**Benchmark**: `control/dual_kc/benchmark_cover_crop_kc.json` — Cover crop Kcb
+(cereal rye, crimson clover, winter wheat, hairy vetch, tillage radish), no-till
+mulch factors (0.25–1.0), Islam et al. Brandt farm observations, rye→corn phases.
+
+**Key Result**: No-till with heavy residue (mulch_factor=0.40) reduces bare soil
+evaporation by ~40% during the initial growth stage. The mulch effect diminishes
+during mid-season when transpiration (Kcb) dominates. Connects to baseCamp
+Sub-thesis 06 (no-till → Anderson geometry coupling).
 
 ---
 
