@@ -2,7 +2,7 @@
 
 **Last Updated**: February 25, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 5 completed, 8 queued. All completed papers use open data and systems.
+**Status**: 6 completed (205/205 Python), 7 queued. All completed papers use open data and systems.
 
 ---
 
@@ -15,10 +15,11 @@
 | 3 | Dong et al. (2024) IoT irrigation pipeline — SoilWatch 10 | 0 | 24/24 | Dong | `benchmark_dong2024.json` | Published tables/equations |
 | 4 | FAO-56 Chapter 8 — Water balance scheduling | 0 | 18/18 | Standard | `benchmark_water_balance.json` | FAO-56 Ch 8 + USDA |
 | 5 | Real data pipeline — 6 Michigan stations, 918 days | 0+ | R²=0.967 | Dong | Python scripts | Open-Meteo ERA5 (free) |
+| 6 | Allen et al. (1998) FAO-56 Ch 7 — Dual Kc (Kcb+Ke) | 0 | 63/63 | Standard | `benchmark_dual_kc.json` | FAO-56 Tables 17, 19 (open literature) |
 
 ### Controls Audit
 
-All 5 completed papers have:
+All 6 completed papers have:
 - **Digitized benchmarks** in `control/*/benchmark_*.json`
 - **Python control scripts** that validate against benchmarks
 - **Rust validation binaries** that load the same benchmarks
@@ -34,6 +35,7 @@ All 5 completed papers have:
 | 3 | 24/24 | 11/11 (`validate_iot`) | `StreamSmoother` (moving window) | — |
 | 4 | 18/18 | 13/13 (`validate_water_balance`) | `BatchedWaterBalance` GPU-STEP | — |
 | 5 | R²=0.967 | 21/21 (`validate_real_data`) | All 6 orchestrators | Future |
+| 6 | 63/63 | — (next: BarraCuda CPU) | Batch Kc (op=7) | Future |
 
 ---
 
@@ -45,7 +47,7 @@ All 5 completed papers have:
 |---|-------------------|------|---------|:----------:|:--------------:|----------|
 | 6 | Dong et al. — Multi-sensor calibration network | 2024+ | Dong | Awaiting field data | None | Batch calibration (op=5) |
 | 7 | Dong et al. — Full IoT irrigation + forecast | 2024+ | Dong | Awaiting field data | None | Forecast integration |
-| 8 | Allen et al. (1998) FAO-56 Ch 7 — Dual Kc | 1998 | Standard | **Yes** (open literature) | Ready to create | Batch Kc (op=7) |
+| 8 | Allen et al. (1998) FAO-56 Ch 7 — Dual Kc | 1998 | Standard | **Yes** (open literature) | **63/63 PASS** (Phase 0) | Batch Kc (op=7) |
 
 ### Tier 2 — Cross-spring extensions
 

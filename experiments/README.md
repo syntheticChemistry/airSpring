@@ -15,7 +15,9 @@
 | 004 | Water balance scheduling (FAO-56 Ch 8) | Irrigation | **Complete** | Python (FAO-56 Ch 8) | `eco::water_balance` | 18+13 |
 | 005 | Real data pipeline (918 station-days) | Integration | **Complete** | Python + Open-Meteo API | All modules | R²=0.967+21 |
 
-**Total**: 142 Python checks + 123 Rust checks + 65 cross-validation values
+| 009 | FAO-56 Dual Kc (Allen 1998 Ch 7) | Irrigation | **Complete (Phase 0)** | Python (FAO-56 Ch 7) | — | 63 |
+
+**Total**: 205 Python checks + 123 Rust checks + 65 cross-validation values
 
 ---
 
@@ -102,6 +104,23 @@ Each experiment follows the same multi-phase protocol:
 **Validation**: R²=0.967 against Open-Meteo's independent ET₀ computation. RMSE 0.295 mm/day (East Lansing).
 
 **Rust**: `validate_real_data` binary — 21/21 checks. 4 crops (blueberry, tomato, corn, reference grass) × rainfed + irrigated scenarios. Mass balance verified for all scenarios.
+
+---
+
+### Exp 009: FAO-56 Dual Crop Coefficient (Allen 1998 Ch 7)
+
+**Paper**: Allen et al. (1998) *FAO-56 Chapter 7 — ETc: Dual crop coefficient.*
+
+**Control**: `control/dual_kc/dual_crop_coefficient.py` — 63/63 checks. Basal Kc
+(Table 17), soil evaporation (Eqs 69-74), evaporation layer water balance, REW/TEW
+(Table 19), multi-day simulations (bare soil drydown, corn mid-season).
+
+**Benchmark**: `control/dual_kc/benchmark_dual_kc.json` — 10 crops Kcb values, 11
+soil types REW/TEW, equation test vectors, integration scenarios.
+
+**Key Result**: Dual Kc separates transpiration (Kcb) from soil evaporation (Ke).
+Under full canopy cover (corn mid-season), ETc/ET₀ ≈ Kcb because Ke → 0. Under
+bare soil, Ke dominates and declines as surface dries (stage 1 → stage 2).
 
 ---
 

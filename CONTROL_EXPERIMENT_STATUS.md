@@ -366,6 +366,21 @@ data (Kumari, Dong & Safferman, 2025) using scipy curve_fit.
 **Goal**: Model photosynthetically active radiation interception under solar
 panel arrays for dual-use agriculture. Deferred until MSU Solar Farm data identified.
 
+### Experiment 009: FAO-56 Dual Crop Coefficient — PHASE 0 COMPLETE
+
+**Goal**: Implement the dual crop coefficient approach (Kcb + Ke) from FAO-56
+Chapter 7, separating transpiration from soil evaporation for precision scheduling.
+
+**Phase 0 (Python baseline — 63/63 PASS):**
+- [x] Digitize FAO-56 Table 17 Kcb values (10 crops: corn, soybean, wheat, alfalfa, tomato, potato, sugar beet, dry bean, blueberry, turfgrass)
+- [x] Digitize FAO-56 Table 19 REW/TEW values (11 USDA soil types)
+- [x] Implement Eq. 69 (ETc dual), Eq. 71/72 (Kc_max, Kr), Eq. 73 (TEW)
+- [x] Implement evaporation layer water balance (Eq. 77)
+- [x] Validate Kcb + evaporation ≈ Kc single (Table 17 vs Table 12 consistency)
+- [x] Validate TEW > REW for all soil types
+- [x] 7-day bare soil drydown simulation (stage 1 → stage 2 evaporation)
+- [x] 5-day corn mid-season simulation (ETc/ET₀ ≈ Kcb under full cover)
+
 ---
 
 ## Evolution Roadmap

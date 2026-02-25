@@ -1,0 +1,247 @@
+{
+  "_provenance": {
+    "method": "FAO-56 Chapter 7 (Allen et al. 1998) — Dual crop coefficient",
+    "digitized_by": "airSpring Phase 0 control",
+    "created": "2026-02-25",
+    "validated_by": "FAO-56 Tables 17, 19; Equations 69-74",
+    "repository": "airSpring/control/dual_kc"
+  },
+  "table_17_kcb": {
+    "_description": "FAO-56 Table 17: Basal crop coefficients (Kcb) for standard climate (subhumid, RHmin≈45%, u2≈2 m/s)",
+    "_reference": "Allen et al. (1998) Table 17, pp. 136-137",
+    "crops": {
+      "corn_grain": {
+        "kcb_ini": 0.15,
+        "kcb_mid": 1.15,
+        "kcb_end": 0.50,
+        "max_height_m": 2.0
+      },
+      "soybean": {
+        "kcb_ini": 0.15,
+        "kcb_mid": 1.10,
+        "kcb_end": 0.30,
+        "max_height_m": 0.75
+      },
+      "winter_wheat": {
+        "kcb_ini": 0.15,
+        "kcb_mid": 1.10,
+        "kcb_end": 0.25,
+        "max_height_m": 1.0
+      },
+      "alfalfa": {
+        "kcb_ini": 0.30,
+        "kcb_mid": 0.90,
+        "kcb_end": 0.85,
+        "max_height_m": 0.7
+      },
+      "tomato": {
+        "kcb_ini": 0.15,
+        "kcb_mid": 1.10,
+        "kcb_end": 0.70,
+        "max_height_m": 0.6
+      },
+      "potato": {
+        "kcb_ini": 0.15,
+        "kcb_mid": 1.10,
+        "kcb_end": 0.65,
+        "max_height_m": 0.6
+      },
+      "sugar_beet": {
+        "kcb_ini": 0.15,
+        "kcb_mid": 1.15,
+        "kcb_end": 0.90,
+        "max_height_m": 0.5
+      },
+      "dry_bean": {
+        "kcb_ini": 0.15,
+        "kcb_mid": 1.10,
+        "kcb_end": 0.25,
+        "max_height_m": 0.4
+      },
+      "blueberry": {
+        "kcb_ini": 0.20,
+        "kcb_mid": 0.95,
+        "kcb_end": 0.55,
+        "max_height_m": 1.5
+      },
+      "turfgrass_cool": {
+        "kcb_ini": 0.80,
+        "kcb_mid": 0.85,
+        "kcb_end": 0.85,
+        "max_height_m": 0.10
+      }
+    }
+  },
+  "table_12_kc_single": {
+    "_description": "FAO-56 Table 12: Single crop coefficient (Kc) for cross-reference with Kcb",
+    "_note": "Kc ≈ Kcb + ~0.05 (humid) to ~0.10 (arid) for mid-season under standard conditions",
+    "crops": {
+      "corn_grain":    { "kc_ini": 0.30, "kc_mid": 1.20, "kc_end": 0.50 },
+      "soybean":       { "kc_ini": 0.40, "kc_mid": 1.15, "kc_end": 0.50 },
+      "winter_wheat":  { "kc_ini": 0.40, "kc_mid": 1.15, "kc_end": 0.25 },
+      "alfalfa":       { "kc_ini": 0.40, "kc_mid": 0.95, "kc_end": 0.90 },
+      "tomato":        { "kc_ini": 0.60, "kc_mid": 1.15, "kc_end": 0.80 },
+      "potato":        { "kc_ini": 0.50, "kc_mid": 1.15, "kc_end": 0.75 },
+      "sugar_beet":    { "kc_ini": 0.35, "kc_mid": 1.20, "kc_end": 0.95 },
+      "dry_bean":      { "kc_ini": 0.40, "kc_mid": 1.15, "kc_end": 0.35 },
+      "blueberry":     { "kc_ini": 0.30, "kc_mid": 1.05, "kc_end": 0.60 },
+      "turfgrass_cool": { "kc_ini": 0.90, "kc_mid": 0.95, "kc_end": 0.95 }
+    }
+  },
+  "table_19_rew": {
+    "_description": "FAO-56 Table 19: Typical soil water characteristics — REW and stage 1 evaporation depth",
+    "_reference": "Allen et al. (1998) Table 19, p. 144",
+    "_units": "REW in mm, theta_fc and theta_wp as m³/m³",
+    "soils": {
+      "sand":        { "theta_fc": 0.12, "theta_wp": 0.04, "rew_mm": 6,  "rew_range": [2, 7]  },
+      "loamy_sand":  { "theta_fc": 0.16, "theta_wp": 0.06, "rew_mm": 6,  "rew_range": [4, 8]  },
+      "sandy_loam":  { "theta_fc": 0.23, "theta_wp": 0.10, "rew_mm": 8,  "rew_range": [6, 10] },
+      "loam":        { "theta_fc": 0.30, "theta_wp": 0.15, "rew_mm": 9,  "rew_range": [8, 10] },
+      "silt_loam":   { "theta_fc": 0.33, "theta_wp": 0.13, "rew_mm": 10, "rew_range": [8, 11] },
+      "silt":        { "theta_fc": 0.36, "theta_wp": 0.15, "rew_mm": 10, "rew_range": [8, 11] },
+      "silty_clay_loam": { "theta_fc": 0.37, "theta_wp": 0.21, "rew_mm": 9, "rew_range": [8, 11] },
+      "sandy_clay":  { "theta_fc": 0.36, "theta_wp": 0.21, "rew_mm": 8,  "rew_range": [7, 9]  },
+      "clay_loam":   { "theta_fc": 0.36, "theta_wp": 0.21, "rew_mm": 9,  "rew_range": [8, 11] },
+      "silty_clay":  { "theta_fc": 0.40, "theta_wp": 0.23, "rew_mm": 10, "rew_range": [8, 12] },
+      "clay":        { "theta_fc": 0.42, "theta_wp": 0.25, "rew_mm": 10, "rew_range": [8, 12] }
+    }
+  },
+  "equations": {
+    "eq_69": {
+      "_description": "ETc = (Kcb × Ks + Ke) × ET0 — dual crop coefficient",
+      "test_cases": [
+        {
+          "label": "full_cover_no_stress",
+          "kcb": 1.15, "ks": 1.0, "ke": 0.0, "et0": 5.0,
+          "expected_etc": 5.75
+        },
+        {
+          "label": "mid_season_with_evap",
+          "kcb": 1.10, "ks": 1.0, "ke": 0.10, "et0": 4.5,
+          "expected_etc": 5.40
+        },
+        {
+          "label": "stressed_with_evap",
+          "kcb": 1.15, "ks": 0.6, "ke": 0.15, "et0": 6.0,
+          "expected_etc": 5.04
+        },
+        {
+          "label": "initial_bare_soil",
+          "kcb": 0.15, "ks": 1.0, "ke": 0.85, "et0": 3.0,
+          "expected_etc": 3.0
+        }
+      ]
+    },
+    "eq_71_kc_max": {
+      "_description": "Kc_max = max(1.2 + [0.04(u2-2) - 0.004(RHmin-45)](h/3)^0.3, Kcb + 0.05)",
+      "_reference": "FAO-56 Eq. 72 (labeled 71 in some editions)",
+      "test_cases": [
+        {
+          "label": "standard_climate_tall_crop",
+          "u2": 2.0, "rh_min": 45.0, "h": 2.0, "kcb": 1.15,
+          "expected_kc_max": 1.20
+        },
+        {
+          "label": "windy_dry_tall_crop",
+          "u2": 4.0, "rh_min": 25.0, "h": 2.0, "kcb": 1.15,
+          "expected_kc_max": 1.3417
+        },
+        {
+          "label": "calm_humid_short_crop",
+          "u2": 1.0, "rh_min": 70.0, "h": 0.4, "kcb": 1.10,
+          "expected_kc_max": 1.15
+        },
+        {
+          "label": "turfgrass_standard",
+          "u2": 2.0, "rh_min": 45.0, "h": 0.10, "kcb": 0.85,
+          "expected_kc_max": 1.20
+        }
+      ]
+    },
+    "eq_73_tew": {
+      "_description": "TEW = 1000 × (θFC - 0.5×θWP) × Ze — total evaporable water",
+      "_units": "mm",
+      "test_cases": [
+        {
+          "label": "sandy_loam_ze10",
+          "theta_fc": 0.23, "theta_wp": 0.10, "ze_m": 0.10,
+          "expected_tew": 18.0
+        },
+        {
+          "label": "loam_ze10",
+          "theta_fc": 0.30, "theta_wp": 0.15, "ze_m": 0.10,
+          "expected_tew": 22.5
+        },
+        {
+          "label": "clay_ze10",
+          "theta_fc": 0.42, "theta_wp": 0.25, "ze_m": 0.10,
+          "expected_tew": 29.5
+        },
+        {
+          "label": "sandy_loam_ze15",
+          "theta_fc": 0.23, "theta_wp": 0.10, "ze_m": 0.15,
+          "expected_tew": 27.0
+        }
+      ]
+    },
+    "eq_72_kr": {
+      "_description": "Kr = (TEW - De) / (TEW - REW) for De > REW, Kr = 1 for De ≤ REW",
+      "test_cases": [
+        {
+          "label": "fully_wet",
+          "tew": 22.5, "rew": 9.0, "de": 0.0,
+          "expected_kr": 1.0
+        },
+        {
+          "label": "at_rew_boundary",
+          "tew": 22.5, "rew": 9.0, "de": 9.0,
+          "expected_kr": 1.0
+        },
+        {
+          "label": "mid_stage2",
+          "tew": 22.5, "rew": 9.0, "de": 15.75,
+          "expected_kr": 0.5
+        },
+        {
+          "label": "near_dry",
+          "tew": 22.5, "rew": 9.0, "de": 21.15,
+          "expected_kr": 0.1
+        },
+        {
+          "label": "fully_dry",
+          "tew": 22.5, "rew": 9.0, "de": 22.5,
+          "expected_kr": 0.0
+        }
+      ]
+    }
+  },
+  "validation_scenarios": {
+    "_description": "Multi-day dual Kc scenarios for integration testing",
+    "bare_soil_drydown": {
+      "_note": "7-day bare soil drying after wetting event — should show stage 1 then stage 2 evaporation",
+      "soil": "sandy_loam",
+      "ze_m": 0.10,
+      "tew": 18.0,
+      "rew": 8.0,
+      "et0_daily": [5.0, 5.5, 5.0, 4.8, 5.2, 4.5, 5.0],
+      "precip_daily": [25.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+      "kcb": 0.15,
+      "kc_max": 1.20,
+      "few": 1.0,
+      "_expected": "De starts at 0 after rain, Kr=1 until De>REW, then declining evaporation"
+    },
+    "corn_mid_season": {
+      "_note": "5-day mid-season corn with full cover — minimal soil evaporation",
+      "soil": "loam",
+      "ze_m": 0.10,
+      "tew": 22.5,
+      "rew": 9.0,
+      "et0_daily": [5.5, 6.0, 5.8, 5.2, 5.0],
+      "precip_daily": [0.0, 0.0, 12.0, 0.0, 0.0],
+      "kcb": 1.15,
+      "kc_max": 1.20,
+      "few": 0.05,
+      "_expected": "Ke contribution small due to low few; ETc ≈ Kcb × ET0"
+    }
+  }
+}
