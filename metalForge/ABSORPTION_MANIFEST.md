@@ -1,6 +1,6 @@
 # Absorption Manifest — airSpring → barracuda
 
-**Date**: February 25, 2026 (updated v0.3.8)
+**Date**: February 25, 2026 (updated v0.3.10)
 **Source**: `metalForge/forge/` (airspring-forge v0.2.0)
 **Target**: `barracuda` (ToadStool crate)
 **Absorption Status**: NOT YET ABSORBED — all 4 modules pending ToadStool review

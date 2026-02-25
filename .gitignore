@@ -28,6 +28,12 @@ data/
 .DS_Store
 Thumbs.db
 
+# Temp / editor
+*.tmp
+*.bak
+*.orig
+*.log
+
 # Secrets
 .env
 credentials*

@@ -10,7 +10,7 @@
 //! - **Needs Adaptation**: Shader exists, needs domain customisation.
 //! - **Needs Primitive**: No `ToadStool` implementation yet.
 //!
-//! # Current Inventory (February 25, 2026 — v0.3.8, synced to `ToadStool` HEAD `02207c4a`)
+//! # Current Inventory (February 25, 2026 — v0.3.10, synced to `ToadStool` HEAD `02207c4a`)
 //!
 //! All four `ToadStool` issues (TS-001 through TS-004) are **RESOLVED**.
 //!

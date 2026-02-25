@@ -21,7 +21,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 
 | Faculty | Institution | Track | Papers | Experiments | Checks | Domain |
 |---------|------------|-------|:------:|:-----------:|:------:|--------|
-| [Dong](dong.md) | MSU BAE | Irrigation & Soil | 8 | 11 | 306+287 | ET₀, soil moisture, IoT, water balance, dual Kc, cover crops |
+| Dong | MSU BAE | Irrigation & Soil | 8 | 11 | 306+287 | ET₀, soil moisture, IoT, water balance, dual Kc, cover crops |
 
 ## Faculty: Younsuk Dong, PhD
 
