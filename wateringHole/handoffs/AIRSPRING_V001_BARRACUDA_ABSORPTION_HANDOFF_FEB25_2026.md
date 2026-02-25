@@ -3,7 +3,7 @@
 **Date**: February 25, 2026
 **From**: airSpring (Precision Agriculture — Ecological & Agricultural Sciences)
 **To**: ToadStool/BarraCuda core team
-**airSpring Version**: 0.3.6+ (253 tests, 123 validation checks, 65/65 cross-validation)
+**airSpring Version**: 0.3.8 (293 tests, 123 validation checks, 65/65 cross-validation)
 **ToadStool HEAD**: `02207c4a` (S62+)
 **License**: AGPL-3.0-or-later
 
@@ -83,11 +83,24 @@ The fixes are in ToadStool commit `0c477306` and benefit all Springs.
 | Nonlinear curve fitting | `optimize::nelder_mead`, `NelderMeadGpu` | Correction equation fitting |
 | m/z tolerance search | `batched_bisection_f64.wgsl` | Cross-spring (wetSpring) |
 
+### Tier B (new) — Richards PDE (PROMOTED from Tier C)
+
+| Need | BarraCuda Primitive | airSpring Purpose |
+|------|--------------------|----|
+| 1D Richards equation | `pde::richards::solve_richards` | Unsaturated soil water flow (van Genuchten-Mualem) |
+| Tridiagonal solve | `linalg::tridiagonal_solve_f64` | Implicit PDE time-stepping |
+| Adaptive ODE (RK45) | `numerical::rk45_solve` | Dynamic soil moisture models |
+
+**Note (v0.3.8):** ToadStool now provides a complete Richards equation solver
+with van Genuchten-Mualem constitutive relations, Picard iteration,
+Crank-Nicolson time-stepping, and Thomas spatial solver. airSpring needs to
+wire `SoilParams` from `eco::soil_moisture` textures and validate against
+HYDRUS benchmarks (Experiment 006).
+
 ### Tier C — Needs New Primitive
 
 | Need | Description | Complexity |
 |------|-------------|:---------:|
-| 1D Richards equation | Unsaturated soil water flow PDE | High — uses `CgGpu` + tridiagonal |
 | HTTP/JSON client | Open-Meteo, NOAA CDO APIs | Low — not GPU |
 
 ---
@@ -193,7 +206,7 @@ precision for everyone.
 - 65/65 Python↔Rust cross-validation match (tol=1e-5)
 - 918 real station-days (Open-Meteo ERA5, 6 Michigan stations)
 - 6 GPU orchestrators wired to BarraCuda primitives
-- 15 evolution gaps tracked (8 Tier A, 5 Tier B, 2 Tier C)
+- 17 evolution gaps tracked (8 Tier A, 8 Tier B, 1 Tier C) — Richards PDE promoted C→B
 - 3 bug fixes contributed upstream (TS-001, TS-003, TS-004)
 - 18 metalForge tests staged for absorption
 
@@ -203,4 +216,6 @@ any farmer, anywhere, with no institutional access required.
 
 ---
 
-*AGPL-3.0-or-later. airSpring v0.3.7, ToadStool HEAD `02207c4a`.*
+*AGPL-3.0-or-later. airSpring v0.3.8, ToadStool HEAD `02207c4a`.
+Richards PDE promoted C→B — upstream `pde::richards::solve_richards` available.
+metalForge candidates (metrics, regression, hydrology, moving_window_f64) NOT yet absorbed.*

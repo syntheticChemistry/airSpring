@@ -2,6 +2,37 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.3.8] - 2026-02-25
+
+### ToadStool Deep Audit — Richards PDE Promoted, Evolution Gaps Reconciled
+
+Deep audit of ToadStool HEAD `02207c4a` (S62+) revealed upstream has
+absorbed the Richards PDE solver (`pde::richards::solve_richards` with
+van Genuchten-Mualem, Picard + Crank-Nicolson + Thomas). Promoted
+from Tier C ("needs new primitive") to Tier B ("wire with domain params").
+
+Also discovered upstream `linalg::tridiagonal_solve_f64` (Thomas algorithm)
+and `numerical::rk45_solve` (Dormand-Prince adaptive ODE) — both added as
+new Tier B evolution gaps for future soil dynamics work.
+
+Confirmed metalForge candidates (metrics, regression, hydrology,
+moving_window_f64) are NOT yet absorbed upstream — pending ToadStool review.
+
+### Changed
+
+- **`evolution_gaps.rs`**: Richards PDE promoted Tier C → Tier B. Added
+  `tridiagonal_batch` and `rk45_adaptive` as new Tier B gaps. Gap count
+  updated from 15 (8A+5B+2C) to 17 (8A+8B+1C).
+- **`specs/BARRACUDA_REQUIREMENTS.md`**: Remaining gaps updated. Richards
+  promoted with note on upstream solver capabilities.
+- **`specs/CROSS_SPRING_EVOLUTION.md`**: Timeline updated with v0.3.8 audit.
+  Gap summary corrected to 8B+1C.
+- **`wateringHole/handoffs/V001`**: Version bumped. Richards promotion noted.
+  metalForge absorption status clarified.
+- **`metalForge/ABSORPTION_MANIFEST.md`**: Explicit "NOT YET ABSORBED" status.
+- **Root docs**: Version bumped to v0.3.8. Evolution gap counts updated.
+- **`Cargo.toml`**: Version `0.3.7` → `0.3.8`.
+
 ## [0.3.7] - 2026-02-25
 
 ### metalForge Evolution — Absorption-Ready Extensions

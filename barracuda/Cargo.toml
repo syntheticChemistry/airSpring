@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.3.7"
+version = "0.3.8"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"

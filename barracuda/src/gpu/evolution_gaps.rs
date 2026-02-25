@@ -10,7 +10,7 @@
 //! - **Needs Adaptation**: Shader exists, needs domain customisation.
 //! - **Needs Primitive**: No `ToadStool` implementation yet.
 //!
-//! # Current Inventory (February 25, 2026 — v0.3.7, synced to `ToadStool` HEAD `02207c4a`)
+//! # Current Inventory (February 25, 2026 — v0.3.8, synced to `ToadStool` HEAD `02207c4a`)
 //!
 //! All four `ToadStool` issues (TS-001 through TS-004) are **RESOLVED**.
 //!
@@ -33,10 +33,11 @@
 //! | Chi-squared decomposition | `stats::chi2::chi2_decomposed` | Available (new in S52+) |
 //! | Spectral density / RMT | `stats::spectral_density::empirical_spectral_density` | Available (new in S57+) |
 //!
-//! ## Tier B: Shader Exists, Needs Domain Adaptation
+//! ## Tier B: Upstream Primitive Exists, Needs Domain Wiring
 //!
 //! | Need | Closest `ToadStool` Primitive | Gap |
 //! |------|---------------------------|-----|
+//! | 1D Richards equation | `pde::richards::solve_richards` (van Genuchten-Mualem) | **PROMOTED from Tier C** — wire with airSpring soil params |
 //! | Sensor calibration (batch) | `batched_elementwise_f64.wgsl` (custom op) | Add `SoilWatch` 10 as op=5 |
 //! | Hargreaves ET₀ (batch) | `batched_elementwise_f64.wgsl` | Add as op=6 (simpler than PM) |
 //! | Kc climate adjustment (batch) | `batched_elementwise_f64.wgsl` | Add as op=7 |
@@ -44,12 +45,13 @@
 //! | Nonlinear curve fitting | `optimize::nelder_mead`, `NelderMeadGpu` | Wire for correction eq fitting |
 //! | Ridge regression | `linalg::ridge::ridge_regression` | **PROMOTED to Tier A** — `eco::correction::fit_ridge` |
 //! | m/z tolerance search | `batched_bisection_f64.wgsl` | Cross-spring from `wetSpring` |
+//! | Tridiagonal solve (batch) | `linalg::tridiagonal_solve_f64` | Available for implicit PDE steps |
+//! | Adaptive ODE (RK45) | `numerical::rk45_solve` (Dormand-Prince) | Available for dynamic soil models |
 //!
 //! ## Tier C: Needs New `ToadStool` Primitives
 //!
 //! | Need | Description | Complexity |
 //! |------|-------------|-----------|
-//! | 1D Richards equation | Unsaturated soil water flow | High — uses `CgGpu` for tridiagonal |
 //! | HTTP/JSON data client | Open-Meteo, NOAA CDO APIs | Low — not GPU, but needed |
 //!
 //! ## Deprecated Patterns (Clean Up)
@@ -107,7 +109,10 @@ pub enum Tier {
     C,
 }
 
-/// All known evolution gaps (15 entries — 8 Tier A integrated, 5 Tier B, 2 Tier C).
+/// All known evolution gaps (17 entries — 8 Tier A integrated, 8 Tier B, 1 Tier C).
+///
+/// Richards PDE promoted C→B: upstream `pde::richards::solve_richards` now available.
+/// Tridiagonal and RK45 added as new Tier B capabilities.
 pub const GAPS: &[EvolutionGap] = &[
     // ── Tier A: Integrated (GPU primitive wired and validated) ─────────
     EvolutionGap {
@@ -197,14 +202,30 @@ pub const GAPS: &[EvolutionGap] = &[
         toadstool_primitive: Some("optimize::nelder_mead, optimize::NelderMeadGpu"),
         action: "Local analytical fits exist; can upgrade to GPU Nelder-Mead for large batches",
     },
-    // ── Tier C: Needs new primitive ──────────────────────────────────
     EvolutionGap {
         id: "richards_pde",
         description: "1D Richards equation for unsaturated soil water flow",
-        tier: Tier::C,
-        toadstool_primitive: Some("ops::crank_nicolson, linalg tridiagonal_solve_f64"),
-        action: "Future: FD solver — upstream CN and tridiagonal solve now available",
+        tier: Tier::B,
+        toadstool_primitive: Some(
+            "pde::richards::solve_richards (van Genuchten-Mualem, Picard + CN + Thomas)",
+        ),
+        action: "PROMOTED C→B: upstream solver available — wire with airSpring soil params",
     },
+    EvolutionGap {
+        id: "tridiagonal_batch",
+        description: "Tridiagonal solver for implicit PDE time-stepping",
+        tier: Tier::B,
+        toadstool_primitive: Some("linalg::tridiagonal_solve_f64, ops::cyclic_reduction_f64"),
+        action: "Available upstream — wire when Richards PDE integration begins",
+    },
+    EvolutionGap {
+        id: "rk45_adaptive",
+        description: "Adaptive RK45 ODE solver for dynamic soil/water models",
+        tier: Tier::B,
+        toadstool_primitive: Some("numerical::rk45_solve (Dormand-Prince, adaptive step)"),
+        action: "Available upstream — wire for soil moisture dynamics, biochar kinetics",
+    },
+    // ── Tier C: Needs new primitive ──────────────────────────────────
     EvolutionGap {
         id: "data_client",
         description: "HTTP/JSON client for Open-Meteo, NOAA CDO APIs",

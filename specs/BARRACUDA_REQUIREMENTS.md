@@ -1,6 +1,6 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: February 25, 2026
+**Last Updated**: February 25, 2026 (v0.3.8 — Richards PDE promoted C→B)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
 **ToadStool HEAD**: `02207c4a` (S62+, 608 WGSL shaders)
 
@@ -73,7 +73,7 @@ gpu::stream     → StreamSmoother::new()     → MovingWindowStats        [slid
 eco::correction → fit_ridge()               → ridge_regression         [CPU linalg]
 ```
 
-### Layer 3: metalForge Mixed Hardware (staged, 18 tests)
+### Layer 3: metalForge Mixed Hardware (staged, 40 tests)
 
 Upstream absorption candidates for `barracuda::stats`:
 
@@ -96,18 +96,26 @@ Future metalForge extensions:
 
 | Need | Primitive | Purpose | Effort |
 |------|----------|---------|:------:|
+| 1D Richards equation | `pde::richards::solve_richards` | Unsaturated soil water flow | Medium — **PROMOTED from Tier C** |
 | Sensor batch calibration | `batched_elementwise_f64` (op=5) | Batch SoilWatch 10 VWC | Low |
 | Hargreaves ET₀ batch | `batched_elementwise_f64` (op=6) | Simpler ET₀ | Low |
 | Kc climate adjustment | `batched_elementwise_f64` (op=7) | FAO-56 Eq. 62 | Low |
 | Nonlinear curve fitting | `optimize::nelder_mead`, `NelderMeadGpu` | Correction equations | Medium |
+| Tridiagonal solve | `linalg::tridiagonal_solve_f64` | Implicit PDE steps | Low |
+| Adaptive ODE (RK45) | `numerical::rk45_solve` | Dynamic soil models | Low |
 | m/z tolerance search | `batched_bisection_f64.wgsl` | Cross-spring from wetSpring | Low |
 
 ### Tier C — Needs New Primitive
 
 | Need | Description | Complexity | Upstream Support |
 |------|-------------|:---------:|------------------|
-| 1D Richards equation | Unsaturated soil water flow PDE | High | `ops::crank_nicolson` + tridiagonal |
 | HTTP/JSON client | Open-Meteo, NOAA CDO APIs | Low | Not GPU |
+
+**Note (v0.3.8):** Richards equation promoted from Tier C to Tier B. ToadStool now
+provides `pde::richards::solve_richards` with van Genuchten-Mualem constitutive
+relations, Picard iteration, Crank-Nicolson time-stepping, and Thomas (tridiagonal)
+spatial solver. airSpring needs to wire this with domain-specific soil parameters
+from `eco::soil_moisture` and validate against HYDRUS benchmarks.
 
 ---
 

@@ -9,7 +9,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → GPU (ToadStool shaders) → metalForge (mixed hardware) → Penny Irrigation
 ```
 
-## Current Status (v0.3.7, 2026-02-25)
+## Current Status (v0.3.8, 2026-02-25)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
@@ -33,7 +33,8 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | `validation` | `validation::ValidationHarness` | neuralSpring | **Absorbed** |
 | `testutil` | `stats::pearson`, `spearman`, `bootstrap_ci` | Shared | **Wired** |
 
-Evolution gaps: 15 total (8 Tier A integrated, 5 Tier B, 2 Tier C).
+Evolution gaps: 17 total (8 Tier A integrated, 8 Tier B, 1 Tier C).
+Richards PDE promoted C→B — upstream `pde::richards::solve_richards` now available.
 See `barracuda/src/gpu/evolution_gaps.rs` for the full roadmap.
 
 ## Quick Start
@@ -206,11 +207,12 @@ AGPL-3.0-or-later
 
 ---
 
-*February 25, 2026 — v0.3.7. 123 validation checks (8 binaries), 293 Rust tests
+*February 25, 2026 — v0.3.8. 123 validation checks (8 binaries), 293 Rust tests
 (253 barracuda + 40 forge), 918 real station-days, 65/65 Python-Rust cross-validation
 match. 97.2% library test coverage. GPU-FIRST with 6 orchestrators (BatchedEt0,
 BatchedWaterBalance, KrigingInterpolator, SeasonalReducer, StreamSmoother, fit_ridge).
 metalForge v0.2.0: 4 absorption-ready modules (metrics, regression, moving_window_f64,
 hydrology) following hotSpring's Write → Absorb → Lean pattern. Cross-spring shader
 evolution: 608 WGSL shaders, 46 absorptions, 3 airSpring fixes contributed upstream.
-15 evolution gaps (8A+5B+2C). Pure Rust + BarraCuda GPU pipeline. AGPL-3.0.*
+17 evolution gaps (8A+8B+1C) — Richards PDE promoted C→B (upstream solver available).
+Pure Rust + BarraCuda GPU pipeline. AGPL-3.0.*

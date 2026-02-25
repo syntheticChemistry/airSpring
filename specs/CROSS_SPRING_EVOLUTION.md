@@ -143,6 +143,7 @@ for nonlinear curve fitting (currently Tier B in evolution gaps).
 | Feb 24 | airSpring v0.3.6: ToadStool sync + rewire | BarraCuda rename, 8 Tier A items |
 | Feb 24 | airSpring v0.3.6+: MovingWindow + Ridge wired | Stream smoothing + calibration pipeline |
 | Feb 25 | airSpring v0.3.7: metalForge v0.2.0 evolution | 4 absorption-ready modules (metrics, regression, moving_window_f64, hydrology) |
+| Feb 25 | airSpring v0.3.8: ToadStool deep audit | Richards PDE promoted C→B (upstream solver available), +2 Tier B gaps (tridiag, RK45) |
 
 ---
 
@@ -160,9 +161,12 @@ for nonlinear curve fitting (currently Tier B in evolution gaps).
 
 ## Remaining Evolution Gaps
 
-**Tier B (5 items):** Sensor calibration batch, Hargreaves batch, Kc climate
-adjustment, nonlinear solver (Nelder-Mead), m/z tolerance search.
+**Tier B (8 items):** 1D Richards equation (PROMOTED from Tier C — upstream
+`pde::richards::solve_richards` now available with van Genuchten-Mualem),
+sensor calibration batch, Hargreaves batch, Kc climate adjustment,
+nonlinear solver (Nelder-Mead), tridiagonal solve, adaptive RK45 ODE,
+m/z tolerance search.
 
-**Tier C (2 items):** 1D Richards equation, HTTP/JSON data client.
+**Tier C (1 item):** HTTP/JSON data client.
 
 See `gpu::evolution_gaps` module for full structured inventory.
