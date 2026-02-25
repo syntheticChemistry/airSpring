@@ -24,7 +24,7 @@ general enough for cross-domain use.
 ### `forge/` — Rust crate (`airspring-forge`)
 
 Four absorption-ready modules extracted from airSpring's validated
-pipeline.  Pure Rust, zero dependencies, 40/40 tests pass.
+pipeline.  Pure Rust, zero dependencies, 53/53 tests pass.
 
 | Module | Functions | Upstream target | Status |
 |--------|-----------|----------------|--------|
@@ -57,7 +57,7 @@ All implementations are validated against published benchmarks:
 | **Crate** | `hotspring-forge` | `airspring-forge` |
 | **Dependencies** | barracuda, wgpu, tokio | None (pure Rust) |
 | **Modules** | substrate, probe, inventory, dispatch, bridge | metrics, regression, moving_window_f64, hydrology |
-| **Tests** | Hardware probing, bridge seam | 40 unit tests, numerical correctness |
+| **Tests** | Hardware probing, bridge seam | 53 unit tests, numerical correctness |
 
 ## Cross-Spring Absorption Candidates
 
@@ -78,5 +78,5 @@ These airSpring patterns may benefit other springs:
 ```
 cargo fmt   — clean
 cargo clippy --all-targets — zero warnings (pedantic)
-cargo test  — 40/40 pass (9 metrics + 11 regression + 7 moving_window + 13 hydrology)
+cargo test  — 53/53 pass (11 metrics + 12 regression + 7 moving_window + 13 hydrology + 5 van_genuchten + 5 isotherm)
 ```

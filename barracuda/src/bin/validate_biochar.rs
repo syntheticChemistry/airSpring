@@ -6,7 +6,10 @@
 //! Baseline: `control/biochar/biochar_isotherms.py` (14/14 PASS).
 
 use airspring_barracuda::eco::isotherm::{self, langmuir_rl};
-use airspring_barracuda::validation::{self, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{
+    self, json_array_opt, json_object_opt, parse_benchmark_json, ValidationHarness,
+};
+use std::process;
 
 /// Benchmark JSON embedded at compile time for reproducibility.
 const BENCHMARK_JSON: &str = include_str!("../../../control/biochar/benchmark_biochar.json");
@@ -21,31 +24,33 @@ fn main() {
     let benchmark =
         parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_biochar.json must parse");
 
-    let datasets = benchmark
-        .get("isotherm_data")
-        .and_then(|d| d.get("datasets"))
-        .and_then(|d| d.as_object())
-        .expect("benchmark must have isotherm_data.datasets");
+    let Some(datasets) = json_object_opt(&benchmark, &["isotherm_data", "datasets"]) else {
+        eprintln!("benchmark JSON: missing isotherm_data.datasets");
+        process::exit(1);
+    };
 
-    let validation = benchmark
-        .get("validation_checks")
-        .expect("benchmark must have validation_checks");
+    let Some(validation) = benchmark.get("validation_checks") else {
+        eprintln!("benchmark JSON: missing validation_checks");
+        process::exit(1);
+    };
 
     let mut results: std::collections::HashMap<String, DatasetResult> =
         std::collections::HashMap::new();
 
     for (ds_name, ds) in datasets {
-        let ce: Vec<f64> = ds
-            .get("Ce")
-            .and_then(|a| a.as_array())
-            .expect("dataset must have Ce")
+        let Some(ce_arr) = json_array_opt(ds, &["Ce"]) else {
+            eprintln!("benchmark JSON: dataset {ds_name} missing Ce");
+            process::exit(1);
+        };
+        let ce: Vec<f64> = ce_arr
             .iter()
             .filter_map(serde_json::Value::as_f64)
             .collect();
-        let qe: Vec<f64> = ds
-            .get("qe")
-            .and_then(|a| a.as_array())
-            .expect("dataset must have qe")
+        let Some(qe_arr) = json_array_opt(ds, &["qe"]) else {
+            eprintln!("benchmark JSON: dataset {ds_name} missing qe");
+            process::exit(1);
+        };
+        let qe: Vec<f64> = qe_arr
             .iter()
             .filter_map(serde_json::Value::as_f64)
             .collect();
@@ -107,18 +112,20 @@ fn main() {
     // ── Langmuir validation checks ─────────────────────────────────────
     validation::section("Langmuir fit validation");
 
-    let lang_checks = validation
-        .get("langmuir_fit")
-        .and_then(|o| o.get("checks"))
-        .and_then(|a| a.as_array())
-        .expect("langmuir_fit.checks");
+    let Some(lang_checks) = json_array_opt(validation, &["langmuir_fit", "checks"]) else {
+        eprintln!("benchmark JSON: missing validation_checks.langmuir_fit.checks");
+        process::exit(1);
+    };
 
     for c in lang_checks {
         let cid = c.get("id").and_then(|v| v.as_str()).unwrap_or("");
         let desc = c.get("description").and_then(|v| v.as_str()).unwrap_or("");
 
         if cid == "wood_qmax_range" {
-            let r = results.get("wood_biochar_500C").unwrap();
+            let Some(r) = results.get("wood_biochar_500C") else {
+                eprintln!("benchmark JSON: wood_biochar_500C not in results");
+                process::exit(1);
+            };
             let min_v = c
                 .get("min")
                 .and_then(serde_json::Value::as_f64)
@@ -132,10 +139,16 @@ fn main() {
                 r.qmax >= min_v && r.qmax <= max_v,
             );
         } else if cid == "wood_KL_positive" {
-            let r = results.get("wood_biochar_500C").unwrap();
+            let Some(r) = results.get("wood_biochar_500C") else {
+                eprintln!("benchmark JSON: wood_biochar_500C not in results");
+                process::exit(1);
+            };
             v.check_bool(&format!("{desc}: KL={:.6}", r.kl), r.kl > 0.0);
         } else if cid == "wood_r2" {
-            let r = results.get("wood_biochar_500C").unwrap();
+            let Some(r) = results.get("wood_biochar_500C") else {
+                eprintln!("benchmark JSON: wood_biochar_500C not in results");
+                process::exit(1);
+            };
             let min_r2 = c
                 .get("min_r2")
                 .and_then(serde_json::Value::as_f64)
@@ -145,7 +158,10 @@ fn main() {
                 r.r2_langmuir >= min_r2,
             );
         } else if cid == "sugar_qmax_range" {
-            let r = results.get("sugar_beet_biochar").unwrap();
+            let Some(r) = results.get("sugar_beet_biochar") else {
+                eprintln!("benchmark JSON: sugar_beet_biochar not in results");
+                process::exit(1);
+            };
             let min_v = c
                 .get("min")
                 .and_then(serde_json::Value::as_f64)
@@ -159,7 +175,10 @@ fn main() {
                 r.qmax >= min_v && r.qmax <= max_v,
             );
         } else if cid == "sugar_r2" {
-            let r = results.get("sugar_beet_biochar").unwrap();
+            let Some(r) = results.get("sugar_beet_biochar") else {
+                eprintln!("benchmark JSON: sugar_beet_biochar not in results");
+                process::exit(1);
+            };
             let min_r2 = c
                 .get("min_r2")
                 .and_then(serde_json::Value::as_f64)
@@ -175,28 +194,36 @@ fn main() {
     println!();
     validation::section("Freundlich fit validation");
 
-    let freund_checks = validation
-        .get("freundlich_fit")
-        .and_then(|o| o.get("checks"))
-        .and_then(|a| a.as_array())
-        .expect("freundlich_fit.checks");
+    let Some(freund_checks) = json_array_opt(validation, &["freundlich_fit", "checks"]) else {
+        eprintln!("benchmark JSON: missing validation_checks.freundlich_fit.checks");
+        process::exit(1);
+    };
 
     for c in freund_checks {
         let cid = c.get("id").and_then(|v| v.as_str()).unwrap_or("");
         let desc = c.get("description").and_then(|v| v.as_str()).unwrap_or("");
 
         if cid == "wood_KF_positive" {
-            let r = results.get("wood_biochar_500C").unwrap();
+            let Some(r) = results.get("wood_biochar_500C") else {
+                eprintln!("benchmark JSON: wood_biochar_500C not in results");
+                process::exit(1);
+            };
             v.check_bool(&format!("{desc}: KF={:.4}", r.kf), r.kf > 0.0);
         } else if cid == "wood_n_favorable" {
-            let r = results.get("wood_biochar_500C").unwrap();
+            let Some(r) = results.get("wood_biochar_500C") else {
+                eprintln!("benchmark JSON: wood_biochar_500C not in results");
+                process::exit(1);
+            };
             let min_n = c
                 .get("min_n")
                 .and_then(serde_json::Value::as_f64)
                 .unwrap_or(1.0);
             v.check_bool(&format!("{desc}: n={:.4}", r.n), r.n >= min_n);
         } else if cid == "wood_r2" {
-            let r = results.get("wood_biochar_500C").unwrap();
+            let Some(r) = results.get("wood_biochar_500C") else {
+                eprintln!("benchmark JSON: wood_biochar_500C not in results");
+                process::exit(1);
+            };
             let min_r2 = c
                 .get("min_r2")
                 .and_then(serde_json::Value::as_f64)
@@ -206,10 +233,16 @@ fn main() {
                 r.r2_freundlich >= min_r2,
             );
         } else if cid == "sugar_KF_positive" {
-            let r = results.get("sugar_beet_biochar").unwrap();
+            let Some(r) = results.get("sugar_beet_biochar") else {
+                eprintln!("benchmark JSON: sugar_beet_biochar not in results");
+                process::exit(1);
+            };
             v.check_bool(&format!("{desc}: KF={:.4}", r.kf), r.kf > 0.0);
         } else if cid == "sugar_n_range" {
-            let r = results.get("sugar_beet_biochar").unwrap();
+            let Some(r) = results.get("sugar_beet_biochar") else {
+                eprintln!("benchmark JSON: sugar_beet_biochar not in results");
+                process::exit(1);
+            };
             let min_v = c
                 .get("min")
                 .and_then(serde_json::Value::as_f64)
@@ -229,18 +262,20 @@ fn main() {
     println!();
     validation::section("Model comparison");
 
-    let model_checks = validation
-        .get("model_comparison")
-        .and_then(|o| o.get("checks"))
-        .and_then(|a| a.as_array())
-        .expect("model_comparison.checks");
+    let Some(model_checks) = json_array_opt(validation, &["model_comparison", "checks"]) else {
+        eprintln!("benchmark JSON: missing validation_checks.model_comparison.checks");
+        process::exit(1);
+    };
 
     for c in model_checks {
         let cid = c.get("id").and_then(|v| v.as_str()).unwrap_or("");
         let desc = c.get("description").and_then(|v| v.as_str()).unwrap_or("");
 
         if cid == "langmuir_better_wood" {
-            let r = results.get("wood_biochar_500C").unwrap();
+            let Some(r) = results.get("wood_biochar_500C") else {
+                eprintln!("benchmark JSON: wood_biochar_500C not in results");
+                process::exit(1);
+            };
             v.check_bool(
                 &format!(
                     "{desc}: Langmuir R²={:.4}, Freundlich R²={:.4}",
@@ -269,11 +304,10 @@ fn main() {
     println!();
     validation::section("Separation factor RL");
 
-    let sep_checks = validation
-        .get("separation_factor")
-        .and_then(|o| o.get("checks"))
-        .and_then(|a| a.as_array())
-        .expect("separation_factor.checks");
+    let Some(sep_checks) = json_array_opt(validation, &["separation_factor", "checks"]) else {
+        eprintln!("benchmark JSON: missing validation_checks.separation_factor.checks");
+        process::exit(1);
+    };
 
     for c in sep_checks {
         let cid = c.get("id").and_then(|v| v.as_str()).unwrap_or("");
@@ -296,7 +330,7 @@ fn main() {
 }
 
 #[allow(clippy::cast_precision_loss)]
-fn len_f64(slice: &[f64]) -> f64 {
+const fn len_f64(slice: &[f64]) -> f64 {
     slice.len() as f64
 }
 

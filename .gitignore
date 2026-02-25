@@ -34,6 +34,12 @@ Thumbs.db
 *.orig
 *.log
 
+# Coverage artifacts
+cobertura.xml
+lcov.info
+*.profraw
+*.profdata
+
 # Secrets
 .env
 credentials*

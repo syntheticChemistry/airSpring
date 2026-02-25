@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: February 25, 2026
-**Status**: 11 experiments, 344/344 Python + 328 Rust tests + GPU wired (8 orchestrators)
+**Status**: 11 experiments, 344/344 Python + 371 Rust lib tests + 97 integration + GPU wired (8 orchestrators)
 
 ---
 
@@ -22,7 +22,7 @@
 | 011 | Cover Crop Dual Kc + No-Till (FAO-56 Ch 11) | Irrigation | **Complete** | Python + Rust CPU | `eco::dual_kc` (mulch) | 40+40 |
 | 015 | 60-Year Water Balance (Wooster OH, ERA5) | Integration | **Complete** | Python + Rust CPU | `eco::water_balance`, `eco::evapotranspiration` | 10+11 |
 
-**Total**: 344 Python checks + 328 Rust tests + 75 cross-validation values + 8 GPU orchestrators
+**Total**: 344 Python checks + 371 Rust lib + 97 integration tests + 75 cross-validation values + 8 GPU orchestrators
 
 ---
 

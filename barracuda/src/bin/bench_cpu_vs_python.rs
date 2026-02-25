@@ -27,14 +27,14 @@ fn make_station_days(n: usize) -> Vec<DailyEt0Input> {
         .map(|i| {
             #[allow(clippy::cast_precision_loss)]
             let day = i as f64;
-            let tmax = 30.0 + 5.0 * (day * 0.017).sin();
-            let tmin = 15.0 + 3.0 * (day * 0.017).cos();
+            let tmax = 5.0f64.mul_add((day * 0.017).sin(), 30.0);
+            let tmin = 3.0f64.mul_add((day * 0.017).cos(), 15.0);
             DailyEt0Input {
                 tmax,
                 tmin,
                 tmean: None,
-                solar_radiation: 18.0 + 4.0 * (day * 0.017).sin(),
-                wind_speed_2m: 2.0 + 0.5 * (day * 0.05).sin(),
+                solar_radiation: 4.0f64.mul_add((day * 0.017).sin(), 18.0),
+                wind_speed_2m: 0.5f64.mul_add((day * 0.05).sin(), 2.0),
                 actual_vapour_pressure: et::saturation_vapour_pressure(tmin) * 0.6,
                 elevation_m: 190.0,
                 latitude_deg: 42.5,
@@ -50,7 +50,7 @@ fn make_dual_kc_inputs(n: usize) -> Vec<DualKcInput> {
             #[allow(clippy::cast_precision_loss)]
             let day = i as f64;
             DualKcInput {
-                et0: 4.0 + 2.0 * (day * 0.017).sin(),
+                et0: 2.0f64.mul_add((day * 0.017).sin(), 4.0),
                 precipitation: if i % 7 == 0 { 12.0 } else { 0.0 },
                 irrigation: 0.0,
             }

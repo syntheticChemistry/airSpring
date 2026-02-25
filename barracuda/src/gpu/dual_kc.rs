@@ -56,6 +56,7 @@ pub struct BatchedDualKc {
 
 impl BatchedDualKc {
     /// Create a new batched dual Kc orchestrator for M fields.
+    #[allow(clippy::missing_const_for_fn)] // Vec cannot be const in stable Rust
     #[must_use]
     pub fn new(configs: Vec<FieldDualKcConfig>) -> Self {
         Self { configs }

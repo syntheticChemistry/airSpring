@@ -56,12 +56,12 @@ fn date_to_doy(year: u32, month: u32, day: u32) -> u32 {
     doy
 }
 
-fn in_season(month: u32, day: u32) -> bool {
+const fn in_season(month: u32, day: u32) -> bool {
     (month > SEASON_START_MONTH || (month == SEASON_START_MONTH && day >= SEASON_START_DAY))
         && (month < SEASON_END_MONTH || (month == SEASON_END_MONTH && day <= SEASON_END_DAY))
 }
 
-/// Parse cached weather JSON into seasons (year -> Vec<WeatherDay>).
+/// Parse cached weather JSON into seasons (year -> `Vec<WeatherDay>`).
 fn parse_weather_cache(
     json: &serde_json::Value,
 ) -> Option<std::collections::BTreeMap<u32, Vec<WeatherDay>>> {

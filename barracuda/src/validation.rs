@@ -111,6 +111,42 @@ pub fn json_array<'a>(value: &'a serde_json::Value, path: &[&str]) -> &'a Vec<se
         .unwrap_or_else(|| panic!("benchmark JSON: expected array at {path:?}"))
 }
 
+/// Extract a string from a nested JSON path; returns `None` if missing or not a string.
+#[must_use]
+pub fn json_str_opt<'a>(value: &'a serde_json::Value, path: &[&str]) -> Option<&'a str> {
+    let mut current = value;
+    for &key in path {
+        current = current.get(key)?;
+    }
+    current.as_str()
+}
+
+/// Extract a JSON array from a nested path; returns `None` if missing or not an array.
+#[must_use]
+pub fn json_array_opt<'a>(
+    value: &'a serde_json::Value,
+    path: &[&str],
+) -> Option<&'a Vec<serde_json::Value>> {
+    let mut current = value;
+    for &key in path {
+        current = current.get(key)?;
+    }
+    current.as_array()
+}
+
+/// Extract a JSON object from a nested path; returns `None` if missing or not an object.
+#[must_use]
+pub fn json_object_opt<'a>(
+    value: &'a serde_json::Value,
+    path: &[&str],
+) -> Option<&'a serde_json::Map<String, serde_json::Value>> {
+    let mut current = value;
+    for &key in path {
+        current = current.get(key)?;
+    }
+    current.as_object()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -187,5 +223,181 @@ mod tests {
         v.check_abs("beyond", 1.02, 1.0, 0.01);
         assert_eq!(v.passed_count(), 1);
         assert_eq!(v.total_count(), 2);
+    }
+
+    // ── json_str ────────────────────────────────────────────────────────────
+    #[test]
+    fn test_json_str_valid() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"label": "hello world"}"#).unwrap();
+        assert_eq!(json_str(&json, "label"), "hello world");
+    }
+
+    #[test]
+    #[should_panic(expected = "benchmark JSON missing string key 'missing'")]
+    fn test_json_str_missing_key() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"other": "x"}"#).unwrap();
+        let _ = json_str(&json, "missing");
+    }
+
+    #[test]
+    #[should_panic(expected = "benchmark JSON missing string key 'num'")]
+    fn test_json_str_non_string_value() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"num": 42}"#).unwrap();
+        let _ = json_str(&json, "num");
+    }
+
+    // ── json_field ───────────────────────────────────────────────────────────
+    #[test]
+    fn test_json_field_valid() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"val": 42.5}"#).unwrap();
+        assert!((json_field(&json, "val") - 42.5).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    #[should_panic(expected = "benchmark JSON missing f64 key 'missing'")]
+    fn test_json_field_missing_key() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"other": 1.0}"#).unwrap();
+        let _ = json_field(&json, "missing");
+    }
+
+    #[test]
+    #[should_panic(expected = "benchmark JSON missing f64 key 'str'")]
+    fn test_json_field_non_number_value() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"str": "hello"}"#).unwrap();
+        let _ = json_field(&json, "str");
+    }
+
+    // ── json_array ──────────────────────────────────────────────────────────
+    #[test]
+    fn test_json_array_valid() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"data": [1.0, 2.0, 3.0]}"#).unwrap();
+        let arr = json_array(&json, &["data"]);
+        assert_eq!(arr.len(), 3);
+        assert!((arr[0].as_f64().unwrap() - 1.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_json_array_empty() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"data": []}"#).unwrap();
+        let arr = json_array(&json, &["data"]);
+        assert!(arr.is_empty());
+    }
+
+    #[test]
+    fn test_json_array_nested_path() {
+        let json: serde_json::Value =
+            serde_json::from_str(r#"{"outer": {"inner": [1.0, 2.0]}}"#).unwrap();
+        let arr = json_array(&json, &["outer", "inner"]);
+        assert_eq!(arr.len(), 2);
+    }
+
+    #[test]
+    #[should_panic(expected = "benchmark JSON missing key 'missing'")]
+    fn test_json_array_missing_key() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"other": []}"#).unwrap();
+        let _ = json_array(&json, &["missing"]);
+    }
+
+    #[test]
+    #[should_panic(expected = "benchmark JSON: expected array at")]
+    fn test_json_array_non_array_value() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"data": 42}"#).unwrap();
+        let _ = json_array(&json, &["data"]);
+    }
+
+    #[test]
+    #[should_panic(expected = "benchmark JSON: expected array at")]
+    fn test_json_array_object_not_array() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"data": {"nested": 1}}"#).unwrap();
+        let _ = json_array(&json, &["data"]);
+    }
+
+    // ── json_f64 extended ───────────────────────────────────────────────────
+    #[test]
+    fn test_json_f64_string_value_returns_none() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"a": "not a number"}"#).unwrap();
+        assert!(json_f64(&json, &["a"]).is_none());
+    }
+
+    #[test]
+    fn test_json_f64_null_returns_none() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"a": null}"#).unwrap();
+        assert!(json_f64(&json, &["a"]).is_none());
+    }
+
+    #[test]
+    fn test_json_f64_integer_value() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"a": 42}"#).unwrap();
+        let v = json_f64(&json, &["a"]).unwrap();
+        assert!((v - 42.0).abs() < f64::EPSILON);
+    }
+
+    // ── check_abs pass, fail, exact boundary ────────────────────────────────
+    #[test]
+    fn test_check_abs_pass() {
+        let mut v = ValidationHarness::new("Pass");
+        v.check_abs("exact", 7.25, 7.25, 0.001);
+        assert_eq!(v.passed_count(), 1);
+    }
+
+    #[test]
+    fn test_check_abs_fail() {
+        let mut v = ValidationHarness::new("Fail");
+        v.check_abs("way off", 10.0, 1.0, 0.01);
+        assert_eq!(v.passed_count(), 0);
+    }
+
+    #[test]
+    fn test_check_abs_exact_boundary() {
+        let mut v = ValidationHarness::new("Boundary");
+        v.check_abs("within tol", 1.009, 1.0, 0.01);
+        v.check_abs("just over", 1.02, 1.0, 0.01);
+        assert_eq!(v.passed_count(), 1);
+        assert_eq!(v.total_count(), 2);
+    }
+
+    // ── check_bool true and false ───────────────────────────────────────────
+    #[test]
+    fn test_check_bool_true_only() {
+        let mut v = ValidationHarness::new("Bool");
+        v.check_bool("ok", true);
+        assert_eq!(v.passed_count(), 1);
+    }
+
+    #[test]
+    fn test_check_bool_false_only() {
+        let mut v = ValidationHarness::new("Bool");
+        v.check_bool("fail", false);
+        assert_eq!(v.passed_count(), 0);
+    }
+
+    // ── passed_count / total_count mixed ────────────────────────────────────
+    #[test]
+    fn test_harness_mixed_pass_fail_counts() {
+        let mut v = ValidationHarness::new("Mixed");
+        v.check_abs("p1", 1.0, 1.0, 0.01);
+        v.check_abs("f1", 1.0, 5.0, 0.01);
+        v.check_bool("p2", true);
+        v.check_bool("f2", false);
+        v.check_abs("p3", 2.0, 2.0, 0.01);
+        assert_eq!(v.passed_count(), 3);
+        assert_eq!(v.total_count(), 5);
+    }
+
+    // ── banner and section (exercise print paths) ───────────────────────────
+    #[test]
+    fn test_banner_and_section() {
+        banner("Test Banner");
+        section("Test Section");
+    }
+
+    // ── parse_benchmark_json (valid already covered, invalid already covered) ─
+    #[test]
+    fn test_parse_benchmark_json_valid_complex() {
+        let json = r#"{"nested": {"arr": [1, 2, 3], "val": 7.25}}"#;
+        let result = parse_benchmark_json(json);
+        assert!(result.is_ok());
+        let val = result.unwrap();
+        assert!(val.get("nested").is_some());
     }
 }

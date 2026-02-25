@@ -16,8 +16,6 @@ use std::collections::HashMap;
 use std::io::{self, BufRead};
 use std::path::Path;
 
-use crate::len_f64;
-
 /// Columnar time series dataset.
 ///
 /// Stores data in column-major order for efficient statistical operations.
@@ -117,26 +115,30 @@ impl TimeseriesData {
     #[must_use]
     pub fn column_stats(&self, name: &str) -> Option<ColumnStats> {
         let values = self.column(name)?;
-        let valid: Vec<f64> = values.iter().copied().filter(|v| !v.is_nan()).collect();
-        if valid.is_empty() {
+        let (sum, count, min, max) = values.iter().filter(|v| !v.is_nan()).fold(
+            (0.0_f64, 0_usize, f64::MAX, f64::MIN),
+            |(s, n, mn, mx), &x| (s + x, n + 1, mn.min(x), mx.max(x)),
+        );
+        if count == 0 {
             return None;
         }
-
-        let n = valid.len();
-        let count_f = len_f64(&valid);
-        let sum: f64 = valid.iter().sum();
+        #[allow(clippy::cast_precision_loss)]
+        let count_f = count as f64;
         let mean = sum / count_f;
-        let variance = valid.iter().map(|v| (v - mean).powi(2)).sum::<f64>() / count_f;
-        let min = valid.iter().copied().fold(f64::MAX, f64::min);
-        let max = valid.iter().copied().fold(f64::MIN, f64::max);
+        let variance = values
+            .iter()
+            .filter(|v| !v.is_nan())
+            .map(|&v| (v - mean).powi(2))
+            .sum::<f64>()
+            / count_f;
 
         Some(ColumnStats {
-            count: n,
+            count,
             mean,
             std_dev: variance.sqrt(),
             min,
             max,
-            missing: values.len() - n,
+            missing: values.len() - count,
         })
     }
 }

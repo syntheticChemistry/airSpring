@@ -18,7 +18,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **344/344 PASS** | FAO-56, soil, IoT, water balance, dual Kc, cover crops, Richards, biochar, 60yr WB |
 | Phase 0+: Real data pipeline | **918 station-days** | ET₀ R²=0.967 vs Open-Meteo (6 Michigan stations) |
-| Phase 1: Rust validation | **328 tests** | 16 binaries, 231 unit + 97 integration |
+| Phase 1: Rust validation | **371 tests** | 16 binaries, 371 unit + 97 integration, 96.84% coverage |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 3: GPU bridge | **8 orchestrators** | 20 evolution gaps (8A+11B+1C) |
 | Phase 4: Penny Irrigation | Vision | Sovereign, consumer hardware |
@@ -27,11 +27,11 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test` | 328 barracuda + 53 forge = **381 total**, 0 failures |
+| `cargo test` | 371 barracuda + 53 forge + 97 integration = **521 total**, 0 failures |
 | `cargo clippy -- -D warnings` | **0 warnings** (pedantic) |
 | `cargo fmt --check` | **Clean** |
 | `cargo doc` | **Builds** |
-| Test breakdown | 231 unit, 33 eco-integration, 31 GPU-integration, 11 stats, 20 I/O, 2 binary |
+| Test breakdown | 371 unit, 33 eco-integration, 31 GPU-integration, 11 stats, 20 I/O, 2 binary |
 
 ## Evolution Architecture: Write → Absorb → Lean
 
@@ -168,14 +168,17 @@ airSpring/
 │   ├── biochar/                 # Biochar adsorption isotherms (14/14)
 │   ├── long_term_wb/            # 60-year water balance (10/10)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1: Rust validation (328 tests, 16 binaries)
+├── barracuda/                   # Phase 1: Rust validation (371 lib + 97 integration, 16 binaries)
 │   ├── src/
 │   │   ├── eco/                 # Domain modules (9 validated against papers)
 │   │   ├── io/                  # csv_ts (streaming columnar IoT parser)
 │   │   ├── gpu/                 # ToadStool/BarraCuda GPU bridge (8 orchestrators)
 │   │   ├── error.rs             # AirSpringError enum
 │   │   ├── validation.rs        # Re-exports barracuda::validation::ValidationHarness
-│   │   ├── testutil.rs          # IA, NSE, RMSE, MBE, R², Pearson r, bootstrap CI
+│   │   ├── testutil/            # IA, NSE, RMSE, MBE, R², Pearson r, bootstrap CI
+│   │   │   ├── generators.rs
+│   │   │   ├── stats.rs
+│   │   │   └── bootstrap.rs
 │   │   └── bin/                 # 16 validate_*, bench_*, cross_validate, simulate_season
 │   ├── tests/                   # 97 integration tests (4 files)
 │   └── Cargo.toml               # v0.4.2
@@ -240,7 +243,7 @@ AGPL-3.0-or-later
 
 ---
 
-*February 25, 2026 — v0.4.2. 328 Rust tests + 53 forge = 381 total.
+*February 25, 2026 — v0.4.2. 371 lib + 97 integration + 53 forge = 521 total. 96.84% coverage.
 344 Python checks, 75/75 cross-validation, 918 real station-days.
 8 GPU orchestrators wired to ToadStool primitives. CPU benchmarks:
 12.5M ET₀/s, 38.9M VG θ/s, 59M Kc/s, 175K NM fits/s, 72 Richards sims/s.

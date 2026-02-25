@@ -11,6 +11,19 @@
 //! - **Needs Adaptation**: Shader exists, needs domain customisation.
 //! - **Needs Primitive**: No `ToadStool` implementation yet.
 //!
+//! # Shader Promotion Mapping
+//!
+//! | Rust Module | GPU Orchestrator | WGSL Shader | Pipeline Stage | Tier |
+//! |---|---|---|---|---|
+//! | `eco::evapotranspiration` | `gpu::et0` | `batched_elementwise_f64.wgsl` (op=0) | ET₀ computation | A (ready) |
+//! | `eco::water_balance` | `gpu::water_balance` | `batched_elementwise_f64.wgsl` (op=1) | Daily water balance | B (needs `BatchedStatefulF64`) |
+//! | `eco::dual_kc` | `gpu::dual_kc` | Pending (op=8) | Crop coefficient | B (needs conditional shader) |
+//! | `eco::soil_moisture` | `gpu::kriging` | `kriging_f64.wgsl` | Spatial interpolation | A (ready) |
+//! | `eco::richards` | `gpu::richards` | `pde_richards.wgsl` | PDE solve | A (ready) |
+//! | `eco::isotherm` | `gpu::isotherm` | `nelder_mead.wgsl` | Isotherm fitting | B (needs batch NM) |
+//! | `testutil` | `gpu::reduce` | `fused_map_reduce_f64.wgsl` | Seasonal stats | A (ready) |
+//! | `io::csv_ts` | `gpu::stream` | `moving_window.wgsl` | Stream smoothing | A (ready) |
+//!
 //! # Current Inventory (February 25, 2026 — v0.4.1, synced to `ToadStool` HEAD `02207c4a`)
 //!
 //! All four `ToadStool` issues (TS-001 through TS-004) are **RESOLVED**.

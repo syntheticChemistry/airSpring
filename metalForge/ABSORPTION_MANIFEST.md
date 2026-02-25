@@ -105,7 +105,7 @@ Once barracuda absorbs these modules, airSpring will:
 
 | airSpring location | Current code | Rewire to |
 |--------------------|-------------|-----------|
-| `barracuda/src/testutil.rs` | `rmse()`, `mbe()`, `index_of_agreement()`, `nash_sutcliffe()` | `barracuda::stats::metrics::*` |
+| `barracuda/src/testutil/stats.rs` | `rmse()`, `mbe()`, `index_of_agreement()`, `nash_sutcliffe()` | `barracuda::stats::metrics::*` |
 | `barracuda/src/eco/correction.rs` | `fit_linear()`, `fit_quadratic()`, `fit_exponential()`, `fit_logarithmic()` | `barracuda::stats::regression::*` |
 | `barracuda/src/gpu/stream.rs` | `smooth_cpu()` (CPU fallback) | `barracuda::ops::moving_window_stats_f64::*` |
 | `barracuda/src/eco/evapotranspiration.rs` | `hargreaves_et0()` inline | `barracuda::ops::hydrology::*` |
@@ -152,7 +152,7 @@ for nonlinear refinement. Linearized fits serve as initial guesses.
 
 | airSpring location | Current code | Rewire to |
 |--------------------|-------------|-----------|
-| `barracuda/src/testutil.rs` | `rmse()`, `mbe()`, etc. | `barracuda::stats::metrics::*` |
+| `barracuda/src/testutil/stats.rs` | `rmse()`, `mbe()`, etc. | `barracuda::stats::metrics::*` |
 | `barracuda/src/eco/correction.rs` | `fit_linear()`, etc. | `barracuda::stats::regression::*` |
 | `barracuda/src/gpu/stream.rs` | `smooth_cpu()` | `barracuda::ops::moving_window_stats_f64::*` |
 | `barracuda/src/eco/evapotranspiration.rs` | `hargreaves_et0()` | `barracuda::ops::hydrology::*` |
@@ -166,7 +166,7 @@ for nonlinear refinement. Linearized fits serve as initial guesses.
 | Candidate | Current location | Upstream fit | Blocker |
 |-----------|-----------------|--------------|---------|
 | `ValidationRunner` | `barracuda/src/validation.rs` | `barracuda::validation` | Needs abstraction from airSpring-specific JSON |
-| `bootstrap_rmse` pattern | `barracuda/src/testutil.rs` | `barracuda::stats::bootstrap` extension | Already wraps `barracuda::stats::bootstrap_ci` |
+| `bootstrap_rmse` pattern | `barracuda/src/testutil/bootstrap.rs` | `barracuda::stats::bootstrap` extension | Already wraps `barracuda::stats::bootstrap_ci` |
 | `len_f64` utility | `forge/src/lib.rs` | `barracuda::util` | Trivial — could be a PR |
 | Batched sensor calibration op | `eco::sensor_calibration` | `batched_elementwise_f64.wgsl` op=5 | Needs WGSL shader work |
 

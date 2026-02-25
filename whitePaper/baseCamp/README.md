@@ -2,7 +2,7 @@
 
 **Updated**: February 25, 2026
 **Project**: airSpring — Ecological & Agricultural Sciences (v0.4.2)
-**Status**: 11 experiments, 344/344 Python + 328 Rust tests + 75/75 cross-validation + 8 GPU orchestrators
+**Status**: 11 experiments, 344/344 Python + 371 Rust lib + 97 integration + 75/75 cross-validation + 8 GPU orchestrators
 
 ---
 
@@ -11,7 +11,7 @@
 ```
 Phase 0   Python/R baselines    — reproduce paper results with original tools (344/344)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (328 tests, 16 binaries)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (371 lib + 97 integration tests, 16 binaries, 96.84% coverage)
 Phase 2   BarraCuda GPU         — 8 orchestrators wired (cross-spring shader evolution)
 Phase 3   metalForge            — mixed CPU/GPU/NPU, 6 modules (2 absorbed, 4 pending)
 Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($600 GPU)
@@ -21,7 +21,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 
 | Faculty | Institution | Track | Papers | Experiments | Checks | Domain |
 |---------|------------|-------|:------:|:-----------:|:------:|--------|
-| Dong | MSU BAE | Irrigation & Soil | 8+ | 11 | 344+328 | ET₀, soil moisture, IoT, water balance, dual Kc, cover crops, Richards, biochar |
+| Dong | MSU BAE | Irrigation & Soil | 8+ | 11 | 344+468 | ET₀, soil moisture, IoT, water balance, dual Kc, cover crops, Richards, biochar |
 
 ## Faculty: Younsuk Dong, PhD
 

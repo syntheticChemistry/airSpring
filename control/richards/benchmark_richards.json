@@ -9,12 +9,14 @@
         "baseline_command": "python control/richards/richards_1d.py",
         "python_version": "3.10.12",
         "reproduction_note": "Re-run baseline_command to regenerate expected values",
+        "baseline_commit": "3afc229",
         "references": [
             "van Genuchten (1980) A closed-form equation for predicting the hydraulic conductivity of unsaturated soils. SSSA J 44:892-898",
             "Richards (1931) Capillary conduction of liquids through porous mediums. Physics 1:318-333",
             "Dong et al. (2019) J Sustainable Water in the Built Environment 5(4):04019005",
             "Carsel & Parrish (1988) Developing joint probability distributions of soil water retention characteristics. WRR 24:755-769"
-        ]
+        ],
+        "_tolerance_justification": "Tolerances accommodate Picard iteration convergence (1e-4 cm) and explicit Euler fallback error. Mass balance tolerance (5%) accounts for temporal discretization error in coarse time steps."
     },
     "soil_types": {
         "sand": {

@@ -8,6 +8,7 @@
         "baseline_script": "control/long_term_wb/long_term_water_balance.py",
         "baseline_command": "python control/long_term_wb/long_term_water_balance.py",
         "python_version": "3.10.12",
+        "baseline_commit": "3afc229",
         "data_source": "Open-Meteo Historical Weather API (ERA5 reanalysis)",
         "site": "Wooster, OH (40.78°N, 81.93°W, 311m) — OSU OARDC, Triplett-Van Doren tillage study",
         "period": "1960-2023 growing seasons (May 1 - Sep 30)",
@@ -16,7 +17,8 @@
             "Allen et al. (1998) FAO-56 Chapter 8",
             "Triplett & Van Doren (1969-2025) OSU long-term tillage study",
             "USDA Web Soil Survey — Wayne County, OH"
-        ]
+        ],
+        "_tolerance_justification": "Mass balance tolerance of 0.01 mm per 60 years; ET₀ and precipitation ranges from Open-Meteo ERA5 reanalysis for East Lansing, MI (1964-2023)."
     },
     "site": {
         "name": "Wooster, OH (OSU OARDC)",

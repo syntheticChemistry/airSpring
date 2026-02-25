@@ -1,1 +1,232 @@
-{"_source":"FAO Irrigation and Drainage Paper No. 56, Allen et al. 1998, Chapter 4","_url":"https://www.fao.org/4/X0490E/x0490e08.htm","_note":"All values digitized directly from published calculation sheets","_provenance":{"method":"hand-digitized from published FAO-56 examples","digitized_by":"airSpring control experiment team","created":"2026-02-16","validated_by":"control/fao56/penman_monteith.py","repository":"ecoPrimals/airSpring","baseline_script":"control/fao56/penman_monteith.py","baseline_command":"python control/fao56/penman_monteith.py","baseline_commit":"94cc51d","python_version":"3.10.12","reproduction_note":"Re-run baseline_command at baseline_commit to regenerate expected values"},"example_17_bangkok_monthly":{"_description":"Monthly ET0, Bangkok Thailand, April. FAO-56 Example 17.","inputs":{"tmax_c":34.8,"tmin_c":25.6,"ea_kpa":2.85,"u2_m_s":2.0,"sunshine_hours":8.5,"latitude_deg_n":13.73,"altitude_m":2,"month":4,"day_of_year":105,"t_month_c":30.2,"t_month_prev_c":29.2},"intermediates":{"tmean_c":30.2,"delta_kpa_per_c":0.246,"pressure_kpa":101.3,"gamma_kpa_per_c":0.0674,"es_kpa":4.42,"vpd_kpa":1.57,"ra_mj_m2_day":38.06,"daylight_hours":12.31,"n_over_N":0.69,"rs_mj_m2_day":22.65,"rso_mj_m2_day":28.54,"rs_over_rso":0.79,"rns_mj_m2_day":17.44,"rnl_mj_m2_day":3.11,"rn_mj_m2_day":14.33,"G_mj_m2_day":0.14,"rn_minus_G":14.19,"radiation_term_mm_day":3.97,"wind_term_mm_day":1.75},"expected_et0_mm_day":5.72,"tolerance_mm_day":0.15},"example_18_uccle_daily":{"_description":"Daily ET0, Uccle (Brussels), Belgium, 6 July. FAO-56 Example 18.","inputs":{"tmax_c":21.5,"tmin_c":12.3,"rhmax_pct":84,"rhmin_pct":63,"wind_speed_10m_km_h":10,"sunshine_hours":9.25,"latitude_deg_n":50.8,"altitude_m":100,"day_of_year":187,"month":7,"day":6},"intermediates":{"tmean_c":16.9,"u2_m_s":2.078,"delta_kpa_per_c":0.122,"pressure_kpa":100.1,"gamma_kpa_per_c":0.0666,"e_tmax_kpa":2.564,"e_tmin_kpa":1.431,"es_kpa":1.997,"ea_kpa":1.409,"vpd_kpa":0.589,"ra_mj_m2_day":41.09,"daylight_hours":16.1,"n_over_N":0.57,"rs_mj_m2_day":22.07,"rso_mj_m2_day":30.9,"rs_over_rso":0.71,"rns_mj_m2_day":17.0,"rnl_mj_m2_day":3.71,"rn_mj_m2_day":13.28,"G_mj_m2_day":0,"rn_minus_G":13.28,"radiation_term_mm_day":2.81,"wind_term_mm_day":1.07},"expected_et0_mm_day":3.88,"tolerance_mm_day":0.1},"example_20_lyon_missing_data":{"_description":"Monthly ET0, Lyon France, July, only Tmax/Tmin. FAO-56 Example 20.","inputs":{"tmax_c":26.6,"tmin_c":14.8,"latitude_deg_n":45.72,"altitude_m":200,"month":7,"day_of_year":196,"u2_m_s_estimated":2.0},"intermediates":{"tmean_c":20.7,"delta_kpa_per_c":0.15,"gamma_kpa_per_c":0.066,"tdew_estimated_c":14.8,"ea_kpa":1.68,"e_tmax_kpa":3.48,"e_tmin_kpa":1.68,"es_kpa":2.58,"vpd_kpa":0.9,"ra_mj_m2_day":40.55,"rs_mj_m2_day":22.29,"rso_mj_m2_day":30.58,"rs_over_rso":0.73,"rns_mj_m2_day":17.16,"rnl_mj_m2_day":3.68,"rn_mj_m2_day":13.48,"G_mj_m2_day":0,"rn_minus_G":13.48,"radiation_term_mm_day":3.17,"wind_term_mm_day":1.39},"expected_et0_mm_day":4.56,"tolerance_mm_day":0.15},"saturation_vapour_pressure_table":{"_description":"FAO-56 Table 2.3 \u2014 saturation vapour pressure at various temperatures","data":[{"temp_c":1.0,"es_kpa":0.657},{"temp_c":5.0,"es_kpa":0.872},{"temp_c":10.0,"es_kpa":1.228},{"temp_c":15.0,"es_kpa":1.705},{"temp_c":20.0,"es_kpa":2.338},{"temp_c":25.0,"es_kpa":3.168},{"temp_c":30.0,"es_kpa":4.243},{"temp_c":35.0,"es_kpa":5.624},{"temp_c":40.0,"es_kpa":7.384},{"temp_c":45.0,"es_kpa":9.585},{"temp_c":48.0,"es_kpa":11.171}],"tolerance_kpa":0.01},"slope_vapour_pressure_table":{"_description":"FAO-56 Table 2.4 \u2014 slope of saturation vapour pressure curve","data":[{"temp_c":1.0,"delta_kpa_per_c":0.047},{"temp_c":5.0,"delta_kpa_per_c":0.061},{"temp_c":10.0,"delta_kpa_per_c":0.082},{"temp_c":15.0,"delta_kpa_per_c":0.11},{"temp_c":20.0,"delta_kpa_per_c":0.145},{"temp_c":25.0,"delta_kpa_per_c":0.189},{"temp_c":30.0,"delta_kpa_per_c":0.243},{"temp_c":35.0,"delta_kpa_per_c":0.31},{"temp_c":40.0,"delta_kpa_per_c":0.393},{"temp_c":45.0,"delta_kpa_per_c":0.495}],"tolerance_kpa_per_c":0.005}}
+{
+    "_source": "FAO Irrigation and Drainage Paper No. 56, Allen et al. 1998, Chapter 4",
+    "_url": "https://www.fao.org/4/X0490E/x0490e08.htm",
+    "_note": "All values digitized directly from published calculation sheets",
+    "_provenance": {
+        "method": "hand-digitized from published FAO-56 examples",
+        "digitized_by": "airSpring control experiment team",
+        "created": "2026-02-16",
+        "validated_by": "control/fao56/penman_monteith.py",
+        "repository": "ecoPrimals/airSpring",
+        "baseline_script": "control/fao56/penman_monteith.py",
+        "baseline_command": "python control/fao56/penman_monteith.py",
+        "baseline_commit": "94cc51d",
+        "python_version": "3.10.12",
+        "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
+        "_tolerance_justification": "Tolerances accommodate FAO-56 table rounding (values reported to 1-2 decimal places) and Tetens saturation vapour pressure approximation differences between implementations."
+    },
+    "example_17_bangkok_monthly": {
+        "_description": "Monthly ET0, Bangkok Thailand, April. FAO-56 Example 17.",
+        "inputs": {
+            "tmax_c": 34.8,
+            "tmin_c": 25.6,
+            "ea_kpa": 2.85,
+            "u2_m_s": 2.0,
+            "sunshine_hours": 8.5,
+            "latitude_deg_n": 13.73,
+            "altitude_m": 2,
+            "month": 4,
+            "day_of_year": 105,
+            "t_month_c": 30.2,
+            "t_month_prev_c": 29.2
+        },
+        "intermediates": {
+            "tmean_c": 30.2,
+            "delta_kpa_per_c": 0.246,
+            "pressure_kpa": 101.3,
+            "gamma_kpa_per_c": 0.0674,
+            "es_kpa": 4.42,
+            "vpd_kpa": 1.57,
+            "ra_mj_m2_day": 38.06,
+            "daylight_hours": 12.31,
+            "n_over_N": 0.69,
+            "rs_mj_m2_day": 22.65,
+            "rso_mj_m2_day": 28.54,
+            "rs_over_rso": 0.79,
+            "rns_mj_m2_day": 17.44,
+            "rnl_mj_m2_day": 3.11,
+            "rn_mj_m2_day": 14.33,
+            "G_mj_m2_day": 0.14,
+            "rn_minus_G": 14.19,
+            "radiation_term_mm_day": 3.97,
+            "wind_term_mm_day": 1.75
+        },
+        "expected_et0_mm_day": 5.72,
+        "tolerance_mm_day": 0.15
+    },
+    "example_18_uccle_daily": {
+        "_description": "Daily ET0, Uccle (Brussels), Belgium, 6 July. FAO-56 Example 18.",
+        "inputs": {
+            "tmax_c": 21.5,
+            "tmin_c": 12.3,
+            "rhmax_pct": 84,
+            "rhmin_pct": 63,
+            "wind_speed_10m_km_h": 10,
+            "sunshine_hours": 9.25,
+            "latitude_deg_n": 50.8,
+            "altitude_m": 100,
+            "day_of_year": 187,
+            "month": 7,
+            "day": 6
+        },
+        "intermediates": {
+            "tmean_c": 16.9,
+            "u2_m_s": 2.078,
+            "delta_kpa_per_c": 0.122,
+            "pressure_kpa": 100.1,
+            "gamma_kpa_per_c": 0.0666,
+            "e_tmax_kpa": 2.564,
+            "e_tmin_kpa": 1.431,
+            "es_kpa": 1.997,
+            "ea_kpa": 1.409,
+            "vpd_kpa": 0.589,
+            "ra_mj_m2_day": 41.09,
+            "daylight_hours": 16.1,
+            "n_over_N": 0.57,
+            "rs_mj_m2_day": 22.07,
+            "rso_mj_m2_day": 30.9,
+            "rs_over_rso": 0.71,
+            "rns_mj_m2_day": 17.0,
+            "rnl_mj_m2_day": 3.71,
+            "rn_mj_m2_day": 13.28,
+            "G_mj_m2_day": 0,
+            "rn_minus_G": 13.28,
+            "radiation_term_mm_day": 2.81,
+            "wind_term_mm_day": 1.07
+        },
+        "expected_et0_mm_day": 3.88,
+        "tolerance_mm_day": 0.1
+    },
+    "example_20_lyon_missing_data": {
+        "_description": "Monthly ET0, Lyon France, July, only Tmax/Tmin. FAO-56 Example 20.",
+        "inputs": {
+            "tmax_c": 26.6,
+            "tmin_c": 14.8,
+            "latitude_deg_n": 45.72,
+            "altitude_m": 200,
+            "month": 7,
+            "day_of_year": 196,
+            "u2_m_s_estimated": 2.0
+        },
+        "intermediates": {
+            "tmean_c": 20.7,
+            "delta_kpa_per_c": 0.15,
+            "gamma_kpa_per_c": 0.066,
+            "tdew_estimated_c": 14.8,
+            "ea_kpa": 1.68,
+            "e_tmax_kpa": 3.48,
+            "e_tmin_kpa": 1.68,
+            "es_kpa": 2.58,
+            "vpd_kpa": 0.9,
+            "ra_mj_m2_day": 40.55,
+            "rs_mj_m2_day": 22.29,
+            "rso_mj_m2_day": 30.58,
+            "rs_over_rso": 0.73,
+            "rns_mj_m2_day": 17.16,
+            "rnl_mj_m2_day": 3.68,
+            "rn_mj_m2_day": 13.48,
+            "G_mj_m2_day": 0,
+            "rn_minus_G": 13.48,
+            "radiation_term_mm_day": 3.17,
+            "wind_term_mm_day": 1.39
+        },
+        "expected_et0_mm_day": 4.56,
+        "tolerance_mm_day": 0.15
+    },
+    "saturation_vapour_pressure_table": {
+        "_description": "FAO-56 Table 2.3 \u2014 saturation vapour pressure at various temperatures",
+        "data": [
+            {
+                "temp_c": 1.0,
+                "es_kpa": 0.657
+            },
+            {
+                "temp_c": 5.0,
+                "es_kpa": 0.872
+            },
+            {
+                "temp_c": 10.0,
+                "es_kpa": 1.228
+            },
+            {
+                "temp_c": 15.0,
+                "es_kpa": 1.705
+            },
+            {
+                "temp_c": 20.0,
+                "es_kpa": 2.338
+            },
+            {
+                "temp_c": 25.0,
+                "es_kpa": 3.168
+            },
+            {
+                "temp_c": 30.0,
+                "es_kpa": 4.243
+            },
+            {
+                "temp_c": 35.0,
+                "es_kpa": 5.624
+            },
+            {
+                "temp_c": 40.0,
+                "es_kpa": 7.384
+            },
+            {
+                "temp_c": 45.0,
+                "es_kpa": 9.585
+            },
+            {
+                "temp_c": 48.0,
+                "es_kpa": 11.171
+            }
+        ],
+        "tolerance_kpa": 0.01
+    },
+    "slope_vapour_pressure_table": {
+        "_description": "FAO-56 Table 2.4 \u2014 slope of saturation vapour pressure curve",
+        "data": [
+            {
+                "temp_c": 1.0,
+                "delta_kpa_per_c": 0.047
+            },
+            {
+                "temp_c": 5.0,
+                "delta_kpa_per_c": 0.061
+            },
+            {
+                "temp_c": 10.0,
+                "delta_kpa_per_c": 0.082
+            },
+            {
+                "temp_c": 15.0,
+                "delta_kpa_per_c": 0.11
+            },
+            {
+                "temp_c": 20.0,
+                "delta_kpa_per_c": 0.145
+            },
+            {
+                "temp_c": 25.0,
+                "delta_kpa_per_c": 0.189
+            },
+            {
+                "temp_c": 30.0,
+                "delta_kpa_per_c": 0.243
+            },
+            {
+                "temp_c": 35.0,
+                "delta_kpa_per_c": 0.31
+            },
+            {
+                "temp_c": 40.0,
+                "delta_kpa_per_c": 0.393
+            },
+            {
+                "temp_c": 45.0,
+                "delta_kpa_per_c": 0.495
+            }
+        ],
+        "tolerance_kpa_per_c": 0.005
+    }
+}

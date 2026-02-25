@@ -15,7 +15,7 @@ use crate::len_f64;
 /// Langmuir isotherm: qe = qmax * KL * Ce / (1 + KL * Ce)
 #[must_use]
 pub fn langmuir(ce: f64, qmax: f64, kl: f64) -> f64 {
-    let denom = 1.0 + kl * ce;
+    let denom = kl.mul_add(ce, 1.0);
     if denom.abs() < f64::EPSILON {
         return qmax; // saturation limit as Ce → ∞
     }
@@ -36,7 +36,7 @@ pub fn freundlich(ce: f64, kf: f64, n_inv: f64) -> f64 {
 /// Favorable adsorption when 0 < RL < 1.
 #[must_use]
 pub fn langmuir_rl(kl: f64, c0: f64) -> f64 {
-    1.0 / (1.0 + kl * c0)
+    1.0 / kl.mul_add(c0, 1.0)
 }
 
 /// Result of isotherm fitting.
@@ -159,7 +159,7 @@ pub fn fit_freundlich(ce: &[f64], qe: &[f64]) -> Option<IsothermFit> {
     for i in 0..=N_GRID {
         #[allow(clippy::cast_precision_loss)]
         let t = (i as f64) / (N_GRID as f64);
-        let n = n_lo + t * (n_hi - n_lo);
+        let n = t.mul_add(n_hi - n_lo, n_lo);
         let n_inv = 1.0 / n;
 
         let mut sum_num = 0.0;
@@ -267,7 +267,7 @@ mod tests {
     #[test]
     fn test_freundlich_basic() {
         let q = freundlich(10.0, 2.0, 0.5);
-        assert!((q - 2.0 * 10.0_f64.sqrt()).abs() < 1e-10);
+        assert!((2.0f64.mul_add(-10.0_f64.sqrt(), q)).abs() < 1e-10);
     }
 
     #[test]

@@ -431,7 +431,6 @@ fn main() {
     if results.is_empty() {
         println!("\n  No stations processed — check data directory");
         v.check_bool("At least one station processed", false);
-        v.finish();
     } else {
         check_physical_reasonableness(&mut v, &results);
         check_seasonal_totals(&mut v, &results);
@@ -439,7 +438,7 @@ fn main() {
         check_spatial_variability(&mut v, &results);
         check_geographic_consistency(&mut v, &results);
         check_cross_station_correlation(&mut v, &results);
-
-        v.finish();
     }
+
+    v.finish();
 }

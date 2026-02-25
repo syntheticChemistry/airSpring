@@ -361,4 +361,122 @@ mod tests {
             r.et0_values[1]
         );
     }
+
+    #[test]
+    fn test_compute_single_input() {
+        let engine = BatchedEt0::cpu();
+        let result = engine.compute(&[sample_input()]);
+        assert_eq!(result.et0_values.len(), 1);
+        assert!(result.et0_values[0] > 0.0);
+    }
+
+    #[test]
+    fn test_compute_gpu_single_station_day() {
+        let engine = BatchedEt0::cpu();
+        let result = engine.compute_gpu(&[sample_station_day()]).unwrap();
+        assert_eq!(result.et0_values.len(), 1);
+        assert!(result.et0_values[0] > 2.0 && result.et0_values[0] < 6.0);
+    }
+
+    #[test]
+    fn test_compute_gpu_very_large_batch_cpu_fallback() {
+        let engine = BatchedEt0::cpu();
+        let inputs: Vec<StationDay> = (0..2000)
+            .map(|i| StationDay {
+                doy: 1 + (i % 366),
+                ..sample_station_day()
+            })
+            .collect();
+        let result = engine.compute_gpu(&inputs).unwrap();
+        assert_eq!(result.et0_values.len(), 2000);
+        for &val in &result.et0_values {
+            assert!(val > 0.0, "ET₀ should be positive: {val}");
+        }
+    }
+
+    fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
+        pollster::block_on(barracuda::device::WgpuDevice::new_f64_capable())
+            .ok()
+            .map(std::sync::Arc::new)
+    }
+
+    #[test]
+    fn test_batched_et0_gpu_device_empty() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for BatchedEt0");
+            return;
+        };
+        let engine = BatchedEt0::gpu(device).unwrap();
+        let result = engine.compute_gpu(&[]).unwrap();
+        assert!(result.et0_values.is_empty());
+        assert_eq!(result.backend_used, Backend::Gpu);
+    }
+
+    #[test]
+    fn test_batched_et0_gpu_device_single() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for BatchedEt0");
+            return;
+        };
+        let engine = BatchedEt0::gpu(device).unwrap();
+        let result = engine.compute_gpu(&[sample_station_day()]).unwrap();
+        assert_eq!(result.et0_values.len(), 1);
+        assert!(result.et0_values[0] > 2.0 && result.et0_values[0] < 6.0);
+        assert_eq!(result.backend_used, Backend::Gpu);
+    }
+
+    #[test]
+    fn test_batched_et0_gpu_device_matches_cpu() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for BatchedEt0");
+            return;
+        };
+        let gpu_engine = BatchedEt0::gpu(device).unwrap();
+        let cpu_engine = BatchedEt0::cpu();
+        let inputs: Vec<StationDay> = (0..50)
+            .map(|i| StationDay {
+                doy: 100 + i,
+                ..sample_station_day()
+            })
+            .collect();
+        let gpu_result = gpu_engine.compute_gpu(&inputs).unwrap();
+        let cpu_result = cpu_engine.compute_gpu(&inputs).unwrap();
+        assert_eq!(gpu_result.et0_values.len(), cpu_result.et0_values.len());
+        for (g, c) in gpu_result.et0_values.iter().zip(&cpu_result.et0_values) {
+            assert!((g - c).abs() < 0.01, "GPU {g} vs CPU {c}");
+        }
+    }
+
+    #[test]
+    fn test_batched_et0_gpu_device_large_batch() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for BatchedEt0");
+            return;
+        };
+        let engine = BatchedEt0::gpu(device).unwrap();
+        let inputs: Vec<StationDay> = (0..1500)
+            .map(|i| StationDay {
+                doy: 1 + (i % 365),
+                ..sample_station_day()
+            })
+            .collect();
+        let result = engine.compute_gpu(&inputs).unwrap();
+        assert_eq!(result.et0_values.len(), 1500);
+        assert_eq!(result.backend_used, Backend::Gpu);
+        for &val in &result.et0_values {
+            assert!(val.is_finite(), "ET₀ should be finite: {val}");
+        }
+    }
+
+    #[test]
+    fn test_batched_et0_gpu_debug_format() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for BatchedEt0");
+            return;
+        };
+        let engine = BatchedEt0::gpu(device).unwrap();
+        let dbg = format!("{engine:?}");
+        assert!(dbg.contains("BatchedEt0"));
+        assert!(dbg.contains("true"));
+    }
 }

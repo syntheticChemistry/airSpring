@@ -143,7 +143,7 @@ All experiments run on a single consumer workstation:
 | Python | 3.x (numpy, scipy, pandas, requests) |
 | R | 4.x (planned — for ANOVA matching paper) |
 | Rust | stable (rustc) |
-| GPU | RTX 4070 (SHADER_F64 confirmed) — Phase 3 LIVE (4 orchestrators) |
+| GPU | RTX 4070 (SHADER_F64 confirmed) — Phase 3 LIVE (8 orchestrators) |
 
 ---
 
@@ -168,14 +168,14 @@ All experiments run on a single consumer workstation:
 | IoT Pipeline | SoilWatch 10 + irrigation correct | — | CSV stats + calibration match | ≤1e-5 tolerance |
 | Water Balance | Mass balance < 0.001 mm | Savings per Dong (2024) | Mass balance match Python | ≤1e-5 tolerance |
 
-### Grand Total: 330 Validation Checks Pass + 253 Rust Tests + 918 Real Data Points
+### Grand Total: 330 Validation Checks Pass + 468 Rust Tests + 918 Real Data Points
 
 | Phase | Checks | Description |
 |-------|:------:|-------------|
 | Phase 0 (Python control) | 142 | 64 ET₀ + 36 soil + 24 IoT + 18 water balance |
-| Phase 1 (Rust BarraCuda) | 123 | 31 ET₀ + 25 soil + 11 IoT + 13 water balance + 21 sensor calibration + 21 real data |
-| Phase 1 (Rust tests) | 253 | 175 unit + 76 integration + 2 doc-tests |
-| Phase 2 (Cross-validation) | 65 | Python↔Rust identical outputs (tol=1e-5), loads from benchmark JSON |
+| Phase 1 (Rust BarraCuda) | 327 | 31 ET₀ + 26 soil + 11 IoT + 13 water balance + 21 sensor + 23 real data + dual Kc + cover crop + regional ET₀ + Richards + biochar + long-term WB |
+| Phase 1 (Rust tests) | 468 | 371 lib + 97 integration + doc-tests |
+| Phase 2 (Cross-validation) | 75 | Python↔Rust identical outputs (tol=1e-5), loads from benchmark JSON |
 | **Total** | **330** | **All pass** |
 | Phase 0+ (Real data) | 918 station-days | R²=0.967, 4 crop water balance, zero synthetic |
 

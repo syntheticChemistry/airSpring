@@ -59,9 +59,9 @@ Note: `gpu::dual_kc::BatchedDualKc` has CPU orchestrator wired (Tier B → pendi
 
 ### Layer 1: BarraCuda CPU (validated, complete)
 
-All algorithms implemented in pure Rust. 328 tests, 16 binaries.
+All algorithms implemented in pure Rust. 371 lib + 97 integration tests, 16 binaries.
 This is the baseline for correctness — GPU and metalForge results must match.
-CPU benchmarks: 12.5M ET₀/s, 38.9M VG θ/s, 59M dual Kc/s, 175K NM fits/s.
+CPU benchmarks: 12.7M ET₀/s, 36.5M VG θ/s, 59M dual Kc/s, 57M Langmuir fits/s.
 
 ```
 eco::evapotranspiration → validated daily_et0(), hargreaves_et0()
@@ -122,10 +122,10 @@ Mixed hardware extensions (future):
 | Sensor batch calibration | `batched_elementwise_f64` (op=5) | — | Low |
 | Hargreaves ET₀ batch | `batched_elementwise_f64` (op=6) | — | Low |
 | Kc climate adjustment | `batched_elementwise_f64` (op=7) | — | Low |
-| Richards PDE (GPU) | WGSL van_genuchten_f64 shader | CPU wired via gpu::richards | Medium |
+| Richards PDE (GPU) | WGSL van_genuchten_f64 shader | **Wired** via gpu::richards | — |
 | Tridiagonal solve | `linalg::tridiagonal_solve_f64` | Available upstream | Low |
 | Adaptive ODE (RK45) | `numerical::rk45_solve` | Available upstream | Low |
-| Isotherm batch fitting | `NelderMeadGpu` batch | GPU orchestrator wired | Medium |
+| Isotherm batch fitting | `NelderMeadGpu` batch | **Wired** via gpu::isotherm fit_*_nm | — |
 | m/z tolerance search | `batched_bisection_f64.wgsl` | Cross-spring from wetSpring | Low |
 
 ### Tier C — Needs New Primitive (1 item)

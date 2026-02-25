@@ -54,7 +54,7 @@ bash scripts/run_all_baselines.sh
 # 5. Optionally run R ANOVA (requires R >= 4.0)
 # Rscript control/iot_irrigation/anova_irrigation.R
 
-# 6. Run Rust validation binaries (327 checks across 13 binaries)
+# 6. Run Rust validation binaries (327 checks across 16 binaries)
 cd barracuda
 for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   validate_sensor_calibration validate_real_data cross_validate \
@@ -63,7 +63,7 @@ for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   cargo run --release --bin $bin
 done
 
-# 7. Run Phase 2 cross-validation (65 values, Python vs Rust)
+# 7. Run Phase 2 cross-validation (75 values, Python vs Rust)
 cd .. && python3 scripts/cross_validate.py > /tmp/py.json
 cd barracuda && cargo run --release --bin cross_validate > /tmp/rs.json
 
@@ -225,7 +225,7 @@ Tools used: numpy, scipy (curve_fit), json (benchmarks), base Python math.
 All benchmark data digitized directly from published papers (FAO-56 tables,
 Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2 + yield data).
 
-### 2026-02-16 → 2026-02-25: Project Initialization → v0.4.0 (Rust — 327/327 PASS, 309 tests)
+### 2026-02-16 → 2026-02-25: Project Initialization → v0.4.0 (Rust — 327/327 PASS, 371 lib + 97 integration tests)
 
 - Created airSpring repository
 - Scaffolded Track 1 (Precision Agriculture) and Track 2 (Environmental Systems)
@@ -235,7 +235,7 @@ Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2 + yield data).
 - Dependencies: barracuda (phase1/toadstool), serde, serde_json
 - Comprehensive audit and evolution to modern idiomatic Rust (zero clippy pedantic/nursery warnings)
 - `AirSpringError` unified error type replaces ad-hoc `String` errors
-- Phase 2 cross-validation harness: 65/65 values match Python within 1e-5
+- Phase 2 cross-validation harness: 75/75 values match Python within 1e-5
 - **All validation binaries PASS:**
 
 | Binary | Track | Checks | Key validations |
@@ -246,7 +246,7 @@ Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2 + yield data).
 | validate_water_balance | T1 | 13/13 | Mass balance 0.0000 (3 scenarios), Ks bounds, MI summer |
 | validate_sensor_calibration | T1 | 21/21 | SoilWatch 10 VWC, irrigation model, Dong 2024 field results |
 | validate_real_data | T1 | 23/23 | Open-Meteo ERA5, 6+ MI stations, R²>0.85, capability-based discovery |
-| cross_validate | T1/T2 | — | 65/65 Python↔Rust parity at 1e-5 |
+| cross_validate | T1/T2 | — | 75/75 Python↔Rust parity at 1e-5 |
 | validate_dual_kc | T1 | 61/61 | FAO-56 Ch 7 Eqs 69/71-73/77, Table 17+19, multi-day sims |
 | validate_cover_crop | T1 | 40/40 | FAO-56 Ch 11 mulch, 5 cover crops, no-till vs conventional |
 | validate_regional_et0 | T1 | 61/61 | 6 MI stations, spatial CV, cross-station r, geographic consistency |
@@ -254,9 +254,9 @@ Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2 + yield data).
 | validate_biochar | T2 | 14/14 | Langmuir/Freundlich isotherms, wood + sugar beet biochar |
 | validate_long_term_wb | T1 | 11/11 | 64-year Wooster OH, Hargreaves ET₀, decade trends |
 
-**Total Rust: 327/327 validation checks PASS, 309 tests (201 unit + 78 integration + 30 new) PASS**
-**Phase 2 cross-validation: 65/65 MATCH (Python↔Rust, tol=1e-5)**
-**Phase 3 GPU-first: 7 orchestrators wired, 4/4 ToadStool issues RESOLVED**
+**Total Rust: 327/327 validation checks PASS, 468 tests (371 lib + 97 integration) PASS**
+**Phase 2 cross-validation: 75/75 MATCH (Python↔Rust, tol=1e-5)**
+**Phase 3 GPU-first: 8 orchestrators wired, 4/4 ToadStool issues RESOLVED**
 **CPU benchmarks: ET₀ 12.7M station-days/s, dual Kc 59M days/s, mulched Kc 64M days/s**
 **Quality: zero `.unwrap()`, zero `panic!()`, zero `unsafe`, zero clippy pedantic warnings, all tolerances named `const`**
 
@@ -294,7 +294,7 @@ ET₀ = [0.408 Δ(Rn - G) + γ (900/(T+273)) u₂ (es - ea)] / [Δ + γ(1 + 0.34
 **Rust (Phase 1 — 31/31 PASS, Phase 2 — 65/65 MATCH):**
 - [x] Implement in Rust (`eco::evapotranspiration`) — 22 FAO-56 functions + Hargreaves, sunshine Rs, temp Rs, monthly G
 - [x] Validate against FAO Paper 56 tables (31 checks in `validate_et0`)
-- [x] Cross-validate: Python vs Rust identical outputs — 65/65 values match within 1e-5
+- [x] Cross-validate: Python vs Rust identical outputs — 75/75 values match within 1e-5
 - [x] Benchmark: Rust vs Python throughput (12.7M ET₀/s, `bench_cpu_vs_python`)
 
 ### Experiment 002: Soil Sensor Calibration — PHASE 0 COMPLETE
@@ -468,9 +468,9 @@ Chapter 7, separating transpiration from soil evaporation for precision scheduli
 Track 1 (Precision Agriculture):
   Phase 0  [COMPLETE]: Python baselines — 142/142 PASS (FAO-56, soil, IoT, water balance)
   Phase 0+ [COMPLETE]: Real data pipeline — 918 station-days, ET₀ R²=0.97, water balance
-  Phase 1  [COMPLETE]: Rust validation — 123/123 PASS (8 binaries), 293 tests (253+40 forge), 0 clippy warnings
-  Phase 2  [COMPLETE]: Cross-validation — 65/65 MATCH (Python↔Rust, tol=1e-5)
-  Phase 3  [COMPLETE]: GPU-first — 4/4 ToadStool issues resolved, 253 tests, 97.2% lib coverage
+  Phase 1  [COMPLETE]: Rust validation — 327/327 PASS (16 binaries), 468 tests (371 lib + 97 integration), 0 clippy warnings
+  Phase 2  [COMPLETE]: Cross-validation — 75/75 MATCH (Python↔Rust, tol=1e-5)
+  Phase 3  [COMPLETE]: GPU-first — 4/4 ToadStool issues resolved, 468 tests, 8 orchestrators
   Phase 4:             Penny irrigation (sovereign, consumer hardware)
 
 Track 2 (Environmental Systems):
@@ -537,9 +537,9 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 *Initialized: February 16, 2026 — Updated: February 25, 2026 (v0.4.0)*
 *Phase 0 Python baselines: 344/344 PASS (Exps 001-005, 006-007, 009-011, 015)*
 *Phase 0+ Real data pipeline: 918 station-days, ET₀ R²=0.97, 4 crop water balance*
-*Phase 1 BarraCuda Rust validation: 327/327 PASS (13 binaries), 309 tests + 40 forge*
-*Phase 2 Cross-validation: 65/65 MATCH (Python↔Rust, tol=1e-5)*
-*Phase 3 GPU-first: 7 orchestrators, 4/4 ToadStool issues RESOLVED*
+*Phase 1 BarraCuda Rust validation: 327/327 PASS (16 binaries), 468 tests (371 lib + 97 integration)*
+*Phase 2 Cross-validation: 75/75 MATCH (Python↔Rust, tol=1e-5)*
+*Phase 3 GPU-first: 8 orchestrators, 4/4 ToadStool issues RESOLVED*
 *CPU benchmarks: 12.7M ET₀/s, 59M dual Kc/s, 64M mulched Kc/s*
 *Quality: zero .unwrap() in production, zero unsafe, zero mocks in production*
-*Total: 344 Python + 327 Rust validation + 309 Rust tests + 65 cross-validation = 1045 checks*
+*Total: 344 Python + 327 Rust validation + 468 Rust tests + 75 cross-validation*

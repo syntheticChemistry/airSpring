@@ -9,7 +9,9 @@
 //! never hardcoded inline.
 
 use airspring_barracuda::eco::soil_moisture::{self as sm, SoilTexture};
-use airspring_barracuda::validation::{self, json_f64, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{
+    self, json_array, json_f64, json_field, json_str, parse_benchmark_json, ValidationHarness,
+};
 
 /// Benchmark JSON embedded at compile time for reproducibility.
 const BENCHMARK_JSON: &str = include_str!("../../../control/soil_sensors/benchmark_dong2020.json");
@@ -83,27 +85,43 @@ fn main() {
     println!();
     validation::section("Soil texture hydraulic properties (USDA/Saxton & Rawls 2006)");
 
-    let textures: &[(SoilTexture, &str, f64, f64)] = &[
-        (SoilTexture::Sand, "Sand", 0.10, 0.05),
-        (SoilTexture::SandyLoam, "SandyLoam", 0.18, 0.08),
-        (SoilTexture::Loam, "Loam", 0.27, 0.12),
-        (SoilTexture::SiltLoam, "SiltLoam", 0.33, 0.13),
-        (SoilTexture::Clay, "Clay", 0.36, 0.25),
-    ];
+    let soil_textures = benchmark
+        .get("soil_textures")
+        .expect("benchmark must have soil_textures");
+    let hydraulic_tol = json_f64(soil_textures, &["tolerance"]).unwrap_or(HYDRAULIC_TOL);
+    let texture_entries = json_array(&benchmark, &["soil_textures", "textures"]);
 
-    for &(texture, name, exp_fc, exp_wp) in textures {
+    for entry in texture_entries {
+        let name = json_str(entry, "name");
+        let exp_fc = json_field(entry, "field_capacity");
+        let exp_wp = json_field(entry, "wilting_point");
+        let texture = match name {
+            "Sand" => SoilTexture::Sand,
+            "LoamySand" => SoilTexture::LoamySand,
+            "SandyLoam" => SoilTexture::SandyLoam,
+            "Loam" => SoilTexture::Loam,
+            "SiltLoam" => SoilTexture::SiltLoam,
+            "Silt" => SoilTexture::Silt,
+            "SandyClayLoam" => SoilTexture::SandyClayLoam,
+            "ClayLoam" => SoilTexture::ClayLoam,
+            "SiltyClayLoam" => SoilTexture::SiltyClayLoam,
+            "SandyClay" => SoilTexture::SandyClay,
+            "SiltyClay" => SoilTexture::SiltyClay,
+            "Clay" => SoilTexture::Clay,
+            _ => panic!("benchmark soil_textures: unknown texture name '{name}'"),
+        };
         let props = texture.hydraulic_properties();
         v.check_abs(
             &format!("{name} FC"),
             props.field_capacity,
             exp_fc,
-            HYDRAULIC_TOL,
+            hydraulic_tol,
         );
         v.check_abs(
             &format!("{name} WP"),
             props.wilting_point,
             exp_wp,
-            HYDRAULIC_TOL,
+            hydraulic_tol,
         );
     }
 

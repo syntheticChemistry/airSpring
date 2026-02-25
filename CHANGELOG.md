@@ -2,6 +2,76 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased] - 2026-02-25
+
+### Deep Debt Cleanup, Idiomatic Rust, Module Refactoring, Coverage 97%
+
+Comprehensive audit and cleanup: zero clippy pedantic/nursery warnings,
+96.84% library line coverage (from 89%), all magic numbers named, hot-path
+allocations eliminated, benchmark provenance completed, evolution mapping
+documented, validation binaries hardened, and testutil split into focused
+submodules.
+
+#### Added
+- 120+ unit tests across 8 modules (testutil, validation, richards, reduce,
+  stream, kriging, et0, water_balance) — lib tests 231→371
+- `_tolerance_justification` field to all 9 benchmark JSONs with citation-based
+  rationale for every tolerance value
+- Tolerance fields to `benchmark_dual_kc.json` (previously had none)
+- `baseline_commit` to 3 benchmark JSONs (richards, biochar, long_term_wb)
+- `soil_textures` section to `benchmark_dong2020.json` with all 12 USDA textures
+- Shader Promotion Mapping table in `gpu/evolution_gaps.rs`
+  (Rust module → WGSL shader → pipeline stage → tier)
+- `validation.rs`: `json_str_opt`, `json_array_opt`, `json_object_opt` helpers
+  for safe optional JSON field access
+
+#### Changed
+- **`testutil.rs` → `testutil/` module directory**: split 766-line grab-bag into
+  `testutil/generators.rs` (IoT data), `testutil/stats.rs` (RMSE, MBE, IA, NSE,
+  R², Pearson, Spearman, variance, std_dev), `testutil/bootstrap.rs` (CI).
+  All re-exported from `testutil/mod.rs` — zero breaking changes.
+- `validate_richards.rs`, `validate_biochar.rs`: replaced all `.unwrap()` on
+  JSON field access with `json_f64`, `json_str_opt`, `json_array_opt`,
+  `json_object_opt` + `let...else` error handling with `process::exit(1)`
+- `eco/richards.rs`: `mass_balance_check` — removed `.unwrap()` on
+  `profiles.last()`, replaced with `let...else` guard; fixed misleading
+  `# Panics` doc (function returns 0.0, does not panic, on empty input)
+- `gpu/kriging.rs`: variance formula now uses variogram `range` parameter
+  instead of implicit range=1 — exponential variogram γ(h/range) is correct
+- `eco/richards.rs`: 8 named constants replace inline magic numbers
+  (VG_H_ABS_MAX, VG_POWF_MAX, SATURATED_CAPACITY, CAPACITY_H_MIN, etc.)
+- `eco/richards.rs`: Picard loop preallocates a/b/c/d, h_prev, h_old, q_buf
+  outside time-stepping loop — eliminates per-iteration allocations
+- `io/csv_ts.rs`: `column_stats` uses single-pass iterator fold instead of
+  allocating intermediate Vec for NaN filtering
+- `bench_airspring_gpu.rs`: `run_all_benchmarks` (197 lines) refactored into
+  8 focused benchmark functions (<100 lines each)
+- `validate_soil.rs`: texture FC/WP values loaded from benchmark JSON instead
+  of hardcoded — now validates all 12 USDA textures
+- `validate_regional_et0.rs`: `v.finish()` deduplicated from branches
+- All `a * b + c` patterns → `mul_add()` across 13+ locations (5 files)
+- All `if let Some(x) = ...` → `let...else` in GPU test code
+- metalForge README: test count 40→53 to match actual
+
+#### Documentation
+- README.md: updated test counts (371 lib + 97 integration = 521 total), coverage
+  (96.84%), testutil module directory in tree
+- whitePaper/STUDY.md: 468 tests, 75/75 cross-validation, 8 GPU orchestrators
+- whitePaper/METHODOLOGY.md: aligned Phase 1–3 numbers
+- whitePaper/baseCamp/README.md: updated faculty summary and test counts
+- experiments/README.md: aligned test counts with current workspace
+- specs/PAPER_REVIEW_QUEUE.md: added metalForge module mapping per paper
+- specs/BARRACUDA_REQUIREMENTS.md: updated test counts and Tier B wiring status
+- CONTROL_EXPERIMENT_STATUS.md: aligned all phase counts
+- wateringHole V006 handoff: deep audit results, absorption roadmap, shader
+  promotion mapping, paper controls matrix with CPU/GPU/metalForge columns
+- V005 handoff archived
+
+#### Fixed
+- `cargo clippy --pedantic --nursery`: 0 warnings (was 13+)
+- `cargo doc --no-deps`: 0 warnings (was 1 — unescaped `Vec<WeatherDay>`)
+- `cargo fmt --check`: clean
+
 ## [0.4.2] - 2026-02-25
 
 ### GPU Integration Tests + Cross-Spring Benchmarks + Doc Refresh

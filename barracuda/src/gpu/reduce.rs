@@ -358,4 +358,166 @@ mod tests {
         assert!((sample_variance(&vals)).abs() < 1e-10);
         assert!((sample_std_dev(&vals)).abs() < 1e-10);
     }
+
+    // ── SeasonalStats struct ───────────────────────────────────────────────
+
+    #[test]
+    fn test_seasonal_stats_debug_clone_copy() {
+        let stats = SeasonalStats {
+            total: 10.0,
+            mean: 2.0,
+            max: 4.0,
+            min: 0.0,
+            std_dev: 1.5,
+            count: 5,
+        };
+        let _ = format!("{stats:?}");
+        let cloned = stats;
+        let copy = stats;
+        assert_eq!(copy.count, cloned.count);
+        assert_eq!(cloned.count, 5);
+    }
+
+    #[test]
+    fn test_compute_seasonal_stats_all_same_values() {
+        let vals = [7.5; 20];
+        let stats = compute_seasonal_stats(&vals);
+        assert_eq!(stats.count, 20);
+        assert!((stats.total - 150.0).abs() < 1e-10);
+        assert!((stats.mean - 7.5).abs() < 1e-10);
+        assert!((stats.max - 7.5).abs() < 1e-10);
+        assert!((stats.min - 7.5).abs() < 1e-10);
+        assert!((stats.std_dev).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_sample_variance_n_less_than_two() {
+        assert!((sample_variance(&[])).abs() < 1e-10);
+        assert!((sample_variance(&[42.0])).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_hand_computed_stats() {
+        // [1, 3, 5, 7, 9] → sum=25, mean=5, var=10, std=√10
+        let vals = [1.0, 3.0, 5.0, 7.0, 9.0];
+        let stats = compute_seasonal_stats(&vals);
+        assert!((stats.total - 25.0).abs() < 1e-10);
+        assert!((stats.mean - 5.0).abs() < 1e-10);
+        assert!((stats.max - 9.0).abs() < 1e-10);
+        assert!((stats.min - 1.0).abs() < 1e-10);
+        assert!((stats.std_dev - 10.0_f64.sqrt()).abs() < 1e-10);
+    }
+
+    // ── SeasonalReducer (device-backed, skips if no GPU) ────────────────────
+
+    fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
+        pollster::block_on(barracuda::device::WgpuDevice::new_f64_capable())
+            .ok()
+            .map(std::sync::Arc::new)
+    }
+
+    #[test]
+    fn test_seasonal_reducer_new_and_sum() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for SeasonalReducer");
+            return;
+        };
+        let reducer = SeasonalReducer::new(device).unwrap();
+        let vals = [1.0, 2.0, 3.0, 4.0, 5.0];
+        let sum = reducer.sum(&vals).unwrap();
+        assert!((sum - 15.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_seasonal_reducer_max_min_sum_of_squares() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for SeasonalReducer");
+            return;
+        };
+        let reducer = SeasonalReducer::new(device).unwrap();
+        let vals = [2.0, 4.0, 6.0, 8.0];
+        assert!((reducer.max(&vals).unwrap() - 8.0).abs() < 1e-10);
+        assert!((reducer.min(&vals).unwrap() - 2.0).abs() < 1e-10);
+        // sum of squares: 4+16+36+64 = 120
+        assert!((reducer.sum_of_squares(&vals).unwrap() - 120.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_seasonal_reducer_compute_stats_empty() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for SeasonalReducer");
+            return;
+        };
+        let reducer = SeasonalReducer::new(device).unwrap();
+        let stats = reducer.compute_stats(&[]).unwrap();
+        assert_eq!(stats.count, 0);
+        assert!((stats.total).abs() < 1e-10);
+        assert!(stats.max == f64::NEG_INFINITY);
+        assert!(stats.min == f64::INFINITY);
+    }
+
+    #[test]
+    fn test_seasonal_reducer_compute_stats_single_element() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for SeasonalReducer");
+            return;
+        };
+        let reducer = SeasonalReducer::new(device).unwrap();
+        let vals = [42.0];
+        let stats = reducer.compute_stats(&vals).unwrap();
+        assert_eq!(stats.count, 1);
+        assert!((stats.total - 42.0).abs() < 1e-10);
+        assert!((stats.mean - 42.0).abs() < 1e-10);
+        assert!((stats.std_dev).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_seasonal_reducer_compute_stats_matches_cpu() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for SeasonalReducer");
+            return;
+        };
+        let reducer = SeasonalReducer::new(device).unwrap();
+        let vals: Vec<f64> = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
+            .into_iter()
+            .collect();
+        let gpu_stats = reducer.compute_stats(&vals).unwrap();
+        let cpu_stats = compute_seasonal_stats(&vals);
+        assert_eq!(gpu_stats.count, cpu_stats.count);
+        assert!((gpu_stats.total - cpu_stats.total).abs() < 1e-6);
+        assert!((gpu_stats.mean - cpu_stats.mean).abs() < 1e-6);
+        assert!((gpu_stats.max - cpu_stats.max).abs() < 1e-10);
+        assert!((gpu_stats.min - cpu_stats.min).abs() < 1e-10);
+        assert!((gpu_stats.std_dev - cpu_stats.std_dev).abs() < 0.01);
+    }
+
+    #[test]
+    fn test_seasonal_reducer_cpu_path_small_array() {
+        // N=10 < 1024 → CPU path in FusedMapReduceF64
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for SeasonalReducer");
+            return;
+        };
+        let reducer = SeasonalReducer::new(device).unwrap();
+        let vals: Vec<f64> = (0..10).map(f64::from).collect();
+        let sum = reducer.sum(&vals).unwrap();
+        assert!((sum - 45.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_seasonal_reducer_gpu_path_large_array() {
+        // N=1024 → GPU dispatch threshold
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for SeasonalReducer");
+            return;
+        };
+        let reducer = SeasonalReducer::new(device).unwrap();
+        let vals: Vec<f64> = (0..1024).map(f64::from).collect();
+        let expected_sum: f64 = (0..1024).map(f64::from).sum();
+        let sum = reducer.sum(&vals).unwrap();
+        assert!(
+            (sum - expected_sum).abs() < 1e-4,
+            "sum={sum} expected={expected_sum}"
+        );
+    }
 }

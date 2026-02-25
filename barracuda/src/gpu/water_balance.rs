@@ -398,4 +398,169 @@ mod tests {
             results[0]
         );
     }
+
+    #[test]
+    fn test_simulate_season_single_day() {
+        let engine = BatchedWaterBalance::new(0.30, 0.10, 500.0, 0.5);
+        let inputs = vec![DailyInput {
+            precipitation: 5.0,
+            irrigation: 10.0,
+            et0: 4.0,
+            kc: 1.0,
+        }];
+        let summary = engine.simulate_season(&inputs);
+        assert_eq!(summary.daily_outputs.len(), 1);
+        assert!(summary.mass_balance_error < 0.01);
+        assert!((summary.total_precipitation - 5.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_simulate_season_empty_input() {
+        let engine = BatchedWaterBalance::new(0.30, 0.10, 500.0, 0.5);
+        let summary = engine.simulate_season(&[]);
+        assert!(summary.daily_outputs.is_empty());
+        assert!((summary.total_actual_et).abs() < 1e-10);
+        assert!((summary.total_precipitation).abs() < 1e-10);
+        assert!((summary.mass_balance_error).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_season_mass_balance_explicit() {
+        let engine = BatchedWaterBalance::new(0.30, 0.10, 500.0, 0.5);
+        let inputs: Vec<DailyInput> = (0..20)
+            .map(|day| DailyInput {
+                precipitation: if day % 3 == 0 { 8.0 } else { 0.0 },
+                irrigation: if day == 10 { 30.0 } else { 0.0 },
+                et0: 3.5,
+                kc: 1.0,
+            })
+            .collect();
+        let summary = engine.simulate_season(&inputs);
+        assert!(
+            summary.mass_balance_error < 0.01,
+            "Mass balance error: {}",
+            summary.mass_balance_error
+        );
+        let total_irrigation: f64 = inputs.iter().map(|d| d.irrigation).sum();
+        let inflow = summary.total_precipitation + total_irrigation;
+        let total_runoff: f64 = summary.daily_outputs.iter().map(|o| o.runoff).sum();
+        let outflow = summary.total_actual_et + summary.total_deep_percolation + total_runoff;
+        let storage_change = 0.0 - summary.final_depletion;
+        let residual = (inflow - outflow - storage_change).abs();
+        assert!(
+            residual < 0.01,
+            "Explicit mass balance residual: {residual}"
+        );
+    }
+
+    fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
+        pollster::block_on(barracuda::device::WgpuDevice::new_f64_capable())
+            .ok()
+            .map(std::sync::Arc::new)
+    }
+
+    #[test]
+    fn test_gpu_step_device_empty() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for BatchedWaterBalance");
+            return;
+        };
+        let engine = BatchedWaterBalance::with_gpu(0.30, 0.10, 500.0, 0.5, device).unwrap();
+        let results = engine.gpu_step(&[]).unwrap();
+        assert!(results.is_empty());
+    }
+
+    #[test]
+    fn test_gpu_step_device_single_field() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for BatchedWaterBalance");
+            return;
+        };
+        let engine = BatchedWaterBalance::with_gpu(0.30, 0.10, 500.0, 0.5, device).unwrap();
+        let fields = vec![FieldDayInput {
+            dr_prev: 20.0,
+            precipitation: 5.0,
+            irrigation: 0.0,
+            etc: 4.0,
+            taw: 100.0,
+            raw: 50.0,
+            p: 0.5,
+        }];
+        let results = engine.gpu_step(&fields).unwrap();
+        assert_eq!(results.len(), 1);
+        let expected = 1.0f64.mul_add(4.0, 20.0 - 5.0 - 0.0);
+        assert!(
+            (results[0] - expected).abs() < 1e-6,
+            "GPU {} vs expected {}",
+            results[0],
+            expected
+        );
+    }
+
+    #[test]
+    fn test_gpu_step_device_matches_cpu() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for BatchedWaterBalance");
+            return;
+        };
+        let gpu_engine = BatchedWaterBalance::with_gpu(0.30, 0.10, 500.0, 0.5, device).unwrap();
+        let cpu_engine = BatchedWaterBalance::new(0.30, 0.10, 500.0, 0.5);
+        let fields: Vec<FieldDayInput> = (0..100)
+            .map(|i| FieldDayInput {
+                dr_prev: f64::from(i) * 0.5,
+                precipitation: 2.0,
+                irrigation: 0.0,
+                etc: 5.0,
+                taw: 100.0,
+                raw: 50.0,
+                p: 0.5,
+            })
+            .collect();
+        let gpu_results = gpu_engine.gpu_step(&fields).unwrap();
+        let cpu_results = cpu_engine.gpu_step(&fields).unwrap();
+        assert_eq!(gpu_results.len(), cpu_results.len());
+        for (g, c) in gpu_results.iter().zip(&cpu_results) {
+            assert!((g - c).abs() < 1e-6, "GPU {g} vs CPU {c}");
+        }
+    }
+
+    #[test]
+    fn test_gpu_step_device_large_batch() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for BatchedWaterBalance");
+            return;
+        };
+        let engine = BatchedWaterBalance::with_gpu(0.30, 0.10, 500.0, 0.5, device).unwrap();
+        let fields: Vec<FieldDayInput> = (0..500)
+            .map(|i| FieldDayInput {
+                dr_prev: (f64::from(i) % 80.0),
+                precipitation: 1.0,
+                irrigation: 0.0,
+                etc: 4.0,
+                taw: 100.0,
+                raw: 50.0,
+                p: 0.5,
+            })
+            .collect();
+        let results = engine.gpu_step(&fields).unwrap();
+        assert_eq!(results.len(), 500);
+        for &dr in &results {
+            assert!(
+                (0.0..=100.0 + 1e-6).contains(&dr),
+                "Depletion out of range: {dr}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_with_gpu_debug_format() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for BatchedWaterBalance");
+            return;
+        };
+        let engine = BatchedWaterBalance::with_gpu(0.30, 0.10, 500.0, 0.5, device).unwrap();
+        let dbg = format!("{engine:?}");
+        assert!(dbg.contains("BatchedWaterBalance"));
+        assert!(dbg.contains("true"));
+    }
 }

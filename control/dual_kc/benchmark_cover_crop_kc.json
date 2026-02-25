@@ -12,7 +12,8 @@
     "baseline_command": "python control/dual_kc/cover_crop_dual_kc.py",
     "baseline_commit": "94cc51d",
     "python_version": "3.10.12",
-    "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values"
+    "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
+    "_tolerance_justification": "Cover crop Kcb ranges from literature (Islam et al. 2014, Allen 1998); ET reduction bounds (5-50%) reflect field variability across cover crop systems."
   },
   "cover_crop_kcb": {
     "_description": "Basal Kc for common cover crops in no-till systems. Based on FAO-56 Table 17 + literature adjustments for cover crop growth habits.",

@@ -654,7 +654,10 @@ fn test_all_soil_textures_hydraulic_properties() {
 #[test]
 fn test_correction_quadratic_fit() {
     let x = [1.0, 2.0, 3.0, 4.0, 5.0];
-    let y: Vec<f64> = x.iter().map(|&xi| 0.5 * xi * xi + 2.0 * xi + 1.0).collect();
+    let y: Vec<f64> = x
+        .iter()
+        .map(|&xi| (0.5_f64 * xi).mul_add(xi, 2.0f64.mul_add(xi, 1.0)))
+        .collect();
     let result = correction::fit_quadratic(&x, &y);
     assert!(result.is_some(), "quadratic fit should succeed");
     let fit = result.unwrap();
@@ -675,7 +678,7 @@ fn test_correction_exponential_fit() {
 #[test]
 fn test_correction_logarithmic_fit() {
     let x: [f64; 5] = [1.0, 2.0, 3.0, 4.0, 5.0];
-    let y: Vec<f64> = x.iter().map(|&xi| 3.0 * xi.ln() + 1.0).collect();
+    let y: Vec<f64> = x.iter().map(|&xi| 3.0f64.mul_add(xi.ln(), 1.0)).collect();
     let result = correction::fit_logarithmic(&x, &y);
     assert!(result.is_some(), "logarithmic fit should succeed");
     let fit = result.unwrap();

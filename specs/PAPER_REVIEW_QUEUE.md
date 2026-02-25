@@ -2,7 +2,7 @@
 
 **Last Updated**: February 25, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 11 completed (344/344 Python + 328 Rust tests + 8 GPU orchestrators), 4 queued. All completed papers use open data and systems.
+**Status**: 11 completed (344/344 Python + 371 lib + 97 integration + 8 GPU orchestrators), 4 queued. All completed papers use open data and systems.
 
 ---
 
@@ -35,19 +35,19 @@ All 11 completed papers have:
 
 ### Compute Pipeline Per Paper
 
-| Paper | Python Control | BarraCuda CPU | BarraCuda GPU | metalForge |
-|:-----:|:--------------:|:-------------:|:-------------:|:----------:|
-| 1 | 64/64 | 31/31 (`validate_et0`) | `BatchedEt0` GPU-FIRST | — |
-| 2 | 36/36 | 26/26 (`validate_soil`) | `fit_ridge` (ridge regression) | — |
-| 3 | 24/24 | 11/11 (`validate_iot`) | `StreamSmoother` (moving window) | — |
-| 4 | 18/18 | 13/13 (`validate_water_balance`) | `BatchedWaterBalance` GPU-STEP | — |
-| 5 | R²=0.967 | 23/23 (`validate_real_data`) | All 7 orchestrators | Future |
-| 6 | 63/63 | 61/61 (`validate_dual_kc`) | `BatchedDualKc` (Tier B) | Future |
-| 7 | 61/61 | 61/61 (`validate_regional_et0`) | `BatchedEt0` at scale | Future |
-| 8 | 40/40 | 40/40 (`validate_cover_crop`) | `BatchedDualKc` + mulch | Future |
-| 9 | 14/14 | 15/15 (`validate_richards`) | `BatchedRichards` **WIRED** | Future |
-| 10 | 14/14 | 14/14 (`validate_biochar`) | `fit_*_nm` **WIRED** | Future |
-| 11 | 10/10 | 11/11 (`validate_long_term_wb`) | `BatchedEt0` + `BatchedWaterBalance` | Future |
+| Paper | Python Control | BarraCuda CPU | BarraCuda GPU | metalForge Module |
+|:-----:|:--------------:|:-------------:|:-------------:|:-----------------:|
+| 1 | 64/64 | 31/31 (`validate_et0`) | `BatchedEt0` GPU-FIRST | `metrics` (RMSE, R²) |
+| 2 | 36/36 | 40/40 (`validate_soil`) | `fit_ridge` (ridge regression) | `regression` (4 models) |
+| 3 | 24/24 | 11/11 (`validate_iot`) | `StreamSmoother` (moving window) | `moving_window_f64` |
+| 4 | 18/18 | 13/13 (`validate_water_balance`) | `BatchedWaterBalance` GPU-STEP | `hydrology` (WB) |
+| 5 | R²=0.967 | 23/23 (`validate_real_data`) | All 8 orchestrators | All 4 modules |
+| 6 | 63/63 | 61/61 (`validate_dual_kc`) | `BatchedDualKc` (Tier B) | `hydrology` (Kc) |
+| 7 | 61/61 | 61/61 (`validate_regional_et0`) | `BatchedEt0` at scale | `metrics` (IA, NSE) |
+| 8 | 40/40 | 40/40 (`validate_cover_crop`) | `BatchedDualKc` + mulch | `hydrology` (cover Kc) |
+| 9 | 14/14 | 15/15 (`validate_richards`) | `BatchedRichards` **WIRED** | VG **absorbed** |
+| 10 | 14/14 | 14/14 (`validate_biochar`) | `fit_*_nm` **WIRED** | isotherm **absorbed** |
+| 11 | 10/10 | 11/11 (`validate_long_term_wb`) | `BatchedEt0` + `BatchedWB` | `hydrology` (60yr) |
 
 ---
 

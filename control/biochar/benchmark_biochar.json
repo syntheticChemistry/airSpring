@@ -9,13 +9,15 @@
         "baseline_command": "python control/biochar/biochar_isotherms.py",
         "python_version": "3.10.12",
         "reproduction_note": "Re-run baseline_command to regenerate expected values",
+        "baseline_commit": "3afc229",
         "references": [
             "Kumari, Dong & Safferman (2025) Phosphorus adsorption and recovery from waste streams using biochar. Applied Water Science 15(7):162",
             "Langmuir (1918) The adsorption of gases on plane surfaces. J Am Chem Soc 40:1361-1403",
             "Freundlich (1906) Über die Adsorption in Lösungen. Z Phys Chem 57:385-470",
             "Yao et al. (2011) Biochar from anaerobically digested sugar beet tailings: characterization and phosphate removal. J Environ Qual 40:767-774",
             "Takaya et al. (2016) Phosphate and ammonium sorption capacity of biochar. Chemosphere 145:518-527"
-        ]
+        ],
+        "_tolerance_justification": "Ranges accommodate nonlinear fitting variability — linearized LS vs scipy.curve_fit may converge to slightly different optima. R² > 0.95 threshold from Kumari et al. (2025) Table 3."
     },
     "isotherm_data": {
         "description": "Representative phosphorus adsorption data from biochar studies",

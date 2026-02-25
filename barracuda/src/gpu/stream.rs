@@ -217,4 +217,185 @@ mod tests {
         assert_eq!(result.min.len(), 3);
         assert_eq!(result.max.len(), 3);
     }
+
+    // ── Edge cases: window size, empty, zero ───────────────────────────────
+
+    #[test]
+    fn test_cpu_window_size_one() {
+        // Window size 1: each output = input (no smoothing)
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        let result = smooth_cpu(&data, 1).unwrap();
+        assert_eq!(result.len, 5);
+        assert_eq!(result.mean, vec![1.0, 2.0, 3.0, 4.0, 5.0]);
+        for &v in &result.variance {
+            assert!(v.abs() < 1e-10);
+        }
+    }
+
+    #[test]
+    fn test_cpu_empty_data() {
+        assert!(smooth_cpu(&[], 5).is_none());
+    }
+
+    #[test]
+    fn test_cpu_zero_window() {
+        assert!(smooth_cpu(&[1.0, 2.0, 3.0], 0).is_none());
+    }
+
+    #[test]
+    fn test_cpu_window_equals_data_length() {
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        let result = smooth_cpu(&data, 5).unwrap();
+        assert_eq!(result.len, 1);
+        assert!((result.mean[0] - 3.0).abs() < 1e-10);
+        assert!((result.min[0] - 1.0).abs() < 1e-10);
+        assert!((result.max[0] - 5.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_cpu_window_greater_than_data() {
+        let data = vec![1.0, 2.0, 3.0];
+        assert!(smooth_cpu(&data, 5).is_none());
+    }
+
+    // ── Hand-computed moving average ───────────────────────────────────────
+
+    #[test]
+    fn test_cpu_hand_computed_moving_average() {
+        // [1, 2, 3, 4, 5] window=3
+        // Window 1: [1,2,3] → mean=2.0
+        // Window 2: [2,3,4] → mean=3.0
+        // Window 3: [3,4,5] → mean=4.0
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        let result = smooth_cpu(&data, 3).unwrap();
+        assert_eq!(result.len, 3);
+        assert!((result.mean[0] - 2.0).abs() < 1e-10);
+        assert!((result.mean[1] - 3.0).abs() < 1e-10);
+        assert!((result.mean[2] - 4.0).abs() < 1e-10);
+        // Variance of [1,2,3]: mean=2, ss=(1+0+1)/3 = 2/3
+        assert!((result.variance[0] - 2.0 / 3.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_cpu_min_max_per_window() {
+        let data = vec![10.0, 5.0, 15.0, 3.0, 20.0];
+        let result = smooth_cpu(&data, 3).unwrap();
+        // Window 1: [10,5,15] → min=5, max=15
+        assert!((result.min[0] - 5.0).abs() < 1e-10);
+        assert!((result.max[0] - 15.0).abs() < 1e-10);
+        // Window 2: [5,15,3] → min=3, max=15
+        assert!((result.min[1] - 3.0).abs() < 1e-10);
+        assert!((result.max[1] - 15.0).abs() < 1e-10);
+        // Window 3: [15,3,20] → min=3, max=20
+        assert!((result.min[2] - 3.0).abs() < 1e-10);
+        assert!((result.max[2] - 20.0).abs() < 1e-10);
+    }
+
+    // ── Smoothing property: output variance ≤ input variance ─────────────────
+
+    #[test]
+    fn test_cpu_smoothing_reduces_variance() {
+        // Noisy signal: moving average should smooth it
+        let data: Vec<f64> = (0..50)
+            .map(|i| {
+                #[allow(clippy::cast_precision_loss)]
+                let x = f64::from(i);
+                (x * 0.3).sin().mul_add(2.0, x) // oscillating noise
+            })
+            .collect();
+        let result = smooth_cpu(&data, 10).unwrap();
+        let input_var = crate::gpu::reduce::sample_variance(&data);
+        #[allow(clippy::cast_precision_loss)]
+        let output_var_mean: f64 =
+            result.variance.iter().sum::<f64>() / result.variance.len() as f64;
+        // Smoothed output should have lower average variance per window
+        assert!(
+            output_var_mean < input_var * 1.5,
+            "smoothing should reduce variance: output_avg_var={output_var_mean} input_var={input_var}"
+        );
+    }
+
+    #[test]
+    fn test_cpu_constant_signal_zero_variance() {
+        let data = vec![7.0; 20];
+        let result = smooth_cpu(&data, 5).unwrap();
+        for &v in &result.variance {
+            assert!(v.abs() < 1e-10);
+        }
+    }
+
+    // ── SmoothedSeries struct ───────────────────────────────────────────────
+
+    #[test]
+    fn test_smoothed_series_clone() {
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        let result = smooth_cpu(&data, 3).unwrap();
+        let cloned = result.clone();
+        assert_eq!(cloned.len, result.len);
+        assert_eq!(cloned.window_size, result.window_size);
+    }
+
+    // ── StreamSmoother (device-backed, skips if no GPU) ───────────────────────
+
+    fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
+        pollster::block_on(barracuda::device::WgpuDevice::new_f64_capable())
+            .ok()
+            .map(std::sync::Arc::new)
+    }
+
+    #[test]
+    fn test_stream_smoother_new_and_smooth() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for StreamSmoother");
+            return;
+        };
+        let smoother = StreamSmoother::new(device);
+        let data = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
+        let result = smoother.smooth(&data, 3).unwrap();
+        assert_eq!(result.len, 8);
+        assert_eq!(result.window_size, 3);
+        let cpu_result = smooth_cpu(&data, 3).unwrap();
+        assert_eq!(result.mean.len(), cpu_result.mean.len());
+        for (i, (&g, &c)) in result.mean.iter().zip(&cpu_result.mean).enumerate() {
+            assert!((g - c).abs() < 0.01, "mean[{i}]: GPU={g} CPU={c}");
+        }
+    }
+
+    #[test]
+    fn test_stream_smoother_empty_data_error() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for StreamSmoother");
+            return;
+        };
+        let smoother = StreamSmoother::new(device);
+        let result = smoother.smooth(&[], 5);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_stream_smoother_window_too_large_error() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for StreamSmoother");
+            return;
+        };
+        let smoother = StreamSmoother::new(device);
+        let data = vec![1.0, 2.0, 3.0];
+        let result = smoother.smooth(&data, 5);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_stream_smoother_window_size_one() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for StreamSmoother");
+            return;
+        };
+        let smoother = StreamSmoother::new(device);
+        let data = vec![1.0, 2.0, 3.0];
+        let result = smoother.smooth(&data, 1).unwrap();
+        assert_eq!(result.len, 3);
+        assert!((result.mean[0] - 1.0).abs() < 0.01);
+        assert!((result.mean[1] - 2.0).abs() < 0.01);
+        assert!((result.mean[2] - 3.0).abs() < 0.01);
+    }
 }

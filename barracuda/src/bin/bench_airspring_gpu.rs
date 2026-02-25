@@ -95,8 +95,7 @@ fn time_fn<F: FnMut() -> f64>(mut f: F, warmup: usize, measure: usize) -> (f64, 
     (per_call_us, checksum)
 }
 
-fn run_all_benchmarks() {
-    // ── ET₀ Batched ──────────────────────────────────────────────────
+fn bench_et0() {
     println!("── Batched ET₀ (batched_elementwise_f64, hotSpring pow_f64 fix) ──");
     println!("  {:>8}  {:>12}  {:>12}", "N", "CPU (µs)", "ops/sec");
 
@@ -107,8 +106,9 @@ fn run_all_benchmarks() {
         let ops_per_sec = (n as f64) / (cpu_us / 1_000_000.0);
         println!("  {n:>8}  {cpu_us:>12.1}  {ops_per_sec:>12.0}");
     }
+}
 
-    // ── Seasonal Reduce ──────────────────────────────────────────────
+fn bench_reduce() {
     println!();
     println!("── Seasonal Reduce (fused_map_reduce_f64, wetSpring origin, TS-004 fix) ──");
     println!("  {:>8}  {:>12}  {:>12}", "N", "CPU (µs)", "M elem/sec");
@@ -119,8 +119,9 @@ fn run_all_benchmarks() {
         let m_elem_sec = f64::from(n) / (cpu_us / 1_000_000.0) / 1e6;
         println!("  {n:>8}  {cpu_us:>12.1}  {m_elem_sec:>12.1}");
     }
+}
 
-    // ── Stream Smoothing ─────────────────────────────────────────────
+fn bench_stream() {
     println!();
     println!("── Stream Smoothing (moving_window.wgsl, wetSpring S28+ environmental) ──");
     println!(
@@ -141,8 +142,9 @@ fn run_all_benchmarks() {
         let m_elem_sec = f64::from(n) / (cpu_us / 1_000_000.0) / 1e6;
         println!("  {n:>8}  {w:>8}  {cpu_us:>12.1}  {m_elem_sec:>12.1}");
     }
+}
 
-    // ── Kriging ──────────────────────────────────────────────────────
+fn bench_kriging() {
     println!();
     println!("── Kriging (kriging_f64.wgsl, wetSpring spatial interpolation) ──");
     println!("  {:>8}  {:>8}  {:>12}", "Sensors", "Targets", "CPU (µs)");
@@ -154,7 +156,7 @@ fn run_all_benchmarks() {
                 kriging::SensorReading {
                     x: fi * 10.0,
                     y: fi * 5.0,
-                    vwc: 0.25 + fi * 0.01,
+                    vwc: 0.01f64.mul_add(fi, 0.25),
                 }
             })
             .collect();
@@ -170,8 +172,9 @@ fn run_all_benchmarks() {
         let (cpu_us, _) = time_fn(|| bench_kriging_cpu(&sensors, &targets), WARMUP, MEASURE);
         println!("  {ns:>8}  {nt:>8}  {cpu_us:>12.1}");
     }
+}
 
-    // ── Ridge Regression ─────────────────────────────────────────────
+fn bench_ridge() {
     println!();
     println!("── Ridge Regression (barracuda::linalg::ridge, wetSpring ESN calibration) ──");
     println!("  {:>8}  {:>12}  {:>12}", "N", "CPU (µs)", "R²");
@@ -180,7 +183,7 @@ fn run_all_benchmarks() {
         let x: Vec<f64> = (0..n).map(|i| f64::from(i) * 0.01).collect();
         let y: Vec<f64> = x
             .iter()
-            .map(|&xi| 2.5f64.mul_add(xi, 0.3) + (xi * 0.1).sin() * 0.01)
+            .map(|&xi| (xi * 0.1).sin().mul_add(0.01, 2.5f64.mul_add(xi, 0.3)))
             .collect();
         let mut r2_val = 0.0;
         let (cpu_us, _) = time_fn(
@@ -195,8 +198,9 @@ fn run_all_benchmarks() {
         );
         println!("  {n:>8}  {cpu_us:>12.1}  {r2_val:>12.6}");
     }
+}
 
-    // ── Richards PDE (barracuda::pde::richards — airSpring S40 absorption) ─
+fn bench_richards() {
     println!();
     println!("── Richards PDE (pde::richards, airSpring→ToadStool S40 absorption) ──");
     println!("  Solver uses hotSpring df64 precision for VG constitutive relations.");
@@ -224,8 +228,9 @@ fn run_all_benchmarks() {
         let sims_per_sec = 1_000_000.0 / cpu_us;
         println!("  {n_nodes:>8}  {cpu_us:>12.1}  {sims_per_sec:>12.0}");
     }
+}
 
-    // ── Isotherm fitting (barracuda::optimize, neuralSpring NM optimizer) ─
+fn bench_isotherm() {
     println!();
     println!("── Isotherm Fitting (optimize::nelder_mead → multi_start, neuralSpring) ──");
     println!("  Linearized LS → single NM → multi-start global (LHS exploration).");
@@ -290,13 +295,21 @@ fn run_all_benchmarks() {
             "Multi-start NM (8×LHS)"
         );
     }
+}
 
-    // ── VG Retention (batch, pure arithmetic — GPU candidate) ────────
+fn bench_vg_theta() {
     println!();
     println!("── Van Genuchten θ(h) batch (pure arithmetic, GPU-ready via df64) ──");
     println!("  hotSpring df64 precision enables exact GPU retention curves.");
     println!("  {:>8}  {:>12}  {:>12}", "N", "CPU (µs)", "M evals/sec");
 
+    let sand = VanGenuchtenParams {
+        theta_r: 0.045,
+        theta_s: 0.43,
+        alpha: 0.145,
+        n_vg: 2.68,
+        ks: 712.8,
+    };
     for &n in &[1_000_i32, 10_000, 100_000] {
         let (cpu_us, _) = time_fn(
             || {
@@ -319,6 +332,17 @@ fn run_all_benchmarks() {
         let m_evals_sec = f64::from(n) / (cpu_us / 1_000_000.0) / 1e6;
         println!("  {n:>8}  {cpu_us:>12.1}  {m_evals_sec:>12.1}");
     }
+}
+
+fn run_all_benchmarks() {
+    bench_et0();
+    bench_reduce();
+    bench_stream();
+    bench_kriging();
+    bench_ridge();
+    bench_richards();
+    bench_isotherm();
+    bench_vg_theta();
 }
 
 fn main() {
