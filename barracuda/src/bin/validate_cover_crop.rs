@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Validate cover crop dual Kc + no-till mulch effects against Python control.
 //!
 //! Benchmark: `control/dual_kc/benchmark_cover_crop_kc.json`
@@ -16,8 +17,7 @@ use airspring_barracuda::validation::{
     self, json_array, json_f64, json_field, json_str, parse_benchmark_json, ValidationHarness,
 };
 
-const BENCHMARK_JSON: &str =
-    include_str!("../../../control/dual_kc/benchmark_cover_crop_kc.json");
+const BENCHMARK_JSON: &str = include_str!("../../../control/dual_kc/benchmark_cover_crop_kc.json");
 
 fn validate_cover_crop_kcb(v: &mut ValidationHarness) {
     validation::section("Cover crop Kcb physical reasonableness");
@@ -33,7 +33,10 @@ fn validate_cover_crop_kcb(v: &mut ValidationHarness) {
     for (name, crop) in crops {
         let kcb = crop.basal_coefficients();
         v.check_bool(
-            &format!("{name}: Kcb_ini ({:.2}) < Kcb_mid ({:.2})", kcb.kcb_ini, kcb.kcb_mid),
+            &format!(
+                "{name}: Kcb_ini ({:.2}) < Kcb_mid ({:.2})",
+                kcb.kcb_ini, kcb.kcb_mid
+            ),
             kcb.kcb_ini < kcb.kcb_mid,
         );
         v.check_bool(
@@ -51,7 +54,14 @@ fn validate_mulch_ke(v: &mut ValidationHarness, bench: &serde_json::Value) {
     println!();
     validation::section("Mulch reduces Ke proportionally");
 
-    for tc in json_array(bench, &["validation_checks", "mulch_reduces_evaporation", "test_cases"]) {
+    for tc in json_array(
+        bench,
+        &[
+            "validation_checks",
+            "mulch_reduces_evaporation",
+            "test_cases",
+        ],
+    ) {
         let result = dual_kc::mulched_ke(
             json_field(tc, "kr"),
             json_field(tc, "kcb"),
@@ -59,7 +69,12 @@ fn validate_mulch_ke(v: &mut ValidationHarness, bench: &serde_json::Value) {
             json_field(tc, "few"),
             json_field(tc, "mulch_factor"),
         );
-        v.check_abs(json_str(tc, "label"), result, json_field(tc, "expected_ke"), 1e-6);
+        v.check_abs(
+            json_str(tc, "label"),
+            result,
+            json_field(tc, "expected_ke"),
+            1e-6,
+        );
     }
 }
 
@@ -122,7 +137,8 @@ fn validate_notill_vs_conventional(v: &mut ValidationHarness, bench: &serde_json
     );
 
     let savings_pct = 100.0 * (1.0 - notill_et / conv_et);
-    let expected_range = &bench["validation_checks"]["no_till_conserves_water"]["expected_et_reduction_pct"];
+    let expected_range =
+        &bench["validation_checks"]["no_till_conserves_water"]["expected_et_reduction_pct"];
     let min_pct = json_f64(expected_range, &["min"]).expect("expected_et_reduction_pct.min");
     let max_pct = json_f64(expected_range, &["max"]).expect("expected_et_reduction_pct.max");
 
@@ -139,7 +155,9 @@ fn validate_notill_vs_conventional(v: &mut ValidationHarness, bench: &serde_json
         notill_final.de < conv_final.de,
     );
 
-    println!("  Conventional: {conv_et:.2} mm, No-till: {notill_et:.2} mm, Savings: {savings_pct:.1}%");
+    println!(
+        "  Conventional: {conv_et:.2} mm, No-till: {notill_et:.2} mm, Savings: {savings_pct:.1}%"
+    );
 }
 
 fn validate_transition_phases(v: &mut ValidationHarness, bench: &serde_json::Value) {
@@ -151,8 +169,14 @@ fn validate_transition_phases(v: &mut ValidationHarness, bench: &serde_json::Val
         let kcb = json_field(phase, "kcb");
         let mf = json_field(phase, "mulch_factor");
 
-        v.check_bool(&format!("{period}: Kcb={kcb} in [0, 1.5]"), (0.0..=1.5).contains(&kcb));
-        v.check_bool(&format!("{period}: mf={mf} in [0, 1]"), (0.0..=1.0).contains(&mf));
+        v.check_bool(
+            &format!("{period}: Kcb={kcb} in [0, 1.5]"),
+            (0.0..=1.5).contains(&kcb),
+        );
+        v.check_bool(
+            &format!("{period}: mf={mf} in [0, 1]"),
+            (0.0..=1.0).contains(&mf),
+        );
     }
 }
 
@@ -168,11 +192,17 @@ fn validate_islam_observations(v: &mut ValidationHarness, bench: &serde_json::Va
 
     let nt_soc = f("soil_organic_carbon_pct", "no_till");
     let cv_soc = f("soil_organic_carbon_pct", "conventional");
-    v.check_bool(&format!("SOC: no-till ({nt_soc}%) > conventional ({cv_soc}%)"), nt_soc > cv_soc);
+    v.check_bool(
+        &format!("SOC: no-till ({nt_soc}%) > conventional ({cv_soc}%)"),
+        nt_soc > cv_soc,
+    );
 
     let nt_bd = f("bulk_density_g_cm3", "no_till");
     let cv_bd = f("bulk_density_g_cm3", "conventional");
-    v.check_bool(&format!("BD: no-till ({nt_bd}) < conventional ({cv_bd})"), nt_bd < cv_bd);
+    v.check_bool(
+        &format!("BD: no-till ({nt_bd}) < conventional ({cv_bd})"),
+        nt_bd < cv_bd,
+    );
 
     let nt_inf = f("infiltration_rate_mm_hr", "no_till");
     let cv_inf = f("infiltration_rate_mm_hr", "conventional");
@@ -183,7 +213,10 @@ fn validate_islam_observations(v: &mut ValidationHarness, bench: &serde_json::Va
 
     let nt_awc = f("available_water_capacity_mm", "no_till");
     let cv_awc = f("available_water_capacity_mm", "conventional");
-    v.check_bool(&format!("AWC: no-till ({nt_awc}) > conventional ({cv_awc})"), nt_awc > cv_awc);
+    v.check_bool(
+        &format!("AWC: no-till ({nt_awc}) > conventional ({cv_awc})"),
+        nt_awc > cv_awc,
+    );
 }
 
 fn main() {

@@ -1,0 +1,72 @@
+{
+    "_provenance": {
+        "method": "Langmuir and Freundlich isotherm fitting for P adsorption on biochar",
+        "digitized_by": "airSpring control experiment team",
+        "created": "2026-02-25",
+        "validated_by": "control/biochar/biochar_isotherms.py",
+        "repository": "ecoPrimals/airSpring",
+        "baseline_script": "control/biochar/biochar_isotherms.py",
+        "baseline_command": "python control/biochar/biochar_isotherms.py",
+        "python_version": "3.10.12",
+        "reproduction_note": "Re-run baseline_command to regenerate expected values",
+        "references": [
+            "Kumari, Dong & Safferman (2025) Phosphorus adsorption and recovery from waste streams using biochar. Applied Water Science 15(7):162",
+            "Langmuir (1918) The adsorption of gases on plane surfaces. J Am Chem Soc 40:1361-1403",
+            "Freundlich (1906) Über die Adsorption in Lösungen. Z Phys Chem 57:385-470",
+            "Yao et al. (2011) Biochar from anaerobically digested sugar beet tailings: characterization and phosphate removal. J Environ Qual 40:767-774",
+            "Takaya et al. (2016) Phosphate and ammonium sorption capacity of biochar. Chemosphere 145:518-527"
+        ]
+    },
+    "isotherm_data": {
+        "description": "Representative phosphorus adsorption data from biochar studies",
+        "units": {"Ce": "mg/L", "qe": "mg/g"},
+        "datasets": {
+            "wood_biochar_500C": {
+                "source": "Representative of Takaya et al. (2016) and Kumari et al. (2025) wood-based biochar at 500°C",
+                "Ce": [1.0, 2.5, 5.0, 10.0, 20.0, 40.0, 60.0, 80.0, 100.0],
+                "qe": [0.85, 1.92, 3.45, 5.80, 8.90, 12.10, 13.80, 14.50, 14.90]
+            },
+            "sugar_beet_biochar": {
+                "source": "Representative of Yao et al. (2011) sugar beet tailings biochar",
+                "Ce": [0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 75.0, 100.0],
+                "qe": [1.20, 2.15, 3.50, 6.20, 8.90, 11.50, 14.20, 15.00, 15.40]
+            }
+        }
+    },
+    "validation_checks": {
+        "langmuir_fit": {
+            "description": "Langmuir model: qe = qmax * KL * Ce / (1 + KL * Ce)",
+            "checks": [
+                {"id": "wood_qmax_range", "description": "qmax 12-20 mg/g (typical for wood biochar)", "min": 12, "max": 20},
+                {"id": "wood_KL_positive", "description": "KL > 0 (favorable adsorption)"},
+                {"id": "wood_r2", "description": "R² > 0.95 (good fit)", "min_r2": 0.95},
+                {"id": "sugar_qmax_range", "description": "qmax 14-22 mg/g", "min": 14, "max": 22},
+                {"id": "sugar_r2", "description": "R² > 0.95", "min_r2": 0.95}
+            ]
+        },
+        "freundlich_fit": {
+            "description": "Freundlich model: qe = KF * Ce^(1/n)",
+            "checks": [
+                {"id": "wood_KF_positive", "description": "KF > 0"},
+                {"id": "wood_n_favorable", "description": "n > 1 (favorable adsorption)", "min_n": 1.0},
+                {"id": "wood_r2", "description": "R² > 0.90", "min_r2": 0.90},
+                {"id": "sugar_KF_positive", "description": "KF > 0"},
+                {"id": "sugar_n_range", "description": "n in [1, 10] (typical)", "min": 1, "max": 10}
+            ]
+        },
+        "model_comparison": {
+            "description": "Compare Langmuir vs Freundlich fit quality",
+            "checks": [
+                {"id": "langmuir_better_wood", "description": "Langmuir R² >= Freundlich R² for plateau data (typical)"},
+                {"id": "both_positive_params", "description": "All fitted parameters are positive"},
+                {"id": "residuals_random", "description": "Residuals show no systematic pattern (mean residual < 0.5 mg/g)"}
+            ]
+        },
+        "separation_factor": {
+            "description": "Langmuir separation factor RL = 1/(1+KL*C0) indicates favorability",
+            "checks": [
+                {"id": "rl_favorable", "description": "0 < RL < 1 at C0=100 mg/L (favorable)", "C0": 100}
+            ]
+        }
+    }
+}

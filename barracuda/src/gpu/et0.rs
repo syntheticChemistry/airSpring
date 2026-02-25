@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Batched ET₀ GPU orchestrator — GPU-first via `ToadStool` `BatchedElementwiseF64`.
 //!
 //! Dispatches N station-day ET₀ computations to the GPU via

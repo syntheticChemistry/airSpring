@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: February 25, 2026
-**Status**: 8 experiments, 306/306 Python + 224/224 Rust validation + 279 Rust tests
+**Status**: 11 experiments, 344/344 Python + 328 Rust tests + GPU wired (8 orchestrators)
 
 ---
 
@@ -15,11 +15,14 @@
 | 004 | Water balance scheduling (FAO-56 Ch 8) | Irrigation | **Complete** | Python (FAO-56 Ch 8) | `eco::water_balance` | 18+13 |
 | 005 | Real data pipeline (918 station-days) | Integration | **Complete** | Python + Open-Meteo API | All modules | R²=0.967+21 |
 
+| 006 | HYDRUS Richards Equation (van Genuchten-Mualem) | Environmental | **Complete** | Python + Rust CPU | `eco::richards` | 14+15 |
+| 007 | Biochar Adsorption Isotherms (Kumari et al. 2025) | Environmental | **Complete** | Python + Rust CPU | `eco::isotherm` | 14+14 |
 | 009 | FAO-56 Dual Kc (Allen 1998 Ch 7) | Irrigation | **Complete** | Python + Rust CPU | `eco::dual_kc` | 63+61 |
 | 010 | Regional ET₀ Intercomparison (6 MI stations) | Precision Ag | **Complete** | Python + Rust CPU | `eco::evapotranspiration` | 61+61 |
 | 011 | Cover Crop Dual Kc + No-Till (FAO-56 Ch 11) | Irrigation | **Complete** | Python + Rust CPU | `eco::dual_kc` (mulch) | 40+40 |
+| 015 | 60-Year Water Balance (Wooster OH, ERA5) | Integration | **Complete** | Python + Rust CPU | `eco::water_balance`, `eco::evapotranspiration` | 10+11 |
 
-**Total**: 306 Python checks + 287 Rust validation checks + 279 Rust tests + 65 cross-validation values
+**Total**: 344 Python checks + 328 Rust tests + 75 cross-validation values + 8 GPU orchestrators
 
 ---
 
@@ -44,9 +47,9 @@ Each experiment follows the same multi-phase protocol:
 3. Run `cargo test` (unit + integration)
 
 ### Phase 2: Cross-Validation
-1. Both Python and Rust emit 65 intermediate values to JSON
+1. Both Python and Rust emit 75 intermediate values to JSON
 2. `scripts/cross_validate.py` diffs them (tolerance: 1e-5)
-3. All 65 values must match
+3. All 75 values must match (includes Richards VG, isotherm predictions)
 
 ### Phase 3: GPU Evolution
 1. Wire CPU modules to GPU orchestrators via ToadStool primitives
@@ -65,7 +68,7 @@ Each experiment follows the same multi-phase protocol:
 
 **Rust**: `barracuda/src/eco/evapotranspiration.rs` — 23 FAO-56 functions + Hargreaves ET₀. `validate_et0` binary: 31/31 checks.
 
-**GPU**: `gpu::et0::BatchedEt0` via `BatchedElementwiseF64::fao56_et0_batch()` — GPU-FIRST dispatch. 12.6M ops/sec at N=10,000.
+**GPU**: `gpu::et0::BatchedEt0` via `BatchedElementwiseF64::fao56_et0_batch()` — GPU-FIRST dispatch. 12.5M ops/sec at N=10,000.
 
 **Key Result**: Bangkok 5.72, Uccle 3.88, Lyon 4.56 mm/day match paper exactly.
 
@@ -164,12 +167,45 @@ Spatial CV = 2.0% (tight clustering expected for Lower Michigan stations).
 
 ---
 
+### Exp 006: HYDRUS Richards Equation (Dong 2019 / van Genuchten 1980)
+
+**Paper**: Richards (1931), van Genuchten (1980), Dong et al. (2019) J Sustainable Water 5(4):04019005
+
+**Control**: `control/richards/richards_1d.py` — 14/14 checks. Van Genuchten retention, Mualem conductivity, sand infiltration, silt loam drainage, steady-state flux.
+
+**Rust**: `barracuda/src/eco/richards.rs` — Implicit Euler + Picard iteration, Thomas algorithm. `validate_richards` binary: 15/15 checks.
+
+**GPU**: `gpu::richards::BatchedRichards` wired to `barracuda::pde::richards::solve_richards` (Tier B). Cross-validates eco::richards (implicit Euler) against upstream (Crank-Nicolson) for physical reasonableness.
+
+### Exp 007: Biochar Adsorption Isotherms (Kumari et al. 2025)
+
+**Paper**: Kumari, Dong & Safferman (2025) Applied Water Science 15(7):162
+
+**Control**: `control/biochar/biochar_isotherms.py` — 14/14 checks. Langmuir and Freundlich isotherm fitting for P adsorption on wood and sugar beet biochar.
+
+**Rust**: `barracuda/src/eco/isotherm.rs` — Linearized least squares fitting. `validate_biochar` binary: 14/14 checks.
+
+**GPU**: `gpu::isotherm::fit_langmuir_nm` / `fit_freundlich_nm` wired to `barracuda::optimize::nelder_mead` (Tier B). Linearized LS as initial guess → NM refinement matches scipy.curve_fit.
+
+### Exp 015: 60-Year Water Balance Reconstruction
+
+**Data**: Open-Meteo ERA5 archive, 1960-2023, Wooster OH (OSU OARDC)
+
+**Control**: `control/long_term_wb/long_term_water_balance.py` — 10/10 checks. 64 growing seasons, decade trends, climate signal detection.
+
+**Rust**: Existing `eco::water_balance` + `eco::evapotranspiration::hargreaves_et0`. `validate_long_term_wb` binary: 11/11 checks.
+
+**GPU**: `BatchedEt0` + `BatchedWaterBalance` at 64-year scale (already wired)
+
+---
+
 ## Naming Convention
 
 Experiments follow `NNN_name` format:
 - `001`–`005`: Baseline reproduction (FAO-56, soil, IoT, water balance, real data)
+- `006`–`007`: Richards equation, biochar isotherms (Track 2)
 - `009`–`011`: Dual Kc, regional ET₀, cover crops + no-till
-- `006`+: Future experiments (see `specs/PAPER_REVIEW_QUEUE.md`)
+- `015`: Long-term water balance reconstruction (see `specs/PAPER_REVIEW_QUEUE.md`)
 
 ## Results
 

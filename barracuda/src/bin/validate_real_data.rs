@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Real data validation: compute ET₀ on Open-Meteo Michigan weather.
 //!
 //! Replaces `control/fao56/compute_et0_real_data.py` + `simulate_real_data.py`.
@@ -109,18 +110,20 @@ impl RuntimeConfig {
             .ok()
             .and_then(|v| v.parse().ok())
             .unwrap_or(DEFAULT_MAX_RMSE);
-        let data_dir = std::env::var("AIRSPRING_DATA_DIR")
-            .map(std::path::PathBuf::from)
-            .unwrap_or_else(|_| {
+        let data_dir = std::env::var("AIRSPRING_DATA_DIR").map_or_else(
+            |_| {
                 Path::new(env!("CARGO_MANIFEST_DIR"))
                     .parent()
                     .expect("CARGO_MANIFEST_DIR parent")
                     .join("data")
                     .join("open_meteo")
-            });
-        let stations = std::env::var("AIRSPRING_STATIONS")
-            .map(|s| s.split(',').map(|s| s.trim().to_string()).collect())
-            .unwrap_or_else(|_| Self::discover_stations(&data_dir, &season_start, &season_end));
+            },
+            std::path::PathBuf::from,
+        );
+        let stations = std::env::var("AIRSPRING_STATIONS").map_or_else(
+            |_| Self::discover_stations(&data_dir, &season_start, &season_end),
+            |s| s.split(',').map(|x| x.trim().to_string()).collect(),
+        );
 
         Self {
             season_start,
@@ -144,7 +147,8 @@ impl RuntimeConfig {
             .flatten()
             .filter_map(|entry| {
                 let name = entry.ok()?.file_name().into_string().ok()?;
-                name.strip_suffix(&suffix).map(|s| s.to_string())
+                name.strip_suffix(&suffix)
+                    .map(std::string::ToString::to_string)
             })
             .collect();
         stations.sort();
@@ -157,7 +161,10 @@ impl RuntimeConfig {
     }
 
     fn csv_filename(&self, station: &str) -> String {
-        format!("{station}_{}_{}_daily.csv", self.season_start, self.season_end)
+        format!(
+            "{station}_{}_{}_daily.csv",
+            self.season_start, self.season_end
+        )
     }
 }
 
@@ -312,9 +319,7 @@ fn validate_station_et0(
 fn validate_scenario(scenario: &Scenario, config: &RuntimeConfig, v: &mut ValidationHarness) {
     use airspring_barracuda::eco::water_balance;
 
-    let csv_path = config
-        .data_dir
-        .join(config.csv_filename(&scenario.station));
+    let csv_path = config.data_dir.join(config.csv_filename(&scenario.station));
     if !csv_path.exists() {
         println!(
             "  [SKIP] {} @ {}: CSV not found",
@@ -474,11 +479,16 @@ fn main() {
     let mut all_rust_et0 = Vec::new();
     let mut all_om_et0 = Vec::new();
 
-    println!("  Stations: {} ({})\n",
+    println!(
+        "  Stations: {} ({})\n",
         config.stations.len(),
         if std::env::var("AIRSPRING_STATIONS").is_ok() {
             "from AIRSPRING_STATIONS"
-        } else if config.stations.iter().any(|s| !DEFAULT_STATIONS.contains(&s.as_str())) {
+        } else if config
+            .stations
+            .iter()
+            .any(|s| !DEFAULT_STATIONS.contains(&s.as_str()))
+        {
             "discovered from filesystem"
         } else {
             "defaults"

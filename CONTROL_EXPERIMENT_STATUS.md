@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-02-25 (v0.3.10 — dual Kc, cover crops, regional ET₀, deep debt, GPU wiring)
+**Updated**: 2026-02-25 (v0.4.2 — Richards, biochar, 60-year WB, GPU integration tests, 16 binaries)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -54,11 +54,12 @@ bash scripts/run_all_baselines.sh
 # 5. Optionally run R ANOVA (requires R >= 4.0)
 # Rscript control/iot_irrigation/anova_irrigation.R
 
-# 6. Run Rust validation binaries (287 checks across 10 binaries)
+# 6. Run Rust validation binaries (327 checks across 13 binaries)
 cd barracuda
 for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   validate_sensor_calibration validate_real_data cross_validate \
-  validate_dual_kc validate_cover_crop validate_regional_et0; do
+  validate_dual_kc validate_cover_crop validate_regional_et0 \
+  validate_richards validate_biochar validate_long_term_wb; do
   cargo run --release --bin $bin
 done
 
@@ -224,7 +225,7 @@ Tools used: numpy, scipy (curve_fit), json (benchmarks), base Python math.
 All benchmark data digitized directly from published papers (FAO-56 tables,
 Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2 + yield data).
 
-### 2026-02-16 → 2026-02-25: Project Initialization → v0.3.10 (Rust — 287/287 PASS, 279 tests)
+### 2026-02-16 → 2026-02-25: Project Initialization → v0.4.0 (Rust — 327/327 PASS, 309 tests)
 
 - Created airSpring repository
 - Scaffolded Track 1 (Precision Agriculture) and Track 2 (Environmental Systems)
@@ -249,8 +250,11 @@ Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2 + yield data).
 | validate_dual_kc | T1 | 61/61 | FAO-56 Ch 7 Eqs 69/71-73/77, Table 17+19, multi-day sims |
 | validate_cover_crop | T1 | 40/40 | FAO-56 Ch 11 mulch, 5 cover crops, no-till vs conventional |
 | validate_regional_et0 | T1 | 61/61 | 6 MI stations, spatial CV, cross-station r, geographic consistency |
+| validate_richards | T2 | 15/15 | van Genuchten θ/K/C, implicit Euler + Picard, Thomas algorithm |
+| validate_biochar | T2 | 14/14 | Langmuir/Freundlich isotherms, wood + sugar beet biochar |
+| validate_long_term_wb | T1 | 11/11 | 64-year Wooster OH, Hargreaves ET₀, decade trends |
 
-**Total Rust: 287/287 validation checks PASS, 279 tests (201 unit + 78 integration) PASS**
+**Total Rust: 327/327 validation checks PASS, 309 tests (201 unit + 78 integration + 30 new) PASS**
 **Phase 2 cross-validation: 65/65 MATCH (Python↔Rust, tol=1e-5)**
 **Phase 3 GPU-first: 7 orchestrators wired, 4/4 ToadStool issues RESOLVED**
 **CPU benchmarks: ET₀ 12.7M station-days/s, dual Kc 59M days/s, mulched Kc 64M days/s**
@@ -358,16 +362,57 @@ following FAO-56 Chapter 8.
 **Goal**: Reproduce ET measurements from weighing lysimeter load cell data
 (Dong & Hansen, 2023). Deferred until supplementary data located.
 
-### Experiment 006: HYDRUS Benchmark — NOT STARTED (MEDIUM TERM)
+### Experiment 006: HYDRUS Richards Equation — PHASE 0+1 COMPLETE
 
-**Goal**: Implement pure Python 1D Richards equation solver (scipy ODE),
-validate against HYDRUS CW2D published results (Dong et al. 2019).
-Using open-source alternative to closed HYDRUS software.
+**Goal**: Implement pure 1D Richards equation solver (van Genuchten-Mualem),
+validate against published HYDRUS results and analytical solutions.
 
-### Experiment 007: Biochar Isotherms — NOT STARTED (MEDIUM TERM)
+**Phase 0 (Python baseline — 14/14 PASS):**
+- [x] van Genuchten retention curve (4 analytical checks)
+- [x] Mualem-van Genuchten conductivity (K(0)=Ks for 3 soils)
+- [x] Sand infiltration: wetting front, surface θ → θs
+- [x] Silt loam drainage: cumulative drainage, mass balance
+- [x] Steady-state flux: Darcy's law for all soils
+
+**Rust (Phase 1 — 15/15 PASS):**
+- [x] `eco::richards` — van Genuchten θ(h), K(h), C(h)
+- [x] Implicit Euler + Picard iteration solver
+- [x] Thomas algorithm for tridiagonal systems
+- [x] `validate_richards` binary: 15/15 checks
+
+### Experiment 007: Biochar Isotherms — PHASE 0+1 COMPLETE
 
 **Goal**: Fit Langmuir/Freundlich adsorption isotherms to published biochar
-data (Kumari, Dong & Safferman, 2025) using scipy curve_fit.
+phosphorus adsorption data (Kumari, Dong & Safferman, 2025).
+
+**Phase 0 (Python baseline — 14/14 PASS):**
+- [x] Langmuir fit: qmax, KL, R² for wood and sugar beet biochar
+- [x] Freundlich fit: KF, n, R² for both biochars
+- [x] Model comparison: Langmuir R² > Freundlich R² for plateau data
+- [x] Separation factor RL in (0,1) — favorable adsorption
+
+**Rust (Phase 1 — 14/14 PASS):**
+- [x] `eco::isotherm` — Langmuir, Freundlich models + linearized fitting
+- [x] `validate_biochar` binary: 14/14 checks
+- [x] Results match Python: wood qmax ≈ 18 mg/g, sugar qmax ≈ 16 mg/g
+
+### Experiment 015: 60-Year Water Balance — PHASE 0+1 COMPLETE
+
+**Goal**: Reconstruct 64 years (1960-2023) of growing season water balance
+for Wooster, OH (OSU Triplett-Van Doren tillage study site) using Open-Meteo
+ERA5 80-year archive and validated FAO-56 water balance.
+
+**Phase 0 (Python baseline — 10/10 PASS):**
+- [x] Download ERA5 data (64 growing seasons, May-Sep)
+- [x] FAO-56 water balance for corn on Wooster silt loam
+- [x] Physical reasonableness: ET₀ 400-800 mm, mass balance closure
+- [x] Climate trends: positive ET₀ trend, precip CV 22%, decade stability
+- [x] Cross-validation: ET/Precip ratio 0.6-1.8, irrigation in 100% of seasons
+
+**Rust (Phase 1 — 11/11 PASS):**
+- [x] Hargreaves ET₀ + existing water balance at 64-year scale
+- [x] `validate_long_term_wb` binary: 11/11 checks
+- [x] Rust Hargreaves vs Open-Meteo ET₀ within 1.4%
 
 ### Experiment 011: Cover Crop Dual Kc + No-Till — PHASE 0 COMPLETE
 
@@ -489,12 +534,12 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026 — Updated: February 25, 2026 (v0.3.10)*
-*Phase 0 Python baselines: 306/306 PASS (Exps 001-005, 009-011)*
+*Initialized: February 16, 2026 — Updated: February 25, 2026 (v0.4.0)*
+*Phase 0 Python baselines: 344/344 PASS (Exps 001-005, 006-007, 009-011, 015)*
 *Phase 0+ Real data pipeline: 918 station-days, ET₀ R²=0.97, 4 crop water balance*
-*Phase 1 BarraCuda Rust validation: 287/287 PASS (10 binaries), 279 tests + 40 forge*
+*Phase 1 BarraCuda Rust validation: 327/327 PASS (13 binaries), 309 tests + 40 forge*
 *Phase 2 Cross-validation: 65/65 MATCH (Python↔Rust, tol=1e-5)*
 *Phase 3 GPU-first: 7 orchestrators, 4/4 ToadStool issues RESOLVED*
 *CPU benchmarks: 12.7M ET₀/s, 59M dual Kc/s, 64M mulched Kc/s*
 *Quality: zero .unwrap() in production, zero unsafe, zero mocks in production*
-*Total: 306 Python + 287 Rust validation + 279 Rust tests + 65 cross-validation = 937 checks*
+*Total: 344 Python + 327 Rust validation + 309 Rust tests + 65 cross-validation = 1045 checks*

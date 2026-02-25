@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Soil moisture spatial interpolation via `ToadStool` Kriging.
 //!
 //! Wraps [`barracuda::ops::kriging_f64::KrigingF64`] with domain-specific types
@@ -26,8 +27,10 @@
 //! dispatch for large kriging systems, the [`KrigingInterpolator`] wrapper will
 //! automatically benefit.
 
-/// Squared-distance threshold below which a target is considered collocated
-/// with a sensor (i.e. "exact match"). Prevents division by zero in IDW.
+/// Squared distance below which a prediction point is considered
+/// co-located with a known observation. Set to 0.01 mm² to avoid
+/// division by zero in IDW weights while remaining far below any
+/// physical sensor spacing.
 const COLLOCATED_DIST_SQ: f64 = 1e-10;
 
 /// A soil moisture sensor reading with spatial coordinates.
@@ -203,6 +206,13 @@ const fn to_barracuda_variogram(v: SoilVariogram) -> kriging_f64::VariogramModel
 /// For proper ordinary kriging with variogram-based weights and prediction
 /// variance, use [`KrigingInterpolator`] instead.
 ///
+/// # Variogram usage
+///
+/// Only `nugget` and `sill` are used. The variance approximation uses
+/// γ(h) ≈ nugget + sill·(1 - exp(-h)) (exponential with implicit range=1).
+/// The variogram `range` is ignored; for range-aware variance, use
+/// [`KrigingInterpolator::interpolate`].
+///
 /// # Current Status
 ///
 /// CPU-only. For the device-backed path (proper kriging via LU solve),
@@ -260,7 +270,11 @@ pub fn interpolate_soil_moisture(
             0.0
         };
 
-        // Approximate variance from distance and variogram
+        // Approximate variance from distance and variogram.
+        // Uses γ(h) ≈ nugget + sill·(1 - exp(-h)) — a simplified exponential
+        // variogram with implicit range=1. The `range` field of the variogram
+        // is ignored in this IDW path. For proper variogram-based variance
+        // (including range), use [`KrigingInterpolator::interpolate`].
         let variance = if min_dist_sq < COLLOCATED_DIST_SQ {
             nugget
         } else {

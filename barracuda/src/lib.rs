@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 #![warn(clippy::pedantic)]
 #![allow(
     clippy::module_name_repetitions,
@@ -15,9 +16,11 @@
 //! - [`eco::crop`] — FAO-56 Table 12 crop coefficient (`Kc`) database (10 crops) + climate adjustment
 //! - [`eco::dual_kc`] — FAO-56 Ch 7+11 dual Kc (Kcb + Ke), cover crops, no-till mulch
 //! - [`eco::evapotranspiration`] — FAO-56 Penman-Monteith (low-level + high-level) + Hargreaves ET₀
+//! - [`eco::isotherm`] — Langmuir and Freundlich isotherm fitting for biochar adsorption
 //! - [`eco::sensor_calibration`] — `SoilWatch` 10 VWC calibration + irrigation recommendation
 //! - [`eco::soil_moisture`] — Dielectric sensor calibration (Topp equation)
 //! - [`eco::water_balance`] — Field-scale water budget (standalone + stateful APIs)
+//! - [`eco::richards`] — 1D Richards equation solver (van Genuchten-Mualem hydraulics)
 //!
 //! # GPU Acceleration (all `ToadStool` issues RESOLVED — `0c477306`)
 //! - [`gpu::et0`] — **GPU-first** batched ET₀ via `BatchedElementwiseF64::fao56_et0_batch()`
@@ -25,6 +28,8 @@
 //! - [`gpu::kriging`] — Soil moisture spatial interpolation (`KrigingInterpolator` ↔ `KrigingF64`)
 //! - [`gpu::reduce`] — **GPU** for N≥1024 (`SeasonalReducer` ↔ `FusedMapReduceF64`, TS-004 resolved)
 //! - [`gpu::stream`] — `IoT` stream smoothing (`StreamSmoother` ↔ `MovingWindowStats`, wetSpring S28+)
+//! - [`gpu::richards`] — 1D Richards PDE (`BatchedRichards` ↔ `pde::richards::solve_richards`)
+//! - [`gpu::isotherm`] — Batch isotherm fitting (`fit_*_nm` ↔ `optimize::nelder_mead`)
 //! - [`gpu::evolution_gaps`] — Living roadmap, 4/4 `ToadStool` issues resolved
 //!
 //! # I/O
@@ -46,6 +51,8 @@
 //! - `stats::std_dev` → cross-validation in integration tests
 //! - `linalg::ridge::ridge_regression` → calibration regression in [`eco::correction::fit_ridge`]
 //! - `ops::moving_window_stats` → `IoT` stream smoothing in [`gpu::stream::StreamSmoother`]
+//! - `pde::richards::solve_richards` → upstream Richards PDE in [`gpu::richards::BatchedRichards`]
+//! - `optimize::nelder_mead` → nonlinear isotherm fitting in [`gpu::isotherm`]
 //! - `validation::ValidationHarness` → validation binaries
 
 pub mod eco;

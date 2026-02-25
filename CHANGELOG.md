@@ -2,6 +2,103 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.4.2] - 2026-02-25
+
+### GPU Integration Tests + Cross-Spring Benchmarks + Doc Refresh
+
+Complete rewiring validation. Added integration tests for Richards and Isotherm
+GPU orchestrators. Expanded `bench_airspring_gpu` to exercise all 10 benchmark
+categories with cross-spring shader provenance. Comprehensive documentation
+refresh following wetSpring/hotSpring conventions. V005 handoff for ToadStool.
+
+#### Added
+- `gpu_integration.rs`: 5 new tests for Richards + Isotherm GPU orchestrators
+  - `test_gpu_richards_drainage_physical_bounds` — physical θ bounds
+  - `test_gpu_richards_cross_validate_cpu_upstream` — CPU↔upstream solver
+  - `test_gpu_isotherm_nm_matches_linearized` — NM ≥ linearized R²
+  - `test_gpu_isotherm_global_beats_single_start` — global search quality
+  - `test_gpu_isotherm_batch_global_field_scale` — multi-site batch
+- `bench_airspring_gpu`: Richards PDE, VG θ(h) batch, isotherm 3-level fitting
+- `bench_airspring_gpu`: cross-spring provenance summary (who helps whom)
+
+#### Changed
+- Version bumped to 0.4.2
+- README.md: complete rewrite with Code Quality table, benchmark provenance,
+  cross-spring evolution section, Document Index
+- whitePaper/baseCamp/README.md: updated GPU orchestrators with cross-spring
+  provenance, benchmarks with v0.4.2 numbers
+- experiments/README.md: updated test counts
+- specs/CROSS_SPRING_EVOLUTION.md: added shader provenance table, v0.4.2 timeline
+- specs/README.md: handoff reference V004→V005
+- wateringHole: V005 handoff (complete status, P0/P1/P2 actionable items),
+  V004 archived
+- Updated test counts across all docs (328 barracuda, 381 total)
+
+## [0.4.1] - 2026-02-25
+
+### ToadStool S62 Sync + Multi-Start Nelder-Mead
+
+Synced with ToadStool HEAD `02207c4a` (S62). Confirmed all TS-001 through TS-004
+absorption items resolved upstream. Audited S52-S62 for new upstream primitives.
+Wired `multi_start_nelder_mead` for robust global isotherm fitting.
+
+#### Added
+- `gpu::isotherm::fit_langmuir_global()` — multi-start NM with LHS initial guesses
+- `gpu::isotherm::fit_freundlich_global()` — global search for Freundlich params
+- `gpu::isotherm::fit_batch_global()` — batch global fitting for field-scale mapping
+- 4 new tests (323 total from 319, 376 including forge)
+- evolution_gaps.rs: upstream capability audit documenting S52-S62 discoveries
+
+#### Changed
+- Version bumped to 0.4.1
+- evolution_gaps.rs: updated isotherm fitting entry to reflect multi_start wiring
+- gpu::mod.rs: updated isotherm backend description
+- wateringHole V004 handoff: ToadStool sync + upstream audit + metalForge path
+- wateringHole V003 archived (fossil record)
+
+## [0.4.0] - 2026-02-25
+
+### Added
+- Experiment 006: 1D Richards equation solver (van Genuchten-Mualem) — Python 14/14, Rust 15/15
+- Experiment 007: Biochar adsorption isotherms (Langmuir/Freundlich) — Python 14/14, Rust 14/14
+- Experiment 015: 60-year water balance reconstruction (1960-2023, Open-Meteo ERA5) — Python 10/10, Rust 11/11
+- `eco::richards` — van Genuchten retention, Mualem conductivity, implicit Euler solver with Picard iteration
+- `eco::isotherm` — Langmuir and Freundlich isotherm models with linearized least squares fitting
+- `validate_richards`, `validate_biochar`, `validate_long_term_wb` validation binaries
+- `gpu::richards` — wired to `barracuda::pde::richards` (Crank-Nicolson) with unit conversion bridge
+- `gpu::isotherm` — wired to `barracuda::optimize::nelder_mead` for nonlinear batch fitting
+- Cross-validation expanded: Richards VG retention + isotherm predictions (Python ↔ Rust, 75/75 match)
+- CPU benchmarks expanded: Richards 1D throughput, VG theta batch, Langmuir/Freundlich fit
+- metalForge forge: `van_genuchten` module (absorption target for pde::richards, already absorbed)
+- metalForge forge: `isotherm` module (Langmuir/Freundlich with linearized LS fitting)
+- SPDX-License-Identifier headers on all .rs source files
+- 40 new tests (319 total from 279)
+
+### Fixed
+- Zero clippy pedantic warnings (was ~46)
+- cargo fmt compliance (2 files were non-compliant)
+- CSV parser now reports skipped malformed rows instead of silent drop
+- All 6 benchmark JSONs now have full provenance (baseline_script, commit, python_version)
+- Magic numbers extracted to named constants with documentation (SINGULARITY_GUARD, LOG_DOMAIN_GUARD, BOOTSTRAP_SEED, COLLOCATED_DIST_SQ)
+- Tolerance ranges in validate_regional_et0 now cite FAO-56, Doorenbos & Pruitt, ASCE
+- R ANOVA (control/iot_irrigation/anova_irrigation.R) now runs: 7/7 PASS
+
+### Changed
+- metalForge metrics.rs: returns Result<f64, ForgeError> instead of panicking
+- metalForge regression.rs: predict_one returns Option<f64> instead of 0.0
+- validate_regional_et0 and bench_airspring_gpu refactored (too_many_lines → helper functions)
+- evolution_gaps.rs: Richards PDE promoted to "WIRED", isotherm batch fitting added as Tier B wired
+- ABSORPTION_MANIFEST.md: 2/6 modules absorbed upstream (van_genuchten, isotherm fitting)
+- Root README.md: complete rewrite for v0.4.0 (8 orchestrators, 11 experiments, 344+319 metrics)
+- whitePaper/README.md: updated key results (344/344 Python, 319 tests, 75/75 CV)
+- whitePaper/baseCamp/README.md: updated to 11 experiments, 16 binaries, 8 GPU orchestrators
+- experiments/README.md: updated GPU status for Richards and isotherm experiments
+- specs/BARRACUDA_REQUIREMENTS.md: rewritten for v0.4.0 compute pipeline
+- specs/CROSS_SPRING_EVOLUTION.md: v0.4.0 timeline entry, updated gap counts
+- specs/PAPER_REVIEW_QUEUE.md: GPU status updated for experiments 9/10
+- wateringHole V003 handoff: GPU wiring + absorption + evolution handoff for ToadStool
+- wateringHole V002 archived (fossil record)
+
 ## [0.3.10] - 2026-02-25
 
 ### Cover Crops, No-Till Mulch, CPU Benchmarks, GPU Wiring

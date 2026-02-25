@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Validate `IoT` time series parser and statistics.
 //!
 //! Uses deterministic synthetic agricultural sensor data to validate:

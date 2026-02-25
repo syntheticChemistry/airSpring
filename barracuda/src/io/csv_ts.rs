@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Streaming CSV time series parser for `IoT` sensor data.
 //!
 //! Parses timestamped sensor data (soil moisture, temperature, PAR, weather)
@@ -33,6 +34,8 @@ pub struct TimeseriesData {
     columns: Vec<Vec<f64>>,
     /// Name of the timestamp column.
     pub timestamp_column: String,
+    /// Number of malformed rows skipped during parsing.
+    skipped_rows: usize,
 }
 
 impl TimeseriesData {
@@ -53,6 +56,7 @@ impl TimeseriesData {
             timestamps,
             columns,
             timestamp_column: "timestamp".to_string(),
+            skipped_rows: 0,
         }
     }
 
@@ -92,6 +96,12 @@ impl TimeseriesData {
     #[must_use]
     pub fn timestamps(&self) -> &[String] {
         &self.timestamps
+    }
+
+    /// Number of malformed rows skipped during parsing.
+    #[must_use]
+    pub const fn skipped_rows(&self) -> usize {
+        self.skipped_rows
     }
 
     /// Compute basic statistics for a column using **population** statistics.
@@ -212,18 +222,27 @@ pub fn parse_csv_reader<R: BufRead>(
     let num_cols = column_names.len();
     let mut columns: Vec<Vec<f64>> = vec![Vec::new(); num_cols];
     let mut timestamps = Vec::new();
+    let mut skipped_rows: usize = 0;
 
     // Stream rows — never buffer entire file
-    for line_result in lines {
+    for (line_idx, line_result) in lines.enumerate() {
         let line = line_result.map_err(AirSpringError::Io)?;
         let line = line.trim();
         if line.is_empty() || line.starts_with('#') {
             continue;
         }
 
+        let line_no = line_idx + 2; // Header is line 1, first data row is line 2
         let parts: Vec<&str> = line.split(',').collect();
         if parts.len() != headers.len() {
-            continue; // Skip malformed rows
+            skipped_rows += 1;
+            eprintln!(
+                "csv_ts: line {}: skipped malformed row (wrong column count: expected {}, got {})",
+                line_no,
+                headers.len(),
+                parts.len()
+            );
+            continue;
         }
 
         timestamps.push(parts[ts_idx].trim().to_string());
@@ -239,12 +258,17 @@ pub fn parse_csv_reader<R: BufRead>(
         }
     }
 
+    if skipped_rows > 0 {
+        eprintln!("csv_ts: skipped {skipped_rows} malformed rows");
+    }
+
     Ok(TimeseriesData {
         column_names,
         column_index,
         timestamps,
         columns,
         timestamp_column: ts_col.to_string(),
+        skipped_rows,
     })
 }
 

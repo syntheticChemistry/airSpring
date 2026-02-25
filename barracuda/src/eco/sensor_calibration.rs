@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Sensor calibration equations.
 //!
 //! Implements calibration polynomials for field-deployable soil moisture and

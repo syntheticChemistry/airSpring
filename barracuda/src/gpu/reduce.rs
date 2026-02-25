@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Seasonal statistics via `ToadStool` fused map-reduce — GPU-accelerated.
 //!
 //! Wraps [`barracuda::ops::fused_map_reduce_f64::FusedMapReduceF64`] for

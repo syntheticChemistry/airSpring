@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! FAO-56 Penman-Monteith Reference Evapotranspiration (ET₀).
 //!
 //! Implements the standard FAO Paper 56 equation (Allen et al., 1998):

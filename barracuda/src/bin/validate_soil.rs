@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Validate soil moisture sensor calibration against published values.
 //!
 //! Benchmark source: `control/soil_sensors/benchmark_dong2020.json`

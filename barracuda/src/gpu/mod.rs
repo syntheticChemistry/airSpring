@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! GPU acceleration layer — airSpring ↔ `ToadStool`/`BarraCuda` bridge.
 //!
 //! This module provides domain-specific wrappers around `ToadStool` GPU primitives
@@ -8,12 +9,14 @@
 //!
 //! | Module | Purpose | Backend |
 //! |--------|---------|---------|
-//! | [`et0`] | Batched FAO-56 ET₀ for N station-days | **GPU-first** (`BatchedElementwiseF64`) |
+//! | [`et0`] | Batched FAO-56 ET₀ for `N` station-days | **GPU-first** (`BatchedElementwiseF64`) |
 //! | [`water_balance`] | Batched season simulation + GPU step | **GPU-step** + CPU season |
-//! | [`dual_kc`] | Batched dual Kc (Ke + ETc) for M fields | **CPU** (Tier B → GPU pending) |
+//! | [`dual_kc`] | Batched dual Kc (`Ke` + `ETc`) for M fields | **CPU** (Tier B → GPU pending) |
 //! | [`kriging`] | Soil moisture spatial interpolation | **Integrated** (`KrigingF64`) |
 //! | [`reduce`] | Seasonal aggregation statistics | **GPU** for N≥1024 (`FusedMapReduceF64`) |
 //! | [`stream`] | `IoT` stream smoothing (sliding window) | **GPU** (`MovingWindowStats`, wetSpring) |
+//! | [`richards`] | 1D Richards equation (vadose zone) | **Tier B** (`pde::richards`) |
+//! | [`isotherm`] | Batch isotherm fitting (biochar) | **Tier B** (`nelder_mead` + `multi_start`) |
 //! | [`evolution_gaps`] | Living roadmap of CPU→GPU gaps | Documentation only |
 //!
 //! # `ToadStool` Issues — All RESOLVED
@@ -46,7 +49,9 @@
 pub mod dual_kc;
 pub mod et0;
 pub mod evolution_gaps;
+pub mod isotherm;
 pub mod kriging;
 pub mod reduce;
+pub mod richards;
 pub mod stream;
 pub mod water_balance;

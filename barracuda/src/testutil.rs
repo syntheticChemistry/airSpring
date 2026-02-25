@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Validation and test utilities.
 //!
 //! Synthetic data generators for testing parsers, statistics, and validation
@@ -107,6 +108,9 @@ pub fn r_squared(observed: &[f64], simulated: &[f64]) -> crate::error::Result<f6
 ///
 /// RMSE = sqrt(Σ(obs - sim)² / n)
 ///
+/// Staged for upstream absorption — see `metalForge/forge/src/metrics.rs`
+/// for the `Result`-returning variant destined for `barracuda::stats::metrics`.
+///
 /// # Panics
 ///
 /// Panics if `observed` and `simulated` have different lengths.
@@ -129,6 +133,8 @@ pub fn rmse(observed: &[f64], simulated: &[f64]) -> f64 {
 /// Compute Mean Bias Error (MBE).
 ///
 /// MBE = Σ(sim - obs) / n
+///
+/// Staged for upstream absorption — see `metalForge/forge/src/metrics.rs`.
 ///
 /// # Panics
 ///
@@ -155,6 +161,8 @@ pub fn mbe(observed: &[f64], simulated: &[f64]) -> f64 {
 ///
 /// Ported from the Python baseline (`control/soil_sensors/calibration_dong2020.py`
 /// `compute_ia`).  Values range from 0.0 (no agreement) to 1.0 (perfect).
+///
+/// Staged for upstream absorption — see `metalForge/forge/src/metrics.rs`.
 ///
 /// # Panics
 ///
@@ -195,6 +203,8 @@ pub fn index_of_agreement(observed: &[f64], simulated: &[f64]) -> f64 {
 ///
 /// Widely used in hydrology (Nash & Sutcliffe, 1970). NSE = 1.0 is perfect
 /// agreement; NSE < 0 means the model is worse than using the mean.
+///
+/// Staged for upstream absorption — see `metalForge/forge/src/metrics.rs`.
 ///
 /// # Panics
 ///
@@ -259,6 +269,10 @@ pub fn spearman_r(observed: &[f64], simulated: &[f64]) -> crate::error::Result<f
         .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))
 }
 
+/// Deterministic seed for bootstrap sampling — ensures reproducible CI bounds
+/// across runs. Value is arbitrary but fixed for validation fidelity.
+const BOOTSTRAP_SEED: u64 = 42;
+
 /// Bootstrap confidence interval for RMSE.
 ///
 /// Uses [`barracuda::stats::bootstrap::bootstrap_ci`] to compute a
@@ -300,7 +314,7 @@ pub fn bootstrap_rmse(
         },
         n_bootstrap,
         confidence,
-        42, // deterministic seed
+        BOOTSTRAP_SEED,
     )
     .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
 

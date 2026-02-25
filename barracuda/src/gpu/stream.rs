@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! GPU-accelerated `IoT` stream processing via `ToadStool` `MovingWindowStats`.
 //!
 //! Wraps [`barracuda::ops::moving_window_stats::MovingWindowStats`] for sliding

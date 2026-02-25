@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Batched water balance — GPU + CPU orchestrator.
 //!
 //! Dispatches N field-day water balance steps. Two paths:

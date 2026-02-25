@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Validate water balance model against analytical solutions and mass conservation.
 //!
 //! Benchmark source: `control/water_balance/benchmark_water_balance.json`

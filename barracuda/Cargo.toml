@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.3.10"
+version = "0.4.2"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
@@ -74,3 +74,15 @@ path = "src/bin/bench_cpu_vs_python.rs"
 [[bin]]
 name = "bench_airspring_gpu"
 path = "src/bin/bench_airspring_gpu.rs"
+
+[[bin]]
+name = "validate_long_term_wb"
+path = "src/bin/validate_long_term_wb.rs"
+
+[[bin]]
+name = "validate_biochar"
+path = "src/bin/validate_biochar.rs"
+
+[[bin]]
+name = "validate_richards"
+path = "src/bin/validate_richards.rs"

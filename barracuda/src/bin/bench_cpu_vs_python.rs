@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Benchmark Rust CPU vs Python baseline for airSpring core computations.
 //!
 //! Measures wall-clock time for:
@@ -12,10 +13,10 @@
 //! cargo run --release --bin bench_cpu_vs_python
 //! ```
 
-use airspring_barracuda::eco::dual_kc::{
-    self, DualKcInput, EvaporationLayerState,
-};
+use airspring_barracuda::eco::dual_kc::{self, DualKcInput, EvaporationLayerState};
 use airspring_barracuda::eco::evapotranspiration::{self as et, DailyEt0Input};
+use airspring_barracuda::eco::isotherm;
+use airspring_barracuda::eco::richards::{self, VanGenuchtenParams};
 use std::time::Instant;
 
 const WARMUP: usize = 5;
@@ -37,7 +38,7 @@ fn make_station_days(n: usize) -> Vec<DailyEt0Input> {
                 actual_vapour_pressure: et::saturation_vapour_pressure(tmin) * 0.6,
                 elevation_m: 190.0,
                 latitude_deg: 42.5,
-                day_of_year: ((i % 365) + 1) as u32,
+                day_of_year: u32::try_from((i % 365) + 1).expect("day_of_year 1..365 fits in u32"),
             }
         })
         .collect()
@@ -67,12 +68,11 @@ fn bench<F: Fn()>(label: &str, n: usize, f: F) {
         f();
     }
     let elapsed = start.elapsed();
-    let per_iter = elapsed / MEASURE as u32;
+    let per_iter = elapsed / u32::try_from(MEASURE).expect("MEASURE fits in u32");
+    #[allow(clippy::cast_precision_loss)]
     let throughput = n as f64 / per_iter.as_secs_f64();
 
-    println!(
-        "  {label:<40} {n:>8} items  {per_iter:>10.2?}/iter  {throughput:>12.0} items/s",
-    );
+    println!("  {label:<40} {n:>8} items  {per_iter:>10.2?}/iter  {throughput:>12.0} items/s",);
 }
 
 fn main() {
@@ -99,9 +99,7 @@ fn main() {
     for &n in &[30, 180, 365, 3650] {
         let inputs = make_dual_kc_inputs(n);
         bench(&format!("Dual Kc ({n}-day season)"), n, || {
-            std::hint::black_box(dual_kc::simulate_dual_kc(
-                &inputs, 1.15, 1.20, 0.05, &state,
-            ));
+            std::hint::black_box(dual_kc::simulate_dual_kc(&inputs, 1.15, 1.20, 0.05, &state));
         });
     }
 
@@ -127,8 +125,59 @@ fn main() {
     let big_inputs = make_dual_kc_inputs(3650);
     bench("Dual Kc (3650-day, 10yr)", 3650, || {
         std::hint::black_box(dual_kc::simulate_dual_kc(
-            &big_inputs, 1.15, 1.20, 0.05, &state,
+            &big_inputs,
+            1.15,
+            1.20,
+            0.05,
+            &state,
         ));
+    });
+
+    println!("\n── Richards equation (1D infiltration) ──\n");
+    let sand = VanGenuchtenParams {
+        theta_r: 0.045,
+        theta_s: 0.43,
+        alpha: 0.145,
+        n_vg: 2.68,
+        ks: 712.8,
+    };
+    for &n_nodes in &[20, 50, 100] {
+        bench(
+            &format!("Richards 1D ({n_nodes} nodes, 0.1d)"),
+            n_nodes,
+            || {
+                let _ = std::hint::black_box(richards::solve_richards_1d(
+                    &sand, 100.0, n_nodes, -20.0, 0.0, false, true, 0.1, 0.01,
+                ));
+            },
+        );
+    }
+
+    println!("\n── Van Genuchten retention (batch) ──\n");
+    for &n in &[1_000, 10_000, 100_000] {
+        bench(&format!("VG theta ({n} evaluations)"), n, || {
+            for i in 0..n {
+                #[allow(clippy::cast_precision_loss)]
+                let h = -0.01 * (i as f64 + 1.0);
+                std::hint::black_box(richards::van_genuchten_theta(
+                    h,
+                    sand.theta_r,
+                    sand.theta_s,
+                    sand.alpha,
+                    sand.n_vg,
+                ));
+            }
+        });
+    }
+
+    println!("\n── Isotherm fitting (Langmuir + Freundlich) ──\n");
+    let ce = [1.0, 2.5, 5.0, 10.0, 20.0, 40.0, 60.0, 80.0, 100.0];
+    let qe = [0.85, 1.92, 3.45, 5.8, 8.9, 12.1, 13.8, 14.5, 14.9];
+    bench("Langmuir fit (9 points)", 9, || {
+        std::hint::black_box(isotherm::fit_langmuir(&ce, &qe));
+    });
+    bench("Freundlich fit (9 points)", 9, || {
+        std::hint::black_box(isotherm::fit_freundlich(&ce, &qe));
     });
 
     println!();

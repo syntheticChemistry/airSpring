@@ -1,7 +1,7 @@
 # airSpring Specifications
 
 **Last Updated**: February 25, 2026
-**Status**: Phase 0-3 complete — 142/142 Python + 123/123 Rust + 65/65 cross-validation + GPU-FIRST (6 orchestrators)
+**Status**: Phase 0-3 complete — 344/344 Python + 328/328 Rust tests + 75/75 cross-validation + GPU-wired (8 orchestrators)
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling
 
 ---
@@ -10,13 +10,13 @@
 
 | Metric | Value |
 |--------|-------|
-| Phase 0 (Python) | 142/142 PASS — FAO-56, soil calibration, IoT pipeline, water balance |
+| Phase 0 (Python) | 344/344 PASS — FAO-56, soil, IoT, water balance, Richards, biochar, long-term WB |
 | Phase 0+ (Real data) | 918 station-days, R²=0.967 across 6 Michigan stations |
-| Phase 1 (Rust) | 123/123 PASS — 8 validation binaries, 253 tests, 97.2% coverage |
-| Phase 2 (Cross-validation) | 65/65 Python↔Rust match within 1e-5 |
-| Phase 3 (GPU) | GPU-FIRST — 6 orchestrators, 15 evolution gaps (8A+5B+2C) |
+| Phase 1 (Rust) | 328 tests — 16 binaries, 328 tests, 97%+ coverage |
+| Phase 2 (Cross-validation) | 75/75 Python↔Rust match within 1e-5 (now includes Richards + isotherm) |
+| Phase 3 (GPU) | GPU-wired — 8 orchestrators, 20 evolution gaps (8A+11B+1C), 3 newly wired |
 | Faculty | Dong (BAE, MSU — new lab 2026) |
-| Handoff | V001 in `wateringHole/handoffs/` |
+| Handoff | V005 in `wateringHole/handoffs/` |
 
 ---
 
@@ -36,7 +36,7 @@
 |----------|----------|-------------|
 | CONTROL_EXPERIMENT_STATUS.md | `../` | Detailed experiment logs and check counts |
 | CHANGELOG.md | `../` | Evolution history (Keep a Changelog format) |
-| experiments/README.md | `../experiments/` | Experiment index (5 completed) |
+| experiments/README.md | `../experiments/` | Experiment index (11 completed) |
 | whitePaper/baseCamp/README.md | `../whitePaper/baseCamp/` | Per-faculty research briefings |
 | whitePaper/STUDY.md | `../whitePaper/` | Full study results |
 | whitePaper/METHODOLOGY.md | `../whitePaper/` | Multi-phase validation protocol |
@@ -52,7 +52,7 @@
 - **IoT irrigation pipeline** — Dong 2024 smart scheduling demonstration
 - **Real data pipeline** — Open-Meteo ERA5 + NOAA CDO + OpenWeatherMap
 - **Rust evolution proof** — Python→Rust cross-validated to 1e-5
-- **GPU integration proof** — 6 orchestrators wired to ToadStool/BarraCuda
+- **GPU integration proof** — 8 orchestrators wired to ToadStool/BarraCuda (incl. Richards PDE + isotherm NM)
 
 ### airSpring IS NOT:
 - Machine learning / neural surrogates (neuralSpring provides those)
@@ -73,7 +73,7 @@
 `../whitePaper/STUDY.md` → `../CONTROL_EXPERIMENT_STATUS.md` → BARRACUDA_REQUIREMENTS.md
 
 **Cross-spring evolution** (15 min):
-CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/AIRSPRING_V001_*.md`
+CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/AIRSPRING_V005_*.md`
 
 ---
 

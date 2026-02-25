@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Benchmark airSpring GPU operations vs CPU baselines.
 //!
 //! Measures wall-clock time for all GPU orchestrators and CPU fallbacks across
@@ -5,7 +6,7 @@
 //!
 //! # Cross-spring evolution context
 //!
-//! These GPU paths exist because of shader evolution across the ecoPrimals
+//! These GPU paths exist because of shader evolution across the `ecoPrimals`
 //! ecosystem (608 WGSL shaders, 46 cross-spring absorptions S51-S57):
 //!
 //! - **ET₀ batch** (`batched_elementwise_f64.wgsl`): hotSpring `pow_f64` fix
@@ -16,7 +17,7 @@
 //! - **Reduce** (`fused_map_reduce_f64.wgsl`): wetSpring origin; airSpring TS-004
 //!   fix stabilized N≥1024 dispatch for all Springs
 //! - **Stream smoothing** (`moving_window.wgsl`): wetSpring S28+ environmental
-//!   monitoring; airSpring wired IoT sensor smoothing
+//!   monitoring; airSpring wired `IoT` sensor smoothing
 //! - **Ridge regression** (`barracuda::linalg::ridge`): wetSpring ESN calibration;
 //!   airSpring wired sensor correction pipeline
 //!
@@ -27,7 +28,9 @@
 //! ```
 
 use airspring_barracuda::eco::evapotranspiration::{self as et, DailyEt0Input};
-use airspring_barracuda::gpu::{kriging, reduce, stream};
+use airspring_barracuda::eco::isotherm;
+use airspring_barracuda::eco::richards::{self, VanGenuchtenParams};
+use airspring_barracuda::gpu::{isotherm as gpu_iso, kriging, reduce, stream};
 use std::time::Instant;
 
 const WARMUP: usize = 3;
@@ -92,12 +95,7 @@ fn time_fn<F: FnMut() -> f64>(mut f: F, warmup: usize, measure: usize) -> (f64, 
     (per_call_us, checksum)
 }
 
-fn main() {
-    println!("═══════════════════════════════════════════════════════════════════════");
-    println!("  airSpring GPU Benchmark — Cross-Spring Shader Evolution");
-    println!("═══════════════════════════════════════════════════════════════════════");
-    println!();
-
+fn run_all_benchmarks() {
     // ── ET₀ Batched ──────────────────────────────────────────────────
     println!("── Batched ET₀ (batched_elementwise_f64, hotSpring pow_f64 fix) ──");
     println!("  {:>8}  {:>12}  {:>12}", "N", "CPU (µs)", "ops/sec");
@@ -115,12 +113,10 @@ fn main() {
     println!("── Seasonal Reduce (fused_map_reduce_f64, wetSpring origin, TS-004 fix) ──");
     println!("  {:>8}  {:>12}  {:>12}", "N", "CPU (µs)", "M elem/sec");
 
-    for &n in &[100, 1_000, 10_000, 100_000] {
-        #[allow(clippy::cast_precision_loss)]
-        let data: Vec<f64> = (0..n).map(|i| (i as f64) * 0.01).collect();
+    for &n in &[100_i32, 1_000, 10_000, 100_000] {
+        let data: Vec<f64> = (0..n).map(|i| f64::from(i) * 0.01).collect();
         let (cpu_us, _) = time_fn(|| bench_reduce_cpu(&data), WARMUP, MEASURE);
-        #[allow(clippy::cast_precision_loss)]
-        let m_elem_sec = (n as f64) / (cpu_us / 1_000_000.0) / 1e6;
+        let m_elem_sec = f64::from(n) / (cpu_us / 1_000_000.0) / 1e6;
         println!("  {n:>8}  {cpu_us:>12.1}  {m_elem_sec:>12.1}");
     }
 
@@ -133,18 +129,16 @@ fn main() {
     );
 
     for &(n, w) in &[(168, 24), (720, 24), (8760, 24), (8760, 168)] {
-        #[allow(clippy::cast_precision_loss)]
         let data: Vec<f64> = (0..n)
             .map(|i| {
                 8.0f64.mul_add(
-                    ((i as f64 % 24.0 - 14.0) * std::f64::consts::PI / 12.0).cos(),
+                    ((f64::from(i) % 24.0 - 14.0) * std::f64::consts::PI / 12.0).cos(),
                     25.0,
                 )
             })
             .collect();
         let (cpu_us, _) = time_fn(|| bench_stream_cpu(&data, w), WARMUP, MEASURE);
-        #[allow(clippy::cast_precision_loss)]
-        let m_elem_sec = (n as f64) / (cpu_us / 1_000_000.0) / 1e6;
+        let m_elem_sec = f64::from(n) / (cpu_us / 1_000_000.0) / 1e6;
         println!("  {n:>8}  {w:>8}  {cpu_us:>12.1}  {m_elem_sec:>12.1}");
     }
 
@@ -156,8 +150,7 @@ fn main() {
     for &(ns, nt) in &[(5, 10), (10, 100), (20, 500)] {
         let sensors: Vec<kriging::SensorReading> = (0..ns)
             .map(|i| {
-                #[allow(clippy::cast_precision_loss)]
-                let fi = i as f64;
+                let fi = f64::from(i);
                 kriging::SensorReading {
                     x: fi * 10.0,
                     y: fi * 5.0,
@@ -167,8 +160,7 @@ fn main() {
             .collect();
         let targets: Vec<kriging::TargetPoint> = (0..nt)
             .map(|i| {
-                #[allow(clippy::cast_precision_loss)]
-                let fi = i as f64;
+                let fi = f64::from(i);
                 kriging::TargetPoint {
                     x: fi * 2.0,
                     y: fi * 1.0,
@@ -185,8 +177,7 @@ fn main() {
     println!("  {:>8}  {:>12}  {:>12}", "N", "CPU (µs)", "R²");
 
     for &n in &[50, 200, 1_000, 5_000] {
-        #[allow(clippy::cast_precision_loss)]
-        let x: Vec<f64> = (0..n).map(|i| i as f64 * 0.01).collect();
+        let x: Vec<f64> = (0..n).map(|i| f64::from(i) * 0.01).collect();
         let y: Vec<f64> = x
             .iter()
             .map(|&xi| 2.5f64.mul_add(xi, 0.3) + (xi * 0.1).sin() * 0.01)
@@ -205,12 +196,168 @@ fn main() {
         println!("  {n:>8}  {cpu_us:>12.1}  {r2_val:>12.6}");
     }
 
+    // ── Richards PDE (barracuda::pde::richards — airSpring S40 absorption) ─
+    println!();
+    println!("── Richards PDE (pde::richards, airSpring→ToadStool S40 absorption) ──");
+    println!("  Solver uses hotSpring df64 precision for VG constitutive relations.");
+    println!("  Crank-Nicolson + Picard iteration; Thomas algorithm for tridiagonal.");
+    println!("  {:>8}  {:>12}  {:>12}", "Nodes", "CPU (µs)", "sims/sec");
+
+    let sand = VanGenuchtenParams {
+        theta_r: 0.045,
+        theta_s: 0.43,
+        alpha: 0.145,
+        n_vg: 2.68,
+        ks: 712.8,
+    };
+    for &n_nodes in &[10, 20, 50, 100] {
+        let (cpu_us, _) = time_fn(
+            || {
+                let r = richards::solve_richards_1d(
+                    &sand, 50.0, n_nodes, -20.0, 0.0, true, false, 0.1, 0.01,
+                );
+                r.map_or(0.0, |profiles| profiles.last().map_or(0.0, |p| p.theta[0]))
+            },
+            WARMUP,
+            MEASURE,
+        );
+        let sims_per_sec = 1_000_000.0 / cpu_us;
+        println!("  {n_nodes:>8}  {cpu_us:>12.1}  {sims_per_sec:>12.0}");
+    }
+
+    // ── Isotherm fitting (barracuda::optimize, neuralSpring NM optimizer) ─
+    println!();
+    println!("── Isotherm Fitting (optimize::nelder_mead → multi_start, neuralSpring) ──");
+    println!("  Linearized LS → single NM → multi-start global (LHS exploration).");
+    println!(
+        "  {:>22}  {:>12}  {:>12}  {:>8}",
+        "Method", "CPU (µs)", "fits/sec", "R²"
+    );
+
+    let ce_wood = [1.0, 2.5, 5.0, 10.0, 20.0, 40.0, 60.0, 80.0, 100.0];
+    let qe_wood = [0.85, 1.92, 3.45, 5.8, 8.9, 12.1, 13.8, 14.5, 14.9];
+
+    {
+        let mut r2 = 0.0;
+        let (cpu_us, _) = time_fn(
+            || {
+                let fit = isotherm::fit_langmuir(&ce_wood, &qe_wood).unwrap();
+                r2 = fit.r_squared;
+                fit.r_squared
+            },
+            WARMUP,
+            100,
+        );
+        let fits_sec = 1_000_000.0 / cpu_us;
+        println!(
+            "  {:<22}  {cpu_us:>12.1}  {fits_sec:>12.0}  {r2:>8.4}",
+            "Linearized LS"
+        );
+    }
+
+    {
+        let mut r2 = 0.0;
+        let (cpu_us, _) = time_fn(
+            || {
+                let fit = gpu_iso::fit_langmuir_nm(&ce_wood, &qe_wood).unwrap();
+                r2 = fit.r_squared;
+                fit.r_squared
+            },
+            WARMUP,
+            MEASURE,
+        );
+        let fits_sec = 1_000_000.0 / cpu_us;
+        println!(
+            "  {:<22}  {cpu_us:>12.1}  {fits_sec:>12.0}  {r2:>8.4}",
+            "Nelder-Mead (1 start)"
+        );
+    }
+
+    {
+        let mut r2 = 0.0;
+        let (cpu_us, _) = time_fn(
+            || {
+                let fit = gpu_iso::fit_langmuir_global(&ce_wood, &qe_wood, 8).unwrap();
+                r2 = fit.r_squared;
+                fit.r_squared
+            },
+            WARMUP,
+            MEASURE,
+        );
+        let fits_sec = 1_000_000.0 / cpu_us;
+        println!(
+            "  {:<22}  {cpu_us:>12.1}  {fits_sec:>12.0}  {r2:>8.4}",
+            "Multi-start NM (8×LHS)"
+        );
+    }
+
+    // ── VG Retention (batch, pure arithmetic — GPU candidate) ────────
+    println!();
+    println!("── Van Genuchten θ(h) batch (pure arithmetic, GPU-ready via df64) ──");
+    println!("  hotSpring df64 precision enables exact GPU retention curves.");
+    println!("  {:>8}  {:>12}  {:>12}", "N", "CPU (µs)", "M evals/sec");
+
+    for &n in &[1_000_i32, 10_000, 100_000] {
+        let (cpu_us, _) = time_fn(
+            || {
+                let mut sum = 0.0;
+                for i in 0..n {
+                    let h = -0.01 * (f64::from(i) + 1.0);
+                    sum += richards::van_genuchten_theta(
+                        h,
+                        sand.theta_r,
+                        sand.theta_s,
+                        sand.alpha,
+                        sand.n_vg,
+                    );
+                }
+                sum
+            },
+            WARMUP,
+            MEASURE,
+        );
+        let m_evals_sec = f64::from(n) / (cpu_us / 1_000_000.0) / 1e6;
+        println!("  {n:>8}  {cpu_us:>12.1}  {m_evals_sec:>12.1}");
+    }
+}
+
+fn main() {
+    println!("═══════════════════════════════════════════════════════════════════════");
+    println!("  airSpring GPU Benchmark — Cross-Spring Shader Evolution");
+    println!("═══════════════════════════════════════════════════════════════════════");
+    println!();
+
+    run_all_benchmarks();
+
     // ── Summary ──────────────────────────────────────────────────────
     println!();
     println!("═══════════════════════════════════════════════════════════════════════");
-    println!("  Cross-spring shader provenance:");
-    println!("    608 WGSL shaders in ToadStool (hotSpring 56, wetSpring 25,");
-    println!("    neuralSpring 20, shared 507). airSpring uses 5 + contributed 3 fixes.");
-    println!("    46 cross-spring absorptions (S51-S57) benefit all Springs.");
+    println!("  Cross-Spring Shader Evolution — Who Helps Whom");
+    println!("═══════════════════════════════════════════════════════════════════════");
+    println!();
+    println!("  hotSpring (56 shaders) → Precision foundation");
+    println!("    df64 core: enables f64 GPU math for ALL Springs");
+    println!("    pow_f64 fix (TS-001): airSpring ET₀ uncovered, hotSpring math fixed");
+    println!("    exp/log/trig f64: airSpring VG retention + atmospheric pressure");
+    println!();
+    println!("  wetSpring (25 shaders) → Bio/environmental primitives");
+    println!("    kriging_f64: wetSpring sample sites → airSpring soil moisture mapping");
+    println!("    fused_map_reduce: airSpring TS-004 fix → stabilized for ALL Springs");
+    println!("    moving_window: wetSpring environmental → airSpring IoT sensor smoothing");
+    println!("    ridge_regression: wetSpring ESN → airSpring sensor calibration");
+    println!();
+    println!("  neuralSpring (20 shaders) → ML/optimization");
+    println!("    nelder_mead: neuralSpring optimizer → airSpring isotherm fitting");
+    println!("    multi_start_nelder_mead: LHS → airSpring global isotherm search");
+    println!("    ValidationHarness: neuralSpring S59 → all 16 airSpring binaries");
+    println!();
+    println!("  airSpring (3 fixes contributed) → Domain validation");
+    println!("    TS-001 pow_f64: fractional exponents → fixed for ALL Springs");
+    println!("    TS-003 acos precision: trig boundary values → fixed for ALL Springs");
+    println!("    TS-004 reduce buffer: N≥1024 dispatch → stabilized for ALL Springs");
+    println!("    Richards PDE: airSpring validated, absorbed into barracuda (S40)");
+    println!();
+    println!("  608 WGSL shaders, 46 cross-spring absorptions (S51-S57),");
+    println!("  8 GPU orchestrators in airSpring, zero duplication.");
     println!("═══════════════════════════════════════════════════════════════════════");
 }

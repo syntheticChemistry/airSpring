@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Phase 2 cross-validation: Rust side.
 //!
 //! Computes the same values as `scripts/cross_validate.py` using identical
@@ -12,8 +13,8 @@
 //! ```
 
 use airspring_barracuda::eco::{
-    correction, evapotranspiration as et, sensor_calibration as sc, soil_moisture as sm,
-    water_balance,
+    correction, evapotranspiration as et, isotherm, richards, sensor_calibration as sc,
+    soil_moisture as sm, water_balance,
 };
 use airspring_barracuda::testutil;
 use airspring_barracuda::validation::json_f64;
@@ -293,6 +294,59 @@ fn water_balance_and_correction() -> serde_json::Value {
     })
 }
 
+/// Richards van Genuchten retention and conductivity (Exp 006).
+fn richards_values() -> serde_json::Value {
+    let sand = richards::VanGenuchtenParams {
+        theta_r: 0.045,
+        theta_s: 0.43,
+        alpha: 0.145,
+        n_vg: 2.68,
+        ks: 712.8,
+    };
+
+    json!({
+        "richards": {
+            "theta_h0": round6(richards::van_genuchten_theta(
+                0.0, sand.theta_r, sand.theta_s, sand.alpha, sand.n_vg)),
+            "theta_h10": round6(richards::van_genuchten_theta(
+                -10.0, sand.theta_r, sand.theta_s, sand.alpha, sand.n_vg)),
+            "theta_h100": round6(richards::van_genuchten_theta(
+                -100.0, sand.theta_r, sand.theta_s, sand.alpha, sand.n_vg)),
+            "k_h0": round6(richards::van_genuchten_k(
+                0.0, sand.ks, sand.theta_r, sand.theta_s, sand.alpha, sand.n_vg)),
+            "k_h10": round6(richards::van_genuchten_k(
+                -10.0, sand.ks, sand.theta_r, sand.theta_s, sand.alpha, sand.n_vg)),
+        }
+    })
+}
+
+/// Biochar isotherm predictions (Exp 007).
+fn isotherm_values() -> serde_json::Value {
+    let qmax = 18.0;
+    let kl = 0.05;
+    let kf = 2.0;
+    let n_iso = 2.0;
+    let n_inv = 1.0 / n_iso;
+
+    json!({
+        "isotherm": {
+            "langmuir": {
+                "ce_1": round6(isotherm::langmuir(1.0, qmax, kl)),
+                "ce_10": round6(isotherm::langmuir(10.0, qmax, kl)),
+                "ce_50": round6(isotherm::langmuir(50.0, qmax, kl)),
+                "ce_100": round6(isotherm::langmuir(100.0, qmax, kl)),
+            },
+            "freundlich": {
+                "ce_1": round6(isotherm::freundlich(1.0, kf, n_inv)),
+                "ce_10": round6(isotherm::freundlich(10.0, kf, n_inv)),
+                "ce_50": round6(isotherm::freundlich(50.0, kf, n_inv)),
+                "ce_100": round6(isotherm::freundlich(100.0, kf, n_inv)),
+            },
+            "rl_c0_100": round6(isotherm::langmuir_rl(kl, 100.0)),
+        }
+    })
+}
+
 /// Merge a source JSON object's keys into a destination map.
 fn merge_into(dest: &mut serde_json::Map<String, serde_json::Value>, src: &serde_json::Value) {
     for (key, val) in src.as_object().expect("expected JSON object") {
@@ -306,6 +360,8 @@ fn main() {
     merge_into(&mut output, &uccle_extended(&uccle));
     merge_into(&mut output, &soil_and_sensor_values());
     merge_into(&mut output, &water_balance_and_correction());
+    merge_into(&mut output, &richards_values());
+    merge_into(&mut output, &isotherm_values());
 
     println!(
         "{}",

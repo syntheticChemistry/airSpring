@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Error types for airSpring `BarraCuda`.
 //!
 //! Provides a unified error type that replaces ad-hoc `String` errors

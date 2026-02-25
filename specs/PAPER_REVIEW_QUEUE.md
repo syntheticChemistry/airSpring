@@ -2,7 +2,7 @@
 
 **Last Updated**: February 25, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 8 completed (306/306 Python + 287/287 Rust CPU), 4 queued. All completed papers use open data and systems.
+**Status**: 11 completed (344/344 Python + 328 Rust tests + 8 GPU orchestrators), 4 queued. All completed papers use open data and systems.
 
 ---
 
@@ -18,16 +18,20 @@
 | 6 | Allen et al. (1998) FAO-56 Ch 7 — Dual Kc (Kcb+Ke) | 0 | 63/63 | Standard | `benchmark_dual_kc.json` | FAO-56 Tables 17, 19 (open literature) |
 | 7 | Regional ET₀ intercomparison — 6 Michigan stations | 0 | 61/61 | Dong | `regional_et0_intercomparison.py` | Open-Meteo ERA5 (free) |
 | 8 | Islam et al. (2014) No-till + Allen FAO-56 Ch 11 cover crops | 0 | 40/40 | Standard | `benchmark_cover_crop_kc.json` | ISWCR + FAO-56 (open) |
+| 9 | Richards equation (van Genuchten-Mualem) | 0+1 | 14+15 | Dong | `benchmark_richards.json` | Published parameters |
+| 10 | Kumari et al. (2025) Biochar P adsorption | 0+1 | 14+14 | Dong | `benchmark_biochar.json` | Representative literature data |
+| 11 | 60-year water balance (OSU Triplett) | 0+1 | 10+11 | Standard | `benchmark_long_term_wb.json` | Open-Meteo ERA5 (free) |
 
 ### Controls Audit
 
-All 8 completed papers have:
+All 11 completed papers have:
 - **Digitized benchmarks** in `control/*/benchmark_*.json`
 - **Python control scripts** that validate against benchmarks
-- **Rust validation binaries** (10 binaries) that load the same benchmarks
+- **Rust validation binaries** (16 binaries) that load the same benchmarks
 - **Open or published data** (no institutional access required)
-- **Cross-validation** (65/65 Python↔Rust match at 1e-5)
-- **CPU benchmarks**: 12.7M ET₀/s, 59M dual Kc/s, 64M mulched Kc/s
+- **Cross-validation** (75/75 Python↔Rust match at 1e-5, includes Richards VG + isotherms)
+- **GPU wiring**: 8 orchestrators (BatchedEt0, BatchedWB, BatchedDualKc, Kriging, Reduce, Stream, BatchedRichards, fit_nm)
+- **CPU benchmarks**: 12.7M ET₀/s, 36.5M VG θ/s, 59M Kc/s, 57M Langmuir fits/s
 
 ### Compute Pipeline Per Paper
 
@@ -41,6 +45,9 @@ All 8 completed papers have:
 | 6 | 63/63 | 61/61 (`validate_dual_kc`) | `BatchedDualKc` (Tier B) | Future |
 | 7 | 61/61 | 61/61 (`validate_regional_et0`) | `BatchedEt0` at scale | Future |
 | 8 | 40/40 | 40/40 (`validate_cover_crop`) | `BatchedDualKc` + mulch | Future |
+| 9 | 14/14 | 15/15 (`validate_richards`) | `BatchedRichards` **WIRED** | Future |
+| 10 | 14/14 | 14/14 (`validate_biochar`) | `fit_*_nm` **WIRED** | Future |
+| 11 | 10/10 | 11/11 (`validate_long_term_wb`) | `BatchedEt0` + `BatchedWaterBalance` | Future |
 
 ---
 
@@ -74,7 +81,7 @@ dimension of the Anderson lattice, which determines whether QS signals propagate
 | 12 | Islam et al. "No-till and conservation agriculture: David Brandt farm" | 2014 | — | **Yes** (ISWCR) | **In Exp 011** (data digitized) | N/A (data extraction) |
 | 13 | Allen et al. (1998) FAO-56 Ch 7 — Dual Kc for cover crops | 1998 | Standard | **Yes** (open literature) | **40/40 PASS** (Phase 0) | Batch Kc (op=7) |
 | 14 | Soil moisture → Anderson d_eff coupling model | — | Cross-spring | **Yes** (USDA + Open-Meteo) | Future | `BatchedWaterBalance` → Anderson |
-| 15 | OSU Triplett-Van Doren 60-year water balance reconstruction | — | Cross-spring | **Yes** (Open-Meteo 80-yr, USDA soils) | Future | `BatchedEt0` at scale |
+| 15 | OSU Triplett-Van Doren 60-year water balance reconstruction | — | Cross-spring | **Yes** (Open-Meteo 80-yr, USDA soils) | **10+11 PASS** (Exp 015) | `BatchedEt0` at scale |
 | 16 | Cover crop water use & seasonal diversity dynamics | — | Dong | Awaiting field data | Future | Batch ET₀ with Kc schedule |
 
 **Connection to wetSpring**: airSpring computes θ(t); wetSpring computes

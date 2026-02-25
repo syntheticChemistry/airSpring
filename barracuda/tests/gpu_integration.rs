@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! GPU orchestrator and evolution gap integration tests for airSpring `BarraCuda`.
 //!
 //! Tests GPU-accelerated paths (batched ET₀, water balance, kriging,
@@ -853,6 +854,223 @@ fn test_gpu_kriging_deterministic() {
         assert!(
             (a - b).abs() < f64::EPSILON,
             "Point {i}: variance run1={a} vs run2={b}"
+        );
+    }
+}
+
+// ── GPU orchestrator: Richards PDE (pde::richards — airSpring S40 absorption) ─
+
+#[test]
+fn test_gpu_richards_drainage_physical_bounds() {
+    use airspring_barracuda::eco::richards::VanGenuchtenParams;
+    use airspring_barracuda::gpu::richards::{solve_batch_cpu, RichardsRequest};
+
+    let silt_loam = VanGenuchtenParams {
+        theta_r: 0.067,
+        theta_s: 0.45,
+        alpha: 0.02,
+        n_vg: 1.41,
+        ks: 10.8,
+    };
+
+    let request = RichardsRequest {
+        params: silt_loam,
+        depth_cm: 50.0,
+        n_nodes: 20,
+        h_initial: -100.0,
+        h_top: -30.0,
+        zero_flux_top: false,
+        bottom_free_drain: true,
+        duration_days: 1.0,
+        dt_days: 0.01,
+    };
+
+    let cpu_results = solve_batch_cpu(&[request]);
+    assert_eq!(cpu_results.len(), 1);
+    let profiles = cpu_results[0]
+        .as_ref()
+        .expect("Richards solve should succeed");
+    assert!(!profiles.is_empty(), "Should produce at least one profile");
+
+    let final_profile = profiles.last().unwrap();
+    for &theta in &final_profile.theta {
+        assert!(
+            theta >= silt_loam.theta_r && theta <= silt_loam.theta_s,
+            "theta={theta} outside [{}, {}]",
+            silt_loam.theta_r,
+            silt_loam.theta_s
+        );
+    }
+}
+
+#[test]
+fn test_gpu_richards_cross_validate_cpu_upstream() {
+    use airspring_barracuda::eco::richards::VanGenuchtenParams;
+    use airspring_barracuda::gpu::richards::{BatchedRichards, RichardsRequest};
+
+    let sand = VanGenuchtenParams {
+        theta_r: 0.045,
+        theta_s: 0.43,
+        alpha: 0.145,
+        n_vg: 2.68,
+        ks: 712.8,
+    };
+
+    let req = RichardsRequest {
+        params: sand,
+        depth_cm: 30.0,
+        n_nodes: 10,
+        h_initial: -20.0,
+        h_top: 0.0,
+        zero_flux_top: false,
+        bottom_free_drain: false,
+        duration_days: 0.5,
+        dt_days: 0.05,
+    };
+
+    let result = BatchedRichards::cross_validate(&req);
+    assert!(
+        result.is_ok(),
+        "Cross-validation should succeed: {:?}",
+        result.err()
+    );
+}
+
+// ── GPU orchestrator: Isotherm (optimize::nelder_mead — neuralSpring optimizer) ─
+
+#[test]
+fn test_gpu_isotherm_nm_matches_linearized() {
+    use airspring_barracuda::eco::isotherm;
+    use airspring_barracuda::gpu::isotherm as gpu_iso;
+
+    let ce = [1.0, 2.5, 5.0, 10.0, 20.0, 40.0, 60.0, 80.0, 100.0];
+    let qe = [0.85, 1.92, 3.45, 5.8, 8.9, 12.1, 13.8, 14.5, 14.9];
+
+    let lin = isotherm::fit_langmuir(&ce, &qe).expect("linearized fit");
+    let nm = gpu_iso::fit_langmuir_nm(&ce, &qe).expect("NM fit");
+
+    assert!(
+        nm.r_squared >= lin.r_squared - 0.01,
+        "NM R²={} should be ≥ linearized R²={} (within tolerance)",
+        nm.r_squared,
+        lin.r_squared
+    );
+}
+
+#[test]
+fn test_gpu_isotherm_global_beats_single_start() {
+    use airspring_barracuda::gpu::isotherm as gpu_iso;
+
+    let ce = [1.0, 2.5, 5.0, 10.0, 20.0, 40.0, 60.0, 80.0, 100.0];
+    let qe = [0.85, 1.92, 3.45, 5.8, 8.9, 12.1, 13.8, 14.5, 14.9];
+
+    let nm = gpu_iso::fit_langmuir_nm(&ce, &qe).expect("NM fit");
+    let global = gpu_iso::fit_langmuir_global(&ce, &qe, 8).expect("global fit");
+
+    assert!(
+        global.r_squared >= nm.r_squared - 0.02,
+        "Global R²={} should be competitive with NM R²={}",
+        global.r_squared,
+        nm.r_squared
+    );
+    assert!(global.r_squared > 0.95, "Global R²={}", global.r_squared);
+}
+
+#[test]
+fn test_gpu_isotherm_batch_global_field_scale() {
+    use airspring_barracuda::eco::isotherm;
+    use airspring_barracuda::gpu::isotherm as gpu_iso;
+
+    let ce = [1.0, 5.0, 10.0, 25.0, 50.0, 100.0];
+    let qe_site_a: Vec<f64> = ce
+        .iter()
+        .map(|&c| isotherm::langmuir(c, 15.0, 0.05))
+        .collect();
+    let qe_site_b: Vec<f64> = ce
+        .iter()
+        .map(|&c| isotherm::langmuir(c, 25.0, 0.03))
+        .collect();
+    let qe_site_c: Vec<f64> = ce
+        .iter()
+        .map(|&c| isotherm::freundlich(c, 2.5, 1.0 / 2.8))
+        .collect();
+
+    let datasets: Vec<(&[f64], &[f64])> =
+        vec![(&ce, &qe_site_a), (&ce, &qe_site_b), (&ce, &qe_site_c)];
+
+    let results = gpu_iso::fit_batch_global(&datasets, 4);
+    assert_eq!(results.len(), 3);
+
+    for (i, (lang, freund)) in results.iter().enumerate() {
+        assert!(
+            lang.is_some(),
+            "Site {i}: Langmuir global fit should succeed"
+        );
+        assert!(
+            freund.is_some(),
+            "Site {i}: Freundlich global fit should succeed"
+        );
+        let r2 = lang.as_ref().unwrap().r_squared;
+        assert!(r2 > 0.90, "Site {i}: Langmuir R²={r2}");
+    }
+}
+
+// ── Variogram types ──────────────────────────────────────────────────
+
+#[test]
+fn test_kriging_interpolator_exponential_variogram() {
+    use airspring_barracuda::gpu::kriging::{
+        KrigingInterpolator, SensorReading, SoilVariogram, TargetPoint,
+    };
+
+    let device = device_or_skip!();
+
+    let interp = KrigingInterpolator::new(device).unwrap();
+
+    let sensors = vec![
+        SensorReading {
+            x: 0.0,
+            y: 0.0,
+            vwc: 0.20,
+        },
+        SensorReading {
+            x: 100.0,
+            y: 0.0,
+            vwc: 0.30,
+        },
+        SensorReading {
+            x: 0.0,
+            y: 100.0,
+            vwc: 0.25,
+        },
+        SensorReading {
+            x: 100.0,
+            y: 100.0,
+            vwc: 0.35,
+        },
+    ];
+    let targets = vec![
+        TargetPoint { x: 50.0, y: 50.0 },
+        TargetPoint { x: 25.0, y: 25.0 },
+    ];
+    let variogram = SoilVariogram::Exponential {
+        nugget: 0.001,
+        sill: 0.01,
+        range: 150.0,
+    };
+
+    let result = interp.interpolate(&sensors, &targets, variogram).unwrap();
+
+    assert_eq!(result.vwc_values.len(), 2);
+    assert!(
+        result.vwc_values[0] > 0.20 && result.vwc_values[0] < 0.35,
+        "Center VWC with exponential variogram: {}",
+        result.vwc_values[0]
+    );
+    for &v in &result.variances {
+        assert!(
+            v > 0.0 && v.is_finite(),
+            "Exponential variogram variance: {v}"
         );
     }
 }

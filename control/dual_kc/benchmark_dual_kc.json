@@ -4,7 +4,12 @@
     "digitized_by": "airSpring Phase 0 control",
     "created": "2026-02-25",
     "validated_by": "FAO-56 Tables 17, 19; Equations 69-74",
-    "repository": "airSpring/control/dual_kc"
+    "repository": "airSpring/control/dual_kc",
+    "baseline_script": "control/dual_kc/dual_crop_coefficient.py",
+    "baseline_command": "python control/dual_kc/dual_crop_coefficient.py",
+    "baseline_commit": "94cc51d",
+    "python_version": "3.10.12",
+    "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values"
   },
   "table_17_kcb": {
     "_description": "FAO-56 Table 17: Basal crop coefficients (Kcb) for standard climate (subhumid, RHmin≈45%, u2≈2 m/s)",

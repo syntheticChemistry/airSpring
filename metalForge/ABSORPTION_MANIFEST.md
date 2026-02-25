@@ -1,9 +1,9 @@
 # Absorption Manifest — airSpring → barracuda
 
-**Date**: February 25, 2026 (updated v0.3.10)
+**Date**: February 25, 2026 (updated v0.4.0)
 **Source**: `metalForge/forge/` (airspring-forge v0.2.0)
 **Target**: `barracuda` (ToadStool crate)
-**Absorption Status**: NOT YET ABSORBED — all 4 modules pending ToadStool review
+**Absorption Status**: 2/6 absorbed upstream (van_genuchten → pde::richards, isotherm → optimize), 4 pending
 
 ---
 
@@ -26,19 +26,19 @@ Following the pattern established by hotSpring:
 
 | Function | Signature | Reference |
 |----------|-----------|-----------|
-| `rmse` | `fn(observed: &[f64], simulated: &[f64]) -> f64` | Standard |
-| `mbe` | `fn(observed: &[f64], simulated: &[f64]) -> f64` | Standard |
-| `nash_sutcliffe` | `fn(observed: &[f64], simulated: &[f64]) -> f64` | Nash & Sutcliffe (1970) |
-| `index_of_agreement` | `fn(observed: &[f64], simulated: &[f64]) -> f64` | Willmott (1981) |
-| `coefficient_of_determination` | `fn(observed: &[f64], simulated: &[f64]) -> f64` | Standard (alias of NSE) |
+| `rmse` | `fn(observed: &[f64], simulated: &[f64]) -> Result<f64, ForgeError>` | Standard |
+| `mbe` | `fn(observed: &[f64], simulated: &[f64]) -> Result<f64, ForgeError>` | Standard |
+| `nash_sutcliffe` | `fn(observed: &[f64], simulated: &[f64]) -> Result<f64, ForgeError>` | Nash & Sutcliffe (1970) |
+| `index_of_agreement` | `fn(observed: &[f64], simulated: &[f64]) -> Result<f64, ForgeError>` | Willmott (1981) |
+| `coefficient_of_determination` | `fn(observed: &[f64], simulated: &[f64]) -> Result<f64, ForgeError>` | Standard (alias of NSE) |
 
 **Validation**: Dong et al. (2020) *Agriculture* 10(12):598 — 36/36 checks.
-918 station-days real data.  65/65 Python-Rust cross-validation.
+918 station-days real data.  75/75 Python-Rust cross-validation.
 
 **Dependencies**: None (pure arithmetic on `&[f64]`).
 
-**Tests**: 9 unit tests covering perfect match, known values, zero bias,
-mean predictor, constant bias, and R²=NSE identity.
+**Tests**: 11 unit tests covering perfect match, known values, zero bias,
+mean predictor, constant bias, R²=NSE identity, length mismatch, and empty input.
 
 **BarraCuda integration**: Follows the `stats::correlation` pattern — standalone
 functions on `&[f64]`, re-exported from `stats/mod.rs`.
@@ -54,8 +54,8 @@ functions on `&[f64]`, re-exported from `stats/mod.rs`.
 | `fit_all` | All four | Convenience wrapper | — |
 
 **Result type**: `FitResult { model, params, r_squared, rmse }` with
-`predict(&[f64]) -> Vec<f64>` and `predict_one(f64) -> f64` — follows the
-`RidgeResult::predict()` pattern from `barracuda::linalg::ridge`.
+`predict(&[f64]) -> Vec<Option<f64>>` and `predict_one(f64) -> Option<f64>` —
+returns `None` for unknown model types instead of `0.0`.
 
 **Validation**: Dong et al. (2020) sensor correction equations.  Perfect-fit
 tests for all models.  Edge cases: insufficient points, singular systems,
@@ -110,6 +110,55 @@ Once barracuda absorbs these modules, airSpring will:
 | `barracuda/src/gpu/stream.rs` | `smooth_cpu()` (CPU fallback) | `barracuda::ops::moving_window_stats_f64::*` |
 | `barracuda/src/eco/evapotranspiration.rs` | `hargreaves_et0()` inline | `barracuda::ops::hydrology::*` |
 
+### 5. Van Genuchten Soil Hydraulics → `barracuda::pde::richards` (**ABSORBED**)
+
+| Function | Signature | Reference |
+|----------|-----------|-----------|
+| `theta` | `fn(h, theta_r, theta_s, alpha, n) -> f64` | van Genuchten (1980) |
+| `conductivity` | `fn(h, ks, theta_r, theta_s, alpha, n) -> f64` | Mualem (1976) |
+| `capacity` | `fn(h, theta_r, theta_s, alpha, n) -> f64` | dθ/dh |
+
+**Status**: ABSORBED — `barracuda::pde::richards::SoilParams` provides `theta()`,
+`conductivity()`, `capacity()`. airSpring wires via `gpu::richards::to_barracuda_params`.
+
+**Validation**: Carsel & Parrish (1988), HYDRUS baseline. Python ↔ Rust cross-validation.
+
+**Dependencies**: None (pure arithmetic).
+
+**Tests**: 5 unit tests (saturation, dry, conductivity, capacity).
+
+### 6. Isotherm Models → `barracuda::optimize` (fitting via Nelder-Mead)
+
+| Function | Signature | Reference |
+|----------|-----------|-----------|
+| `langmuir` | `fn(ce, qmax, kl) -> f64` | Langmuir (1918) |
+| `freundlich` | `fn(ce, kf, n_inv) -> f64` | Freundlich (1906) |
+| `separation_factor` | `fn(kl, c0) -> f64` | RL favorability |
+| `fit_langmuir` | `fn(ce, qe) -> Option<IsothermFit>` | Linearized LS |
+| `fit_freundlich` | `fn(ce, qe) -> Option<IsothermFit>` | Log-linearized + grid |
+
+**Status**: WIRED — `gpu::isotherm::fit_langmuir_nm()` uses `barracuda::optimize::nelder_mead`
+for nonlinear refinement. Linearized fits serve as initial guesses.
+
+**Validation**: Kumari, Dong & Safferman (2025), wood and sugar beet biochar datasets.
+
+**Dependencies**: None (pure arithmetic).
+
+**Tests**: 5 unit tests (langmuir, freundlich, separation factor, synthetic fits).
+
+---
+
+## Post-Absorption Rewiring (in airSpring) — Updated v0.4.0
+
+| airSpring location | Current code | Rewire to |
+|--------------------|-------------|-----------|
+| `barracuda/src/testutil.rs` | `rmse()`, `mbe()`, etc. | `barracuda::stats::metrics::*` |
+| `barracuda/src/eco/correction.rs` | `fit_linear()`, etc. | `barracuda::stats::regression::*` |
+| `barracuda/src/gpu/stream.rs` | `smooth_cpu()` | `barracuda::ops::moving_window_stats_f64::*` |
+| `barracuda/src/eco/evapotranspiration.rs` | `hargreaves_et0()` | `barracuda::ops::hydrology::*` |
+| `barracuda/src/eco/richards.rs` | `van_genuchten_theta()`, etc. | `barracuda::pde::richards::SoilParams::*` |
+| `barracuda/src/eco/isotherm.rs` | `fit_langmuir()`, etc. | `barracuda::optimize::nelder_mead` |
+
 ---
 
 ## Future Absorption Candidates (Not Yet Extracted)
@@ -140,5 +189,5 @@ Once barracuda absorbs these modules, airSpring will:
 ```
 cargo fmt   — clean
 cargo clippy --all-targets — zero warnings (pedantic)
-cargo test  — 40/40 pass
+cargo test  — 53/53 pass
 ```

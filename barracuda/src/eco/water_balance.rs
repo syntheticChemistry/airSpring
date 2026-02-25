@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Field-scale water balance model for irrigation scheduling.
 //!
 //! Implements the FAO-56 soil water balance (Allen et al., 1998, Ch. 8):

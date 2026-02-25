@@ -1,6 +1,6 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: February 25, 2026 (v0.3.10 — dual Kc batch added, cover crops, CPU benchmarks)
+**Last Updated**: February 25, 2026 (v0.4.0 — Richards PDE wired, isotherm NM wired, 8 GPU orchestrators)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
 **ToadStool HEAD**: `02207c4a` (S62+, 608 WGSL shaders)
 
@@ -8,7 +8,7 @@
 
 ## Current Kernel Usage
 
-### Phase 1: Validated in Rust CPU
+### Phase 1: Validated in Rust CPU (11 experiments)
 
 | Kernel / Module | Rust Crate | Checks | Validation |
 |----------------|------------|:------:|------------|
@@ -22,10 +22,13 @@
 | Dual Kc (Kcb+Ke) | `eco::dual_kc` | 61/61 | FAO-56 Ch 7, Tables 17/19, all crop groups |
 | Cover crops + mulch | `eco::dual_kc` (cover_crop, mulched_ke) | 40/40 | 5 species, Islam et al., no-till |
 | Regional ET₀ | `eco::evapotranspiration` | 61/61 | 6 Michigan stations, Pearson r, CV |
+| Richards equation | `eco::richards` | 15/15 | VG retention/K, infiltration, drainage, mass balance |
+| Biochar isotherms | `eco::isotherm` | 14/14 | Langmuir/Freundlich R², RL, residuals |
+| 60-year water balance | `eco::water_balance` + Hargreaves | 11/11 | Decadal stability, climate trends |
 | Real data (capability) | `eco::*` + `io::csv_ts` | 23/23 | Dynamic station discovery |
-| Cross-validation harness | `validation` | 65/65 | Python↔Rust match (tol=1e-5) |
+| Cross-validation harness | `validation` | 75/75 | Python↔Rust match (tol=1e-5) |
 
-### Phase 2: GPU Orchestrators Wired
+### Phase 2: GPU Orchestrators Wired (8 modules)
 
 | Orchestrator | BarraCuda Primitive | Status | Provenance |
 |-------------|--------------------|----|---|
@@ -35,7 +38,10 @@
 | `gpu::reduce::SeasonalReducer` | `ops::fused_map_reduce_f64` | **GPU N≥1024** | wetSpring, TS-004 fix |
 | `gpu::stream::StreamSmoother` | `ops::moving_window_stats` | **Wired** | wetSpring S28+ |
 | `eco::correction::fit_ridge` | `linalg::ridge::ridge_regression` | **Wired** | wetSpring ESN |
-| `gpu::dual_kc::BatchedDualKc` | CPU path (Tier B → GPU pending) | **CPU-STEP** | airSpring v0.3.10 |
+| `gpu::richards::BatchedRichards` | `pde::richards::solve_richards` | **Wired** (v0.4.0) | airSpring → upstream |
+| `gpu::isotherm::fit_*_nm` | `optimize::nelder_mead` | **Wired** (v0.4.0) | airSpring → upstream |
+
+Note: `gpu::dual_kc::BatchedDualKc` has CPU orchestrator wired (Tier B → pending shader).
 
 ### Phase 2: Stats & Validation
 
@@ -45,7 +51,7 @@
 | `stats::spearman_correlation` | `testutil::spearman_r` | Working |
 | `stats::bootstrap_ci` | `testutil::bootstrap_rmse` | Working |
 | `stats::std_dev` | Integration tests | Working |
-| `validation::ValidationHarness` | 6 validation binaries | Absorbed (S59) |
+| `validation::ValidationHarness` | 16 binaries | Absorbed (S59) |
 
 ---
 
@@ -53,95 +59,100 @@
 
 ### Layer 1: BarraCuda CPU (validated, complete)
 
-All algorithms implemented in pure Rust. 279 tests, 287 validation checks.
+All algorithms implemented in pure Rust. 328 tests, 16 binaries.
 This is the baseline for correctness — GPU and metalForge results must match.
-CPU benchmarks: 12.7M ET₀/s, 59M dual Kc/s, 64M mulched Kc/s.
+CPU benchmarks: 12.5M ET₀/s, 38.9M VG θ/s, 59M dual Kc/s, 175K NM fits/s.
 
 ```
-eco::evapotranspiration → validated daily_et0()
+eco::evapotranspiration → validated daily_et0(), hargreaves_et0()
 eco::soil_moisture      → validated topp_equation(), inverse_topp()
 eco::water_balance      → validated simulate_season()
 eco::dual_kc            → validated simulate_dual_kc(), cover crops, mulched_ke()
 eco::correction         → validated fit_linear/quadratic/exponential/logarithmic/ridge()
 eco::sensor_calibration → validated soilwatch10_calibrate()
+eco::richards           → validated solve_richards_1d(), van_genuchten theta/K
+eco::isotherm           → validated fit_langmuir/freundlich(), predictions
 io::csv_ts              → validated parse(), TimeseriesData
 ```
 
-### Layer 2: BarraCuda GPU (wired, 6 orchestrators)
+### Layer 2: BarraCuda GPU (wired, 8 orchestrators)
 
 GPU dispatch for batch operations. CPU fallback available for all.
 
 ```
-gpu::et0        → BatchedEt0::gpu()        → fao56_et0_batch()        [op=0]
-gpu::water_balance → BatchedWaterBalance::gpu_step() → water_balance_batch() [op=1]
-gpu::kriging    → KrigingInterpolator::new() → KrigingF64              [spatial]
-gpu::reduce     → SeasonalReducer::new()    → FusedMapReduceF64       [N≥1024]
-gpu::stream     → StreamSmoother::new()     → MovingWindowStats        [sliding window]
-eco::correction → fit_ridge()               → ridge_regression         [CPU linalg]
+gpu::et0           → BatchedEt0::gpu()             → fao56_et0_batch()         [op=0]
+gpu::water_balance → BatchedWaterBalance::gpu_step()→ water_balance_batch()     [op=1]
+gpu::kriging       → KrigingInterpolator::new()     → KrigingF64               [spatial]
+gpu::reduce        → SeasonalReducer::new()         → FusedMapReduceF64        [N≥1024]
+gpu::stream        → StreamSmoother::new()          → MovingWindowStats         [sliding]
+gpu::richards      → BatchedRichards::solve_upstream()→ pde::richards           [Tier B]
+gpu::isotherm      → fit_langmuir_nm/freundlich_nm  → optimize::nelder_mead    [Tier B]
+eco::correction    → fit_ridge()                    → ridge_regression          [CPU]
 ```
 
-### Layer 3: metalForge Mixed Hardware (staged, 40 tests)
+### Layer 3: metalForge Mixed Hardware (staged, 53 tests)
 
-Upstream absorption candidates for `barracuda::stats`:
+Upstream absorption candidates:
 
 ```
-forge::metrics    → rmse, mbe, nash_sutcliffe, index_of_agreement    [→ barracuda::stats::metrics]
-forge::regression → fit_linear, fit_quadratic, fit_exponential,       [→ barracuda::stats::regression]
-                    fit_logarithmic, fit_all
+forge::metrics       → rmse, mbe, nse, ia, r2                        [→ barracuda::stats::metrics]
+forge::regression    → fit_linear, quadratic, exponential, logarithmic [→ barracuda::stats::regression]
+forge::moving_window → moving_window_stats_f64                        [→ barracuda::ops]
+forge::hydrology     → hargreaves_et0, crop_kc, soil_water_balance    [→ barracuda::ops::hydrology]
+forge::van_genuchten → theta, conductivity, capacity                  [ABSORBED → pde::richards]
+forge::isotherm      → langmuir, freundlich, fit, separation_factor   [WIRED → optimize]
 ```
 
-Future metalForge extensions:
+Mixed hardware extensions (future):
 - GPU batch metrics (RMSE/R²/IA over N scenario arrays)
 - Mixed CPU+GPU pipeline (CPU for control flow, GPU for batch math)
-- NPU streaming (future: real-time IoT on neural accelerator)
+- NPU streaming (real-time IoT on neural accelerator)
 
 ---
 
 ## Remaining Gaps
 
-### Tier B — Ready to Wire (upstream primitive exists)
+### Tier B — Ready to Wire (11 items)
 
-| Need | Primitive | Purpose | Effort |
-|------|----------|---------|:------:|
-| 1D Richards equation | `pde::richards::solve_richards` | Unsaturated soil water flow | Medium — **PROMOTED from Tier C** |
-| Sensor batch calibration | `batched_elementwise_f64` (op=5) | Batch SoilWatch 10 VWC | Low |
-| Hargreaves ET₀ batch | `batched_elementwise_f64` (op=6) | Simpler ET₀ | Low |
-| Kc climate adjustment | `batched_elementwise_f64` (op=7) | FAO-56 Eq. 62 | Low |
-| Dual Kc batch (Ke) | `batched_elementwise_f64` (op=8) | GPU Ke for M-field batching | Low — orchestrator wired |
-| Nonlinear curve fitting | `optimize::nelder_mead`, `NelderMeadGpu` | Correction equations | Medium |
-| Tridiagonal solve | `linalg::tridiagonal_solve_f64` | Implicit PDE steps | Low |
-| Adaptive ODE (RK45) | `numerical::rk45_solve` | Dynamic soil models | Low |
+| Need | Primitive | Status | Effort |
+|------|----------|--------|:------:|
+| **Dual Kc batch (Ke)** | `batched_elementwise_f64` (op=8) | CPU orchestrator wired | Low |
+| **VG θ/K batch** | `batched_elementwise_f64` (new op) | eco::richards validated | Low |
+| **Batch Nelder-Mead** | `NelderMeadGpu` | CPU NM wired via gpu::isotherm | Medium |
+| Sensor batch calibration | `batched_elementwise_f64` (op=5) | — | Low |
+| Hargreaves ET₀ batch | `batched_elementwise_f64` (op=6) | — | Low |
+| Kc climate adjustment | `batched_elementwise_f64` (op=7) | — | Low |
+| Richards PDE (GPU) | WGSL van_genuchten_f64 shader | CPU wired via gpu::richards | Medium |
+| Tridiagonal solve | `linalg::tridiagonal_solve_f64` | Available upstream | Low |
+| Adaptive ODE (RK45) | `numerical::rk45_solve` | Available upstream | Low |
+| Isotherm batch fitting | `NelderMeadGpu` batch | GPU orchestrator wired | Medium |
 | m/z tolerance search | `batched_bisection_f64.wgsl` | Cross-spring from wetSpring | Low |
 
-### Tier C — Needs New Primitive
+### Tier C — Needs New Primitive (1 item)
 
-| Need | Description | Complexity | Upstream Support |
-|------|-------------|:---------:|------------------|
-| HTTP/JSON client | Open-Meteo, NOAA CDO APIs | Low | Not GPU |
-
-**Note (v0.3.10):** Richards equation promoted from Tier C to Tier B. ToadStool now
-provides `pde::richards::solve_richards` with van Genuchten-Mualem constitutive
-relations, Picard iteration, Crank-Nicolson time-stepping, and Thomas (tridiagonal)
-spatial solver. airSpring needs to wire this with domain-specific soil parameters
-from `eco::soil_moisture` and validate against HYDRUS benchmarks.
-
-Dual Kc batch (op=8) added. The GPU orchestrator `gpu::dual_kc::BatchedDualKc` is
-wired with CPU fallback and M-field batching. Pending: ToadStool shader for GPU Ke
-computation. Cover crop species (5) and no-till mulch reduction are CPU-validated.
+| Need | Description | Complexity |
+|------|-------------|:---------:|
+| HTTP/JSON client | Open-Meteo, NOAA CDO APIs | Low (not GPU) |
 
 ---
 
 ## Benchmark Results (CPU baselines, `--release`)
 
-Run `cargo run --release --bin bench_airspring_gpu` for current numbers.
+Run `cargo run --release --bin bench_cpu_vs_python` for current numbers.
 
-| Operation | N | Time (µs) | Throughput | Shader |
-|-----------|---|-----------|------------|--------|
-| ET₀ (FAO-56) | 10,000 | 795 | 12.6M ops/sec | `batched_elementwise_f64.wgsl` |
-| Reduce (seasonal) | 100,000 | 251 | 399M elem/sec | `fused_map_reduce_f64.wgsl` |
-| Stream smooth | 8,760 (24h) | 270 | 32.4M elem/sec | `moving_window.wgsl` |
-| Kriging | 20→500 | 26 | — | `kriging_f64.wgsl` |
-| Ridge regression | 5,000 | 48 | R²=1.000 | (CPU-only) |
+| Operation | N | Throughput | Source |
+|-----------|---|------------|--------|
+| ET₀ (FAO-56) | 1M | 12.2M ops/sec | `bench_cpu_vs_python` |
+| Dual Kc (Kcb+Ke) | 3,650 | 59M days/sec | `bench_cpu_vs_python` |
+| Mulched Kc | 3,650 | 64M days/sec | `bench_cpu_vs_python` |
+| VG θ retention | 100K | 36.5M evals/sec | `bench_cpu_vs_python` (v0.4.0) |
+| Richards 1D | 10 steps | 3,618 sims/sec | `bench_cpu_vs_python` (v0.4.0) |
+| Langmuir fit | 9 pts | 57M fits/sec | `bench_cpu_vs_python` (v0.4.0) |
+| Freundlich fit | 9 pts | 1.2M fits/sec | `bench_cpu_vs_python` (v0.4.0) |
+| Reduce (seasonal) | 100K | 399M elem/sec | `bench_airspring_gpu` |
+| Stream smooth | 8,760 | 32.4M elem/sec | `bench_airspring_gpu` |
+| Kriging | 20→500 | — | `bench_airspring_gpu` |
+| Ridge regression | 5,000 | R²=1.000 | `bench_airspring_gpu` (CPU-only) |
 
 ---
 
@@ -154,4 +165,4 @@ Run `cargo run --release --bin bench_airspring_gpu` for current numbers.
 | TS-003 | `acos`/`sin` precision drift in f64 WGSL shaders | **RESOLVED** |
 | TS-004 | `FusedMapReduceF64` buffer conflict for N≥1024 | **RESOLVED** |
 
-See `barracuda/src/gpu/evolution_gaps.rs` for the full 18-gap roadmap.
+See `barracuda/src/gpu/evolution_gaps.rs` for the full 20-gap roadmap.

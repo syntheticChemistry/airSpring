@@ -2,7 +2,7 @@
 
 **Status**: Working draft — reviewed for PII, suitable for public repository
 **Purpose**: Document the replication of precision agriculture computational methods on consumer hardware using BarraCuda
-**Date**: February 2026
+**Date**: February 2026 (v0.4.0)
 
 ---
 
@@ -12,29 +12,33 @@
 |----------|-------------|----------|
 | [METHODOLOGY.md](METHODOLOGY.md) | Multi-phase validation protocol (Python control → Rust evolution → cross-validation) | Methodology review |
 | [STUDY.md](STUDY.md) | Full results: paper benchmarks, real data pipeline, Rust validation | Reviewers, collaborators |
+| [baseCamp/README.md](baseCamp/README.md) | Per-faculty research briefings and next steps | Lab planning |
 
 ---
 
 ## What This Study Is
 
-airSpring replicates published precision irrigation and soil science methods from Dr. Younsuk Dong (Michigan State University) and the FAO-56 standard, first in Python/R (the original tools), then in Rust via BarraCuda, with the goal of GPU-accelerated sovereign irrigation scheduling on consumer hardware.
+airSpring replicates published precision irrigation, soil science, and environmental systems methods from Dr. Younsuk Dong (Michigan State University), the FAO-56 standard, and classical soil physics, first in Python/R (the original tools), then in Rust via BarraCuda, with the goal of GPU-accelerated sovereign irrigation scheduling on consumer hardware.
 
-The study answers three questions:
+The study answers four questions:
 
 1. **Can published agricultural science be independently reproduced using open tools?**
-   Answer: yes — 142/142 Python checks pass against digitized paper benchmarks (FAO-56 examples, Dong 2020 soil sensor data, Dong 2024 IoT irrigation system).
+   Answer: yes — 344/344 Python checks pass against digitized paper benchmarks (FAO-56 examples, Dong 2020 soil sensor data, Dong 2024 IoT irrigation, Richards equation, biochar isotherms, 60-year water balance).
 
 2. **Can open data replace institutional weather station access?**
    Answer: yes — Open-Meteo (free, no key, 80+ years) provides real historical Michigan weather at 10km resolution. Our FAO-56 ET₀ matches Open-Meteo's independent computation with R²=0.967 across 918 station-days. NOAA CDO and OpenWeatherMap supplement with GHCND daily records and real-time forecasts.
 
 3. **Can Rust + WebGPU replace Python/Excel for precision agriculture?**
-   Answer: yes (validation complete) — Rust BarraCuda passes 123/123 validation checks across 8 binaries with 293 tests (253 barracuda + 40 forge). A cross-validation harness confirms 65/65 Python-Rust value matches within 1e-5 tolerance. The Rust crate now includes Hargreaves ET₀, crop Kc database (10 crops), sensor calibration, and a full growing-season pipeline demonstration. GPU acceleration is LIVE — 6 orchestrators, 4/4 ToadStool issues resolved, GPU determinism verified. metalForge stages 4 absorption-ready modules for upstream barracuda integration following hotSpring's Write → Absorb → Lean pattern.
+   Answer: yes (validation complete) — Rust BarraCuda passes 328 tests across 16 binaries. A cross-validation harness confirms 75/75 Python-Rust value matches within 1e-5 tolerance. 8 GPU orchestrators wired to ToadStool/BarraCuda primitives including Richards PDE and isotherm fitting. CPU benchmarks: 12.5M ET₀/s, 38.9M VG θ/s, 175K NM fits/s.
+
+4. **Can the math be truly portable across hardware?**
+   In progress — metalForge stages 6 absorption-ready modules for upstream barracuda integration following hotSpring's Write → Absorb → Lean pattern. 2 modules already absorbed upstream (van_genuchten into pde::richards, isotherm into optimize). GPU wiring proves the compute is hardware-portable; metalForge will demonstrate mixed CPU/GPU/NPU dispatch.
 
 ---
 
 ## Key Results
 
-### Phase 0 (Python Control): 142/142 checks pass
+### Phase 0 (Python Control): 344/344 checks pass (11 experiments)
 
 | Experiment | Paper | Checks | Key Validation |
 |------------|-------|:------:|----------------|
@@ -42,6 +46,12 @@ The study answers three questions:
 | Soil Sensor Calibration | Dong et al. 2020 | 36/36 | Topp eq, RMSE/IA/MBE, correction fits |
 | IoT Irrigation Pipeline | Dong et al. 2024 | 24/24 | SoilWatch 10, irrigation model, ANOVA |
 | Water Balance | FAO-56 Chapter 8 | 18/18 | Mass balance 0.0000 mm, Ks bounds |
+| Dual Kc | FAO-56 Chapter 7 | 63/63 | 10 crops, 11 soils, Kcb+Ke partitioning |
+| Cover Crops | FAO-56 Ch 11 + Islam | 40/40 | 5 species, mulch reduction, no-till savings |
+| Regional ET₀ | 6 Michigan stations | 61/61 | CV, pairwise r, geographic consistency |
+| Richards Equation | van Genuchten 1980 | 14/14 | VG retention, conductivity, infiltration, drainage |
+| Biochar Isotherms | Kumari et al. 2025 | 14/14 | Langmuir/Freundlich R², RL factor |
+| 60-Year Water Balance | OSU Triplett, ERA5 | 10/10 | Decadal stability, mass balance, climate trends |
 
 ### Phase 0+ (Real Data): 918 station-days, R²=0.967
 
@@ -53,9 +63,7 @@ The study answers three questions:
 | West Olive (blueberry) | 0.257 | 0.963 | 639.1 mm | 635.2 mm |
 | **Overall** | **0.267** | **0.967** | — | — |
 
-Water balance simulations on real data: 53-72% water savings with smart scheduling vs naive irrigation — consistent with Dong et al. (2024) published results.
-
-### Phase 1 (Rust BarraCuda): 123/123 checks pass, 253 tests
+### Phase 1 (Rust BarraCuda): 328 tests, 16 binaries
 
 | Binary | Checks | Key Validation |
 |--------|:------:|----------------|
@@ -63,16 +71,22 @@ Water balance simulations on real data: 53-72% water savings with smart scheduli
 | validate_soil | 26/26 | Topp equation, 5 USDA textures, PAW |
 | validate_iot | 11/11 | CSV time series, column statistics |
 | validate_water_balance | 13/13 | Mass balance, Ks bounds, MI summer |
-| validate_sensor_calibration | 21/21 | SoilWatch 10, irrigation model, Dong 2024 |
-| validate_real_data | 21/21 | Real data pipeline, Open-Meteo ET₀ |
-| cross_validate | 65 values | Python↔Rust JSON harness |
-| simulate_season | — | Full growing-season pipeline |
+| validate_sensor_calibration | 21/21 | SoilWatch 10, irrigation model |
+| validate_real_data | 23/23 | Real data pipeline, Open-Meteo ET₀ |
+| validate_dual_kc | 61/61 | FAO-56 Ch 7, 10 crops, Kcb+Ke |
+| validate_cover_crop | 40/40 | 5 cover crops, mulch, no-till |
+| validate_regional_et0 | 61/61 | 6-station intercomparison |
+| validate_richards | 15/15 | VG retention, infiltration, drainage, mass balance |
+| validate_biochar | 14/14 | Langmuir/Freundlich R², RL, residuals |
+| validate_long_term_wb | 11/11 | 60-year ET₀, water balance, climate |
+| cross_validate | 75 values | Python↔Rust JSON harness |
 
-### Phase 2 (Cross-validation): 65/65 MATCH
+### Phase 2 (Cross-validation): 75/75 MATCH
 
-Python and Rust produce identical results (within 1e-5 tolerance) for 65 values
+Python and Rust produce identical results (within 1e-5 tolerance) for 75 values
 across atmospheric, solar, radiation, ET₀, Topp, SoilWatch 10, irrigation,
-statistics, Hargreaves, sunshine Rs, and monthly soil heat flux.
+statistics, Hargreaves, sunshine Rs, monthly soil heat flux, van Genuchten
+retention/conductivity, and Langmuir/Freundlich isotherm predictions.
 
 ---
 
@@ -91,43 +105,8 @@ No institutional access required. No proprietary software. AGPL-3.0 licensed.
 
 ---
 
-## Next Phase: Paper Review Candidates
+## Next Phase: GPU Validation & metalForge
 
-airSpring's current work centers on **Younsuk Dong** (BAE, MSU — new lab 2026) and the FAO-56 standard. The faculty network reveals several extensions through cross-spring connections and Dong's broader program.
-
-### Extension of Dong's Work
-
-| Priority | Paper / Direction | Why |
-|----------|-------------------|-----|
-| **Tier 1** | Dong et al. — IoT soil moisture sensor network calibration (MSU field data) | Direct extension of current Exp 002/003. Real multi-sensor field data for site-specific calibration curves. Bridges to groundSpring Exp 001 (sensor noise characterization) |
-| **Tier 1** | Dong et al. (2024) — Full IoT irrigation scheduling system with weather forecast integration | Extends current Exp 004 from single-field to multi-site demonstration. Real growing-season decision pipeline |
-| **Tier 2** | Allen et al. (1998) FAO-56 Chapter 7 — Extended crop coefficient (Kc) studies | Current work validates ET₀; next step is crop-specific ETc via dual Kc. BarraCuda Rust crate already has 10-crop Kc database |
-| **Tier 2** | Regional ET₀ model intercomparison across Michigan microclimates | Quantify how much ET₀ varies across the state using Open-Meteo's 80-year archive. Statistical framework for "is my local model portable?" |
-
-### Cross-Spring Connections
-
-| Spring | Connection to airSpring | What It Means |
-|--------|------------------------|---------------|
-| **groundSpring** | Exp 003 (error propagation) quantifies that humidity dominates ET₀ uncertainty at 66% | airSpring knows *how* to compute ET₀; groundSpring tells it *which input to worry about most* |
-| **neuralSpring** | Exp 004 (transfer learning) shows Michigan→NM gap is ΔR²=0.326 | neuralSpring tells airSpring *how* to port a model to a new location; fine-tuning with 200 local samples bridges most of the domain gap |
-| **neuralSpring** | Exp 001 (surrogate) replaces the full FAO-56 chain with a 4,673-param MLP at R²=0.999 | The surrogate is the fast inner loop for BarraCuda real-time irrigation scheduling |
-| **wetSpring** | Soil microbiome health affects plant water uptake efficiency | Long-term: soil biology data from wetSpring pipelines informs crop stress models |
-
-### Faculty Who Extend airSpring
-
-| Professor | Department | Relevance |
-|-----------|-----------|-----------|
-| **Younsuk Dong** (primary) | BAE, MSU | ET₀, soil sensors, IoT irrigation — direct paper reproduction target |
-| **Emily Dolson** (indirect) | CSE, MSU | Evolutionary optimization of irrigation scheduling parameters — directed evolution of sensor placement |
-| **Christopher Waters** (indirect) | MMG, MSU | Soil microbiome signaling — how bacterial health in the rhizosphere affects plant water dynamics |
-
-### BarraCuda Status for airSpring Extension
-
-| Feature | Status | Next |
-|---------|--------|------|
-| ET₀ (Hargreaves + PM) | Rust validated, 123/123 | GPU: batch multi-site ET₀ |
-| Crop Kc database | 10 crops in Rust | Extend to dual Kc (FAO-56 Ch 7) |
-| Water balance | Rust validated, 13/13 | Multi-field scheduling optimizer |
-| Sensor calibration | Rust validated, 21/21 | Real-time IoT stream processing |
-| Correction equation fitting | Complete (eco::correction, pure Rust) | — |
-| Cross-validation | 65/65 Python↔Rust match | Foundation for GPU promotion |
+See `specs/PAPER_REVIEW_QUEUE.md` for the full paper queue and compute pipeline.
+See `wateringHole/handoffs/` for the latest ToadStool/BarraCuda handoff (V005).
+See `CHANGELOG.md` for the full evolution history.

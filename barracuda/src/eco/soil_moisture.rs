@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Soil moisture sensor calibration — dielectric permittivity to volumetric water content.
 //!
 //! Implements the Topp equation (Topp et al., 1980) and soil-specific

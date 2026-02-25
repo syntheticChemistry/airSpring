@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Statistical agreement metrics for model validation.
 //!
 //! Pure-Rust implementations of standard metrics used across hydrology,
@@ -21,23 +22,58 @@
 
 use crate::len_f64;
 
+/// Errors from forge metric computations.
+#[derive(Debug, Clone, PartialEq)]
+pub enum ForgeError {
+    /// Input slices have different lengths.
+    LengthMismatch { expected: usize, got: usize },
+    /// Input slices are empty.
+    EmptyInput,
+}
+
+impl std::fmt::Display for ForgeError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::LengthMismatch { expected, got } => {
+                write!(f, "length mismatch: expected {expected}, got {got}")
+            }
+            Self::EmptyInput => write!(f, "empty input"),
+        }
+    }
+}
+
+impl std::error::Error for ForgeError {}
+
+fn validate_slices(observed: &[f64], simulated: &[f64]) -> Result<(), ForgeError> {
+    if observed.len() != simulated.len() {
+        return Err(ForgeError::LengthMismatch {
+            expected: observed.len(),
+            got: simulated.len(),
+        });
+    }
+    if observed.is_empty() {
+        return Err(ForgeError::EmptyInput);
+    }
+    Ok(())
+}
+
 /// Root Mean Square Error.
 ///
 /// RMSE = √(Σ(obsᵢ − simᵢ)² / n)
 ///
-/// # Panics
+/// # Errors
 ///
-/// Panics if slices have different lengths.
-#[must_use]
-pub fn rmse(observed: &[f64], simulated: &[f64]) -> f64 {
-    assert_eq!(observed.len(), simulated.len(), "length mismatch");
+/// Returns [`ForgeError::LengthMismatch`] if slices have different lengths,
+/// or [`ForgeError::EmptyInput`] if either slice is empty.
+pub fn rmse(observed: &[f64], simulated: &[f64]) -> Result<f64, ForgeError> {
+    validate_slices(observed, simulated)?;
     let n = len_f64(observed);
     let ss: f64 = observed
         .iter()
         .zip(simulated)
         .map(|(o, s)| (o - s).powi(2))
         .sum();
-    (ss / n).sqrt()
+    Ok((ss / n).sqrt())
 }
 
 /// Mean Bias Error.
@@ -46,15 +82,15 @@ pub fn rmse(observed: &[f64], simulated: &[f64]) -> f64 {
 ///
 /// Positive MBE indicates over-prediction.
 ///
-/// # Panics
+/// # Errors
 ///
-/// Panics if slices have different lengths.
-#[must_use]
-pub fn mbe(observed: &[f64], simulated: &[f64]) -> f64 {
-    assert_eq!(observed.len(), simulated.len(), "length mismatch");
+/// Returns [`ForgeError::LengthMismatch`] if slices have different lengths,
+/// or [`ForgeError::EmptyInput`] if either slice is empty.
+pub fn mbe(observed: &[f64], simulated: &[f64]) -> Result<f64, ForgeError> {
+    validate_slices(observed, simulated)?;
     let n = len_f64(observed);
     let bias: f64 = observed.iter().zip(simulated).map(|(o, s)| s - o).sum();
-    bias / n
+    Ok(bias / n)
 }
 
 /// Nash-Sutcliffe Efficiency (Nash & Sutcliffe, 1970).
@@ -64,13 +100,12 @@ pub fn mbe(observed: &[f64], simulated: &[f64]) -> f64 {
 /// NSE = 1.0 is perfect; NSE = 0.0 means the model is no better than the
 /// mean; NSE < 0 means the model is worse than the mean.
 ///
-/// # Panics
+/// # Errors
 ///
-/// Panics if slices have different lengths or are empty.
-#[must_use]
-pub fn nash_sutcliffe(observed: &[f64], simulated: &[f64]) -> f64 {
-    assert_eq!(observed.len(), simulated.len(), "length mismatch");
-    assert!(!observed.is_empty(), "empty input");
+/// Returns [`ForgeError::LengthMismatch`] if slices have different lengths,
+/// or [`ForgeError::EmptyInput`] if either slice is empty.
+pub fn nash_sutcliffe(observed: &[f64], simulated: &[f64]) -> Result<f64, ForgeError> {
+    validate_slices(observed, simulated)?;
 
     let n = len_f64(observed);
     let mean_obs: f64 = observed.iter().sum::<f64>() / n;
@@ -83,9 +118,9 @@ pub fn nash_sutcliffe(observed: &[f64], simulated: &[f64]) -> f64 {
     let ss_tot: f64 = observed.iter().map(|o| (o - mean_obs).powi(2)).sum();
 
     if ss_tot == 0.0 {
-        return 1.0;
+        return Ok(1.0);
     }
-    1.0 - ss_res / ss_tot
+    Ok(1.0 - ss_res / ss_tot)
 }
 
 /// Index of Agreement (Willmott, 1981).
@@ -94,13 +129,12 @@ pub fn nash_sutcliffe(observed: &[f64], simulated: &[f64]) -> f64 {
 ///
 /// Values range from 0.0 (no agreement) to 1.0 (perfect).
 ///
-/// # Panics
+/// # Errors
 ///
-/// Panics if slices have different lengths or are empty.
-#[must_use]
-pub fn index_of_agreement(observed: &[f64], simulated: &[f64]) -> f64 {
-    assert_eq!(observed.len(), simulated.len(), "length mismatch");
-    assert!(!observed.is_empty(), "empty input");
+/// Returns [`ForgeError::LengthMismatch`] if slices have different lengths,
+/// or [`ForgeError::EmptyInput`] if either slice is empty.
+pub fn index_of_agreement(observed: &[f64], simulated: &[f64]) -> Result<f64, ForgeError> {
+    validate_slices(observed, simulated)?;
 
     let n = len_f64(observed);
     let mean_obs: f64 = observed.iter().sum::<f64>() / n;
@@ -117,9 +151,9 @@ pub fn index_of_agreement(observed: &[f64], simulated: &[f64]) -> f64 {
         .sum();
 
     if denominator == 0.0 {
-        return 1.0;
+        return Ok(1.0);
     }
-    1.0 - numerator / denominator
+    Ok(1.0 - numerator / denominator)
 }
 
 /// Coefficient of determination (R²) via sum-of-squares.
@@ -128,8 +162,15 @@ pub fn index_of_agreement(observed: &[f64], simulated: &[f64]) -> f64 {
 ///
 /// Equivalent to [`nash_sutcliffe`] — provided as a named alias for
 /// domains where "R²" is the conventional term.
-#[must_use]
-pub fn coefficient_of_determination(observed: &[f64], simulated: &[f64]) -> f64 {
+///
+/// # Errors
+///
+/// Returns [`ForgeError::LengthMismatch`] if slices have different lengths,
+/// or [`ForgeError::EmptyInput`] if either slice is empty.
+pub fn coefficient_of_determination(
+    observed: &[f64],
+    simulated: &[f64],
+) -> Result<f64, ForgeError> {
     nash_sutcliffe(observed, simulated)
 }
 
@@ -140,54 +181,54 @@ mod tests {
     #[test]
     fn test_rmse_perfect() {
         let a = [1.0, 2.0, 3.0];
-        assert!(rmse(&a, &a) < f64::EPSILON);
+        assert!(rmse(&a, &a).unwrap() < f64::EPSILON);
     }
 
     #[test]
     fn test_rmse_known() {
         let obs = [1.0, 2.0, 3.0, 4.0];
         let sim = [1.1, 2.1, 2.9, 3.9];
-        assert!((rmse(&obs, &sim) - 0.1).abs() < 1e-10);
+        assert!((rmse(&obs, &sim).unwrap() - 0.1).abs() < 1e-10);
     }
 
     #[test]
     fn test_mbe_positive_bias() {
         let obs = [1.0, 2.0, 3.0];
         let sim = [1.5, 2.5, 3.5];
-        assert!((mbe(&obs, &sim) - 0.5).abs() < 1e-10);
+        assert!((mbe(&obs, &sim).unwrap() - 0.5).abs() < 1e-10);
     }
 
     #[test]
     fn test_mbe_zero() {
         let obs = [1.0, 2.0, 3.0];
         let sim = [0.9, 2.1, 3.0];
-        assert!(mbe(&obs, &sim).abs() < 1e-10);
+        assert!(mbe(&obs, &sim).unwrap().abs() < 1e-10);
     }
 
     #[test]
     fn test_nse_perfect() {
         let a = [1.0, 2.0, 3.0, 4.0, 5.0];
-        assert!((nash_sutcliffe(&a, &a) - 1.0).abs() < f64::EPSILON);
+        assert!((nash_sutcliffe(&a, &a).unwrap() - 1.0).abs() < f64::EPSILON);
     }
 
     #[test]
     fn test_nse_mean_predictor() {
         let obs = [1.0, 2.0, 3.0, 4.0, 5.0];
         let mean = [3.0; 5];
-        assert!(nash_sutcliffe(&obs, &mean).abs() < 1e-10);
+        assert!(nash_sutcliffe(&obs, &mean).unwrap().abs() < 1e-10);
     }
 
     #[test]
     fn test_ia_perfect() {
         let a = [1.0, 2.0, 3.0, 4.0, 5.0];
-        assert!((index_of_agreement(&a, &a) - 1.0).abs() < f64::EPSILON);
+        assert!((index_of_agreement(&a, &a).unwrap() - 1.0).abs() < f64::EPSILON);
     }
 
     #[test]
     fn test_ia_constant_bias() {
         let obs = [1.0, 2.0, 3.0, 4.0];
         let sim = [1.5, 2.5, 3.5, 4.5];
-        let ia = index_of_agreement(&obs, &sim);
+        let ia = index_of_agreement(&obs, &sim).unwrap();
         assert!(ia > 0.9 && ia < 1.0, "IA={ia}");
     }
 
@@ -196,8 +237,30 @@ mod tests {
         let obs = [1.0, 2.5, 3.1, 4.7, 5.3];
         let sim = [1.1, 2.3, 3.4, 4.5, 5.5];
         assert!(
-            (coefficient_of_determination(&obs, &sim) - nash_sutcliffe(&obs, &sim)).abs()
+            (coefficient_of_determination(&obs, &sim).unwrap()
+                - nash_sutcliffe(&obs, &sim).unwrap())
+            .abs()
                 < f64::EPSILON
         );
+    }
+
+    #[test]
+    fn test_length_mismatch() {
+        let obs = [1.0, 2.0, 3.0];
+        let sim = [1.0, 2.0];
+        assert_eq!(
+            rmse(&obs, &sim).unwrap_err(),
+            ForgeError::LengthMismatch {
+                expected: 3,
+                got: 2
+            }
+        );
+    }
+
+    #[test]
+    fn test_empty_input() {
+        let obs: [f64; 0] = [];
+        let sim: [f64; 0] = [];
+        assert_eq!(rmse(&obs, &sim).unwrap_err(), ForgeError::EmptyInput);
     }
 }

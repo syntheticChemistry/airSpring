@@ -1,6 +1,6 @@
 # Cross-Spring Shader Evolution — airSpring Provenance
 
-**Updated**: February 25, 2026 (v0.3.10, ToadStool HEAD `02207c4a`)
+**Updated**: February 25, 2026 (v0.4.0, ToadStool HEAD `02207c4a`)
 
 ## Summary
 
@@ -77,8 +77,8 @@ Domain: Evolutionary optimization, neural surrogates, spectral methods.
 | **Stats** | 2 | mean_reduce, histogram |
 
 Key contributions to ecosystem: Multi-head attention decomposition, mixed-hardware
-inference infrastructure, and the `nelder_mead` optimizer that airSpring may wire
-for nonlinear curve fitting (currently Tier B in evolution gaps).
+inference infrastructure, and the `nelder_mead` optimizer. airSpring's `gpu::isotherm`
+module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 
 ### airSpring — Precision Agriculture (5 shaders used, 3 fixes contributed)
 
@@ -123,7 +123,9 @@ for nonlinear curve fitting (currently Tier B in evolution gaps).
 | `gpu::reduce::SeasonalReducer` | `ops::fused_map_reduce_f64` | wetSpring | GPU N≥1024 |
 | `gpu::stream::StreamSmoother` | `ops::moving_window_stats` | wetSpring S28+ | **WIRED** (new) |
 | `eco::correction::fit_ridge` | `linalg::ridge::ridge_regression` | wetSpring ESN | **WIRED** (new) |
-| `gpu::dual_kc::BatchedDualKc` | CPU path (Tier B → GPU pending) | airSpring | **CPU-STEP** (new) |
+| `gpu::dual_kc::BatchedDualKc` | CPU path (Tier B → GPU pending) | airSpring | **CPU-STEP** |
+| `gpu::richards::BatchedRichards` | `pde::richards::solve_richards` | airSpring v0.4.0 | **WIRED** (new) |
+| `gpu::isotherm::fit_*_nm` | `optimize::nelder_mead` | airSpring v0.4.0 | **WIRED** (new) |
 | `validation` | `validation::ValidationHarness` | neuralSpring | ABSORBED |
 | `testutil::r_squared` | `stats::pearson_correlation` | Shared | WIRED |
 | `testutil::spearman_r` | `stats::spearman_correlation` | Shared | WIRED |
@@ -146,31 +148,52 @@ for nonlinear curve fitting (currently Tier B in evolution gaps).
 | Feb 25 | airSpring v0.3.7: metalForge v0.2.0 evolution | 4 absorption-ready modules (metrics, regression, moving_window_f64, hydrology) |
 | Feb 25 | airSpring v0.3.8: ToadStool deep audit | Richards PDE promoted C→B (upstream solver available), +2 Tier B gaps (tridiag, RK45) |
 | Feb 25 | airSpring v0.3.9: Dual Kc + cover crops | FAO-56 Ch 7/11 CPU-validated, 5 cover crop species, no-till mulch |
-| Feb 25 | airSpring v0.3.10: GPU dual Kc + benchmarks | BatchedDualKc orchestrator, CPU benchmarks 12.7M ET₀/s, 287 validation checks |
+| Feb 25 | airSpring v0.3.10: GPU dual Kc + benchmarks | BatchedDualKc orchestrator, CPU benchmarks 12.7M ET₀/s |
+| Feb 25 | airSpring v0.4.0: Richards + isotherm + 60yr WB | `gpu::richards` wired to pde::richards, `gpu::isotherm` wired to optimize::nelder_mead, 75/75 cross-validation |
+| Feb 25 | airSpring v0.4.1: ToadStool S52-S62 sync | multi_start_nelder_mead wired, global isotherm fitting (LHS), 323 tests |
+| Feb 25 | airSpring v0.4.2: GPU integration + benchmarks | Richards/isotherm GPU integration tests, cross-spring benchmark suite, 328 tests |
 
 ---
 
-## Benchmark Summary (CPU baselines, `--release`)
+## Cross-Spring Shader Provenance — Who Helps Whom
+
+| Spring | Shaders | Contribution to airSpring | Reverse Contribution |
+|--------|---------|--------------------------|---------------------|
+| **hotSpring** | 56 | df64 core, pow/exp/log/trig f64 — enables VG retention, atmospheric pressure | TS-001 pow_f64 fix (airSpring uncovered) |
+| **wetSpring** | 25 | kriging_f64, fused_map_reduce, moving_window, ridge_regression | TS-004 reduce buffer fix (airSpring stabilized for all) |
+| **neuralSpring** | 20 | nelder_mead, multi_start_nelder_mead, ValidationHarness | TS-003 acos precision fix (airSpring found boundary issue) |
+| **airSpring** | — | Domain consumer | Richards PDE → absorbed upstream (S40) |
+
+608 WGSL shaders in ToadStool, 46 cross-spring absorptions (S51-S57). airSpring uses 5 shader families + contributed 3 critical fixes. Zero shader duplication.
+
+---
+
+## Benchmark Summary (CPU baselines, `--release`, v0.4.2)
 
 | Operation | N | Time (µs) | Throughput | Provenance |
 |-----------|---|-----------|------------|------------|
-| ET₀ (FAO-56) | 10,000 | 795 | 12.6M ops/sec | hotSpring pow_f64, multi-spring elementwise |
-| Reduce (seasonal) | 100,000 | 251 | 399M elem/sec | wetSpring fused_map_reduce |
-| Stream smooth | 8,760 (24h) | 270 | 32.4M elem/sec | wetSpring moving_window |
+| ET₀ (FAO-56) | 10,000 | 797 | 12.5M ops/sec | hotSpring pow_f64, multi-spring elementwise |
+| Reduce (seasonal) | 100,000 | 254 | 395M elem/sec | wetSpring fused_map_reduce |
+| Stream smooth | 8,760 (24h) | 276 | 31.7M elem/sec | wetSpring moving_window |
 | Kriging | 20→500 | 26 | — | wetSpring kriging_f64 |
 | Ridge regression | 5,000 | 48 | R²=1.000 | wetSpring ESN ridge |
+| Richards PDE | 50 nodes | 13,930 | 72 sims/sec | airSpring→ToadStool S40, hotSpring df64 |
+| VG θ(h) batch | 100,000 | 2,575 | 38.9M evals/sec | hotSpring df64 precision |
+| Isotherm (linearized) | 9 pts | 0.1 | 8.3M fits/sec | airSpring eco::isotherm |
+| Isotherm (NM 1-start) | 9 pts | 5.7 | 175K fits/sec | neuralSpring nelder_mead |
+| Isotherm (NM 8×LHS) | 9 pts | 23.5 | 42.5K fits/sec | neuralSpring multi_start_nelder_mead |
 
 ---
 
 ## Remaining Evolution Gaps
 
-**Tier B (9 items):** 1D Richards equation (PROMOTED from Tier C — upstream
-`pde::richards::solve_richards` now available with van Genuchten-Mualem),
+**Tier B (11 items):** Richards PDE GPU shader (CPU wired via `gpu::richards`),
+batch Nelder-Mead (CPU wired via `gpu::isotherm`), VG θ/K batch (new op),
 dual Kc batch (op=8, GPU orchestrator wired, pending shader),
 sensor calibration batch, Hargreaves batch, Kc climate adjustment,
-nonlinear solver (Nelder-Mead), tridiagonal solve, adaptive RK45 ODE,
+isotherm batch fitting, tridiagonal solve, adaptive RK45 ODE,
 m/z tolerance search.
 
 **Tier C (1 item):** HTTP/JSON data client.
 
-See `gpu::evolution_gaps` module for full structured inventory.
+See `gpu::evolution_gaps` module for full structured inventory (20 gaps total).

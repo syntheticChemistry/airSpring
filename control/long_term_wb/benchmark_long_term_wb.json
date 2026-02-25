@@ -1,0 +1,60 @@
+{
+    "_provenance": {
+        "method": "FAO-56 Chapter 8 water balance applied to Open-Meteo ERA5 historical data",
+        "digitized_by": "airSpring control experiment team",
+        "created": "2026-02-25",
+        "validated_by": "control/long_term_wb/long_term_water_balance.py",
+        "repository": "ecoPrimals/airSpring",
+        "baseline_script": "control/long_term_wb/long_term_water_balance.py",
+        "baseline_command": "python control/long_term_wb/long_term_water_balance.py",
+        "python_version": "3.10.12",
+        "data_source": "Open-Meteo Historical Weather API (ERA5 reanalysis)",
+        "site": "Wooster, OH (40.78°N, 81.93°W, 311m) — OSU OARDC, Triplett-Van Doren tillage study",
+        "period": "1960-2023 growing seasons (May 1 - Sep 30)",
+        "soil": "Wooster silt loam (USDA SiltLoam: FC=0.33, WP=0.13, Ksat=6.8 mm/hr)",
+        "references": [
+            "Allen et al. (1998) FAO-56 Chapter 8",
+            "Triplett & Van Doren (1969-2025) OSU long-term tillage study",
+            "USDA Web Soil Survey — Wayne County, OH"
+        ]
+    },
+    "site": {
+        "name": "Wooster, OH (OSU OARDC)",
+        "latitude": 40.78,
+        "longitude": -81.93,
+        "elevation_m": 311,
+        "soil_texture": "SiltLoam",
+        "field_capacity": 0.33,
+        "wilting_point": 0.13,
+        "root_depth_m": 0.60,
+        "depletion_fraction": 0.50,
+        "crop": "Corn (continuous — Triplett study)"
+    },
+    "validation_checks": {
+        "physical_reasonableness": {
+            "description": "Multi-decade water balance physical constraints",
+            "checks": [
+                {"id": "annual_et0_range", "description": "Annual ET₀ 400-800 mm (Ohio temperate)", "min": 400, "max": 800},
+                {"id": "seasonal_et0_mean", "description": "Growing season ET₀ 500-700 mm", "min": 500, "max": 700},
+                {"id": "mass_balance", "description": "Mass balance closure < 0.01 mm per season", "tolerance": 0.01},
+                {"id": "stress_fraction", "description": "Drought stress (Ks<1) in 50-100% of seasons (Ohio corn)", "min_pct": 50, "max_pct": 100},
+                {"id": "deep_percolation", "description": "Deep percolation > 0 in wet years", "min_seasons_with_dp": 10}
+            ]
+        },
+        "climate_trends": {
+            "description": "Detect known climate signals in Ohio (warming, intensification)",
+            "checks": [
+                {"id": "et0_trend", "description": "Positive ET₀ trend (warming signal)", "expected_sign": "positive_or_zero"},
+                {"id": "precip_variability", "description": "Precipitation CV 15-40%", "min_cv": 15, "max_cv": 40},
+                {"id": "decade_means_stable", "description": "Decade-to-decade ET₀ varies < 15%", "max_decade_cv": 15}
+            ]
+        },
+        "cross_validation": {
+            "description": "Consistency with known Ohio hydrology",
+            "checks": [
+                {"id": "et_precip_ratio", "description": "Season ET/Precip ratio 0.6-1.8 (Ohio corn)", "min": 0.6, "max": 1.8},
+                {"id": "irrigation_need", "description": "Irrigation needed (deficit) in 60-100% of seasons", "min_pct": 60, "max_pct": 100}
+            ]
+        }
+    }
+}

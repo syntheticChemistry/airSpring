@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Eco-science integration tests for airSpring `BarraCuda`.
 //!
 //! Tests cross-module interactions within the `eco` domain:
@@ -600,5 +601,95 @@ fn test_soil_texture_ordering_ksat() {
     assert!(
         sand > clay,
         "Sand Ksat ({sand}) should be > Clay Ksat ({clay})"
+    );
+}
+
+// ── Additional crop/soil/correction edge cases ───────────────────────
+
+#[test]
+fn test_crop_coefficients_all_10_crops() {
+    let crops = [
+        CropType::Corn,
+        CropType::Soybean,
+        CropType::WinterWheat,
+        CropType::Alfalfa,
+        CropType::Tomato,
+        CropType::Potato,
+        CropType::SugarBeet,
+        CropType::DryBean,
+        CropType::Blueberry,
+        CropType::Turfgrass,
+    ];
+    for crop in &crops {
+        let kc = crop.coefficients();
+        assert!(kc.kc_ini > 0.0, "{crop:?} kc_ini must be positive");
+        assert!(kc.kc_ini < kc.kc_mid, "{crop:?} kc_ini < kc_mid");
+        assert!(kc.kc_mid > 0.0, "{crop:?} kc_mid must be positive");
+    }
+}
+
+#[test]
+fn test_all_soil_textures_hydraulic_properties() {
+    let textures = [
+        SoilTexture::Sand,
+        SoilTexture::LoamySand,
+        SoilTexture::SandyLoam,
+        SoilTexture::Loam,
+        SoilTexture::SiltLoam,
+        SoilTexture::Silt,
+        SoilTexture::Clay,
+    ];
+    for tex in &textures {
+        let props = tex.hydraulic_properties();
+        assert!(
+            props.field_capacity > props.wilting_point,
+            "{tex:?} FC > WP"
+        );
+        assert!(props.field_capacity > 0.0, "{tex:?} FC > 0");
+        assert!(props.wilting_point >= 0.0, "{tex:?} WP >= 0");
+        assert!(props.ksat_mm_hr > 0.0, "{tex:?} Ksat > 0");
+    }
+}
+
+#[test]
+fn test_correction_quadratic_fit() {
+    let x = [1.0, 2.0, 3.0, 4.0, 5.0];
+    let y: Vec<f64> = x.iter().map(|&xi| 0.5 * xi * xi + 2.0 * xi + 1.0).collect();
+    let result = correction::fit_quadratic(&x, &y);
+    assert!(result.is_some(), "quadratic fit should succeed");
+    let fit = result.unwrap();
+    assert!(
+        fit.r_squared > 0.99,
+        "perfect quadratic data R² should be ~1.0"
+    );
+}
+
+#[test]
+fn test_correction_exponential_fit() {
+    let x = [1.0, 2.0, 3.0, 4.0, 5.0];
+    let y: Vec<f64> = x.iter().map(|&xi| 2.0 * (0.5_f64 * xi).exp()).collect();
+    let result = correction::fit_exponential(&x, &y);
+    assert!(result.is_some(), "exponential fit should succeed");
+}
+
+#[test]
+fn test_correction_logarithmic_fit() {
+    let x: [f64; 5] = [1.0, 2.0, 3.0, 4.0, 5.0];
+    let y: Vec<f64> = x.iter().map(|&xi| 3.0 * xi.ln() + 1.0).collect();
+    let result = correction::fit_logarithmic(&x, &y);
+    assert!(result.is_some(), "logarithmic fit should succeed");
+    let fit = result.unwrap();
+    assert!(fit.r_squared > 0.99, "perfect log data R² should be ~1.0");
+}
+
+#[test]
+fn test_sensor_calibration_boundary_raw_counts() {
+    // Test boundary raw count values
+    let vwc = sc::soilwatch10_vwc(0.0);
+    assert!(vwc.is_finite(), "zero raw count should produce finite VWC");
+    let vwc_high = sc::soilwatch10_vwc(10000.0);
+    assert!(
+        vwc_high.is_finite(),
+        "high raw count should produce finite VWC"
     );
 }

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Crop coefficient (Kc) database — FAO-56 Table 12.
 //!
 //! Standard crop coefficients for use in water balance scheduling.

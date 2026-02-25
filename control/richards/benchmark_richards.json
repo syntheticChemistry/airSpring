@@ -1,0 +1,91 @@
+{
+    "_provenance": {
+        "method": "Richards equation with van Genuchten-Mualem hydraulics",
+        "digitized_by": "airSpring control experiment team",
+        "created": "2026-02-25",
+        "validated_by": "control/richards/richards_1d.py",
+        "repository": "ecoPrimals/airSpring",
+        "baseline_script": "control/richards/richards_1d.py",
+        "baseline_command": "python control/richards/richards_1d.py",
+        "python_version": "3.10.12",
+        "reproduction_note": "Re-run baseline_command to regenerate expected values",
+        "references": [
+            "van Genuchten (1980) A closed-form equation for predicting the hydraulic conductivity of unsaturated soils. SSSA J 44:892-898",
+            "Richards (1931) Capillary conduction of liquids through porous mediums. Physics 1:318-333",
+            "Dong et al. (2019) J Sustainable Water in the Built Environment 5(4):04019005",
+            "Carsel & Parrish (1988) Developing joint probability distributions of soil water retention characteristics. WRR 24:755-769"
+        ]
+    },
+    "soil_types": {
+        "sand": {
+            "theta_r": 0.045,
+            "theta_s": 0.430,
+            "alpha": 0.145,
+            "n_vg": 2.68,
+            "Ks_cm_day": 712.8,
+            "source": "Carsel & Parrish (1988) Table 1"
+        },
+        "silt_loam": {
+            "theta_r": 0.067,
+            "theta_s": 0.450,
+            "alpha": 0.020,
+            "n_vg": 1.41,
+            "Ks_cm_day": 10.8,
+            "source": "Carsel & Parrish (1988) Table 1"
+        },
+        "clay": {
+            "theta_r": 0.068,
+            "theta_s": 0.380,
+            "alpha": 0.008,
+            "n_vg": 1.09,
+            "Ks_cm_day": 4.8,
+            "source": "Carsel & Parrish (1988) Table 1"
+        }
+    },
+    "validation_checks": {
+        "van_genuchten_retention": {
+            "description": "Water retention curve matches van Genuchten (1980) Eq. 1",
+            "test_cases": [
+                {"soil": "sand", "h_cm": -10, "expected_theta": 0.2143, "tolerance": 0.001},
+                {"soil": "sand", "h_cm": -100, "expected_theta": 0.0493, "tolerance": 0.001},
+                {"soil": "silt_loam", "h_cm": -100, "expected_theta": 0.3297, "tolerance": 0.005},
+                {"soil": "clay", "h_cm": -100, "expected_theta": 0.3654, "tolerance": 0.005}
+            ]
+        },
+        "hydraulic_conductivity": {
+            "description": "Mualem-van Genuchten conductivity (Eq. 9 in van Genuchten 1980)",
+            "test_cases": [
+                {"soil": "sand", "h_cm": 0, "expected_K_ratio": 1.0, "tolerance": 0.001},
+                {"soil": "sand", "h_cm": -10, "expected_K_ratio_range": [0.01, 0.5]}
+            ]
+        },
+        "infiltration_sand": {
+            "description": "1D infiltration into initially moist sand — surface wets, solver converges",
+            "column_depth_cm": 100,
+            "initial_h_cm": -20,
+            "top_h_cm": 0,
+            "duration_hours": 1,
+            "checks": [
+                {"id": "solver_converges", "description": "Solver completes without error"},
+                {"id": "theta_surface", "description": "Surface θ approaches θs", "min_theta": 0.35}
+            ]
+        },
+        "drainage_silt_loam": {
+            "description": "Free drainage from initially wet silt loam column",
+            "column_depth_cm": 100,
+            "initial_h_cm": -5,
+            "duration_hours": 24,
+            "checks": [
+                {"id": "solver_converges", "description": "Solver completes without error"},
+                {"id": "bottom_drains", "description": "Cumulative drainage > 0"},
+                {"id": "mass_balance", "description": "Mass balance < 50%", "tolerance_pct": 50.0}
+            ]
+        },
+        "steady_state_flux": {
+            "description": "Steady state Darcy flux through saturated column equals Ks",
+            "checks": [
+                {"id": "saturated_flux", "description": "Flux ≈ Ks under unit gradient", "tolerance_pct": 5.0}
+            ]
+        }
+    }
+}

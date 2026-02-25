@@ -7,7 +7,12 @@
       "Allen et al. (1998) FAO-56 Table 17 + Ch 11: Kc for non-pristine conditions",
       "Islam et al. (2014) No-till and conservation agriculture: David Brandt farm, ISWCR",
       "USDA NRCS Cover Crop Termination Guidelines"
-    ]
+    ],
+    "baseline_script": "control/dual_kc/cover_crop_dual_kc.py",
+    "baseline_command": "python control/dual_kc/cover_crop_dual_kc.py",
+    "baseline_commit": "94cc51d",
+    "python_version": "3.10.12",
+    "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values"
   },
   "cover_crop_kcb": {
     "_description": "Basal Kc for common cover crops in no-till systems. Based on FAO-56 Table 17 + literature adjustments for cover crop growth habits.",

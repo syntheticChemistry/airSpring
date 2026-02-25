@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Evolution gaps: airSpring CPU→GPU migration roadmap.
 //!
 //! This module documents the gaps between airSpring's validated CPU pipeline
@@ -10,7 +11,7 @@
 //! - **Needs Adaptation**: Shader exists, needs domain customisation.
 //! - **Needs Primitive**: No `ToadStool` implementation yet.
 //!
-//! # Current Inventory (February 25, 2026 — v0.3.10, synced to `ToadStool` HEAD `02207c4a`)
+//! # Current Inventory (February 25, 2026 — v0.4.1, synced to `ToadStool` HEAD `02207c4a`)
 //!
 //! All four `ToadStool` issues (TS-001 through TS-004) are **RESOLVED**.
 //!
@@ -37,16 +38,17 @@
 //!
 //! | Need | Closest `ToadStool` Primitive | Gap |
 //! |------|---------------------------|-----|
-//! | 1D Richards equation | `pde::richards::solve_richards` (van Genuchten-Mualem) | **PROMOTED from Tier C** — wire with airSpring soil params |
+//! | 1D Richards equation | `pde::richards::solve_richards` (van Genuchten-Mualem) | **WIRED** — `gpu::richards::BatchedRichards` (v0.4.0) |
 //! | Sensor calibration (batch) | `batched_elementwise_f64.wgsl` (custom op) | Add `SoilWatch` 10 as op=5 |
 //! | Hargreaves ET₀ (batch) | `batched_elementwise_f64.wgsl` | Add as op=6 (simpler than PM) |
 //! | Kc climate adjustment (batch) | `batched_elementwise_f64.wgsl` | Add as op=7 |
 //! | Moving window statistics | `ops::moving_window_stats` | **PROMOTED to Tier A** — `gpu::stream::StreamSmoother` |
-//! | Nonlinear curve fitting | `optimize::nelder_mead`, `NelderMeadGpu` | Wire for correction eq fitting |
+//! | Nonlinear curve fitting | `optimize::nelder_mead`, `NelderMeadGpu` | **WIRED** — `gpu::isotherm::fit_*_nm()` + `fit_*_global()` (v0.4.1) |
 //! | Ridge regression | `linalg::ridge::ridge_regression` | **PROMOTED to Tier A** — `eco::correction::fit_ridge` |
 //! | m/z tolerance search | `batched_bisection_f64.wgsl` | Cross-spring from `wetSpring` |
-//! | Tridiagonal solve (batch) | `linalg::tridiagonal_solve_f64` | Available for implicit PDE steps |
+//! | Tridiagonal solve (batch) | `linalg::tridiagonal_solve_f64` | Wired via `pde::richards` (v0.4.0) |
 //! | Adaptive ODE (RK45) | `numerical::rk45_solve` (Dormand-Prince) | Available for dynamic soil models |
+//! | Batch isotherm fitting | `optimize::multi_start_nelder_mead` | **WIRED** — `gpu::isotherm::fit_batch_global()` (v0.4.1) |
 //!
 //! ## Tier C: Needs New `ToadStool` Primitives
 //!
@@ -77,9 +79,9 @@
 //! ## Cross-Validation Strategy
 //!
 //! GPU paths are validated against CPU baselines:
-//! 1. CPU validation remains source of truth (123/123 checks)
+//! 1. CPU validation remains source of truth (319 tests, 16 binaries)
 //! 2. GPU results must match CPU within documented tolerance
-//! 3. Cross-validation harness (65/65 Python↔Rust) extends to GPU path
+//! 3. Cross-validation harness (75/75 Python↔Rust) extends to GPU path
 //! 4. Each GPU function has a `test_gpu_matches_cpu_*` integration test
 //! 5. GPU determinism proven: 4 bit-identical rerun tests (`gpu_integration.rs`)
 
@@ -109,11 +111,19 @@ pub enum Tier {
     C,
 }
 
-/// All known evolution gaps (18 entries — 8 Tier A integrated, 9 Tier B, 1 Tier C).
+/// All known evolution gaps (20 entries — 8 Tier A integrated, 11 Tier B (4 wired), 1 Tier C).
 ///
-/// Richards PDE promoted C→B: upstream `pde::richards::solve_richards` now available.
-/// Tridiagonal and RK45 added as new Tier B capabilities.
+/// v0.4.1: Added `multi_start_nelder_mead` for robust global isotherm fitting.
+/// v0.4.0: Richards PDE wired to `barracuda::pde::richards`, isotherm fitting
+/// wired to `barracuda::optimize::nelder_mead`, tridiagonal available via PDE solver.
 /// Dual Kc batch added as Tier B: `gpu::dual_kc` CPU ready, pending shader op.
+///
+/// Upstream capabilities discovered (S52-S62, not yet wired):
+/// - `NelderMeadGpu`: GPU-resident optimizer (5-50 params, not cost-effective for 2-param isotherms)
+/// - `ops::crank_nicolson`: GPU Crank-Nicolson PDE solver (**f32 only** — needs f64 for Richards)
+/// - `unified_hardware`: `HardwareDiscovery`, `ComputeScheduler`, `MixedSubstrate` — metalForge target
+/// - `optimize::bfgs`: Quasi-Newton with gradient (useful for smooth objectives)
+/// - `optimize::adaptive_penalty`: Constrained optimization with data-driven penalty
 pub const GAPS: &[EvolutionGap] = &[
     // ── Tier A: Integrated (GPU primitive wired and validated) ─────────
     EvolutionGap {
@@ -217,14 +227,14 @@ pub const GAPS: &[EvolutionGap] = &[
         toadstool_primitive: Some(
             "pde::richards::solve_richards (van Genuchten-Mualem, Picard + CN + Thomas)",
         ),
-        action: "PROMOTED C→B: upstream solver available — wire with airSpring soil params",
+        action: "WIRED (v0.4.0): gpu::richards::BatchedRichards wraps barracuda::pde::richards",
     },
     EvolutionGap {
         id: "tridiagonal_batch",
         description: "Tridiagonal solver for implicit PDE time-stepping",
         tier: Tier::B,
         toadstool_primitive: Some("linalg::tridiagonal_solve_f64, ops::cyclic_reduction_f64"),
-        action: "Available upstream — wire when Richards PDE integration begins",
+        action: "Wired via pde::richards (v0.4.0) — direct use available for other PDE solvers",
     },
     EvolutionGap {
         id: "rk45_adaptive",
@@ -232,6 +242,13 @@ pub const GAPS: &[EvolutionGap] = &[
         tier: Tier::B,
         toadstool_primitive: Some("numerical::rk45_solve (Dormand-Prince, adaptive step)"),
         action: "Available upstream — wire for soil moisture dynamics, biochar kinetics",
+    },
+    EvolutionGap {
+        id: "isotherm_batch_fitting",
+        description: "Batch isotherm fitting via nonlinear optimization",
+        tier: Tier::B,
+        toadstool_primitive: Some("optimize::nelder_mead, multi_start_nelder_mead, NelderMeadGpu"),
+        action: "WIRED (v0.4.1): gpu::isotherm::{fit_*_nm, fit_*_global, fit_batch_global}",
     },
     // ── Tier C: Needs new primitive ──────────────────────────────────
     EvolutionGap {

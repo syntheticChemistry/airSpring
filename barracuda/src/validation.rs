@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Shared validation infrastructure for hotSpring-pattern binaries.
 //!
 //! Leans on [`barracuda::validation::ValidationHarness`] (absorbed upstream
@@ -66,8 +67,11 @@ pub fn json_f64(value: &serde_json::Value, path: &[&str]) -> Option<f64> {
 
 /// Extract a string from a JSON value with path context for error messages.
 ///
-/// Panics with a descriptive message if the key is missing — intended for
-/// compile-time embedded benchmark JSON where the schema is known.
+/// Intended for compile-time embedded benchmark JSON where the schema is known.
+///
+/// # Panics
+///
+/// Panics if `key` is missing from `tc` or if the value at `key` is not a string.
 #[must_use]
 pub fn json_str<'a>(tc: &'a serde_json::Value, key: &str) -> &'a str {
     tc[key]
@@ -78,6 +82,10 @@ pub fn json_str<'a>(tc: &'a serde_json::Value, key: &str) -> &'a str {
 /// Extract an f64 from a JSON test case with descriptive panic.
 ///
 /// Intended for compile-time embedded benchmark JSON.
+///
+/// # Panics
+///
+/// Panics if `key` is missing from `tc` or if the value at `key` is not an f64.
 #[must_use]
 pub fn json_field(tc: &serde_json::Value, key: &str) -> f64 {
     tc[key]
@@ -86,6 +94,10 @@ pub fn json_field(tc: &serde_json::Value, key: &str) -> f64 {
 }
 
 /// Extract a JSON array with descriptive panic.
+///
+/// # Panics
+///
+/// Panics if any key in `path` is missing, or if the value at the final path is not an array.
 #[must_use]
 pub fn json_array<'a>(value: &'a serde_json::Value, path: &[&str]) -> &'a Vec<serde_json::Value> {
     let mut current = value;
@@ -96,7 +108,7 @@ pub fn json_array<'a>(value: &'a serde_json::Value, path: &[&str]) -> &'a Vec<se
     }
     current
         .as_array()
-        .unwrap_or_else(|| panic!("benchmark JSON: expected array at {:?}", path))
+        .unwrap_or_else(|| panic!("benchmark JSON: expected array at {path:?}"))
 }
 
 #[cfg(test)]

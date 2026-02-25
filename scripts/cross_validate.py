@@ -283,6 +283,61 @@ def main():
         "logarithmic_val": round6(log_val),
     }
 
+    # ── Richards van Genuchten retention (Exp 006) ────────────────────
+    def vg_theta(h, theta_r, theta_s, alpha, n):
+        """Van Genuchten water retention (Eq. 1)."""
+        if h >= 0:
+            return theta_s
+        m = 1.0 - 1.0 / n
+        x = (alpha * abs(h)) ** n
+        se = 1.0 / (1.0 + x) ** m
+        return theta_r + (theta_s - theta_r) * se
+
+    def vg_k(h, ks, theta_r, theta_s, alpha, n):
+        """Van Genuchten-Mualem conductivity."""
+        if h >= 0:
+            return ks
+        m = 1.0 - 1.0 / n
+        theta = vg_theta(h, theta_r, theta_s, alpha, n)
+        se = (theta - theta_r) / (theta_s - theta_r)
+        if se <= 0:
+            return 0.0
+        if se >= 1:
+            return ks
+        term = 1.0 - se ** (1.0 / m)
+        kr = se ** 0.5 * (1.0 - term ** m) ** 2
+        return ks * max(0.0, min(1.0, kr))
+
+    sand = {"theta_r": 0.045, "theta_s": 0.43, "alpha": 0.145, "n": 2.68, "ks": 712.8}
+
+    results["richards"] = {
+        "theta_h0": round6(vg_theta(0.0, **{k: sand[k] for k in ["theta_r", "theta_s", "alpha", "n"]})),
+        "theta_h10": round6(vg_theta(-10.0, **{k: sand[k] for k in ["theta_r", "theta_s", "alpha", "n"]})),
+        "theta_h100": round6(vg_theta(-100.0, **{k: sand[k] for k in ["theta_r", "theta_s", "alpha", "n"]})),
+        "k_h0": round6(vg_k(0.0, **sand)),
+        "k_h10": round6(vg_k(-10.0, **sand)),
+    }
+
+    # ── Biochar isotherm predictions (Exp 007) ──────────────────────
+    def langmuir_pred(ce, qmax, kl):
+        return qmax * kl * ce / (1.0 + kl * ce)
+
+    def freundlich_pred(ce, kf, n_inv):
+        return kf * max(ce, 1e-10) ** n_inv
+
+    def langmuir_rl(kl, c0):
+        return 1.0 / (1.0 + kl * c0)
+
+    qmax, kl = 18.0, 0.05
+    kf, n_iso = 2.0, 2.0
+    ce_vals = [1.0, 10.0, 50.0, 100.0]
+
+    results["isotherm"] = {
+        "langmuir": {f"ce_{int(c)}": round6(langmuir_pred(c, qmax, kl)) for c in ce_vals},
+        "freundlich": {f"ce_{int(c)}": round6(freundlich_pred(c, kf, 1.0 / n_iso)) for c in ce_vals},
+        "rl_c0_100": round6(langmuir_rl(kl, 100.0)),
+    }
+
     print(json.dumps(results, indent=2))
 
 

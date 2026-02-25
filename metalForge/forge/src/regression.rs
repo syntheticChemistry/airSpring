@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Analytical least-squares regression primitives.
 //!
 //! Pure-Rust implementations of four common regression models using
@@ -38,25 +39,30 @@ pub struct FitResult {
 
 impl FitResult {
     /// Evaluate the fitted model at a single x value.
+    ///
+    /// Returns `None` for unknown model types.
     #[must_use]
-    pub fn predict_one(&self, x: f64) -> f64 {
+    pub fn predict_one(&self, x: f64) -> Option<f64> {
         match self.model {
-            "linear" => self.params[0].mul_add(x, self.params[1]),
-            "quadratic" => self.params[0].mul_add(x * x, self.params[1].mul_add(x, self.params[2])),
-            "exponential" => self.params[0] * (self.params[1] * x).exp(),
+            "linear" => Some(self.params[0].mul_add(x, self.params[1])),
+            "quadratic" => {
+                Some(self.params[0].mul_add(x * x, self.params[1].mul_add(x, self.params[2])))
+            }
+            "exponential" => Some(self.params[0] * (self.params[1] * x).exp()),
             "logarithmic" => {
                 debug_assert!(x > 0.0, "logarithmic model requires x > 0");
-                self.params[0].mul_add(x.ln(), self.params[1])
+                Some(self.params[0].mul_add(x.ln(), self.params[1]))
             }
-            _ => 0.0,
+            _ => None,
         }
     }
 
     /// Evaluate the fitted model at multiple x values.
     ///
-    /// Returns a `Vec<f64>` of predictions, one per input.
+    /// Returns a `Vec<Option<f64>>` of predictions, one per input.
+    /// Each element is `None` for unknown model types.
     #[must_use]
-    pub fn predict(&self, x: &[f64]) -> Vec<f64> {
+    pub fn predict(&self, x: &[f64]) -> Vec<Option<f64>> {
         x.iter().map(|&xi| self.predict_one(xi)).collect()
     }
 }
@@ -342,9 +348,9 @@ mod tests {
         let y: Vec<f64> = x.iter().map(|&xi| 3.0f64.mul_add(xi, 2.0)).collect();
         let r = fit_linear(&x, &y).unwrap();
         let pred = r.predict(&[0.0, 5.0, 10.0]);
-        assert!((pred[0] - 2.0).abs() < 1e-8);
-        assert!((pred[1] - 17.0).abs() < 1e-8);
-        assert!((pred[2] - 32.0).abs() < 1e-8);
+        assert!((pred[0].unwrap() - 2.0).abs() < 1e-8);
+        assert!((pred[1].unwrap() - 17.0).abs() < 1e-8);
+        assert!((pred[2].unwrap() - 32.0).abs() < 1e-8);
     }
 
     #[test]
@@ -352,7 +358,20 @@ mod tests {
         let x: Vec<f64> = (0..20).map(|i| f64::from(i) * 0.5).collect();
         let y: Vec<f64> = x.iter().map(|&xi| xi * xi).collect();
         let r = fit_quadratic(&x, &y).unwrap();
-        assert!((r.predict_one(3.0) - 9.0).abs() < 0.01);
+        assert!((r.predict_one(3.0).unwrap() - 9.0).abs() < 0.01);
+    }
+
+    #[test]
+    fn test_predict_one_unknown_model_returns_none() {
+        let r = FitResult {
+            model: "unknown",
+            params: vec![1.0, 2.0],
+            r_squared: 0.0,
+            rmse: 0.0,
+        };
+        assert!(r.predict_one(1.0).is_none());
+        let pred = r.predict(&[1.0, 2.0, 3.0]);
+        assert_eq!(pred, vec![None, None, None]);
     }
 
     #[test]

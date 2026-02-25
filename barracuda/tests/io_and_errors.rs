@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! I/O parsing and error handling integration tests for airSpring `BarraCuda`.
 //!
 //! Tests CSV streaming parser, round-trip fidelity, and the unified error type.
@@ -166,4 +167,35 @@ fn test_error_type_display_and_source() {
     let debug_err = AirSpringError::InvalidInput("test".to_string());
     let debug_msg = format!("{debug_err:?}");
     assert!(debug_msg.contains("InvalidInput"), "Debug: {debug_msg}");
+}
+
+// ── CSV parser edge cases ────────────────────────────────────────────
+
+#[test]
+fn test_csv_malformed_floats_stored_as_nan() {
+    // CSV with unparseable values should store NaN, not crash
+    let csv = "timestamp,temp,rh\n2024-01-01,18.5,notanumber\n2024-01-02,20.0,65.0\n";
+    let cursor = std::io::Cursor::new(csv);
+    let data = csv_ts::parse_csv_reader(cursor, Some("timestamp")).unwrap();
+    assert_eq!(data.len(), 2);
+    assert!(data.column("rh").unwrap()[0].is_nan());
+    assert!((data.column("rh").unwrap()[1] - 65.0).abs() < f64::EPSILON);
+}
+
+#[test]
+fn test_csv_wrong_column_count_skipped() {
+    // Rows with wrong column count should be skipped
+    let csv = "timestamp,temp,rh\n2024-01-01,18.5,70.0\n2024-01-02,20.0\n2024-01-03,22.0,75.0\n";
+    let cursor = std::io::Cursor::new(csv);
+    let data = csv_ts::parse_csv_reader(cursor, Some("timestamp")).unwrap();
+    assert_eq!(data.len(), 2);
+    assert_eq!(data.skipped_rows(), 1);
+}
+
+#[test]
+fn test_csv_single_row() {
+    let csv = "timestamp,temp\n2024-01-01,18.5\n";
+    let cursor = std::io::Cursor::new(csv);
+    let data = csv_ts::parse_csv_reader(cursor, Some("timestamp")).unwrap();
+    assert_eq!(data.len(), 1);
 }

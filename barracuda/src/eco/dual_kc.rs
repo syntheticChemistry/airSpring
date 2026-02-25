@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Dual crop coefficient (Kcb + Ke) — FAO-56 Chapters 7 + 11.
 //!
 //! Separates crop evapotranspiration into transpiration (Kcb) and soil
@@ -37,7 +38,7 @@ pub struct BasalCropCoefficients {
     pub kcb_mid: f64,
     /// Kcb during late season (senescence).
     pub kcb_end: f64,
-    /// Maximum crop height (m) — needed for Kc_max calculation.
+    /// Maximum crop height (m) — needed for `Kc_max` calculation.
     pub max_height_m: f64,
 }
 
@@ -130,7 +131,7 @@ impl SoilTexture {
     /// FAO-56 Table 19 evaporation parameters.
     ///
     /// REW values are typical midpoints for each USDA texture class.
-    /// θFC and θWP are from Table 19 (may differ slightly from
+    /// `θFC` and `θWP` are from Table 19 (may differ slightly from
     /// [`SoilTexture::hydraulic_properties`] which uses Saxton & Rawls).
     #[must_use]
     pub const fn evaporation_params(&self) -> EvaporationParams {
@@ -203,7 +204,7 @@ impl SoilTexture {
 
 /// FAO-56 Eq. 69: dual crop evapotranspiration.
 ///
-/// ETc = (Kcb × Ks + Ke) × ET₀
+/// `ETc` = (Kcb × Ks + Ke) × ET₀
 #[must_use]
 pub fn etc_dual(kcb: f64, ks: f64, ke: f64, et0: f64) -> f64 {
     kcb.mul_add(ks, ke) * et0
@@ -211,7 +212,7 @@ pub fn etc_dual(kcb: f64, ks: f64, ke: f64, et0: f64) -> f64 {
 
 /// FAO-56 Eq. 72: upper limit on evapotranspiration coefficient.
 ///
-/// Kc_max = max(1.2 + \[0.04(u₂ − 2) − 0.004(RHmin − 45)\] × (h/3)^0.3,
+/// `Kc_max` = max(1.2 + \[0.04(u₂ − 2) − 0.004(RHmin − 45)\] × (h/3)^0.3,
 ///              Kcb + 0.05)
 #[must_use]
 pub fn kc_max(u2: f64, rh_min: f64, h: f64, kcb: f64) -> f64 {
@@ -223,7 +224,7 @@ pub fn kc_max(u2: f64, rh_min: f64, h: f64, kcb: f64) -> f64 {
 
 /// FAO-56 Eq. 73: total evaporable water from the surface soil layer.
 ///
-/// TEW = 1000 × (θFC − 0.5 × θWP) × Ze (mm)
+/// TEW = 1000 × (`θFC` − 0.5 × `θWP`) × Ze (mm)
 #[must_use]
 pub fn total_evaporable_water(theta_fc: f64, theta_wp: f64, ze: f64) -> f64 {
     1000.0 * theta_wp.mul_add(-0.5, theta_fc) * ze
@@ -246,7 +247,7 @@ pub fn evaporation_reduction(tew: f64, rew: f64, de: f64) -> f64 {
 
 /// FAO-56 Eq. 71: soil evaporation coefficient.
 ///
-/// Ke = min(Kr × (Kc_max − Kcb), few × Kc_max), bounded ≥ 0.
+/// `Ke` = min(Kr × (`Kc_max` − `Kcb`), `few` × `Kc_max`), bounded ≥ 0.
 #[must_use]
 pub fn soil_evaporation_ke(kr: f64, kcb: f64, kc_max_val: f64, few: f64) -> f64 {
     let ke = kr * (kc_max_val - kcb);
@@ -426,7 +427,7 @@ impl ResidueLevel {
 
 /// Soil evaporation with mulch reduction (FAO-56 Ch 11).
 ///
-/// Ke_mulch = Ke × mulch_factor
+/// `Ke_mulch` = Ke × `mulch_factor`
 #[must_use]
 pub fn mulched_ke(kr: f64, kcb: f64, kc_max_val: f64, few: f64, mulch_factor: f64) -> f64 {
     soil_evaporation_ke(kr, kcb, kc_max_val, few) * mulch_factor
@@ -693,7 +694,10 @@ mod tests {
         for crop in crops {
             let kcb = crop.basal_coefficients();
             assert!(kcb.kcb_ini < kcb.kcb_mid, "{crop:?}: ini < mid");
-            assert!(kcb.kcb_mid >= 0.5 && kcb.kcb_mid <= 1.3, "{crop:?}: mid range");
+            assert!(
+                kcb.kcb_mid >= 0.5 && kcb.kcb_mid <= 1.3,
+                "{crop:?}: mid range"
+            );
             assert!(kcb.max_height_m > 0.0, "{crop:?}: height > 0");
         }
     }
@@ -751,14 +755,19 @@ mod tests {
             .enumerate()
             .map(|(i, &et0)| DualKcInput {
                 et0,
-                precipitation: if i == 0 { 10.0 } else if i == 5 { 8.0 } else { 0.0 },
+                precipitation: if i == 0 {
+                    10.0
+                } else if i == 5 {
+                    8.0
+                } else {
+                    0.0
+                },
                 irrigation: 0.0,
             })
             .collect();
 
         let (conv, _) = simulate_dual_kc(&inputs, 0.15, 1.20, 1.0, &state);
-        let (notill, _) =
-            simulate_dual_kc_mulched(&inputs, 0.15, 1.20, 1.0, 0.40, &state);
+        let (notill, _) = simulate_dual_kc_mulched(&inputs, 0.15, 1.20, 1.0, 0.40, &state);
 
         let conv_et: f64 = conv.iter().map(|o| o.etc).sum();
         let notill_et: f64 = notill.iter().map(|o| o.etc).sum();

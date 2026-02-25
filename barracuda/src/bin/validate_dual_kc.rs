@@ -1,11 +1,12 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Validate FAO-56 Chapter 7 dual crop coefficient against Python control.
 //!
 //! Benchmark source: `control/dual_kc/benchmark_dual_kc.json`
 //! Python baseline: `control/dual_kc/dual_crop_coefficient.py` (63/63 PASS)
 //!
 //! Validates:
-//! 1. Eq. 69 — ETc = (Kcb × Ks + Ke) × ET₀
-//! 2. Eq. 72 — Kc_max upper limit
+//! 1. Eq. 69 — `ETc` = (`Kcb` × `Ks` + `Ke`) × ET₀
+//! 2. Eq. 72 — `Kc_max` upper limit
 //! 3. Eq. 73 — TEW total evaporable water
 //! 4. Eq. 72 — Kr evaporation reduction coefficient
 //! 5. Ke boundary conditions
@@ -48,7 +49,12 @@ fn validate_kc_max(v: &mut ValidationHarness, bench: &serde_json::Value) {
             json_field(tc, "h"),
             json_field(tc, "kcb"),
         );
-        v.check_abs(json_str(tc, "label"), result, json_field(tc, "expected_kc_max"), 0.01);
+        v.check_abs(
+            json_str(tc, "label"),
+            result,
+            json_field(tc, "expected_kc_max"),
+            0.01,
+        );
     }
 }
 
@@ -62,7 +68,12 @@ fn validate_tew(v: &mut ValidationHarness, bench: &serde_json::Value) {
             json_field(tc, "theta_wp"),
             json_field(tc, "ze_m"),
         );
-        v.check_abs(json_str(tc, "label"), result, json_field(tc, "expected_tew"), 1e-6);
+        v.check_abs(
+            json_str(tc, "label"),
+            result,
+            json_field(tc, "expected_tew"),
+            1e-6,
+        );
     }
 }
 
@@ -76,7 +87,12 @@ fn validate_kr(v: &mut ValidationHarness, bench: &serde_json::Value) {
             json_field(tc, "rew"),
             json_field(tc, "de"),
         );
-        v.check_abs(json_str(tc, "label"), result, json_field(tc, "expected_kr"), 1e-6);
+        v.check_abs(
+            json_str(tc, "label"),
+            result,
+            json_field(tc, "expected_kr"),
+            1e-6,
+        );
     }
 }
 
@@ -203,19 +219,26 @@ fn validate_bare_soil_drydown(v: &mut ValidationHarness, bench: &serde_json::Val
     let state = EvaporationLayerState { de: 0.0, tew, rew };
     let (outputs, final_state) = dual_kc::simulate_dual_kc(&inputs, kcb, kc_max_val, few, &state);
 
-    v.check_bool("Day 1 Kr=1.0 (stage 1)", (outputs[0].kr - 1.0).abs() < 1e-10);
+    v.check_bool(
+        "Day 1 Kr=1.0 (stage 1)",
+        (outputs[0].kr - 1.0).abs() < 1e-10,
+    );
     v.check_bool("Kr declines", outputs[0].kr >= outputs[6].kr);
     v.check_bool("De increases", outputs[0].de <= outputs[6].de);
     v.check_bool("Ke declines", outputs[0].ke >= outputs[6].ke);
 
     let total_etc: f64 = outputs.iter().map(|o| o.etc).sum();
-    v.check_bool(&format!("Total ETc > 0: {total_etc:.2} mm"), total_etc > 0.0);
+    v.check_bool(
+        &format!("Total ETc > 0: {total_etc:.2} mm"),
+        total_etc > 0.0,
+    );
     v.check_bool(
         &format!("Final De <= TEW: {:.2} <= {tew}", final_state.de),
         final_state.de <= tew,
     );
 
-    // Cross-validate against Python daily values (from Python simulation output)
+    // Python baseline: control/dual_kc/dual_crop_coefficient.py (commit 94cc51d)
+    // 7-day bare soil drydown Kr values from FAO-56 Eq. 72
     let py_kr = [1.0, 1.0, 0.6975, 0.3313, 0.1643, 0.0746, 0.0394];
     for (i, (&py, out)) in py_kr.iter().zip(outputs.iter()).enumerate() {
         v.check_abs(&format!("Day {} Kr vs Python", i + 1), out.kr, py, 0.001);

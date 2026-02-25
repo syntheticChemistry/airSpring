@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Statistical primitives integration tests for airSpring `BarraCuda`.
 //!
 //! Cross-validates `airSpring` testutil and `csv_ts::column_stats` against
@@ -212,5 +213,47 @@ fn test_barracuda_variance_matches_manual() {
     assert!(
         (bc_var - manual_var).abs() < 1e-10,
         "barracuda var {bc_var} vs manual {manual_var}"
+    );
+}
+
+// ── Edge case stats ──────────────────────────────────────────────────
+
+#[test]
+fn test_rmse_identical_vectors() {
+    let obs = [1.0, 2.0, 3.0, 4.0, 5.0];
+    let rmse = testutil::rmse(&obs, &obs);
+    assert!(
+        rmse.abs() < f64::EPSILON,
+        "identical vectors should have RMSE=0"
+    );
+}
+
+#[test]
+fn test_nash_sutcliffe_perfect_is_one() {
+    let obs = [1.0, 2.0, 3.0, 4.0, 5.0];
+    let nse = testutil::nash_sutcliffe(&obs, &obs);
+    assert!(
+        (nse - 1.0).abs() < f64::EPSILON,
+        "perfect match should give NSE=1.0"
+    );
+}
+
+#[test]
+fn test_index_of_agreement_perfect_is_one() {
+    let obs = [1.0, 2.0, 3.0, 4.0, 5.0];
+    let ia = testutil::index_of_agreement(&obs, &obs);
+    assert!(
+        (ia - 1.0).abs() < f64::EPSILON,
+        "perfect match should give IA=1.0"
+    );
+}
+
+#[test]
+fn test_mbe_zero_for_identical() {
+    let obs = [1.0, 2.0, 3.0];
+    let mbe = testutil::mbe(&obs, &obs);
+    assert!(
+        mbe.abs() < f64::EPSILON,
+        "identical vectors should have MBE=0"
     );
 }

@@ -1,15 +1,16 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Batched dual Kc — GPU + CPU orchestrator.
 //!
-//! Dispatches M fields' dual Kc computations (Ke + ETc) in parallel.
+//! Dispatches M fields' dual Kc computations (`Ke` + `ETc`) in parallel.
 //!
-//! - **GPU**: Per-timestep Ke batch across M independent fields via
-//!   `BatchedElementwiseF64` (Tier B — pending ToadStool primitive absorption).
+//! - **GPU**: Per-timestep `Ke` batch across M independent fields via
+//!   `BatchedElementwiseF64` (Tier B — pending `ToadStool` primitive absorption).
 //! - **CPU**: Sequential multi-day simulation using validated `eco::dual_kc`.
 //!
 //! # GPU readiness
 //!
 //! The CPU path is fully validated against FAO-56 Ch 7+11. The GPU interface
-//! is wired and ready for ToadStool absorption. Once ToadStool adds a
+//! is wired and ready for `ToadStool` absorption. Once `ToadStool` adds a
 //! `dual_kc_ke_batch` shader operation, the GPU path activates automatically.
 //!
 //! # Mulch support
@@ -17,9 +18,7 @@
 //! Both CPU and GPU paths support optional mulch factors for no-till systems
 //! (FAO-56 Ch 11). Pass `mulch_factor = 1.0` for conventional tillage.
 
-use crate::eco::dual_kc::{
-    self, DualKcInput, DualKcOutput, EvaporationLayerState,
-};
+use crate::eco::dual_kc::{self, DualKcInput, DualKcOutput, EvaporationLayerState};
 
 /// Per-field configuration for batched dual Kc.
 #[derive(Debug, Clone, Copy)]
@@ -47,7 +46,7 @@ pub struct BatchedDualKcResult {
 
 /// Batched dual Kc orchestrator — M fields in parallel.
 ///
-/// Computes Ke and ETc for M independent fields sharing the same
+/// Computes `Ke` and `ETc` for M independent fields sharing the same
 /// daily weather (ET₀, precipitation, irrigation). Each field has
 /// its own crop parameters and evaporation layer state.
 #[derive(Debug)]
@@ -64,7 +63,7 @@ impl BatchedDualKc {
 
     /// Compute one timestep across all fields (CPU path).
     ///
-    /// Each field independently computes Ke and ETc using the shared
+    /// Each field independently computes `Ke` and `ETc` using the shared
     /// daily weather input and its own crop/soil parameters.
     #[must_use]
     pub fn step_cpu(&mut self, input: &DualKcInput) -> BatchedDualKcResult {
@@ -101,7 +100,7 @@ impl BatchedDualKc {
 
     /// Run a multi-day season simulation across all fields.
     ///
-    /// Returns per-field seasonal totals (ETc, Ke, etc.).
+    /// Returns per-field seasonal totals (`ETc`, `Ke`, etc.).
     #[must_use]
     pub fn simulate_season(&mut self, inputs: &[DualKcInput]) -> Vec<SeasonFieldSummary> {
         let mut summaries: Vec<SeasonFieldSummary> = self

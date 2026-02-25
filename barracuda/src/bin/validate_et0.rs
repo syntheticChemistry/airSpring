@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Validate FAO-56 Penman-Monteith ET₀ against published examples.
 //!
 //! Benchmark source: `control/fao56/benchmark_fao56.json`

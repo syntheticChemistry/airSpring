@@ -77,6 +77,31 @@ run_baseline \
     "Exp 004: FAO-56 Water Balance (Python)" \
     "python control/water_balance/fao56_water_balance.py"
 
+# --- Experiment 006: Richards Equation (van Genuchten) ---
+run_baseline \
+    "Exp 006: Richards Equation (Python)" \
+    "python control/richards/richards_1d.py"
+
+# --- Experiment 007: Biochar Isotherms (Kumari et al. 2025) ---
+run_baseline \
+    "Exp 007: Biochar Isotherms (Python)" \
+    "python control/biochar/biochar_isotherms.py"
+
+# --- Experiment 009: Dual Kc (FAO-56 Ch 7) ---
+run_baseline \
+    "Exp 009: Dual Crop Coefficient (Python)" \
+    "python control/dual_kc/dual_crop_coefficient.py"
+
+# --- Experiment 011: Cover Crops + No-Till (FAO-56 Ch 11) ---
+run_baseline \
+    "Exp 011: Cover Crop Dual Kc (Python)" \
+    "python control/dual_kc/cover_crop_dual_kc.py"
+
+# --- Experiment 015: 60-Year Water Balance ---
+run_baseline \
+    "Exp 015: 60-Year Water Balance (Python)" \
+    "python control/long_term_wb/long_term_water_balance.py"
+
 # =====================================================================
 # REAL DATA PIPELINE (requires API/internet — optional but preferred)
 # =====================================================================

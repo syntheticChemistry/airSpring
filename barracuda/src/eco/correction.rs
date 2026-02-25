@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //! Sensor correction equations — Dong et al. (2020) methodology.
 //!
 //! Implements the four correction model types from the paper:
@@ -105,6 +106,13 @@ pub fn evaluate(model: &FittedModel, x: f64) -> f64 {
 
 use crate::len_f64;
 
+/// Guard against singular matrices in regression — smaller than any
+/// physically meaningful determinant in sensor calibration.
+const SINGULARITY_GUARD: f64 = 1e-30;
+
+/// Minimum x-value for logarithmic regression — avoids log(0) domain error.
+const LOG_DOMAIN_GUARD: f64 = 0.001;
+
 // ── Least-squares fitting ────────────────────────────────────────────
 
 /// Fit a linear model y = a·x + b using normal equations.
@@ -123,7 +131,7 @@ pub fn fit_linear(x: &[f64], y: &[f64]) -> Option<FittedModel> {
     let s_cross: f64 = x.iter().zip(y).map(|(&xi, &yi)| xi * yi).sum();
 
     let det = count.mul_add(s_xx, -(s_x * s_x));
-    if det.abs() < 1e-30 {
+    if det.abs() < SINGULARITY_GUARD {
         return None;
     }
 
@@ -153,7 +161,7 @@ fn det3(m: &[[f64; 3]; 3]) -> f64 {
 /// given by rows. Returns `None` if the determinant is near zero.
 fn cramer_3x3(m: [[f64; 3]; 3], rhs: [f64; 3]) -> Option<(f64, f64, f64)> {
     let det = det3(&m);
-    if det.abs() < 1e-30 {
+    if det.abs() < SINGULARITY_GUARD {
         return None;
     }
     let inv = 1.0 / det;
@@ -261,7 +269,7 @@ pub fn fit_logarithmic(x: &[f64], y: &[f64]) -> Option<FittedModel> {
     let valid: Vec<(f64, f64)> = x
         .iter()
         .zip(y)
-        .filter(|(&xi, _)| xi > 0.001)
+        .filter(|(&xi, _)| xi > LOG_DOMAIN_GUARD)
         .map(|(&xi, &yi)| (xi, yi))
         .collect();
     if valid.len() < 2 {
