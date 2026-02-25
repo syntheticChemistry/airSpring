@@ -72,16 +72,64 @@ const STATIONS: &[&str] = &[
 /// Mass balance tolerance (mm) — FAO-56 Chapter 8 conservation law.
 const MASS_BALANCE_TOLERANCE: f64 = 0.01;
 
+/// Default date range for growing season CSV filenames.
+/// Override with `AIRSPRING_SEASON_START` and `AIRSPRING_SEASON_END` env vars.
+const DEFAULT_SEASON_START: &str = "2023-05-01";
+const DEFAULT_SEASON_END: &str = "2023-09-30";
+
 /// Minimum acceptable R² for ET₀ vs Open-Meteo.
-/// Justified: Open-Meteo uses ERA5 reanalysis which differs systematically from
-/// point-based FAO-56 PM (different radiation, wind models). R²>0.90 confirms
-/// our implementation is sound while acknowledging methodological differences.
-const MIN_R2: f64 = 0.90;
+/// Override with `AIRSPRING_MIN_R2` env var.
+const DEFAULT_MIN_R2: f64 = 0.90;
 
 /// Maximum acceptable RMSE (mm/day) for ET₀ vs Open-Meteo.
-/// Justified: ~1 mm/day is typical for FAO-56 PM vs reanalysis comparisons
-/// (Allen et al., 2005). We allow 1.5 to account for Michigan's variable climate.
-const MAX_RMSE: f64 = 1.5;
+/// Override with `AIRSPRING_MAX_RMSE` env var.
+const DEFAULT_MAX_RMSE: f64 = 1.5;
+
+/// Runtime configuration discovered from environment.
+struct RuntimeConfig {
+    season_start: String,
+    season_end: String,
+    min_r2: f64,
+    max_rmse: f64,
+    data_dir: std::path::PathBuf,
+}
+
+impl RuntimeConfig {
+    fn discover() -> Self {
+        let season_start = std::env::var("AIRSPRING_SEASON_START")
+            .unwrap_or_else(|_| DEFAULT_SEASON_START.to_string());
+        let season_end = std::env::var("AIRSPRING_SEASON_END")
+            .unwrap_or_else(|_| DEFAULT_SEASON_END.to_string());
+        let min_r2 = std::env::var("AIRSPRING_MIN_R2")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(DEFAULT_MIN_R2);
+        let max_rmse = std::env::var("AIRSPRING_MAX_RMSE")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(DEFAULT_MAX_RMSE);
+        let data_dir = std::env::var("AIRSPRING_DATA_DIR")
+            .map(std::path::PathBuf::from)
+            .unwrap_or_else(|_| {
+                Path::new(env!("CARGO_MANIFEST_DIR"))
+                    .parent()
+                    .expect("CARGO_MANIFEST_DIR parent")
+                    .join("data")
+                    .join("open_meteo")
+            });
+        Self {
+            season_start,
+            season_end,
+            min_r2,
+            max_rmse,
+            data_dir,
+        }
+    }
+
+    fn csv_filename(&self, station: &str) -> String {
+        format!("{station}_{}_{}_daily.csv", self.season_start, self.season_end)
+    }
+}
 
 /// One row of Open-Meteo daily weather data.
 struct WeatherRow {
@@ -185,12 +233,12 @@ fn compute_et0_for_row(row: &WeatherRow) -> f64 {
 /// Validate ET₀ for a single station; accumulate Rust/Open-Meteo series.
 fn validate_station_et0(
     station: &str,
-    data_dir: &Path,
+    config: &RuntimeConfig,
     v: &mut ValidationHarness,
     all_rust: &mut Vec<f64>,
     all_om: &mut Vec<f64>,
 ) {
-    let csv_path = data_dir.join(format!("{station}_2023-05-01_2023-09-30_daily.csv"));
+    let csv_path = config.data_dir.join(config.csv_filename(station));
     if !csv_path.exists() {
         println!("  [SKIP] {station}: CSV not found");
         return;
@@ -215,14 +263,15 @@ fn validate_station_et0(
 
     v.check_bool(
         &format!(
-            "{station} R²>{MIN_R2} ({} days, R²={r2:.3})",
+            "{station} R²>{:.2} ({} days, R²={r2:.3})",
+            config.min_r2,
             valid_rows.len()
         ),
-        r2 > MIN_R2,
+        r2 > config.min_r2,
     );
     v.check_bool(
-        &format!("{station} RMSE<{MAX_RMSE} (RMSE={rmse:.3})"),
-        rmse < MAX_RMSE,
+        &format!("{station} RMSE<{:.2} (RMSE={rmse:.3})", config.max_rmse),
+        rmse < config.max_rmse,
     );
 
     all_rust.extend_from_slice(&rust_et0);
@@ -230,13 +279,12 @@ fn validate_station_et0(
 }
 
 /// Validate water balance for a single crop scenario (rainfed + irrigated).
-fn validate_scenario(scenario: &Scenario, data_dir: &Path, v: &mut ValidationHarness) {
+fn validate_scenario(scenario: &Scenario, config: &RuntimeConfig, v: &mut ValidationHarness) {
     use airspring_barracuda::eco::water_balance;
 
-    let csv_path = data_dir.join(format!(
-        "{}_2023-05-01_2023-09-30_daily.csv",
-        scenario.station
-    ));
+    let csv_path = config
+        .data_dir
+        .join(config.csv_filename(&scenario.station));
     if !csv_path.exists() {
         println!(
             "  [SKIP] {} @ {}: CSV not found",
@@ -373,41 +421,34 @@ fn run_irrigated(
 }
 
 fn main() {
-    let data_dir = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .parent()
-        .expect("CARGO_MANIFEST_DIR must have a parent directory")
-        .join("data")
-        .join("open_meteo");
+    let config = RuntimeConfig::discover();
 
-    if !data_dir.exists() {
+    if !config.data_dir.exists() {
         println!("═══════════════════════════════════════════════════════════");
-        println!("  [SKIP] No real data at {}", data_dir.display());
-        println!(
-            "  Run: python scripts/download_open_meteo.py --all-stations --growing-season 2023"
-        );
+        println!("  [SKIP] No real data at {}", config.data_dir.display());
+        println!("  Run: python scripts/download_open_meteo.py --all-stations");
+        println!("  Or set AIRSPRING_DATA_DIR to an existing data directory.");
         println!("═══════════════════════════════════════════════════════════");
         std::process::exit(0);
     }
 
     validation::banner("Real Data Validation");
+    println!(
+        "  Config: season={}/{}, R²>{:.2}, RMSE<{:.2}",
+        config.season_start, config.season_end, config.min_r2, config.max_rmse
+    );
+    println!("  Data: {}\n", config.data_dir.display());
+
     let mut v = ValidationHarness::new("Real Data Validation");
 
     let mut all_rust_et0 = Vec::new();
     let mut all_om_et0 = Vec::new();
 
-    // Per-station ET₀ validation
     validation::section("Per-Station ET₀ (Rust vs Open-Meteo)");
     for station in STATIONS {
-        validate_station_et0(
-            station,
-            &data_dir,
-            &mut v,
-            &mut all_rust_et0,
-            &mut all_om_et0,
-        );
+        validate_station_et0(station, &config, &mut v, &mut all_rust_et0, &mut all_om_et0);
     }
 
-    // Overall ET₀
     if !all_rust_et0.is_empty() {
         validation::section("Overall ET₀");
         let overall_r2 = testutil::r_squared(&all_om_et0, &all_rust_et0).unwrap_or(0.0);
@@ -421,16 +462,15 @@ fn main() {
         );
 
         v.check_bool(
-            &format!("Overall R²>{MIN_R2} (R²={overall_r2:.4})"),
-            overall_r2 > MIN_R2,
+            &format!("Overall R²>{:.2} (R²={overall_r2:.4})", config.min_r2),
+            overall_r2 > config.min_r2,
         );
     }
 
-    // Water balance: crop scenarios loaded from benchmark JSON
     let scenarios = load_scenarios();
     validation::section("Water Balance Scenarios");
     for scenario in &scenarios {
-        validate_scenario(scenario, &data_dir, &mut v);
+        validate_scenario(scenario, &config, &mut v);
     }
 
     v.finish();

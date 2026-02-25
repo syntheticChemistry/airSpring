@@ -2,6 +2,31 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.3.9] - 2026-02-25
+
+### Experiment 009: Dual Kc + BarraCuda CPU + Technical Debt Cleanup
+
+New experiment: FAO-56 Chapter 7 dual crop coefficient (Kcb + Ke) separating
+transpiration from soil evaporation for precision irrigation scheduling.
+
+#### Added
+- **Exp 009 Python control**: `control/dual_kc/dual_crop_coefficient.py` — 63/63 PASS.
+  Digitized FAO-56 Table 17 (Kcb, 10 crops) and Table 19 (REW/TEW, 11 soils).
+  Implements Eqs 69, 71-73, 77. Multi-day simulations: bare soil drydown + corn mid-season.
+- **`eco::dual_kc` module**: Pure Rust dual Kc (Eqs 69, 71-73, 77) + 15 unit tests.
+  `CropType::basal_coefficients()` returns Table 17 Kcb values.
+  `SoilTexture::evaporation_params()` returns Table 19 REW/TEW parameters.
+- **`validate_dual_kc` binary**: 61/61 PASS with Python↔Rust cross-validation at 1e-3.
+
+#### Changed
+- **`validate_real_data`**: Evolved from hardcoded date range to capability-based runtime
+  discovery via env vars (`AIRSPRING_DATA_DIR`, `AIRSPRING_SEASON_START/END`,
+  `AIRSPRING_MIN_R2`, `AIRSPRING_MAX_RMSE`). Primal discovers its data at runtime.
+- **Technical debt audit**: No unsafe code, no mocks in production, all deps pure Rust.
+  `evapotranspiration.rs` (695 lines) reviewed — cohesive domain module, no split needed.
+- **Test count**: 268 Rust tests (up from 253), 268/268 PASS. 205 Python checks, all PASS.
+- **`gpu_integration`**: Tier C gap count assertion updated after Richards PDE promotion.
+
 ## [0.3.8] - 2026-02-25
 
 ### ToadStool Deep Audit — Richards PDE Promoted, Evolution Gaps Reconciled
