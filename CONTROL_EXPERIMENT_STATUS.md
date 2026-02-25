@@ -361,6 +361,19 @@ Using open-source alternative to closed HYDRUS software.
 **Goal**: Fit Langmuir/Freundlich adsorption isotherms to published biochar
 data (Kumari, Dong & Safferman, 2025) using scipy curve_fit.
 
+### Experiment 010: Regional ET₀ Intercomparison — PHASE 0 COMPLETE
+
+**Goal**: Validate FAO-56 PM ET₀ across Michigan microclimates using Open-Meteo ERA5
+data. Establishes spatial variability baseline for GPU-batched ET₀ at scale.
+
+**Phase 0 (Python baseline — 61/61 PASS):**
+- [x] Compute ET₀ for 6 Michigan stations (918 station-days, 2023 growing season)
+- [x] Per-station R² > 0.96 vs Open-Meteo, RMSE < 0.33 mm/day
+- [x] Season totals 633–677 mm (matches MSU Enviro-weather references)
+- [x] Spatial CV = 2.0% (expected for Lower MI stations)
+- [x] 15 station-pair temporal correlations: r = 0.80–0.96
+- [x] Geographic consistency: latitude span 1.55°, all in MI range
+
 ### Experiment 008: Agrivoltaics PAR — NOT STARTED (DEFERRED)
 
 **Goal**: Model photosynthetically active radiation interception under solar

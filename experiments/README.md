@@ -17,7 +17,9 @@
 
 | 009 | FAO-56 Dual Kc (Allen 1998 Ch 7) | Irrigation | **Complete (Phase 0)** | Python (FAO-56 Ch 7) | — | 63 |
 
-**Total**: 205 Python checks + 123 Rust checks + 65 cross-validation values
+| 010 | Regional ET₀ Intercomparison (6 MI stations) | Precision Ag | **Complete (Phase 0)** | Python (Open-Meteo) | — | 61 |
+
+**Total**: 266 Python checks + 123 Rust checks + 65 cross-validation values
 
 ---
 
@@ -121,6 +123,24 @@ soil types REW/TEW, equation test vectors, integration scenarios.
 **Key Result**: Dual Kc separates transpiration (Kcb) from soil evaporation (Ke).
 Under full canopy cover (corn mid-season), ETc/ET₀ ≈ Kcb because Ke → 0. Under
 bare soil, Ke dominates and declines as surface dries (stage 1 → stage 2).
+
+---
+
+### Exp 010: Regional ET₀ Intercomparison — 6 Michigan Stations
+
+**Paper**: Regional ET₀ intercomparison across Michigan microclimates.
+
+**Control**: `control/regional_et0/regional_et0_intercomparison.py` — 61/61 checks.
+Per-station FAO-56 PM ET₀ vs Open-Meteo ERA5, seasonal totals, spatial variability,
+geographic consistency, 15-station-pair temporal correlations.
+
+**Data**: Open-Meteo Historical Weather API (ERA5 reanalysis), 2023 growing season
+(May 1 – Sep 30), 6 stations × 153 days = 918 station-days.
+
+**Key Results**: R² > 0.96 all stations, RMSE < 0.33 mm/day. Grand mean ET₀ =
+4.27 mm/day. Season totals 633–677 mm (matches MSU Enviro-weather references).
+Cross-station correlation r = 0.80–0.96 (geographic proximity drives correlation).
+Spatial CV = 2.0% (tight clustering expected for Lower Michigan stations).
 
 ---
 

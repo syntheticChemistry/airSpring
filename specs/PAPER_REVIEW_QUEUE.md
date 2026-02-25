@@ -2,7 +2,7 @@
 
 **Last Updated**: February 25, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 6 completed (205/205 Python), 7 queued. All completed papers use open data and systems.
+**Status**: 7 completed (266/266 Python), 6 queued. All completed papers use open data and systems.
 
 ---
 
@@ -16,6 +16,7 @@
 | 4 | FAO-56 Chapter 8 — Water balance scheduling | 0 | 18/18 | Standard | `benchmark_water_balance.json` | FAO-56 Ch 8 + USDA |
 | 5 | Real data pipeline — 6 Michigan stations, 918 days | 0+ | R²=0.967 | Dong | Python scripts | Open-Meteo ERA5 (free) |
 | 6 | Allen et al. (1998) FAO-56 Ch 7 — Dual Kc (Kcb+Ke) | 0 | 63/63 | Standard | `benchmark_dual_kc.json` | FAO-56 Tables 17, 19 (open literature) |
+| 7 | Regional ET₀ intercomparison — 6 Michigan stations | 0 | 61/61 | Dong | `regional_et0_intercomparison.py` | Open-Meteo ERA5 (free) |
 
 ### Controls Audit
 
@@ -36,6 +37,7 @@ All 6 completed papers have:
 | 4 | 18/18 | 13/13 (`validate_water_balance`) | `BatchedWaterBalance` GPU-STEP | — |
 | 5 | R²=0.967 | 21/21 (`validate_real_data`) | All 6 orchestrators | Future |
 | 6 | 63/63 | — (next: BarraCuda CPU) | Batch Kc (op=7) | Future |
+| 7 | 61/61 | — (next: BarraCuda CPU) | `BatchedEt0` at scale | Future |
 
 ---
 
@@ -53,7 +55,7 @@ All 6 completed papers have:
 
 | # | Paper / Direction | Year | Faculty | Open Data? | Control Status | GPU Path |
 |---|-------------------|------|---------|:----------:|:--------------:|----------|
-| 9 | Regional ET₀ intercomparison — Michigan microclimates | — | Dong | **Yes** (80-yr Open-Meteo) | Ready to create | `BatchedEt0` at scale |
+| 9 | Regional ET₀ intercomparison — Michigan microclimates | — | Dong | **Yes** (80-yr Open-Meteo) | **61/61 PASS** (Phase 0, 2023) | `BatchedEt0` at scale |
 | 10 | neuralSpring Exp 004 — Transfer learning MI→NM/CA | — | Cross-spring | Yes | Already validated | N/A (reference) |
 | 11 | groundSpring Exp 003 — Error propagation through FAO-56 | — | Cross-spring | Yes | Already validated | N/A (reference) |
 
