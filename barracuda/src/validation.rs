@@ -23,6 +23,21 @@
 
 pub use barracuda::validation::ValidationHarness;
 
+/// Initialise tracing so that `ValidationHarness::finish()` output is visible.
+///
+/// Call once at the top of every validation binary's `main()`.
+/// Uses the `RUST_LOG` env-var if set, otherwise defaults to `info`.
+pub fn init_tracing() {
+    use tracing_subscriber::EnvFilter;
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
+        )
+        .without_time()
+        .with_target(false)
+        .init();
+}
+
 /// Print a section header for visual grouping in validation output.
 pub fn section(name: &str) {
     println!("── {name} ──");

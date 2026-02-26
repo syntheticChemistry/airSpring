@@ -234,6 +234,7 @@ fn validate_islam_observations(v: &mut ValidationHarness, bench: &serde_json::Va
 }
 
 fn main() {
+    validation::init_tracing();
     validation::banner("Cover Crop + No-Till Validation (FAO-56 Ch 11)");
     let mut v = ValidationHarness::new("Cover Crop Validation");
     let bench = parse_benchmark_json(BENCHMARK_JSON).expect("benchmark must parse");

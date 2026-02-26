@@ -271,6 +271,7 @@ fn simulate_season(n: usize, cfg: &SimConfig<'_>) -> (f64, f64, usize) {
 }
 
 fn main() {
+    validation::init_tracing();
     validation::banner("Yield Response Validation (FAO-56 Ch. 10 / Stewart 1977)");
     let mut v = ValidationHarness::new("Yield Response Validation");
     let benchmark =

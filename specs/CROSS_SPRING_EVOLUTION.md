@@ -1,6 +1,6 @@
 # Cross-Spring Shader Evolution — airSpring Provenance
 
-**Updated**: February 26, 2026 (v0.4.6, ToadStool HEAD `045103a7` — S66)
+**Updated**: February 26, 2026 (v0.4.6, ToadStool HEAD `f0feb226` — S68)
 
 ## Summary
 
@@ -202,7 +202,7 @@ module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 
 ---
 
-774 WGSL shaders in ToadStool (S66), 46+ cross-spring absorptions (S51-S66). airSpring metalForge fully absorbed.
+774 WGSL shaders in ToadStool (S68), 46+ cross-spring absorptions (S51-S66). airSpring metalForge fully absorbed.
 
 ## Benchmark Summary (CPU baselines, `--release`, v0.4.5)
 

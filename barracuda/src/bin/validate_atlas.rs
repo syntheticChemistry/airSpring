@@ -553,6 +553,7 @@ fn validate_atlas_summary(results: &[StationResult], v: &mut ValidationHarness) 
 }
 
 fn main() {
+    validation::init_tracing();
     let config = AtlasConfig::discover();
 
     if !config.data_dir.exists() {

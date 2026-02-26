@@ -182,6 +182,7 @@ fn validate_michigan(v: &mut ValidationHarness, mi_et_mid: f64, mi_et_tol: f64) 
 }
 
 fn main() {
+    validation::init_tracing();
     validation::banner("Water Balance Validation");
     let mut v = ValidationHarness::new("Water Balance Validation");
     let benchmark =

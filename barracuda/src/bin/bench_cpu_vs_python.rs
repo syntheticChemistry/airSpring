@@ -433,6 +433,7 @@ fn bench_sensitivity_oat() {
 }
 
 fn main() {
+    airspring_barracuda::validation::init_tracing();
     println!("═══════════════════════════════════════════════════════════");
     println!("  airSpring CPU Benchmark — Rust vs Python baseline");
     println!("═══════════════════════════════════════════════════════════\n");

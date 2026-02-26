@@ -15,7 +15,7 @@
 | Phase 1 (Rust) | 662 tests + 1302 atlas — 22 binaries, 464 lib + 134 integration + 64 forge |
 | Phase 1.5 (CPU benchmark) | Rust 69x faster than Python (geometric mean, 20x–502x) |
 | Phase 2 (Cross-validation) | 75/75 Python↔Rust match within 1e-5; 690 crop-station yield pairs within 0.01 |
-| Phase 3 (GPU) | 11 Tier A modules wired, cross-spring S66 fully rewired |
+| Phase 3 (GPU) | 11 Tier A modules wired, cross-spring S68 fully rewired |
 | Faculty | Dong (BAE, MSU — new lab 2026) |
 | Handoff | V017 in `wateringHole/handoffs/` |
 

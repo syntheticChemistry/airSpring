@@ -125,7 +125,9 @@ fn rmse(a: &[f64], b: &[f64]) -> f64 {
     barracuda::stats::rmse(a, b)
 }
 
+#[allow(clippy::too_many_lines)]
 fn main() {
+    validation::init_tracing();
     validation::banner("Lysimeter ET Direct Measurement (Exp 016)");
     let mut v = ValidationHarness::new("Lysimeter Validation");
     let benchmark =

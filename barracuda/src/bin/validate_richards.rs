@@ -333,6 +333,7 @@ fn validate_steady_state_flux(v: &mut ValidationHarness, benchmark: &serde_json:
 }
 
 fn main() {
+    validation::init_tracing();
     validation::banner("Richards Equation Validation");
     let mut v = ValidationHarness::new("Richards Equation Validation");
     let benchmark =

@@ -387,6 +387,7 @@ fn check_cross_station_correlation(v: &mut ValidationHarness, results: &[Station
 }
 
 fn main() {
+    validation::init_tracing();
     let start = std::env::var("ET0_SEASON_START").unwrap_or_else(|_| "2023-05-01".into());
     let end = std::env::var("ET0_SEASON_END").unwrap_or_else(|_| "2023-09-30".into());
     let data_dir = std::env::var("ET0_DATA_DIR").map_or_else(

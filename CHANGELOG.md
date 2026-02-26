@@ -53,6 +53,12 @@ provenance coverage, and 100-station Michigan Crop Water Atlas at scale.
 - forge metrics: ForgeError derives Eq, validate_slices const fn
 - forge: 11 doc-tests added (was 0), total tests: 53 unit + 11 doc = 64
 
+#### ToadStool S68 Pin Update
+- ToadStool pin updated: S66 (`045103a7`) → S68 (`f0feb226`)
+- S68 evolution: universal f64 precision (ZERO f32-only shaders remain),
+  ValidationHarness println→tracing::info, `LazyLock<String>` shader constants
+- All active docs and handoffs updated to reflect current pin
+
 ## [0.4.5] - 2026-02-26
 
 ### S66 Complete Rewiring, Validation, and Benchmarking

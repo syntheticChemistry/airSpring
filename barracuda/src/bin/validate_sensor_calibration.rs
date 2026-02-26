@@ -213,6 +213,7 @@ fn validate_performance_and_demos(v: &mut ValidationHarness, bm: &serde_json::Va
 }
 
 fn main() {
+    validation::init_tracing();
     validation::banner("Sensor Calibration Validation (Dong et al. 2024)");
     let mut v = ValidationHarness::new("Sensor Calibration Validation (Dong et al. 2024)");
 

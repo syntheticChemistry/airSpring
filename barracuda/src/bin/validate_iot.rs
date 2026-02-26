@@ -158,6 +158,7 @@ fn validate_csv_round_trip(
 }
 
 fn main() {
+    validation::init_tracing();
     validation::banner("IoT Time Series Validation");
     let mut v = ValidationHarness::new("IoT Time Series Validation");
 

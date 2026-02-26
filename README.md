@@ -21,7 +21,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | Phase 1: Rust validation | **662 tests + 1302 atlas** | 22 binaries, 464 lib + 134 integration + 64 forge |
 | Phase 1.5: CPU Benchmark | **69x faster** | Rust vs Python geometric mean (20x–502x range) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
-| Phase 3: GPU bridge | **11 Tier A modules** | S66 synced — all metalForge absorbed upstream, evolution\_gaps current |
+| Phase 3: GPU bridge | **11 Tier A modules** | S68 synced — all metalForge absorbed upstream, evolution\_gaps current |
 | Phase 4: Penny Irrigation | Vision | Sovereign, consumer hardware |
 
 ### Code Quality
@@ -57,7 +57,7 @@ airSpring domain code (`eco::`) is validated against papers, then wrapped by GPU
 
 ### Cross-Spring Shader Evolution
 
-ToadStool contains **774 WGSL shaders** across 41+ categories (S66: 2,541+ barracuda tests). airSpring uses 6 shared shader families, contributed **3 upstream fixes**, and had **all metalForge modules absorbed upstream** (S64 + S66):
+ToadStool contains **774 WGSL shaders** across 41+ categories (S68: 2,541+ barracuda tests). airSpring uses 6 shared shader families, contributed **3 upstream fixes**, and had **all metalForge modules absorbed upstream** (S64 + S66):
 
 | Spring | Shaders | What airSpring Gets | What airSpring Gave Back |
 |--------|---------|--------------------|-----------------------|
@@ -87,7 +87,7 @@ ToadStool contains **774 WGSL shaders** across 41+ categories (S66: 2,541+ barra
 
 Also wired: `validation::ValidationHarness` (neuralSpring), `stats::pearson`, `spearman`, `bootstrap_ci`, `stats::metrics` re-exports (airSpring→upstream S64).
 
-Evolution gaps: 23 total (11 Tier A integrated, 11 Tier B ready, 1 Tier C pending). ToadStool S66 synced.
+Evolution gaps: 23 total (11 Tier A integrated, 11 Tier B ready, 1 Tier C pending). ToadStool S68 synced.
 See `barracuda/src/gpu/evolution_gaps.rs` for the full roadmap.
 
 ### CPU Benchmarks: Rust vs Python (69x geometric mean speedup)
@@ -268,5 +268,5 @@ AGPL-3.0-or-later
 *February 26, 2026 — v0.4.6. 17 experiments, 474/474 Python, 662 Rust tests + 1302
 atlas checks, 22 binaries, 75/75 cross-validation, 15,300 station-days (100 MI
 stations). Rust 69x faster than Python (geometric mean). 11 Tier A wired modules.
-ToadStool S66 synced (774 WGSL, all metalForge absorbed). Pure Rust + BarraCuda.
+ToadStool S68 synced (774 WGSL, all metalForge absorbed). Pure Rust + BarraCuda.
 AGPL-3.0-or-later.*

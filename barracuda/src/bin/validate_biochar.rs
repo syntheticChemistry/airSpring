@@ -19,6 +19,7 @@ const MAX_MEAN_RESIDUAL: f64 = 0.5;
 
 #[allow(clippy::too_many_lines)]
 fn main() {
+    validation::init_tracing();
     validation::banner("Biochar Adsorption Isotherms Validation");
     let mut v = ValidationHarness::new("Biochar Adsorption Isotherms Validation");
     let benchmark =

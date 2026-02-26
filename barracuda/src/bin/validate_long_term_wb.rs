@@ -555,6 +555,7 @@ fn validate_et0_cross(v: &mut ValidationHarness, results: &[SeasonResult]) {
 }
 
 fn main() {
+    validation::init_tracing();
     validation::banner("Long-Term Water Balance Validation (Exp 015)");
 
     let benchmark =

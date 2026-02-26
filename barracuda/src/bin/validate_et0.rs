@@ -214,6 +214,7 @@ fn validate_boundaries(v: &mut ValidationHarness, uccle_et0: f64) {
 }
 
 fn main() {
+    validation::init_tracing();
     validation::banner("FAO-56 Penman-Monteith Validation");
     let mut v = ValidationHarness::new("FAO-56 Penman-Monteith Validation");
     let benchmark = parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_fao56.json must parse");

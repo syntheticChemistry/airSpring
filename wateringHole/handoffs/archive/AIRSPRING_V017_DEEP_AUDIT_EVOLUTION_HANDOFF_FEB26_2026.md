@@ -3,7 +3,7 @@
 **Date**: February 26, 2026
 **From**: airSpring v0.4.6 — 16 experiments, 474 Python + 662 Rust tests + 1302 atlas checks, 22 binaries
 **To**: ToadStool / BarraCuda core team
-**ToadStool PIN**: `045103a7` (S66 — cross-spring absorption, explicit BGL, multi-precision WGSL)
+**ToadStool PIN**: `f0feb226` (S68 — universal f64, ValidationHarness tracing, LazyLock shader constants)
 **Supersedes**: V016 (S66 validation — both retained for context)
 
 ---
@@ -106,5 +106,5 @@ None critical. All P0/P1 items resolved.
 
 ---
 
-*airSpring v0.4.6 → ToadStool S66 (`045103a7`). Deep audit complete, 662 Rust tests + 1302 atlas checks,
+*airSpring v0.4.6 → ToadStool S68 (`f0feb226`). Deep audit complete, 662 Rust tests + 1302 atlas checks,
 474 Python checks, 22 binaries, 97.45% coverage. Next: Tier B GPU wiring.*

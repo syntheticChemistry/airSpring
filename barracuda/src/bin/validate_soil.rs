@@ -30,6 +30,7 @@ const ANALYTICAL_TOL: f64 = 0.1;
 const DEFAULT_TOPP_TOL: f64 = 0.005;
 
 fn main() {
+    validation::init_tracing();
     validation::banner("Soil Moisture Calibration Validation");
     let mut v = ValidationHarness::new("Soil Moisture Calibration Validation");
     let benchmark =

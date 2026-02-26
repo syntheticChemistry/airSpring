@@ -456,6 +456,7 @@ fn run_irrigated(
 }
 
 fn main() {
+    validation::init_tracing();
     let config = RuntimeConfig::discover();
 
     if !config.data_dir.exists() {

@@ -518,6 +518,7 @@ fn count_f64_values(val: &serde_json::Value) -> usize {
 }
 
 fn main() {
+    validation::init_tracing();
     let args: Vec<String> = std::env::args().collect();
     if args.iter().any(|a| a == "--json") {
         run_json_mode();

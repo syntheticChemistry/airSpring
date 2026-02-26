@@ -185,6 +185,7 @@ fn validate_multi_site(
 }
 
 fn main() {
+    validation::init_tracing();
     validation::banner("ET₀ Sensitivity Analysis (Exp 017)");
     let mut v = ValidationHarness::new("Sensitivity Analysis");
     let benchmark =

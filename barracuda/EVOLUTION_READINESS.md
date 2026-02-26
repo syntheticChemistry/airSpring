@@ -1,7 +1,7 @@
 # airSpring BarraCuda — Evolution Readiness
 
 **Last Updated**: February 26, 2026 (v0.4.6 — 464 lib + 134 integration + 64 forge, 97.45% coverage)
-**ToadStool PIN**: `045103a7` (S66 — cross-spring absorption, regression/hydrology/moving_window_f64, multi-precision WGSL)
+**ToadStool PIN**: `f0feb226` (S68 — universal f64, ValidationHarness tracing, LazyLock shader constants)
 **Handoff**: V017 (deep audit & evolution — clippy nursery, R-S66-001/003 wired, van_genuchten extracted)
 **License**: AGPL-3.0-or-later
 

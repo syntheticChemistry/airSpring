@@ -3,7 +3,7 @@
 **Date**: 2026-02-26
 **From**: airSpring v0.4.6
 **To**: ToadStool / BarraCuda
-**ToadStool pin**: S66 (`045103a7`)
+**ToadStool pin**: S68 (`f0feb226`)
 **airSpring**: 662 Rust tests + 1302 atlas checks, 22 binaries, 97.45% coverage, 0 clippy warnings (pedantic + nursery)
 
 ---
@@ -126,6 +126,6 @@ items from the atlas work.
 
 ---
 
-*airSpring v0.4.6 → ToadStool S66. 17 experiments, 662 Rust tests + 1302 atlas
+*airSpring v0.4.6 → ToadStool S68. 17 experiments, 662 Rust tests + 1302 atlas
 checks, 22 binaries, 15,300 station-days (100 Michigan stations). Pure Rust +
 BarraCuda. AGPL-3.0-or-later.*

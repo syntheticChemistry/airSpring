@@ -241,6 +241,7 @@ fn validate_results(
 }
 
 fn main() {
+    validation::init_tracing();
     validation::banner("Irrigation Scheduling Optimization (Exp 014)");
     let mut v = ValidationHarness::new("Scheduling Optimization");
     let benchmark =

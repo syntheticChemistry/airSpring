@@ -248,6 +248,7 @@ fn env_usize(key: &str, default: usize) -> usize {
 }
 
 fn main() {
+    airspring_barracuda::validation::init_tracing();
     println!("═══════════════════════════════════════════════════════════");
     println!("  airSpring — Growing Season Simulation");
     println!("═══════════════════════════════════════════════════════════\n");

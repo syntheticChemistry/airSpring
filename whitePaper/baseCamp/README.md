@@ -12,7 +12,7 @@
 Phase 0   Python/R baselines    — reproduce paper results with original tools (474/474)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
 Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (464 lib + 134 integration tests, 22 binaries, 97.45% coverage)
-Phase 2   BarraCuda GPU         — 11 Tier A modules wired (cross-spring S66 fully rewired)
+Phase 2   BarraCuda GPU         — 11 Tier A modules wired (cross-spring S68 fully rewired)
 Phase 3   metalForge            — Write→Absorb→Lean complete, 6/6 modules absorbed upstream
 Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($600 GPU)
 ```

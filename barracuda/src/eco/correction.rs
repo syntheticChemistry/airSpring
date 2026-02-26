@@ -11,7 +11,7 @@
 //! Linear and quadratic use analytical normal equations.
 //! Exponential and logarithmic use log-linearized least squares.
 //!
-//! # Upstream equivalence (`ToadStool` S66)
+//! # Upstream equivalence (`ToadStool` S68)
 //!
 //! `barracuda::stats::regression` provides generic `fit_linear`, `fit_quadratic`,
 //! `fit_exponential`, `fit_logarithmic` with `FitResult` (absorbed from airSpring
