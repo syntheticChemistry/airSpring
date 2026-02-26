@@ -7,7 +7,7 @@
 //! # Cross-spring evolution context
 //!
 //! These GPU paths exist because of shader evolution across the `ecoPrimals`
-//! ecosystem (608 WGSL shaders, 46 cross-spring absorptions S51-S57):
+//! ecosystem (774 WGSL shaders in `ToadStool` S66, 46+ cross-spring absorptions):
 //!
 //! - **ET₀ batch** (`batched_elementwise_f64.wgsl`): hotSpring `pow_f64` fix
 //!   (TS-001) made fractional exponents work; airSpring wired FAO-56 as op=0
@@ -20,6 +20,10 @@
 //!   monitoring; airSpring wired `IoT` sensor smoothing
 //! - **Ridge regression** (`barracuda::linalg::ridge`): wetSpring ESN calibration;
 //!   airSpring wired sensor correction pipeline
+//! - **Regression** (`stats::regression`): airSpring metalForge → absorbed S66,
+//!   completing the Write→Absorb→Lean cycle for sensor correction fitting
+//! - **S66 GPU dispatch fix**: explicit `BindGroupLayout` (R-S66-041) resolved
+//!   the P0 `BatchedElementwiseF64` dispatch panic — GPU-first paths now stable
 //!
 //! # Usage
 //!
@@ -412,6 +416,145 @@ fn bench_brent_vg_inverse() {
     }
 }
 
+fn bench_regression() {
+    println!();
+    println!("── Regression Fitting (stats::regression, airSpring metalForge → S66 absorbed) ──");
+    println!("  Write→Absorb→Lean: local metalForge → upstream barracuda::stats::regression.");
+    println!(
+        "  {:>8}  {:>12}  {:>12}  {:>8}",
+        "N", "CPU (µs)", "fits/sec", "R²"
+    );
+
+    for &n in &[20_i32, 100, 500, 2_000] {
+        let x: Vec<f64> = (0..n).map(|i| f64::from(i) * 0.1).collect();
+        let y: Vec<f64> = x
+            .iter()
+            .map(|&xi| 2.5f64.mul_add(xi, 0.3) + (xi * 0.01).sin())
+            .collect();
+        let mut r2 = 0.0;
+        let (cpu_us, _) = time_fn(
+            || {
+                let fit = barracuda::stats::regression::fit_linear(&x, &y).unwrap();
+                r2 = fit.r_squared;
+                fit.r_squared
+            },
+            WARMUP,
+            MEASURE,
+        );
+        let fits_sec = 1_000_000.0 / cpu_us;
+        println!("  {n:>8}  {cpu_us:>12.1}  {fits_sec:>12.0}  {r2:>8.6}");
+    }
+}
+
+fn bench_soil_params() {
+    println!();
+    println!("── SoilParams θ(h) batch (pde::richards::SoilParams, S66 named constants) ──");
+    println!("  8 named soils from Carsel & Parrish (1988), R-S66-006.");
+    println!(
+        "  {:>12}  {:>8}  {:>12}  {:>12}",
+        "Soil", "N", "CPU (µs)", "M evals/sec"
+    );
+
+    let soils: &[(&str, barracuda::pde::richards::SoilParams)] = &[
+        ("sand", barracuda::pde::richards::SoilParams::SAND),
+        (
+            "sandy_loam",
+            barracuda::pde::richards::SoilParams::SANDY_LOAM,
+        ),
+        ("silt_loam", barracuda::pde::richards::SoilParams::SILT_LOAM),
+        ("clay", barracuda::pde::richards::SoilParams::CLAY),
+    ];
+
+    for &(name, soil) in soils {
+        let n = 100_000_i32;
+        let (cpu_us, _) = time_fn(
+            || {
+                let mut sum = 0.0;
+                for i in 0..n {
+                    let h = -0.01 * (f64::from(i) + 1.0);
+                    sum += soil.theta(h);
+                }
+                sum
+            },
+            WARMUP,
+            MEASURE,
+        );
+        let m_evals_sec = f64::from(n) / (cpu_us / 1_000_000.0) / 1e6;
+        println!("  {name:>12}  {n:>8}  {cpu_us:>12.1}  {m_evals_sec:>12.1}");
+    }
+}
+
+fn bench_scheduling_pipeline() {
+    use airspring_barracuda::eco::water_balance::DailyInput;
+    use airspring_barracuda::gpu::water_balance::BatchedWaterBalance;
+    println!();
+    println!("── Scheduling Pipeline: ET₀→Kc→WB→Yield (Exp 014 composition) ──");
+    println!("  Full ET₀→crop coefficient→water balance→Stewart yield pipeline.");
+    println!("  {:>8}  {:>12}  {:>12}", "Days", "CPU (µs)", "seasons/sec");
+
+    for &n_days in &[90_u32, 180, 365] {
+        let inputs: Vec<DailyEt0Input> = (0..n_days)
+            .map(|i| {
+                let d = f64::from(i);
+                DailyEt0Input {
+                    tmin: 12.0 + (d * 0.017).sin(),
+                    tmax: 25.0 + (d * 0.017).cos(),
+                    tmean: None,
+                    solar_radiation: 18.0 + 4.0 * (d * 0.017).sin(),
+                    wind_speed_2m: 2.0,
+                    actual_vapour_pressure: 1.4,
+                    elevation_m: 200.0,
+                    latitude_deg: 42.0,
+                    day_of_year: 91 + i,
+                }
+            })
+            .collect();
+
+        let kc_values: Vec<f64> = (0..n_days)
+            .map(|i| {
+                let frac = f64::from(i) / f64::from(n_days);
+                if frac < 0.2 {
+                    0.3
+                } else if frac < 0.5 {
+                    0.3 + (frac - 0.2) / 0.3 * 0.85
+                } else if frac < 0.8 {
+                    1.15
+                } else {
+                    1.15 - (frac - 0.8) / 0.2 * 0.75
+                }
+            })
+            .collect();
+
+        let (cpu_us, _) = time_fn(
+            || {
+                let et0_values: Vec<f64> =
+                    inputs.iter().map(|inp| et::daily_et0(inp).et0).collect();
+                let wb_inputs: Vec<DailyInput> = et0_values
+                    .iter()
+                    .zip(&kc_values)
+                    .enumerate()
+                    .map(|(i, (&e, &kc))| DailyInput {
+                        precipitation: if i % 5 == 0 { 10.0 } else { 0.0 },
+                        irrigation: if i % 7 == 0 { 20.0 } else { 0.0 },
+                        et0: e,
+                        kc,
+                    })
+                    .collect();
+                let engine = BatchedWaterBalance::new(0.30, 0.10, 500.0, 0.5);
+                let summary = engine.simulate_season(&wb_inputs);
+                let ky = 1.25;
+                let etc_sum: f64 = et0_values.iter().zip(&kc_values).map(|(e, k)| e * k).sum();
+                let eta_ratio = summary.total_actual_et / etc_sum;
+                1.0 - ky * (1.0 - eta_ratio)
+            },
+            WARMUP,
+            MEASURE,
+        );
+        let seasons_sec = 1_000_000.0 / cpu_us;
+        println!("  {n_days:>8}  {cpu_us:>12.1}  {seasons_sec:>12.0}");
+    }
+}
+
 fn run_all_benchmarks() {
     bench_et0();
     bench_reduce();
@@ -423,6 +566,9 @@ fn run_all_benchmarks() {
     bench_vg_theta();
     bench_mc_et0_ci();
     bench_brent_vg_inverse();
+    bench_regression();
+    bench_soil_params();
+    bench_scheduling_pipeline();
 }
 
 fn main() {
@@ -439,32 +585,41 @@ fn main() {
     println!("  Cross-Spring Shader Evolution — Who Helps Whom");
     println!("═══════════════════════════════════════════════════════════════════════");
     println!();
-    println!("  hotSpring (56 shaders) → Precision foundation");
+    println!("  hotSpring (S42) → Precision foundation");
     println!("    df64 core: enables f64 GPU math for ALL Springs");
     println!("    pow_f64 fix (TS-001): airSpring ET₀ uncovered, hotSpring math fixed");
     println!("    exp/log/trig f64: airSpring VG retention + atmospheric pressure");
+    println!("    └→ airSpring: VG retention, atmospheric pressure, ET₀");
     println!();
-    println!("  wetSpring (25 shaders) → Bio/environmental primitives");
+    println!("  wetSpring (S28) → Bio/environmental primitives");
     println!("    kriging_f64: wetSpring sample sites → airSpring soil moisture mapping");
     println!("    fused_map_reduce: airSpring TS-004 fix → stabilized for ALL Springs");
     println!("    moving_window: wetSpring environmental → airSpring IoT sensor smoothing");
     println!("    ridge_regression: wetSpring ESN → airSpring sensor calibration");
+    println!("    └→ airSpring: soil mapping, seasonal stats, IoT smoothing, calibration");
     println!();
-    println!("  neuralSpring (20 shaders) → ML/optimization");
+    println!("  neuralSpring (S52) → ML/optimization");
     println!("    nelder_mead: neuralSpring optimizer → airSpring isotherm fitting");
     println!("    multi_start_nelder_mead: LHS → airSpring global isotherm search");
     println!("    brent: neuralSpring root-finder → airSpring VG θ→h inversion (v0.4.5)");
-    println!("    ValidationHarness: neuralSpring S59 → all 16 airSpring binaries");
+    println!("    ValidationHarness: neuralSpring S59 → all 21 airSpring binaries");
+    println!("    └→ airSpring: isotherm fitting, VG inversion, all binaries");
     println!();
-    println!("  airSpring (3 fixes + 2 wirings) → Domain validation");
+    println!("  groundSpring (S64) → Uncertainty quantification");
+    println!("    mc_et0_propagate: Monte Carlo ET₀ propagation");
+    println!("    norm_ppf: Moro (1995) inverse normal for parametric CI");
+    println!("    └→ airSpring: MC uncertainty, parametric CI");
+    println!();
+    println!("  airSpring (3 fixes + S40 + S66 metalForge) → Domain validation");
     println!("    TS-001 pow_f64: fractional exponents → fixed for ALL Springs");
     println!("    TS-003 acos precision: trig boundary values → fixed for ALL Springs");
     println!("    TS-004 reduce buffer: N≥1024 dispatch → stabilized for ALL Springs");
     println!("    Richards PDE: airSpring validated, absorbed into barracuda (S40)");
-    println!("    norm_ppf→parametric_ci: hotSpring precision → MC ET₀ analytic CI (v0.4.5)");
-    println!("    brent→inverse_vg: neuralSpring solver → VG pressure head inversion (v0.4.5)");
+    println!("    metalForge (S66): regression, hydrology, moving_window_f64");
+    println!("    └→ all Springs: unsaturated flow, sensor correction, crop water, stream stats");
     println!();
-    println!("  608 WGSL shaders, 46 cross-spring absorptions (S51-S57),");
+    println!("  774 WGSL shaders (ToadStool S66), 46+ cross-spring absorptions,");
     println!("  11 Tier A wired modules in airSpring, zero duplication.");
+    println!("  S66 explicit BGL resolved P0 GPU dispatch blocker — GPU-first paths stable.");
     println!("═══════════════════════════════════════════════════════════════════════");
 }

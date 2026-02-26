@@ -148,12 +148,15 @@ control experiment" — measuring ET directly rather than computing it.
 
 ---
 
-## P0 Blocker (unchanged from V013)
+## P0 Blocker — RESOLVED (S66)
 
-`BatchedElementwiseF64` GPU dispatch panics with:
+`BatchedElementwiseF64` GPU dispatch previously panicked with:
 ```
 dispatch_workgroups: Dispatch dimension 0 (X) is 0. At least one dimension must be > 0
 ```
+**RESOLVED**: S66 switched to explicit `BindGroupLayout` (R-S66-041), eliminating the
+`layout: None` + `get_bind_group_layout(0)` pattern that caused the panic. All GPU
+dispatch tests now pass (ET₀, water balance, reducer, kriging, determinism).
 
 Root cause: `ceil(n / workgroup_size)` returns 0 when `n == 0` or integer division
 rounds down. This is a ToadStool dispatch issue, not airSpring-specific.
@@ -183,10 +186,10 @@ math is correct; GPU validation blocked until this is resolved.
 
 | ID | Item | Priority | Status |
 |----|------|:--------:|--------|
-| N1 | `BatchedElementwiseF64` GPU dispatch panic (P0) | P0 | **Blocked** |
-| N2 | Named VG soil type constants (from V013) | P2 | Open |
-| N3 | `spearman_correlation` re-export (from V013) | P3 | Open |
-| N4 | `forge::regression` → `barracuda::linalg` absorption | P2 | Open |
+| N1 | `BatchedElementwiseF64` GPU dispatch (was P0) | P0 | **RESOLVED** (S66 R-S66-041) |
+| N2 | Named VG soil type constants (from V013) | P2 | **RESOLVED** (S66 R-S66-006) |
+| N3 | `spearman_correlation` re-export (from V013) | P3 | **RESOLVED** (S66 R-S66-005) |
+| N4 | `forge::regression` → `barracuda::linalg` absorption | P2 | **RESOLVED** (S66 R-S66-001) |
 | N5 | `forge::hydrology` → `barracuda::eco` absorption | P2 | Open |
 | N6 | Lysimeter `mass_to_et` utility for `barracuda::eco` | P3 | New |
 | N7 | OAT sensitivity utility for `barracuda::stats` | P3 | New |

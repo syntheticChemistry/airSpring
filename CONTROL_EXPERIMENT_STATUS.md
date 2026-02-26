@@ -265,7 +265,7 @@ Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2, Stewart 1977, CW2D media params)
 | validate_lysimeter | T1 | 25/25 | Mass-to-ET, temp compensation, calibration, diurnal |
 | validate_sensitivity | T1 | 23/23 | OAT ±10%, 3 climatic zones, monotonicity, ranking |
 
-**Total Rust: 515/515 validation checks PASS, 643 tests (464 lib + 126 integration + 53 forge) PASS**
+**Total Rust: 515/515 validation checks PASS, 649 tests (464 lib + 132 integration + 53 forge) PASS**
 **Phase 2 cross-validation: 75/75 MATCH (Python↔Rust, tol=1e-5)**
 **Phase 3 GPU-first: 11 orchestrators wired, 4/4 ToadStool issues RESOLVED**
 **CPU benchmarks: ET₀ 12.7M station-days/s, dual Kc 59M days/s, mulched Kc 64M days/s**
@@ -514,7 +514,7 @@ Chapter 7, separating transpiration from soil evaporation for precision scheduli
 Track 1 (Precision Agriculture):
   Phase 0  [COMPLETE]: Python baselines — 474/474 PASS (16 experiments)
   Phase 0+ [COMPLETE]: Real data pipeline — 918 station-days, ET₀ R²=0.97
-  Phase 1  [COMPLETE]: Rust validation — 719 checks (464 lib + 126 integration + 53 forge + 76 binary), 21 binaries
+  Phase 1  [COMPLETE]: Rust validation — 725 checks (464 lib + 132 integration + 53 forge + 76 binary), 21 binaries
   Phase 1.5[COMPLETE]: CPU benchmark — Rust 69x faster than Python (geometric mean)
   Phase 2  [COMPLETE]: Cross-validation — 75/75 MATCH (Python↔Rust, tol=1e-5)
   Phase 3  [COMPLETE]: GPU bridge — 8 orchestrators wired to ToadStool primitives
@@ -581,6 +581,6 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 ---
 
 *Initialized: February 16, 2026 — Updated: February 26, 2026 (v0.4.5)*
-*16 experiments, 474/474 Python, 719 Rust checks, 21 binaries, 75/75 cross-validation.*
+*16 experiments, 474/474 Python, 725 Rust checks, 21 binaries, 75/75 cross-validation.*
 *Rust 69x faster than Python (geometric mean). 11 Tier A wired modules.*
 *Quality: zero .unwrap(), zero unsafe, zero clippy pedantic warnings. AGPL-3.0-or-later.*

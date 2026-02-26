@@ -1,6 +1,6 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: February 26, 2026 (v0.4.5 — 464 lib + 126 integration)
+**Last Updated**: February 26, 2026 (v0.4.5 — 464 lib + 132 integration)
 **ToadStool PIN**: `045103a7` (S66 — cross-spring absorption, regression/hydrology/moving_window_f64, multi-precision WGSL)
 **Handoff**: V015 (ToadStool S66 sync — all metalForge absorbed, evolution_gaps updated)
 **License**: AGPL-3.0-or-later
@@ -20,15 +20,16 @@ validate against papers, hand off to ToadStool/BarraCuda, lean on upstream.
 | `van_genuchten` | `barracuda::pde::richards::SoilParams` | S40 | **Leaning** — `gpu::richards` bridges to upstream |
 | `isotherm NM` | `barracuda::optimize::nelder_mead` | S62 | **Leaning** — `gpu::isotherm` bridges to upstream |
 
-### Ready for Absorption (4 metalForge modules)
+### Absorbed Upstream (6/6 metalForge modules — Write→Absorb→Lean complete)
 
-| Module | Target | Tests | Provenance |
-|--------|--------|:-----:|------------|
-| `forge::metrics` | `barracuda::stats::metrics` | 11 | **ABSORBED S64** — now leaning on upstream |
-| `forge::regression` | `barracuda::stats::regression` | 11 | Dong 2020 sensor corrections |
-| `forge::moving_window` | `barracuda::ops::moving_window_stats_f64` | 7 | IoT sensor smoothing (f64) |
-| `forge::hydrology` | `barracuda::ops::hydrology` | 13 | FAO-56, Hargreaves 1985 |
-| `forge::isotherm` | `barracuda::ops::isotherm` | 5 | Langmuir/Freundlich linearized fits |
+| Module | Absorbed Into | When | Status |
+|--------|--------------|------|--------|
+| `forge::metrics` | `barracuda::stats::metrics` | S64 | **LEANING** — `testutil::stats` delegates |
+| `forge::regression` | `barracuda::stats::regression` | S66 (R-S66-001) | **LEANING** — `eco::correction` keeps domain `FittedModel` |
+| `forge::moving_window` | `barracuda::stats::moving_window_f64` | S66 (R-S66-003) | **LEANING** — `gpu::stream` f64 path available |
+| `forge::hydrology` | `barracuda::stats::hydrology` | S66 (R-S66-002) | **LEANING** — `eco::evapotranspiration` keeps FAO-56 param order |
+| `forge::isotherm` | `barracuda::eco::isotherm` (was local) | S64 | **LEANING** — `gpu::isotherm` delegates via NM |
+| `forge::van_genuchten` | `barracuda::pde::richards::SoilParams` | S40+S66 | **LEANING** — 8 named constants (R-S66-006) |
 
 See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation details.
 
@@ -89,7 +90,7 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 
 ---
 
-## ToadStool S42–S65 Evolution (170+ commits)
+## ToadStool S42–S66 Evolution (180+ commits)
 
 ToadStool underwent massive evolution since S42. Key milestones:
 
@@ -147,7 +148,7 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `chi2_decomposed` | `stats` | S52 | Chi-squared goodness-of-fit |
 | `spectral_density` | `stats` | S57 | RMT spectral analysis |
 | `normal::norm_cdf` | `stats` | S52+ | Normal cumulative distribution |
-| `spearman_correlation` | `stats::correlation` | S52+ | Rank correlation (exists, not re-exported from `stats/mod.rs`) |
+| `spearman_correlation` | `stats::correlation` | S66 (R-S66-005) | Rank correlation — **now re-exported** from `stats/mod.rs` |
 
 ---
 
@@ -158,12 +159,13 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `cargo fmt --check` | **Clean** |
 | `cargo clippy -- -D warnings` | **0 warnings** (pedantic via `[lints.clippy]`) |
 | `cargo doc --no-deps` | **Builds**, 0 warnings |
-| `cargo test` | **719 total** (464 lib + 126 integration + 53 forge) |
+| `cargo test` | **725 total** (464 lib + 132 integration + 53 forge) |
 | `cargo llvm-cov --lib` | **96.81%** line coverage (97.58% functions) |
 | `unsafe` code | **Zero** |
 | `unwrap()` in lib | **Zero** (all in `#[cfg(test)]`) |
 | Files > 1000 lines | **Zero** (max: 845 lines) |
-| Validation binaries | **16/16 PASS** (341 checks) |
+| Validation binaries | **21/21 PASS** (515 checks) |
+| GPU dispatch (P0 blocker) | **RESOLVED** — S66 explicit BGL (R-S66-041) |
 | Cross-validation | **75/75 MATCH** (tol=1e-5) |
 
 ---
@@ -177,10 +179,13 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `moving_window_stats` | wetSpring | IoT stream smoothing |
 | `ridge_regression` | wetSpring | Sensor correction pipeline |
 | `nelder_mead`, `multi_start` | neuralSpring | Isotherm fitting |
-| `ValidationHarness` | neuralSpring | All 16 validation binaries |
+| `ValidationHarness` | neuralSpring | All 21 validation binaries |
 | `norm_ppf` (Moro 1995) | hotSpring | MC ET₀ parametric confidence intervals |
 | `brent` (Brent 1973) | neuralSpring | VG pressure head inversion (θ→h) |
 | `pde::richards` | airSpring → upstream | 1D Richards equation (absorbed S40) |
+| `stats::regression` | airSpring metalForge → upstream | Sensor correction fitting (absorbed S66) |
+| `stats::hydrology` | airSpring metalForge → upstream | Hargreaves ET₀, batch (absorbed S66) |
+| `stats::moving_window_f64` | airSpring metalForge → upstream | f64 stream statistics (absorbed S66) |
 
 ### airSpring Contributions Back
 

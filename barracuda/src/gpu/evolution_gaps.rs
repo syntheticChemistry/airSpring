@@ -161,7 +161,7 @@ pub enum Tier {
 /// wired to `barracuda::optimize::nelder_mead`, tridiagonal available via PDE solver.
 /// Dual Kc batch added as Tier B: `gpu::dual_kc` CPU ready, pending shader op.
 ///
-/// Upstream capabilities discovered (S52-S65):
+/// Upstream capabilities discovered (S52-S66):
 /// - `NelderMeadGpu`: GPU-resident optimizer (5-50 params, not cost-effective for 2-param isotherms)
 /// - `pde::crank_nicolson::CrankNicolson1D`: **f64** CN PDE solver + `WGSL_CRANK_NICOLSON_F64` GPU shader
 /// - `optimize::bfgs`: Quasi-Newton with gradient (smooth objectives, e.g. isotherm residuals)
@@ -172,6 +172,8 @@ pub enum Tier {
 /// - `optimize::ResumableNelderMead`: Checkpoint/resume for long-running optimization
 /// - `optimize::adaptive_penalty`: Constrained optimization with data-driven penalty
 /// - `unified_hardware`: `HardwareDiscovery`, `ComputeScheduler`, `MixedSubstrate` — metalForge target
+/// - S66: Explicit `BindGroupLayout` (R-S66-041) — **resolves P0 GPU dispatch blocker**
+///   (`BatchedElementwiseF64` no longer uses `layout: None` + `get_bind_group_layout(0)`)
 pub const GAPS: &[EvolutionGap] = &[
     // ── Tier A: Integrated (GPU primitive wired and validated) ─────────
     EvolutionGap {

@@ -9,15 +9,19 @@ pub fn try_create_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevic
         .map(std::sync::Arc::new)
 }
 
-/// Catch panics from upstream shader regressions (toadstool S60-S65
-/// sovereign compiler bind-group reflection). Returns `None` on panic,
+/// Catch panics from upstream shader regressions. Returns `None` on panic,
 /// letting the test SKIP rather than FAIL.
+///
+/// History: `ToadStool` S60-S65 used `layout: None` + `get_bind_group_layout(0)`
+/// which panicked on `BatchedElementwiseF64` dispatch. S66 switched to explicit
+/// `BindGroupLayout` (R-S66-041), resolving the P0 blocker. Retained as a
+/// defensive wrapper for future shader regressions.
 #[allow(dead_code)]
 pub fn try_gpu_dispatch<T>(f: impl FnOnce() -> T) -> Option<T> {
     if let Ok(val) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(f)) {
         Some(val)
     } else {
-        eprintln!("SKIP: upstream shader regression (toadstool S60-S65)");
+        eprintln!("SKIP: upstream shader regression");
         None
     }
 }

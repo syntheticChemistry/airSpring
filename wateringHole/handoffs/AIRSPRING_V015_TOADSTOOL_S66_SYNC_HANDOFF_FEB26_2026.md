@@ -74,7 +74,7 @@ and `rawr_mean`. airSpring has pulled S66, validated against it (643 cargo tests
 
 | ID | Item | Priority | Status |
 |----|------|:--------:|--------|
-| N1 | `BatchedElementwiseF64` GPU dispatch panic (P0) | P0 | **Blocked** (unchanged) |
+| N1 | `BatchedElementwiseF64` GPU dispatch (was P0) | P0 | **RESOLVED** — S66 explicit BGL (R-S66-041) |
 | N6 | Lysimeter `mass_to_et` utility for `barracuda::eco` | P3 | Open |
 | N7 | OAT sensitivity utility for `barracuda::stats` | P3 | Open |
 | N8 | Scheduling irrigation trigger API for `barracuda::eco` | P3 | Open |

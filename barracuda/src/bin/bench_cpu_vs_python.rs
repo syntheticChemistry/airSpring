@@ -12,6 +12,9 @@
 //! 8. Water use efficiency
 //! 9. Season yield + water balance integration
 //! 10. CW2D Richards (gravel + organic media)
+//! 11. Scheduling pipeline: ET₀→Kc→WB→Stewart yield (Exp 014)
+//! 12. Lysimeter ET: mass→ET conversion throughput (Exp 016)
+//! 13. Sensitivity OAT: 6-variable perturbation batch (Exp 017)
 //!
 //! Outputs timing data in a format directly comparable to Python controls.
 //! Run with `--release` for production-representative numbers:
@@ -300,6 +303,135 @@ fn bench_cw2d() {
     }
 }
 
+fn bench_scheduling_pipeline() {
+    use airspring_barracuda::gpu::water_balance::BatchedWaterBalance;
+    println!("\n── Scheduling Pipeline: ET₀→Kc→WB→Stewart yield (Exp 014) ──\n");
+
+    for &n_days in &[90_u32, 180, 365] {
+        let inputs = make_station_days(n_days as usize);
+        let kc_values: Vec<f64> = (0..n_days)
+            .map(|i| {
+                let frac = f64::from(i) / f64::from(n_days);
+                if frac < 0.2 {
+                    0.3
+                } else if frac < 0.5 {
+                    0.3 + (frac - 0.2) / 0.3 * 0.85
+                } else if frac < 0.8 {
+                    1.15
+                } else {
+                    1.15 - (frac - 0.8) / 0.2 * 0.75
+                }
+            })
+            .collect();
+
+        bench(
+            &format!("Scheduling pipeline ({n_days}-day)"),
+            n_days as usize,
+            || {
+                let et0_vals: Vec<f64> = inputs.iter().map(|inp| et::daily_et0(inp).et0).collect();
+                let wb_inputs: Vec<water_balance::DailyInput> = et0_vals
+                    .iter()
+                    .zip(&kc_values)
+                    .enumerate()
+                    .map(|(i, (&e, &kc))| water_balance::DailyInput {
+                        precipitation: if i % 5 == 0 { 10.0 } else { 0.0 },
+                        irrigation: if i % 7 == 0 { 20.0 } else { 0.0 },
+                        et0: e,
+                        kc,
+                    })
+                    .collect();
+                let engine = BatchedWaterBalance::new(0.30, 0.10, 500.0, 0.5);
+                let summary = engine.simulate_season(&wb_inputs);
+                let etc_sum: f64 = et0_vals.iter().zip(&kc_values).map(|(e, k)| e * k).sum();
+                let ratio = summary.total_actual_et / etc_sum;
+                std::hint::black_box(yield_response::yield_ratio_single(1.25, ratio));
+            },
+        );
+    }
+}
+
+fn bench_lysimeter_et() {
+    println!("\n── Lysimeter ET: mass→ET conversion (Exp 016) ──\n");
+
+    for &n_readings in &[24_usize, 168, 720, 8760] {
+        let mass_readings: Vec<(f64, f64)> = (0..n_readings)
+            .map(|i| {
+                let hour = i as f64;
+                let mass = 50.0 - 0.01 * hour + 0.005 * (hour * 0.26).sin();
+                (hour, mass)
+            })
+            .collect();
+
+        bench(
+            &format!("Lysimeter ET ({n_readings} readings)"),
+            n_readings,
+            || {
+                let area = 1.0_f64;
+                let mut total_et = 0.0;
+                for pair in mass_readings.windows(2) {
+                    let dm = pair[1].1 - pair[0].1;
+                    let et_mm = -dm / area;
+                    total_et += et_mm.max(0.0);
+                }
+                std::hint::black_box(total_et);
+            },
+        );
+    }
+}
+
+fn bench_sensitivity_oat() {
+    println!("\n── Sensitivity OAT: 6-var × 2-dir ET₀ perturbation (Exp 017) ──\n");
+
+    for &n_sites in &[1_usize, 10, 100, 1_000] {
+        let base_inputs: Vec<DailyEt0Input> = (0..n_sites)
+            .map(|i| {
+                let fi = i as f64;
+                DailyEt0Input {
+                    tmin: 19.1 + fi * 0.01,
+                    tmax: 32.6 + fi * 0.01,
+                    tmean: None,
+                    solar_radiation: 22.07,
+                    wind_speed_2m: 2.078,
+                    actual_vapour_pressure: 1.409,
+                    elevation_m: 100.0 + fi,
+                    latitude_deg: 50.80,
+                    day_of_year: 187,
+                }
+            })
+            .collect();
+
+        bench(
+            &format!("OAT sensitivity ({n_sites} sites × 12)"),
+            n_sites * 12,
+            || {
+                for inp in &base_inputs {
+                    let base_et0 = et::daily_et0(inp).et0;
+                    for delta in &[-0.1_f64, 0.1] {
+                        let mut p = *inp;
+                        p.tmax *= 1.0 + delta;
+                        std::hint::black_box(et::daily_et0(&p).et0 - base_et0);
+                        p = *inp;
+                        p.tmin *= 1.0 + delta;
+                        std::hint::black_box(et::daily_et0(&p).et0 - base_et0);
+                        p = *inp;
+                        p.solar_radiation *= 1.0 + delta;
+                        std::hint::black_box(et::daily_et0(&p).et0 - base_et0);
+                        p = *inp;
+                        p.wind_speed_2m *= 1.0 + delta;
+                        std::hint::black_box(et::daily_et0(&p).et0 - base_et0);
+                        p = *inp;
+                        p.actual_vapour_pressure *= 1.0 + delta;
+                        std::hint::black_box(et::daily_et0(&p).et0 - base_et0);
+                        p = *inp;
+                        p.elevation_m *= 1.0 + delta;
+                        std::hint::black_box(et::daily_et0(&p).et0 - base_et0);
+                    }
+                }
+            },
+        );
+    }
+}
+
 fn main() {
     println!("═══════════════════════════════════════════════════════════");
     println!("  airSpring CPU Benchmark — Rust vs Python baseline");
@@ -309,6 +441,9 @@ fn main() {
     bench_richards_and_isotherms();
     bench_yield_response();
     bench_cw2d();
+    bench_scheduling_pipeline();
+    bench_lysimeter_et();
+    bench_sensitivity_oat();
 
     println!();
     println!("Done. All throughput numbers are Rust --release (pure f64 math).");

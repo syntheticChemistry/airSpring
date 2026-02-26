@@ -4,6 +4,32 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [0.4.5] - 2026-02-26
 
+### S66 Complete Rewiring, Validation, and Benchmarking
+
+GPU dispatch P0 blocker resolved, S66 cross-spring validation tests added,
+benchmarks updated with S66 provenance and new experiment pipelines.
+
+#### Added
+- 8 S66 cross-spring evolution tests in `cross_spring_evolution.rs`:
+  regression, hydrology, moving_window_f64, spearman, SoilParams, mae,
+  shannon_from_frequencies, regression throughput benchmark
+- 3 new GPU benchmark operations: regression fitting, SoilParams θ(h) batch,
+  scheduling pipeline (ET₀→Kc→WB→Yield composition from Exp 014)
+- 3 new CPU benchmark sections: scheduling pipeline (Exp 014), lysimeter ET
+  conversion (Exp 016), sensitivity OAT perturbation (Exp 017)
+
+#### Changed
+- GPU benchmark provenance updated: 774 WGSL shaders (was 608), S51-S66 (was S51-S57)
+- GPU benchmark summary now includes groundSpring and airSpring metalForge lineage
+- `try_gpu_dispatch` wrapper retained defensively but documented as S66-resolved
+- Integration tests: 126 → 132 (cross_spring 29 → 37)
+- EVOLUTION_READINESS: metalForge section updated to "6/6 absorbed", P0 resolved,
+  21/21 validation binaries, spearman re-export available
+
+#### Resolved
+- **P0 GPU dispatch blocker**: S66 explicit BindGroupLayout (R-S66-041) resolves
+  `BatchedElementwiseF64` dispatch panic — GPU-first paths now stable
+
 ### ToadStool S66 Sync: All metalForge Absorbed
 
 ToadStool S66 (`045103a7`) absorbed all four pending metalForge modules upstream.

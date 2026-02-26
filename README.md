@@ -18,7 +18,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **474/474 PASS** | FAO-56, soil, IoT, water balance, dual Kc, cover crops, Richards, biochar, yield, CW2D, 60yr WB, scheduling, lysimeter, sensitivity |
 | Phase 0+: Real data pipeline | **918 station-days** | ET₀ R²=0.967 vs Open-Meteo (6 Michigan stations) |
-| Phase 1: Rust validation | **719 tests** | 21 binaries, 464 unit + 126 integration + 53 forge + 76 new binary checks |
+| Phase 1: Rust validation | **725 tests** | 21 binaries, 464 unit + 132 integration + 53 forge + 76 new binary checks |
 | Phase 1.5: CPU Benchmark | **69x faster** | Rust vs Python geometric mean (20x–502x range) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 3: GPU bridge | **11 Tier A modules** | S66 synced — all metalForge absorbed upstream, evolution\_gaps current |
@@ -28,7 +28,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test` | 464 barracuda + 53 forge + 126 integration = **643 lib/integration**, 0 failures |
+| `cargo test` | 464 barracuda + 53 forge + 132 integration = **649 lib/integration**, 0 failures |
 | `cargo clippy -- -D warnings` | **0 warnings** (pedantic) |
 | `cargo fmt --check` | **Clean** |
 | `cargo doc` | **Builds** |
@@ -181,7 +181,7 @@ airSpring/
 │   ├── lysimeter/               # Lysimeter ET measurement (26/26)
 │   ├── sensitivity/             # ET₀ sensitivity analysis (23/23)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1: Rust validation (464 lib + 126 integration, 21 binaries)
+├── barracuda/                   # Phase 1: Rust validation (464 lib + 132 integration, 21 binaries)
 │   ├── src/
 │   │   ├── eco/                 # Domain modules (12 validated against papers, incl. diversity)
 │   │   ├── io/                  # csv_ts (streaming columnar IoT parser)
@@ -193,7 +193,7 @@ airSpring/
 │   │   │   ├── stats.rs
 │   │   │   └── bootstrap.rs
 │   │   └── bin/                 # 21 validate_*, bench_*, cross_validate, simulate_season
-│   ├── tests/                   # 126 integration tests (7 files + common/)
+│   ├── tests/                   # 132 integration tests (7 files + common/)
 │   │   ├── common/              # Shared GPU device helpers
 │   │   ├── eco_integration.rs   # Eco module cross-validation
 │   │   ├── gpu_integration.rs   # GPU orchestrator functional tests
@@ -265,7 +265,7 @@ AGPL-3.0-or-later
 
 ---
 
-*February 26, 2026 — v0.4.5. 16 experiments, 474/474 Python, 719 Rust checks,
+*February 26, 2026 — v0.4.5. 16 experiments, 474/474 Python, 725 Rust checks,
 21 binaries, 75/75 cross-validation, 918 real station-days. Rust 69x faster
 than Python (geometric mean). 11 Tier A wired modules. ToadStool S66 synced
 (774 WGSL, all metalForge absorbed). Pure Rust + BarraCuda. AGPL-3.0-or-later.*

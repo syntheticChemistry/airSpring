@@ -2,7 +2,7 @@
 
 **Updated**: February 26, 2026
 **Project**: airSpring — Ecological & Agricultural Sciences (v0.4.5)
-**Status**: 16 experiments, 474/474 Python + 719 Rust tests + 75/75 cross-validation + 11 Tier A modules + 69x CPU speedup
+**Status**: 16 experiments, 474/474 Python + 725 Rust tests + 75/75 cross-validation + 11 Tier A modules + 69x CPU speedup
 
 ---
 
@@ -11,7 +11,7 @@
 ```
 Phase 0   Python/R baselines    — reproduce paper results with original tools (474/474)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (464 lib + 126 integration tests, 21 binaries, 96.81% coverage)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (464 lib + 132 integration tests, 21 binaries, 96.81% coverage)
 Phase 2   BarraCuda GPU         — 11 Tier A modules wired (cross-spring S65 fully rewired)
 Phase 3   metalForge            — mixed CPU/GPU/NPU, 6 modules (2 absorbed, 4 pending)
 Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($600 GPU)
@@ -21,7 +21,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 
 | Faculty | Institution | Track | Papers | Experiments | Checks | Domain |
 |---------|------------|-------|:------:|:-----------:|:------:|--------|
-| Dong | MSU BAE | Irrigation & Soil | 8+ | 13 | 474+719 | ET₀, soil moisture, IoT, water balance, dual Kc, cover crops, Richards, biochar, yield, CW2D |
+| Dong | MSU BAE | Irrigation & Soil | 8+ | 13 | 474+725 | ET₀, soil moisture, IoT, water balance, dual Kc, cover crops, Richards, biochar, yield, CW2D |
 
 ## Faculty: Younsuk Dong, PhD
 

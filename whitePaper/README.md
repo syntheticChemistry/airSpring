@@ -29,7 +29,7 @@ The study answers four questions:
    Answer: yes — Open-Meteo (free, no key, 80+ years) provides real historical Michigan weather at 10km resolution. Our FAO-56 ET₀ matches Open-Meteo's independent computation with R²=0.967 across 918 station-days. NOAA CDO and OpenWeatherMap supplement with GHCND daily records and real-time forecasts.
 
 3. **Can Rust + WebGPU replace Python/Excel for precision agriculture?**
-   Answer: yes (validation complete) — Rust BarraCuda passes 719 tests across 21 binaries (96.81% coverage). A cross-validation harness confirms 75/75 Python-Rust value matches within 1e-5 tolerance. 11 Tier A modules wired to ToadStool/BarraCuda primitives including Richards PDE, isotherm fitting, MC ET₀ uncertainty (parametric CI via `norm_ppf`), VG pressure head inversion (via `brent`), and agroecological diversity. CPU benchmarks: 12.5M ET₀/s, 38.9M VG θ/s, 175K NM fits/s.
+   Answer: yes (validation complete) — Rust BarraCuda passes 725 tests across 21 binaries (96.81% coverage). A cross-validation harness confirms 75/75 Python-Rust value matches within 1e-5 tolerance. 11 Tier A modules wired to ToadStool/BarraCuda primitives including Richards PDE, isotherm fitting, MC ET₀ uncertainty (parametric CI via `norm_ppf`), VG pressure head inversion (via `brent`), and agroecological diversity. S66 resolves the P0 GPU dispatch blocker — GPU-first paths now stable. CPU benchmarks: 12.5M ET₀/s, 38.9M VG θ/s, 175K NM fits/s.
 
 4. **Can the math be truly portable across hardware?**
    In progress — metalForge stages 6 absorption-ready modules for upstream barracuda integration following hotSpring's Write → Absorb → Lean pattern. 2 modules already absorbed upstream (van_genuchten into pde::richards, isotherm into optimize). GPU wiring proves the compute is hardware-portable; metalForge will demonstrate mixed CPU/GPU/NPU dispatch.
@@ -68,7 +68,7 @@ The study answers four questions:
 | West Olive (blueberry) | 0.257 | 0.963 | 639.1 mm | 635.2 mm |
 | **Overall** | **0.267** | **0.967** | — | — |
 
-### Phase 1 (Rust BarraCuda): 719 tests, 21 binaries, 96.81% coverage
+### Phase 1 (Rust BarraCuda): 725 tests, 21 binaries, 96.81% coverage
 
 | Binary | Checks | Key Validation |
 |--------|:------:|----------------|
