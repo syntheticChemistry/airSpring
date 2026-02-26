@@ -19,6 +19,7 @@ References:
   - Stewart (1977) Yield–water relationship
 
 Provenance:
+  Baseline commit: cb59873
   Script: control/scheduling/irrigation_scheduling.py
   Benchmark: control/scheduling/benchmark_scheduling.json
 """

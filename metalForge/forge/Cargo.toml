@@ -9,6 +9,7 @@ description = "Domain primitives for upstream absorption into barracuda — metr
 
 [lints.clippy]
 pedantic = { level = "deny", priority = -1 }
+nursery = { level = "warn", priority = -1 }
 cast_precision_loss = "allow"
 many_single_char_names = "allow"
 similar_names = "allow"

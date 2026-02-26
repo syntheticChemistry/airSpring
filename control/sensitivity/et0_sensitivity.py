@@ -17,6 +17,7 @@ References:
   Estévez et al. (2009) J Irrig Drain Eng 135(3):275-286
 
 Provenance:
+  Baseline commit: cb59873
   Script: control/sensitivity/et0_sensitivity.py
   Benchmark: control/sensitivity/benchmark_sensitivity.json
 """

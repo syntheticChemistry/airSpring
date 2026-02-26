@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: February 26, 2026
-**Status**: 16 experiments, 474/474 Python + 725 Rust (464 lib + 132 integration + 53 forge) + 75/75 cross-validation + 11 Tier A modules
+**Status**: 17 experiments, 474/474 Python + 662 Rust (464 lib + 134 integration + 64 forge) + 1302 atlas checks + 75/75 cross-validation + 11 Tier A modules
 
 ---
 
@@ -25,12 +25,13 @@
 | 014 | Irrigation Scheduling Optimization | Precision Ag | **Complete** | Python + Rust CPU | `eco::water_balance`, `eco::yield_response` | 25+28 |
 | 016 | Lysimeter ET Direct Measurement | IoT | **Complete** | Python + Rust CPU | mass→ET, temp compensation | 26+25 |
 | 017 | ET₀ Sensitivity Analysis (OAT) | Precision Ag | **Complete** | Python + Rust CPU | `eco::evapotranspiration` | 23+23 |
+| 018 | Michigan Crop Water Atlas (100 stations) | Integration | **Active** | Python + Rust CPU | All `eco::` + `yield_response` | 1302/1302 |
 
-**Grand Total**: 474 Python + 464 Rust lib + 132 integration + 53 forge = **725 Rust tests** + 75 cross-validation values + 11 Tier A modules
+**Grand Total**: 474 Python + 464 Rust lib + 134 integration + 64 forge = **662 Rust tests** + 1302 atlas checks + 75 cross-validation values + 11 Tier A modules
 
 ---
 
-## Test Breakdown (v0.4.5)
+## Test Breakdown (v0.4.6)
 
 | Category | Tests | Source |
 |----------|:-----:|--------|
@@ -43,8 +44,9 @@
 | Stats integration | 20 | `tests/stats_integration.rs` |
 | I/O + errors | 11 | `tests/io_and_errors.rs` |
 | Doc tests | 2 | `cargo test --doc` |
-| Forge | 53 | `metalForge/forge/` (vestigial — all absorbed upstream) |
-| **Total** | **725** | |
+| Forge | 64 | `metalForge/forge/` (53 unit + 11 doc, all absorbed upstream) |
+| **Total** | **662** | |
+| Atlas checks | 1302 | `validate_atlas` (100 stations × 13 checks each) |
 
 ---
 
@@ -269,6 +271,24 @@ geographic consistency, 15-station-pair temporal correlations.
 
 **Key Result**: Solar radiation and wind consistently dominate across all climates. Complements groundSpring Exp 003 (humidity at 66% of MC variance).
 
+### Exp 018: Michigan Crop Water Atlas
+
+**Data**: Open-Meteo ERA5 archive, 100 Michigan stations, up to 80 years daily weather (free, no API key). See `specs/ATLAS_STATION_LIST.md`.
+
+**Control**: `control/atlas/atlas_water_budget.py` — Runs FAO-56 ET₀ + water balance + Stewart yield response for 10 crops × all available stations.
+
+**Rust**: `barracuda/src/bin/validate_atlas.rs` — **1302/1302 checks** on 100 Michigan stations. Discovers CSVs at runtime, computes ET₀ (R² > 0.96 vs Open-Meteo), runs water balance for 10 crops per station-year, checks mass balance (< 0.01 mm), yield ratio bounds, and aggregate Michigan ET₀ statistics.
+
+**Cross-validation**: Python vs Rust — 690 crop-station yield ratios all within 0.01 (mean diff 0.0003). Mean ET₀ diff 0.133% across matched stations.
+
+**Output**: `data/atlas_results/atlas_station_summary.csv` (100 rows) and `atlas_crop_summary.csv` (1000 rows) — per-station and per-crop seasonal water budgets.
+
+**Scale**: 100 stations × 10 crops × 80 years = 29.2B cell-days. 100-station pilot: 15,300 station-days processed in 141s (release mode). Full 80yr: ~2hr CPU, ~5min GPU (estimated).
+
+**Key Result**: All 100 stations show ET₀ R² > 0.96, mass balance = 0.000 mm, yield ratios 0.99+ with smart irrigation. Statewide mean ET₀ = 640 mm (growing season 2023).
+
+**GPU**: Candidate for `BatchedEt0` + `BatchedWaterBalance` at atlas scale. Kriging interpolation (100 stations → 10km grid) via `gpu::kriging`.
+
 ---
 
 ## Naming Convention
@@ -283,6 +303,7 @@ Experiments follow `NNN_name` format:
 - `015`: Long-term water balance reconstruction
 - `016`: Lysimeter ET measurement (Dong & Hansen 2023)
 - `017`: ET₀ sensitivity analysis (Gong 2006 methodology)
+- `018`: Michigan Crop Water Atlas (100 stations × 10 crops × 80yr)
 
 Gap (013) reserved for future experiments. See `specs/PAPER_REVIEW_QUEUE.md`.
 

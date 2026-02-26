@@ -29,6 +29,15 @@
 /// * `t_min` — Minimum daily temperature (°C)
 ///
 /// Returns `None` if inputs are physically impossible (`t_max` < `t_min` or `ra` < 0).
+///
+/// # Examples
+///
+/// ```
+/// use airspring_forge::hydrology::hargreaves_et0;
+///
+/// let et0 = hargreaves_et0(35.0, 32.0, 18.0).unwrap();
+/// assert!(et0 > 0.0 && et0 < 15.0);
+/// ```
 #[must_use]
 pub fn hargreaves_et0(ra: f64, t_max: f64, t_min: f64) -> Option<f64> {
     let delta = t_max - t_min;

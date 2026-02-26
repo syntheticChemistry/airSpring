@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.4.5"
+version = "0.4.6"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
@@ -16,14 +16,19 @@ barracuda = { path = "../../phase1/toadstool/crates/barracuda" }
 # JSON parsing: loads benchmark JSON files (control/fao56/*.json, etc.)
 # with full provenance for validation fidelity.
 # serde derive feature unused — only serde_json::Value API needed.
+# Pure Rust (no C deps) — sovereign-compatible.
 serde_json = "1"
 
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }
+nursery = { level = "warn", priority = -1 }
 module_name_repetitions = "allow"
 must_use_candidate = "allow"
 return_self_not_must_use = "allow"
 cast_precision_loss = "allow"
+# Scientific computing: usize/u64→f64 casts are ubiquitous for array indices
+# and lengths that never exceed 2^52.
+cast_possible_truncation = "allow"
 
 [dev-dependencies]
 # Async runtime for WgpuDevice initialisation in integration tests.
@@ -113,3 +118,7 @@ path = "src/bin/validate_lysimeter.rs"
 [[bin]]
 name = "validate_sensitivity"
 path = "src/bin/validate_sensitivity.rs"
+
+[[bin]]
+name = "validate_atlas"
+path = "src/bin/validate_atlas.rs"

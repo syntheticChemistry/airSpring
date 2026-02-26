@@ -26,8 +26,6 @@ use std::sync::Arc;
 use barracuda::device::WgpuDevice;
 use barracuda::ops::moving_window_stats::MovingWindowStats;
 
-use crate::len_f64;
-
 /// Smoothed time series from a sliding window operation.
 #[derive(Debug, Clone)]
 pub struct SmoothedSeries {
@@ -101,41 +99,19 @@ impl StreamSmoother {
 
 /// CPU fallback for sliding window statistics (f64 precision).
 ///
+/// Delegates to `barracuda::stats::moving_window_stats_f64` (R-S66-003).
 /// Used when no GPU is available or for small datasets where GPU dispatch
 /// overhead exceeds computation time.
 pub fn smooth_cpu(data: &[f64], window_size: usize) -> Option<SmoothedSeries> {
-    if data.len() < window_size || window_size == 0 {
-        return None;
-    }
-
-    let out_len = data.len() - window_size + 1;
-    let wf = len_f64(&data[..window_size]);
-    let mut mean = Vec::with_capacity(out_len);
-    let mut variance = Vec::with_capacity(out_len);
-    let mut min_vals = Vec::with_capacity(out_len);
-    let mut max_vals = Vec::with_capacity(out_len);
-
-    for i in 0..out_len {
-        let window = &data[i..i + window_size];
-        let sum: f64 = window.iter().sum();
-        let m = sum / wf;
-        let var: f64 = window.iter().map(|&x| (x - m).powi(2)).sum::<f64>() / wf;
-        let wmin = window.iter().copied().fold(f64::INFINITY, f64::min);
-        let wmax = window.iter().copied().fold(f64::NEG_INFINITY, f64::max);
-
-        mean.push(m);
-        variance.push(var);
-        min_vals.push(wmin);
-        max_vals.push(wmax);
-    }
-
+    let result = barracuda::stats::moving_window_stats_f64(data, window_size)?;
+    let len = result.mean.len();
     Some(SmoothedSeries {
-        mean,
-        variance,
-        min: min_vals,
-        max: max_vals,
+        mean: result.mean,
+        variance: result.variance,
+        min: result.min,
+        max: result.max,
         window_size,
-        len: out_len,
+        len,
     })
 }
 

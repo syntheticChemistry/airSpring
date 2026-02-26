@@ -33,7 +33,7 @@ fn generate_deterministic_weather(n: usize) -> (Vec<f64>, Vec<f64>) {
     for day in 0..n {
         let t = day as f64 / n as f64;
         let seasonal = (std::f64::consts::PI * t).sin();
-        et0.push((3.5 + 2.5 * seasonal).max(0.5));
+        et0.push(2.5f64.mul_add(seasonal, 3.5).max(0.5));
         precip.push(if day % 4 == 0 { 6.0 } else { 0.0 });
     }
     (et0, precip)
@@ -53,12 +53,12 @@ fn kc_schedule(n: usize, kc_ini: f64, kc_mid: f64, kc_end: f64) -> Vec<f64> {
                 kc_ini
             } else if d < l_ini + l_dev {
                 let frac = (d - l_ini) as f64 / l_dev as f64;
-                kc_ini + (kc_mid - kc_ini) * frac
+                (kc_mid - kc_ini).mul_add(frac, kc_ini)
             } else if d < l_ini + l_dev + l_mid {
                 kc_mid
             } else if d < total {
                 let frac = (d - l_ini - l_dev - l_mid) as f64 / l_late as f64;
-                kc_mid + (kc_end - kc_mid) * frac
+                (kc_end - kc_mid).mul_add(frac, kc_mid)
             } else {
                 kc_end
             }

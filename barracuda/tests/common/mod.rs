@@ -18,12 +18,13 @@ pub fn try_create_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevic
 /// defensive wrapper for future shader regressions.
 #[allow(dead_code)]
 pub fn try_gpu_dispatch<T>(f: impl FnOnce() -> T) -> Option<T> {
-    if let Ok(val) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(f)) {
-        Some(val)
-    } else {
-        eprintln!("SKIP: upstream shader regression");
-        None
-    }
+    std::panic::catch_unwind(std::panic::AssertUnwindSafe(f)).map_or_else(
+        |_| {
+            eprintln!("SKIP: upstream shader regression");
+            None
+        },
+        Some,
+    )
 }
 
 /// Get a device or skip the test.

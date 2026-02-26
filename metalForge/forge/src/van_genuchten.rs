@@ -12,6 +12,15 @@
 /// Van Genuchten water retention: θ(h).
 ///
 /// θ = θr + (θs − θr) / [1 + (α|h|)^n]^m  where m = 1 − 1/n
+///
+/// # Examples
+///
+/// ```
+/// use airspring_forge::van_genuchten::theta;
+///
+/// let t = theta(0.0, 0.045, 0.43, 0.145, 2.68);
+/// assert!((t - 0.43).abs() < 1e-10);
+/// ```
 #[must_use]
 pub fn theta(h: f64, theta_r: f64, theta_s: f64, alpha: f64, n: f64) -> f64 {
     if h >= 0.0 {
@@ -20,7 +29,9 @@ pub fn theta(h: f64, theta_r: f64, theta_s: f64, alpha: f64, n: f64) -> f64 {
     let m = 1.0 - 1.0 / n;
     let x = (alpha * h.abs()).powf(n);
     let se = 1.0 / (1.0 + x).powf(m);
-    (theta_r + (theta_s - theta_r) * se).clamp(theta_r, theta_s)
+    (theta_s - theta_r)
+        .mul_add(se, theta_r)
+        .clamp(theta_r, theta_s)
 }
 
 /// Mualem-van Genuchten hydraulic conductivity: K(h).

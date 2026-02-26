@@ -1,4 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+// Data strategy: validation binaries embed benchmark JSON at compile time via
+// include_str!. Library code never accesses the filesystem directly — callers
+// provide data. Runtime file access is isolated to io::csv_ts (accepts paths
+// from callers) and validation binaries.
 //! Shared validation infrastructure for hotSpring-pattern binaries.
 //!
 //! Leans on [`barracuda::validation::ValidationHarness`] (absorbed upstream

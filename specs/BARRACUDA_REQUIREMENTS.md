@@ -1,6 +1,6 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: February 26, 2026 (v0.4.5 — 464 lib + 126 integration, 11 Tier A modules)
+**Last Updated**: February 26, 2026 (v0.4.6 — 464 lib + 134 integration, 11 Tier A modules)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
 **ToadStool HEAD**: `045103a7` (S66 — cross-spring absorption, regression/hydrology/moving_window_f64, explicit BGL, 774 WGSL shaders)
 
@@ -51,7 +51,7 @@ Note: `gpu::dual_kc::BatchedDualKc` has CPU orchestrator wired (Tier B → pendi
 | `stats::spearman_correlation` | `testutil::spearman_r` | Working |
 | `stats::bootstrap_ci` | `testutil::bootstrap_rmse` | Working |
 | `stats::std_dev` | Integration tests | Working |
-| `validation::ValidationHarness` | 21 binaries | Absorbed (S59) |
+| `validation::ValidationHarness` | 22 binaries | Absorbed (S59) |
 
 ---
 
@@ -59,7 +59,7 @@ Note: `gpu::dual_kc::BatchedDualKc` has CPU orchestrator wired (Tier B → pendi
 
 ### Layer 1: BarraCuda CPU (validated, complete)
 
-All algorithms implemented in pure Rust. 433 lib + 115 integration tests, 21 binaries.
+All algorithms implemented in pure Rust. 464 lib + 134 integration tests, 22 binaries.
 This is the baseline for correctness — GPU and metalForge results must match.
 CPU benchmarks: 12.7M ET₀/s, 36.5M VG θ/s, 59M dual Kc/s, 57M Langmuir fits/s.
 
@@ -90,7 +90,7 @@ gpu::isotherm      → fit_langmuir_nm/freundlich_nm  → optimize::nelder_mead 
 eco::correction    → fit_ridge()                    → ridge_regression          [CPU]
 ```
 
-### Layer 3: metalForge Mixed Hardware (staged, 53 tests)
+### Layer 3: metalForge Mixed Hardware (staged, 64 tests)
 
 Upstream absorption candidates:
 

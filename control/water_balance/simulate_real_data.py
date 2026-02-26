@@ -13,6 +13,10 @@ at their actual Michigan demonstration sites from Dong et al. (2024).
 
 Usage:
     python control/water_balance/simulate_real_data.py
+
+Provenance:
+  Baseline commit: cb59873
+  Created: 2026-02-26
 """
 
 import sys

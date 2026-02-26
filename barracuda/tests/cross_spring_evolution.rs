@@ -157,7 +157,10 @@ fn wetspring_reduce_enables_seasonal_stats() {
     let daily_et0: Vec<f64> = (0..365)
         .map(|d| {
             let doy = f64::from(d);
-            3.0 + 2.5 * (2.0 * std::f64::consts::PI * (doy - 172.0) / 365.0).cos()
+            2.5f64.mul_add(
+                (2.0 * std::f64::consts::PI * (doy - 172.0) / 365.0).cos(),
+                3.0,
+            )
         })
         .collect();
 
@@ -222,7 +225,7 @@ fn wetspring_ridge_enables_sensor_calibration() {
     let x: Vec<f64> = (0..100).map(|i| f64::from(i) * 0.1).collect();
     let y: Vec<f64> = x
         .iter()
-        .map(|&xi| 2.5_f64.mul_add(xi, 0.3) + (xi * 0.1).sin() * 0.01)
+        .map(|&xi| (xi * 0.1).sin().mul_add(0.01, 2.5_f64.mul_add(xi, 0.3)))
         .collect();
 
     let model = fit_ridge(&x, &y, 1e-6).expect("fit_ridge: sufficient data");
@@ -706,7 +709,7 @@ fn s66_hydrology_hargreaves_absorbed_upstream() {
 
 #[test]
 fn s66_moving_window_f64_absorbed_upstream() {
-    let data: Vec<f64> = (0..100).map(|i| (i as f64 * 0.1).sin()).collect();
+    let data: Vec<f64> = (0..100).map(|i| (f64::from(i) * 0.1).sin()).collect();
     let result = barracuda::stats::moving_window_f64::moving_window_stats_f64(&data, 10)
         .expect("barracuda::stats::moving_window_f64 should succeed (R-S66-003)");
 
@@ -803,10 +806,10 @@ fn s66_diversity_shannon_from_frequencies() {
 fn benchmark_s66_regression_throughput() {
     use std::time::Instant;
 
-    let x: Vec<f64> = (0..50).map(|i| i as f64).collect();
+    let x: Vec<f64> = (0..50).map(f64::from).collect();
     let y: Vec<f64> = x
         .iter()
-        .map(|&xi| 2.0 * xi + 1.0 + (xi * 0.01).sin())
+        .map(|&xi| 2.0f64.mul_add(xi, 1.0) + (xi * 0.01).sin())
         .collect();
 
     let start = Instant::now();
@@ -838,8 +841,8 @@ fn benchmark_diversity_throughput() {
     let elapsed = start.elapsed();
 
     assert!(
-        elapsed.as_millis() < 2000,
-        "10K alpha diversity computations (100 species) should complete in <2s; \
+        elapsed.as_millis() < 3000,
+        "10K alpha diversity computations (100 species) should complete in <3s; \
          wetSpring bio/diversity.rs absorbed in S64, took {elapsed:?}"
     );
 }

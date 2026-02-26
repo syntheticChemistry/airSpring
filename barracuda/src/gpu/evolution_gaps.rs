@@ -24,7 +24,7 @@
 //! | `testutil` | `gpu::reduce` | `fused_map_reduce_f64.wgsl` | Seasonal stats | A (ready) |
 //! | `io::csv_ts` | `gpu::stream` | `moving_window.wgsl` | Stream smoothing | A (ready) |
 //!
-//! # Current Inventory (February 26, 2026 — v0.4.5, synced to `ToadStool` HEAD `045103a7`)
+//! # Current Inventory (February 26, 2026 — v0.4.6, synced to `ToadStool` HEAD `045103a7`)
 //!
 //! `ToadStool` S42–S66: 170+ commits, 46+ cross-spring absorptions, 2,541+ tests.
 //! All four airSpring issues (TS-001 through TS-004) resolved in **S54**.
@@ -121,7 +121,7 @@
 //! ## Cross-Validation Strategy
 //!
 //! GPU paths are validated against CPU baselines:
-//! 1. CPU validation remains source of truth (464 lib tests, 21 binaries)
+//! 1. CPU validation remains source of truth (464 lib tests, 22 binaries)
 //! 2. GPU results must match CPU within documented tolerance
 //! 3. Cross-validation harness (33/33 Python↔Rust) extends to GPU path
 //! 4. Each GPU function has a `test_gpu_matches_cpu_*` integration test

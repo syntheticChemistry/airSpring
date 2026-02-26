@@ -1,6 +1,6 @@
 # Absorption Manifest — airSpring → barracuda
 
-**Date**: February 26, 2026 (updated v0.4.5 — ToadStool S66 absorption complete)
+**Date**: February 26, 2026 (updated v0.4.6 — V018 active handoff)
 **Source**: `metalForge/forge/` (airspring-forge v0.2.0)
 **Target**: `barracuda` (ToadStool crate)
 **Absorption Status**: 6/6 absorbed upstream — ALL modules absorbed as of S66
@@ -123,5 +123,5 @@ It can be archived or removed at any time without affecting the build.
 ```
 cargo fmt   — clean
 cargo clippy --all-targets — zero warnings (pedantic)
-cargo test  — 53/53 pass (forge), 643/643 pass (barracuda workspace)
+cargo test  — 53/53 pass (forge), 662/662 pass (barracuda workspace: 464+134+64)
 ```

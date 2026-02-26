@@ -2,7 +2,7 @@
 
 **Last Updated**: February 26, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 16 completed (474/474 Python + 464 lib + 126 integration + 11 Tier A modules). All completed papers use open data and systems.
+**Status**: 16 completed (474/474 Python + 662 Rust tests + 1302 atlas checks + 11 Tier A modules). All completed papers use open data and systems.
 
 ---
 
@@ -14,7 +14,7 @@
 | 2 | Dong et al. (2020) Soil sensor calibration — CS616/EC5 | 0 | 36/36 | Dong | `benchmark_dong2020.json` | Published Tables 3-4 |
 | 3 | Dong et al. (2024) IoT irrigation pipeline — SoilWatch 10 | 0 | 24/24 | Dong | `benchmark_dong2024.json` | Published tables/equations |
 | 4 | FAO-56 Chapter 8 — Water balance scheduling | 0 | 18/18 | Standard | `benchmark_water_balance.json` | FAO-56 Ch 8 + USDA |
-| 5 | Real data pipeline — 6 Michigan stations, 918 days | 0+ | R²=0.967 | Dong | Python scripts | Open-Meteo ERA5 (free) |
+| 5 | Real data pipeline — 100 Michigan stations, 15,300 days | 0+ | R²=0.967 | Dong | Python scripts | Open-Meteo ERA5 (free) |
 | 6 | Allen et al. (1998) FAO-56 Ch 7 — Dual Kc (Kcb+Ke) | 0 | 63/63 | Standard | `benchmark_dual_kc.json` | FAO-56 Tables 17, 19 (open literature) |
 | 7 | Regional ET₀ intercomparison — 6 Michigan stations | 0 | 61/61 | Dong | `regional_et0_intercomparison.py` | Open-Meteo ERA5 (free) |
 | 8 | Islam et al. (2014) No-till + Allen FAO-56 Ch 11 cover crops | 0 | 40/40 | Standard | `benchmark_cover_crop_kc.json` | ISWCR + FAO-56 (open) |
@@ -32,10 +32,10 @@
 All 16 completed papers have:
 - **Digitized benchmarks** in `control/*/benchmark_*.json`
 - **Python control scripts** that validate against benchmarks
-- **Rust validation binaries** (21 binaries) that load the same benchmarks
+- **Rust validation binaries** (22 binaries) that load the same benchmarks
 - **Open or published data** (no institutional access required)
-- **Cross-validation** (75/75 Python↔Rust match at 1e-5, includes Richards VG + isotherms)
-- **GPU wiring**: 8 orchestrators (BatchedEt0, BatchedWB, BatchedDualKc, Kriging, Reduce, Stream, BatchedRichards, fit_nm)
+- **Cross-validation** (75/75 Python↔Rust match at 1e-5; 690 crop-station yield pairs within 0.01)
+- **GPU wiring**: 11 Tier A modules (BatchedEt0, BatchedWB, Kriging, Reduce, Stream, fit_ridge, BatchedRichards, fit_nm, diversity, norm_ppf, brent)
 - **CPU benchmarks**: 12.7M ET₀/s, 36.5M VG θ/s, 59M Kc/s, 57M Langmuir fits/s
 
 ### Compute Pipeline Per Paper
@@ -46,7 +46,7 @@ All 16 completed papers have:
 | 2 | 36/36 | 40/40 (`validate_soil`) | `fit_ridge` (ridge regression) | `regression` (4 models) |
 | 3 | 24/24 | 11/11 (`validate_iot`) | `StreamSmoother` (moving window) | `moving_window_f64` |
 | 4 | 18/18 | 13/13 (`validate_water_balance`) | `BatchedWaterBalance` GPU-STEP | `hydrology` (WB) |
-| 5 | R²=0.967 | 23/23 (`validate_real_data`) | All 8 orchestrators | All 4 modules |
+| 5 | R²=0.967 | 23/23 (`validate_real_data`) | All 11 Tier A modules | All 4 modules |
 | 6 | 63/63 | 61/61 (`validate_dual_kc`) | `BatchedDualKc` (Tier B) | `hydrology` (Kc) |
 | 7 | 61/61 | 61/61 (`validate_regional_et0`) | `BatchedEt0` at scale | `metrics` (IA, NSE) |
 | 8 | 40/40 | 40/40 (`validate_cover_crop`) | `BatchedDualKc` + mulch | `hydrology` (cover Kc) |

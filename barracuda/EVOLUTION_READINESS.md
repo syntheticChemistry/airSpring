@@ -1,8 +1,8 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: February 26, 2026 (v0.4.5 — 464 lib + 132 integration)
+**Last Updated**: February 26, 2026 (v0.4.6 — 464 lib + 134 integration + 64 forge, 97.45% coverage)
 **ToadStool PIN**: `045103a7` (S66 — cross-spring absorption, regression/hydrology/moving_window_f64, multi-precision WGSL)
-**Handoff**: V016 (S66 validation complete — P0 resolved, 8 cross-spring tests, absorption candidates)
+**Handoff**: V017 (deep audit & evolution — clippy nursery, R-S66-001/003 wired, van_genuchten extracted)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -16,7 +16,7 @@ validate against papers, hand off to ToadStool/BarraCuda, lean on upstream.
 
 | Module | Absorbed Into | When | Status |
 |--------|--------------|------|--------|
-| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all 21 binaries use upstream |
+| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all 22 binaries use upstream |
 | `van_genuchten` | `barracuda::pde::richards::SoilParams` | S40 | **Leaning** — `gpu::richards` bridges to upstream |
 | `isotherm NM` | `barracuda::optimize::nelder_mead` | S62 | **Leaning** — `gpu::isotherm` bridges to upstream |
 
@@ -118,7 +118,7 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | Capability | Module | Wired In | Status |
 |-----------|--------|----------|--------|
 | `barracuda::tolerances` | `tolerances` | v0.3.6 | **LEANING** — re-exported |
-| `barracuda::validation::ValidationHarness` | `validation` | v0.3.6 | **LEANING** — all 21 binaries |
+| `barracuda::validation::ValidationHarness` | `validation` | v0.3.6 | **LEANING** — all 22 binaries (incl. validate_atlas, 1302 checks) |
 | `pde::richards::solve_richards` | `pde` | v0.4.0 | **WIRED** — `gpu::richards` |
 | `pde::crank_nicolson::CrankNicolson1D` | `pde` | v0.4.4 | **WIRED** — CN f64 diffusion cross-val |
 | `optimize::nelder_mead` | `optimize` | v0.4.1 | **WIRED** — isotherm fitting |
@@ -159,12 +159,12 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `cargo fmt --check` | **Clean** |
 | `cargo clippy -- -D warnings` | **0 warnings** (pedantic via `[lints.clippy]`) |
 | `cargo doc --no-deps` | **Builds**, 0 warnings |
-| `cargo test` | **725 total** (464 lib + 132 integration + 53 forge) |
-| `cargo llvm-cov --lib` | **96.81%** line coverage (97.58% functions) |
+| `cargo test` | **662 total** (464 lib + 134 integration + 64 forge) |
+| `cargo llvm-cov --lib` | **97.45%** line coverage (97.58% functions) |
 | `unsafe` code | **Zero** |
 | `unwrap()` in lib | **Zero** (all in `#[cfg(test)]`) |
 | Files > 1000 lines | **Zero** (max: 845 lines) |
-| Validation binaries | **21/21 PASS** (515 checks) |
+| Validation binaries | **22/22 PASS** (515 checks + 1302 atlas) |
 | GPU dispatch (P0 blocker) | **RESOLVED** — S66 explicit BGL (R-S66-041) |
 | Cross-validation | **75/75 MATCH** (tol=1e-5) |
 
@@ -179,7 +179,7 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `moving_window_stats` | wetSpring | IoT stream smoothing |
 | `ridge_regression` | wetSpring | Sensor correction pipeline |
 | `nelder_mead`, `multi_start` | neuralSpring | Isotherm fitting |
-| `ValidationHarness` | neuralSpring | All 21 validation binaries |
+| `ValidationHarness` | neuralSpring | All 22 validation binaries |
 | `norm_ppf` (Moro 1995) | hotSpring | MC ET₀ parametric confidence intervals |
 | `brent` (Brent 1973) | neuralSpring | VG pressure head inversion (θ→h) |
 | `pde::richards` | airSpring → upstream | 1D Richards equation (absorbed S40) |

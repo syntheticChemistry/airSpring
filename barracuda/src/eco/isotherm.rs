@@ -55,7 +55,9 @@ pub struct IsothermFit {
 /// Guard against singular matrices in regression.
 const SINGULARITY_GUARD: f64 = 1e-30;
 
-/// Minimum value for log domain (avoids log(0)).
+/// Guard against log-domain singularity. Set to 1e-10 because linearized isotherm
+/// fitting uses ln(Ce) and ln(qe) where concentrations are always positive (mg/L);
+/// this floor avoids numerical instability while preserving near-zero data points.
 const LOG_DOMAIN_GUARD: f64 = 1e-10;
 
 /// Fit Langmuir isotherm to (Ce, qe) data using linearized least squares.
@@ -415,8 +417,7 @@ mod tests {
             rmse: 0.01,
         };
         let _ = format!("{fit:?}");
-        let cloned = fit.clone();
-        assert_eq!(cloned.model, "test");
+        assert_eq!(fit.model, "test");
     }
 
     #[test]

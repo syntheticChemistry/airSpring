@@ -22,6 +22,8 @@ Usage:
     python scripts/download_open_meteo.py --station east_lansing --start 2023-05-01 --end 2023-09-30
     python scripts/download_open_meteo.py --all-stations --start 2020-01-01 --end 2024-12-31
     python scripts/download_open_meteo.py --all-stations --growing-season 2023
+    python scripts/download_open_meteo.py --atlas --year-range 1945-2024
+    python scripts/download_open_meteo.py --atlas --growing-season 2023 --batch-size 10
 
 Output:
     data/open_meteo/<station>_<start>_<end>_daily.csv
@@ -86,6 +88,8 @@ STATIONS = {
     },
 }
 
+ATLAS_STATIONS_FILE = Path(__file__).parent / "atlas_stations.json"
+
 OPEN_METEO_BASE = "https://archive-api.open-meteo.com/v1/archive"
 
 # Daily variables needed for FAO-56 Penman-Monteith ET₀
@@ -115,6 +119,16 @@ HOURLY_VARS = [
     "surface_pressure",
     "cloudcover",
 ]
+
+
+def load_atlas_stations() -> dict:
+    """Load the full 100-station atlas from atlas_stations.json."""
+    if not ATLAS_STATIONS_FILE.exists():
+        print(f"  ERROR: Atlas station file not found: {ATLAS_STATIONS_FILE}")
+        sys.exit(1)
+    with open(ATLAS_STATIONS_FILE) as f:
+        data = json.load(f)
+    return data["stations"]
 
 
 def fetch_daily(lat: float, lon: float, start: str, end: str) -> pd.DataFrame:
@@ -214,7 +228,9 @@ def main():
                         choices=list(STATIONS.keys()),
                         help="Station location")
     parser.add_argument("--all-stations", action="store_true",
-                        help="Download for all Michigan stations")
+                        help="Download for all 6 core Michigan stations")
+    parser.add_argument("--atlas", action="store_true",
+                        help="Download for all 100 atlas stations (from atlas_stations.json)")
     parser.add_argument("--start", default=None,
                         help="Start date (YYYY-MM-DD)")
     parser.add_argument("--end", default=None,
@@ -223,12 +239,20 @@ def main():
                         help="Download May-Sep for given year")
     parser.add_argument("--full-year", type=int, default=None,
                         help="Download full year Jan-Dec")
+    parser.add_argument("--year-range", default=None,
+                        help="Year range for atlas (e.g. 1945-2024)")
+    parser.add_argument("--batch-size", type=int, default=20,
+                        help="Stations per batch for atlas mode (default: 20)")
     parser.add_argument("--hourly", action="store_true",
                         help="Also download hourly data")
     args = parser.parse_args()
 
     # Date range resolution
-    if args.growing_season:
+    if args.year_range:
+        yr_start, yr_end = args.year_range.split("-")
+        start = f"{yr_start}-01-01"
+        end = f"{yr_end}-12-31"
+    elif args.growing_season:
         start = f"{args.growing_season}-05-01"
         end = f"{args.growing_season}-09-30"
     elif args.full_year:
@@ -244,8 +268,15 @@ def main():
     out_dir = Path(__file__).parent.parent / "data" / "open_meteo"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    stations_to_fetch = list(STATIONS.keys()) if args.all_stations \
-        else [args.station]
+    if args.atlas:
+        atlas_stations = load_atlas_stations()
+        active_stations = atlas_stations
+    elif args.all_stations:
+        active_stations = STATIONS
+    else:
+        active_stations = {args.station: STATIONS[args.station]}
+
+    stations_to_fetch = list(active_stations.keys())
 
     print("=" * 65)
     print("  airSpring — Open-Meteo Historical Weather Download")
@@ -259,8 +290,9 @@ def main():
     all_daily = []
 
     for station_id in stations_to_fetch:
-        info = STATIONS[station_id]
-        print(f"\n--- {info['name']} ({station_id}) ---")
+        info = active_stations[station_id]
+        name = info.get("name", station_id)
+        print(f"\n--- {name} ({station_id}) ---")
         print(f"  Lat: {info['lat']}, Lon: {info['lon']}, "
               f"Elev: {info['elevation_m']}m")
 
@@ -298,8 +330,8 @@ def main():
                 df_hourly.to_csv(hourly_path, index=False)
                 print(f"  Hourly: {len(df_hourly)} records → {hourly_path}")
 
-            # Rate limit: be polite to Open-Meteo
-            time.sleep(0.5)
+            delay = 2.0 if len(stations_to_fetch) > 20 else 0.5
+            time.sleep(delay)
 
         except Exception as e:
             print(f"  ERROR: {e}")

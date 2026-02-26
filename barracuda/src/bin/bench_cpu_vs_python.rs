@@ -213,8 +213,8 @@ fn bench_yield_response() {
     for &n in &[1_000, 10_000, 100_000] {
         bench(&format!("WUE ({n} calculations)"), n, || {
             for i in 0..n {
-                let y = 8000.0 + (i as f64 * 0.04);
-                let eta = 300.0 + (i as f64 * 0.002);
+                let y = (i as f64).mul_add(0.04, 8000.0);
+                let eta = (i as f64).mul_add(0.002, 300.0);
                 std::hint::black_box(yield_response::water_use_efficiency(y, eta).unwrap());
             }
         });
@@ -315,11 +315,11 @@ fn bench_scheduling_pipeline() {
                 if frac < 0.2 {
                     0.3
                 } else if frac < 0.5 {
-                    0.3 + (frac - 0.2) / 0.3 * 0.85
+                    ((frac - 0.2) / 0.3).mul_add(0.85, 0.3)
                 } else if frac < 0.8 {
                     1.15
                 } else {
-                    1.15 - (frac - 0.8) / 0.2 * 0.75
+                    ((frac - 0.8) / 0.2).mul_add(-0.75, 1.15)
                 }
             })
             .collect();
@@ -357,7 +357,7 @@ fn bench_lysimeter_et() {
         let mass_readings: Vec<(f64, f64)> = (0..n_readings)
             .map(|i| {
                 let hour = i as f64;
-                let mass = 50.0 - 0.01 * hour + 0.005 * (hour * 0.26).sin();
+                let mass = 0.005f64.mul_add((hour * 0.26).sin(), 0.01f64.mul_add(-hour, 50.0));
                 (hour, mass)
             })
             .collect();
@@ -387,8 +387,8 @@ fn bench_sensitivity_oat() {
             .map(|i| {
                 let fi = i as f64;
                 DailyEt0Input {
-                    tmin: 19.1 + fi * 0.01,
-                    tmax: 32.6 + fi * 0.01,
+                    tmin: fi.mul_add(0.01, 19.1),
+                    tmax: fi.mul_add(0.01, 32.6),
                     tmean: None,
                     solar_radiation: 22.07,
                     wind_speed_2m: 2.078,

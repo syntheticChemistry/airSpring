@@ -168,12 +168,11 @@ fn validate_multi_site(
             .collect();
         site_results.sort_by(|a, b| b.abs_sensitivity.partial_cmp(&a.abs_sensitivity).unwrap());
 
-        let top3: Vec<&str> = site_results
+        let has_rad = site_results
             .iter()
             .take(3)
             .map(|r| r.name.as_str())
-            .collect();
-        let has_rad = top3.contains(&"solar_rad_mj_m2_day");
+            .any(|x| x == "solar_rad_mj_m2_day");
         v.check_bool(
             &format!("{site_name}: ET₀={site_et0:.2}, radiation in top-3"),
             has_rad,

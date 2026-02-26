@@ -146,13 +146,11 @@ pub fn mc_et0_cpu(
         let tmin_p = input.tmin + z_tmin * uncertainties.sigma_tmin;
         let tmean_p = f64::midpoint(tmax_p, tmin_p);
 
-        let rh_max_p = (input.actual_vapour_pressure / et::saturation_vapour_pressure(input.tmin)
-            * 100.0
-            + z_rh_max * uncertainties.sigma_rh_max)
+        let rh_max_p = (input.actual_vapour_pressure / et::saturation_vapour_pressure(input.tmin))
+            .mul_add(100.0, z_rh_max * uncertainties.sigma_rh_max)
             .clamp(1.0, 100.0);
-        let rh_min_p = (input.actual_vapour_pressure / et::saturation_vapour_pressure(input.tmax)
-            * 100.0
-            + z_rh_min * uncertainties.sigma_rh_min)
+        let rh_min_p = (input.actual_vapour_pressure / et::saturation_vapour_pressure(input.tmax))
+            .mul_add(100.0, z_rh_min * uncertainties.sigma_rh_min)
             .clamp(1.0, 100.0);
 
         let ea_p = et::actual_vapour_pressure_rh(tmin_p, tmax_p, rh_min_p, rh_max_p);

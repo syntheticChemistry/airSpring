@@ -13,9 +13,18 @@
 use crate::len_f64;
 
 /// Langmuir isotherm: qe = qmax × KL × Ce / (1 + KL × Ce)
+///
+/// # Examples
+///
+/// ```
+/// use airspring_forge::isotherm::langmuir;
+///
+/// let q = langmuir(10.0, 18.0, 0.05);
+/// assert!((q - 6.0).abs() < 0.1);
+/// ```
 #[must_use]
 pub fn langmuir(ce: f64, qmax: f64, kl: f64) -> f64 {
-    let denom = 1.0 + kl * ce;
+    let denom = kl.mul_add(ce, 1.0);
     if denom.abs() < f64::EPSILON {
         return qmax;
     }
@@ -23,6 +32,15 @@ pub fn langmuir(ce: f64, qmax: f64, kl: f64) -> f64 {
 }
 
 /// Freundlich isotherm: qe = KF × Ce^(1/n)
+///
+/// # Examples
+///
+/// ```
+/// use airspring_forge::isotherm::freundlich;
+///
+/// let q = freundlich(10.0, 2.0, 0.5);
+/// assert!((q - 2.0 * 10.0_f64.sqrt()).abs() < 1e-10);
+/// ```
 #[must_use]
 pub fn freundlich(ce: f64, kf: f64, n_inv: f64) -> f64 {
     kf * ce.max(1e-10).powf(n_inv)
@@ -31,7 +49,7 @@ pub fn freundlich(ce: f64, kf: f64, n_inv: f64) -> f64 {
 /// Langmuir separation factor: RL = 1 / (1 + KL × C0)
 #[must_use]
 pub fn separation_factor(kl: f64, c0: f64) -> f64 {
-    1.0 / (1.0 + kl * c0)
+    1.0 / kl.mul_add(c0, 1.0)
 }
 
 /// Result of isotherm fitting.
@@ -203,7 +221,7 @@ mod tests {
     #[test]
     fn test_freundlich() {
         let q = freundlich(10.0, 2.0, 0.5);
-        assert!((q - 2.0 * 10.0_f64.sqrt()).abs() < 1e-10);
+        assert!(2.0f64.mul_add(-10.0_f64.sqrt(), q).abs() < 1e-10);
     }
 
     #[test]

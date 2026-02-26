@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
 **Updated**: February 26, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.4.5)
-**Status**: 16 experiments, 474/474 Python + 725 Rust tests + 75/75 cross-validation + 11 Tier A modules + 69x CPU speedup
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.4.6)
+**Status**: 16 experiments, 474/474 Python + 662 Rust tests + 1302 atlas checks + 75/75 cross-validation + 11 Tier A modules + 69x CPU speedup
 
 ---
 
@@ -11,8 +11,8 @@
 ```
 Phase 0   Python/R baselines    — reproduce paper results with original tools (474/474)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (464 lib + 132 integration tests, 21 binaries, 96.81% coverage)
-Phase 2   BarraCuda GPU         — 11 Tier A modules wired (cross-spring S65 fully rewired)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (464 lib + 134 integration tests, 22 binaries, 97.45% coverage)
+Phase 2   BarraCuda GPU         — 11 Tier A modules wired (cross-spring S66 fully rewired)
 Phase 3   metalForge            — Write→Absorb→Lean complete, 6/6 modules absorbed upstream
 Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($600 GPU)
 ```
@@ -37,7 +37,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | 2 | Dong et al. (2020) Soil sensor calibration — CS616/EC5 | 0→GPU | 36/36 | Published Tables 3-4 |
 | 3 | Dong et al. (2024) IoT irrigation pipeline — SoilWatch 10 | 0→GPU | 24/24 | Published tables/equations |
 | 4 | FAO-56 Chapter 8 — Water balance scheduling | 0→GPU | 18/18 | FAO-56 Ch 8 + USDA |
-| 5 | Real data pipeline — 6 Michigan stations, 918 days | 0+ | R²=0.967 | Open-Meteo ERA5 |
+| 5 | Real data pipeline — 100 Michigan stations, 15,300 days | 0+ | R²=0.967 | Open-Meteo ERA5 |
 | 6 | Allen et al. (1998) FAO-56 Ch 7 — Dual Kc (Kcb+Ke) | 0→CPU | 63/63 | FAO-56 Tables 17, 19 |
 | 7 | Regional ET₀ intercomparison — 6 Michigan stations | 0→CPU | 61/61 | Open-Meteo ERA5 |
 | 8 | Islam et al. (2014) No-till + FAO-56 Ch 11 cover crops | 0→CPU | 40/40 | ISWCR + FAO-56 |
@@ -46,8 +46,11 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | 11 | 60-year water balance (OSU Triplett-Van Doren) | 0→CPU | 10+11 | Open-Meteo ERA5 60yr |
 | 12 | Stewart (1977) yield response to water stress | 0→CPU | 32+32 | FAO-56 Table 24 |
 | 13 | Dong et al. (2019) CW2D Richards extension | 0→CPU | 24+24 | HYDRUS CW2D params |
+| 14 | Ali, Dong & Lavely (2024) Irrigation scheduling optimization | 0→CPU | 25+28 | Ag Water Mgmt 306 |
+| 16 | Dong & Hansen (2023) Weighing lysimeter ET measurement | 0→CPU | 26+25 | Smart Ag Tech 4 |
+| 17 | Gong et al. (2006) ET₀ sensitivity analysis (OAT) | 0→CPU | 23+23 | Ag Water Mgmt 86 |
 
-### Rust Validation (Phase 1) — 21 binaries
+### Rust Validation (Phase 1) — 22 binaries
 
 | Binary | Checks | Modules Exercised |
 |--------|:------:|-------------------|
@@ -65,9 +68,10 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | `validate_long_term_wb` | 11 | 60-year ET₀, water balance, climate trends |
 | `validate_yield` | 32 | Stewart 1977, Ky table, multi-stage, WUE, scheduling |
 | `validate_cw2d` | 24 | CW2D media, VG retention, mass balance |
+| `validate_atlas` | 1302/1302 | 100 Michigan stations × 13 checks each |
 | `cross_validate` | 75 | Python↔Rust exact match (tol=1e-5) |
 
-### GPU Orchestrators (Phase 2) — 8 wired
+### GPU Orchestrators (Phase 2) — 11 Tier A wired
 
 | Orchestrator | BarraCuda Primitive | Cross-Spring Provenance | Status |
 |-------------|--------------------|----|---|
@@ -80,7 +84,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | `BatchedRichards` | `pde::richards::solve_richards` | airSpring→ToadStool S40 absorption | **Wired** |
 | `fit_*_nm/global` | `optimize::nelder_mead` + `multi_start` | neuralSpring optimizer | **Wired** |
 
-### CPU Benchmarks (v0.4.5) — Rust 69x Faster Than Python
+### CPU Benchmarks (v0.4.6) — Rust 69x Faster Than Python
 
 | Operation | Rust Throughput | Speedup vs Python | Cross-Spring Provenance |
 |-----------|----------------|:-----------------:|------------------------|
@@ -98,7 +102,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 |----------|---------|
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C breakdown, absorbed vs stays-local, quality gates |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
-| `wateringHole/handoffs/` | V016 active handoff — S66 validation, P0 resolved, absorption candidates |
+| `wateringHole/handoffs/` | V017 active handoff — S66 validation, P0 resolved, absorption candidates |
 | `specs/CROSS_SPRING_EVOLUTION.md` | 774 WGSL shader provenance across all Springs |
 
 ### Next Steps (Dong Lab)
@@ -109,7 +113,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 - **metalForge absorption**: COMPLETE — 6/6 modules absorbed upstream (S64+S66)
 - **metalForge mixed hardware**: CPU+GPU+NPU dispatch demonstration (future)
 - **Weighing lysimeter**: Dong & Hansen (2023) load cell → direct ET (Exp 016 complete)
-- **Coverage**: 96.81% → target 98%+ (remaining gaps: GPU-dependent code paths)
+- **Coverage**: 97.45% → target 98%+ (remaining gaps: GPU-dependent code paths)
 
 ### What Good Science Looks Like
 
@@ -122,3 +126,76 @@ Every Dong lab paper we reproduced:
 This is *exactly* the kind of science that benefits from sovereign compute.
 The farmer doesn't need a $5000 Campbell Scientific station. They need a
 $200 sensor, Open-Meteo weather data, and a $600 GPU running BarraCuda.
+
+---
+
+## Extension Explorations
+
+With 16 paper reproductions validated and the full Python → Rust CPU → GPU pipeline
+operational, airSpring can now extend beyond reproduction into new science. These
+explorations use the validated stack to answer questions the original papers did not.
+
+| File | Title | Data Tier | Status |
+|------|-------|:---------:|--------|
+| [open_data_atlas.md](open_data_atlas.md) | Michigan Crop Water Atlas (80yr, 100 stations) | Tier 1 (free) | **Complete** — 1302/1302 atlas checks, 15,300 station-days |
+| [yield_validation.md](yield_validation.md) | Stewart Yield Model vs USDA NASS Reality | Tier 1 (free) | Planning |
+| [et_gold_standard.md](et_gold_standard.md) | Direct ET Validation via AmeriFlux Eddy Covariance | Tier 2 (registration) | Planning |
+| [forecast_scheduling.md](forecast_scheduling.md) | Predictive Irrigation with Weather Forecasts | Tier 2 (API key) | Planning |
+| [soil_moisture_validation.md](soil_moisture_validation.md) | Richards theta(t) vs USDA SCAN In-Situ | Tier 2 (free) | Planning |
+
+Cross-spring explorations (no-till Anderson coupling, soil microbiome response)
+are documented in `gen3/baseCamp/06_notill_anderson.md`.
+
+### Data Extension Roadmap
+
+**Tier 1 — Trivial (tools exist, just download)**
+
+| Source | Records | Size | Cost | Notes |
+|--------|---------|------|------|-------|
+| Open-Meteo 80yr (100 stations) | ~2.9M | ~600MB | Free | 15,300 station-days, atlas complete |
+| Open-Meteo 80yr (100 stations) | ~2.9M | ~600MB | Free | More lat/lon points |
+| USDA NASS crop yields (Michigan) | ~66K | ~10MB | Free | County-level CSV |
+| FAO-56 additional crop Kc | ~50 crops | ~5KB | Free | Published tables |
+
+**Tier 2 — Moderate (new API integrations)**
+
+| Source | Records | Size | Cost | Notes |
+|--------|---------|------|------|-------|
+| Open-Meteo full Michigan grid (10km) | ~292M | ~60GB | Free | ~1000 grid cells |
+| USDA SCAN soil moisture stations | ~2M | ~400MB | Free | In-situ theta(t) |
+| AmeriFlux/FLUXNET eddy covariance | ~365K | ~75MB | Free (registration) | Direct ET |
+| PRISM 4km daily (Michigan) | ~730M | ~150GB | Free (academic) | Higher-res |
+
+**Tier 3 — Substantial (satellite, reanalysis)**
+
+| Source | Records | Size | Cost | Notes |
+|--------|---------|------|------|-------|
+| NASA SMAP soil moisture | ~1.5M | ~300MB | Free | 9km, 2015-present |
+| ERA5-Land (Michigan) | ~15B | ~3TB | Free (CDS) | 9km, hourly, soil layers |
+| Sentinel-2 NDVI (Michigan) | ~50K tiles | ~500GB | Free (Copernicus) | Crop health |
+
+### Compute Requirements (Eastgate: i9-12900K + RTX 4070)
+
+| Workload | Scale | CPU Time | GPU Time |
+|----------|-------|----------|----------|
+| ET₀ for 100 stations, 80yr | 2.9M calcs | 0.2 sec | ~0.01 sec |
+| Water balance 100 stations, 80yr | 2.9M steps | ~3 sec | ~0.1 sec |
+| Richards 1D, 1000 grid cells, 80yr | 29M sims | ~2.2 hrs | ~6 min |
+| Kriging 100 stations per timestep | O(100^3) x 29K | ~8 hrs | ~20 min |
+| Full Michigan grid 80yr (ET₀+WB+yield) | ~1B calcs | ~2 min | ~5 sec |
+
+Tier 1-2 data fits on Eastgate (2TB NVMe). Tier 3 benefits from Westgate ZFS
+(76TB cold). Compute is not the bottleneck — download time is.
+
+### Primal Integration Path
+
+```
+Step 1: NestGate data providers (Open-Meteo, NOAA, USDA)
+        Model after ncbi_live_provider.rs — download once, store with provenance
+Step 2: Local NUCLEUS on Eastgate (Tower + Node + Nest)
+        airSpring as first workload consumer via capability.call
+Step 3: LAN HPC (Plasmodium across gates via 10G mesh)
+        Westgate=Nest (76TB), Southgate=Node (RTX 3090), Eastgate=Node+NPU
+Step 4: Full scale
+        Strandgate (dual EPYC), Northgate (RTX 5090), cross-spring pipelines
+```

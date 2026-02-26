@@ -54,9 +54,10 @@ fn linear_regression(x: &[f64], y: &[f64]) -> (f64, f64, f64) {
     let sxx: f64 = x.iter().map(|xi| xi * xi).sum();
     let sxy: f64 = x.iter().zip(y.iter()).map(|(xi, yi)| xi * yi).sum();
 
-    let denom = n * sxx - sx * sx;
-    let slope = (n * sxy - sx * sy) / denom;
-    let intercept = (sy * sxx - sx * sxy) / denom;
+    #[allow(clippy::suspicious_operation_groupings)] // n·Σx² − (Σx)² is correct least-squares
+    let denom = n.mul_add(sxx, -(sx * sx));
+    let slope = n.mul_add(sxy, -(sx * sy)) / denom;
+    let intercept = sy.mul_add(sxx, -(sx * sxy)) / denom;
 
     let y_mean = sy / n;
     let ss_tot: f64 = y.iter().map(|yi| (yi - y_mean).powi(2)).sum();
@@ -90,7 +91,7 @@ fn generate_synthetic_comparison(n_days: usize) -> (Vec<f64>, Vec<f64>) {
 
     for d in 0..n_days {
         let t = d as f64 / n_days as f64;
-        let base_et0 = 4.5 + 1.5 * (std::f64::consts::PI * t).sin();
+        let base_et0 = 1.5f64.mul_add((std::f64::consts::PI * t).sin(), 4.5);
         et0.push(base_et0);
 
         let noise = 0.2 * ((d as f64 * 7.3).sin() + (d as f64 * 3.1).cos()) * 0.5;

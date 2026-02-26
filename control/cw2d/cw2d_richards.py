@@ -20,6 +20,7 @@ References:
     van Genuchten (1980) SSSA J 44:892-898
 
 Provenance:
+  Baseline commit: cb59873
   Benchmark output: control/cw2d/benchmark_cw2d.json
   Reproduction: python control/cw2d/cw2d_richards.py
   Created: 2026-02-25

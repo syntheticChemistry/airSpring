@@ -217,7 +217,7 @@ fn generate_synthetic_weather(n: usize, et0_mean: f64) -> (Vec<f64>, Vec<f64>) {
     for day in 0..n {
         let t = day as f64 / n as f64;
         let seasonal = (std::f64::consts::PI * t).sin();
-        et0.push((et0_mean + 2.0 * seasonal).max(0.5));
+        et0.push(2.0f64.mul_add(seasonal, et0_mean).max(0.5));
 
         if day % 3 == 0 {
             precip.push(8.0);
@@ -254,15 +254,13 @@ fn simulate_season(n: usize, cfg: &SimConfig<'_>) -> (f64, f64, usize) {
         let etc = cfg.kc * cfg.et0[i];
         let eta = ks * etc;
 
-        let irrig = if let Some(frac) = cfg.thresh_frac {
+        let irrig = cfg.thresh_frac.map_or(0.0, |frac| {
             if dr > frac * cfg.taw {
                 cfg.irrig_depth
             } else {
                 0.0
             }
-        } else {
-            0.0
-        };
+        });
 
         dr = (dr - cfg.precip[i] - irrig + eta).clamp(0.0, cfg.taw);
         actual_et_sum += eta;

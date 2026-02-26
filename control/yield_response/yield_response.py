@@ -15,6 +15,7 @@ Key equations:
 Ky values from FAO-56 Table 24 (Doorenbos & Kassam 1979).
 
 Provenance:
+  Baseline commit: cb59873
   Benchmark output: control/yield_response/benchmark_yield_response.json
   Reproduction: python control/yield_response/yield_response.py
   Created: 2026-02-25

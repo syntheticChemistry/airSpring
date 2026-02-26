@@ -49,7 +49,7 @@ pub struct YieldResult {
 /// * `eta_etc_ratio` — Ratio of actual to potential ET (typically 0–1)
 #[must_use]
 pub fn yield_ratio_single(ky: f64, eta_etc_ratio: f64) -> f64 {
-    1.0 - ky * (1.0 - eta_etc_ratio)
+    ky.mul_add(-(1.0 - eta_etc_ratio), 1.0)
 }
 
 /// Multi-stage yield response (FAO-56 Eq. 90).
@@ -69,7 +69,7 @@ pub fn yield_ratio_multistage(stages: &[(f64, f64)]) -> Result<f64> {
     }
     let ratio = stages
         .iter()
-        .map(|&(ky, eta_etc)| 1.0 - ky * (1.0 - eta_etc))
+        .map(|&(ky, eta_etc)| ky.mul_add(-(1.0 - eta_etc), 1.0))
         .product();
     Ok(ratio)
 }
@@ -93,7 +93,7 @@ pub fn water_use_efficiency(yield_kg_ha: f64, eta_mm: f64) -> Result<f64> {
 
 /// Clamp a yield ratio to the physically meaningful range `[0, 1]`.
 #[must_use]
-pub fn clamp_yield_ratio(ratio: f64) -> f64 {
+pub const fn clamp_yield_ratio(ratio: f64) -> f64 {
     ratio.clamp(0.0, 1.0)
 }
 

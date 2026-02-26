@@ -16,6 +16,10 @@ Usage:
     python control/fao56/compute_et0_real_data.py
     python control/fao56/compute_et0_real_data.py --station east_lansing
     python control/fao56/compute_et0_real_data.py --all-stations
+
+Provenance:
+  Baseline commit: cb59873
+  Created: 2026-02-26
 """
 
 import argparse

@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-02-26 (v0.4.5 — 16 experiments, 474 Python + 725 Rust, 21 binaries, 69x CPU speedup)
+**Updated**: 2026-02-26 (v0.4.6 — 17 experiments, 474 Python + 662 Rust + 1302 atlas checks, 22 binaries, 69x CPU speedup, 97.45% coverage)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -59,14 +59,14 @@ bash scripts/run_all_baselines.sh
 #    Cached to: control/long_term_wb/data/wooster_era5_1960_2023.json
 python control/long_term_wb/long_term_water_balance.py
 
-# 7. Run Rust validation binaries (515 checks across 21 binaries)
+# 7. Run Rust validation binaries (515 checks across 22 binaries)
 cd barracuda
 for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   validate_sensor_calibration validate_real_data cross_validate \
   validate_dual_kc validate_cover_crop validate_regional_et0 \
   validate_richards validate_biochar validate_long_term_wb \
   validate_yield validate_cw2d validate_scheduling \
-  validate_lysimeter validate_sensitivity; do
+  validate_lysimeter validate_sensitivity validate_atlas; do
   cargo run --release --bin $bin
 done
 
@@ -225,7 +225,8 @@ BEFORE evolving to Rust/BarraCuda.
 | `control/water_balance/fao56_water_balance.py` | FAO-56 Chapter 8 | 18/18 | TAW/RAW (3), Ks bounds (5), dry-down mass balance (2), irrigated mass balance (3), MI summer 535mm ET (3), heavy rain DP (2) |
 | `control/iot_irrigation/anova_irrigation.R` | Dong et al. 2024 (R v4.3.1) | — | Written, awaiting R install; one-way ANOVA on blueberry/tomato yield |
 
-**Total Python: 474/474 checks PASS, 16/16 experiments PASS**
+**Total Python: 474/474 checks PASS, 16/16 baseline experiments PASS**
+**Exp 018 Atlas: 1302/1302 Rust checks PASS (100-station full Michigan, 10 crops, cross-validated vs Python)**
 **R ANOVA: script written, 1 skip (R not installed)**
 
 Tools used: numpy, scipy (curve_fit, solve_ivp), json (benchmarks), base Python math.
@@ -266,7 +267,7 @@ Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2, Stewart 1977, CW2D media params)
 | validate_lysimeter | T1 | 25/25 | Mass-to-ET, temp compensation, calibration, diurnal |
 | validate_sensitivity | T1 | 23/23 | OAT ±10%, 3 climatic zones, monotonicity, ranking |
 
-**Total Rust: 515/515 validation checks PASS, 649 tests (464 lib + 132 integration + 53 forge) PASS**
+**Total Rust: 515/515 validation checks PASS, 662 tests (464 lib + 134 integration + 64 forge) PASS**
 **Phase 2 cross-validation: 75/75 MATCH (Python↔Rust, tol=1e-5)**
 **Phase 3 GPU-first: 11 orchestrators wired, 4/4 ToadStool issues RESOLVED**
 **CPU benchmarks: ET₀ 12.7M station-days/s, dual Kc 59M days/s, mulched Kc 64M days/s**
@@ -492,6 +493,40 @@ organic θs=0.60).
 panel arrays for dual-use agriculture. Deferred until MSU Solar Farm data identified.
 (Originally Experiment 008; renumbered to avoid conflict with Yield Response.)
 
+### Experiment 018: Michigan Crop Water Atlas — ACTIVE
+
+**Goal**: Run the validated ET₀ + water balance + yield response pipeline
+across 100 Michigan stations, 10 crops, and up to 80 years of Open-Meteo ERA5 data.
+
+**Data**: Open-Meteo ERA5 archive (free, no API key). 100 stations defined in `specs/ATLAS_STATION_LIST.md`.
+
+**Phase 0 (Python baseline):**
+- [x] `control/atlas/atlas_water_budget.py` — 10-crop pipeline for cross-validation
+- [x] FAO-56 ET₀ + water balance + Stewart yield (reuses validated Exp 001/004/008)
+
+**Phase 1 (Rust):**
+- [x] `validate_atlas` binary — 1302/1302 checks on 100-station full Michigan atlas
+- [x] Station discovery from filesystem (capability-based)
+- [x] Per-station ET₀ R² > 0.96, mass balance = 0.000 mm
+- [x] 10-crop yield ratios in [0.3, 1.0] range
+- [x] CSV output: `atlas_station_summary.csv`, `atlas_crop_summary.csv`
+
+**Phase 1.5 (100-station pilot — COMPLETE):**
+- [x] Downloaded 100 stations × 2023 growing season (15,300 station-days)
+- [x] 1302/1302 Rust checks PASS (100 stations × 13 checks each)
+- [x] Python cross-validation: 690 crop-station yield pairs within 0.01 (mean diff 0.0003)
+- [x] Mean ET₀ diff Python vs Rust: 0.133% across 69 matched stations
+- [x] Statewide mean ET₀ = 640 mm (growing season 2023)
+- [x] Processing time: 141s in release mode
+
+**Phase 2 (Scale-out):**
+- [ ] Download 100 stations × 80yr data (`python scripts/download_atlas_80yr.py`)
+- [ ] Run atlas pipeline at full 80yr scale (est. ~2hr CPU)
+- [ ] Decade trend analysis (1945-2024 ET₀ and yield trends)
+- [ ] Spatial interpolation via `gpu::kriging` (Phase 3)
+
+---
+
 ### Experiment 009: FAO-56 Dual Crop Coefficient — PHASE 0 COMPLETE
 
 **Goal**: Implement the dual crop coefficient approach (Kcb + Ke) from FAO-56
@@ -515,10 +550,10 @@ Chapter 7, separating transpiration from soil evaporation for precision scheduli
 Track 1 (Precision Agriculture):
   Phase 0  [COMPLETE]: Python baselines — 474/474 PASS (16 experiments)
   Phase 0+ [COMPLETE]: Real data pipeline — 918 station-days, ET₀ R²=0.97
-  Phase 1  [COMPLETE]: Rust validation — 725 checks (464 lib + 132 integration + 53 forge + 76 binary), 21 binaries
+  Phase 1  [COMPLETE]: Rust validation — 662 tests (464 lib + 134 integration + 64 forge) + 1302 atlas checks, 22 binaries
   Phase 1.5[COMPLETE]: CPU benchmark — Rust 69x faster than Python (geometric mean)
   Phase 2  [COMPLETE]: Cross-validation — 75/75 MATCH (Python↔Rust, tol=1e-5)
-  Phase 3  [COMPLETE]: GPU bridge — 8 orchestrators wired to ToadStool primitives
+  Phase 3  [COMPLETE]: GPU bridge — 11 Tier A modules wired to ToadStool primitives
   Phase 4:             Penny irrigation (sovereign, consumer hardware)
 
 Track 2 (Environmental Systems):
@@ -581,7 +616,7 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026 — Updated: February 26, 2026 (v0.4.5)*
-*16 experiments, 474/474 Python, 725 Rust checks, 21 binaries, 75/75 cross-validation.*
-*Rust 69x faster than Python (geometric mean). 11 Tier A wired modules.*
-*Quality: zero .unwrap(), zero unsafe, zero clippy pedantic warnings. AGPL-3.0-or-later.*
+*Initialized: February 16, 2026 — Updated: February 26, 2026 (v0.4.6)*
+*17 experiments, 474/474 Python, 662 Rust tests + 1302 atlas checks, 22 binaries, 75/75 cross-validation, 100 Michigan stations.*
+*Rust 69x faster than Python (geometric mean). 11 Tier A wired modules. 97.45% coverage.*
+*Quality: zero .unwrap(), zero unsafe, zero clippy pedantic + nursery warnings. AGPL-3.0-or-later.*

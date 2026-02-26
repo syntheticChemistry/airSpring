@@ -35,11 +35,11 @@ Phase 0+ uses zero synthetic data. Three open data sources:
 Re-implement the same computations in pure Rust using BarraCuda. Compare:
 - **Accuracy**: Same ET₀, soil moisture, water balance outputs as Python
 - **Throughput**: Evaluations per second
-- **Dependencies**: BarraCuda target is minimal external dependencies (barracuda, serde, serde_json)
+- **Dependencies**: BarraCuda target is minimal external dependencies (barracuda, serde_json)
 - **Reproducibility**: Deterministic results
 - **GPU readiness**: Architecture suitable for ToadStool GPU acceleration
-- **Code quality**: Zero clippy pedantic/nursery warnings, proper error types, idiomatic Rust
-- **Binaries**: 21 binaries (17 validate_*, 2 bench_*, cross_validate, simulate_season)
+- **Code quality**: Zero clippy pedantic and nursery warnings, proper error types, idiomatic Rust
+- **Binaries**: 22 binaries (18 validate_*, 2 bench_*, cross_validate, simulate_season)
 
 ### Phase 2: Cross-Validation (Python↔Rust)
 
@@ -60,7 +60,7 @@ Verify that Python and Rust produce identical results for identical inputs:
 
 **Phase 0**: Implement all FAO-56 component equations (Eqs. 6-50) in Python with numpy. Validate against 3 worked examples covering monthly (Bangkok), daily (Uccle), and missing-data (Lyon) scenarios. Check all intermediate values (Delta, gamma, es, ea, Ra, Rs, Rn, etc.).
 
-**Phase 0+**: Compute ET₀ for 6 Michigan agricultural stations using 2023 growing season data (153 days each, 918 station-days total). Cross-check against Open-Meteo's independent ET₀ computation.
+**Phase 0+**: Compute ET₀ for 100 Michigan agricultural stations using 2023 growing season data (153 days each, 15,300 station-days total). Cross-check against Open-Meteo's independent ET₀ computation.
 
 **Phase 1**: Implement in Rust (`eco::evapotranspiration`). Validate against same FAO-56 tables.
 
@@ -143,7 +143,7 @@ All experiments run on a single consumer workstation:
 | Python | 3.x (numpy, scipy, pandas, requests) |
 | R | 4.x (planned — for ANOVA matching paper) |
 | Rust | stable (rustc) |
-| GPU | RTX 4070 (SHADER_F64 confirmed) — Phase 3 LIVE (8 orchestrators) |
+| GPU | RTX 4070 (SHADER_F64 confirmed) — Phase 3 LIVE (11 Tier A modules wired) |
 
 ---
 
@@ -168,17 +168,18 @@ All experiments run on a single consumer workstation:
 | IoT Pipeline | SoilWatch 10 + irrigation correct | — | CSV stats + calibration match | ≤1e-5 tolerance |
 | Water Balance | Mass balance < 0.001 mm | Savings per Dong (2024) | Mass balance match Python | ≤1e-5 tolerance |
 
-### Grand Total: 474 Python + 725 Rust Checks + 918 Real Data Points
+### Grand Total: 474 Python + 662 Rust Tests + 1302 Atlas + 15,300 Real Data Points
 
 | Phase | Checks | Description |
 |-------|:------:|-------------|
 | Phase 0 (Python control) | 474 | 16 experiments: FAO-56, soil, IoT, water balance, dual Kc, cover crops, regional ET₀, Richards, biochar, 60yr WB, yield, CW2D, scheduling, lysimeter, sensitivity |
-| Phase 1 (Rust validation) | 515 | 21 binaries: same benchmarks validated in Rust |
-| Phase 1 (Rust tests) | 649 | 464 lib + 132 integration + 53 forge |
+| Phase 1 (Rust validation) | 22 binaries | All pass: same benchmarks validated in Rust |
+| Phase 1 (Rust tests) | 662 | 464 lib + 134 integration + 64 forge |
+| Phase 1 (Atlas validation) | 1302 | 100 Michigan stations × 13 checks each |
 | Phase 1.5 (CPU benchmark) | — | Rust 69x faster than Python (geometric mean, 20x–502x) |
-| Phase 2 (Cross-validation) | 75 | Python↔Rust identical outputs (tol=1e-5) |
-| **Total** | **474 + 515 + 649 + 75** | **All pass** |
-| Phase 0+ (Real data) | 918 station-days | R²=0.967, 4 crop water balance, zero synthetic |
+| Phase 2 (Cross-validation) | 75 + 690 | Python↔Rust identical (tol=1e-5); 690 crop-station yield pairs within 0.01 |
+| **Total** | **474 + 662 + 1302 + 75** | **All pass** |
+| Phase 0+ (Real data) | 15,300 station-days | R²=0.967, 100 Michigan stations, zero synthetic |
 
 ---
 
@@ -192,7 +193,7 @@ All experiments run on a single consumer workstation:
 | pandas | 2.0+ | Data handling |
 | pyet | 1.4+ | FAO-56 PM cross-reference |
 | R | 4.3.1 (paper match) | One-way ANOVA (planned) |
-| Rust | stable (1.77+) | BarraCuda, zero unsafe |
+| Rust | stable (1.80+) | BarraCuda, edition 2021, zero unsafe |
 | serde | 1.x | Rust serialization |
 | serde_json | 1.x | Benchmark JSON + cross-validation |
 | OS | Pop!_OS 22.04 | Linux 6.17 |

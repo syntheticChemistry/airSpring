@@ -463,12 +463,13 @@ mod tests {
     /// sovereign compiler bind-group reflection). Returns `None` on panic,
     /// letting the test SKIP rather than FAIL.
     fn try_gpu<T>(f: impl FnOnce() -> T) -> Option<T> {
-        if let Ok(val) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(f)) {
-            Some(val)
-        } else {
-            eprintln!("SKIP: upstream shader regression (toadstool S60-S65)");
-            None
-        }
+        std::panic::catch_unwind(std::panic::AssertUnwindSafe(f)).map_or_else(
+            |_| {
+                eprintln!("SKIP: upstream shader regression (toadstool S60-S65)");
+                None
+            },
+            Some,
+        )
     }
 
     #[test]

@@ -500,7 +500,7 @@ fn bench_scheduling_pipeline() {
                     tmin: 12.0 + (d * 0.017).sin(),
                     tmax: 25.0 + (d * 0.017).cos(),
                     tmean: None,
-                    solar_radiation: 18.0 + 4.0 * (d * 0.017).sin(),
+                    solar_radiation: 4.0f64.mul_add((d * 0.017).sin(), 18.0),
                     wind_speed_2m: 2.0,
                     actual_vapour_pressure: 1.4,
                     elevation_m: 200.0,
@@ -516,11 +516,11 @@ fn bench_scheduling_pipeline() {
                 if frac < 0.2 {
                     0.3
                 } else if frac < 0.5 {
-                    0.3 + (frac - 0.2) / 0.3 * 0.85
+                    ((frac - 0.2) / 0.3).mul_add(0.85, 0.3)
                 } else if frac < 0.8 {
                     1.15
                 } else {
-                    1.15 - (frac - 0.8) / 0.2 * 0.75
+                    ((frac - 0.8) / 0.2).mul_add(-0.75, 1.15)
                 }
             })
             .collect();

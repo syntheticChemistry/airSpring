@@ -71,6 +71,18 @@ impl FitResult {
 ///
 /// Returns `None` if there are fewer than 2 points or the system is singular
 /// (all x-values identical).
+///
+/// # Examples
+///
+/// ```
+/// use airspring_forge::regression::fit_linear;
+///
+/// let x = [1.0, 2.0, 3.0, 4.0];
+/// let y = [3.0, 5.0, 7.0, 9.0];
+/// let r = fit_linear(&x, &y).unwrap();
+/// assert!((r.params[0] - 2.0).abs() < 1e-10);
+/// assert!((r.params[1] - 1.0).abs() < 1e-10);
+/// ```
 #[must_use]
 #[allow(clippy::many_single_char_names)]
 pub fn fit_linear(x: &[f64], y: &[f64]) -> Option<FitResult> {
@@ -104,6 +116,18 @@ pub fn fit_linear(x: &[f64], y: &[f64]) -> Option<FitResult> {
 /// Fit a quadratic model y = a·x² + b·x + c via 3×3 Cramer's rule.
 ///
 /// Returns `None` if there are fewer than 3 points or the system is singular.
+///
+/// # Examples
+///
+/// ```
+/// use airspring_forge::regression::fit_quadratic;
+///
+/// let x = [0.0, 1.0, 2.0, 3.0];
+/// let y = [1.0, 2.0, 5.0, 10.0];
+/// let r = fit_quadratic(&x, &y).unwrap();
+/// assert!((r.params[0] - 1.0).abs() < 0.01);
+/// assert!((r.params[2] - 1.0).abs() < 0.01);
+/// ```
 #[must_use]
 #[allow(clippy::many_single_char_names, clippy::similar_names)]
 pub fn fit_quadratic(x: &[f64], y: &[f64]) -> Option<FitResult> {

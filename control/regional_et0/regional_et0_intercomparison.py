@@ -17,6 +17,10 @@ This establishes the baseline for GPU-batched ET₀ at scale (BatchedEt0).
 Reference:
     Allen, R.G. et al. (1998) FAO-56; MSU Enviro-weather network;
     Open-Meteo Historical Weather API (ERA5 reanalysis).
+
+Provenance:
+  Baseline commit: cb59873
+  Created: 2026-02-26
 """
 
 import csv

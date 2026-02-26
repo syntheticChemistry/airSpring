@@ -7,7 +7,8 @@
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V016** | [AIRSPRING_V016_TOADSTOOL_S66_VALIDATION_HANDOFF_FEB26_2026.md](handoffs/AIRSPRING_V016_TOADSTOOL_S66_VALIDATION_HANDOFF_FEB26_2026.md) | 2026-02-26 | **current** — S66 validation complete: P0 resolved, 8 cross-spring tests, benchmarks updated, absorption candidates, cross-spring learnings |
+| **V018** | [AIRSPRING_V018_ATLAS_SCALE_EVOLUTION_HANDOFF_FEB26_2026.md](handoffs/AIRSPRING_V018_ATLAS_SCALE_EVOLUTION_HANDOFF_FEB26_2026.md) | 2026-02-26 | **current** — 100-station Michigan Crop Water Atlas, 1302 atlas checks, scale validation of Tier A stack |
+| **V017** | [AIRSPRING_V017_DEEP_AUDIT_EVOLUTION_HANDOFF_FEB26_2026.md](handoffs/AIRSPRING_V017_DEEP_AUDIT_EVOLUTION_HANDOFF_FEB26_2026.md) | 2026-02-26 | Deep audit: Clippy nursery, R-S66-001/003 wired, van_genuchten extracted, 97.45% coverage |
 
 ## Cross-Spring Documents
 
@@ -21,6 +22,7 @@
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_V016_TOADSTOOL_S66_VALIDATION_HANDOFF_FEB26_2026.md` | v0.4.5: S66 validation complete — P0 resolved, 8 cross-spring tests, absorption candidates |
 | `handoffs/archive/AIRSPRING_V015_TOADSTOOL_S66_SYNC_HANDOFF_FEB26_2026.md` | v0.4.5: S66 sync — all metalForge absorbed, evolution_gaps updated |
 | `handoffs/archive/AIRSPRING_V014_TOADSTOOL_EXPERIMENT_BUILDOUT_HANDOFF_FEB26_2026.md` | v0.4.5: 3 new experiments, GPU promotion roadmap |
 | `handoffs/archive/AIRSPRING_V013_TOADSTOOL_ABSORPTION_HANDOFF_FEB26_2026.md` | v0.4.5: Absorption candidates (all resolved by S66) |

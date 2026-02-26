@@ -16,14 +16,14 @@ Write locally → Validate against benchmarks → Hand off to ToadStool → Abso
 ```
 
 **Status: COMPLETE.** All 6 metalForge modules have been absorbed upstream.
-The forge crate remains as a fossil record (53 tests) but is no longer
+The forge crate remains as a fossil record (64 tests) but is no longer
 in the active dependency graph. airSpring now leans on upstream primitives.
 
 ## What's Here
 
 ### `forge/` — Rust crate (`airspring-forge`)
 
-Six modules, all absorbed upstream. Pure Rust, zero dependencies, 53/53 tests pass.
+Six modules, all absorbed upstream. Pure Rust, zero dependencies, 64/64 tests pass.
 
 | Module | Functions | Absorbed Into | When |
 |--------|-----------|--------------|------|
@@ -58,7 +58,7 @@ All implementations are validated against published benchmarks:
 | **Crate** | `hotspring-forge` | `airspring-forge` |
 | **Dependencies** | barracuda, wgpu, tokio | None (pure Rust) |
 | **Modules** | substrate, probe, inventory, dispatch, bridge | metrics, regression, moving_window_f64, hydrology |
-| **Tests** | Hardware probing, bridge seam | 53 unit tests, numerical correctness |
+| **Tests** | Hardware probing, bridge seam | 64 tests (53 unit + 11 doc), numerical correctness |
 
 ## Cross-Spring Absorption Candidates
 
@@ -79,5 +79,5 @@ These airSpring patterns may benefit other springs:
 ```
 cargo fmt   — clean
 cargo clippy --all-targets — zero warnings (pedantic)
-cargo test  — 53/53 pass (11 metrics + 12 regression + 7 moving_window + 13 hydrology + 5 van_genuchten + 5 isotherm)
+cargo test  — 64/64 pass (11 metrics + 12 regression + 7 moving_window + 13 hydrology + 5 van_genuchten + 5 isotherm)
 ```

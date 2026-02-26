@@ -18,6 +18,7 @@ References:
   López-Urrea et al. (2006) Ag Water Mgmt 82(1-2):13-24
 
 Provenance:
+  Baseline commit: cb59873
   Script: control/lysimeter/lysimeter_et.py
   Benchmark: control/lysimeter/benchmark_lysimeter.json
 """

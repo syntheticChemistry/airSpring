@@ -114,191 +114,56 @@ pub fn evaluate(model: &FittedModel, x: f64) -> f64 {
 
 use crate::len_f64;
 
-/// Guard against singular matrices in regression — smaller than any
-/// physically meaningful determinant in sensor calibration.
-const SINGULARITY_GUARD: f64 = 1e-30;
+// ── Least-squares fitting (R-S66-001: delegates to barracuda::stats::regression) ──
 
-/// Minimum x-value for logarithmic regression — avoids log(0) domain error.
-const LOG_DOMAIN_GUARD: f64 = 0.001;
-
-// ── Least-squares fitting ────────────────────────────────────────────
+fn fit_result_to_fitted_model(
+    r: barracuda::stats::FitResult,
+    model_type: ModelType,
+) -> FittedModel {
+    FittedModel {
+        model_type,
+        params: r.params,
+        r_squared: r.r_squared,
+        rmse: r.rmse,
+    }
+}
 
 /// Fit a linear model y = a·x + b using normal equations.
 ///
+/// Delegates to `barracuda::stats::regression::fit_linear` (R-S66-001).
 /// Returns `Some(FittedModel)` or `None` if the system is singular.
 #[must_use]
 pub fn fit_linear(x: &[f64], y: &[f64]) -> Option<FittedModel> {
-    let count = len_f64(x);
-    if x.len() < 2 || x.len() != y.len() {
-        return None;
-    }
-
-    let s_x: f64 = x.iter().sum();
-    let s_y: f64 = y.iter().sum();
-    let s_xx: f64 = x.iter().map(|&xi| xi * xi).sum();
-    let s_cross: f64 = x.iter().zip(y).map(|(&xi, &yi)| xi * yi).sum();
-
-    let det = count.mul_add(s_xx, -(s_x * s_x));
-    if det.abs() < SINGULARITY_GUARD {
-        return None;
-    }
-
-    let a = count.mul_add(s_cross, -(s_x * s_y)) / det;
-    let b = s_xx.mul_add(s_y, -(s_x * s_cross)) / det;
-
-    let (r2, rmse) = goodness_of_fit(x, y, |xi| linear_model(xi, a, b));
-    Some(FittedModel {
-        model_type: ModelType::Linear,
-        params: vec![a, b],
-        r_squared: r2,
-        rmse,
-    })
-}
-
-/// 3x3 determinant via cofactor expansion along row 0.
-fn det3(m: &[[f64; 3]; 3]) -> f64 {
-    let minor0 = m[1][1].mul_add(m[2][2], -(m[1][2] * m[2][1]));
-    let minor1 = m[1][0].mul_add(m[2][2], -(m[1][2] * m[2][0]));
-    let minor2 = m[1][0].mul_add(m[2][1], -(m[1][1] * m[2][0]));
-    m[0][2].mul_add(minor2, m[0][0].mul_add(minor0, -(m[0][1] * minor1)))
-}
-
-/// Solve a 3x3 linear system via Cramer's rule.
-///
-/// Solves `M · [p0, p1, p2]ᵀ = rhs` where M is a 3x3 symmetric matrix
-/// given by rows. Returns `None` if the determinant is near zero.
-fn cramer_3x3(m: [[f64; 3]; 3], rhs: [f64; 3]) -> Option<(f64, f64, f64)> {
-    let det = det3(&m);
-    if det.abs() < SINGULARITY_GUARD {
-        return None;
-    }
-    let inv = 1.0 / det;
-
-    // Replace each column in turn with rhs, compute determinant
-    let m0 = [
-        [rhs[0], m[0][1], m[0][2]],
-        [rhs[1], m[1][1], m[1][2]],
-        [rhs[2], m[2][1], m[2][2]],
-    ];
-    let m1 = [
-        [m[0][0], rhs[0], m[0][2]],
-        [m[1][0], rhs[1], m[1][2]],
-        [m[2][0], rhs[2], m[2][2]],
-    ];
-    let m2 = [
-        [m[0][0], m[0][1], rhs[0]],
-        [m[1][0], m[1][1], rhs[1]],
-        [m[2][0], m[2][1], rhs[2]],
-    ];
-
-    Some((inv * det3(&m0), inv * det3(&m1), inv * det3(&m2)))
+    barracuda::stats::fit_linear(x, y).map(|r| fit_result_to_fitted_model(r, ModelType::Linear))
 }
 
 /// Fit a quadratic model y = a·x² + b·x + c using normal equations.
+///
+/// Delegates to `barracuda::stats::regression::fit_quadratic` (R-S66-001).
 #[must_use]
 pub fn fit_quadratic(xs: &[f64], ys: &[f64]) -> Option<FittedModel> {
-    let count = len_f64(xs);
-    if xs.len() < 3 || xs.len() != ys.len() {
-        return None;
-    }
-
-    // Sums for normal equations: A'A·p = A'y where A = [x², x, 1]
-    let s_x: f64 = xs.iter().sum();
-    let s_x2: f64 = xs.iter().map(|&xi| xi * xi).sum();
-    let s_x3: f64 = xs.iter().map(|&xi| xi.powi(3)).sum();
-    let s_x4: f64 = xs.iter().map(|&xi| xi.powi(4)).sum();
-    let s_y: f64 = ys.iter().sum();
-    let s_cross: f64 = xs.iter().zip(ys).map(|(&xi, &yi)| xi * yi).sum();
-    let s_x2_cross: f64 = xs.iter().zip(ys).map(|(&xi, &yi)| xi * xi * yi).sum();
-
-    // 3×3 symmetric normal equation matrix and RHS
-    let matrix = [[s_x4, s_x3, s_x2], [s_x3, s_x2, s_x], [s_x2, s_x, count]];
-    let rhs = [s_x2_cross, s_cross, s_y];
-
-    let (coeff_a, coeff_b, coeff_c) = cramer_3x3(matrix, rhs)?;
-
-    let (r2, rmse) = goodness_of_fit(xs, ys, |xi| quadratic_model(xi, coeff_a, coeff_b, coeff_c));
-    Some(FittedModel {
-        model_type: ModelType::Quadratic,
-        params: vec![coeff_a, coeff_b, coeff_c],
-        r_squared: r2,
-        rmse,
-    })
+    barracuda::stats::fit_quadratic(xs, ys)
+        .map(|r| fit_result_to_fitted_model(r, ModelType::Quadratic))
 }
 
 /// Fit an exponential model y = a·exp(b·x) via log-linearized least squares.
 ///
-/// Transforms to ln(y) = ln(a) + b·x and fits linear.
-/// Requires all y > 0.
+/// Delegates to `barracuda::stats::regression::fit_exponential` (R-S66-001).
+/// Transforms to ln(y) = ln(a) + b·x and fits linear. Requires all y > 0.
 #[must_use]
 pub fn fit_exponential(x: &[f64], y: &[f64]) -> Option<FittedModel> {
-    if x.len() < 2 || x.len() != y.len() {
-        return None;
-    }
-    // Filter to positive y values
-    let valid: Vec<(f64, f64)> = x
-        .iter()
-        .zip(y)
-        .filter(|(_, &yi)| yi > 0.0)
-        .map(|(&xi, &yi)| (xi, yi))
-        .collect();
-    if valid.len() < 2 {
-        return None;
-    }
-
-    let xv: Vec<f64> = valid.iter().map(|&(xi, _)| xi).collect();
-    let ly: Vec<f64> = valid.iter().map(|&(_, yi)| yi.ln()).collect();
-
-    let lin = fit_linear(&xv, &ly)?;
-    let ln_a = lin.params[1];
-    let b = lin.params[0];
-    let a = ln_a.exp();
-
-    // Compute R² and RMSE in original space
-    let (r2, rmse) = goodness_of_fit(&xv, &valid.iter().map(|v| v.1).collect::<Vec<_>>(), |xi| {
-        exponential_model(xi, a, b)
-    });
-    Some(FittedModel {
-        model_type: ModelType::Exponential,
-        params: vec![a, b],
-        r_squared: r2,
-        rmse,
-    })
+    barracuda::stats::fit_exponential(x, y)
+        .map(|r| fit_result_to_fitted_model(r, ModelType::Exponential))
 }
 
 /// Fit a logarithmic model y = a·ln(x) + b via linearized least squares.
 ///
+/// Delegates to `barracuda::stats::regression::fit_logarithmic` (R-S66-001).
 /// Transforms to y = a·z + b where z = ln(x). Requires all x > 0.
 #[must_use]
 pub fn fit_logarithmic(x: &[f64], y: &[f64]) -> Option<FittedModel> {
-    if x.len() < 2 || x.len() != y.len() {
-        return None;
-    }
-    let valid: Vec<(f64, f64)> = x
-        .iter()
-        .zip(y)
-        .filter(|(&xi, _)| xi > LOG_DOMAIN_GUARD)
-        .map(|(&xi, &yi)| (xi, yi))
-        .collect();
-    if valid.len() < 2 {
-        return None;
-    }
-
-    let lnx: Vec<f64> = valid.iter().map(|&(xi, _)| xi.ln()).collect();
-    let yv: Vec<f64> = valid.iter().map(|&(_, yi)| yi).collect();
-
-    let lin = fit_linear(&lnx, &yv)?;
-    let a = lin.params[0];
-    let b = lin.params[1];
-
-    let xv: Vec<f64> = valid.iter().map(|v| v.0).collect();
-    let (r2, rmse) = goodness_of_fit(&xv, &yv, |xi| logarithmic_model(xi, a, b));
-    Some(FittedModel {
-        model_type: ModelType::Logarithmic,
-        params: vec![a, b],
-        r_squared: r2,
-        rmse,
-    })
+    barracuda::stats::fit_logarithmic(x, y)
+        .map(|r| fit_result_to_fitted_model(r, ModelType::Logarithmic))
 }
 
 /// Fit a regularized linear model using upstream `barracuda::linalg::ridge`.
