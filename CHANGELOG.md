@@ -4,6 +4,30 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [0.4.5] - 2026-02-26
 
+### ToadStool S66 Sync: All metalForge Absorbed
+
+ToadStool S66 (`045103a7`) absorbed all four pending metalForge modules upstream.
+airSpring pulls, validates, and documents the absorption.
+
+#### Changed
+- Synced to ToadStool S66 (`045103a7`) from S65 (`17932267`)
+- `validate_lysimeter::rmse` rewired to `barracuda::stats::rmse` (was local)
+- Added upstream provenance notes to `eco::correction`, `eco::evapotranspiration`,
+  `testutil::stats` documenting S66 equivalences
+- Updated `evolution_gaps.rs` to S66 inventory (from S65)
+- metalForge ABSORPTION_MANIFEST: 6/6 absorbed (was 2/6)
+- V015 handoff created (S66 sync), V013 archived (all items resolved)
+
+#### S66 Absorption Items Resolved
+- R-S66-001: `stats::regression` (fit_linear/quadratic/exponential/logarithmic)
+- R-S66-002: `stats::hydrology` (hargreaves_et0, crop_coefficient, soil_water_balance)
+- R-S66-003: `stats::moving_window_f64` (CPU f64 moving window)
+- R-S66-005: `spearman_correlation` re-exported from `stats::correlation`
+- R-S66-006: 8 named `SoilParams` constants (Carsel & Parrish 1988)
+- R-S66-036: `stats::metrics::mae` added
+- R-S66-037: `stats::diversity::shannon_from_frequencies` added
+- R-S66-038: `stats::metrics::{hill, monod}` added
+
 ### Experiment Buildout: Scheduling + Lysimeter + Sensitivity (3 new papers)
 
 Three new paper reproductions completing the full Python→Rust pipeline.

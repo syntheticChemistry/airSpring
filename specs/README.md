@@ -17,7 +17,7 @@
 | Phase 2 (Cross-validation) | 75/75 Python↔Rust match within 1e-5 (includes Richards + isotherm) |
 | Phase 3 (GPU) | 11 Tier A modules wired, cross-spring S65 fully rewired |
 | Faculty | Dong (BAE, MSU — new lab 2026) |
-| Handoff | V014 in `wateringHole/handoffs/` |
+| Handoff | V015 in `wateringHole/handoffs/` |
 
 ---
 
@@ -88,7 +88,7 @@ Re-run `scripts/run_all_baselines.sh` at the respective commits to verify.
 `../whitePaper/STUDY.md` → `../CONTROL_EXPERIMENT_STATUS.md` → BARRACUDA_REQUIREMENTS.md
 
 **Cross-spring evolution** (15 min):
-CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/AIRSPRING_V014_*.md`
+CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/AIRSPRING_V015_*.md`
 
 ---
 

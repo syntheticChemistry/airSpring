@@ -21,7 +21,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | Phase 1: Rust validation | **719 tests** | 21 binaries, 464 unit + 126 integration + 53 forge + 76 new binary checks |
 | Phase 1.5: CPU Benchmark | **69x faster** | Rust vs Python geometric mean (20x–502x range) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
-| Phase 3: GPU bridge | **11 Tier A modules** | S65 cross-spring rewired (norm\_ppf CI, brent VG inverse, diversity, MC ET₀) |
+| Phase 3: GPU bridge | **11 Tier A modules** | S66 synced — all metalForge absorbed upstream, evolution\_gaps current |
 | Phase 4: Penny Irrigation | Vision | Sovereign, consumer hardware |
 
 ### Code Quality
@@ -57,7 +57,7 @@ airSpring domain code (`eco::`) is validated against papers, then wrapped by GPU
 
 ### Cross-Spring Shader Evolution
 
-ToadStool contains **774 WGSL shaders** across 41+ categories. airSpring uses 6 shared shader families, contributed **3 upstream fixes**, and had its **stats metrics absorbed upstream** (S64):
+ToadStool contains **774 WGSL shaders** across 41+ categories (S66: 2,541+ barracuda tests). airSpring uses 6 shared shader families, contributed **3 upstream fixes**, and had **all metalForge modules absorbed upstream** (S64 + S66):
 
 | Spring | Shaders | What airSpring Gets | What airSpring Gave Back |
 |--------|---------|--------------------|-----------------------|
@@ -67,7 +67,7 @@ ToadStool contains **774 WGSL shaders** across 41+ categories. airSpring uses 6 
 | **groundSpring** | — | **MC ET₀ uncertainty propagation shader** | — |
 | **airSpring** | — | Domain consumer + stats absorbed upstream | Richards PDE (S40), stats metrics (S64) |
 
-46+ cross-spring absorptions (S51-S65). See `specs/CROSS_SPRING_EVOLUTION.md`.
+46+ cross-spring absorptions (S51-S66). All metalForge absorbed. See `specs/CROSS_SPRING_EVOLUTION.md`.
 
 ### BarraCuda Integration (11 Tier A modules)
 
@@ -87,7 +87,7 @@ ToadStool contains **774 WGSL shaders** across 41+ categories. airSpring uses 6 
 
 Also wired: `validation::ValidationHarness` (neuralSpring), `stats::pearson`, `spearman`, `bootstrap_ci`, `stats::metrics` re-exports (airSpring→upstream S64).
 
-Evolution gaps: 23 total (11 Tier A integrated, 11 Tier B ready, 1 Tier C pending).
+Evolution gaps: 23 total (11 Tier A integrated, 11 Tier B ready, 1 Tier C pending). ToadStool S66 synced.
 See `barracuda/src/gpu/evolution_gaps.rs` for the full roadmap.
 
 ### CPU Benchmarks: Rust vs Python (69x geometric mean speedup)
@@ -214,7 +214,7 @@ airSpring/
 │   └── STUDY.md                 # Full results narrative
 ├── experiments/                 # Experiment protocols and results (16 complete)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
-│   └── handoffs/                # Versioned (V014 active)
+│   └── handoffs/                # Versioned (V015 active)
 ├── CHANGELOG.md                 # Keep-a-Changelog versioned history
 ├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
 └── LICENSE                      # AGPL-3.0-or-later
@@ -257,7 +257,7 @@ airSpring/
 | `whitePaper/STUDY.md` | Full results narrative |
 | `whitePaper/METHODOLOGY.md` | Validation protocol |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V014 active) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V015 active) |
 
 ## License
 
@@ -267,6 +267,5 @@ AGPL-3.0-or-later
 
 *February 26, 2026 — v0.4.5. 16 experiments, 474/474 Python, 719 Rust checks,
 21 binaries, 75/75 cross-validation, 918 real station-days. Rust 69x faster
-than Python (geometric mean). 11 Tier A wired modules, 774 WGSL shaders.
-Cross-spring S65 fully rewired (norm\_ppf CI, brent VG inverse, CN f64,
-diversity, MC ET₀, stats). Pure Rust + BarraCuda. AGPL-3.0-or-later.*
+than Python (geometric mean). 11 Tier A wired modules. ToadStool S66 synced
+(774 WGSL, all metalForge absorbed). Pure Rust + BarraCuda. AGPL-3.0-or-later.*

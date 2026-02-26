@@ -179,6 +179,8 @@ module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 | Feb 26 | airSpring v0.4.3: Modern rewiring | Stats delegate to upstream, `eco::diversity` wired (wetSpring), `gpu::mc_et0` wired (groundSpring), 571 tests |
 | Feb 26 | airSpring v0.4.4: Deep S65 rewiring | `norm_ppf` → parametric CI, `brent` → VG inverse, CN f64 cross-val, 11 Tier A |
 | Feb 26 | airSpring v0.4.5: Experiment buildout | 3 new experiments (scheduling, lysimeter, sensitivity), 474/474 Python, 719 Rust checks, 21 binaries |
+| Feb 26 | ToadStool S66 pulled | Cross-spring absorption: regression (R-S66-001), hydrology (R-S66-002), moving_window_f64 (R-S66-003), spearman re-export (R-S66-005), 8 SoilParams constants (R-S66-006), mae/hill/monod, multi-precision WGSL |
+| Feb 26 | airSpring S66 sync | All metalForge modules absorbed upstream — rewired provenance docs, cleaned ABSORPTION_MANIFEST, evolution_gaps updated |
 
 ---
 
@@ -195,6 +197,8 @@ module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 774 WGSL shaders in ToadStool, 46+ cross-spring absorptions (S51-S65). airSpring uses 6 shader families + contributed 3 critical fixes + stats metrics absorbed upstream. Zero shader duplication.
 
 ---
+
+774 WGSL shaders in ToadStool (S66), 46+ cross-spring absorptions (S51-S66). airSpring metalForge fully absorbed.
 
 ## Benchmark Summary (CPU baselines, `--release`, v0.4.5)
 

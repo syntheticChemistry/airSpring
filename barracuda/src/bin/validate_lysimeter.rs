@@ -121,14 +121,7 @@ fn pearson_r(a: &[f64], b: &[f64]) -> f64 {
 }
 
 fn rmse(a: &[f64], b: &[f64]) -> f64 {
-    let n = a.len() as f64;
-    let mse: f64 = a
-        .iter()
-        .zip(b.iter())
-        .map(|(ai, bi)| (ai - bi).powi(2))
-        .sum::<f64>()
-        / n;
-    mse.sqrt()
+    barracuda::stats::rmse(a, b)
 }
 
 fn main() {

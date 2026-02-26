@@ -24,12 +24,12 @@
 //! | `testutil` | `gpu::reduce` | `fused_map_reduce_f64.wgsl` | Seasonal stats | A (ready) |
 //! | `io::csv_ts` | `gpu::stream` | `moving_window.wgsl` | Stream smoothing | A (ready) |
 //!
-//! # Current Inventory (February 26, 2026 — v0.4.5, synced to `ToadStool` HEAD `17932267`)
+//! # Current Inventory (February 26, 2026 — v0.4.5, synced to `ToadStool` HEAD `045103a7`)
 //!
-//! `ToadStool` S42–S65: 170+ commits, 46+ cross-spring absorptions, 4,224+ tests.
+//! `ToadStool` S42–S66: 170+ commits, 46+ cross-spring absorptions, 2,541+ tests.
 //! All four airSpring issues (TS-001 through TS-004) resolved in **S54**.
 //!
-//! Upstream capabilities available (S51–S65):
+//! Upstream capabilities available (S51–S66):
 //! - S51+: `solve_f64_cpu()`, `GpuSessionBuilder`, `OdeSystem` trait + `BatchedOdeRK4`
 //! - S52+: `NelderMeadGpu`, `BatchedBisectionGpu`, `chi2_decomposed`, `FusedMapReduceF64::dot()`
 //! - S54+: TS-001–004 resolved, `barracuda::tolerances`, `barracuda::provenance`
@@ -38,6 +38,9 @@
 //! - S62+: `BandwidthTier`, `PeakDetectF64`, `CrankNicolson1D` (f64 + GPU shader!)
 //! - S64: Stats absorption (metrics, diversity, bootstrap from Springs)
 //! - S65: Smart refactoring, dead code removal, doc cleanup
+//! - S66: **Cross-spring absorption** — regression, hydrology, `moving_window_f64`,
+//!   `spearman_correlation` re-export, 8 named `SoilParams` constants, `mae`,
+//!   `hill`/`monod`, `shannon_from_frequencies`, `rawr_mean`, multi-precision WGSL
 //!
 //! **Key evolution since V011**: `pde::crank_nicolson` is now **f64** with
 //! `WGSL_CRANK_NICOLSON_F64` GPU shader — previously documented as f32-only.
@@ -118,7 +121,7 @@
 //! ## Cross-Validation Strategy
 //!
 //! GPU paths are validated against CPU baselines:
-//! 1. CPU validation remains source of truth (464 lib tests, 16 binaries)
+//! 1. CPU validation remains source of truth (464 lib tests, 21 binaries)
 //! 2. GPU results must match CPU within documented tolerance
 //! 3. Cross-validation harness (33/33 Python↔Rust) extends to GPU path
 //! 4. Each GPU function has a `test_gpu_matches_cpu_*` integration test
@@ -329,7 +332,7 @@ pub const GAPS: &[EvolutionGap] = &[
 ///
 /// These were communicated to the `ToadStool` team and fixed in the
 /// February 16, 2026 unified handoff. `ToadStool` has since evolved to
-/// `17932267` (S65), absorbing cross-spring content from all Springs.
+/// `045103a7` (S66), absorbing cross-spring content from all Springs.
 pub const TOADSTOOL_ISSUES: &[ToadStoolIssue] = &[
     ToadStoolIssue {
         id: "TS-001",

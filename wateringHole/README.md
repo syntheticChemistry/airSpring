@@ -7,8 +7,8 @@
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V014** | [AIRSPRING_V014_TOADSTOOL_EXPERIMENT_BUILDOUT_HANDOFF_FEB26_2026.md](handoffs/AIRSPRING_V014_TOADSTOOL_EXPERIMENT_BUILDOUT_HANDOFF_FEB26_2026.md) | 2026-02-26 | **current** — v0.4.5: 3 new experiments (scheduling, lysimeter, sensitivity), 474/474 Python, 719 Rust, 21 binaries, GPU promotion roadmap |
-| V013 | [AIRSPRING_V013_TOADSTOOL_ABSORPTION_HANDOFF_FEB26_2026.md](handoffs/AIRSPRING_V013_TOADSTOOL_ABSORPTION_HANDOFF_FEB26_2026.md) | 2026-02-26 | Absorption candidates + cross-spring learnings (still active for pending items) |
+| **V015** | [AIRSPRING_V015_TOADSTOOL_S66_SYNC_HANDOFF_FEB26_2026.md](handoffs/AIRSPRING_V015_TOADSTOOL_S66_SYNC_HANDOFF_FEB26_2026.md) | 2026-02-26 | **current** — S66 sync: all metalForge absorbed, evolution_gaps updated, V013 items resolved |
+| V014 | [AIRSPRING_V014_TOADSTOOL_EXPERIMENT_BUILDOUT_HANDOFF_FEB26_2026.md](handoffs/AIRSPRING_V014_TOADSTOOL_EXPERIMENT_BUILDOUT_HANDOFF_FEB26_2026.md) | 2026-02-26 | v0.4.5 experiment buildout (retained for GPU promotion roadmap) |
 
 ## Cross-Spring Documents
 
@@ -22,6 +22,7 @@
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_V013_TOADSTOOL_ABSORPTION_HANDOFF_FEB26_2026.md` | v0.4.5: Absorption candidates (all resolved by S66) |
 | `handoffs/archive/AIRSPRING_V012_TOADSTOOL_S65_REWIRE_HANDOFF_FEB26_2026.md` | v0.4.4: S65 primitive rewiring: CN f64, brent+norm_ppf, 11 Tier A, 643 tests |
 | `handoffs/archive/AIRSPRING_V011_FULL_REWIRE_ABSORPTION_HANDOFF_FEB26_2026.md` | v0.4.3: Full cross-spring rewiring: diversity, MC ET₀, stats re-exports, absorption roadmap |
 | `handoffs/archive/AIRSPRING_V010_TOADSTOOL_SYNC_FEB26_2026.md` | v0.4.3: ToadStool S60–S65 sync, stats rewired, sovereign compiler regression, 582 tests |

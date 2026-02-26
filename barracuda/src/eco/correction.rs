@@ -11,6 +11,14 @@
 //! Linear and quadratic use analytical normal equations.
 //! Exponential and logarithmic use log-linearized least squares.
 //!
+//! # Upstream equivalence (`ToadStool` S66)
+//!
+//! `barracuda::stats::regression` provides generic `fit_linear`, `fit_quadratic`,
+//! `fit_exponential`, `fit_logarithmic` with `FitResult` (absorbed from airSpring
+//! metalForge, R-S66-001). This module keeps domain-specific `FittedModel` with
+//! typed `ModelType` enum and sensor correction evaluation functions (`evaluate`,
+//! `fit_correction_equations`) that the generic API does not provide.
+//!
 //! # Reference
 //!
 //! Dong Y, Miller WL, Kelley LC, Pease LA (2020)

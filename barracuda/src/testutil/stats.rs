@@ -2,11 +2,12 @@
 //! Validation metrics: RMSE, MBE, R², IA, NSE, Pearson/Spearman correlation,
 //! variance, and standard deviation.
 //!
-//! # Upstream absorption (`ToadStool` S64)
+//! # Upstream absorption (`ToadStool` S64 + S66)
 //!
-//! `barracuda::stats::metrics` now provides `rmse`, `mbe`, `nash_sutcliffe`,
+//! `barracuda::stats::metrics` provides `rmse`, `mbe`, `mae`, `nash_sutcliffe`,
 //! `r_squared` (SS-based), `index_of_agreement`, `hit_rate`, `mean`,
-//! `percentile`, `dot`, `l2_norm` — absorbed from this module in S64.
+//! `percentile`, `dot`, `l2_norm`, `hill`, `monod` — absorbed S64, expanded S66.
+//! `barracuda::stats::correlation` now re-exports `spearman_correlation` (R-S66-005).
 //!
 //! This module delegates `rmse` and `mbe` to upstream. `nash_sutcliffe` and
 //! `index_of_agreement` keep local implementations because our edge-case

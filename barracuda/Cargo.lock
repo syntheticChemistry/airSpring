@@ -76,12 +76,10 @@ name = "barracuda"
 version = "0.2.0"
 dependencies = [
  "akida-driver",
- "anyhow",
  "async-trait",
  "bytemuck",
  "etcetera",
  "half",
- "log",
  "naga",
  "num-traits",
  "pollster",

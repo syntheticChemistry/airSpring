@@ -1,8 +1,8 @@
 # airSpring BarraCuda — Evolution Readiness
 
 **Last Updated**: February 26, 2026 (v0.4.5 — 464 lib + 126 integration)
-**ToadStool PIN**: `17932267` (S65 — sovereign compiler, df64 transcendentals, stats absorption, 774 WGSL shaders)
-**Handoff**: V014 (v0.4.5 experiment buildout, 3 new experiments, GPU promotion roadmap)
+**ToadStool PIN**: `045103a7` (S66 — cross-spring absorption, regression/hydrology/moving_window_f64, multi-precision WGSL)
+**Handoff**: V015 (ToadStool S66 sync — all metalForge absorbed, evolution_gaps updated)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -108,6 +108,7 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | S61-63 | Sovereign compiler, SPIR-V passthrough, `CrankNicolson1D` **f64** | **CN now f64!** |
 | S64 | Stats absorption (metrics, diversity from Springs), `chrono` removed | Diversity leaning |
 | S65 | Smart refactoring, dead code removal, doc cleanup | Stabilization |
+| S66 | **Cross-spring absorption**: regression, hydrology, moving_window_f64, spearman re-export, 8 SoilParams, mae/hill/monod, multi-precision WGSL | **All metalForge absorbed** |
 
 ## Upstream Capabilities — Wired and Available
 

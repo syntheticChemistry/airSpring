@@ -234,6 +234,13 @@ pub fn soil_heat_flux_monthly(t_month: f64, t_month_prev: f64) -> f64 {
 /// are unavailable. Accuracy is lower than Penman-Monteith.
 ///
 /// Ra must be in equivalent mm/day (divide MJ/m²/day by 2.45 = λ).
+///
+/// # Upstream note (`ToadStool` S66)
+///
+/// `barracuda::stats::hydrology::hargreaves_et0(ra, t_max, t_min)` provides
+/// an equivalent (R-S66-002, absorbed from airSpring metalForge). This local
+/// version uses FAO-56-validated `(tmin, tmax, ra)` parameter convention and
+/// is kept for consistency with all existing validation binaries.
 #[must_use]
 pub fn hargreaves_et0(tmin: f64, tmax: f64, ra_mm_day: f64) -> f64 {
     let tmean = f64::midpoint(tmin, tmax);
