@@ -2,7 +2,7 @@
 
 **Status**: Working draft — reviewed for PII, suitable for public repository
 **Purpose**: Document the replication of precision agriculture computational methods on consumer hardware using BarraCuda
-**Date**: February 2026 (v0.4.4)
+**Date**: February 2026 (v0.4.5)
 
 ---
 
@@ -23,13 +23,13 @@ airSpring replicates published precision irrigation, soil science, and environme
 The study answers four questions:
 
 1. **Can published agricultural science be independently reproduced using open tools?**
-   Answer: yes — 400/400 Python checks pass against digitized paper benchmarks (FAO-56 examples, Dong 2020 soil sensor data, Dong 2024 IoT irrigation, Richards equation, biochar isotherms, yield response, CW2D, 60-year water balance).
+   Answer: yes — 474/474 Python checks pass against digitized paper benchmarks (FAO-56 examples, Dong 2020 soil sensor data, Dong 2024 IoT irrigation, Richards equation, biochar isotherms, yield response, CW2D, 60-year water balance).
 
 2. **Can open data replace institutional weather station access?**
    Answer: yes — Open-Meteo (free, no key, 80+ years) provides real historical Michigan weather at 10km resolution. Our FAO-56 ET₀ matches Open-Meteo's independent computation with R²=0.967 across 918 station-days. NOAA CDO and OpenWeatherMap supplement with GHCND daily records and real-time forecasts.
 
 3. **Can Rust + WebGPU replace Python/Excel for precision agriculture?**
-   Answer: yes (validation complete) — Rust BarraCuda passes 643 tests across 18 binaries (96.81% coverage). A cross-validation harness confirms 75/75 Python-Rust value matches within 1e-5 tolerance. 11 Tier A modules wired to ToadStool/BarraCuda primitives including Richards PDE, isotherm fitting, MC ET₀ uncertainty (parametric CI via `norm_ppf`), VG pressure head inversion (via `brent`), and agroecological diversity. CPU benchmarks: 12.5M ET₀/s, 38.9M VG θ/s, 175K NM fits/s.
+   Answer: yes (validation complete) — Rust BarraCuda passes 719 tests across 21 binaries (96.81% coverage). A cross-validation harness confirms 75/75 Python-Rust value matches within 1e-5 tolerance. 11 Tier A modules wired to ToadStool/BarraCuda primitives including Richards PDE, isotherm fitting, MC ET₀ uncertainty (parametric CI via `norm_ppf`), VG pressure head inversion (via `brent`), and agroecological diversity. CPU benchmarks: 12.5M ET₀/s, 38.9M VG θ/s, 175K NM fits/s.
 
 4. **Can the math be truly portable across hardware?**
    In progress — metalForge stages 6 absorption-ready modules for upstream barracuda integration following hotSpring's Write → Absorb → Lean pattern. 2 modules already absorbed upstream (van_genuchten into pde::richards, isotherm into optimize). GPU wiring proves the compute is hardware-portable; metalForge will demonstrate mixed CPU/GPU/NPU dispatch.
@@ -38,7 +38,7 @@ The study answers four questions:
 
 ## Key Results
 
-### Phase 0 (Python Control): 400/400 checks pass (13 experiments)
+### Phase 0 (Python Control): 474/474 checks pass (16 experiments)
 
 | Experiment | Paper | Checks | Key Validation |
 |------------|-------|:------:|----------------|
@@ -65,7 +65,7 @@ The study answers four questions:
 | West Olive (blueberry) | 0.257 | 0.963 | 639.1 mm | 635.2 mm |
 | **Overall** | **0.267** | **0.967** | — | — |
 
-### Phase 1 (Rust BarraCuda): 643 tests, 18 binaries, 96.81% coverage
+### Phase 1 (Rust BarraCuda): 719 tests, 21 binaries, 96.81% coverage
 
 | Binary | Checks | Key Validation |
 |--------|:------:|----------------|

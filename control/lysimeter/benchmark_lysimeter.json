@@ -1,0 +1,100 @@
+{
+  "_source": "Dong & Hansen (2023) 'Design of an affordable weighing lysimeter' Smart Ag Tech 4:100147",
+  "_note": "Benchmark for lysimeter-based ET measurement: load cell mass change → ET, temperature compensation, data quality filtering, and comparison with FAO-56 ET₀.",
+  "_provenance": {
+    "method": "Analytical: mass change / (area × density × time) → ET rate. Temperature compensation: M_corr = M_raw - α(T - T_ref). Published calibration equations and design parameters.",
+    "digitized_by": "airSpring Exp 016",
+    "created": "2026-02-26",
+    "validated_by": "control/lysimeter/lysimeter_et.py",
+    "baseline_script": "control/lysimeter/lysimeter_et.py",
+    "baseline_command": "python3 control/lysimeter/lysimeter_et.py",
+    "baseline_commit": "5684b1e",
+    "python_version": ">=3.10",
+    "references": [
+      "Dong & Hansen (2023) Smart Ag Tech 4:100147",
+      "Allen et al. (1998) FAO-56 Chapter 4 (ET₀ reference)",
+      "ASCE (2005) Standardized Reference Evapotranspiration Equation",
+      "López-Urrea et al. (2006) Weighing lysimeter ET measurement accuracy"
+    ],
+    "_tolerance_justification": "Mass-to-ET conversion: 0.001 mm (analytical). Temperature compensation: 0.01 mm (calibration uncertainty). Daily ET comparison: 0.5 mm/day (field measurement ± instrument noise). Calibration R²: 0.001 (load cell linearity)."
+  },
+  "lysimeter_design": {
+    "_source": "Dong & Hansen (2023) Table 1",
+    "surface_area_m2": 1.0,
+    "soil_depth_m": 1.5,
+    "soil_mass_kg": 2250,
+    "water_density_kg_m3": 998.2,
+    "load_cell_capacity_kg": 5000,
+    "load_cell_resolution_g": 10
+  },
+  "temperature_compensation": {
+    "_source": "Dong & Hansen (2023) Section 3.2",
+    "alpha_g_per_c": 2.5,
+    "t_ref_c": 20.0,
+    "note": "Load cell thermal drift: α = 2.5 g/°C. Measured at MSU Hort Farm."
+  },
+  "calibration": {
+    "_source": "Dong & Hansen (2023) Table 2 — known mass additions",
+    "known_masses_kg": [0.0, 0.5, 1.0, 2.0, 5.0, 10.0, 20.0],
+    "measured_readings_kg": [0.002, 0.498, 1.003, 1.997, 5.008, 9.995, 20.012],
+    "expected_r_squared": 0.9999,
+    "tolerance_r_squared": 0.001
+  },
+  "validation_checks": {
+    "mass_to_et_conversion": {
+      "description": "Convert mass change to ET: ET_mm = ΔM_kg / (A_m2 × ρ_w × 1000) × 1000",
+      "test_cases": [
+        {"label": "1kg_loss_1m2", "mass_change_kg": -1.0, "area_m2": 1.0, "expected_et_mm": 1.0, "tolerance": 0.001},
+        {"label": "0.5kg_loss_1m2", "mass_change_kg": -0.5, "area_m2": 1.0, "expected_et_mm": 0.5, "tolerance": 0.001},
+        {"label": "5kg_loss_1m2", "mass_change_kg": -5.0, "area_m2": 1.0, "expected_et_mm": 5.0, "tolerance": 0.01},
+        {"label": "1kg_loss_0.5m2", "mass_change_kg": -1.0, "area_m2": 0.5, "expected_et_mm": 2.0, "tolerance": 0.001},
+        {"label": "mass_gain_rain", "mass_change_kg": 2.0, "area_m2": 1.0, "expected_et_mm": -2.0, "tolerance": 0.001},
+        {"label": "zero_change", "mass_change_kg": 0.0, "area_m2": 1.0, "expected_et_mm": 0.0, "tolerance": 0.001}
+      ]
+    },
+    "temperature_compensation": {
+      "description": "Correct for thermal drift: M_corr = M_raw - α(T - T_ref) / 1000",
+      "test_cases": [
+        {"label": "at_ref_temp", "mass_raw_kg": 100.0, "temp_c": 20.0, "expected_corr_kg": 100.0, "tolerance": 0.001},
+        {"label": "10c_above_ref", "mass_raw_kg": 100.0, "temp_c": 30.0, "expected_corr_kg": 99.975, "tolerance": 0.001},
+        {"label": "10c_below_ref", "mass_raw_kg": 100.0, "temp_c": 10.0, "expected_corr_kg": 100.025, "tolerance": 0.001},
+        {"label": "extreme_hot", "mass_raw_kg": 100.0, "temp_c": 40.0, "expected_corr_kg": 99.950, "tolerance": 0.001}
+      ]
+    },
+    "data_quality_filter": {
+      "description": "Reject readings with >10g step change (rain/irrigation event) or <10g resolution",
+      "test_cases": [
+        {"label": "normal_et", "delta_g": -50, "expected_valid": true},
+        {"label": "rain_event", "delta_g": 5000, "expected_valid": false},
+        {"label": "at_resolution", "delta_g": -10, "expected_valid": true},
+        {"label": "below_resolution", "delta_g": -5, "expected_valid": false},
+        {"label": "large_irrigation", "delta_g": 15000, "expected_valid": false}
+      ]
+    },
+    "daily_et_synthetic": {
+      "description": "Synthetic 30-day lysimeter vs FAO-56 ET₀ comparison",
+      "days": 30,
+      "mean_et0_mm": 4.5,
+      "kc": 1.0,
+      "noise_std_mm": 0.3,
+      "expected_correlation_min": 0.80,
+      "expected_rmse_max_mm": 1.0,
+      "expected_bias_max_mm": 0.5
+    },
+    "hourly_et_pattern": {
+      "description": "Verify diurnal ET pattern: night ET ≈ 0, peak at solar noon",
+      "test_cases": [
+        {"label": "nighttime_0200", "hour": 2, "expected_low": true},
+        {"label": "morning_0800", "hour": 8, "expected_low": false},
+        {"label": "noon_peak_1200", "hour": 12, "expected_peak": true},
+        {"label": "afternoon_1500", "hour": 15, "expected_low": false},
+        {"label": "evening_2100", "hour": 21, "expected_low": true}
+      ]
+    },
+    "calibration_linearity": {
+      "description": "Load cell calibration R² from known mass additions",
+      "expected_r_squared": 0.9999,
+      "tolerance": 0.001
+    }
+  }
+}

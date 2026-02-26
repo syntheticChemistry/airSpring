@@ -1,6 +1,6 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: February 26, 2026 (v0.4.4 — 464 lib + 126 integration, 11 Tier A modules)
+**Last Updated**: February 26, 2026 (v0.4.5 — 464 lib + 126 integration, 11 Tier A modules)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
 **ToadStool HEAD**: `17932267` (S65 — sovereign compiler, df64 transcendentals, stats metrics absorption, 774 WGSL shaders)
 
@@ -8,7 +8,7 @@
 
 ## Current Kernel Usage
 
-### Phase 1: Validated in Rust CPU (13 experiments)
+### Phase 1: Validated in Rust CPU (16 experiments)
 
 | Kernel / Module | Rust Crate | Checks | Validation |
 |----------------|------------|:------:|------------|
@@ -51,7 +51,7 @@ Note: `gpu::dual_kc::BatchedDualKc` has CPU orchestrator wired (Tier B → pendi
 | `stats::spearman_correlation` | `testutil::spearman_r` | Working |
 | `stats::bootstrap_ci` | `testutil::bootstrap_rmse` | Working |
 | `stats::std_dev` | Integration tests | Working |
-| `validation::ValidationHarness` | 18 binaries | Absorbed (S59) |
+| `validation::ValidationHarness` | 21 binaries | Absorbed (S59) |
 
 ---
 
@@ -59,7 +59,7 @@ Note: `gpu::dual_kc::BatchedDualKc` has CPU orchestrator wired (Tier B → pendi
 
 ### Layer 1: BarraCuda CPU (validated, complete)
 
-All algorithms implemented in pure Rust. 433 lib + 115 integration tests, 18 binaries.
+All algorithms implemented in pure Rust. 433 lib + 115 integration tests, 21 binaries.
 This is the baseline for correctness — GPU and metalForge results must match.
 CPU benchmarks: 12.7M ET₀/s, 36.5M VG θ/s, 59M dual Kc/s, 57M Langmuir fits/s.
 

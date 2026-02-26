@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-02-26 (v0.4.4 — 13 experiments, 400 Python + 643 Rust, 18 binaries, 69x CPU speedup)
+**Updated**: 2026-02-26 (v0.4.5 — 16 experiments, 474 Python + 719 Rust, 21 binaries, 69x CPU speedup)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 

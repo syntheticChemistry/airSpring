@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.4.4"
+version = "0.4.5"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
@@ -101,3 +101,15 @@ path = "src/bin/validate_yield.rs"
 [[bin]]
 name = "validate_cw2d"
 path = "src/bin/validate_cw2d.rs"
+
+[[bin]]
+name = "validate_scheduling"
+path = "src/bin/validate_scheduling.rs"
+
+[[bin]]
+name = "validate_lysimeter"
+path = "src/bin/validate_lysimeter.rs"
+
+[[bin]]
+name = "validate_sensitivity"
+path = "src/bin/validate_sensitivity.rs"

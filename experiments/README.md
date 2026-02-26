@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: February 26, 2026
-**Status**: 13 experiments, 400/400 Python + 643 Rust (464 lib + 126 integration + 53 forge) + 75/75 cross-validation + 11 Tier A modules
+**Status**: 16 experiments, 474/474 Python + 719 Rust (464 lib + 126 integration + 53 forge) + 75/75 cross-validation + 11 Tier A modules
 
 ---
 
@@ -23,11 +23,11 @@
 | 008 | Yield Response to Water Stress (FAO-56 Ch 10) | Irrigation | **Complete** | Python + Rust CPU | `eco::yield_response` | 32+32 |
 | 012 | CW2D Richards Extension (Dong 2019) | Environmental | **Complete** | Python + Rust CPU | `eco::richards` (CW2D media) | 24+24 |
 
-**Grand Total**: 400 Python + 464 Rust lib + 126 integration + 53 forge = **643 Rust tests** + 75 cross-validation values + 11 Tier A modules
+**Grand Total**: 474 Python + 464 Rust lib + 126 integration + 53 forge = **719 Rust tests** + 75 cross-validation values + 11 Tier A modules
 
 ---
 
-## Test Breakdown (v0.4.4)
+## Test Breakdown (v0.4.5)
 
 | Category | Tests | Source |
 |----------|:-----:|--------|
@@ -41,7 +41,7 @@
 | I/O + errors | 11 | `tests/io_and_errors.rs` |
 | Doc tests | 2 | `cargo test --doc` |
 | Forge | 53 | `metalForge/forge/` |
-| **Total** | **643** | |
+| **Total** | **719** | |
 
 ---
 

@@ -1,0 +1,98 @@
+{
+  "_source": "Allen et al. (1998) FAO-56 Ch 4; groundSpring Exp 003 error propagation; Gong et al. (2006) 'Sensitivity of PM ET₀'",
+  "_note": "Benchmark for one-at-a-time (OAT) sensitivity analysis of FAO-56 Penman-Monteith ET₀. Quantifies which input variable dominates the ET₀ response.",
+  "_provenance": {
+    "method": "OAT sensitivity: perturb each input ±10% from baseline, compute ΔET₀/Δx. Baseline: FAO-56 Example 18 (Uccle, Belgium, July). Complements groundSpring Exp 003 Monte Carlo error propagation.",
+    "digitized_by": "airSpring Exp 017",
+    "created": "2026-02-26",
+    "validated_by": "control/sensitivity/et0_sensitivity.py",
+    "baseline_script": "control/sensitivity/et0_sensitivity.py",
+    "baseline_command": "python3 control/sensitivity/et0_sensitivity.py",
+    "baseline_commit": "5684b1e",
+    "python_version": ">=3.10",
+    "references": [
+      "Allen et al. (1998) FAO-56 Chapter 4",
+      "Gong et al. (2006) Ag Water Mgmt 86:57-63",
+      "Estévez et al. (2009) J Irrigation Drainage Eng 135(3):275-286",
+      "groundSpring Exp 003: humidity dominates at 66% of ET₀ variance"
+    ],
+    "_tolerance_justification": "Sensitivity index: 0.05 (numerical derivative stability). Rank ordering: deterministic for given baseline. Elasticity: 0.02 (ratio stability)."
+  },
+  "baseline_conditions": {
+    "_source": "FAO-56 Example 18: Uccle, Belgium, July 6",
+    "tmin_c": 12.3,
+    "tmax_c": 21.5,
+    "rh_min_pct": 63.0,
+    "rh_max_pct": 84.0,
+    "wind_2m_m_s": 2.078,
+    "solar_rad_mj_m2_day": 22.07,
+    "elevation_m": 100.0,
+    "latitude_deg": 50.8,
+    "day_of_year": 187,
+    "expected_et0_mm_day": 3.88,
+    "tolerance_mm_day": 0.05
+  },
+  "perturbation_pct": 10.0,
+  "variables": [
+    {"name": "tmax_c", "label": "T_max", "unit": "°C"},
+    {"name": "tmin_c", "label": "T_min", "unit": "°C"},
+    {"name": "rh_min_pct", "label": "RH_min", "unit": "%"},
+    {"name": "rh_max_pct", "label": "RH_max", "unit": "%"},
+    {"name": "wind_2m_m_s", "label": "u₂", "unit": "m/s"},
+    {"name": "solar_rad_mj_m2_day", "label": "R_s", "unit": "MJ/m²/day"}
+  ],
+  "validation_checks": {
+    "baseline_et0": {
+      "description": "Baseline ET₀ matches FAO-56 Example 18",
+      "expected": 3.88,
+      "tolerance": 0.05
+    },
+    "sensitivity_ranking": {
+      "description": "Variables ranked by absolute sensitivity index. Literature consensus: Rs and humidity dominate, wind is secondary, temperature contributes through VPD.",
+      "note": "groundSpring Exp 003 found humidity at 66% of variance. Gong et al. (2006) found Rs > RH > wind > T for humid climates.",
+      "top_two_include": ["solar_rad_mj_m2_day", "rh_min_pct", "rh_max_pct"],
+      "note2": "At least one radiation or humidity variable must be in the top 2 by absolute sensitivity"
+    },
+    "elasticity_bounds": {
+      "description": "Elasticity (% change in ET₀ per % change in input) should be [-2, 2] for all variables",
+      "min_elasticity": -2.0,
+      "max_elasticity": 2.0
+    },
+    "monotonicity": {
+      "description": "ET₀ must increase with more energy input (Rs, T) and decrease with more humidity (RH)",
+      "positive_sensitivity": ["tmax_c", "tmin_c", "solar_rad_mj_m2_day", "wind_2m_m_s"],
+      "negative_sensitivity": ["rh_min_pct", "rh_max_pct"]
+    },
+    "symmetry": {
+      "description": "Sensitivity should be approximately symmetric: |S(+10%)| ≈ |S(-10%)| within 50%",
+      "tolerance_ratio": 2.0
+    },
+    "multi_site_consistency": {
+      "description": "Sensitivity ranking consistent across 3 climatic conditions",
+      "sites": [
+        {
+          "name": "Uccle (humid temperate)",
+          "tmin_c": 12.3, "tmax_c": 21.5,
+          "rh_min_pct": 63.0, "rh_max_pct": 84.0,
+          "wind_2m_m_s": 2.078, "solar_rad_mj_m2_day": 22.07,
+          "elevation_m": 100, "latitude_deg": 50.8, "day_of_year": 187
+        },
+        {
+          "name": "Arid (Phoenix-like)",
+          "tmin_c": 26.0, "tmax_c": 42.0,
+          "rh_min_pct": 10.0, "rh_max_pct": 30.0,
+          "wind_2m_m_s": 1.5, "solar_rad_mj_m2_day": 28.0,
+          "elevation_m": 340, "latitude_deg": 33.4, "day_of_year": 187
+        },
+        {
+          "name": "Tropical (Manaus-like)",
+          "tmin_c": 24.0, "tmax_c": 32.0,
+          "rh_min_pct": 70.0, "rh_max_pct": 95.0,
+          "wind_2m_m_s": 1.0, "solar_rad_mj_m2_day": 16.0,
+          "elevation_m": 40, "latitude_deg": -3.1, "day_of_year": 187
+        }
+      ],
+      "all_sites_radiation_in_top3": true
+    }
+  }
+}

@@ -2,6 +2,35 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.4.5] - 2026-02-26
+
+### Experiment Buildout: Scheduling + Lysimeter + Sensitivity (3 new papers)
+
+Three new paper reproductions completing the full Python→Rust pipeline.
+
+#### Added
+- **Exp 014: Irrigation scheduling optimization** (Ali, Dong & Lavely 2024)
+  - 5-strategy comparison: rainfed, MAD 50/60/70%, growth-stage
+  - Full pipeline: ET₀ → Kc → water balance → Stewart yield → WUE
+  - Python: 25/25, Rust: 28/28 checks. Mass balance closure < 1e-13 mm.
+- **Exp 016: Lysimeter ET direct measurement** (Dong & Hansen 2023)
+  - Mass-to-ET conversion, temperature compensation, data quality filtering
+  - Load cell calibration (R²=0.9999), diurnal ET pattern
+  - Python: 26/26, Rust: 25/25 checks.
+- **Exp 017: ET₀ sensitivity analysis** (Gong et al. 2006 methodology)
+  - OAT ±10% perturbation of 6 input variables across 3 climatic zones
+  - Monotonicity, elasticity, symmetry, multi-site ranking consistency
+  - Python: 23/23, Rust: 23/23 checks.
+- 3 new benchmark JSONs: `benchmark_scheduling.json`, `benchmark_lysimeter.json`,
+  `benchmark_sensitivity.json`
+- 3 new Python controls, 3 new Rust validation binaries
+
+#### Changed
+- Paper count: 13 → 16 completed reproductions
+- Python checks: 400 → 474
+- Rust validation binaries: 18 → 21
+- Paper queue updated to reflect current state
+
 ## [0.4.4] - 2026-02-26
 
 ### ToadStool S65 Deep Rewiring: brent + norm_ppf + CN f64 + Benchmarks

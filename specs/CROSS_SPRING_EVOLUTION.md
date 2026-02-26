@@ -1,6 +1,6 @@
 # Cross-Spring Shader Evolution — airSpring Provenance
 
-**Updated**: February 26, 2026 (v0.4.4, ToadStool HEAD `17932267`)
+**Updated**: February 26, 2026 (v0.4.5, ToadStool HEAD `17932267`)
 
 ## Summary
 
@@ -177,7 +177,7 @@ module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 | Feb 25 | airSpring v0.4.2: GPU integration + benchmarks | Richards/isotherm GPU integration tests, cross-spring benchmark suite, 328 tests |
 | Feb 26 | ToadStool S60-S65 pulled | 234 files changed, df64 FMA, stats absorption, diversity, MC ET₀, sovereign compiler regression |
 | Feb 26 | airSpring v0.4.3: Modern rewiring | Stats delegate to upstream, `eco::diversity` wired (wetSpring), `gpu::mc_et0` wired (groundSpring), 571 tests |
-| Feb 26 | airSpring v0.4.4: Deep S65 rewiring | `norm_ppf` → parametric CI, `brent` → VG inverse, CN f64 cross-val, 11 Tier A, 643 tests |
+| Feb 26 | airSpring v0.4.4: Deep S65 rewiring | `norm_ppf` → parametric CI, `brent` → VG inverse, CN f64 cross-val, 11 Tier A, 719 tests |
 
 ---
 

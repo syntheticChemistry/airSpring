@@ -1,8 +1,8 @@
 # airSpring — Paper Review Queue
 
-**Last Updated**: February 25, 2026
+**Last Updated**: February 26, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 13 completed (400/400 Python + 464 lib + 126 integration + 11 Tier A modules). All completed papers use open data and systems.
+**Status**: 16 completed (474/474 Python + 464 lib + 126 integration + 11 Tier A modules). All completed papers use open data and systems.
 
 ---
 
@@ -23,13 +23,16 @@
 | 11 | 60-year water balance (OSU Triplett) | 0+1 | 10+11 | Standard | `benchmark_long_term_wb.json` | Open-Meteo ERA5 (free) |
 | 12 | Stewart (1977) yield response to water stress | 0+1 | 32+32 | Standard | `benchmark_yield_response.json` | FAO-56 Table 24 (open) |
 | 13 | Dong et al. (2019) CW2D Richards extension | 0+1 | 24+24 | Dong | `benchmark_cw2d.json` | HYDRUS CW2D params (published) |
+| 14 | Ali, Dong & Lavely (2024) Irrigation scheduling | 0+1 | 25+28 | Dong | `benchmark_scheduling.json` | FAO-56 + synthetic (open) |
+| 15 | Dong & Hansen (2023) Weighing lysimeter ET | 0+1 | 26+25 | Dong | `benchmark_lysimeter.json` | Published design params |
+| 16 | FAO-56 ET₀ sensitivity analysis (Gong 2006) | 0+1 | 23+23 | Standard | `benchmark_sensitivity.json` | FAO-56 + literature (open) |
 
 ### Controls Audit
 
-All 13 completed papers have:
+All 16 completed papers have:
 - **Digitized benchmarks** in `control/*/benchmark_*.json`
 - **Python control scripts** that validate against benchmarks
-- **Rust validation binaries** (18 binaries) that load the same benchmarks
+- **Rust validation binaries** (21 binaries) that load the same benchmarks
 - **Open or published data** (no institutional access required)
 - **Cross-validation** (75/75 Python↔Rust match at 1e-5, includes Richards VG + isotherms)
 - **GPU wiring**: 8 orchestrators (BatchedEt0, BatchedWB, BatchedDualKc, Kriging, Reduce, Stream, BatchedRichards, fit_nm)
@@ -52,6 +55,9 @@ All 13 completed papers have:
 | 11 | 10/10 | 11/11 (`validate_long_term_wb`) | `BatchedEt0` + `BatchedWB` | `hydrology` (60yr) |
 | 12 | 32/32 | 32/32 (`validate_yield`) | `BatchedElementwise` (Tier B) | `yield_response` |
 | 13 | 24/24 | 24/24 (`validate_cw2d`) | `BatchedRichards` | VG (CW2D media) |
+| 14 | 25/25 | 28/28 (`validate_scheduling`) | `BatchedWB` + `BatchedEt0` | `hydrology` (scheduling) |
+| 15 | 26/26 | 25/25 (`validate_lysimeter`) | `BatchedEt0` (ground truth) | `metrics` (lysimeter) |
+| 16 | 23/23 | 23/23 (`validate_sensitivity`) | `BatchedEt0` (perturbation) | `metrics` (sensitivity) |
 
 ---
 

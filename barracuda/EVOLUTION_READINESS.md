@@ -1,6 +1,6 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: February 26, 2026 (v0.4.4 — 464 lib + 126 integration)
+**Last Updated**: February 26, 2026 (v0.4.5 — 464 lib + 126 integration)
 **ToadStool PIN**: `17932267` (S65 — sovereign compiler, df64 transcendentals, stats absorption, 774 WGSL shaders)
 **Handoff**: V012 (rewired to S65 primitives, CN f64 integrated, optimizer inventory expanded)
 **License**: AGPL-3.0-or-later
@@ -16,7 +16,7 @@ validate against papers, hand off to ToadStool/BarraCuda, lean on upstream.
 
 | Module | Absorbed Into | When | Status |
 |--------|--------------|------|--------|
-| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all 18 binaries use upstream |
+| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all 21 binaries use upstream |
 | `van_genuchten` | `barracuda::pde::richards::SoilParams` | S40 | **Leaning** — `gpu::richards` bridges to upstream |
 | `isotherm NM` | `barracuda::optimize::nelder_mead` | S62 | **Leaning** — `gpu::isotherm` bridges to upstream |
 
@@ -116,7 +116,7 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | Capability | Module | Wired In | Status |
 |-----------|--------|----------|--------|
 | `barracuda::tolerances` | `tolerances` | v0.3.6 | **LEANING** — re-exported |
-| `barracuda::validation::ValidationHarness` | `validation` | v0.3.6 | **LEANING** — all 18 binaries |
+| `barracuda::validation::ValidationHarness` | `validation` | v0.3.6 | **LEANING** — all 21 binaries |
 | `pde::richards::solve_richards` | `pde` | v0.4.0 | **WIRED** — `gpu::richards` |
 | `pde::crank_nicolson::CrankNicolson1D` | `pde` | v0.4.4 | **WIRED** — CN f64 diffusion cross-val |
 | `optimize::nelder_mead` | `optimize` | v0.4.1 | **WIRED** — isotherm fitting |
@@ -157,7 +157,7 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `cargo fmt --check` | **Clean** |
 | `cargo clippy -- -D warnings` | **0 warnings** (pedantic via `[lints.clippy]`) |
 | `cargo doc --no-deps` | **Builds**, 0 warnings |
-| `cargo test` | **643 total** (464 lib + 126 integration + 53 forge) |
+| `cargo test` | **719 total** (464 lib + 126 integration + 53 forge) |
 | `cargo llvm-cov --lib` | **96.81%** line coverage (97.58% functions) |
 | `unsafe` code | **Zero** |
 | `unwrap()` in lib | **Zero** (all in `#[cfg(test)]`) |

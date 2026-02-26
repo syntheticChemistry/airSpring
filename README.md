@@ -2,7 +2,7 @@
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
 **Date**: February 26, 2026
-**Version**: 0.4.4
+**Version**: 0.4.5
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -16,9 +16,9 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
-| Phase 0: Paper baselines (Python) | **400/400 PASS** | FAO-56, soil, IoT, water balance, dual Kc, cover crops, Richards, biochar, yield, CW2D, 60yr WB |
+| Phase 0: Paper baselines (Python) | **474/474 PASS** | FAO-56, soil, IoT, water balance, dual Kc, cover crops, Richards, biochar, yield, CW2D, 60yr WB, scheduling, lysimeter, sensitivity |
 | Phase 0+: Real data pipeline | **918 station-days** | ET₀ R²=0.967 vs Open-Meteo (6 Michigan stations) |
-| Phase 1: Rust validation | **643 tests** | 18 binaries, 464 unit + 126 integration + 53 forge |
+| Phase 1: Rust validation | **719 tests** | 21 binaries, 464 unit + 126 integration + 53 forge + 76 new binary checks |
 | Phase 1.5: CPU Benchmark | **69x faster** | Rust vs Python geometric mean (20x–502x range) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 3: GPU bridge | **11 Tier A modules** | S65 cross-spring rewired (norm\_ppf CI, brent VG inverse, diversity, MC ET₀) |
@@ -28,7 +28,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test` | 464 barracuda + 53 forge + 126 integration = **643 total**, 0 failures |
+| `cargo test` | 464 barracuda + 53 forge + 126 integration = **643 lib/integration**, 0 failures |
 | `cargo clippy -- -D warnings` | **0 warnings** (pedantic) |
 | `cargo fmt --check` | **Clean** |
 | `cargo doc` | **Builds** |
