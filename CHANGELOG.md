@@ -59,6 +59,11 @@ provenance coverage, and 100-station Michigan Crop Water Atlas at scale.
   ValidationHarness println→tracing::info, `LazyLock<String>` shader constants
 - All active docs and handoffs updated to reflect current pin
 
+#### S68 Cross-Spring Evolution Tests and Benchmarks (commit 07f9501)
+- Cross-spring evolution tests expanded to 47 (from 29)
+- Atlas ValidationHarness checks increased to 1354/1354 (from 1302)
+- Cargo test count: 608 (consolidated from 662)
+
 ## [0.4.5] - 2026-02-26
 
 ### S66 Complete Rewiring, Validation, and Benchmarking

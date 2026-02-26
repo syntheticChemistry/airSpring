@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: February 26, 2026
-**Status**: 17 experiments, 474/474 Python + 662 Rust (464 lib + 134 integration + 64 forge) + 1302 atlas checks + 75/75 cross-validation + 11 Tier A modules
+**Status**: 17 experiments, 474/474 Python + 608 Rust (464 lib + 134 integration + 64 forge) + 1354 atlas checks + 75/75 cross-validation + 11 Tier A modules
 
 ---
 
@@ -25,9 +25,9 @@
 | 014 | Irrigation Scheduling Optimization | Precision Ag | **Complete** | Python + Rust CPU | `eco::water_balance`, `eco::yield_response` | 25+28 |
 | 016 | Lysimeter ET Direct Measurement | IoT | **Complete** | Python + Rust CPU | mass→ET, temp compensation | 26+25 |
 | 017 | ET₀ Sensitivity Analysis (OAT) | Precision Ag | **Complete** | Python + Rust CPU | `eco::evapotranspiration` | 23+23 |
-| 018 | Michigan Crop Water Atlas (100 stations) | Integration | **Active** | Python + Rust CPU | All `eco::` + `yield_response` | 1302/1302 |
+| 018 | Michigan Crop Water Atlas (100 stations) | Integration | **Active** | Python + Rust CPU | All `eco::` + `yield_response` | 1354/1354 |
 
-**Grand Total**: 474 Python + 464 Rust lib + 134 integration + 64 forge = **662 Rust tests** + 1302 atlas checks + 75 cross-validation values + 11 Tier A modules
+**Grand Total**: 474 Python + 464 Rust lib + 134 integration + 64 forge = **608 Rust tests** + 1354 atlas checks + 75 cross-validation values + 11 Tier A modules
 
 ---
 
@@ -40,13 +40,13 @@
 | GPU functional | 21 | `tests/gpu_integration.rs` |
 | GPU evolution | 6 | `tests/gpu_evolution.rs` |
 | GPU determinism | 4 | `tests/gpu_determinism.rs` |
-| Cross-spring evolution | 37 | `tests/cross_spring_evolution.rs` (S64 §7–§10 + S66 §11–§12 + benchmarks) |
+| Cross-spring evolution | 47 | `tests/cross_spring_evolution.rs` (S64 §7–§10 + S66 §11–§12 + benchmarks) |
 | Stats integration | 20 | `tests/stats_integration.rs` |
 | I/O + errors | 11 | `tests/io_and_errors.rs` |
 | Doc tests | 2 | `cargo test --doc` |
 | Forge | 64 | `metalForge/forge/` (53 unit + 11 doc, all absorbed upstream) |
-| **Total** | **662** | |
-| Atlas checks | 1302 | `validate_atlas` (100 stations × 13 checks each) |
+| **Total** | **608** | |
+| Atlas checks | 1354 | `validate_atlas` (100 stations × 13 checks each) |
 
 ---
 
@@ -277,7 +277,7 @@ geographic consistency, 15-station-pair temporal correlations.
 
 **Control**: `control/atlas/atlas_water_budget.py` — Runs FAO-56 ET₀ + water balance + Stewart yield response for 10 crops × all available stations.
 
-**Rust**: `barracuda/src/bin/validate_atlas.rs` — **1302/1302 checks** on 100 Michigan stations. Discovers CSVs at runtime, computes ET₀ (R² > 0.96 vs Open-Meteo), runs water balance for 10 crops per station-year, checks mass balance (< 0.01 mm), yield ratio bounds, and aggregate Michigan ET₀ statistics.
+**Rust**: `barracuda/src/bin/validate_atlas.rs` — **1354/1354 checks** on 100 Michigan stations. Discovers CSVs at runtime, computes ET₀ (R² > 0.96 vs Open-Meteo), runs water balance for 10 crops per station-year, checks mass balance (< 0.01 mm), yield ratio bounds, and aggregate Michigan ET₀ statistics.
 
 **Cross-validation**: Python vs Rust — 690 crop-station yield ratios all within 0.01 (mean diff 0.0003). Mean ET₀ diff 0.133% across matched stations.
 

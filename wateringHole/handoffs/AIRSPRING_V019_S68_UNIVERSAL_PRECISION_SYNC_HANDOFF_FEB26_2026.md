@@ -4,7 +4,7 @@
 **From**: airSpring v0.4.6
 **To**: ToadStool / BarraCuda
 **ToadStool pin**: S68 (`f0feb226`)
-**airSpring**: 662 Rust tests + 1354 atlas checks, 22 binaries, 97.45% coverage, 0 clippy warnings
+**airSpring**: 608 Rust tests + 1354 atlas checks, 22 binaries, 97.45% coverage, 0 clippy warnings
 
 ---
 
@@ -49,7 +49,7 @@ all 22 validation binaries to restore harness output visibility.
 
 | Check | Result |
 |-------|--------|
-| `cargo test` | 662 PASS (464 lib + 134 integration + 64 forge) |
+| `cargo test` | 608 PASS (464 lib + 47 cross-spring + 97 integration) |
 | `cargo clippy --all-targets` | 0 warnings (pedantic + nursery) |
 | `cargo fmt --check` | Clean |
 | `validate_atlas` | 1354/1354 PASS (104 stations discovered) |
@@ -60,7 +60,7 @@ all 22 validation binaries to restore harness output visibility.
 
 ## Part 3: What This Means for ToadStool
 
-1. **Universal f64 precision confirmed**: airSpring's 662 CPU tests all pass against
+1. **Universal f64 precision confirmed**: airSpring's 608 CPU tests all pass against
    S68's precision-evolved barracuda. No numerical regressions detected.
 
 2. **LazyLock shader pattern works**: The `pub static WGSL_*: LazyLock<String>` change
@@ -82,7 +82,7 @@ all 22 validation binaries to restore harness output visibility.
 | Gate | Value |
 |------|-------|
 | ToadStool pin | S68 (`f0feb226`) |
-| `cargo test` | 662 PASS |
+| `cargo test` | 608 PASS |
 | Atlas checks | 1354/1354 PASS |
 | `cargo clippy` | 0 warnings |
 | P0 blockers | None |
@@ -90,4 +90,4 @@ all 22 validation binaries to restore harness output visibility.
 ---
 
 *airSpring v0.4.6 → ToadStool S68. Universal f64 precision confirmed.
-662 Rust tests + 1354 atlas checks, 22 binaries, 0 clippy warnings. AGPL-3.0-or-later.*
+608 Rust tests + 1354 atlas checks, 22 binaries, 0 clippy warnings. AGPL-3.0-or-later.*

@@ -18,7 +18,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **474/474 PASS** | FAO-56, soil, IoT, water balance, dual Kc, cover crops, Richards, biochar, yield, CW2D, 60yr WB, scheduling, lysimeter, sensitivity |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **662 tests + 1302 atlas** | 22 binaries, 464 lib + 134 integration + 64 forge |
+| Phase 1: Rust validation | **608 tests + 1354 atlas** | 22 binaries |
 | Phase 1.5: CPU Benchmark | **69x faster** | Rust vs Python geometric mean (20x–502x range) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 3: GPU bridge | **11 Tier A modules** | S68 synced — all metalForge absorbed upstream, evolution\_gaps current |
@@ -28,12 +28,12 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test` | 464 barracuda + 64 forge + 134 integration = **662 lib/integration**, 0 failures |
+| `cargo test` | **608 lib/integration**, 0 failures |
 | `cargo clippy -- -D warnings` | **0 warnings** (pedantic + nursery) |
 | `cargo fmt --check` | **Clean** |
 | `cargo doc` | **Builds** |
 | `cargo llvm-cov --lib` | **97.45%** line coverage |
-| Test breakdown | 464 unit, 33 eco, 21 GPU, 6 evolution, 4 determinism, 29 cross-spring, 20 stats, 11 I/O, 2 doc, 11 doc |
+| Test breakdown | 464 unit, 33 eco, 21 GPU, 6 evolution, 4 determinism, 47 cross-spring, 20 stats, 11 I/O, 2 doc, 11 doc |
 
 ## Evolution Architecture: Write → Absorb → Lean
 
@@ -181,7 +181,7 @@ airSpring/
 │   ├── lysimeter/               # Lysimeter ET measurement (26/26)
 │   ├── sensitivity/             # ET₀ sensitivity analysis (23/23)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1: Rust validation (464 lib + 134 integration, 22 binaries)
+├── barracuda/                   # Phase 1: Rust validation (608 tests, 22 binaries)
 │   ├── src/
 │   │   ├── eco/                 # Domain modules (12 validated against papers, incl. diversity)
 │   │   ├── io/                  # csv_ts (streaming columnar IoT parser)
@@ -214,7 +214,7 @@ airSpring/
 │   └── STUDY.md                 # Full results narrative
 ├── experiments/                 # Experiment protocols and results (17 experiments)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
-│   └── handoffs/                # Versioned (V017 active)
+│   └── handoffs/                # Versioned (V018 atlas, V019 S68 sync active)
 ├── CHANGELOG.md                 # Keep-a-Changelog versioned history
 ├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
 └── LICENSE                      # AGPL-3.0-or-later
@@ -257,7 +257,7 @@ airSpring/
 | `whitePaper/STUDY.md` | Full results narrative |
 | `whitePaper/METHODOLOGY.md` | Validation protocol |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V017 active) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V018 atlas, V019 S68 sync active) |
 
 ## License
 
@@ -265,7 +265,7 @@ AGPL-3.0-or-later
 
 ---
 
-*February 26, 2026 — v0.4.6. 17 experiments, 474/474 Python, 662 Rust tests + 1302
+*February 26, 2026 — v0.4.6. 17 experiments, 474/474 Python, 608 Rust tests + 1354
 atlas checks, 22 binaries, 75/75 cross-validation, 15,300 station-days (100 MI
 stations). Rust 69x faster than Python (geometric mean). 11 Tier A wired modules.
 ToadStool S68 synced (774 WGSL, all metalForge absorbed). Pure Rust + BarraCuda.

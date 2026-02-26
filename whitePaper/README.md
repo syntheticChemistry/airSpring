@@ -29,7 +29,7 @@ The study answers four questions:
    Answer: yes — Open-Meteo (free, no key, 80+ years) provides real historical Michigan weather at 10km resolution. Our FAO-56 ET₀ matches Open-Meteo's independent computation with R²=0.967 across 15,300 station-days. NOAA CDO and OpenWeatherMap supplement with GHCND daily records and real-time forecasts.
 
 3. **Can Rust + WebGPU replace Python/Excel for precision agriculture?**
-   Answer: yes (validation complete) — Rust BarraCuda passes 662 tests + 1302 atlas checks across 22 binaries (97.45% coverage, pedantic + nursery 0 warnings). A cross-validation harness confirms 75/75 Python-Rust value matches within 1e-5 tolerance; 690 crop-station yield pairs within 0.01. 11 Tier A modules wired to ToadStool/BarraCuda primitives including Richards PDE, isotherm fitting, MC ET₀ uncertainty (parametric CI via `norm_ppf`), VG pressure head inversion (via `brent`), and agroecological diversity. S66 resolves the P0 GPU dispatch blocker — GPU-first paths now stable. CPU benchmarks: 12.7M ET₀/s, 35.8M VG θ/s, 175K NM fits/s.
+   Answer: yes (validation complete) — Rust BarraCuda passes 608 tests + 1354 atlas checks across 22 binaries (97.45% coverage, pedantic + nursery 0 warnings). A cross-validation harness confirms 75/75 Python-Rust value matches within 1e-5 tolerance; 690 crop-station yield pairs within 0.01. 11 Tier A modules wired to ToadStool/BarraCuda primitives including Richards PDE, isotherm fitting, MC ET₀ uncertainty (parametric CI via `norm_ppf`), VG pressure head inversion (via `brent`), and agroecological diversity. S66 resolves the P0 GPU dispatch blocker — GPU-first paths now stable. CPU benchmarks: 12.7M ET₀/s, 35.8M VG θ/s, 175K NM fits/s.
 
 4. **Can the math be truly portable across hardware?**
    Complete — all 6 metalForge modules absorbed upstream into barracuda (S64: metrics; S66: regression, hydrology, moving_window_f64; S40: van_genuchten; S64: isotherm). airSpring now leans on upstream primitives following the Write → Absorb → Lean cycle. GPU wiring proves the compute is hardware-portable; metalForge demonstrates the cross-system absorption pattern.
@@ -68,7 +68,7 @@ The study answers four questions:
 | West Olive (blueberry) | 0.257 | 0.963 | 639.1 mm | 635.2 mm |
 | **Overall** | **0.267** | **0.967** | — | — |
 
-### Phase 1 (Rust BarraCuda): 662 tests + 1302 atlas checks, 22 binaries, 97.45% coverage
+### Phase 1 (Rust BarraCuda): 608 tests + 1354 atlas checks, 22 binaries, 97.45% coverage
 
 | Binary | Checks | Key Validation |
 |--------|:------:|----------------|
@@ -89,7 +89,7 @@ The study answers four questions:
 | validate_scheduling | 28/28 | 5 strategies, mass balance, yield ordering |
 | validate_lysimeter | 25/25 | Mass-to-ET, calibration, diurnal pattern |
 | validate_sensitivity | 23/23 | OAT ±10%, 3 climatic zones, ranking |
-| validate_atlas | 1302/1302 | 100 Michigan stations × 13 checks each |
+| validate_atlas | 1354/1354 | 100 Michigan stations, ValidationHarness checks |
 | cross_validate | 75 values | Python↔Rust JSON harness |
 
 ### Phase 2 (Cross-validation): 75/75 MATCH + 690 crop-station yield pairs within 0.01
@@ -119,5 +119,5 @@ No institutional access required. No proprietary software. AGPL-3.0 licensed.
 ## Next Phase: GPU Validation & metalForge
 
 See `specs/PAPER_REVIEW_QUEUE.md` for the full paper queue and compute pipeline.
-See `wateringHole/handoffs/` for the latest ToadStool/BarraCuda handoff (V017).
+See `wateringHole/handoffs/` for the latest ToadStool/BarraCuda handoff (V018 atlas, V019 S68 sync).
 See `CHANGELOG.md` for the full evolution history.

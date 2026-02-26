@@ -8,7 +8,7 @@
 
 ## Abstract
 
-We independently replicate 16 precision agriculture and environmental systems computational methods — FAO-56 Penman-Monteith evapotranspiration, soil moisture calibration, IoT irrigation, daily water balance, dual crop coefficient, cover crops, regional ET₀ intercomparison, Richards equation, biochar adsorption isotherms, yield response to water stress, CW2D constructed wetland media, 60-year water balance reconstruction, irrigation scheduling optimization, lysimeter ET measurement, and ET₀ sensitivity analysis — using only open-source tools and publicly available data. Python baselines (474/474 checks) validate against digitized paper benchmarks. A real data pipeline using Open-Meteo historical weather (918 station-days, 6 Michigan stations, 2023 growing season) produces ET₀ with R²=0.967 against independent computation. Water balance simulations show 53-72% water savings with smart scheduling. A Rust implementation via BarraCuda passes 662 tests + 1302 atlas checks (662 cargo: 464 lib + 134 integration + 64 forge) across 22 binaries, with 75/75 Python-Rust cross-validation matches within 1e-5 tolerance. CPU benchmarks show Rust is 69x faster than Python (geometric mean, 20x–502x range) — establishing the foundation for GPU-accelerated precision irrigation on consumer hardware.
+We independently replicate 16 precision agriculture and environmental systems computational methods — FAO-56 Penman-Monteith evapotranspiration, soil moisture calibration, IoT irrigation, daily water balance, dual crop coefficient, cover crops, regional ET₀ intercomparison, Richards equation, biochar adsorption isotherms, yield response to water stress, CW2D constructed wetland media, 60-year water balance reconstruction, irrigation scheduling optimization, lysimeter ET measurement, and ET₀ sensitivity analysis — using only open-source tools and publicly available data. Python baselines (474/474 checks) validate against digitized paper benchmarks. A real data pipeline using Open-Meteo historical weather (918 station-days, 6 Michigan stations, 2023 growing season) produces ET₀ with R²=0.967 against independent computation. Water balance simulations show 53-72% water savings with smart scheduling. A Rust implementation via BarraCuda passes 608 tests + 1354 atlas checks (608 cargo: 464 lib + 142 integration + 2 doc) across 22 binaries, with 75/75 Python-Rust cross-validation matches within 1e-5 tolerance. CPU benchmarks show Rust is 69x faster than Python (geometric mean, 20x–502x range) — establishing the foundation for GPU-accelerated precision irrigation on consumer hardware.
 
 ---
 
@@ -117,7 +117,7 @@ All mass balances close to 0.0000 mm. Water savings of 53-72% are consistent wit
 
 ---
 
-## 4. Phase 1: Rust BarraCuda (464 lib + 134 integration + 64 forge = 662 tests + 1302 atlas checks)
+## 4. Phase 1: Rust BarraCuda (464 lib + 142 integration + 2 doc = 608 tests + 1354 atlas checks)
 
 ### 4.1 Module Structure
 
@@ -131,10 +131,10 @@ All mass balances close to 0.0000 mm. Water savings of 53-72% are consistent wit
 | `io::csv_ts` | TimeseriesData columnar parser, streaming BufReader | 11 | 6 |
 | `error` | AirSpringError enum (Io, CsvParse, JsonParse, InvalidInput, Barracuda) | — | — |
 | `testutil` | RMSE, MBE, R², IA, NSE, synthetic data generators | — | 6 |
-| **Integration tests** | Cross-module pipelines, determinism, error paths, crop↔balance | — | 134 |
+| **Integration tests** | Cross-module pipelines, determinism, error paths, crop↔balance | — | 142 |
 | **Forge** | metalForge absorbed upstream (53 unit + 11 doc) | — | 64 |
 | **Doc-tests** | Inline documentation examples | — | 2 |
-| **Total** | 464 lib + 134 integration + 64 forge | — | 662 |
+| **Total** | 464 lib + 142 integration + 2 doc | — | 608 |
 
 ### 4.2 Python-Rust Parity
 
@@ -235,5 +235,5 @@ The same BarraCuda/ToadStool infrastructure supports both domains. The key share
 
 ---
 
-*February 2026 — 474 Python + 662 Rust tests + 1302 atlas checks (464 lib + 134 integration + 64 forge), 22 validation binaries all pass,
+*February 2026 — 474 Python + 608 Rust tests + 1354 atlas checks (464 lib + 142 integration + 2 doc), 22 validation binaries all pass,
 15,300 station-days (100 stations) real data, 75/75 cross-validation match, zero synthetic*

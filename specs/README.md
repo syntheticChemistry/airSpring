@@ -1,7 +1,7 @@
 # airSpring Specifications
 
 **Last Updated**: February 26, 2026
-**Status**: Phase 0-3 complete — 474/474 Python + 662 Rust tests + 1302 atlas checks + 75/75 cross-validation + 11 Tier A modules + 69x CPU speedup (v0.4.6)
+**Status**: Phase 0-3 complete — 474/474 Python + 608 Rust tests + 1354 atlas checks + 75/75 cross-validation + 11 Tier A modules + 69x CPU speedup (v0.4.6)
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling
 
 ---
@@ -12,12 +12,12 @@
 |--------|-------|
 | Phase 0 (Python) | 474/474 PASS — 16 experiments (FAO-56, soil, IoT, WB, dual Kc, cover crops, regional ET₀, Richards, biochar, 60yr WB, yield, CW2D, scheduling, lysimeter, sensitivity) |
 | Phase 0+ (Real data) | 15,300 station-days, R²=0.967 across 100 Michigan stations |
-| Phase 1 (Rust) | 662 tests + 1302 atlas — 22 binaries, 464 lib + 134 integration + 64 forge |
+| Phase 1 (Rust) | 608 tests + 1354 atlas — 22 binaries |
 | Phase 1.5 (CPU benchmark) | Rust 69x faster than Python (geometric mean, 20x–502x) |
 | Phase 2 (Cross-validation) | 75/75 Python↔Rust match within 1e-5; 690 crop-station yield pairs within 0.01 |
 | Phase 3 (GPU) | 11 Tier A modules wired, cross-spring S68 fully rewired |
 | Faculty | Dong (BAE, MSU — new lab 2026) |
-| Handoff | V017 in `wateringHole/handoffs/` |
+| Handoff | V018 (atlas), V019 (S68 sync) in `wateringHole/handoffs/` |
 
 ---
 
@@ -91,7 +91,7 @@ Re-run `scripts/run_all_baselines.sh` at the respective commits to verify.
 `../whitePaper/STUDY.md` → `../CONTROL_EXPERIMENT_STATUS.md` → BARRACUDA_REQUIREMENTS.md
 
 **Cross-spring evolution** (15 min):
-CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/AIRSPRING_V017_*.md`
+CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/AIRSPRING_V019_*.md`
 
 ---
 

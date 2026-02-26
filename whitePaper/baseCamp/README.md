@@ -2,7 +2,7 @@
 
 **Updated**: February 26, 2026
 **Project**: airSpring — Ecological & Agricultural Sciences (v0.4.6)
-**Status**: 16 experiments, 474/474 Python + 662 Rust tests + 1302 atlas checks + 75/75 cross-validation + 11 Tier A modules + 69x CPU speedup
+**Status**: 17 experiments, 474/474 Python + 608 Rust tests + 1354 atlas checks + 75/75 cross-validation + 11 Tier A modules + 69x CPU speedup
 
 ---
 
@@ -68,7 +68,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | `validate_long_term_wb` | 11 | 60-year ET₀, water balance, climate trends |
 | `validate_yield` | 32 | Stewart 1977, Ky table, multi-stage, WUE, scheduling |
 | `validate_cw2d` | 24 | CW2D media, VG retention, mass balance |
-| `validate_atlas` | 1302/1302 | 100 Michigan stations × 13 checks each |
+| `validate_atlas` | 1354/1354 | 100 Michigan stations × 13 checks each |
 | `cross_validate` | 75 | Python↔Rust exact match (tol=1e-5) |
 
 ### GPU Orchestrators (Phase 2) — 11 Tier A wired
@@ -102,7 +102,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 |----------|---------|
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C breakdown, absorbed vs stays-local, quality gates |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
-| `wateringHole/handoffs/` | V017 active handoff — S66 validation, P0 resolved, absorption candidates |
+| `wateringHole/handoffs/` | V019 active handoff — S68 sync, P0 resolved, absorption candidates |
 | `specs/CROSS_SPRING_EVOLUTION.md` | 774 WGSL shader provenance across all Springs |
 
 ### Next Steps (Dong Lab)
@@ -137,7 +137,7 @@ explorations use the validated stack to answer questions the original papers did
 
 | File | Title | Data Tier | Status |
 |------|-------|:---------:|--------|
-| [open_data_atlas.md](open_data_atlas.md) | Michigan Crop Water Atlas (80yr, 100 stations) | Tier 1 (free) | **Complete** — 1302/1302 atlas checks, 15,300 station-days |
+| [open_data_atlas.md](open_data_atlas.md) | Michigan Crop Water Atlas (80yr, 100 stations) | Tier 1 (free) | **Complete** — 1354/1354 atlas checks, 15,300 station-days |
 | [yield_validation.md](yield_validation.md) | Stewart Yield Model vs USDA NASS Reality | Tier 1 (free) | Planning |
 | [et_gold_standard.md](et_gold_standard.md) | Direct ET Validation via AmeriFlux Eddy Covariance | Tier 2 (registration) | Planning |
 | [forecast_scheduling.md](forecast_scheduling.md) | Predictive Irrigation with Weather Forecasts | Tier 2 (API key) | Planning |

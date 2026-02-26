@@ -2,7 +2,7 @@
 
 **Last Updated**: February 26, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 16 completed (474/474 Python + 662 Rust tests + 1302 atlas checks + 11 Tier A modules). All completed papers use open data and systems.
+**Status**: 16 completed (474/474 Python + 608 Rust tests + 1354 atlas checks + 11 Tier A modules). All completed papers use open data and systems.
 
 ---
 

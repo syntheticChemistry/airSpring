@@ -1,8 +1,8 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: February 26, 2026 (v0.4.6 — 464 lib + 134 integration + 64 forge, 97.45% coverage)
+**Last Updated**: February 26, 2026 (v0.4.6 — 608 tests, 97.45% coverage)
 **ToadStool PIN**: `f0feb226` (S68 — universal f64, ValidationHarness tracing, LazyLock shader constants)
-**Handoff**: V017 (deep audit & evolution — clippy nursery, R-S66-001/003 wired, van_genuchten extracted)
+**Handoff**: V019 (S68 sync — universal f64, atlas 1354 checks)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -118,7 +118,7 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | Capability | Module | Wired In | Status |
 |-----------|--------|----------|--------|
 | `barracuda::tolerances` | `tolerances` | v0.3.6 | **LEANING** — re-exported |
-| `barracuda::validation::ValidationHarness` | `validation` | v0.3.6 | **LEANING** — all 22 binaries (incl. validate_atlas, 1302 checks) |
+| `barracuda::validation::ValidationHarness` | `validation` | v0.3.6 | **LEANING** — all 22 binaries (incl. validate_atlas, 1354 checks) |
 | `pde::richards::solve_richards` | `pde` | v0.4.0 | **WIRED** — `gpu::richards` |
 | `pde::crank_nicolson::CrankNicolson1D` | `pde` | v0.4.4 | **WIRED** — CN f64 diffusion cross-val |
 | `optimize::nelder_mead` | `optimize` | v0.4.1 | **WIRED** — isotherm fitting |
@@ -159,12 +159,12 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `cargo fmt --check` | **Clean** |
 | `cargo clippy -- -D warnings` | **0 warnings** (pedantic via `[lints.clippy]`) |
 | `cargo doc --no-deps` | **Builds**, 0 warnings |
-| `cargo test` | **662 total** (464 lib + 134 integration + 64 forge) |
+| `cargo test` | **608 total** |
 | `cargo llvm-cov --lib` | **97.45%** line coverage (97.58% functions) |
 | `unsafe` code | **Zero** |
 | `unwrap()` in lib | **Zero** (all in `#[cfg(test)]`) |
 | Files > 1000 lines | **Zero** (max: 845 lines) |
-| Validation binaries | **22/22 PASS** (515 checks + 1302 atlas) |
+| Validation binaries | **22/22 PASS** (515 checks + 1354 atlas) |
 | GPU dispatch (P0 blocker) | **RESOLVED** — S66 explicit BGL (R-S66-041) |
 | Cross-validation | **75/75 MATCH** (tol=1e-5) |
 

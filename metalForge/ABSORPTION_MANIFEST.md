@@ -123,5 +123,5 @@ It can be archived or removed at any time without affecting the build.
 ```
 cargo fmt   — clean
 cargo clippy --all-targets — zero warnings (pedantic)
-cargo test  — 53/53 pass (forge), 662/662 pass (barracuda workspace: 464+134+64)
+cargo test  — 53/53 pass (forge), 608/608 pass (barracuda workspace: 464+142+2)
 ```

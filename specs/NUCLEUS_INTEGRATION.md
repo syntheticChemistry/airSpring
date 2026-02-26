@@ -16,7 +16,7 @@ airSpring (Spring — validation consumer)
     │       └── NestGate providers (Open-Meteo, NOAA, USDA NASS)
     │               download → ZFS store with provenance
     │
-    ├── barracuda/ (Rust validation, 662 cargo tests)
+    ├── barracuda/ (Rust validation, 608 cargo tests)
     │       │
     │       ├── eco:: modules (CPU validated, 464 lib tests)
     │       │
@@ -150,7 +150,7 @@ Open-Meteo requires no API key. USDA NASS registration is instant and free.
 1. **Without NUCLEUS**: `cargo test` + `cargo run --bin validate_*` (current, works now)
 2. **With local NUCLEUS**: Same tests, but data flows through NestGate
 3. **With Plasmodium**: Same tests, but GPU workloads route to best available gate
-4. **Validation invariant**: All 662 Rust tests + 1302 atlas checks must pass regardless of deployment mode
+4. **Validation invariant**: All 608 Rust tests + 1354 atlas checks must pass regardless of deployment mode
 
 The compute results are deterministic. NUCLEUS changes *where* the compute runs,
 not *what* it computes. The 75/75 cross-validation match (tol=1e-5) is the

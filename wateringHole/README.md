@@ -7,14 +7,14 @@
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V019** | [AIRSPRING_V019_S68_UNIVERSAL_PRECISION_SYNC_HANDOFF_FEB26_2026.md](handoffs/AIRSPRING_V019_S68_UNIVERSAL_PRECISION_SYNC_HANDOFF_FEB26_2026.md) | 2026-02-26 | **current** — ToadStool S68 sync: universal f64 precision, tracing migration, 1354 atlas checks |
-| **V018** | [AIRSPRING_V018_ATLAS_SCALE_EVOLUTION_HANDOFF_FEB26_2026.md](handoffs/AIRSPRING_V018_ATLAS_SCALE_EVOLUTION_HANDOFF_FEB26_2026.md) | 2026-02-26 | 100-station Michigan Crop Water Atlas, 1302 atlas checks, scale validation of Tier A stack |
+| **V020** | [AIRSPRING_V020_CROSS_SPRING_EVOLUTION_HANDOFF_FEB26_2026.md](handoffs/AIRSPRING_V020_CROSS_SPRING_EVOLUTION_HANDOFF_FEB26_2026.md) | 2026-02-26 | **current** — Cross-spring evolution: 14 primitives, 47 tests, 5-spring shader lineage, benchmarks, evolution roadmap |
+| **V019** | [AIRSPRING_V019_S68_UNIVERSAL_PRECISION_SYNC_HANDOFF_FEB26_2026.md](handoffs/AIRSPRING_V019_S68_UNIVERSAL_PRECISION_SYNC_HANDOFF_FEB26_2026.md) | 2026-02-26 | ToadStool S68 sync: universal f64 precision, tracing migration, 608 tests + 1354 atlas checks |
 
 ## Cross-Spring Documents
 
 | File | Purpose |
 |------|---------|
-| `../specs/CROSS_SPRING_EVOLUTION.md` | 774 WGSL shader provenance (hotSpring/wetSpring/neuralSpring/airSpring) |
+| `../specs/CROSS_SPRING_EVOLUTION.md` | 774+ WGSL shader provenance (hotSpring/wetSpring/neuralSpring/airSpring/groundSpring) |
 | `../barracuda/EVOLUTION_READINESS.md` | Tier A/B/C status, absorbed/stays-local, quality gates |
 | `../metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66), post-absorption leaning status |
 
@@ -22,6 +22,7 @@
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_V018_ATLAS_SCALE_EVOLUTION_HANDOFF_FEB26_2026.md` | v0.4.6: 100-station Michigan Crop Water Atlas, 1302 atlas checks, scale validation |
 | `handoffs/archive/AIRSPRING_V017_DEEP_AUDIT_EVOLUTION_HANDOFF_FEB26_2026.md` | v0.4.6: Deep audit — Clippy nursery, R-S66 wired, van_genuchten extracted |
 | `handoffs/archive/AIRSPRING_V016_TOADSTOOL_S66_VALIDATION_HANDOFF_FEB26_2026.md` | v0.4.5: S66 validation complete — P0 resolved, 8 cross-spring tests, absorption candidates |
 | `handoffs/archive/AIRSPRING_V015_TOADSTOOL_S66_SYNC_HANDOFF_FEB26_2026.md` | v0.4.5: S66 sync — all metalForge absorbed, evolution_gaps updated |
