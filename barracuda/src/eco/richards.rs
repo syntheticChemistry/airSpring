@@ -223,11 +223,7 @@ fn richards_rhs(
 /// Returns `AirSpringError::InvalidInput` if both methods fail.
 #[allow(clippy::too_many_arguments, clippy::too_many_lines)]
 #[allow(clippy::many_single_char_names, clippy::similar_names)]
-#[allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
+#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 pub fn solve_richards_1d(
     params: &VanGenuchtenParams,
     depth_cm: f64,
@@ -733,7 +729,6 @@ mod tests {
         assert!(err_pct < 10.0);
         // With zero flux top and free drainage, storage should decrease or stay similar
         let theta_init = van_genuchten_theta(-30.0, p.theta_r, p.theta_s, p.alpha, p.n_vg);
-        #[allow(clippy::cast_precision_loss)]
         let theta_final: f64 = profiles.last().unwrap().theta.iter().sum::<f64>()
             / profiles.last().unwrap().theta.len() as f64;
         assert!(theta_final <= theta_init + 0.05); // no significant inflow

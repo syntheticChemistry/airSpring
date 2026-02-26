@@ -10,3 +10,4 @@ pub mod richards;
 pub mod sensor_calibration;
 pub mod soil_moisture;
 pub mod water_balance;
+pub mod yield_response;

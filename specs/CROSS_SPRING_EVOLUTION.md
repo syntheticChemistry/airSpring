@@ -4,7 +4,7 @@
 
 ## Summary
 
-ToadStool's BarraCuda runtime contains **608 WGSL shaders** across 41 categories,
+ToadStool's BarraCuda runtime contains **758 WGSL shaders** across 41+ categories,
 built through **46 cross-spring absorptions** (sessions S51-S57). Each Spring
 contributes domain-specific GPU primitives that benefit the entire ecosystem.
 
@@ -164,7 +164,7 @@ module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 | **neuralSpring** | 20 | nelder_mead, multi_start_nelder_mead, ValidationHarness | TS-003 acos precision fix (airSpring found boundary issue) |
 | **airSpring** | — | Domain consumer | Richards PDE → absorbed upstream (S40) |
 
-608 WGSL shaders in ToadStool, 46 cross-spring absorptions (S51-S57). airSpring uses 5 shader families + contributed 3 critical fixes. Zero shader duplication.
+758 WGSL shaders in ToadStool, 46 cross-spring absorptions (S51-S57). airSpring uses 5 shader families + contributed 3 critical fixes. Zero shader duplication.
 
 ---
 

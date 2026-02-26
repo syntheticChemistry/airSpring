@@ -17,6 +17,12 @@ Implements:
   5. Michigan summer scenario with synthetic weather
 
 All open-source: numpy only.
+
+Provenance:
+  Baseline commit: 94cc51d
+  Benchmark output: control/water_balance/benchmark_water_balance.json
+  Reproduction: python control/water_balance/fao56_water_balance.py
+  Created: 2026-02-16
 """
 
 import json

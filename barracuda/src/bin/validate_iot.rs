@@ -125,9 +125,7 @@ fn validate_csv_round_trip(
 
     match csv_ts::parse_csv(&tmp_path, Some("timestamp")) {
         Ok(parsed) => {
-            #[allow(clippy::cast_precision_loss)] // exact: n = 168 << 2^53
             let parsed_n = parsed.len() as f64;
-            #[allow(clippy::cast_precision_loss)] // exact: cols = 5 << 2^53
             let parsed_cols = parsed.num_columns() as f64;
             v.check_abs("Parsed record count", parsed_n, 168.0, f64::EPSILON);
             v.check_abs("Parsed column count", parsed_cols, 5.0, f64::EPSILON);
@@ -159,9 +157,7 @@ fn main() {
     validation::section("Synthetic sensor data (deterministic, known properties)");
     let data = generate_synthetic_iot_data(168); // 7 days hourly
 
-    #[allow(clippy::cast_precision_loss)] // exact: n = 168 << 2^53
     let record_count = data.len() as f64;
-    #[allow(clippy::cast_precision_loss)] // exact: cols = 5 << 2^53
     let column_count = data.num_columns() as f64;
     println!("  Generated {record_count:.0} records, {column_count:.0} columns");
 

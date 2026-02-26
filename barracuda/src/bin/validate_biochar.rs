@@ -329,7 +329,6 @@ fn main() {
     v.finish();
 }
 
-#[allow(clippy::cast_precision_loss)]
 const fn len_f64(slice: &[f64]) -> f64 {
     slice.len() as f64
 }

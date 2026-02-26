@@ -72,6 +72,7 @@ impl FitResult {
 /// Returns `None` if there are fewer than 2 points or the system is singular
 /// (all x-values identical).
 #[must_use]
+#[allow(clippy::many_single_char_names)]
 pub fn fit_linear(x: &[f64], y: &[f64]) -> Option<FitResult> {
     let n = len_f64(x);
     if x.len() < 2 || x.len() != y.len() {

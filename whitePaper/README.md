@@ -2,7 +2,7 @@
 
 **Status**: Working draft — reviewed for PII, suitable for public repository
 **Purpose**: Document the replication of precision agriculture computational methods on consumer hardware using BarraCuda
-**Date**: February 2026 (v0.4.0)
+**Date**: February 2026 (v0.4.2)
 
 ---
 
@@ -23,13 +23,13 @@ airSpring replicates published precision irrigation, soil science, and environme
 The study answers four questions:
 
 1. **Can published agricultural science be independently reproduced using open tools?**
-   Answer: yes — 344/344 Python checks pass against digitized paper benchmarks (FAO-56 examples, Dong 2020 soil sensor data, Dong 2024 IoT irrigation, Richards equation, biochar isotherms, 60-year water balance).
+   Answer: yes — 400/400 Python checks pass against digitized paper benchmarks (FAO-56 examples, Dong 2020 soil sensor data, Dong 2024 IoT irrigation, Richards equation, biochar isotherms, yield response, CW2D, 60-year water balance).
 
 2. **Can open data replace institutional weather station access?**
    Answer: yes — Open-Meteo (free, no key, 80+ years) provides real historical Michigan weather at 10km resolution. Our FAO-56 ET₀ matches Open-Meteo's independent computation with R²=0.967 across 918 station-days. NOAA CDO and OpenWeatherMap supplement with GHCND daily records and real-time forecasts.
 
 3. **Can Rust + WebGPU replace Python/Excel for precision agriculture?**
-   Answer: yes (validation complete) — Rust BarraCuda passes 328 tests across 16 binaries. A cross-validation harness confirms 75/75 Python-Rust value matches within 1e-5 tolerance. 8 GPU orchestrators wired to ToadStool/BarraCuda primitives including Richards PDE and isotherm fitting. CPU benchmarks: 12.5M ET₀/s, 38.9M VG θ/s, 175K NM fits/s.
+   Answer: yes (validation complete) — Rust BarraCuda passes 601 tests across 18 binaries (97.55% coverage). A cross-validation harness confirms 75/75 Python-Rust value matches within 1e-5 tolerance. 8 GPU orchestrators wired to ToadStool/BarraCuda primitives including Richards PDE and isotherm fitting. CPU benchmarks: 12.5M ET₀/s, 38.9M VG θ/s, 175K NM fits/s.
 
 4. **Can the math be truly portable across hardware?**
    In progress — metalForge stages 6 absorption-ready modules for upstream barracuda integration following hotSpring's Write → Absorb → Lean pattern. 2 modules already absorbed upstream (van_genuchten into pde::richards, isotherm into optimize). GPU wiring proves the compute is hardware-portable; metalForge will demonstrate mixed CPU/GPU/NPU dispatch.
@@ -38,7 +38,7 @@ The study answers four questions:
 
 ## Key Results
 
-### Phase 0 (Python Control): 344/344 checks pass (11 experiments)
+### Phase 0 (Python Control): 400/400 checks pass (13 experiments)
 
 | Experiment | Paper | Checks | Key Validation |
 |------------|-------|:------:|----------------|
@@ -52,6 +52,8 @@ The study answers four questions:
 | Richards Equation | van Genuchten 1980 | 14/14 | VG retention, conductivity, infiltration, drainage |
 | Biochar Isotherms | Kumari et al. 2025 | 14/14 | Langmuir/Freundlich R², RL factor |
 | 60-Year Water Balance | OSU Triplett, ERA5 | 10/10 | Decadal stability, mass balance, climate trends |
+| Yield Response | Stewart 1977, FAO-56 Ch 10 | 32/32 | Ky table, single/multi-stage, WUE, scheduling |
+| CW2D Richards | Dong et al. 2019, HYDRUS | 24/24 | Gravel/organic VG, infiltration, mass balance |
 
 ### Phase 0+ (Real Data): 918 station-days, R²=0.967
 
@@ -63,7 +65,7 @@ The study answers four questions:
 | West Olive (blueberry) | 0.257 | 0.963 | 639.1 mm | 635.2 mm |
 | **Overall** | **0.267** | **0.967** | — | — |
 
-### Phase 1 (Rust BarraCuda): 328 tests, 16 binaries
+### Phase 1 (Rust BarraCuda): 601 tests, 18 binaries, 97.55% coverage
 
 | Binary | Checks | Key Validation |
 |--------|:------:|----------------|
@@ -79,6 +81,8 @@ The study answers four questions:
 | validate_richards | 15/15 | VG retention, infiltration, drainage, mass balance |
 | validate_biochar | 14/14 | Langmuir/Freundlich R², RL, residuals |
 | validate_long_term_wb | 11/11 | 60-year ET₀, water balance, climate |
+| validate_yield | 32/32 | Stewart 1977, Ky table, multi-stage, WUE |
+| validate_cw2d | 24/24 | CW2D media, VG retention, mass balance |
 | cross_validate | 75 values | Python↔Rust JSON harness |
 
 ### Phase 2 (Cross-validation): 75/75 MATCH
@@ -108,5 +112,5 @@ No institutional access required. No proprietary software. AGPL-3.0 licensed.
 ## Next Phase: GPU Validation & metalForge
 
 See `specs/PAPER_REVIEW_QUEUE.md` for the full paper queue and compute pipeline.
-See `wateringHole/handoffs/` for the latest ToadStool/BarraCuda handoff (V005).
+See `wateringHole/handoffs/` for the latest ToadStool/BarraCuda handoff (V009).
 See `CHANGELOG.md` for the full evolution history.

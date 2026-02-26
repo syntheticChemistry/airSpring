@@ -1,7 +1,7 @@
 # airSpring — Ecological & Agricultural Sciences
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
-**Date**: February 25, 2026
+**Date**: February 26, 2026
 **Version**: 0.4.2
 **License**: AGPL-3.0-or-later
 
@@ -16,9 +16,10 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
-| Phase 0: Paper baselines (Python) | **344/344 PASS** | FAO-56, soil, IoT, water balance, dual Kc, cover crops, Richards, biochar, 60yr WB |
+| Phase 0: Paper baselines (Python) | **400/400 PASS** | FAO-56, soil, IoT, water balance, dual Kc, cover crops, Richards, biochar, yield, CW2D, 60yr WB |
 | Phase 0+: Real data pipeline | **918 station-days** | ET₀ R²=0.967 vs Open-Meteo (6 Michigan stations) |
-| Phase 1: Rust validation | **371 tests** | 16 binaries, 371 unit + 97 integration, 96.84% coverage |
+| Phase 1: Rust validation | **601 tests** | 18 binaries, 433 unit + 115 integration + 53 forge |
+| Phase 1.5: CPU Benchmark | **69x faster** | Rust vs Python geometric mean (20x–502x range) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 3: GPU bridge | **8 orchestrators** | 20 evolution gaps (8A+11B+1C) |
 | Phase 4: Penny Irrigation | Vision | Sovereign, consumer hardware |
@@ -27,11 +28,12 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test` | 371 barracuda + 53 forge + 97 integration = **521 total**, 0 failures |
+| `cargo test` | 433 barracuda + 53 forge + 115 integration = **601 total**, 0 failures |
 | `cargo clippy -- -D warnings` | **0 warnings** (pedantic) |
 | `cargo fmt --check` | **Clean** |
 | `cargo doc` | **Builds** |
-| Test breakdown | 371 unit, 33 eco-integration, 31 GPU-integration, 11 stats, 20 I/O, 2 binary |
+| `cargo llvm-cov --lib` | **97.55%** line coverage |
+| Test breakdown | 433 unit, 33 eco, 21 GPU, 6 evolution, 4 determinism, 18 cross-spring, 20 stats, 11 I/O, 2 doc |
 
 ## Evolution Architecture: Write → Absorb → Lean
 
@@ -45,7 +47,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
   barracuda::ops/linalg/stats/pde/optimize (GPU dispatch + CPU fallback)
        │
        ▼
-  ToadStool WGSL shaders (f64 precision on GPU, 608 shaders)
+  ToadStool WGSL shaders (f64 precision on GPU, 758 shaders)
        │
        ▼
   metalForge (mixed CPU + GPU + future NPU)
@@ -55,7 +57,7 @@ airSpring domain code (`eco::`) is validated against papers, then wrapped by GPU
 
 ### Cross-Spring Shader Evolution
 
-ToadStool contains **608 WGSL shaders** across 41 categories. airSpring uses 5 shared shader families and contributed **3 upstream fixes** that benefit ALL Springs:
+ToadStool contains **758 WGSL shaders** across 41+ categories. airSpring uses 5 shared shader families and contributed **3 upstream fixes** that benefit ALL Springs:
 
 | Spring | Shaders | What airSpring Gets | What airSpring Gave Back |
 |--------|---------|--------------------|-----------------------|
@@ -84,21 +86,23 @@ Also wired: `validation::ValidationHarness` (neuralSpring), `stats::pearson`, `s
 Evolution gaps: 20 total (8 Tier A integrated, 11 Tier B ready, 1 Tier C pending).
 See `barracuda/src/gpu/evolution_gaps.rs` for the full roadmap.
 
-### CPU Benchmarks (cross-spring provenance)
+### CPU Benchmarks: Rust vs Python (69x geometric mean speedup)
 
-| Operation | N | Throughput | Provenance |
-|-----------|---|-----------|------------|
-| ET₀ (FAO-56) | 10,000 | 12.5M ops/sec | hotSpring `pow_f64`, multi-spring elementwise |
-| VG θ(h) batch | 100,000 | 38.9M evals/sec | hotSpring df64 precision |
-| Dual Kc season | 3,650 | 59M days/sec | airSpring `eco::dual_kc` |
-| Reduce (seasonal) | 100,000 | 395M elem/sec | wetSpring `fused_map_reduce` |
-| Stream smooth | 8,760 | 31.7M elem/sec | wetSpring `moving_window` |
-| Kriging (20→500) | 500 | 26 µs/solve | wetSpring `kriging_f64` |
-| Ridge regression | 5,000 | R²=1.000 | wetSpring ESN ridge |
-| Richards PDE | 50 nodes | 72 sims/sec | airSpring→ToadStool S40, hotSpring df64 |
-| Isotherm (linearized) | 9 pts | 8.3M fits/sec | airSpring `eco::isotherm` |
-| Isotherm (NM 1-start) | 9 pts | 175K fits/sec | neuralSpring `nelder_mead` |
-| Isotherm (NM 8×LHS) | 9 pts | 42.5K fits/sec | neuralSpring `multi_start_nelder_mead` |
+| Computation | Python | Rust CPU | Speedup |
+|---|---:|---:|---:|
+| FAO-56 ET₀ (10K) | 632K/s | 12.7M/s | **20x** |
+| VG θ(h) retention (100K) | 434K/s | 35.8M/s | **83x** |
+| Yield single-stage (100K) | 13.4M/s | 1.08B/s | **81x** |
+| Yield multi-stage (100K) | 4.1M/s | 378M/s | **93x** |
+| Richards 1D (20 nodes) | 23/s | 3,683/s | **159x** |
+| Richards 1D (50 nodes) | 7/s | 3,620/s | **502x** |
+| Dual Kc (3650-day) | — | 59M days/s | — |
+| CW2D VG gravel (100K) | 444K/s | 35.5M/s | **80x** |
+
+Same algorithms, same f64 precision. Python loops vs Rust `--release`. Richards
+PDE sees the largest gains (up to 502x) because scipy.integrate overhead dwarfs
+Rust's hand-coded implicit Euler + Thomas algorithm. See `experiments/README.md`
+for full results and `scripts/bench_compare.py` to reproduce.
 
 ## Quick Start
 
@@ -157,7 +161,7 @@ Richards equation (unsaturated flow — open-source alternative to HYDRUS), bioc
 
 ```
 airSpring/
-├── control/                     # Phase 0: Python/R baselines (344/344)
+├── control/                     # Phase 0: Python/R baselines (400/400)
 │   ├── fao56/                   # FAO-56 Penman-Monteith ET₀ (64/64)
 │   ├── soil_sensors/            # Soil moisture calibration (36/36)
 │   ├── iot_irrigation/          # IoT irrigation pipeline (24/24)
@@ -166,11 +170,13 @@ airSpring/
 │   ├── regional_et0/            # Regional ET₀ intercomparison (61/61)
 │   ├── richards/                # 1D Richards equation (14/14)
 │   ├── biochar/                 # Biochar adsorption isotherms (14/14)
+│   ├── yield_response/          # Yield response to water stress (32/32)
+│   ├── cw2d/                    # CW2D Richards extension (24/24)
 │   ├── long_term_wb/            # 60-year water balance (10/10)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1: Rust validation (371 lib + 97 integration, 16 binaries)
+├── barracuda/                   # Phase 1: Rust validation (433 lib + 115 integration, 18 binaries)
 │   ├── src/
-│   │   ├── eco/                 # Domain modules (9 validated against papers)
+│   │   ├── eco/                 # Domain modules (10 validated against papers)
 │   │   ├── io/                  # csv_ts (streaming columnar IoT parser)
 │   │   ├── gpu/                 # ToadStool/BarraCuda GPU bridge (8 orchestrators)
 │   │   ├── error.rs             # AirSpringError enum
@@ -179,22 +185,29 @@ airSpring/
 │   │   │   ├── generators.rs
 │   │   │   ├── stats.rs
 │   │   │   └── bootstrap.rs
-│   │   └── bin/                 # 16 validate_*, bench_*, cross_validate, simulate_season
-│   ├── tests/                   # 97 integration tests (4 files)
+│   │   └── bin/                 # 18 validate_*, bench_*, cross_validate, simulate_season
+│   ├── tests/                   # 115 integration tests (7 files + common/)
+│   │   ├── common/              # Shared GPU device helpers
+│   │   ├── eco_integration.rs   # Eco module cross-validation
+│   │   ├── gpu_integration.rs   # GPU orchestrator functional tests
+│   │   ├── gpu_evolution.rs     # Evolution gap / ToadStool issue tracking
+│   │   ├── gpu_determinism.rs   # Bit-identical rerun validation
+│   │   ├── io_and_errors.rs     # CSV parsing, error variants
+│   │   └── stats_integration.rs # Statistical metrics cross-validation
 │   └── Cargo.toml               # v0.4.2
 ├── metalForge/                  # Upstream absorption staging (→ barracuda)
 │   └── forge/                   # airspring-forge v0.2.0 (53 tests, 6 modules)
 ├── specs/                       # Specifications and requirements
-│   ├── PAPER_REVIEW_QUEUE.md    # Paper reproduction queue (11 complete, 4 queued)
+│   ├── PAPER_REVIEW_QUEUE.md    # Paper reproduction queue (13 complete, 4 queued)
 │   ├── BARRACUDA_REQUIREMENTS.md# GPU kernel requirements
 │   └── CROSS_SPRING_EVOLUTION.md# Cross-spring shader provenance
 ├── whitePaper/                  # Methodology and study documentation
 │   ├── baseCamp/                # Per-faculty research briefings
 │   ├── METHODOLOGY.md           # Multi-phase validation protocol
 │   └── STUDY.md                 # Full results narrative
-├── experiments/                 # Experiment protocols and results (11 complete)
+├── experiments/                 # Experiment protocols and results (13 complete)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
-│   └── handoffs/                # Versioned (V005 active)
+│   └── handoffs/                # Versioned (V009 active)
 ├── CHANGELOG.md                 # Keep-a-Changelog versioned history
 ├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
 └── LICENSE                      # AGPL-3.0-or-later
@@ -229,13 +242,15 @@ airSpring/
 |----------|---------|
 | `CHANGELOG.md` | Versioned change history |
 | `CONTROL_EXPERIMENT_STATUS.md` | Detailed experiment results |
+| `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C GPU evolution, absorbed/stays-local |
+| `metalForge/ABSORPTION_MANIFEST.md` | 4 modules ready for upstream absorption |
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance |
 | `specs/BARRACUDA_REQUIREMENTS.md` | GPU kernel requirements |
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue |
 | `whitePaper/STUDY.md` | Full results narrative |
 | `whitePaper/METHODOLOGY.md` | Validation protocol |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V005 active) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V009 active) |
 
 ## License
 
@@ -243,9 +258,7 @@ AGPL-3.0-or-later
 
 ---
 
-*February 25, 2026 — v0.4.2. 371 lib + 97 integration + 53 forge = 521 total. 96.84% coverage.
-344 Python checks, 75/75 cross-validation, 918 real station-days.
-8 GPU orchestrators wired to ToadStool primitives. CPU benchmarks:
-12.5M ET₀/s, 38.9M VG θ/s, 59M Kc/s, 175K NM fits/s, 72 Richards sims/s.
-Cross-spring evolution: 608 WGSL shaders, 46 absorptions, 3 airSpring fixes upstream.
-Pure Rust + BarraCuda. AGPL-3.0.*
+*February 25, 2026 — v0.4.2. 13 experiments, 400/400 Python, 601 Rust tests,
+18 binaries, 75/75 cross-validation, 918 real station-days. Rust 69x faster
+than Python (geometric mean). 8 GPU orchestrators, 758 WGSL shaders.
+Pure Rust + BarraCuda. AGPL-3.0-or-later.*

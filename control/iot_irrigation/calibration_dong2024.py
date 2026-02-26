@@ -16,6 +16,12 @@ Implements:
 The ANOVA analysis is in anova_irrigation.R (R v4.3.1, matching the paper).
 
 All open-source: numpy, scipy only.
+
+Provenance:
+  Baseline commit: 94cc51d
+  Benchmark output: control/iot_irrigation/benchmark_dong2024.json
+  Reproduction: python control/iot_irrigation/calibration_dong2024.py
+  Created: 2026-02-16
 """
 
 import json

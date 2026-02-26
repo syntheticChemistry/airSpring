@@ -16,6 +16,12 @@ geometry) via the soil moisture coupling pathway.
 References:
     Allen et al. (1998) FAO-56 Ch 7 + Ch 11
     Islam & Reeder (2014) ISWCR 2(3): 176-186
+
+Provenance:
+  Baseline commit: 94cc51d
+  Benchmark output: control/dual_kc/benchmark_cover_crop_kc.json
+  Reproduction: python control/dual_kc/cover_crop_dual_kc.py
+  Created: 2026-02-25
 """
 
 import json

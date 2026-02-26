@@ -400,4 +400,90 @@ mod tests {
         let val = result.unwrap();
         assert!(val.get("nested").is_some());
     }
+
+    // ── json_str_opt ─────────────────────────────────────────────────────
+    #[test]
+    fn test_json_str_opt_present() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"a": {"label": "hello"}}"#).unwrap();
+        assert_eq!(json_str_opt(&json, &["a", "label"]), Some("hello"));
+    }
+
+    #[test]
+    fn test_json_str_opt_missing_path() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"a": 1}"#).unwrap();
+        assert!(json_str_opt(&json, &["a", "b"]).is_none());
+    }
+
+    #[test]
+    fn test_json_str_opt_not_a_string() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"a": 42}"#).unwrap();
+        assert!(json_str_opt(&json, &["a"]).is_none());
+    }
+
+    #[test]
+    fn test_json_str_opt_empty_path() {
+        let json: serde_json::Value = serde_json::from_str(r#""bare string""#).unwrap();
+        assert_eq!(json_str_opt(&json, &[]), Some("bare string"));
+    }
+
+    // ── json_array_opt ───────────────────────────────────────────────────
+    #[test]
+    fn test_json_array_opt_present() {
+        let json: serde_json::Value =
+            serde_json::from_str(r#"{"data": {"items": [1, 2, 3]}}"#).unwrap();
+        let arr = json_array_opt(&json, &["data", "items"]);
+        assert!(arr.is_some());
+        assert_eq!(arr.unwrap().len(), 3);
+    }
+
+    #[test]
+    fn test_json_array_opt_missing_path() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"a": 1}"#).unwrap();
+        assert!(json_array_opt(&json, &["a", "b"]).is_none());
+    }
+
+    #[test]
+    fn test_json_array_opt_not_an_array() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"a": "text"}"#).unwrap();
+        assert!(json_array_opt(&json, &["a"]).is_none());
+    }
+
+    #[test]
+    fn test_json_array_opt_empty_array() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"a": []}"#).unwrap();
+        let arr = json_array_opt(&json, &["a"]);
+        assert!(arr.is_some());
+        assert!(arr.unwrap().is_empty());
+    }
+
+    // ── json_object_opt ──────────────────────────────────────────────────
+    #[test]
+    fn test_json_object_opt_present() {
+        let json: serde_json::Value =
+            serde_json::from_str(r#"{"meta": {"k": "v", "n": 1}}"#).unwrap();
+        let obj = json_object_opt(&json, &["meta"]);
+        assert!(obj.is_some());
+        assert_eq!(obj.unwrap().len(), 2);
+    }
+
+    #[test]
+    fn test_json_object_opt_missing_path() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"a": 1}"#).unwrap();
+        assert!(json_object_opt(&json, &["x", "y"]).is_none());
+    }
+
+    #[test]
+    fn test_json_object_opt_not_an_object() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"a": [1]}"#).unwrap();
+        assert!(json_object_opt(&json, &["a"]).is_none());
+    }
+
+    #[test]
+    fn test_json_object_opt_nested() {
+        let json: serde_json::Value =
+            serde_json::from_str(r#"{"a": {"b": {"c": "deep"}}}"#).unwrap();
+        let obj = json_object_opt(&json, &["a", "b"]);
+        assert!(obj.is_some());
+        assert!(obj.unwrap().contains_key("c"));
+    }
 }

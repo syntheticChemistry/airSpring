@@ -5,6 +5,14 @@
 //! precision agriculture aggregate statistics: seasonal ET₀ totals,
 //! field-level VWC averages, and `IoT` stream summaries.
 //!
+//! # Cross-Spring Provenance
+//!
+//! `FusedMapReduceF64` supports Shannon entropy and Simpson index map ops
+//! (wetSpring metagenomics), convergence norms (hotSpring HMC), and
+//! identity/sum/mean (airSpring seasonal aggregation). The `dot()` method
+//! (S51, M-007) enables GPU inner products. The N≥1024 buffer fix (TS-004,
+//! S54 H-013) was discovered by airSpring and fixed by `ToadStool` for all Springs.
+//!
 //! # Two API Levels
 //!
 //! | API | GPU? | Dependency |

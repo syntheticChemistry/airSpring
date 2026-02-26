@@ -15,6 +15,12 @@ Reference:
   evapotranspiration — Guidelines for computing crop water requirements.
   FAO Irrigation and Drainage Paper 56. Rome: FAO.
   https://www.fao.org/4/X0490E/x0490e00.htm
+
+Provenance:
+  Baseline commit: 94cc51d
+  Benchmark output: control/fao56/benchmark_fao56.json
+  Reproduction: python control/fao56/penman_monteith.py
+  Created: 2026-02-16
 """
 
 import json

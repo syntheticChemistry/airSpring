@@ -30,7 +30,6 @@ fn test_barracuda_pearson_cross_validation() {
 }
 
 #[test]
-#[allow(clippy::cast_precision_loss)]
 fn test_barracuda_stats_vs_airspring_stats() {
     // Cross-validate: airSpring's column_stats (population, n divisor)
     // vs barracuda::stats (sample, n-1 divisor).
@@ -204,7 +203,6 @@ fn test_barracuda_variance_matches_manual() {
         .unwrap()
         .to_vec();
 
-    #[allow(clippy::cast_precision_loss)]
     let n = temps.len() as f64;
     let mean = temps.iter().sum::<f64>() / n;
     let manual_var = temps.iter().map(|t| (t - mean).powi(2)).sum::<f64>() / (n - 1.0);

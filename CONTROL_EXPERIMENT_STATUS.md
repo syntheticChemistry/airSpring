@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-02-25 (v0.4.2 — Richards, biochar, 60-year WB, GPU integration tests, 16 binaries)
+**Updated**: 2026-02-25 (v0.4.2 — 13 experiments, 400 Python + 601 Rust, 18 binaries, 69x CPU speedup)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -54,12 +54,13 @@ bash scripts/run_all_baselines.sh
 # 5. Optionally run R ANOVA (requires R >= 4.0)
 # Rscript control/iot_irrigation/anova_irrigation.R
 
-# 6. Run Rust validation binaries (327 checks across 16 binaries)
+# 6. Run Rust validation binaries (439 checks across 18 binaries)
 cd barracuda
 for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   validate_sensor_calibration validate_real_data cross_validate \
   validate_dual_kc validate_cover_crop validate_regional_et0 \
-  validate_richards validate_biochar validate_long_term_wb; do
+  validate_richards validate_biochar validate_long_term_wb \
+  validate_yield validate_cw2d; do
   cargo run --release --bin $bin
 done
 
@@ -218,14 +219,14 @@ BEFORE evolving to Rust/BarraCuda.
 | `control/water_balance/fao56_water_balance.py` | FAO-56 Chapter 8 | 18/18 | TAW/RAW (3), Ks bounds (5), dry-down mass balance (2), irrigated mass balance (3), MI summer 535mm ET (3), heavy rain DP (2) |
 | `control/iot_irrigation/anova_irrigation.R` | Dong et al. 2024 (R v4.3.1) | — | Written, awaiting R install; one-way ANOVA on blueberry/tomato yield |
 
-**Total Python: 142/142 checks PASS, 4/4 experiments PASS**
+**Total Python: 400/400 checks PASS, 13/13 experiments PASS**
 **R ANOVA: script written, 1 skip (R not installed)**
 
-Tools used: numpy, scipy (curve_fit), json (benchmarks), base Python math.
+Tools used: numpy, scipy (curve_fit, solve_ivp), json (benchmarks), base Python math.
 All benchmark data digitized directly from published papers (FAO-56 tables,
-Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2 + yield data).
+Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2, Stewart 1977, CW2D media params).
 
-### 2026-02-16 → 2026-02-25: Project Initialization → v0.4.0 (Rust — 327/327 PASS, 371 lib + 97 integration tests)
+### 2026-02-16 → 2026-02-25: Project Initialization → v0.4.2 (Rust — 439/439 PASS, 433 lib + 115 integration tests)
 
 - Created airSpring repository
 - Scaffolded Track 1 (Precision Agriculture) and Track 2 (Environmental Systems)
@@ -253,8 +254,10 @@ Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2 + yield data).
 | validate_richards | T2 | 15/15 | van Genuchten θ/K/C, implicit Euler + Picard, Thomas algorithm |
 | validate_biochar | T2 | 14/14 | Langmuir/Freundlich isotherms, wood + sugar beet biochar |
 | validate_long_term_wb | T1 | 11/11 | 64-year Wooster OH, Hargreaves ET₀, decade trends |
+| validate_yield | T1 | 32/32 | Stewart 1977, FAO-56 Table 24, multi-stage, WUE, scheduling |
+| validate_cw2d | T2 | 24/24 | CW2D media (gravel, organic), VG retention, mass balance |
 
-**Total Rust: 327/327 validation checks PASS, 468 tests (371 lib + 97 integration) PASS**
+**Total Rust: 439/439 validation checks PASS, 601 tests (433 lib + 115 integration + 53 forge) PASS**
 **Phase 2 cross-validation: 75/75 MATCH (Python↔Rust, tol=1e-5)**
 **Phase 3 GPU-first: 8 orchestrators wired, 4/4 ToadStool issues RESOLVED**
 **CPU benchmarks: ET₀ 12.7M station-days/s, dual Kc 59M days/s, mulched Kc 64M days/s**
@@ -440,10 +443,45 @@ data. Establishes spatial variability baseline for GPU-batched ET₀ at scale.
 - [x] 15 station-pair temporal correlations: r = 0.80–0.96
 - [x] Geographic consistency: latitude span 1.55°, all in MI range
 
-### Experiment 008: Agrivoltaics PAR — NOT STARTED (DEFERRED)
+### Experiment 008: Yield Response to Water Stress — PHASE 0+1 COMPLETE
+
+**Goal**: Implement the Stewart (1977) yield response model from FAO-56 Chapter 10.
+Single-stage Ya/Ymax = 1 - Ky*(1 - ETa/ETc), multi-stage product formula (FAO-56 Eq. 90),
+water use efficiency, Ky table (9 crops from FAO-56 Table 24), scheduling comparison.
+
+**Phase 0 (Python baseline — 32/32 PASS):**
+- [x] Ky table values (7 crops)
+- [x] Single-stage Stewart equation (8 analytical)
+- [x] Multi-stage product formula (5 analytical)
+- [x] WUE calculations (4 crops)
+- [x] Scheduling comparison (3 strategies × metrics + ordering checks)
+
+**Rust (Phase 1 — 32/32 PASS, 16 unit tests):**
+- [x] `eco::yield_response` — single, multi, WUE, ky_table
+- [x] `validate_yield` binary: 32/32 checks
+
+### Experiment 012: CW2D Richards Extension — PHASE 0+1 COMPLETE
+
+**Goal**: Validate existing Richards solver on constructed wetland media
+(Dong et al. 2019, HYDRUS CW2D). Extreme VG parameters (gravel Ks=5000 cm/day,
+organic θs=0.60).
+
+**Phase 0 (Python baseline — 24/24 PASS):**
+- [x] VG retention curves for 4 CW2D media
+- [x] Mualem conductivity for gravel + organic
+- [x] Gravel infiltration (60 cm, 1 hour)
+- [x] Organic substrate drainage
+- [x] Mass balance checks
+
+**Rust (Phase 1 — 24/24 PASS):**
+- [x] Reuses `eco::richards` with CW2D media parameters
+- [x] `validate_cw2d` binary: 24/24 checks
+
+### Deferred: Agrivoltaics PAR — NOT STARTED
 
 **Goal**: Model photosynthetically active radiation interception under solar
 panel arrays for dual-use agriculture. Deferred until MSU Solar Farm data identified.
+(Originally Experiment 008; renumbered to avoid conflict with Yield Response.)
 
 ### Experiment 009: FAO-56 Dual Crop Coefficient — PHASE 0 COMPLETE
 
@@ -466,19 +504,19 @@ Chapter 7, separating transpiration from soil evaporation for precision scheduli
 
 ```
 Track 1 (Precision Agriculture):
-  Phase 0  [COMPLETE]: Python baselines — 142/142 PASS (FAO-56, soil, IoT, water balance)
-  Phase 0+ [COMPLETE]: Real data pipeline — 918 station-days, ET₀ R²=0.97, water balance
-  Phase 1  [COMPLETE]: Rust validation — 327/327 PASS (16 binaries), 468 tests (371 lib + 97 integration), 0 clippy warnings
+  Phase 0  [COMPLETE]: Python baselines — 400/400 PASS (13 experiments)
+  Phase 0+ [COMPLETE]: Real data pipeline — 918 station-days, ET₀ R²=0.97
+  Phase 1  [COMPLETE]: Rust validation — 601 tests (433 lib + 115 integration + 53 forge), 18 binaries
+  Phase 1.5[COMPLETE]: CPU benchmark — Rust 69x faster than Python (geometric mean)
   Phase 2  [COMPLETE]: Cross-validation — 75/75 MATCH (Python↔Rust, tol=1e-5)
-  Phase 3  [COMPLETE]: GPU-first — 4/4 ToadStool issues resolved, 468 tests, 8 orchestrators
+  Phase 3  [COMPLETE]: GPU bridge — 8 orchestrators wired to ToadStool primitives
   Phase 4:             Penny irrigation (sovereign, consumer hardware)
 
 Track 2 (Environmental Systems):
-  Phase B0:           HYDRUS benchmarks + biochar fitting (Python baselines)
-  Phase B1:           Contaminant transport + adsorption (scipy validation)
-  Phase B2:           Rust ports (BarraCuda: Richards solver, isotherm fitting)
-  Phase B3:           GPU acceleration (field-scale PDE, Monte Carlo)
-  Phase B4:           Sovereign remediation monitoring
+  Phase B0 [COMPLETE]: HYDRUS Richards + biochar isotherms + CW2D (Python + Rust)
+  Phase B1:            Contaminant transport + adsorption (scipy validation)
+  Phase B2:            GPU acceleration (field-scale PDE, Monte Carlo)
+  Phase B3:            Sovereign remediation monitoring
 ```
 
 ### GPU Acceleration Targets — Track 1
@@ -534,12 +572,7 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026 — Updated: February 25, 2026 (v0.4.0)*
-*Phase 0 Python baselines: 344/344 PASS (Exps 001-005, 006-007, 009-011, 015)*
-*Phase 0+ Real data pipeline: 918 station-days, ET₀ R²=0.97, 4 crop water balance*
-*Phase 1 BarraCuda Rust validation: 327/327 PASS (16 binaries), 468 tests (371 lib + 97 integration)*
-*Phase 2 Cross-validation: 75/75 MATCH (Python↔Rust, tol=1e-5)*
-*Phase 3 GPU-first: 8 orchestrators, 4/4 ToadStool issues RESOLVED*
-*CPU benchmarks: 12.7M ET₀/s, 59M dual Kc/s, 64M mulched Kc/s*
-*Quality: zero .unwrap() in production, zero unsafe, zero mocks in production*
-*Total: 344 Python + 327 Rust validation + 468 Rust tests + 75 cross-validation*
+*Initialized: February 16, 2026 — Updated: February 25, 2026 (v0.4.2)*
+*13 experiments, 400/400 Python, 601 Rust tests, 18 binaries, 75/75 cross-validation.*
+*Rust 69x faster than Python (geometric mean). 8 GPU orchestrators.*
+*Quality: zero .unwrap(), zero unsafe, zero clippy pedantic warnings. AGPL-3.0-or-later.*

@@ -1,7 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! GPU-accelerated Richards equation solver — bridges `eco::richards` ↔ `barracuda::pde::richards`.
 //!
-//! Provides two API levels:
+//! # Cross-Spring Provenance
+//!
+//! The Richards PDE solver was **contributed by airSpring** (absorbed upstream in
+//! S40), making it one of airSpring's direct contributions to `ToadStool`. The
+//! `van_genuchten_f64.wgsl` shader uses hotSpring precision math (`pow_f64`,
+//! `exp_f64`) for water retention curve evaluation.
+//!
+//! # Two API Levels
 //!
 //! | API | GPU? | Backend |
 //! |-----|:----:|---------|
@@ -102,7 +109,6 @@ impl BatchedRichards {
     /// Returns an error string if the solver fails.
     pub fn solve_upstream(req: &RichardsRequest) -> Result<pde_richards::RichardsResult, String> {
         let soil = to_barracuda_params(&req.params);
-        #[allow(clippy::cast_precision_loss)]
         let dz = req.depth_cm / (req.n_nodes as f64);
         let dt_s = req.dt_days * 86_400.0;
         #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]

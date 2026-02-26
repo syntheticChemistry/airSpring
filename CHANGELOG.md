@@ -4,6 +4,146 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [Unreleased] - 2026-02-25
 
+### CPU Benchmark: Rust 69x Faster Than Python (Geometric Mean)
+
+Full benchmark suite comparing Rust CPU (`--release`) against Python CPython
+scalar loops. Same algorithms, same f64 precision. Demonstrates BarraCuda is
+pure math — no interpreter overhead, no GIL, no boxing.
+
+#### Added
+- `bench_cpu_vs_python` extended with yield response, CW2D, WUE, season integration
+- `scripts/bench_python_baselines.py` — Python benchmark matching Rust workloads
+- `scripts/bench_compare.py` — automated Rust vs Python comparison report
+- `scripts/bench_python_results.json` + `scripts/bench_comparison.json` — raw data
+- Exp 008 + 012 added to `scripts/run_all_baselines.sh`
+
+#### Key Results
+- **Geometric mean speedup: 69x** (range: 20x ET₀ to 502x Richards PDE)
+- Yield single-stage: 1.08 billion evals/s (Rust) vs 13.4M (Python) = **81x**
+- Richards 50-node: 3,620/s (Rust) vs 7/s (Python) = **502x**
+- All 13 experiments produce identical f64 results in both languages
+
+### Exp 008 + Exp 012: Yield Response + CW2D Richards — 601 Tests, 18 Binaries
+
+Two new experiments built through full pipeline (Python → Rust CPU → validation):
+
+- **Exp 008**: FAO-56 yield response to water stress (Stewart 1977). New `eco::yield_response` module with `ky_table` (9 crops), single-stage and multi-stage yield models, WUE, scheduling comparison. 32/32 Python + 32/32 Rust (16 new unit tests).
+- **Exp 012**: CW2D Richards equation extension (Dong 2019). Validates existing Richards solver on constructed wetland media (gravel Ks=5000, organic θs=0.60). 24/24 Python + 24/24 Rust. No new Rust module (parameter-driven validation).
+
+#### Added
+- `eco::yield_response` module: `yield_ratio_single`, `yield_ratio_multistage`, `water_use_efficiency`, `ky_table` (FAO-56 Table 24)
+- `validate_yield` binary: 32/32 checks against Stewart 1977 + FAO-56 Ch 10
+- `validate_cw2d` binary: 24/24 checks against HYDRUS CW2D media parameters
+- `control/yield_response/` — Python baseline + benchmark JSON
+- `control/cw2d/` — Python baseline + benchmark JSON
+
+#### Changed
+- Lib tests: 417→433 (16 new yield_response unit tests)
+- Total Rust tests: 585→601 (2 new validation binaries)
+- Validation binaries: 16→18
+- Paper queue: 11→13 completed reproductions
+
+### Doc Cleanup + V009 Evolution Handoff — 758 Shaders, 585 Tests
+
+Corrected stale WGSL shader counts across all docs (608→758 actual, counted
+from ToadStool HEAD). Updated stale references (407→417 lib, 95→115
+integration, 0c477306→S54 session refs). Archived V008 handoff, created V009
+comprehensive evolution handoff for ToadStool/BarraCuda team covering: full
+BarraCuda integration map (14 primitives, 8 GPU orchestrators), 4 pending
+metalForge absorption modules (42 tests), cross-spring evolution observations,
+and updated action items (P0–P3). Aligned doc patterns with sibling Springs
+(wetSpring, hotSpring conventions).
+
+#### Changed
+- WGSL shader count corrected: 608→758 across README, specs, wateringHole, baseCamp
+- EVOLUTION_READINESS.md: `0c477306`→S54 session references for TS issues
+- experiments/README.md: added cross-spring evolution test row, updated status line
+- All active docs now reference V009 (supersedes V008)
+
+#### Added
+- V009 evolution handoff: `AIRSPRING_V009_EVOLUTION_HANDOFF_FEB25_2026.md`
+  — full BarraCuda integration map, domain learnings, cross-spring observations
+
+### ToadStool S62 Sync + Cross-Spring Evolution — 585 Tests, 97.55% Coverage
+
+ToadStool S42–S62 sync: reviewed 170 upstream commits, 46 cross-spring
+absorptions, 4,224+ ToadStool tests. All 4 airSpring issues (TS-001
+through TS-004) confirmed resolved in S54. Rewired to modern BarraCuda:
+`barracuda::tolerances` (S52) for domain-specific validation, cross-spring
+shader provenance documented in all GPU modules, 18 cross-spring evolution
+integration tests, 3 throughput benchmarks. V008 handoff to ToadStool team.
+
+Full codebase audit: benchmark provenance gaps closed, GPU test suite
+refactored by domain cohesion, validation.rs 100% covered, CSV parser
+streamlined, forge clippy hardened, baseline lineage documented, clippy
+lint configuration migrated to Cargo.toml. Zero unsafe, zero unwrap in
+lib, zero TODO/FIXME, all files under 850 lines.
+
+#### Added
+- **`tolerances.rs`**: 21 domain-specific validation tolerances using upstream
+  `barracuda::tolerances::Tolerance` struct (S52 M-010). Covers ET₀, water
+  balance, Richards PDE, isotherm fitting, GPU/CPU cross-validation, kriging,
+  IoT smoothing, sensor calibration. 100% coverage, 10 unit tests.
+- **`tests/cross_spring_evolution.rs`**: 18 integration tests documenting
+  cross-spring shader provenance — hotSpring precision math (pow_f64, exp,
+  acos), wetSpring bio primitives (kriging, reduce, moving_window, ridge),
+  neuralSpring optimizers (nelder_mead, ValidationHarness), airSpring
+  contributions back (TS-001/003/004, Richards PDE). 3 throughput benchmarks.
+- Cross-spring provenance doc comments in all 7 GPU modules (et0, water_balance,
+  kriging, reduce, stream, richards, isotherm)
+- 46 new unit+integration tests: 10 tolerances + 18 cross-spring + 18 prior —
+  lib total 407→417, integration 95→115, overall 555→585
+- `tests/common/mod.rs`: shared GPU device helpers and `device_or_skip!`
+  macro for integration tests
+- `tests/gpu_evolution.rs`: evolution gap catalog and ToadStool issue
+  tracking (6 tests, structural invariants, no GPU required)
+- `tests/gpu_determinism.rs`: bit-identical rerun validation across all
+  GPU orchestrators (4 tests)
+- Provenance `Provenance:` blocks to all 8 Python baseline scripts
+  (commit, benchmark output, reproduction command, date)
+- `reproduction_note` to `benchmark_long_term_wb.json`
+- `data_api_url` + `data_api_params` to `benchmark_long_term_wb.json`
+  for ERA5 Open-Meteo data accession
+- `repository` field to `benchmark_cover_crop_kc.json`
+- Baseline Commit Lineage table in `specs/README.md` (94cc51d, 3afc229)
+
+#### Changed
+- **Clippy lint config migrated to `[lints.clippy]` in Cargo.toml** (modern
+  Rust pattern, matches forge): `pedantic`, `module_name_repetitions`,
+  `must_use_candidate`, `return_self_not_must_use`, `cast_precision_loss`
+  moved from `#![warn/allow]` in lib.rs to Cargo.toml. ~28 redundant
+  per-item `#[allow(clippy::cast_precision_loss)]` removed across 14 files.
+- **`tests/gpu_integration.rs` refactored** (1076→754 lines): split by
+  domain cohesion into `gpu_integration.rs` (functional), `gpu_evolution.rs`
+  (metadata), `gpu_determinism.rs` (cross-cutting). All files under 1000.
+- `io/csv_ts.rs`: merged two-pass column_names+column_index build into
+  single pass with `HashMap::with_capacity`; simplified row iteration
+- `metalForge/forge/src/regression.rs`: added inline
+  `#[allow(clippy::many_single_char_names)]` on `fit_linear` so clippy
+  passes with both Cargo.toml lints and explicit `-D warnings` CLI flags
+
+#### Documentation
+- V008 wateringHole handoff: ToadStool S62 sync — 170 commits reviewed,
+  TS-001–004 confirmed resolved, 0 breaking changes, revalidation complete,
+  updated action items for metalForge absorption and `crank_nicolson_f64`
+- `barracuda/EVOLUTION_READINESS.md`: updated with ToadStool S42–S62 evolution
+  timeline, new upstream capabilities table (tolerances, provenance, dot, etc.)
+- V007 archived; wateringHole README updated to V008
+- README.md: document index expanded (EVOLUTION_READINESS, ABSORPTION_MANIFEST)
+- `evolution_gaps.rs`: updated inventory header to v0.4.2, added S42–S62 summary
+- All docs aligned to 417 lib + 115 integration + 53 forge = 585 total
+- experiments/README.md: added test breakdown table, "how to add experiments"
+  section, naming convention notes
+- baseCamp README: added evolution documents table, expanded next steps
+- BARRACUDA_REQUIREMENTS.md: version header updated to v0.4.2
+- `evolution_gaps.rs`: test count 319→417, determinism tests → `gpu_determinism.rs`
+
+#### Fixed
+- `benchmark_richards.json`, `benchmark_biochar.json`: `reproduction_note`
+  now includes "at baseline_commit" (aligned with other benchmarks)
+
+## [Unreleased] - 2026-02-25 (prior)
+
 ### Deep Debt Cleanup, Idiomatic Rust, Module Refactoring, Coverage 97%
 
 Comprehensive audit and cleanup: zero clippy pedantic/nursery warnings,

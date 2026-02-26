@@ -4,6 +4,13 @@
 //! Wraps [`barracuda::ops::kriging_f64::KrigingF64`] with domain-specific types
 //! for precision agriculture soil moisture mapping.
 //!
+//! # Cross-Spring Provenance
+//!
+//! `kriging_f64` (geostatistical interpolation) was developed jointly by
+//! airSpring (soil moisture mapping) and wetSpring (sampling site interpolation).
+//! The variogram models (spherical, exponential, Gaussian, linear) share the
+//! same mathematical primitives as wetSpring's spatial ecology pipelines.
+//!
 //! # Two API Levels
 //!
 //! | API | GPU? | Dependency |

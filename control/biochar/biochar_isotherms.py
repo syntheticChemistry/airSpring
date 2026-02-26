@@ -12,6 +12,12 @@ Models:
   Freundlich: qe = KF * Ce^(1/n)
 
 Uses scipy.optimize.curve_fit for nonlinear least squares fitting.
+
+Provenance:
+  Baseline commit: 3afc229
+  Benchmark output: control/biochar/benchmark_biochar.json
+  Reproduction: python control/biochar/biochar_isotherms.py
+  Created: 2026-02-25
 """
 
 import json

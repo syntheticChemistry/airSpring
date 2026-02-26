@@ -24,9 +24,14 @@
 //! | `testutil` | `gpu::reduce` | `fused_map_reduce_f64.wgsl` | Seasonal stats | A (ready) |
 //! | `io::csv_ts` | `gpu::stream` | `moving_window.wgsl` | Stream smoothing | A (ready) |
 //!
-//! # Current Inventory (February 25, 2026 — v0.4.1, synced to `ToadStool` HEAD `02207c4a`)
+//! # Current Inventory (February 25, 2026 — v0.4.2, synced to `ToadStool` HEAD `02207c4a`)
 //!
-//! All four `ToadStool` issues (TS-001 through TS-004) are **RESOLVED**.
+//! `ToadStool` S42–S62: 170 commits, 46 cross-spring absorptions, 4,224+ tests.
+//! All four airSpring issues (TS-001 through TS-004) resolved in **S54**.
+//!
+//! New upstream capabilities (S51–S62): `FusedMapReduceF64::dot()`,
+//! `barracuda::tolerances` (centralized), `barracuda::provenance` (tags),
+//! `solve_f64_cpu()`, `GpuSessionBuilder`, `OdeSystem` trait + `BatchedOdeRK4`.
 //!
 //! ## Tier A: Integrated (GPU primitive wired, validated, GPU-first)
 //!
@@ -92,11 +97,11 @@
 //! ## Cross-Validation Strategy
 //!
 //! GPU paths are validated against CPU baselines:
-//! 1. CPU validation remains source of truth (319 tests, 16 binaries)
+//! 1. CPU validation remains source of truth (407 lib tests, 16 binaries)
 //! 2. GPU results must match CPU within documented tolerance
 //! 3. Cross-validation harness (75/75 Python↔Rust) extends to GPU path
 //! 4. Each GPU function has a `test_gpu_matches_cpu_*` integration test
-//! 5. GPU determinism proven: 4 bit-identical rerun tests (`gpu_integration.rs`)
+//! 5. GPU determinism proven: 4 bit-identical rerun tests (`gpu_determinism.rs`)
 
 /// Structured representation of an evolution gap.
 #[derive(Debug)]

@@ -5,6 +5,13 @@
 //! 1. FAO-56 PM ET₀ computation (N station-days)
 //! 2. Dual Kc simulation (N-day growing seasons)
 //! 3. Cover crop + mulch simulation
+//! 4. Richards PDE (1D infiltration)
+//! 5. Van Genuchten retention (batch)
+//! 6. Isotherm fitting (Langmuir + Freundlich)
+//! 7. Yield response (Stewart 1977 single + multi-stage)
+//! 8. Water use efficiency
+//! 9. Season yield + water balance integration
+//! 10. CW2D Richards (gravel + organic media)
 //!
 //! Outputs timing data in a format directly comparable to Python controls.
 //! Run with `--release` for production-representative numbers:
@@ -17,6 +24,8 @@ use airspring_barracuda::eco::dual_kc::{self, DualKcInput, EvaporationLayerState
 use airspring_barracuda::eco::evapotranspiration::{self as et, DailyEt0Input};
 use airspring_barracuda::eco::isotherm;
 use airspring_barracuda::eco::richards::{self, VanGenuchtenParams};
+use airspring_barracuda::eco::water_balance;
+use airspring_barracuda::eco::yield_response;
 use std::time::Instant;
 
 const WARMUP: usize = 5;
@@ -25,7 +34,6 @@ const MEASURE: usize = 20;
 fn make_station_days(n: usize) -> Vec<DailyEt0Input> {
     (0..n)
         .map(|i| {
-            #[allow(clippy::cast_precision_loss)]
             let day = i as f64;
             let tmax = 5.0f64.mul_add((day * 0.017).sin(), 30.0);
             let tmin = 3.0f64.mul_add((day * 0.017).cos(), 15.0);
@@ -47,7 +55,6 @@ fn make_station_days(n: usize) -> Vec<DailyEt0Input> {
 fn make_dual_kc_inputs(n: usize) -> Vec<DualKcInput> {
     (0..n)
         .map(|i| {
-            #[allow(clippy::cast_precision_loss)]
             let day = i as f64;
             DualKcInput {
                 et0: 2.0f64.mul_add((day * 0.017).sin(), 4.0),
@@ -69,17 +76,12 @@ fn bench<F: Fn()>(label: &str, n: usize, f: F) {
     }
     let elapsed = start.elapsed();
     let per_iter = elapsed / u32::try_from(MEASURE).expect("MEASURE fits in u32");
-    #[allow(clippy::cast_precision_loss)]
     let throughput = n as f64 / per_iter.as_secs_f64();
 
     println!("  {label:<40} {n:>8} items  {per_iter:>10.2?}/iter  {throughput:>12.0} items/s",);
 }
 
-fn main() {
-    println!("═══════════════════════════════════════════════════════════");
-    println!("  airSpring CPU Benchmark — Rust vs Python baseline");
-    println!("═══════════════════════════════════════════════════════════\n");
-
+fn bench_et0_and_kc() {
     println!("── FAO-56 PM ET₀ computation ──\n");
     for &n in &[100, 1_000, 10_000, 100_000] {
         let data = make_station_days(n);
@@ -132,7 +134,9 @@ fn main() {
             &state,
         ));
     });
+}
 
+fn bench_richards_and_isotherms() {
     println!("\n── Richards equation (1D infiltration) ──\n");
     let sand = VanGenuchtenParams {
         theta_r: 0.045,
@@ -157,7 +161,6 @@ fn main() {
     for &n in &[1_000, 10_000, 100_000] {
         bench(&format!("VG theta ({n} evaluations)"), n, || {
             for i in 0..n {
-                #[allow(clippy::cast_precision_loss)]
                 let h = -0.01 * (i as f64 + 1.0);
                 std::hint::black_box(richards::van_genuchten_theta(
                     h,
@@ -179,10 +182,135 @@ fn main() {
     bench("Freundlich fit (9 points)", 9, || {
         std::hint::black_box(isotherm::fit_freundlich(&ce, &qe));
     });
+}
+
+#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+fn bench_yield_response() {
+    println!("\n── Yield response (Stewart 1977, single-stage) ──\n");
+    for &n in &[1_000, 10_000, 100_000, 1_000_000] {
+        bench(&format!("Yield single ({n} evaluations)"), n, || {
+            for i in 0..n {
+                let eta_etc = (i as f64 + 1.0) / (n as f64 + 1.0);
+                std::hint::black_box(yield_response::yield_ratio_single(1.25, eta_etc));
+            }
+        });
+    }
+
+    println!("\n── Yield response (multi-stage, 4-stage corn) ──\n");
+    let corn_stages = [(0.40, 0.9), (1.50, 0.85), (0.50, 0.95), (0.20, 0.98)];
+    for &n in &[1_000, 10_000, 100_000] {
+        bench(&format!("Yield multi-stage ({n} corn seasons)"), n, || {
+            for _ in 0..n {
+                std::hint::black_box(yield_response::yield_ratio_multistage(&corn_stages).unwrap());
+            }
+        });
+    }
+
+    println!("\n── Water use efficiency ──\n");
+    for &n in &[1_000, 10_000, 100_000] {
+        bench(&format!("WUE ({n} calculations)"), n, || {
+            for i in 0..n {
+                let y = 8000.0 + (i as f64 * 0.04);
+                let eta = 300.0 + (i as f64 * 0.002);
+                std::hint::black_box(yield_response::water_use_efficiency(y, eta).unwrap());
+            }
+        });
+    }
+
+    println!("\n── Yield + WB integration (140-day season) ──\n");
+    for &n in &[100, 1_000, 10_000] {
+        bench(&format!("Season yield ({n} scenarios)"), n, || {
+            for i in 0..n {
+                let taw = water_balance::total_available_water(0.18, 0.08, 900.0);
+                let raw = water_balance::readily_available_water(taw, 0.55);
+                let mut dr = 0.0_f64;
+                let mut actual_et_sum = 0.0_f64;
+                let mut potential_et_sum = 0.0_f64;
+                for day in 0..140_usize {
+                    let ks = water_balance::stress_coefficient(dr, taw, raw);
+                    let et0 = 5.0 + (day as f64 * 0.04).sin();
+                    let etc = 1.2 * et0;
+                    let eta = ks * etc;
+                    let precip = if (day + i) % 5 == 0 { 8.0 } else { 0.0 };
+                    dr = (dr - precip + eta).clamp(0.0, taw);
+                    actual_et_sum += eta;
+                    potential_et_sum += etc;
+                }
+                let ratio = actual_et_sum / potential_et_sum;
+                std::hint::black_box(yield_response::yield_ratio_single(1.25, ratio));
+            }
+        });
+    }
+}
+
+fn bench_cw2d() {
+    println!("\n── CW2D Richards (gravel, organic) ──\n");
+    let gravel = VanGenuchtenParams {
+        theta_r: 0.025,
+        theta_s: 0.40,
+        alpha: 0.100,
+        n_vg: 3.00,
+        ks: 5000.0,
+    };
+    let organic = VanGenuchtenParams {
+        theta_r: 0.100,
+        theta_s: 0.60,
+        alpha: 0.050,
+        n_vg: 1.50,
+        ks: 50.0,
+    };
+    for &(label, params) in &[("gravel", &gravel), ("organic", &organic)] {
+        bench(
+            &format!("CW2D Richards {label} (20 nodes, 0.04d)"),
+            20,
+            || {
+                let _ = std::hint::black_box(richards::solve_richards_1d(
+                    params, 60.0, 20, -20.0, -20.0, true, true, 0.04, 0.001,
+                ));
+            },
+        );
+    }
+
+    println!("\n── CW2D VG retention (gravel + organic batch) ──\n");
+    for &n in &[10_000, 100_000] {
+        bench(&format!("CW2D VG gravel ({n} evaluations)"), n, || {
+            for i in 0..n {
+                let h = -0.01 * (i as f64 + 1.0);
+                std::hint::black_box(richards::van_genuchten_theta(
+                    h,
+                    gravel.theta_r,
+                    gravel.theta_s,
+                    gravel.alpha,
+                    gravel.n_vg,
+                ));
+            }
+        });
+        bench(&format!("CW2D VG organic ({n} evaluations)"), n, || {
+            for i in 0..n {
+                let h = -0.01 * (i as f64 + 1.0);
+                std::hint::black_box(richards::van_genuchten_theta(
+                    h,
+                    organic.theta_r,
+                    organic.theta_s,
+                    organic.alpha,
+                    organic.n_vg,
+                ));
+            }
+        });
+    }
+}
+
+fn main() {
+    println!("═══════════════════════════════════════════════════════════");
+    println!("  airSpring CPU Benchmark — Rust vs Python baseline");
+    println!("═══════════════════════════════════════════════════════════\n");
+
+    bench_et0_and_kc();
+    bench_richards_and_isotherms();
+    bench_yield_response();
+    bench_cw2d();
 
     println!();
-    println!("Python baseline reference (Exp 009 control):");
-    println!("  63 checks in ~0.8s interpreted = ~80 checks/s");
-    println!("  Rust target: 1M+ ET₀/s, 100K+ Kc days/s\n");
-    println!("Done.");
+    println!("Done. All throughput numbers are Rust --release (pure f64 math).");
+    println!("Compare against Python baselines via: python3 scripts/bench_python_baselines.py");
 }

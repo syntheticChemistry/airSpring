@@ -8,7 +8,7 @@
         "baseline_script": "control/biochar/biochar_isotherms.py",
         "baseline_command": "python control/biochar/biochar_isotherms.py",
         "python_version": "3.10.12",
-        "reproduction_note": "Re-run baseline_command to regenerate expected values",
+        "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
         "baseline_commit": "3afc229",
         "references": [
             "Kumari, Dong & Safferman (2025) Phosphorus adsorption and recovery from waste streams using biochar. Applied Water Science 15(7):162",

@@ -1,7 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! GPU-accelerated isotherm fitting — bridges `eco::isotherm` ↔ `barracuda::optimize`.
 //!
-//! Provides three API levels:
+//! # Cross-Spring Provenance
+//!
+//! `nelder_mead` and `multi_start_nelder_mead` were developed in neuralSpring
+//! for neural architecture search and absorbed into `ToadStool` S62. airSpring
+//! uses these for 2-parameter isotherm fitting (Langmuir qm/KL, Freundlich
+//! Kf/n). The `NelderMeadGpu` variant (S52+) exists for 5-50 parameter
+//! problems but is not cost-effective for 2-parameter isotherms.
+//!
+//! # Three API Levels
 //!
 //! | API | Backend | Best for |
 //! |-----|---------|----------|

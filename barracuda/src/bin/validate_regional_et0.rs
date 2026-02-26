@@ -232,7 +232,6 @@ fn load_and_compute(
     let r2 = testutil::r_squared(&et0_om, &et0_rust).unwrap_or(0.0);
     let rmse = testutil::rmse(&et0_om, &et0_rust);
     let total: f64 = et0_rust.iter().sum();
-    #[allow(clippy::cast_precision_loss)]
     let mean = total / et0_rust.len() as f64;
     let max_val = et0_rust.iter().copied().fold(f64::NEG_INFINITY, f64::max);
     let min_val = et0_rust.iter().copied().fold(f64::INFINITY, f64::min);
@@ -310,9 +309,7 @@ fn check_spatial_variability(v: &mut ValidationHarness, results: &[StationResult
     validation::section("Spatial variability");
     let all_means: Vec<f64> = results.iter().map(|sr| sr.daily_mean).collect();
     let all_totals: Vec<f64> = results.iter().map(|sr| sr.seasonal_total).collect();
-    #[allow(clippy::cast_precision_loss)]
     let grand_mean = all_means.iter().sum::<f64>() / all_means.len() as f64;
-    #[allow(clippy::cast_precision_loss)]
     let std_dev = (all_means
         .iter()
         .map(|x| (x - grand_mean).powi(2))

@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: February 25, 2026
-**Status**: 11 experiments, 344/344 Python + 371 Rust lib tests + 97 integration + GPU wired (8 orchestrators)
+**Status**: 13 experiments, 400/400 Python + 601 Rust (433 lib + 115 integration + 53 forge) + 75/75 cross-validation + 8 GPU orchestrators
 
 ---
 
@@ -14,15 +14,34 @@
 | 003 | IoT irrigation pipeline (Dong 2024) | IoT | **Complete** | Python + R ANOVA | `io::csv_ts`, `eco::sensor_calibration` | 24+11 |
 | 004 | Water balance scheduling (FAO-56 Ch 8) | Irrigation | **Complete** | Python (FAO-56 Ch 8) | `eco::water_balance` | 18+13 |
 | 005 | Real data pipeline (918 station-days) | Integration | **Complete** | Python + Open-Meteo API | All modules | R²=0.967+21 |
-
-| 006 | HYDRUS Richards Equation (van Genuchten-Mualem) | Environmental | **Complete** | Python + Rust CPU | `eco::richards` | 14+15 |
-| 007 | Biochar Adsorption Isotherms (Kumari et al. 2025) | Environmental | **Complete** | Python + Rust CPU | `eco::isotherm` | 14+14 |
+| 006 | HYDRUS Richards Equation (VG-Mualem) | Environmental | **Complete** | Python + Rust CPU | `eco::richards` | 14+15 |
+| 007 | Biochar Adsorption Isotherms (Kumari 2025) | Environmental | **Complete** | Python + Rust CPU | `eco::isotherm` | 14+14 |
 | 009 | FAO-56 Dual Kc (Allen 1998 Ch 7) | Irrigation | **Complete** | Python + Rust CPU | `eco::dual_kc` | 63+61 |
 | 010 | Regional ET₀ Intercomparison (6 MI stations) | Precision Ag | **Complete** | Python + Rust CPU | `eco::evapotranspiration` | 61+61 |
 | 011 | Cover Crop Dual Kc + No-Till (FAO-56 Ch 11) | Irrigation | **Complete** | Python + Rust CPU | `eco::dual_kc` (mulch) | 40+40 |
-| 015 | 60-Year Water Balance (Wooster OH, ERA5) | Integration | **Complete** | Python + Rust CPU | `eco::water_balance`, `eco::evapotranspiration` | 10+11 |
+| 015 | 60-Year Water Balance (Wooster OH, ERA5) | Integration | **Complete** | Python + Rust CPU | `eco::water_balance`, Hargreaves | 10+11 |
+| 008 | Yield Response to Water Stress (FAO-56 Ch 10) | Irrigation | **Complete** | Python + Rust CPU | `eco::yield_response` | 32+32 |
+| 012 | CW2D Richards Extension (Dong 2019) | Environmental | **Complete** | Python + Rust CPU | `eco::richards` (CW2D media) | 24+24 |
 
-**Total**: 344 Python checks + 371 Rust lib + 97 integration tests + 75 cross-validation values + 8 GPU orchestrators
+**Grand Total**: 400 Python + 433 Rust lib + 115 integration + 53 forge = **601 Rust tests** + 75 cross-validation values + 8 GPU orchestrators
+
+---
+
+## Test Breakdown (v0.4.2)
+
+| Category | Tests | Source |
+|----------|:-----:|--------|
+| Lib (unit) | 433 | `cargo test --lib` |
+| Eco integration | 33 | `tests/eco_integration.rs` |
+| GPU functional | 21 | `tests/gpu_integration.rs` |
+| GPU evolution | 6 | `tests/gpu_evolution.rs` |
+| GPU determinism | 4 | `tests/gpu_determinism.rs` |
+| Cross-spring evolution | 18 | `tests/cross_spring_evolution.rs` |
+| Stats integration | 11 | `tests/stats_integration.rs` |
+| I/O + errors | 20 | `tests/io_and_errors.rs` |
+| Doc tests | 2 | `cargo test --doc` |
+| Forge | 53 | `metalForge/forge/` |
+| **Total** | **601** | |
 
 ---
 
@@ -78,7 +97,7 @@ Each experiment follows the same multi-phase protocol:
 
 **Control**: `control/soil_sensors/calibration_dong2020.py` — 36/36 checks. Topp equation, RMSE/IA/MBE, four correction models (linear, quadratic, exponential, logarithmic).
 
-**Rust**: `barracuda/src/eco/soil_moisture.rs`, `eco/correction.rs` — 7 soil textures, 4 correction fits + ridge regression via `barracuda::linalg::ridge`. `validate_soil` binary: 26/26 checks.
+**Rust**: `barracuda/src/eco/soil_moisture.rs`, `eco/correction.rs` — 7 soil textures, 4 correction fits + ridge regression via `barracuda::linalg::ridge`. `validate_soil` binary: 40/40 checks.
 
 ### Exp 003: IoT Irrigation Pipeline (Dong 2024)
 
@@ -143,9 +162,7 @@ no-till ET savings (39.6% during initial stage).
 mulch factors (0.25–1.0), Islam et al. Brandt farm observations, rye→corn phases.
 
 **Key Result**: No-till with heavy residue (mulch_factor=0.40) reduces bare soil
-evaporation by ~40% during the initial growth stage. The mulch effect diminishes
-during mid-season when transpiration (Kcb) dominates. Connects to baseCamp
-Sub-thesis 06 (no-till → Anderson geometry coupling).
+evaporation by ~40% during the initial growth stage.
 
 ---
 
@@ -161,9 +178,7 @@ geographic consistency, 15-station-pair temporal correlations.
 (May 1 – Sep 30), 6 stations × 153 days = 918 station-days.
 
 **Key Results**: R² > 0.96 all stations, RMSE < 0.33 mm/day. Grand mean ET₀ =
-4.27 mm/day. Season totals 633–677 mm (matches MSU Enviro-weather references).
-Cross-station correlation r = 0.80–0.96 (geographic proximity drives correlation).
-Spatial CV = 2.0% (tight clustering expected for Lower Michigan stations).
+4.27 mm/day. Season totals 633–677 mm. Cross-station correlation r = 0.80–0.96.
 
 ---
 
@@ -175,7 +190,7 @@ Spatial CV = 2.0% (tight clustering expected for Lower Michigan stations).
 
 **Rust**: `barracuda/src/eco/richards.rs` — Implicit Euler + Picard iteration, Thomas algorithm. `validate_richards` binary: 15/15 checks.
 
-**GPU**: `gpu::richards::BatchedRichards` wired to `barracuda::pde::richards::solve_richards` (Tier B). Cross-validates eco::richards (implicit Euler) against upstream (Crank-Nicolson) for physical reasonableness.
+**GPU**: `gpu::richards::BatchedRichards` wired to `barracuda::pde::richards::solve_richards` (Tier B). Cross-validates eco::richards (implicit Euler) against upstream (Crank-Nicolson).
 
 ### Exp 007: Biochar Adsorption Isotherms (Kumari et al. 2025)
 
@@ -183,9 +198,9 @@ Spatial CV = 2.0% (tight clustering expected for Lower Michigan stations).
 
 **Control**: `control/biochar/biochar_isotherms.py` — 14/14 checks. Langmuir and Freundlich isotherm fitting for P adsorption on wood and sugar beet biochar.
 
-**Rust**: `barracuda/src/eco/isotherm.rs` — Linearized least squares fitting. `validate_biochar` binary: 14/14 checks.
+**Rust**: `barracuda/src/eco/isotherm.rs` — Linearized least squares + grid refinement. `validate_biochar` binary: 14/14 checks.
 
-**GPU**: `gpu::isotherm::fit_langmuir_nm` / `fit_freundlich_nm` wired to `barracuda::optimize::nelder_mead` (Tier B). Linearized LS as initial guess → NM refinement matches scipy.curve_fit.
+**GPU**: `gpu::isotherm::fit_langmuir_nm` / `fit_freundlich_nm` wired to `barracuda::optimize::nelder_mead`. Linearized LS as initial guess → NM refinement matches scipy.curve_fit.
 
 ### Exp 015: 60-Year Water Balance Reconstruction
 
@@ -195,7 +210,31 @@ Spatial CV = 2.0% (tight clustering expected for Lower Michigan stations).
 
 **Rust**: Existing `eco::water_balance` + `eco::evapotranspiration::hargreaves_et0`. `validate_long_term_wb` binary: 11/11 checks.
 
-**GPU**: `BatchedEt0` + `BatchedWaterBalance` at 64-year scale (already wired)
+**GPU**: `BatchedEt0` + `BatchedWaterBalance` at 64-year scale (already wired).
+
+### Exp 008: Yield Response to Water Stress (Stewart 1977 / FAO-56 Ch 10)
+
+**Paper**: Stewart (1977); Allen et al. (1998) *FAO-56 Chapter 10*, Table 24 (Doorenbos & Kassam 1979); Ali, Dong & Lavely (2024) Ag Water Mgmt 306:109148
+
+**Control**: `control/yield_response/yield_response.py` — 32/32 checks. Ky table values (7 crops), single-stage Stewart equation (8 analytical), multi-stage product formula (5 analytical), WUE calculations (4 crops), scheduling comparison (3 strategies × 2 metrics + 2 ordering checks).
+
+**Benchmark**: `control/yield_response/benchmark_yield_response.json` — FAO-56 Table 24 Ky values, Stewart equation test vectors, multi-stage product formula, WUE, scheduling scenarios.
+
+**Rust**: `barracuda/src/eco/yield_response.rs` — `yield_ratio_single`, `yield_ratio_multistage`, `water_use_efficiency`, `ky_table` (9 crops). `validate_yield` binary: 32/32 checks. 16 unit tests.
+
+**GPU**: `BatchedElementwiseF64` yield batch (Tier B — ready for GPU promotion).
+
+### Exp 012: CW2D Richards Extension (Dong 2019)
+
+**Paper**: Dong et al. (2019) *Land-based wastewater treatment system modeling using HYDRUS CW2D.* J Sustainable Water 5(4):04019005
+
+**Control**: `control/cw2d/cw2d_richards.py` — 24/24 checks. VG retention curves for 4 CW2D media (gravel, coarse sand, organic, fine gravel), Mualem conductivity, gravel infiltration, organic drainage, mass balance.
+
+**Benchmark**: `control/cw2d/benchmark_cw2d.json` — HYDRUS CW2D standard media parameters (Šimůnek et al. 2012), analytical VG values, solver convergence checks.
+
+**Rust**: Reuses existing `barracuda/src/eco/richards.rs` — validates same solver on extreme VG parameters. `validate_cw2d` binary: 24/24 checks. No new Rust module needed (parameter-driven validation).
+
+**GPU**: Reuses `gpu::richards::BatchedRichards` — CW2D parameters work with existing GPU pipeline.
 
 ---
 
@@ -204,12 +243,88 @@ Spatial CV = 2.0% (tight clustering expected for Lower Michigan stations).
 Experiments follow `NNN_name` format:
 - `001`–`005`: Baseline reproduction (FAO-56, soil, IoT, water balance, real data)
 - `006`–`007`: Richards equation, biochar isotherms (Track 2)
+- `008`: Yield response to water stress (Stewart 1977 / FAO-56 Ch 10)
 - `009`–`011`: Dual Kc, regional ET₀, cover crops + no-till
-- `015`: Long-term water balance reconstruction (see `specs/PAPER_REVIEW_QUEUE.md`)
+- `012`: CW2D Richards extension (Dong 2019)
+- `015`: Long-term water balance reconstruction
+
+Gaps (013-014) are reserved for future experiments. See `specs/PAPER_REVIEW_QUEUE.md`.
+
+## Adding a New Experiment
+
+1. Create benchmark JSON: `control/{name}/benchmark_{name}.json` with provenance
+2. Write Python baseline: `control/{name}/{name}.py` with provenance docstring
+3. Run baseline: validate against paper, add to `CONTROL_EXPERIMENT_STATUS.md`
+4. Write Rust validation binary: `barracuda/src/bin/validate_{name}.rs`
+5. Add `[[bin]]` to `barracuda/Cargo.toml`
+6. Add row to experiment index above
+7. Update counts in README, CHANGELOG, whitePaper docs
+
+## CPU Benchmark: Rust vs Python
+
+All experiments validate mathematical parity between Python baselines and Rust.
+The table below shows Rust CPU throughput vs Python CPython scalar loops — same
+algorithms, same f64 precision, no numpy vectorization on the Python side.
+
+| Computation | Python (items/s) | Rust CPU (items/s) | Speedup |
+|---|---:|---:|---:|
+| FAO-56 ET₀ (10K station-days) | 632,300 | 12,714,768 | **20x** |
+| VG θ(h) retention (100K) | 434,262 | 35,842,872 | **83x** |
+| Yield single-stage (100K) | 13,410,816 | 1,083,658,431 | **81x** |
+| Yield multi-stage 4-crop (100K) | 4,075,460 | 377,597,873 | **93x** |
+| Water use efficiency (100K) | 12,022,977 | 677,607,774 | **56x** |
+| Season yield + WB (1K scenarios) | 20,859 | 940,353 | **45x** |
+| Richards 1D (20 nodes, 0.1d) | 23 | 3,683 | **159x** |
+| Richards 1D (50 nodes, 0.1d) | 7 | 3,620 | **502x** |
+| CW2D VG gravel (100K) | 444,138 | 35,518,730 | **80x** |
+| CW2D VG organic (100K) | 446,810 | 33,847,030 | **76x** |
+
+**Geometric mean speedup: 69x** (range: 20x – 502x)
+
+Key insight: Rust achieves **1 billion** yield evaluations/sec and **12.5M**
+ET₀ computations/sec. Richards PDE sees the largest gains (159–502x) because
+Python's `scipy.integrate.solve_ivp` overhead per step dwarfs Rust's hand-coded
+implicit Euler + Thomas algorithm.
+
+Reproduce:
+```sh
+cargo run --release --bin bench_cpu_vs_python   # Rust
+python3 scripts/bench_python_baselines.py       # Python
+python3 scripts/bench_compare.py                # Side-by-side report
+```
+
+---
+
+## GPU Benchmark: CPU vs GPU Orchestrators
+
+The GPU benchmark measures throughput for 8 GPU orchestrators wired through
+ToadStool's shader evolution (608 WGSL shaders, 46 cross-spring absorptions):
+
+| Orchestrator | CPU (items/s) | Notes |
+|---|---:|---|
+| Batched ET₀ | 8.6M (N=10K) | `batched_elementwise_f64.wgsl` |
+| Seasonal Reduce | 244M elem/s | `fused_map_reduce_f64.wgsl` |
+| Stream Smoothing | 33M elem/s | `moving_window.wgsl` (24h window) |
+| Kriging (20→500) | 500 targets in 25µs | `kriging_f64.wgsl` |
+| Ridge Regression | 5K in 50µs, R²=1.0 | `barracuda::linalg::ridge` |
+| Richards PDE (100 nodes) | 36/s | Crank-Nicolson + Thomas |
+| VG θ(h) batch (100K) | 37.7M/s | `df64` precision |
+| Isotherm NM | 36.6K fits/s | Multi-start Nelder-Mead |
+
+GPU dispatches are CPU-only in this benchmark (no GPU hardware detected).
+BarraCuda GPU validation will show identical math with GPU dispatch overhead.
+
+Reproduce:
+```sh
+cargo run --release --bin bench_airspring_gpu
+```
+
+---
 
 ## Results
 
 Benchmark data is stored in `control/*/benchmark_*.json` (digitized paper values)
 and used by both Python control scripts and Rust validation binaries as ground
 truth. Cross-validation outputs are produced by `cross_validate` (Rust) and
-`scripts/cross_validate.py` (Python).
+`scripts/cross_validate.py` (Python). Benchmark throughput data is in
+`scripts/bench_python_results.json` and `scripts/bench_comparison.json`.

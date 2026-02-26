@@ -15,6 +15,12 @@ References:
     van Genuchten (1980) SSSA J 44:892-898
     Richards (1931) Physics 1:318-333
     Dong et al. (2019) J Sustainable Water in the Built Environment 5(4):04019005
+
+Provenance:
+  Baseline commit: 3afc229
+  Benchmark output: control/richards/benchmark_richards.json
+  Reproduction: python control/richards/richards_1d.py
+  Created: 2026-02-25
 """
 
 import json

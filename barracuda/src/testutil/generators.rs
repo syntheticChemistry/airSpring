@@ -24,7 +24,6 @@ use crate::io::csv_ts::TimeseriesData;
 /// | `humidity` | 70.0 | 55.0 | 85.0 |
 /// | `par` | ~464 | 0.0 | 1800.0 |
 #[must_use]
-#[allow(clippy::cast_precision_loss)]
 pub fn generate_synthetic_iot_data(n_records: usize) -> TimeseriesData {
     use std::f64::consts::PI;
 

@@ -2,7 +2,7 @@
 
 **Last Updated**: February 25, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 11 completed (344/344 Python + 371 lib + 97 integration + 8 GPU orchestrators), 4 queued. All completed papers use open data and systems.
+**Status**: 13 completed (400/400 Python + 433 lib + 115 integration + 8 GPU orchestrators). All completed papers use open data and systems.
 
 ---
 
@@ -21,13 +21,15 @@
 | 9 | Richards equation (van Genuchten-Mualem) | 0+1 | 14+15 | Dong | `benchmark_richards.json` | Published parameters |
 | 10 | Kumari et al. (2025) Biochar P adsorption | 0+1 | 14+14 | Dong | `benchmark_biochar.json` | Representative literature data |
 | 11 | 60-year water balance (OSU Triplett) | 0+1 | 10+11 | Standard | `benchmark_long_term_wb.json` | Open-Meteo ERA5 (free) |
+| 12 | Stewart (1977) yield response to water stress | 0+1 | 32+32 | Standard | `benchmark_yield_response.json` | FAO-56 Table 24 (open) |
+| 13 | Dong et al. (2019) CW2D Richards extension | 0+1 | 24+24 | Dong | `benchmark_cw2d.json` | HYDRUS CW2D params (published) |
 
 ### Controls Audit
 
-All 11 completed papers have:
+All 13 completed papers have:
 - **Digitized benchmarks** in `control/*/benchmark_*.json`
 - **Python control scripts** that validate against benchmarks
-- **Rust validation binaries** (16 binaries) that load the same benchmarks
+- **Rust validation binaries** (18 binaries) that load the same benchmarks
 - **Open or published data** (no institutional access required)
 - **Cross-validation** (75/75 Python↔Rust match at 1e-5, includes Richards VG + isotherms)
 - **GPU wiring**: 8 orchestrators (BatchedEt0, BatchedWB, BatchedDualKc, Kriging, Reduce, Stream, BatchedRichards, fit_nm)
@@ -48,6 +50,8 @@ All 11 completed papers have:
 | 9 | 14/14 | 15/15 (`validate_richards`) | `BatchedRichards` **WIRED** | VG **absorbed** |
 | 10 | 14/14 | 14/14 (`validate_biochar`) | `fit_*_nm` **WIRED** | isotherm **absorbed** |
 | 11 | 10/10 | 11/11 (`validate_long_term_wb`) | `BatchedEt0` + `BatchedWB` | `hydrology` (60yr) |
+| 12 | 32/32 | 32/32 (`validate_yield`) | `BatchedElementwise` (Tier B) | `yield_response` |
+| 13 | 24/24 | 24/24 (`validate_cw2d`) | `BatchedRichards` | VG (CW2D media) |
 
 ---
 
@@ -59,7 +63,6 @@ All 11 completed papers have:
 |---|-------------------|------|---------|:----------:|:--------------:|----------|
 | 6 | Dong et al. — Multi-sensor calibration network | 2024+ | Dong | Awaiting field data | None | Batch calibration (op=5) |
 | 7 | Dong et al. — Full IoT irrigation + forecast | 2024+ | Dong | Awaiting field data | None | Forecast integration |
-| 8 | Allen et al. (1998) FAO-56 Ch 7 — Dual Kc | 1998 | Standard | **Yes** (open literature) | **63/63 PASS** (Phase 0), **61/61** (Rust) | `BatchedDualKc` (Tier B) |
 
 ### Tier 2 — Cross-spring extensions
 

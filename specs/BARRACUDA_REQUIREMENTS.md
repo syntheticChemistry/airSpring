@@ -1,14 +1,14 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: February 25, 2026 (v0.4.0 — Richards PDE wired, isotherm NM wired, 8 GPU orchestrators)
+**Last Updated**: February 25, 2026 (v0.4.2 — 433 lib + 115 integration, 8 GPU orchestrators)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
-**ToadStool HEAD**: `02207c4a` (S62+, 608 WGSL shaders)
+**ToadStool HEAD**: `02207c4a` (S62+ — 170 commits, 46 absorptions, 4,224+ core tests, 758 WGSL shaders)
 
 ---
 
 ## Current Kernel Usage
 
-### Phase 1: Validated in Rust CPU (11 experiments)
+### Phase 1: Validated in Rust CPU (13 experiments)
 
 | Kernel / Module | Rust Crate | Checks | Validation |
 |----------------|------------|:------:|------------|
@@ -51,7 +51,7 @@ Note: `gpu::dual_kc::BatchedDualKc` has CPU orchestrator wired (Tier B → pendi
 | `stats::spearman_correlation` | `testutil::spearman_r` | Working |
 | `stats::bootstrap_ci` | `testutil::bootstrap_rmse` | Working |
 | `stats::std_dev` | Integration tests | Working |
-| `validation::ValidationHarness` | 16 binaries | Absorbed (S59) |
+| `validation::ValidationHarness` | 18 binaries | Absorbed (S59) |
 
 ---
 
@@ -59,7 +59,7 @@ Note: `gpu::dual_kc::BatchedDualKc` has CPU orchestrator wired (Tier B → pendi
 
 ### Layer 1: BarraCuda CPU (validated, complete)
 
-All algorithms implemented in pure Rust. 371 lib + 97 integration tests, 16 binaries.
+All algorithms implemented in pure Rust. 433 lib + 115 integration tests, 18 binaries.
 This is the baseline for correctness — GPU and metalForge results must match.
 CPU benchmarks: 12.7M ET₀/s, 36.5M VG θ/s, 59M dual Kc/s, 57M Langmuir fits/s.
 
@@ -160,9 +160,9 @@ Run `cargo run --release --bin bench_cpu_vs_python` for current numbers.
 
 | ID | Summary | Status |
 |----|---------|:------:|
-| TS-001 | `pow_f64` returns 0.0 for fractional exponents | **RESOLVED** (`0c477306`) |
-| TS-002 | No Rust orchestrator for `batched_elementwise_f64` | **RESOLVED** |
-| TS-003 | `acos`/`sin` precision drift in f64 WGSL shaders | **RESOLVED** |
-| TS-004 | `FusedMapReduceF64` buffer conflict for N≥1024 | **RESOLVED** |
+| TS-001 | `pow_f64` returns 0.0 for fractional exponents | **RESOLVED** (S54 — H-011) |
+| TS-002 | No Rust orchestrator for `batched_elementwise_f64` | **RESOLVED** (S54 — L-011, already present) |
+| TS-003 | `acos`/`sin` precision drift in f64 WGSL shaders | **RESOLVED** (S54 — H-012) |
+| TS-004 | `FusedMapReduceF64` buffer conflict for N≥1024 | **RESOLVED** (S54 — H-013) |
 
 See `barracuda/src/gpu/evolution_gaps.rs` for the full 20-gap roadmap.

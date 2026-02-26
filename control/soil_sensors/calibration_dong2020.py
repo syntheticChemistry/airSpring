@@ -14,6 +14,12 @@ Implements:
   4. Synthetic sensor data generation and validation
 
 All open-source: numpy, scipy only.
+
+Provenance:
+  Baseline commit: 94cc51d
+  Benchmark output: control/soil_sensors/benchmark_dong2020.json
+  Reproduction: python control/soil_sensors/calibration_dong2020.py
+  Created: 2026-02-16
 """
 
 import json

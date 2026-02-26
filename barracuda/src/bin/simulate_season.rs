@@ -54,7 +54,6 @@ impl Rng {
     }
 
     /// Uniform [0, 1)
-    #[allow(clippy::cast_precision_loss)]
     fn uniform(&mut self) -> f64 {
         (self.next_u64() >> 11) as f64 / (1u64 << 53) as f64
     }
@@ -181,7 +180,6 @@ fn generate_weather(
 
     for day_idx in 0..n_days {
         let day_idx_u32 = u32::try_from(day_idx).expect("season length fits u32");
-        #[allow(clippy::cast_precision_loss)] // exact: day_idx < 365 << 2^53
         let day_idx_f = day_idx as f64;
         let doy = doy_start + day_idx_u32;
 
@@ -258,7 +256,6 @@ fn main() {
     let soil = SoilTexture::SandyLoam.hydraulic_properties();
     let n_days: usize = env_usize("AIRSPRING_SEASON_DAYS", 90);
     let n_days_u32 = u32::try_from(n_days).expect("season length fits u32");
-    #[allow(clippy::cast_precision_loss)]
     let n_days_f = n_days as f64;
     let latitude_deg: f64 = env_f64("AIRSPRING_LATITUDE", 42.77);
     let elevation_m = env_f64("AIRSPRING_ELEVATION", 256.0);

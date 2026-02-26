@@ -3,8 +3,15 @@
 //!
 //! Dispatches N station-day ET₀ computations to the GPU via
 //! [`barracuda::ops::batched_elementwise_f64::BatchedElementwiseF64`].
-//! All four `ToadStool` issues (TS-001 through TS-004) are **resolved** as of
-//! commit `0c477306`.
+//!
+//! # Cross-Spring Shader Provenance
+//!
+//! The `batched_elementwise_f64.wgsl` shader relies on `math_f64.wgsl`
+//! precision primitives (`pow_f64`, `exp_f64`, `log_f64`, `sin_f64`, `cos_f64`)
+//! originally developed for hotSpring nuclear physics (lattice QCD f64).
+//! The `pow_f64` fix (TS-001, S54 H-011) and `acos_f64` fix (TS-003, S54 H-012)
+//! directly improved ET₀ accuracy for van Genuchten retention and solar
+//! declination calculations.
 //!
 //! # Two API Levels
 //!

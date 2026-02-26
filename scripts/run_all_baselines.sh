@@ -87,6 +87,11 @@ run_baseline \
     "Exp 007: Biochar Isotherms (Python)" \
     "python control/biochar/biochar_isotherms.py"
 
+# --- Experiment 008: Yield Response to Water Stress ---
+run_baseline \
+    "Exp 008: Yield Response (Python)" \
+    "python control/yield_response/yield_response.py"
+
 # --- Experiment 009: Dual Kc (FAO-56 Ch 7) ---
 run_baseline \
     "Exp 009: Dual Crop Coefficient (Python)" \
@@ -96,6 +101,11 @@ run_baseline \
 run_baseline \
     "Exp 011: Cover Crop Dual Kc (Python)" \
     "python control/dual_kc/cover_crop_dual_kc.py"
+
+# --- Experiment 012: CW2D Richards Extension ---
+run_baseline \
+    "Exp 012: CW2D Richards (Python)" \
+    "python control/cw2d/cw2d_richards.py"
 
 # --- Experiment 015: 60-Year Water Balance ---
 run_baseline \

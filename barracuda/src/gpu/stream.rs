@@ -190,7 +190,6 @@ mod tests {
         use std::f64::consts::PI;
         let data: Vec<f64> = (0..168)
             .map(|i| {
-                #[allow(clippy::cast_precision_loss)]
                 let hour = f64::from(i);
                 8.0f64.mul_add(((hour % 24.0 - 14.0) * PI / 12.0).cos(), 25.0)
             })
@@ -298,14 +297,12 @@ mod tests {
         // Noisy signal: moving average should smooth it
         let data: Vec<f64> = (0..50)
             .map(|i| {
-                #[allow(clippy::cast_precision_loss)]
                 let x = f64::from(i);
                 (x * 0.3).sin().mul_add(2.0, x) // oscillating noise
             })
             .collect();
         let result = smooth_cpu(&data, 10).unwrap();
         let input_var = crate::gpu::reduce::sample_variance(&data);
-        #[allow(clippy::cast_precision_loss)]
         let output_var_mean: f64 =
             result.variance.iter().sum::<f64>() / result.variance.len() as f64;
         // Smoothed output should have lower average variance per window

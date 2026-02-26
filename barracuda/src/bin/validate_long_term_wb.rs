@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::cast_precision_loss)] // n, count, len as f64 for averaging; n < 2^53
 #![allow(clippy::doc_markdown)] // paths in doc comments
 //! Experiment 015: 60-year water balance validation.
 //!
@@ -331,7 +330,6 @@ fn validate_physical_checks(
     }
 }
 
-#[allow(clippy::cast_precision_loss)]
 fn compute_trend_stats(results: &[SeasonResult]) -> (f64, f64, f64) {
     let n = results.len();
     let et0_arr: Vec<f64> = results.iter().map(|r| r.total_et0_rust).collect();
@@ -364,7 +362,6 @@ fn compute_trend_stats(results: &[SeasonResult]) -> (f64, f64, f64) {
     (slope, cv_precip, compute_decade_cv(results))
 }
 
-#[allow(clippy::cast_precision_loss)]
 fn compute_decade_cv(results: &[SeasonResult]) -> f64 {
     let mut decade_means: Vec<f64> = Vec::new();
     for d in (1960..2024).step_by(10) {

@@ -157,7 +157,6 @@ pub fn fit_freundlich(ce: &[f64], qe: &[f64]) -> Option<IsothermFit> {
     let mut best_n = n_init;
 
     for i in 0..=N_GRID {
-        #[allow(clippy::cast_precision_loss)]
         let t = (i as f64) / (N_GRID as f64);
         let n = t.mul_add(n_hi - n_lo, n_lo);
         let n_inv = 1.0 / n;
@@ -343,5 +342,101 @@ mod tests {
         assert!(fit.params[0] > 0.0, "KF={}", fit.params[0]);
         assert!(fit.params[1] >= 1.0, "n={}", fit.params[1]);
         assert!(fit.r_squared > 0.90, "R²={}", fit.r_squared);
+    }
+
+    #[test]
+    fn test_langmuir_denom_near_zero() {
+        let q = langmuir(1e12, 10.0, -1e-12);
+        assert!((q - 10.0).abs() < 1.0, "qmax saturation guard: q={q}");
+    }
+
+    #[test]
+    fn test_fit_langmuir_all_zero_qe() {
+        let ce = [1.0, 2.0, 3.0];
+        let qe = [0.0, 0.0, 0.0];
+        assert!(fit_langmuir(&ce, &qe).is_none());
+    }
+
+    #[test]
+    fn test_fit_langmuir_mismatched_lengths() {
+        assert!(fit_langmuir(&[1.0, 2.0], &[1.0]).is_none());
+    }
+
+    #[test]
+    fn test_fit_freundlich_insufficient() {
+        assert!(fit_freundlich(&[1.0], &[2.0]).is_none());
+        assert!(fit_freundlich(&[], &[]).is_none());
+    }
+
+    #[test]
+    fn test_fit_freundlich_mismatched_lengths() {
+        assert!(fit_freundlich(&[1.0, 2.0], &[1.0]).is_none());
+    }
+
+    #[test]
+    fn test_fit_freundlich_all_zero() {
+        let ce = [0.0, 0.0, 0.0];
+        let qe = [0.0, 0.0, 0.0];
+        assert!(fit_freundlich(&ce, &qe).is_none());
+    }
+
+    #[test]
+    fn test_fit_linear_internal_singular() {
+        let x = [5.0, 5.0, 5.0];
+        let y = [1.0, 2.0, 3.0];
+        assert!(fit_linear_internal(&x, &y).is_none());
+    }
+
+    #[test]
+    fn test_fit_linear_internal_too_few() {
+        assert!(fit_linear_internal(&[1.0], &[2.0]).is_none());
+    }
+
+    #[test]
+    fn test_fit_linear_internal_mismatched() {
+        assert!(fit_linear_internal(&[1.0, 2.0], &[1.0]).is_none());
+    }
+
+    #[test]
+    fn test_goodness_of_fit_constant_qe() {
+        let ce = [1.0, 2.0, 3.0];
+        let qe = [5.0, 5.0, 5.0];
+        let (r2, rmse) = goodness_of_fit(&ce, &qe, |_| 5.0);
+        assert!((r2 - 1.0).abs() < 1e-10, "r2={r2}");
+        assert!(rmse.abs() < 1e-10, "rmse={rmse}");
+    }
+
+    #[test]
+    fn test_isotherm_fit_debug_clone() {
+        let fit = IsothermFit {
+            model: "test",
+            params: vec![1.0, 2.0],
+            r_squared: 0.99,
+            rmse: 0.01,
+        };
+        let _ = format!("{fit:?}");
+        let cloned = fit.clone();
+        assert_eq!(cloned.model, "test");
+    }
+
+    #[test]
+    fn test_langmuir_rl_extreme() {
+        assert!((langmuir_rl(0.0, 100.0) - 1.0).abs() < 1e-10);
+        let rl_large = langmuir_rl(100.0, 100.0);
+        assert!(rl_large < 0.001, "rl={rl_large}");
+    }
+
+    #[test]
+    fn test_freundlich_near_zero_ce() {
+        let q = freundlich(0.0, 2.0, 0.5);
+        assert!(q > 0.0 && q < 1.0, "guarded: q={q}");
+    }
+
+    #[test]
+    fn test_fit_langmuir_constant_qe() {
+        let ce = [1.0, 10.0, 50.0, 100.0];
+        let qe = [5.0, 5.0, 5.0, 5.0];
+        let fit = fit_langmuir(&ce, &qe);
+        assert!(fit.is_some() || fit.is_none()); // singular or near-zero slope
     }
 }

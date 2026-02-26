@@ -8,7 +8,7 @@
         "baseline_script": "control/richards/richards_1d.py",
         "baseline_command": "python control/richards/richards_1d.py",
         "python_version": "3.10.12",
-        "reproduction_note": "Re-run baseline_command to regenerate expected values",
+        "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
         "baseline_commit": "3afc229",
         "references": [
             "van Genuchten (1980) A closed-form equation for predicting the hydraulic conductivity of unsaturated soils. SSSA J 44:892-898",

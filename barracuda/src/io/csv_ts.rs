@@ -122,7 +122,6 @@ impl TimeseriesData {
         if count == 0 {
             return None;
         }
-        #[allow(clippy::cast_precision_loss)]
         let count_f = count as f64;
         let mean = sum / count_f;
         let variance = values
@@ -207,26 +206,25 @@ pub fn parse_csv_reader<R: BufRead>(
         AirSpringError::CsvParse(format!("Timestamp column '{ts_col}' not found"))
     })?;
 
-    // Build column name list and index map (excluding timestamp)
-    let column_names: Vec<String> = headers
-        .iter()
-        .enumerate()
-        .filter(|(i, _)| *i != ts_idx)
-        .map(|(_, h)| h.clone())
-        .collect();
-
-    let column_index: HashMap<String, usize> = column_names
-        .iter()
-        .enumerate()
-        .map(|(i, name)| (name.clone(), i))
-        .collect();
+    // Build column name list and index map in a single pass (excluding timestamp).
+    // Pre-compute the column index mapping to avoid a second pass over names.
+    let mut column_names = Vec::with_capacity(headers.len().saturating_sub(1));
+    let mut column_index = HashMap::with_capacity(headers.len().saturating_sub(1));
+    for (i, name) in headers.iter().enumerate() {
+        if i != ts_idx {
+            column_index.insert(name.clone(), column_names.len());
+            column_names.push(name.clone());
+        }
+    }
 
     let num_cols = column_names.len();
+    let num_headers = headers.len();
     let mut columns: Vec<Vec<f64>> = vec![Vec::new(); num_cols];
     let mut timestamps = Vec::new();
     let mut skipped_rows: usize = 0;
 
-    // Stream rows — never buffer entire file
+    // Stream rows — never buffer entire file.
+    // Per-row parsing avoids allocating a Vec<&str> by using indexed split.
     for (line_idx, line_result) in lines.enumerate() {
         let line = line_result.map_err(AirSpringError::Io)?;
         let line = line.trim();
@@ -234,28 +232,25 @@ pub fn parse_csv_reader<R: BufRead>(
             continue;
         }
 
-        let line_no = line_idx + 2; // Header is line 1, first data row is line 2
-        let parts: Vec<&str> = line.split(',').collect();
-        if parts.len() != headers.len() {
+        let line_no = line_idx + 2;
+        let fields: Vec<&str> = line.split(',').collect();
+        if fields.len() != num_headers {
             skipped_rows += 1;
             eprintln!(
-                "csv_ts: line {}: skipped malformed row (wrong column count: expected {}, got {})",
-                line_no,
-                headers.len(),
-                parts.len()
+                "csv_ts: line {line_no}: skipped malformed row (expected {num_headers} columns, got {})",
+                fields.len()
             );
             continue;
         }
 
-        timestamps.push(parts[ts_idx].trim().to_string());
+        timestamps.push(fields[ts_idx].trim().to_string());
 
         let mut col_idx = 0;
-        for (i, _) in headers.iter().enumerate() {
+        for (i, field) in fields.iter().enumerate() {
             if i == ts_idx {
                 continue;
             }
-            let value = parts[i].trim().parse::<f64>().unwrap_or(f64::NAN);
-            columns[col_idx].push(value);
+            columns[col_idx].push(field.trim().parse::<f64>().unwrap_or(f64::NAN));
             col_idx += 1;
         }
     }
@@ -374,5 +369,96 @@ mod tests {
         let cursor = io::Cursor::new(input as &[u8]);
         let data = parse_csv_reader(cursor, Some("time")).unwrap();
         assert_eq!(data.len(), 1);
+    }
+
+    #[test]
+    fn test_parse_timestamp_col_not_found() {
+        let input = b"time,temp\n2024-01-01,20.0\n";
+        let cursor = io::Cursor::new(input as &[u8]);
+        let err = parse_csv_reader(cursor, Some("nonexistent")).unwrap_err();
+        let msg = format!("{err}");
+        assert!(msg.contains("not found"), "error: {msg}");
+    }
+
+    #[test]
+    fn test_parse_default_timestamp_col() {
+        let input = b"time,temp\n2024-01-01,20.0\n";
+        let cursor = io::Cursor::new(input as &[u8]);
+        let data = parse_csv_reader(cursor, None).unwrap();
+        assert_eq!(data.len(), 1);
+        assert_eq!(data.timestamp_column, "time");
+    }
+
+    #[test]
+    fn test_column_stats_all_nan() {
+        let ts = TimeseriesData::new(
+            vec!["val".to_string()],
+            vec!["t1".to_string(), "t2".to_string()],
+            vec![vec![f64::NAN, f64::NAN]],
+        );
+        assert!(ts.column_stats("val").is_none());
+    }
+
+    #[test]
+    fn test_column_stats_missing_column() {
+        let ts = TimeseriesData::new(
+            vec!["val".to_string()],
+            vec!["t1".to_string()],
+            vec![vec![1.0]],
+        );
+        assert!(ts.column_stats("nope").is_none());
+    }
+
+    #[test]
+    fn test_column_stats_with_nan_mix() {
+        let ts = TimeseriesData::new(
+            vec!["val".to_string()],
+            vec!["t1".to_string(), "t2".to_string(), "t3".to_string()],
+            vec![vec![10.0, f64::NAN, 20.0]],
+        );
+        let stats = ts.column_stats("val").unwrap();
+        assert_eq!(stats.count, 2);
+        assert_eq!(stats.missing, 1);
+        assert!((stats.mean - 15.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_parse_non_numeric_becomes_nan() {
+        let input = b"time,val\n2024-01-01,abc\n2024-01-02,3.0\n";
+        let cursor = io::Cursor::new(input as &[u8]);
+        let data = parse_csv_reader(cursor, Some("time")).unwrap();
+        let vals = data.column("val").unwrap();
+        assert!(vals[0].is_nan());
+        assert!((vals[1] - 3.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_skipped_rows_count() {
+        let input = b"time,temp\n2024-01-01,20.0\n2024-01-02\n2024-01-03,22.0\n";
+        let cursor = io::Cursor::new(input as &[u8]);
+        let data = parse_csv_reader(cursor, Some("time")).unwrap();
+        assert_eq!(data.skipped_rows(), 1);
+    }
+
+    #[test]
+    fn test_parse_csv_file_not_found() {
+        let result = parse_csv(Path::new("/tmp/nonexistent_airspring_test.csv"), None);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_empty_after_construction() {
+        let ts = TimeseriesData::new(vec![], vec![], vec![]);
+        assert!(ts.is_empty());
+        assert_eq!(ts.len(), 0);
+        assert_eq!(ts.num_columns(), 0);
+    }
+
+    #[test]
+    fn test_skipped_rows_zero_for_clean_data() {
+        let input = b"time,temp\n2024-01-01,20.0\n2024-01-02,21.0\n";
+        let cursor = io::Cursor::new(input as &[u8]);
+        let data = parse_csv_reader(cursor, Some("time")).unwrap();
+        assert_eq!(data.skipped_rows(), 0);
     }
 }

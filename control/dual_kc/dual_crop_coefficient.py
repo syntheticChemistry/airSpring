@@ -16,6 +16,12 @@ Reference:
     Allen, R.G., Pereira, L.S., Raes, D., Smith, M. (1998).
     FAO Irrigation and Drainage Paper 56, Chapter 7.
     https://www.fao.org/4/X0490E/x0490e00.htm
+
+Provenance:
+  Baseline commit: 94cc51d
+  Benchmark output: control/dual_kc/benchmark_dual_kc.json
+  Reproduction: python control/dual_kc/dual_crop_coefficient.py
+  Created: 2026-02-25
 """
 
 import json

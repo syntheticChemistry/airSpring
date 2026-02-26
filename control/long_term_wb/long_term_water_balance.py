@@ -15,6 +15,12 @@ Usage:
     python control/long_term_wb/long_term_water_balance.py
 
 Self-contained: uses only numpy, requests. No imports from other control scripts.
+
+Provenance:
+  Baseline commit: 3afc229
+  Benchmark output: control/long_term_wb/benchmark_long_term_wb.json
+  Reproduction: python control/long_term_wb/long_term_water_balance.py
+  Created: 2026-02-25
 """
 
 import json
