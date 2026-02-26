@@ -247,6 +247,139 @@ pub fn hargreaves_et0(tmin: f64, tmax: f64, ra_mm_day: f64) -> f64 {
     (0.0023 * (tmean + 17.8) * (tmax - tmin).max(0.0).sqrt() * ra_mm_day).max(0.0)
 }
 
+/// Priestley-Taylor ET₀ estimate (mm/day).
+///
+/// ```text
+/// ET₀_PT = α × 0.408 × (Δ / (Δ + γ)) × (Rn - G)
+/// ```
+///
+/// A radiation-only method requiring net radiation and temperature (no wind
+/// or humidity). The coefficient α = 1.26 accounts for the empirical ratio
+/// of actual to equilibrium evaporation for well-watered surfaces.
+///
+/// # Reference
+///
+/// Priestley CHB, Taylor RJ (1972) "On the assessment of surface heat flux
+/// and evaporation using large-scale parameters." *Monthly Weather Review*
+/// 100(2): 81-92.
+///
+/// The 0.408 factor converts MJ/m²/day to mm/day (= 1/λ for water at 20°C).
+#[must_use]
+pub fn priestley_taylor_et0(rn: f64, g: f64, tmean_c: f64, elevation_m: f64) -> f64 {
+    const ALPHA_PT: f64 = 1.26;
+    let pressure = atmospheric_pressure(elevation_m);
+    let gamma = psychrometric_constant(pressure);
+    let delta = vapour_pressure_slope(tmean_c);
+    (ALPHA_PT * 0.408 * (delta / (delta + gamma)) * (rn - g)).max(0.0)
+}
+
+/// Compute both Priestley-Taylor and Penman-Monteith ET₀ from the same inputs.
+///
+/// Returns `(pt_et0, pm_et0, rn)` for cross-validation.
+#[must_use]
+pub fn daily_et0_pt_and_pm(input: &DailyEt0Input) -> (f64, Et0Result) {
+    let pm_result = daily_et0(input);
+    let tmean = input
+        .tmean
+        .unwrap_or_else(|| f64::midpoint(input.tmin, input.tmax));
+    let pt = priestley_taylor_et0(pm_result.rn, pm_result.g, tmean, input.elevation_m);
+    (pt, pm_result)
+}
+
+// ── Thornthwaite (1948) monthly ET₀ ──────────────────────────────────
+
+/// Single-month contribution to the annual Thornthwaite heat index.
+///
+/// `i = (T/5)^1.514` for T > 0, else 0.
+///
+/// # Reference
+/// Thornthwaite C.W. (1948) Geographical Review, 38(1):55-94.
+#[must_use]
+pub fn monthly_heat_index_term(tmean_c: f64) -> f64 {
+    if tmean_c <= 0.0 {
+        return 0.0;
+    }
+    (tmean_c / 5.0).powf(1.514)
+}
+
+/// Annual Thornthwaite heat index: I = Σ (Tᵢ/5)^1.514 for 12 months.
+#[must_use]
+pub fn annual_heat_index(monthly_temps: &[f64; 12]) -> f64 {
+    monthly_temps
+        .iter()
+        .map(|&t| monthly_heat_index_term(t))
+        .sum()
+}
+
+/// Thornthwaite exponent from annual heat index.
+///
+/// `a = 6.75×10⁻⁷·I³ − 7.71×10⁻⁵·I² + 1.792×10⁻²·I + 0.49239`
+#[must_use]
+pub fn thornthwaite_exponent(heat_index: f64) -> f64 {
+    let i = heat_index;
+    6.75e-7f64
+        .mul_add(i, -7.71e-5)
+        .mul_add(i, 1.792e-2)
+        .mul_add(i, 0.49239)
+}
+
+/// Unadjusted monthly Thornthwaite ET₀ (mm/month for a 30-day month with 12-hr daylight).
+///
+/// For T > 26.5°C, applies the Willmott et al. (1985) high-temperature correction.
+#[must_use]
+pub fn thornthwaite_unadjusted_et0(tmean_c: f64, heat_index: f64, exponent_a: f64) -> f64 {
+    if tmean_c <= 0.0 || heat_index <= 0.0 {
+        return 0.0;
+    }
+    if tmean_c >= 26.5 {
+        #[allow(clippy::suboptimal_flops)]
+        return (-415.85 + 32.24 * tmean_c - 0.43 * tmean_c * tmean_c).max(0.0);
+    }
+    16.0 * (10.0 * tmean_c / heat_index).powf(exponent_a)
+}
+
+/// Mean daylight hours for a month at a given latitude.
+///
+/// Averages [`daylight_hours`] over every day in the month.
+#[must_use]
+pub fn mean_daylight_hours_for_month(latitude_deg: f64, month_index: usize) -> f64 {
+    const DAYS_IN_MONTH: [u32; 12] = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    let doy_start: u32 = DAYS_IN_MONTH[..month_index].iter().sum::<u32>() + 1;
+    let days = DAYS_IN_MONTH[month_index];
+    let total: f64 = (0..days)
+        .map(|d| daylight_hours(latitude_deg.to_radians(), doy_start + d))
+        .sum();
+    total / f64::from(days)
+}
+
+/// Full Thornthwaite monthly ET₀ (mm/month) for 12 months.
+///
+/// Applies daylight-hour and month-length corrections to the unadjusted estimate.
+///
+/// # Arguments
+/// * `monthly_temps` — 12 mean monthly temperatures (°C), Jan–Dec
+/// * `latitude_deg` — Station latitude (degrees)
+///
+/// # Returns
+/// Array of 12 monthly ET₀ values (mm/month), adjusted for daylight and month length.
+#[must_use]
+pub fn thornthwaite_monthly_et0(monthly_temps: &[f64; 12], latitude_deg: f64) -> [f64; 12] {
+    const DAYS_IN_MONTH: [u32; 12] = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    let hi = annual_heat_index(monthly_temps);
+    if hi <= 0.0 {
+        return [0.0; 12];
+    }
+    let a = thornthwaite_exponent(hi);
+    let mut result = [0.0; 12];
+    for m in 0..12 {
+        let pet_unadj = thornthwaite_unadjusted_et0(monthly_temps[m], hi, a);
+        let n_hours = mean_daylight_hours_for_month(latitude_deg, m);
+        let d = f64::from(DAYS_IN_MONTH[m]);
+        result[m] = (pet_unadj * (n_hours / 12.0) * (d / 30.0)).max(0.0);
+    }
+    result
+}
+
 // ── Wind speed adjustment ─────────────────────────────────────────────
 
 /// Convert wind speed measured at height `z_m` to the standard 2 m height.
@@ -699,5 +832,168 @@ mod tests {
         // Even with cold conditions, should not go negative
         let et0 = hargreaves_et0(-5.0, 0.0, 5.0);
         assert!(et0 >= 0.0, "ET₀ = {et0}");
+    }
+
+    #[test]
+    fn test_priestley_taylor_zero_radiation() {
+        let pt = priestley_taylor_et0(0.0, 0.0, 20.0, 0.0);
+        assert!((pt).abs() < 1e-10, "PT should be 0 when Rn=0: {pt}");
+    }
+
+    #[test]
+    fn test_priestley_taylor_negative_rn_clamped() {
+        let pt = priestley_taylor_et0(-2.0, 0.0, 15.0, 0.0);
+        assert!(
+            (pt).abs() < 1e-10,
+            "PT should clamp to 0 for negative Rn: {pt}"
+        );
+    }
+
+    #[test]
+    fn test_priestley_taylor_summer_reasonable() {
+        let pt = priestley_taylor_et0(15.0, 0.0, 25.0, 0.0);
+        assert!(
+            pt > 3.0 && pt < 10.0,
+            "PT should be 3-10 mm/day for summer Rn=15: {pt}"
+        );
+    }
+
+    #[test]
+    fn test_priestley_taylor_increases_with_rn() {
+        let pt_low = priestley_taylor_et0(5.0, 0.0, 20.0, 0.0);
+        let pt_high = priestley_taylor_et0(20.0, 0.0, 20.0, 0.0);
+        assert!(
+            pt_high > pt_low,
+            "PT should increase with Rn: {pt_low} → {pt_high}"
+        );
+    }
+
+    #[test]
+    fn test_priestley_taylor_increases_with_temp() {
+        let pt_cool = priestley_taylor_et0(15.0, 0.0, 5.0, 0.0);
+        let pt_warm = priestley_taylor_et0(15.0, 0.0, 35.0, 0.0);
+        assert!(
+            pt_warm > pt_cool,
+            "PT should increase with temperature (Δ/(Δ+γ) increases): {pt_cool} → {pt_warm}"
+        );
+    }
+
+    #[test]
+    fn test_priestley_taylor_altitude_effect() {
+        let pt_sea = priestley_taylor_et0(15.0, 0.0, 25.0, 0.0);
+        let pt_high = priestley_taylor_et0(15.0, 0.0, 25.0, 1500.0);
+        assert!(
+            pt_high > pt_sea,
+            "PT should be higher at altitude (lower γ → higher Δ/(Δ+γ)): {pt_sea} → {pt_high}"
+        );
+    }
+
+    #[test]
+    fn test_priestley_taylor_soil_heat_flux() {
+        let pt_no_g = priestley_taylor_et0(15.0, 0.0, 25.0, 0.0);
+        let pt_with_g = priestley_taylor_et0(15.0, 2.0, 25.0, 0.0);
+        assert!(
+            pt_no_g > pt_with_g,
+            "PT should decrease with positive G (less energy for ET): {pt_no_g} → {pt_with_g}"
+        );
+    }
+
+    #[test]
+    fn test_thornthwaite_heat_index_term() {
+        let hi = monthly_heat_index_term(25.0);
+        assert!((hi - 11.435).abs() < 0.01, "5^1.514 ≈ 11.435: got {hi}");
+        assert_eq!(monthly_heat_index_term(-5.0), 0.0);
+        assert_eq!(monthly_heat_index_term(0.0), 0.0);
+    }
+
+    #[test]
+    fn test_thornthwaite_annual_heat_index() {
+        let hi = annual_heat_index(&[25.0; 12]);
+        assert!((hi - 137.22).abs() < 0.5, "12 × 11.435 ≈ 137.22: got {hi}");
+    }
+
+    #[test]
+    fn test_thornthwaite_freezing_zero() {
+        let et0 = thornthwaite_monthly_et0(&[-10.0; 12], 42.0);
+        assert!(et0.iter().all(|&e| e == 0.0));
+    }
+
+    #[test]
+    fn test_thornthwaite_summer_gt_winter() {
+        let temps = [
+            -3.2, -2.1, 2.8, 9.1, 15.4, 21.3, 23.8, 22.5, 18.9, 12.1, 5.3, 0.8,
+        ];
+        let et0 = thornthwaite_monthly_et0(&temps, 42.73);
+        let summer: f64 = et0[5..8].iter().sum();
+        let winter = et0[0] + et0[1] + et0[11];
+        assert!(summer > winter, "summer={summer:.1} winter={winter:.1}");
+    }
+
+    #[test]
+    fn test_thornthwaite_annual_range() {
+        let temps = [
+            -3.2, -2.1, 2.8, 9.1, 15.4, 21.3, 23.8, 22.5, 18.9, 12.1, 5.3, 0.8,
+        ];
+        let et0 = thornthwaite_monthly_et0(&temps, 42.73);
+        let annual: f64 = et0.iter().sum();
+        assert!(
+            (400.0..=900.0).contains(&annual),
+            "annual ET₀={annual:.0} not in [400,900]"
+        );
+    }
+
+    #[test]
+    fn test_thornthwaite_monotonicity() {
+        let mut prev = 0.0_f64;
+        for t in [10.0, 15.0, 20.0, 25.0, 30.0] {
+            let et0 = thornthwaite_monthly_et0(&[t; 12], 42.0);
+            let annual: f64 = et0.iter().sum();
+            assert!(annual > prev, "annual should increase: T={t} → {annual:.0}");
+            prev = annual;
+        }
+    }
+
+    #[test]
+    fn test_thornthwaite_tropical() {
+        let et0 = thornthwaite_monthly_et0(&[28.0; 12], 5.0);
+        let annual: f64 = et0.iter().sum();
+        assert!(
+            (1000.0..=2000.0).contains(&annual),
+            "tropical annual={annual:.0}"
+        );
+    }
+
+    #[test]
+    fn test_thornthwaite_single_warm_month() {
+        let mut temps = [-5.0; 12];
+        temps[6] = 20.0;
+        let et0 = thornthwaite_monthly_et0(&temps, 42.0);
+        assert!(et0[6] > 0.0, "warm month should have ET₀>0");
+        for (i, &e) in et0.iter().enumerate() {
+            if i != 6 {
+                assert_eq!(e, 0.0, "month {i} should be 0");
+            }
+        }
+    }
+
+    #[test]
+    fn test_priestley_taylor_cross_validate_pm() {
+        let input = DailyEt0Input {
+            tmin: 12.3,
+            tmax: 21.5,
+            tmean: Some(16.9),
+            solar_radiation: 22.07,
+            wind_speed_2m: 2.078,
+            actual_vapour_pressure: 1.409,
+            elevation_m: 100.0,
+            latitude_deg: 50.8,
+            day_of_year: 187,
+        };
+        let (pt, pm_result) = daily_et0_pt_and_pm(&input);
+        let ratio = pt / pm_result.et0;
+        assert!(
+            (0.85..=1.25).contains(&ratio),
+            "PT/PM ratio should be 0.85-1.25 for humid climate (Uccle): ratio={ratio}"
+        );
     }
 }

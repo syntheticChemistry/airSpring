@@ -1,0 +1,222 @@
+{
+  "analytical_tests": [
+    {
+      "name": "zero_radiation",
+      "rn": 0.0,
+      "g": 0.0,
+      "tmean_c": 20.0,
+      "elevation_m": 0.0,
+      "expected_pt_et0": 0.0,
+      "tolerance": 1e-10
+    },
+    {
+      "name": "summer_sea_level",
+      "rn": 15.0,
+      "g": 0.0,
+      "tmean_c": 25.0,
+      "elevation_m": 0.0,
+      "expected_pt_et0": 5.682422,
+      "tolerance": 0.001
+    },
+    {
+      "name": "high_altitude_1500m",
+      "rn": 15.0,
+      "g": 0.0,
+      "tmean_c": 25.0,
+      "elevation_m": 1500.0,
+      "expected_pt_et0": 5.93714,
+      "tolerance": 0.001
+    },
+    {
+      "name": "winter_low_radiation",
+      "rn": 3.0,
+      "g": 0.0,
+      "tmean_c": 5.0,
+      "elevation_m": 200.0,
+      "expected_pt_et0": 0.741184,
+      "tolerance": 0.001
+    },
+    {
+      "name": "negative_rn_clamped",
+      "rn": -2.0,
+      "g": 0.0,
+      "tmean_c": 15.0,
+      "elevation_m": 0.0,
+      "expected_pt_et0": 0.0,
+      "tolerance": 1e-10
+    },
+    {
+      "name": "with_soil_heat_flux",
+      "rn": 15.0,
+      "g": 2.0,
+      "tmean_c": 25.0,
+      "elevation_m": 0.0,
+      "expected_pt_et0": 4.924766,
+      "tolerance": 0.001
+    }
+  ],
+  "fao56_example_18": {
+    "inputs": {
+      "tmin": 12.3,
+      "tmax": 21.5,
+      "tmean": 16.9,
+      "solar_rad": 22.07,
+      "wind_2m": 2.078,
+      "ea": 1.409,
+      "elev": 100.0,
+      "lat_deg": 50.8,
+      "doy": 187
+    },
+    "expected": {
+      "pt_et0": 4.418911,
+      "pm_et0": 3.879506,
+      "pt_pm_ratio_range": [
+        0.85,
+        1.25
+      ]
+    },
+    "tolerance_pt": 0.01,
+    "tolerance_pm": 0.15
+  },
+  "climate_gradient": {
+    "cases": [
+      {
+        "name": "humid_michigan",
+        "inputs": {
+          "tmin": 11.899999999999999,
+          "tmax": 21.9,
+          "tmean": 16.9,
+          "solar_rad": 22.07,
+          "wind_2m": 2.0,
+          "ea": 1.8,
+          "elev": 200.0,
+          "lat_deg": 42.7,
+          "doy": 187
+        },
+        "expected_pt_et0": 4.609394,
+        "tolerance": 0.01
+      },
+      {
+        "name": "semi_arid_oklahoma",
+        "inputs": {
+          "tmin": 20.0,
+          "tmax": 30.0,
+          "tmean": 25.0,
+          "solar_rad": 25.0,
+          "wind_2m": 3.5,
+          "ea": 1.0,
+          "elev": 350.0,
+          "lat_deg": 35.5,
+          "doy": 200
+        },
+        "expected_pt_et0": 5.138804,
+        "tolerance": 0.01
+      },
+      {
+        "name": "arid_arizona",
+        "inputs": {
+          "tmin": 25.0,
+          "tmax": 35.0,
+          "tmean": 30.0,
+          "solar_rad": 28.0,
+          "wind_2m": 4.0,
+          "ea": 0.6,
+          "elev": 400.0,
+          "lat_deg": 33.4,
+          "doy": 200
+        },
+        "expected_pt_et0": 5.321301,
+        "tolerance": 0.01
+      }
+    ]
+  },
+  "monotonicity_tests": {
+    "increasing_rn": [
+      {
+        "rn": 5.0,
+        "tmean_c": 20.0,
+        "elevation_m": 0.0,
+        "expected_pt_et0": 1.75404,
+        "tolerance": 0.001
+      },
+      {
+        "rn": 10.0,
+        "tmean_c": 20.0,
+        "elevation_m": 0.0,
+        "expected_pt_et0": 3.508081,
+        "tolerance": 0.001
+      },
+      {
+        "rn": 15.0,
+        "tmean_c": 20.0,
+        "elevation_m": 0.0,
+        "expected_pt_et0": 5.262121,
+        "tolerance": 0.001
+      },
+      {
+        "rn": 20.0,
+        "tmean_c": 20.0,
+        "elevation_m": 0.0,
+        "expected_pt_et0": 7.016161,
+        "tolerance": 0.001
+      },
+      {
+        "rn": 25.0,
+        "tmean_c": 20.0,
+        "elevation_m": 0.0,
+        "expected_pt_et0": 8.770202,
+        "tolerance": 0.001
+      }
+    ]
+  },
+  "temperature_sensitivity": {
+    "increasing_temp": [
+      {
+        "rn": 15.0,
+        "tmean_c": 5.0,
+        "elevation_m": 0.0,
+        "expected_pt_et0": 3.660921,
+        "tolerance": 0.001
+      },
+      {
+        "rn": 15.0,
+        "tmean_c": 15.0,
+        "elevation_m": 0.0,
+        "expected_pt_et0": 4.778897,
+        "tolerance": 0.001
+      },
+      {
+        "rn": 15.0,
+        "tmean_c": 25.0,
+        "elevation_m": 0.0,
+        "expected_pt_et0": 5.682422,
+        "tolerance": 0.001
+      },
+      {
+        "rn": 15.0,
+        "tmean_c": 35.0,
+        "elevation_m": 0.0,
+        "expected_pt_et0": 6.337404,
+        "tolerance": 0.001
+      },
+      {
+        "rn": 15.0,
+        "tmean_c": 45.0,
+        "elevation_m": 0.0,
+        "expected_pt_et0": 6.783783,
+        "tolerance": 0.001
+      }
+    ]
+  },
+  "provenance": {
+    "method": "Priestley-Taylor (1972) radiation-based ET\u2080 vs FAO-56 PM",
+    "digitized_by": "Computed from Priestley & Taylor (1972) Eq. 1, Allen et al. (1998) FAO-56 intermediates",
+    "created": "2026-02-26",
+    "validated_by": "priestley_taylor_et0.py (self-consistent generation)",
+    "baseline_script": "control/priestley_taylor/priestley_taylor_et0.py",
+    "baseline_command": "python control/priestley_taylor/priestley_taylor_et0.py",
+    "baseline_commit": "9a84ae5",
+    "python_version": "3.10.12",
+    "_tolerance_justification": "Analytical tests: 0.001 mm/day (floating-point rounding). PM cross-validation: 0.15 mm/day (FAO-56 Example 18 digitization tolerance, same as Exp 001). PT tolerance: 0.01 mm/day (self-consistent). PT/PM ratio range [0.85, 1.25]: literature reports 0.85-1.35 for humid climates (Xu & Singh 2002, Tabari 2010). Climate gradient: PT/PM decreasing from humid to arid is established by Jensen et al. (1990) \u2014 PT overestimates in humid, underestimates in arid relative to PM due to missing advection term."
+  }
+}

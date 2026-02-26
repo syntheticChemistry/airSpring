@@ -7,8 +7,7 @@
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V020** | [AIRSPRING_V020_CROSS_SPRING_EVOLUTION_HANDOFF_FEB26_2026.md](handoffs/AIRSPRING_V020_CROSS_SPRING_EVOLUTION_HANDOFF_FEB26_2026.md) | 2026-02-26 | **current** — Cross-spring evolution: 14 primitives, 47 tests, 5-spring shader lineage, benchmarks, evolution roadmap |
-| **V019** | [AIRSPRING_V019_S68_UNIVERSAL_PRECISION_SYNC_HANDOFF_FEB26_2026.md](handoffs/AIRSPRING_V019_S68_UNIVERSAL_PRECISION_SYNC_HANDOFF_FEB26_2026.md) | 2026-02-26 | ToadStool S68 sync: universal f64 precision, tracing migration, 608 tests + 1354 atlas checks |
+| **V022** | [AIRSPRING_V022_THORNTHWAITE_GDD_PEDOTRANSFER_HANDOFF_FEB26_2026.md](handoffs/AIRSPRING_V022_THORNTHWAITE_GDD_PEDOTRANSFER_HANDOFF_FEB26_2026.md) | 2026-02-26 | **current** — Thornthwaite ET₀, GDD, Saxton-Rawls pedotransfer (22 papers, 594 Python, 491 Rust, 570 validation, 27 binaries) |
 
 ## Cross-Spring Documents
 
@@ -22,6 +21,9 @@
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_V021_PT_INTERCOMPARISON_EVOLUTION_HANDOFF_FEB26_2026.md` | v0.4.7: Priestley-Taylor ET₀ + 3-method intercomparison (18 papers) |
+| `handoffs/archive/AIRSPRING_V019_S68_UNIVERSAL_PRECISION_SYNC_HANDOFF_FEB26_2026.md` | v0.4.6: S68 universal f64 precision sync |
+| `handoffs/archive/AIRSPRING_V020_CROSS_SPRING_EVOLUTION_HANDOFF_FEB26_2026.md` | v0.4.6: Cross-spring evolution: 14 primitives, 47 tests, 5-spring shader lineage |
 | `handoffs/archive/AIRSPRING_V018_ATLAS_SCALE_EVOLUTION_HANDOFF_FEB26_2026.md` | v0.4.6: 100-station Michigan Crop Water Atlas, 1302 atlas checks, scale validation |
 | `handoffs/archive/AIRSPRING_V017_DEEP_AUDIT_EVOLUTION_HANDOFF_FEB26_2026.md` | v0.4.6: Deep audit — Clippy nursery, R-S66 wired, van_genuchten extracted |
 | `handoffs/archive/AIRSPRING_V016_TOADSTOOL_S66_VALIDATION_HANDOFF_FEB26_2026.md` | v0.4.5: S66 validation complete — P0 resolved, 8 cross-spring tests, absorption candidates |

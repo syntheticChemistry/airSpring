@@ -1,0 +1,261 @@
+{
+  "_provenance": {
+    "method": "Growing Degree Days (McMaster & Wilhelm 1997)",
+    "baseline_script": "control/gdd/growing_degree_days.py",
+    "baseline_commit": "pending",
+    "python_version": "3.10",
+    "created": "2026-02-26",
+    "references": [
+      "McMaster GS, Wilhelm WW (1997) Ag Forest Met 87:291-300",
+      "FAO-56 Allen et al. (1998) Table 11"
+    ]
+  },
+  "analytical": {
+    "gdd_avg": [
+      {
+        "tmax": 30.0,
+        "tmin": 20.0,
+        "tbase": 10.0,
+        "expected": 15.0
+      },
+      {
+        "tmax": 8.0,
+        "tmin": 2.0,
+        "tbase": 10.0,
+        "expected": 0.0
+      },
+      {
+        "tmax": 20.0,
+        "tmin": 10.0,
+        "tbase": 10.0,
+        "expected": 5.0
+      },
+      {
+        "tmax": 30.0,
+        "tmin": 10.0,
+        "tbase": 10.0,
+        "expected": 10.0
+      },
+      {
+        "tmax": 25.0,
+        "tmin": 15.0,
+        "tbase": 10.0,
+        "expected": 10.0
+      },
+      {
+        "tmax": -20.0,
+        "tmin": -30.0,
+        "tbase": 10.0,
+        "expected": 0.0
+      },
+      {
+        "tmax": 50.0,
+        "tmin": 30.0,
+        "tbase": 10.0,
+        "expected": 30.0
+      },
+      {
+        "tmax": 20.0,
+        "tmin": 20.0,
+        "tbase": 10.0,
+        "expected": 10.0
+      }
+    ],
+    "gdd_clamp": [
+      {
+        "tmax": 30.0,
+        "tmin": 20.0,
+        "tbase": 10.0,
+        "tceil": 30.0,
+        "expected": 15.0
+      },
+      {
+        "tmax": 40.0,
+        "tmin": 20.0,
+        "tbase": 10.0,
+        "tceil": 30.0,
+        "expected": 15.0
+      },
+      {
+        "tmax": 20.0,
+        "tmin": 5.0,
+        "tbase": 10.0,
+        "tceil": 30.0,
+        "expected": 5.0
+      },
+      {
+        "tmax": 40.0,
+        "tmin": 0.0,
+        "tbase": 10.0,
+        "tceil": 30.0,
+        "expected": 10.0
+      },
+      {
+        "tmax": 8.0,
+        "tmin": 2.0,
+        "tbase": 10.0,
+        "tceil": 30.0,
+        "expected": 0.0
+      },
+      {
+        "tmax": 35.0,
+        "tmin": 20.0,
+        "tbase": 10.0,
+        "tceil": 30.0,
+        "expected": 15.0
+      }
+    ]
+  },
+  "crop_params": {
+    "corn": {
+      "tbase": 10.0,
+      "tceil": 30.0,
+      "maturity_gdd": 2700.0,
+      "kc_stages_gdd": [
+        0,
+        200,
+        800,
+        2200,
+        2700
+      ],
+      "kc_values": [
+        0.3,
+        0.3,
+        1.2,
+        1.2,
+        0.6
+      ]
+    },
+    "winter_wheat": {
+      "tbase": 0.0,
+      "tceil": 30.0,
+      "maturity_gdd": 2100.0,
+      "kc_stages_gdd": [
+        0,
+        160,
+        700,
+        1700,
+        2100
+      ],
+      "kc_values": [
+        0.4,
+        0.4,
+        1.15,
+        1.15,
+        0.25
+      ]
+    },
+    "soybean": {
+      "tbase": 10.0,
+      "tceil": 30.0,
+      "maturity_gdd": 2600.0,
+      "kc_stages_gdd": [
+        0,
+        200,
+        900,
+        2100,
+        2600
+      ],
+      "kc_values": [
+        0.4,
+        0.4,
+        1.15,
+        1.15,
+        0.5
+      ]
+    },
+    "alfalfa": {
+      "tbase": 5.0,
+      "tceil": 30.0,
+      "maturity_gdd": 800.0,
+      "kc_stages_gdd": [
+        0,
+        100,
+        300,
+        650,
+        800
+      ],
+      "kc_values": [
+        0.4,
+        0.4,
+        1.2,
+        1.2,
+        1.05
+      ]
+    }
+  },
+  "east_lansing_season": {
+    "monthly_profiles": {
+      "apr": {
+        "tmax": 13.5,
+        "tmin": 1.5,
+        "days": 30
+      },
+      "may": {
+        "tmax": 21.0,
+        "tmin": 8.5,
+        "days": 31
+      },
+      "jun": {
+        "tmax": 27.5,
+        "tmin": 14.5,
+        "days": 30
+      },
+      "jul": {
+        "tmax": 30.0,
+        "tmin": 17.0,
+        "days": 31
+      },
+      "aug": {
+        "tmax": 28.5,
+        "tmin": 15.5,
+        "days": 31
+      },
+      "sep": {
+        "tmax": 24.5,
+        "tmin": 11.5,
+        "days": 30
+      },
+      "oct": {
+        "tmax": 16.0,
+        "tmin": 3.5,
+        "days": 31
+      }
+    },
+    "total_days": 214
+  },
+  "accumulation": {
+    "corn_avg_total_gdd": 1507.75,
+    "corn_clamp_total_gdd": 1676.5,
+    "alfalfa_avg_total_gdd": 2495.0,
+    "tol": 0.01
+  },
+  "phenology": {
+    "corn_kc_at_gdd": [
+      {
+        "gdd": 0,
+        "expected_kc": 0.3
+      },
+      {
+        "gdd": 500,
+        "expected_kc": 0.75
+      },
+      {
+        "gdd": 1500,
+        "expected_kc": 1.2
+      },
+      {
+        "gdd": 2700,
+        "expected_kc": 0.6
+      }
+    ],
+    "tol": 0.01
+  },
+  "thresholds": {
+    "corn_gdd_range": [
+      1400.0,
+      2200.0
+    ],
+    "method_diff_max": 200.0
+  }
+}

@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: February 26, 2026
-**Status**: 17 experiments, 474/474 Python + 608 Rust (464 lib + 134 integration + 64 forge) + 1354 atlas checks + 75/75 cross-validation + 11 Tier A modules
+**Status**: 22 experiments, 594/594 Python + 491 Rust tests + 570 validation + 1393 atlas checks + 75/75 cross-validation + 11 Tier A modules
 
 ---
 
@@ -26,27 +26,32 @@
 | 016 | Lysimeter ET Direct Measurement | IoT | **Complete** | Python + Rust CPU | mass→ET, temp compensation | 26+25 |
 | 017 | ET₀ Sensitivity Analysis (OAT) | Precision Ag | **Complete** | Python + Rust CPU | `eco::evapotranspiration` | 23+23 |
 | 018 | Michigan Crop Water Atlas (100 stations) | Integration | **Active** | Python + Rust CPU | All `eco::` + `yield_response` | 1354/1354 |
+| 019 | Priestley-Taylor ET₀ (1972) | Precision Ag | **Complete** | Python + Rust CPU | `eco::evapotranspiration` (PT) | 32+32 |
+| 020 | ET₀ 3-Method Intercomparison (PM/PT/HG) | Integration | **Complete** | Python + Rust CPU | `eco::evapotranspiration` (all 3) | 36+36 |
+| 021 | Thornthwaite Monthly ET₀ (1948) | Precision Ag | **Complete** | Python + Rust CPU | `eco::evapotranspiration` (Thornthwaite) | 23+50 |
+| 022 | Growing Degree Days (GDD) | Precision Ag | **Complete** | Python + Rust CPU | `eco::crop` (gdd_avg, kc_from_gdd) | 33+26 |
+| 023 | Pedotransfer Functions (Saxton-Rawls 2006) | Soil | **Complete** | Python + Rust CPU | `eco::soil_moisture` (saxton_rawls) | 70+58 |
 
-**Grand Total**: 474 Python + 464 Rust lib + 134 integration + 64 forge = **608 Rust tests** + 1354 atlas checks + 75 cross-validation values + 11 Tier A modules
+**Grand Total**: 594 Python + **491 Rust tests** + 570 validation + 1393 atlas checks + 75 cross-validation values + 11 Tier A modules
 
 ---
 
-## Test Breakdown (v0.4.6)
+## Test Breakdown (v0.4.8)
 
 | Category | Tests | Source |
 |----------|:-----:|--------|
-| Lib (unit) | 464 | `cargo test --lib` (incl. diversity 11, mc\_et0 9, stats re-exports 7) |
+| Lib (unit) | 472 | `cargo test --lib` (incl. diversity 11, mc\_et0 9, stats re-exports 7) |
 | Eco integration | 33 | `tests/eco_integration.rs` |
 | GPU functional | 21 | `tests/gpu_integration.rs` |
 | GPU evolution | 6 | `tests/gpu_evolution.rs` |
 | GPU determinism | 4 | `tests/gpu_determinism.rs` |
-| Cross-spring evolution | 47 | `tests/cross_spring_evolution.rs` (S64 §7–§10 + S66 §11–§12 + benchmarks) |
+| Cross-spring evolution | 47 | `tests/cross_spring_absorption.rs`, `tests/cross_spring_benchmarks.rs`, `tests/cross_spring_primitives.rs` (S64 §7–§10 + S66 §11–§12 + benchmarks) |
 | Stats integration | 20 | `tests/stats_integration.rs` |
 | I/O + errors | 11 | `tests/io_and_errors.rs` |
 | Doc tests | 2 | `cargo test --doc` |
 | Forge | 64 | `metalForge/forge/` (53 unit + 11 doc, all absorbed upstream) |
-| **Total** | **608** | |
-| Atlas checks | 1354 | `validate_atlas` (100 stations × 13 checks each) |
+| **Total** | **491** | |
+| Atlas checks | 1393 | `validate_atlas` (100 stations × 13 checks each) |
 
 ---
 

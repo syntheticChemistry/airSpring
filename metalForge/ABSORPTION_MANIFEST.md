@@ -1,6 +1,6 @@
 # Absorption Manifest — airSpring → barracuda
 
-**Date**: February 26, 2026 (updated v0.4.6 — V018 active handoff)
+**Date**: February 26, 2026 (updated v0.4.8 — V022 active handoff)
 **Source**: `metalForge/forge/` (airspring-forge v0.2.0)
 **Target**: `barracuda` (ToadStool crate)
 **Absorption Status**: 6/6 absorbed upstream — ALL modules absorbed as of S66

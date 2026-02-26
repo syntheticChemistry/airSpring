@@ -1,8 +1,8 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: February 26, 2026 (v0.4.6 — 608 tests, 97.45% coverage)
-**ToadStool PIN**: `f0feb226` (S68 — universal f64, ValidationHarness tracing, LazyLock shader constants)
-**Handoff**: V019 (S68 sync — universal f64, atlas 1354 checks)
+**Last Updated**: February 26, 2026 (v0.4.8 — 491 tests, 97.45% coverage)
+**ToadStool PIN**: S68 (universal f64, ValidationHarness tracing, LazyLock shader constants)
+**Handoff**: V022 (Thornthwaite + GDD + pedotransfer — 27 binaries, 570 validation + 1393 atlas checks)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -16,7 +16,7 @@ validate against papers, hand off to ToadStool/BarraCuda, lean on upstream.
 
 | Module | Absorbed Into | When | Status |
 |--------|--------------|------|--------|
-| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all 22 binaries use upstream |
+| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all 27 binaries use upstream |
 | `van_genuchten` | `barracuda::pde::richards::SoilParams` | S40 | **Leaning** — `gpu::richards` bridges to upstream |
 | `isotherm NM` | `barracuda::optimize::nelder_mead` | S62 | **Leaning** — `gpu::isotherm` bridges to upstream |
 
@@ -39,7 +39,9 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 |--------|--------|
 | `eco::dual_kc` | FAO-56 Ch 7/11 domain logic — too specialized for barracuda |
 | `eco::sensor_calibration` | SoilWatch 10 specific — domain consumer |
-| `eco::crop` | FAO-56 Table 12 crop database — domain data |
+| `eco::crop` | FAO-56 Table 12 crop database, GDD, kc_from_gdd — domain data |
+| `eco::evapotranspiration` | Thornthwaite monthly ET₀ — domain consumer |
+| `eco::soil_moisture` | Saxton-Rawls pedotransfer (θs/θr/Ks from texture) — domain consumer |
 | `io::csv_ts` | airSpring-specific IoT CSV parser |
 | `testutil::generators` | Synthetic IoT data for airSpring tests |
 
@@ -118,7 +120,7 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | Capability | Module | Wired In | Status |
 |-----------|--------|----------|--------|
 | `barracuda::tolerances` | `tolerances` | v0.3.6 | **LEANING** — re-exported |
-| `barracuda::validation::ValidationHarness` | `validation` | v0.3.6 | **LEANING** — all 22 binaries (incl. validate_atlas, 1354 checks) |
+| `barracuda::validation::ValidationHarness` | `validation` | v0.3.6 | **LEANING** — all 27 binaries (incl. validate_atlas, 1393 checks) |
 | `pde::richards::solve_richards` | `pde` | v0.4.0 | **WIRED** — `gpu::richards` |
 | `pde::crank_nicolson::CrankNicolson1D` | `pde` | v0.4.4 | **WIRED** — CN f64 diffusion cross-val |
 | `optimize::nelder_mead` | `optimize` | v0.4.1 | **WIRED** — isotherm fitting |
@@ -157,14 +159,14 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | Check | Status |
 |-------|--------|
 | `cargo fmt --check` | **Clean** |
-| `cargo clippy -- -D warnings` | **0 warnings** (pedantic via `[lints.clippy]`) |
+| `cargo clippy -- -D warnings` | **0 warnings** (pedantic + nursery via `[lints.clippy]`) |
 | `cargo doc --no-deps` | **Builds**, 0 warnings |
-| `cargo test` | **608 total** |
+| `cargo test` | **491 total** (lib + integration + doc-tests) |
 | `cargo llvm-cov --lib` | **97.45%** line coverage (97.58% functions) |
 | `unsafe` code | **Zero** |
-| `unwrap()` in lib | **Zero** (all in `#[cfg(test)]`) |
-| Files > 1000 lines | **Zero** (max: 845 lines) |
-| Validation binaries | **22/22 PASS** (515 checks + 1354 atlas) |
+| `unwrap()` in lib | **Zero** (all in `#[cfg(test)]` or validation-binary JSON helpers) |
+| Files > 1000 lines | **Zero** (max src: 800 lines `eco/richards.rs`, max test: 698 lines `eco_integration.rs`) |
+| Validation binaries | **27/27 PASS** (570 checks + 1393 atlas) |
 | GPU dispatch (P0 blocker) | **RESOLVED** — S66 explicit BGL (R-S66-041) |
 | Cross-validation | **75/75 MATCH** (tol=1e-5) |
 
@@ -179,7 +181,7 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `moving_window_stats` | wetSpring | IoT stream smoothing |
 | `ridge_regression` | wetSpring | Sensor correction pipeline |
 | `nelder_mead`, `multi_start` | neuralSpring | Isotherm fitting |
-| `ValidationHarness` | neuralSpring | All 22 validation binaries |
+| `ValidationHarness` | neuralSpring | All 27 validation binaries |
 | `norm_ppf` (Moro 1995) | hotSpring | MC ET₀ parametric confidence intervals |
 | `brent` (Brent 1973) | neuralSpring | VG pressure head inversion (θ→h) |
 | `pde::richards` | airSpring → upstream | 1D Richards equation (absorbed S40) |

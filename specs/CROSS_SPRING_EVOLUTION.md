@@ -1,6 +1,6 @@
 # Cross-Spring Shader Evolution — airSpring Provenance
 
-**Updated**: February 26, 2026 (v0.4.6, ToadStool HEAD `f0feb226` — S68)
+**Updated**: February 26, 2026 (v0.4.8, ToadStool HEAD `f0feb226` — S68)
 
 ## Summary
 
@@ -187,6 +187,8 @@ module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 | Feb 26 | airSpring v0.4.6: Deep audit | R-S66-001/003 wired (correction→regression, stream→moving_window), van_genuchten extracted, clippy nursery enforced, 11 doc-tests, 662 Rust tests + 1302 atlas checks, 97.45% coverage |
 | Feb 26 | ToadStool S67-S68 pulled | S67 codified "math is universal, precision is silicon"; S68 evolved 334+ shaders to f64-canonical with `downcast_f64_to_f32()` backward compat. `ValidationHarness` migrated to `tracing::info!` |
 | Feb 26 | airSpring S68 sync | Added `tracing-subscriber` for `ValidationHarness` output, wired `init_tracing()` into all 22 binaries, 10 new S68 cross-spring evolution tests (regression, hydrology, diversity, moving_window, Brent, Spearman, bootstrap, atlas pipeline, Richards benchmarks). 608 cargo tests + 1354 atlas checks all pass |
+| Feb 26 | airSpring v0.4.7: PT + intercomparison | Priestley-Taylor ET₀ (Exp 019), 3-method intercomparison (Exp 020). 24 binaries, 616 Rust tests + 1393 atlas. Cross-spring test files split: `cross_spring_absorption.rs`, `cross_spring_benchmarks.rs`, `cross_spring_primitives.rs` |
+| Feb 26 | airSpring v0.4.8: Thornthwaite + GDD + pedotransfer | Thornthwaite monthly ET₀ (Exp 021), GDD phenology (Exp 022), Saxton-Rawls pedotransfer (Exp 023). 22 experiments, 594/594 Python, 491 Rust tests + 570 validation + 1393 atlas, 27 binaries. V022 handoff |
 
 ---
 

@@ -165,6 +165,157 @@ pub fn adjust_kc_for_climate(kc_table: f64, u2: f64, rh_min: f64, crop_height_m:
     (kc_table + adjustment).max(0.0)
 }
 
+// ── Growing Degree Days (GDD) ────────────────────────────────────────
+
+/// Growing degree-day parameters for a crop.
+#[derive(Debug, Clone)]
+pub struct GddCropParams {
+    /// Base temperature below which no development occurs (°C).
+    pub tbase: f64,
+    /// Ceiling temperature above which Tmax is clamped (°C).
+    pub tceil: f64,
+    /// Cumulative GDD at maturity.
+    pub maturity_gdd: f64,
+    /// GDD thresholds for stage boundaries (must start at 0).
+    pub kc_stages_gdd: Vec<f64>,
+    /// Kc value at each stage boundary (same length as `kc_stages_gdd`).
+    pub kc_values: Vec<f64>,
+}
+
+impl CropType {
+    /// Return GDD parameters for this crop.
+    ///
+    /// Base temperatures from `McMaster` & Wilhelm (1997); maturity GDD from
+    /// Midwest US averages; Kc stages mapped to thermal time.
+    #[must_use]
+    pub fn gdd_params(self) -> GddCropParams {
+        let kc = self.coefficients();
+        match self {
+            Self::Corn => GddCropParams {
+                tbase: 10.0,
+                tceil: 30.0,
+                maturity_gdd: 2700.0,
+                kc_stages_gdd: vec![0.0, 200.0, 800.0, 2200.0, 2700.0],
+                kc_values: vec![kc.kc_ini, kc.kc_ini, kc.kc_mid, kc.kc_mid, kc.kc_end],
+            },
+            Self::Soybean => GddCropParams {
+                tbase: 10.0,
+                tceil: 30.0,
+                maturity_gdd: 2600.0,
+                kc_stages_gdd: vec![0.0, 200.0, 900.0, 2100.0, 2600.0],
+                kc_values: vec![kc.kc_ini, kc.kc_ini, kc.kc_mid, kc.kc_mid, kc.kc_end],
+            },
+            Self::WinterWheat => GddCropParams {
+                tbase: 0.0,
+                tceil: 30.0,
+                maturity_gdd: 2100.0,
+                kc_stages_gdd: vec![0.0, 160.0, 700.0, 1700.0, 2100.0],
+                kc_values: vec![kc.kc_ini, kc.kc_ini, kc.kc_mid, kc.kc_mid, kc.kc_end],
+            },
+            Self::Alfalfa => GddCropParams {
+                tbase: 5.0,
+                tceil: 30.0,
+                maturity_gdd: 800.0,
+                kc_stages_gdd: vec![0.0, 100.0, 300.0, 650.0, 800.0],
+                kc_values: vec![kc.kc_ini, kc.kc_ini, kc.kc_mid, kc.kc_mid, kc.kc_end],
+            },
+            _ => GddCropParams {
+                tbase: 10.0,
+                tceil: 30.0,
+                maturity_gdd: 2500.0,
+                kc_stages_gdd: vec![0.0, 200.0, 800.0, 2000.0, 2500.0],
+                kc_values: vec![kc.kc_ini, kc.kc_ini, kc.kc_mid, kc.kc_mid, kc.kc_end],
+            },
+        }
+    }
+}
+
+/// Daily growing degree-days via the simple average method.
+///
+/// `GDD = max(0, (Tmax + Tmin)/2 − Tbase)`
+///
+/// `McMaster` & Wilhelm (1997) Method 1.
+#[must_use]
+pub fn gdd_avg(tmax: f64, tmin: f64, tbase: f64) -> f64 {
+    (f64::midpoint(tmax, tmin) - tbase).max(0.0)
+}
+
+/// Daily growing degree-days via the clamped (modified) method.
+///
+/// `GDD = max(0, (min(Tmax, Tceil) + max(Tmin, Tbase))/2 − Tbase)`
+///
+/// Handles temperature extremes by clamping before averaging.
+#[must_use]
+pub fn gdd_clamp(tmax: f64, tmin: f64, tbase: f64, tceil: f64) -> f64 {
+    let tmax_c = tmax.min(tceil);
+    let tmin_c = tmin.max(tbase).min(tmax_c);
+    (f64::midpoint(tmax_c, tmin_c) - tbase).max(0.0)
+}
+
+/// Accumulate growing degree-days over a season using the simple average method.
+///
+/// Returns a vector of cumulative GDD values, one per day.
+///
+/// # Panics
+///
+/// Panics if `daily_tmax` and `daily_tmin` have different lengths.
+#[must_use]
+pub fn accumulated_gdd_avg(daily_tmax: &[f64], daily_tmin: &[f64], tbase: f64) -> Vec<f64> {
+    assert_eq!(daily_tmax.len(), daily_tmin.len(), "arrays must match");
+    let mut cum = Vec::with_capacity(daily_tmax.len());
+    let mut total = 0.0;
+    for (&tx, &tn) in daily_tmax.iter().zip(daily_tmin) {
+        total += gdd_avg(tx, tn, tbase);
+        cum.push(total);
+    }
+    cum
+}
+
+/// Accumulate growing degree-days over a season using the clamped method.
+///
+/// # Panics
+///
+/// Panics if `daily_tmax` and `daily_tmin` have different lengths.
+#[must_use]
+pub fn accumulated_gdd_clamp(
+    daily_tmax: &[f64],
+    daily_tmin: &[f64],
+    tbase: f64,
+    tceil: f64,
+) -> Vec<f64> {
+    assert_eq!(daily_tmax.len(), daily_tmin.len(), "arrays must match");
+    let mut cum = Vec::with_capacity(daily_tmax.len());
+    let mut total = 0.0;
+    for (&tx, &tn) in daily_tmax.iter().zip(daily_tmin) {
+        total += gdd_clamp(tx, tn, tbase, tceil);
+        cum.push(total);
+    }
+    cum
+}
+
+/// Interpolate crop coefficient from cumulative GDD using stage thresholds.
+///
+/// Linearly interpolates between Kc values defined at GDD breakpoints.
+///
+/// # Panics
+///
+/// Panics if `stages_gdd` and `kc_values` have different lengths.
+#[must_use]
+pub fn kc_from_gdd(cum_gdd: f64, stages_gdd: &[f64], kc_values: &[f64]) -> f64 {
+    assert_eq!(stages_gdd.len(), kc_values.len(), "stage/Kc array mismatch");
+    for i in 0..stages_gdd.len() - 1 {
+        if cum_gdd <= stages_gdd[i + 1] {
+            let span = stages_gdd[i + 1] - stages_gdd[i];
+            if span <= 0.0 {
+                return kc_values[i];
+            }
+            let frac = (cum_gdd - stages_gdd[i]) / span;
+            return frac.mul_add(kc_values[i + 1] - kc_values[i], kc_values[i]);
+        }
+    }
+    *kc_values.last().unwrap_or(&0.0)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -230,6 +381,54 @@ mod tests {
         // Lower wind and higher humidity → lower Kc
         let kc = adjust_kc_for_climate(1.20, 1.0, 70.0, 2.0);
         assert!(kc < 1.20, "Calm+humid should decrease Kc: {kc}");
+    }
+
+    #[test]
+    fn test_gdd_avg_basic() {
+        assert!((gdd_avg(30.0, 20.0, 10.0) - 15.0).abs() < 1e-10);
+        assert_eq!(gdd_avg(8.0, 2.0, 10.0), 0.0);
+        assert!((gdd_avg(30.0, 10.0, 10.0) - 10.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_gdd_clamp_extremes() {
+        assert!((gdd_clamp(40.0, 20.0, 10.0, 30.0) - 15.0).abs() < 1e-10);
+        assert!((gdd_clamp(20.0, 5.0, 10.0, 30.0) - 5.0).abs() < 1e-10);
+        assert!((gdd_clamp(40.0, 0.0, 10.0, 30.0) - 10.0).abs() < 1e-10);
+        assert_eq!(gdd_clamp(8.0, 2.0, 10.0, 30.0), 0.0);
+    }
+
+    #[test]
+    fn test_accumulated_gdd_constant() {
+        let tmax = vec![30.0; 100];
+        let tmin = vec![20.0; 100];
+        let cum = accumulated_gdd_avg(&tmax, &tmin, 10.0);
+        assert!((cum[99] - 1500.0).abs() < 1e-8);
+    }
+
+    #[test]
+    fn test_kc_from_gdd_corn() {
+        let stages = vec![0.0, 200.0, 800.0, 2200.0, 2700.0];
+        let kc_vals = vec![0.30, 0.30, 1.20, 1.20, 0.60];
+        assert!((kc_from_gdd(0.0, &stages, &kc_vals) - 0.30).abs() < 0.01);
+        assert!((kc_from_gdd(1500.0, &stages, &kc_vals) - 1.20).abs() < 0.01);
+        assert!((kc_from_gdd(2700.0, &stages, &kc_vals) - 0.60).abs() < 0.01);
+    }
+
+    #[test]
+    fn test_gdd_monotonic() {
+        let cum = accumulated_gdd_avg(&[25.0; 50], &[15.0; 50], 10.0);
+        for i in 0..cum.len() - 1 {
+            assert!(cum[i] <= cum[i + 1]);
+        }
+    }
+
+    #[test]
+    fn test_corn_gdd_params() {
+        let params = CropType::Corn.gdd_params();
+        assert!((params.tbase - 10.0).abs() < f64::EPSILON);
+        assert!((params.maturity_gdd - 2700.0).abs() < f64::EPSILON);
+        assert_eq!(params.kc_stages_gdd.len(), params.kc_values.len());
     }
 
     #[test]

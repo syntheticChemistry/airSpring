@@ -1,0 +1,150 @@
+{
+  "_provenance": {
+    "method": "Thornthwaite (1948) monthly ET\u2080",
+    "baseline_script": "control/thornthwaite/thornthwaite_et0.py",
+    "baseline_commit": "pending",
+    "python_version": "3.10",
+    "created": "2026-02-26",
+    "references": [
+      "Thornthwaite C.W. (1948) Geographical Review 38(1):55-94",
+      "Willmott C.J. et al. (1985) Physical Climatology"
+    ]
+  },
+  "analytical": {
+    "heat_index_25C": 11.435116,
+    "heat_index_annual_uniform_25C": 137.221396,
+    "exponent_uniform_25C": 3.243718,
+    "unadjusted_et0_25C": 111.986978,
+    "freezing_et0": 0.0
+  },
+  "east_lansing": {
+    "latitude": 42.73,
+    "monthly_tmean_c": [
+      -3.2,
+      -2.1,
+      2.8,
+      9.1,
+      15.4,
+      21.3,
+      23.8,
+      22.5,
+      18.9,
+      12.1,
+      5.3,
+      0.8
+    ],
+    "heat_index": 50.17249,
+    "exponent_a": 1.28265,
+    "monthly_et0_mm": [
+      0.0,
+      0.0,
+      7.6115,
+      37.6616,
+      83.7831,
+      128.5074,
+      150.2285,
+      129.5102,
+      89.7118,
+      45.9919,
+      13.6395,
+      1.1649
+    ],
+    "annual_et0_mm": 687.8104,
+    "tol": 0.5
+  },
+  "wooster": {
+    "latitude": 40.78,
+    "monthly_tmean_c": [
+      -1.8,
+      -0.5,
+      4.2,
+      10.5,
+      16.8,
+      22.1,
+      24.6,
+      23.2,
+      19.7,
+      13.0,
+      6.5,
+      2.1
+    ],
+    "heat_index": 54.944087,
+    "exponent_a": 1.356195,
+    "monthly_et0_mm": [
+      0.0,
+      0.0,
+      11.1932,
+      41.9877,
+      89.4714,
+      130.9422,
+      153.7165,
+      132.1581,
+      92.3564,
+      48.171,
+      16.2506,
+      3.4114
+    ],
+    "annual_et0_mm": 719.6584,
+    "tol": 0.5
+  },
+  "monotonicity_temps": [
+    10.0,
+    15.0,
+    20.0,
+    25.0,
+    30.0
+  ],
+  "monotonicity_latitude": 42.0,
+  "edge_cases": {
+    "all_frozen": {
+      "monthly_tmean_c": [
+        -10.0,
+        -10.0,
+        -10.0,
+        -10.0,
+        -10.0,
+        -10.0,
+        -10.0,
+        -10.0,
+        -10.0,
+        -10.0,
+        -10.0,
+        -10.0
+      ],
+      "expected_annual": 0.0
+    },
+    "tropical_uniform": {
+      "monthly_tmean_c": [
+        28.0,
+        28.0,
+        28.0,
+        28.0,
+        28.0,
+        28.0,
+        28.0,
+        28.0,
+        28.0,
+        28.0,
+        28.0,
+        28.0
+      ],
+      "latitude": 5.0,
+      "annual_range": [
+        1000.0,
+        2000.0
+      ]
+    }
+  },
+  "thresholds": {
+    "annual_et0_range_mm": [
+      400.0,
+      900.0
+    ],
+    "growing_season_fraction_min": 0.65,
+    "th_hg_ratio_range": [
+      0.4,
+      2.5
+    ],
+    "_tolerance_justification": "Thornthwaite is a monthly empirical method; wider tolerances than PM reflect the method's inherent approximation. Annual range per Thornthwaite (1948) for humid continental climate."
+  }
+}

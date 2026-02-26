@@ -1,6 +1,6 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: February 26, 2026 (v0.4.6 — 464 lib + 134 integration, 11 Tier A modules)
+**Last Updated**: February 26, 2026 (v0.4.8 — 491 lib tests, 27 binaries, 11 Tier A modules)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
 **ToadStool HEAD**: `f0feb226` (S68 — universal f64, ValidationHarness tracing, LazyLock shader constants)
 
@@ -8,7 +8,7 @@
 
 ## Current Kernel Usage
 
-### Phase 1: Validated in Rust CPU (16 experiments)
+### Phase 1: Validated in Rust CPU (22 experiments)
 
 | Kernel / Module | Rust Crate | Checks | Validation |
 |----------------|------------|:------:|------------|
@@ -26,6 +26,11 @@
 | Biochar isotherms | `eco::isotherm` | 14/14 | Langmuir/Freundlich R², RL, residuals |
 | 60-year water balance | `eco::water_balance` + Hargreaves | 11/11 | Decadal stability, climate trends |
 | Real data (capability) | `eco::*` + `io::csv_ts` | 23/23 | Dynamic station discovery |
+| Priestley-Taylor ET₀ | `eco::evapotranspiration` | 32/32 | α=1.26, Rn-only method |
+| ET₀ 3-method intercomp | `eco::evapotranspiration` | 36/36 | PM vs PT vs HG, 6 MI stations |
+| Thornthwaite monthly ET₀ | `eco::evapotranspiration` | 50/50 | Heat index, 2-station monthly |
+| Growing Degree Days | `eco::crop` | 26/26 | GDD avg/clamp, Kc from GDD |
+| Saxton-Rawls pedotransfer | `eco::soil_moisture` | 58/58 | θ_wp/θ_fc/θ_s/Ksat, 8 textures |
 | Cross-validation harness | `validation` | 75/75 | Python↔Rust match (tol=1e-5) |
 
 ### Phase 2: GPU Orchestrators Wired (8 modules)
@@ -59,7 +64,7 @@ Note: `gpu::dual_kc::BatchedDualKc` has CPU orchestrator wired (Tier B → pendi
 
 ### Layer 1: BarraCuda CPU (validated, complete)
 
-All algorithms implemented in pure Rust. 464 lib + 134 integration tests, 22 binaries.
+All algorithms implemented in pure Rust. 491 lib tests, 27 binaries, 570 validation checks.
 This is the baseline for correctness — GPU and metalForge results must match.
 CPU benchmarks: 12.7M ET₀/s, 36.5M VG θ/s, 59M dual Kc/s, 57M Langmuir fits/s.
 
@@ -72,6 +77,7 @@ eco::correction         → validated fit_linear/quadratic/exponential/logarithm
 eco::sensor_calibration → validated soilwatch10_calibrate()
 eco::richards           → validated solve_richards_1d(), van_genuchten theta/K
 eco::isotherm           → validated fit_langmuir/freundlich(), predictions
+eco::crop               → validated gdd_avg/clamp(), accumulated_gdd(), kc_from_gdd()
 io::csv_ts              → validated parse(), TimeseriesData
 ```
 

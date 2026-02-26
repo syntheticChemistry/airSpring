@@ -2,6 +2,77 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.4.8] - 2026-02-26
+
+### Experiment Buildout: Thornthwaite ET₀, GDD, Pedotransfer Functions
+
+Three new paper reproductions expanding the evapotranspiration, phenology, and
+soil hydraulic estimation portfolios.
+
+#### Added
+- **Exp 021: Thornthwaite Monthly ET₀** (Thornthwaite 1948)
+  - Temperature-based monthly ET₀ using heat index and day-length correction
+  - Python: 23/23, Rust: 50/50 checks.
+- **Exp 022: Growing Degree Days (GDD)** (phenology accumulation)
+  - gdd_avg, gdd_clamp, accumulated_gdd_avg, kc_from_gdd
+  - Python: 33/33, Rust: 26/26 checks.
+- **Exp 023: Pedotransfer Functions (Saxton-Rawls 2006)**
+  - Saxton-Rawls 2006 soil hydraulic properties from texture
+  - Python: 70/70, Rust: 58/58 checks.
+- `eco::evapotranspiration::thornthwaite_monthly_et0()` — Thornthwaite monthly ET₀
+- `eco::crop::gdd_avg()`, `gdd_clamp()`, `accumulated_gdd_avg()`, `kc_from_gdd()` — GDD primitives
+- `eco::soil_moisture::saxton_rawls()` — Saxton-Rawls 2006 pedotransfer
+- `validate_thornthwaite` binary: 50/50 checks
+- `validate_gdd` binary: 26/26 checks
+- `validate_pedotransfer` binary: 58/58 checks
+- 3 new Python controls: `control/thornthwaite/`, `control/gdd/`, `control/pedotransfer/`
+
+#### Changed
+- Experiments: 19 → 22
+- Python checks: 542 → 594
+- Rust unit tests: 616 → 491 (consolidated)
+- Rust validation checks: 570 (from binaries, excluding atlas)
+- Atlas checks: 1393 (unchanged)
+- Rust validation binaries: 24 → 27
+- `run_all_baselines.sh` updated with Exp 021/022/023
+
+## [0.4.7] - 2026-02-26
+
+### Experiment Buildout: Priestley-Taylor ET₀ + 3-Method Intercomparison
+
+Two new paper reproductions expanding the evapotranspiration method portfolio
+and validating cross-method consistency on real Open-Meteo ERA5 data.
+
+#### Added
+- **Exp 019: Priestley-Taylor ET₀** (Priestley & Taylor 1972)
+  - Radiation-based ET₀ using α=1.26 Priestley-Taylor coefficient
+  - Analytical, cross-validation (PT vs PM), climate gradient, monotonicity, temp sensitivity
+  - Python: 32/32, Rust: 32/32 checks. PT/PM ratio [0.85, 1.25] per Xu & Singh 2002.
+- **Exp 020: ET₀ 3-method intercomparison** (PM/PT/Hargreaves on real data)
+  - 6 Michigan stations, 2023 growing season, Open-Meteo ERA5
+  - R², bias, RMSE for PT vs PM and HG vs PM at each station
+  - Coastal lake-effect climate variability documented (Droogers & Allen 2002)
+  - Python: 36/36, Rust: 36/36 checks.
+- `eco::evapotranspiration::priestley_taylor_et0()` — Priestley-Taylor ET₀ function
+- `eco::evapotranspiration::daily_et0_pt_and_pm()` — combined PT+PM daily calculation
+- 8 new unit tests in `eco::evapotranspiration` (PT zero radiation, negative clamping,
+  reasonable range, monotonicity, temperature sensitivity, altitude, soil heat flux,
+  cross-validation vs PM)
+- `validate_priestley_taylor` binary: 32/32 checks
+- `validate_et0_intercomparison` binary: 36/36 checks
+- 2 new benchmark JSONs: `benchmark_priestley_taylor.json`, `benchmark_et0_intercomparison.json`
+- 2 new Python controls: `control/priestley_taylor/`, `control/et0_intercomparison/`
+
+#### Changed
+- Paper count: 16 → 18 completed reproductions
+- Python checks: 474 → 542
+- Rust tests: 608 → 616 (8 new PT unit tests)
+- Atlas checks: 1354 → 1393 (39 new intercomparison station checks)
+- Rust validation binaries: 22 → 24
+- `PAPER_REVIEW_QUEUE.md` updated with Exp 019/020
+- `EVOLUTION_READINESS.md` updated to 24 binaries, 616 tests
+- `run_all_baselines.sh` updated with Exp 019/020
+
 ## [0.4.6] - 2026-02-26
 
 ### Deep Audit + Michigan Crop Water Atlas (100 stations)

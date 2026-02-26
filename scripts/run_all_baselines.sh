@@ -145,6 +145,36 @@ run_baseline \
     "Exp 017: ET₀ Sensitivity Analysis (Python)" \
     "python3 control/sensitivity/et0_sensitivity.py"
 
+# --- Experiment 019: Priestley-Taylor ET₀ ---
+run_baseline \
+    "Exp 019: Priestley-Taylor ET₀ (Python)" \
+    "python3 control/priestley_taylor/priestley_taylor_et0.py"
+
+# --- Experiment 020: ET₀ Three-Method Intercomparison ---
+if [ -d data/open_meteo ]; then
+    run_baseline \
+        "Exp 020: ET₀ 3-Method Intercomparison (Python)" \
+        "python3 control/et0_intercomparison/et0_three_method.py"
+else
+    echo "  [SKIP] Exp 020 — run Open-Meteo download first"
+    SKIP=$((SKIP + 1))
+fi
+
+# --- Experiment 021: Thornthwaite Monthly ET₀ ---
+run_baseline \
+    "Exp 021: Thornthwaite Monthly ET₀ (Python)" \
+    "python3 control/thornthwaite/thornthwaite_et0.py"
+
+# --- Experiment 022: Growing Degree Days ---
+run_baseline \
+    "Exp 022: Growing Degree Days (Python)" \
+    "python3 control/gdd/growing_degree_days.py"
+
+# --- Experiment 023: Pedotransfer Functions (Saxton-Rawls 2006) ---
+run_baseline \
+    "Exp 023: Pedotransfer Functions (Python)" \
+    "python3 control/pedotransfer/saxton_rawls.py"
+
 # =====================================================================
 # REAL DATA PIPELINE (requires API/internet — optional but preferred)
 # =====================================================================

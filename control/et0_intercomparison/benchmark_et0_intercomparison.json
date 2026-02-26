@@ -1,0 +1,209 @@
+{
+  "total_station_days": 918,
+  "n_stations": 6,
+  "stations": {
+    "east_lansing": {
+      "n_days": 153,
+      "pm_mean": 4.313518,
+      "pt_mean": 4.124688,
+      "hg_mean": 4.339377,
+      "pt_pm_ratio": 0.956224,
+      "hg_pm_ratio": 1.005995,
+      "pm_vs_openmeteo": {
+        "n": 153,
+        "r2": 0.955687,
+        "bias": 0.117701,
+        "rmse": 0.294154,
+        "mae": 0.236338
+      },
+      "pt_vs_pm": {
+        "n": 153,
+        "r2": 0.862954,
+        "bias": -0.18883,
+        "rmse": 0.485105,
+        "mae": 0.363246
+      },
+      "hg_vs_pm": {
+        "n": 153,
+        "r2": 0.783333,
+        "bias": 0.025858,
+        "rmse": 0.609956,
+        "mae": 0.477824
+      }
+    },
+    "grand_junction": {
+      "n_days": 153,
+      "pm_mean": 4.294872,
+      "pt_mean": 4.301312,
+      "hg_mean": 4.336833,
+      "pt_pm_ratio": 1.001499,
+      "hg_pm_ratio": 1.00977,
+      "pm_vs_openmeteo": {
+        "n": 153,
+        "r2": 0.968353,
+        "bias": 0.048728,
+        "rmse": 0.242339,
+        "mae": 0.195642
+      },
+      "pt_vs_pm": {
+        "n": 153,
+        "r2": 0.861434,
+        "bias": 0.006441,
+        "rmse": 0.47806,
+        "mae": 0.385692
+      },
+      "hg_vs_pm": {
+        "n": 153,
+        "r2": 0.745959,
+        "bias": 0.041961,
+        "rmse": 0.647301,
+        "mae": 0.49905
+      }
+    },
+    "sparta": {
+      "n_days": 153,
+      "pm_mean": 4.489839,
+      "pt_mean": 4.228059,
+      "hg_mean": 4.366455,
+      "pt_pm_ratio": 0.941695,
+      "hg_pm_ratio": 0.972519,
+      "pm_vs_openmeteo": {
+        "n": 153,
+        "r2": 0.965462,
+        "bias": 0.096375,
+        "rmse": 0.274279,
+        "mae": 0.213935
+      },
+      "pt_vs_pm": {
+        "n": 153,
+        "r2": 0.816787,
+        "bias": -0.261781,
+        "rmse": 0.603348,
+        "mae": 0.44682
+      },
+      "hg_vs_pm": {
+        "n": 153,
+        "r2": 0.769204,
+        "bias": -0.123384,
+        "rmse": 0.67718,
+        "mae": 0.527491
+      }
+    },
+    "hart": {
+      "n_days": 153,
+      "pm_mean": 4.330589,
+      "pt_mean": 4.356476,
+      "hg_mean": 3.945166,
+      "pt_pm_ratio": 1.005978,
+      "hg_pm_ratio": 0.911,
+      "pm_vs_openmeteo": {
+        "n": 153,
+        "r2": 0.973268,
+        "bias": 0.045229,
+        "rmse": 0.216444,
+        "mae": 0.177372
+      },
+      "pt_vs_pm": {
+        "n": 153,
+        "r2": 0.825816,
+        "bias": 0.025888,
+        "rmse": 0.5381,
+        "mae": 0.437588
+      },
+      "hg_vs_pm": {
+        "n": 153,
+        "r2": 0.673776,
+        "bias": -0.385423,
+        "rmse": 0.736406,
+        "mae": 0.5864
+      }
+    },
+    "west_olive": {
+      "n_days": 153,
+      "pm_mean": 4.175099,
+      "pt_mean": 4.352131,
+      "hg_mean": 3.778198,
+      "pt_pm_ratio": 1.042402,
+      "hg_pm_ratio": 0.904936,
+      "pm_vs_openmeteo": {
+        "n": 153,
+        "r2": 0.961901,
+        "bias": 0.02353,
+        "rmse": 0.254403,
+        "mae": 0.202031
+      },
+      "pt_vs_pm": {
+        "n": 153,
+        "r2": 0.703199,
+        "bias": 0.177032,
+        "rmse": 0.668663,
+        "mae": 0.541167
+      },
+      "hg_vs_pm": {
+        "n": 153,
+        "r2": 0.599293,
+        "bias": -0.396901,
+        "rmse": 0.776941,
+        "mae": 0.625853
+      }
+    },
+    "ann_arbor": {
+      "n_days": 153,
+      "pm_mean": 4.28276,
+      "pt_mean": 4.176962,
+      "hg_mean": 4.335192,
+      "pt_pm_ratio": 0.975297,
+      "hg_pm_ratio": 1.012243,
+      "pm_vs_openmeteo": {
+        "n": 153,
+        "r2": 0.949713,
+        "bias": 0.114982,
+        "rmse": 0.297294,
+        "mae": 0.229044
+      },
+      "pt_vs_pm": {
+        "n": 153,
+        "r2": 0.891997,
+        "bias": -0.105798,
+        "rmse": 0.411945,
+        "mae": 0.305704
+      },
+      "hg_vs_pm": {
+        "n": 153,
+        "r2": 0.751726,
+        "bias": 0.052432,
+        "rmse": 0.624579,
+        "mae": 0.482515
+      }
+    }
+  },
+  "thresholds": {
+    "pm_vs_openmeteo_r2_min": 0.9,
+    "pt_vs_pm_r2_min": 0.7,
+    "hg_vs_pm_r2_min": 0.55,
+    "pt_pm_ratio_range": [
+      0.7,
+      1.5
+    ],
+    "hg_pm_ratio_range": [
+      0.6,
+      1.8
+    ],
+    "pm_mean_range_mm_day": [
+      2.0,
+      6.0
+    ]
+  },
+  "provenance": {
+    "method": "ET\u2080 3-method intercomparison (PM, PT, Hargreaves) on real Michigan data",
+    "digitized_by": "Computed from Open-Meteo ERA5 reanalysis (6 stations \u00d7 153 days)",
+    "created": "2026-02-26",
+    "validated_by": "et0_three_method.py (self-consistent generation)",
+    "baseline_script": "control/et0_intercomparison/et0_three_method.py",
+    "baseline_command": "python control/et0_intercomparison/et0_three_method.py",
+    "baseline_commit": "9a84ae5",
+    "python_version": "3.10.12",
+    "data_source": "Open-Meteo ERA5 reanalysis (2023 growing season, free API)",
+    "_tolerance_justification": "PM vs Open-Meteo R\u00b2 > 0.90: our PM matches ERA5-based PM closely. PT vs PM R\u00b2 > 0.70: radiation methods have reduced correlation at Lake Michigan coastal stations with lake-effect variability (Xu & Singh 2002 report 0.60-0.95). Hargreaves vs PM R\u00b2 > 0.55: temperature-only methods have largest scatter at coastal sites where wind/cloud effects dominate (Droogers & Allen 2002 report R\u00b2 0.50-0.85). Mean ratio ranges: wide to accommodate seasonal and station variability (Jensen et al. 1990, Tabari et al. 2013)."
+  }
+}

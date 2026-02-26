@@ -46,15 +46,15 @@
 //!   `downcast_f64_to_f32()` for backward compat, `ValidationHarness` migrated
 //!   to `tracing::info!` (requires `tracing-subscriber` in consumers)
 //!
-//! ## Cross-Spring Shader Provenance (validated in `cross_spring_evolution.rs` §13)
+//! ## Cross-Spring Shader Provenance (validated in `cross_spring_absorption.rs` §13)
 //!
-//! | Spring | Domain | Contributed to ToadStool |
+//! | Spring | Domain | Contributed to `ToadStool` |
 //! |--------|--------|------------------------|
-//! | hotSpring | Nuclear/precision physics | df64_core, math_f64, complex_f64, SU(3), Hermite/Laguerre, Lanczos |
-//! | wetSpring | Bio/environmental | Shannon/Simpson/Bray-Curtis, kriging, moving_window, Hill, ODE bio, NMF |
-//! | neuralSpring | ML/optimization | Nelder-Mead, ValidationHarness, pairwise metrics, batch IPR, matmul |
-//! | airSpring | Precision agriculture | regression, hydrology, moving_window_f64, Richards PDE (S40), TS-001/003/004 fixes |
-//! | groundSpring | Uncertainty/stats | MC ET₀ propagation, batched_multinomial, rawr_mean |
+//! | hotSpring | Nuclear/precision physics | `df64_core`, `math_f64`, `complex_f64`, SU(3), Hermite/Laguerre, Lanczos |
+//! | wetSpring | Bio/environmental | Shannon/Simpson/Bray-Curtis, kriging, `moving_window`, Hill, ODE bio, NMF |
+//! | neuralSpring | ML/optimization | Nelder-Mead, `ValidationHarness`, pairwise metrics, batch IPR, matmul |
+//! | airSpring | Precision agriculture | regression, hydrology, `moving_window_f64`, Richards PDE (S40), TS-001/003/004 fixes |
+//! | groundSpring | Uncertainty/stats | MC ET₀ propagation, `batched_multinomial`, `rawr_mean` |
 //!
 //! **Key evolution since V011**: `pde::crank_nicolson` is now **f64** with
 //! `WGSL_CRANK_NICOLSON_F64` GPU shader — previously documented as f32-only.

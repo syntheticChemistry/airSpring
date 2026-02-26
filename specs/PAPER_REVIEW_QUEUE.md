@@ -2,7 +2,7 @@
 
 **Last Updated**: February 26, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 16 completed (474/474 Python + 608 Rust tests + 1354 atlas checks + 11 Tier A modules). All completed papers use open data and systems.
+**Status**: 22 completed (594/594 Python + 491 Rust tests + 570 validation + 1393 atlas checks + 11 Tier A modules). All completed papers use open data and systems.
 
 ---
 
@@ -26,15 +26,20 @@
 | 14 | Ali, Dong & Lavely (2024) Irrigation scheduling | 0+1 | 25+28 | Dong | `benchmark_scheduling.json` | FAO-56 + synthetic (open) |
 | 15 | Dong & Hansen (2023) Weighing lysimeter ET | 0+1 | 26+25 | Dong | `benchmark_lysimeter.json` | Published design params |
 | 16 | FAO-56 ET₀ sensitivity analysis (Gong 2006) | 0+1 | 23+23 | Standard | `benchmark_sensitivity.json` | FAO-56 + literature (open) |
+| 17 | Priestley & Taylor (1972) radiation-based ET₀ | 0+1 | 32+32 | Standard | `benchmark_priestley_taylor.json` | FAO-56 intermediates (open literature) |
+| 18 | ET₀ 3-method intercomparison (PM/PT/HG) — 6 stations | 0+1 | 36+36 | Dong | `benchmark_et0_intercomparison.json` | Open-Meteo ERA5 (free) |
+| 19 | Thornthwaite (1948) monthly ET₀ — Exp 021 | 0+1 | 23+50 | Standard | `benchmark_thornthwaite.json` | Temperature-based heat index (open) |
+| 20 | Growing Degree Days (GDD) — Exp 022 | 0+1 | 33+26 | Standard | `benchmark_gdd.json` | Phenology, kc_from_gdd (open) |
+| 21 | Saxton & Rawls (2006) pedotransfer — Exp 023 | 0+1 | 70+58 | Standard | `benchmark_pedotransfer.json` | θs/θr/Ks from texture (open) |
 
 ### Controls Audit
 
-All 16 completed papers have:
+All 22 completed papers have:
 - **Digitized benchmarks** in `control/*/benchmark_*.json`
 - **Python control scripts** that validate against benchmarks
-- **Rust validation binaries** (22 binaries) that load the same benchmarks
+- **Rust validation binaries** (27 binaries) that load the same benchmarks
 - **Open or published data** (no institutional access required)
-- **Cross-validation** (75/75 Python↔Rust match at 1e-5; 690 crop-station yield pairs within 0.01)
+- **Cross-validation** (75/75 Python↔Rust match at 1e-5; 690 crop-station yield pairs within 0.01; PT↔PM cross-validated)
 - **GPU wiring**: 11 Tier A modules (BatchedEt0, BatchedWB, Kriging, Reduce, Stream, fit_ridge, BatchedRichards, fit_nm, diversity, norm_ppf, brent)
 - **CPU benchmarks**: 12.7M ET₀/s, 36.5M VG θ/s, 59M Kc/s, 57M Langmuir fits/s
 
@@ -58,6 +63,11 @@ All 16 completed papers have:
 | 14 | 25/25 | 28/28 (`validate_scheduling`) | `BatchedWB` + `BatchedEt0` | `hydrology` (scheduling) |
 | 15 | 26/26 | 25/25 (`validate_lysimeter`) | `BatchedEt0` (ground truth) | `metrics` (lysimeter) |
 | 16 | 23/23 | 23/23 (`validate_sensitivity`) | `BatchedEt0` (perturbation) | `metrics` (sensitivity) |
+| 17 | 32/32 | 32/32 (`validate_priestley_taylor`) | `BatchedElementwise` (Tier B, op=PT) | `evapotranspiration` (PT) |
+| 18 | 36/36 | 36/36 (`validate_et0_intercomparison`) | All 3 methods at scale | `evapotranspiration` (PM+PT+HG) |
+| 19 | 23/23 | 50/50 (`validate_thornthwaite`) | `BatchedElementwise` (Tier B) | `evapotranspiration` (Thornthwaite) |
+| 20 | 33/33 | 26/26 (`validate_gdd`) | GDD accumulation | `crop` (kc_from_gdd) |
+| 21 | 70/70 | 58/58 (`validate_pedotransfer`) | Saxton-Rawls θs/θr/Ks | `soil_moisture` (pedotransfer) |
 
 ---
 
@@ -144,4 +154,5 @@ moisture uncertainty → geometry uncertainty → QS prediction uncertainty.
 - Papers 12-16 (Tier 3) support baseCamp Sub-thesis 06 (no-till Anderson QS)
 - Paper 12 (Brandt farm) and Paper 15 (OSU 60-year reconstruction) use only open data
 - Paper 13 (dual Kc) is needed for cover crop water balance in the Anderson coupling
+- Paper 17 (Priestley-Taylor) validates radiation-only ET₀ against PM — uses same open data
 - Every completed paper has been validated through the full pipeline: Python → Rust CPU → GPU

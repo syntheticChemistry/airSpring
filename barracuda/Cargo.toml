@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.4.6"
+version = "0.4.8"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
@@ -126,3 +126,23 @@ path = "src/bin/validate_sensitivity.rs"
 [[bin]]
 name = "validate_atlas"
 path = "src/bin/validate_atlas.rs"
+
+[[bin]]
+name = "validate_priestley_taylor"
+path = "src/bin/validate_priestley_taylor.rs"
+
+[[bin]]
+name = "validate_et0_intercomparison"
+path = "src/bin/validate_et0_intercomparison.rs"
+
+[[bin]]
+name = "validate_thornthwaite"
+path = "src/bin/validate_thornthwaite.rs"
+
+[[bin]]
+name = "validate_gdd"
+path = "src/bin/validate_gdd.rs"
+
+[[bin]]
+name = "validate_pedotransfer"
+path = "src/bin/validate_pedotransfer.rs"

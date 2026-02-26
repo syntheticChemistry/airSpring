@@ -1,7 +1,7 @@
 # airSpring Specifications
 
 **Last Updated**: February 26, 2026
-**Status**: Phase 0-3 complete — 474/474 Python + 608 Rust tests + 1354 atlas checks + 75/75 cross-validation + 11 Tier A modules + 69x CPU speedup (v0.4.6)
+**Status**: Phase 0-3 complete — 594/594 Python + 491 Rust tests + 570 validation + 1393 atlas checks + 75/75 cross-validation + 11 Tier A modules + 69x CPU speedup (v0.4.8)
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling
 
 ---
@@ -10,14 +10,14 @@
 
 | Metric | Value |
 |--------|-------|
-| Phase 0 (Python) | 474/474 PASS — 16 experiments (FAO-56, soil, IoT, WB, dual Kc, cover crops, regional ET₀, Richards, biochar, 60yr WB, yield, CW2D, scheduling, lysimeter, sensitivity) |
+| Phase 0 (Python) | 594/594 PASS — 22 experiments (FAO-56, soil, IoT, WB, dual Kc, cover crops, regional ET₀, Richards, biochar, 60yr WB, yield, CW2D, scheduling, lysimeter, sensitivity, Priestley-Taylor, 3-method intercomparison, Thornthwaite, GDD, pedotransfer) |
 | Phase 0+ (Real data) | 15,300 station-days, R²=0.967 across 100 Michigan stations |
-| Phase 1 (Rust) | 608 tests + 1354 atlas — 22 binaries |
+| Phase 1 (Rust) | 491 tests + 570 validation + 1393 atlas — 27 binaries |
 | Phase 1.5 (CPU benchmark) | Rust 69x faster than Python (geometric mean, 20x–502x) |
 | Phase 2 (Cross-validation) | 75/75 Python↔Rust match within 1e-5; 690 crop-station yield pairs within 0.01 |
 | Phase 3 (GPU) | 11 Tier A modules wired, cross-spring S68 fully rewired |
 | Faculty | Dong (BAE, MSU — new lab 2026) |
-| Handoff | V018 (atlas), V019 (S68 sync) in `wateringHole/handoffs/` |
+| Handoff | V022 (Thornthwaite+GDD+pedotransfer) in `wateringHole/handoffs/` |
 
 ---
 
@@ -39,7 +39,7 @@
 |----------|----------|-------------|
 | CONTROL_EXPERIMENT_STATUS.md | `../` | Detailed experiment logs and check counts |
 | CHANGELOG.md | `../` | Evolution history (Keep a Changelog format) |
-| experiments/README.md | `../experiments/` | Experiment index (16 completed) |
+| experiments/README.md | `../experiments/` | Experiment index (22 completed) |
 | whitePaper/baseCamp/README.md | `../whitePaper/baseCamp/` | Per-faculty research briefings |
 | whitePaper/STUDY.md | `../whitePaper/` | Full study results |
 | whitePaper/METHODOLOGY.md | `../whitePaper/` | Multi-phase validation protocol |
@@ -49,13 +49,16 @@
 
 ## Baseline Commit Lineage
 
-Python baselines were generated across two commits as experiments expanded:
+Python baselines were generated across five commits as experiments expanded:
 
 | Commit | Phase | Benchmarks | Date |
 |--------|-------|-----------|------|
 | `94cc51d` | Phase 1 | FAO-56, Dong 2020, Dong 2024, water balance, dual Kc, cover crop Kc | 2026-02-16 — 2026-02-25 |
 | `3afc229` | Phase 2 | Richards equation, biochar isotherms, 60-year water balance | 2026-02-25 |
-| `cb59873` | Phase 0+ | 8 scripts: compute_et0_real_data, simulate_real_data, regional_et0_intercomparison, irrigation_scheduling, et0_sensitivity, lysimeter_et, yield_response, cw2d_richards | 2026-02-26 |
+| `5684b1e` | Phase 2+ | Scheduling, sensitivity, lysimeter | 2026-02-26 |
+| `af1eb97` | Phase 2+ | Yield response, CW2D Richards | 2026-02-26 |
+| `cb59873` | Phase 0+ | Atlas (100 stations), compute_et0_real_data, simulate_real_data, regional_et0_intercomparison | 2026-02-26 |
+| `9a84ae5` | Phase 2+ | Priestley-Taylor ET₀, 3-method intercomparison | 2026-02-26 |
 
 Each benchmark JSON embeds its provenance (script, commit, command, date).
 Re-run `scripts/run_all_baselines.sh` at the respective commits to verify.
@@ -91,7 +94,7 @@ Re-run `scripts/run_all_baselines.sh` at the respective commits to verify.
 `../whitePaper/STUDY.md` → `../CONTROL_EXPERIMENT_STATUS.md` → BARRACUDA_REQUIREMENTS.md
 
 **Cross-spring evolution** (15 min):
-CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/AIRSPRING_V019_*.md`
+CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/AIRSPRING_V022_*.md`
 
 ---
 

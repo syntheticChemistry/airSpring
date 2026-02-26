@@ -2,7 +2,7 @@
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
 **Date**: February 26, 2026
-**Version**: 0.4.6
+**Version**: 0.4.8
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -12,13 +12,13 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → GPU (ToadStool shaders) → metalForge (mixed hardware) → Penny Irrigation
 ```
 
-## Current Status (v0.4.6)
+## Current Status (v0.4.8)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
-| Phase 0: Paper baselines (Python) | **474/474 PASS** | FAO-56, soil, IoT, water balance, dual Kc, cover crops, Richards, biochar, yield, CW2D, 60yr WB, scheduling, lysimeter, sensitivity |
+| Phase 0: Paper baselines (Python) | **594/594 PASS** | FAO-56, soil, IoT, water balance, dual Kc, cover crops, Richards, biochar, yield, CW2D, 60yr WB, scheduling, lysimeter, sensitivity, Priestley-Taylor, 3-method intercomparison, Thornthwaite, GDD, pedotransfer |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **608 tests + 1354 atlas** | 22 binaries |
+| Phase 1: Rust validation | **491 tests + 570 validation + 1393 atlas** | 27 binaries |
 | Phase 1.5: CPU Benchmark | **69x faster** | Rust vs Python geometric mean (20x–502x range) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 3: GPU bridge | **11 Tier A modules** | S68 synced — all metalForge absorbed upstream, evolution\_gaps current |
@@ -28,12 +28,12 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test` | **608 lib/integration**, 0 failures |
+| `cargo test` | **491 lib/integration**, 0 failures |
 | `cargo clippy -- -D warnings` | **0 warnings** (pedantic + nursery) |
 | `cargo fmt --check` | **Clean** |
 | `cargo doc` | **Builds** |
 | `cargo llvm-cov --lib` | **97.45%** line coverage |
-| Test breakdown | 464 unit, 33 eco, 21 GPU, 6 evolution, 4 determinism, 47 cross-spring, 20 stats, 11 I/O, 2 doc, 11 doc |
+| Test breakdown | 491 total (lib + integration + doc) |
 
 ## Evolution Architecture: Write → Absorb → Lean
 
@@ -165,7 +165,7 @@ Richards equation (unsaturated flow — open-source alternative to HYDRUS), bioc
 
 ```
 airSpring/
-├── control/                     # Phase 0: Python baselines (474/474)
+├── control/                     # Phase 0: Python baselines (594/594)
 │   ├── fao56/                   # FAO-56 Penman-Monteith ET₀ (64/64)
 │   ├── soil_sensors/            # Soil moisture calibration (36/36)
 │   ├── iot_irrigation/          # IoT irrigation pipeline (24/24)
@@ -180,8 +180,13 @@ airSpring/
 │   ├── scheduling/              # Irrigation scheduling optimization (25/25)
 │   ├── lysimeter/               # Lysimeter ET measurement (26/26)
 │   ├── sensitivity/             # ET₀ sensitivity analysis (23/23)
+│   ├── priestley_taylor/        # Priestley-Taylor ET₀ (32/32)
+│   ├── et0_intercomparison/     # ET₀ 3-method intercomparison (36/36)
+│   ├── thornthwaite/            # Thornthwaite monthly ET₀ (23/23)
+│   ├── gdd/                     # Growing Degree Days (33/33)
+│   ├── pedotransfer/            # Saxton-Rawls 2006 pedotransfer (70/70)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1: Rust validation (608 tests, 22 binaries)
+├── barracuda/                   # Phase 1: Rust validation (491 tests, 570 validation, 1393 atlas, 27 binaries)
 │   ├── src/
 │   │   ├── eco/                 # Domain modules (12 validated against papers, incl. diversity)
 │   │   ├── io/                  # csv_ts (streaming columnar IoT parser)
@@ -192,7 +197,7 @@ airSpring/
 │   │   │   ├── generators.rs
 │   │   │   ├── stats.rs
 │   │   │   └── bootstrap.rs
-│   │   └── bin/                 # 22 validate_*, bench_*, cross_validate, simulate_season
+│   │   └── bin/                 # 27 validate_*, bench_*, cross_validate, simulate_season
 │   ├── tests/                   # 134 integration tests (7 files + common/)
 │   │   ├── common/              # Shared GPU device helpers
 │   │   ├── eco_integration.rs   # Eco module cross-validation
@@ -201,20 +206,20 @@ airSpring/
 │   │   ├── gpu_determinism.rs   # Bit-identical rerun validation
 │   │   ├── io_and_errors.rs     # CSV parsing, error variants
 │   │   └── stats_integration.rs # Statistical metrics cross-validation
-│   └── Cargo.toml               # v0.4.6
+│   └── Cargo.toml               # v0.4.8
 ├── metalForge/                  # Upstream absorption staging (→ barracuda)
 │   └── forge/                   # airspring-forge v0.2.0 (53 tests, 6 modules)
 ├── specs/                       # Specifications and requirements
-│   ├── PAPER_REVIEW_QUEUE.md    # Paper reproduction queue (16 complete, queued)
+│   ├── PAPER_REVIEW_QUEUE.md    # Paper reproduction queue (18 complete, queued)
 │   ├── BARRACUDA_REQUIREMENTS.md# GPU kernel requirements
 │   └── CROSS_SPRING_EVOLUTION.md# Cross-spring shader provenance
 ├── whitePaper/                  # Methodology and study documentation
 │   ├── baseCamp/                # Per-faculty research briefings
 │   ├── METHODOLOGY.md           # Multi-phase validation protocol
 │   └── STUDY.md                 # Full results narrative
-├── experiments/                 # Experiment protocols and results (17 experiments)
+├── experiments/                 # Experiment protocols and results (22 experiments)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
-│   └── handoffs/                # Versioned (V018 atlas, V019 S68 sync active)
+│   └── handoffs/                # Versioned (V020 evolution, V021 PT+intercomparison active)
 ├── CHANGELOG.md                 # Keep-a-Changelog versioned history
 ├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
 └── LICENSE                      # AGPL-3.0-or-later
@@ -257,7 +262,7 @@ airSpring/
 | `whitePaper/STUDY.md` | Full results narrative |
 | `whitePaper/METHODOLOGY.md` | Validation protocol |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V018 atlas, V019 S68 sync active) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V022 Thornthwaite+GDD+pedotransfer active) |
 
 ## License
 
@@ -265,8 +270,8 @@ AGPL-3.0-or-later
 
 ---
 
-*February 26, 2026 — v0.4.6. 17 experiments, 474/474 Python, 608 Rust tests + 1354
-atlas checks, 22 binaries, 75/75 cross-validation, 15,300 station-days (100 MI
-stations). Rust 69x faster than Python (geometric mean). 11 Tier A wired modules.
-ToadStool S68 synced (774 WGSL, all metalForge absorbed). Pure Rust + BarraCuda.
-AGPL-3.0-or-later.*
+*February 26, 2026 — v0.4.8. 22 experiments, 594/594 Python, 491 Rust tests + 570
+validation + 1393 atlas checks, 27 binaries, 75/75 cross-validation, 15,300
+station-days (100 MI stations). Rust 69x faster than Python (geometric mean).
+11 Tier A wired modules. ToadStool S68 synced (774 WGSL, all metalForge absorbed).
+Pure Rust + BarraCuda. AGPL-3.0-or-later.*

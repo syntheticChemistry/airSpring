@@ -1,17 +1,17 @@
 # baseCamp: Per-Faculty Research Briefings
 
 **Updated**: February 26, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.4.6)
-**Status**: 17 experiments, 474/474 Python + 608 Rust tests + 1354 atlas checks + 75/75 cross-validation + 11 Tier A modules + 69x CPU speedup
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.4.8)
+**Status**: 22 experiments, 594/594 Python + 491 Rust tests + 570 validation + 1393 atlas checks + 75/75 cross-validation + 11 Tier A modules + 69x CPU speedup
 
 ---
 
 ## Evolution Path
 
 ```
-Phase 0   Python/R baselines    — reproduce paper results with original tools (474/474)
+Phase 0   Python/R baselines    — reproduce paper results with original tools (594/594)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (464 lib + 134 integration tests, 22 binaries, 97.45% coverage)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (491 tests, 570 validation + 1393 atlas, 27 binaries, 97.45% coverage)
 Phase 2   BarraCuda GPU         — 11 Tier A modules wired (cross-spring S68 fully rewired)
 Phase 3   metalForge            — Write→Absorb→Lean complete, 6/6 modules absorbed upstream
 Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($600 GPU)
@@ -21,7 +21,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 
 | Faculty | Institution | Track | Papers | Experiments | Checks | Domain |
 |---------|------------|-------|:------:|:-----------:|:------:|--------|
-| Dong | MSU BAE | Irrigation & Soil | 8+ | 13 | 474+725 | ET₀, soil moisture, IoT, water balance, dual Kc, cover crops, Richards, biochar, yield, CW2D |
+| Dong | MSU BAE | Irrigation & Soil | 10+ | 22 | 594+570 | ET₀, soil moisture, IoT, water balance, dual Kc, cover crops, Richards, biochar, yield, CW2D, Thornthwaite, GDD, pedotransfer |
 
 ## Faculty: Younsuk Dong, PhD
 
@@ -49,8 +49,13 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | 14 | Ali, Dong & Lavely (2024) Irrigation scheduling optimization | 0→CPU | 25+28 | Ag Water Mgmt 306 |
 | 16 | Dong & Hansen (2023) Weighing lysimeter ET measurement | 0→CPU | 26+25 | Smart Ag Tech 4 |
 | 17 | Gong et al. (2006) ET₀ sensitivity analysis (OAT) | 0→CPU | 23+23 | Ag Water Mgmt 86 |
+| 18 | Priestley & Taylor (1972) radiation-based ET₀ | 0→CPU | 32+32 | FAO-56 intermediates |
+| 19 | ET₀ 3-method intercomparison (PM/PT/HG) | 0→CPU | 36+36 | Open-Meteo ERA5 |
+| 20 | Thornthwaite (1948) monthly ET₀ | 0→CPU | 23+50 | Temperature-based heat index |
+| 21 | Growing Degree Days (GDD) | 0→CPU | 33+26 | Phenology, kc_from_gdd |
+| 22 | Saxton & Rawls (2006) pedotransfer | 0→CPU | 70+58 | θs/θr/Ks from texture |
 
-### Rust Validation (Phase 1) — 22 binaries
+### Rust Validation (Phase 1) — 27 binaries
 
 | Binary | Checks | Modules Exercised |
 |--------|:------:|-------------------|
@@ -68,7 +73,10 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | `validate_long_term_wb` | 11 | 60-year ET₀, water balance, climate trends |
 | `validate_yield` | 32 | Stewart 1977, Ky table, multi-stage, WUE, scheduling |
 | `validate_cw2d` | 24 | CW2D media, VG retention, mass balance |
-| `validate_atlas` | 1354/1354 | 100 Michigan stations × 13 checks each |
+| `validate_atlas` | 1393/1393 | 100 Michigan stations × 13 checks each |
+| `validate_thornthwaite` | 50 | Thornthwaite monthly ET₀ |
+| `validate_gdd` | 26 | GDD accumulation, kc_from_gdd |
+| `validate_pedotransfer` | 58 | Saxton-Rawls 2006 |
 | `cross_validate` | 75 | Python↔Rust exact match (tol=1e-5) |
 
 ### GPU Orchestrators (Phase 2) — 11 Tier A wired
@@ -84,7 +92,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | `BatchedRichards` | `pde::richards::solve_richards` | airSpring→ToadStool S40 absorption | **Wired** |
 | `fit_*_nm/global` | `optimize::nelder_mead` + `multi_start` | neuralSpring optimizer | **Wired** |
 
-### CPU Benchmarks (v0.4.6) — Rust 69x Faster Than Python
+### CPU Benchmarks (v0.4.8) — Rust 69x Faster Than Python
 
 | Operation | Rust Throughput | Speedup vs Python | Cross-Spring Provenance |
 |-----------|----------------|:-----------------:|------------------------|
@@ -102,7 +110,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 |----------|---------|
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C breakdown, absorbed vs stays-local, quality gates |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
-| `wateringHole/handoffs/` | V019 active handoff — S68 sync, P0 resolved, absorption candidates |
+| `wateringHole/handoffs/` | V022 active handoff — Thornthwaite, GDD, pedotransfer, S68 sync |
 | `specs/CROSS_SPRING_EVOLUTION.md` | 774 WGSL shader provenance across all Springs |
 
 ### Next Steps (Dong Lab)
@@ -131,13 +139,13 @@ $200 sensor, Open-Meteo weather data, and a $600 GPU running BarraCuda.
 
 ## Extension Explorations
 
-With 16 paper reproductions validated and the full Python → Rust CPU → GPU pipeline
+With 22 paper reproductions validated and the full Python → Rust CPU → GPU pipeline
 operational, airSpring can now extend beyond reproduction into new science. These
 explorations use the validated stack to answer questions the original papers did not.
 
 | File | Title | Data Tier | Status |
 |------|-------|:---------:|--------|
-| [open_data_atlas.md](open_data_atlas.md) | Michigan Crop Water Atlas (80yr, 100 stations) | Tier 1 (free) | **Complete** — 1354/1354 atlas checks, 15,300 station-days |
+| [open_data_atlas.md](open_data_atlas.md) | Michigan Crop Water Atlas (80yr, 100 stations) | Tier 1 (free) | **Complete** — 1393/1393 atlas checks, 15,300 station-days |
 | [yield_validation.md](yield_validation.md) | Stewart Yield Model vs USDA NASS Reality | Tier 1 (free) | Planning |
 | [et_gold_standard.md](et_gold_standard.md) | Direct ET Validation via AmeriFlux Eddy Covariance | Tier 2 (registration) | Planning |
 | [forecast_scheduling.md](forecast_scheduling.md) | Predictive Irrigation with Weather Forecasts | Tier 2 (API key) | Planning |

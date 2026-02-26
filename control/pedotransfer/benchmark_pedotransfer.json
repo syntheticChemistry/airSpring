@@ -1,0 +1,135 @@
+{
+  "_provenance": {
+    "method": "Saxton & Rawls (2006) pedotransfer functions",
+    "baseline_script": "control/pedotransfer/saxton_rawls.py",
+    "baseline_commit": "pending",
+    "python_version": "3.10",
+    "created": "2026-02-26",
+    "references": [
+      "Saxton KE, Rawls WJ (2006) SSSAJ 70(5):1569-1578"
+    ]
+  },
+  "loam_intermediates": {
+    "S": 0.4,
+    "C": 0.2,
+    "OM": 2.5,
+    "theta_1500_first": 0.13774,
+    "theta_1500": 0.137024,
+    "theta_33_first": 0.29376,
+    "theta_33": 0.27961,
+    "theta_s_33_first": 0.17278,
+    "theta_s_33": 0.175668,
+    "theta_s": 0.459478,
+    "lambda": 0.186874,
+    "ksat_mm_hr": 15.475656
+  },
+  "texture_classes": {
+    "sand": {
+      "S": 0.92,
+      "C": 0.03,
+      "OM": 1.0,
+      "theta_wp": 0.020603,
+      "theta_fc": 0.062303,
+      "theta_s": 0.437968,
+      "ksat_mm_hr": 135.905009,
+      "lambda": 0.289925
+    },
+    "loamy_sand": {
+      "S": 0.82,
+      "C": 0.06,
+      "OM": 1.5,
+      "theta_wp": 0.045967,
+      "theta_fc": 0.106323,
+      "theta_s": 0.433456,
+      "ksat_mm_hr": 86.367004,
+      "lambda": 0.219708
+    },
+    "sandy_loam": {
+      "S": 0.65,
+      "C": 0.1,
+      "OM": 2.0,
+      "theta_wp": 0.076239,
+      "theta_fc": 0.172028,
+      "theta_s": 0.436538,
+      "ksat_mm_hr": 47.427422,
+      "lambda": 0.213216
+    },
+    "loam": {
+      "S": 0.4,
+      "C": 0.2,
+      "OM": 2.5,
+      "theta_wp": 0.137024,
+      "theta_fc": 0.27961,
+      "theta_s": 0.459478,
+      "ksat_mm_hr": 15.475656,
+      "lambda": 0.186874
+    },
+    "silt_loam": {
+      "S": 0.2,
+      "C": 0.15,
+      "OM": 3.0,
+      "theta_wp": 0.112742,
+      "theta_fc": 0.311017,
+      "theta_s": 0.496298,
+      "ksat_mm_hr": 19.217964,
+      "lambda": 0.26587
+    },
+    "clay_loam": {
+      "S": 0.3,
+      "C": 0.35,
+      "OM": 2.0,
+      "theta_wp": 0.216311,
+      "theta_fc": 0.355358,
+      "theta_s": 0.468852,
+      "ksat_mm_hr": 3.744462,
+      "lambda": 0.130062
+    },
+    "silty_clay": {
+      "S": 0.07,
+      "C": 0.45,
+      "OM": 2.0,
+      "theta_wp": 0.266838,
+      "theta_fc": 0.411285,
+      "theta_s": 0.522981,
+      "ksat_mm_hr": 3.448104,
+      "lambda": 0.113356
+    },
+    "clay": {
+      "S": 0.2,
+      "C": 0.55,
+      "OM": 2.0,
+      "theta_wp": 0.323402,
+      "theta_fc": 0.441457,
+      "theta_s": 0.513739,
+      "ksat_mm_hr": 0.902961,
+      "lambda": 0.081532
+    }
+  },
+  "tol_moisture": 0.0001,
+  "tol_ksat": 0.5,
+  "expected_ranges": {
+    "theta_wp": [
+      0.01,
+      0.35
+    ],
+    "theta_fc": [
+      0.05,
+      0.5
+    ],
+    "theta_s": [
+      0.3,
+      0.65
+    ],
+    "ksat": [
+      0.1,
+      500.0
+    ]
+  },
+  "thresholds": {
+    "awc_range": [
+      0.01,
+      0.25
+    ],
+    "_tolerance_justification": "Saxton-Rawls regression coefficients have 4 significant digits; intermediate values may accumulate floating-point differences. Ksat tolerance is wider due to exponential amplification."
+  }
+}

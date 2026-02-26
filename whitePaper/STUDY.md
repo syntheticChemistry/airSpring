@@ -8,7 +8,7 @@
 
 ## Abstract
 
-We independently replicate 16 precision agriculture and environmental systems computational methods — FAO-56 Penman-Monteith evapotranspiration, soil moisture calibration, IoT irrigation, daily water balance, dual crop coefficient, cover crops, regional ET₀ intercomparison, Richards equation, biochar adsorption isotherms, yield response to water stress, CW2D constructed wetland media, 60-year water balance reconstruction, irrigation scheduling optimization, lysimeter ET measurement, and ET₀ sensitivity analysis — using only open-source tools and publicly available data. Python baselines (474/474 checks) validate against digitized paper benchmarks. A real data pipeline using Open-Meteo historical weather (918 station-days, 6 Michigan stations, 2023 growing season) produces ET₀ with R²=0.967 against independent computation. Water balance simulations show 53-72% water savings with smart scheduling. A Rust implementation via BarraCuda passes 608 tests + 1354 atlas checks (608 cargo: 464 lib + 142 integration + 2 doc) across 22 binaries, with 75/75 Python-Rust cross-validation matches within 1e-5 tolerance. CPU benchmarks show Rust is 69x faster than Python (geometric mean, 20x–502x range) — establishing the foundation for GPU-accelerated precision irrigation on consumer hardware.
+We independently replicate 22 precision agriculture and environmental systems computational methods — FAO-56 Penman-Monteith evapotranspiration, soil moisture calibration, IoT irrigation, daily water balance, dual crop coefficient, cover crops, regional ET₀ intercomparison, Richards equation, biochar adsorption isotherms, yield response to water stress, CW2D constructed wetland media, 60-year water balance reconstruction, irrigation scheduling optimization, lysimeter ET measurement, ET₀ sensitivity analysis, Priestley-Taylor ET₀, ET₀ 3-method intercomparison, Thornthwaite monthly ET₀, growing degree days, and Saxton-Rawls pedotransfer — using only open-source tools and publicly available data. Python baselines (594/594 checks) validate against digitized paper benchmarks. A real data pipeline using Open-Meteo historical weather (918 station-days, 6 Michigan stations, 2023 growing season) produces ET₀ with R²=0.967 against independent computation. Water balance simulations show 53-72% water savings with smart scheduling. A Rust implementation via BarraCuda passes 491 tests + 570 validation checks + 1393 atlas checks across 27 binaries, with 75/75 Python-Rust cross-validation matches within 1e-5 tolerance. CPU benchmarks show Rust is 69x faster than Python (geometric mean, 20x–502x range) — establishing the foundation for GPU-accelerated precision irrigation on consumer hardware.
 
 ---
 
@@ -34,7 +34,30 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda) 
 
 ---
 
-## 2. Phase 0: Python/R Control (474/474 PASS)
+## 2. Phase 0: Python/R Control (594/594 PASS)
+
+| Experiment | Paper | Checks | Key Validation |
+|------------|-------|:------:|----------------|
+| FAO-56 Penman-Monteith | Allen et al. 1998 | 64/64 | Bangkok 5.72, Uccle 3.88, Lyon 4.56 mm/day |
+| Soil Sensor Calibration | Dong et al. 2020 | 36/36 | Topp eq, RMSE/IA/MBE, correction fits |
+| IoT Irrigation Pipeline | Dong et al. 2024 | 24/24 | SoilWatch 10, irrigation model, ANOVA |
+| Water Balance | FAO-56 Chapter 8 | 18/18 | Mass balance 0.0000 mm, Ks bounds |
+| Dual Kc | FAO-56 Chapter 7 | 63/63 | 10 crops, 11 soils, Kcb+Ke partitioning |
+| Cover Crops | FAO-56 Ch 11 + Islam | 40/40 | 5 species, mulch reduction, no-till savings |
+| Regional ET₀ | 6 Michigan stations | 61/61 | CV, pairwise r, geographic consistency |
+| Richards Equation | van Genuchten 1980 | 14/14 | VG retention, conductivity, infiltration, drainage |
+| Biochar Isotherms | Kumari et al. 2025 | 14/14 | Langmuir/Freundlich R², RL factor |
+| 60-Year Water Balance | OSU Triplett, ERA5 | 10/10 | Decadal stability, mass balance, climate trends |
+| Yield Response | Stewart 1977, FAO-56 Ch 10 | 32/32 | Ky table, single/multi-stage, WUE, scheduling |
+| CW2D Richards | Dong et al. 2019, HYDRUS | 24/24 | Gravel/organic VG, infiltration, mass balance |
+| Scheduling Optimization | Ali, Dong & Lavely 2024 | 25/25 | 5 strategies, mass balance, yield ordering, WUE |
+| Lysimeter ET | Dong & Hansen 2023 | 26/26 | Mass-to-ET, temp compensation, calibration R² |
+| ET₀ Sensitivity | Gong et al. 2006 methodology | 23/23 | OAT ±10%, 3 climatic zones, monotonicity |
+| Priestley-Taylor ET₀ | Priestley & Taylor 1972 | 32/32 | PT α=1.26, analytical, cross-val vs PM, climate gradient |
+| ET₀ 3-Method Intercomparison | PM/PT/HG on real data | 36/36 | 6 MI stations, R², bias, coastal effects |
+| Thornthwaite ET₀ | Thornthwaite 1948 | 23/23 | Monthly heat index, temperature-based ET₀ |
+| Growing Degree Days | Phenology standard | 33/33 | GDD accumulation, kc_from_gdd |
+| Pedotransfer (Saxton-Rawls) | Saxton & Rawls 2006 | 70/70 | θs/θr/Ks from texture |
 
 ### 2.1 FAO-56 Penman-Monteith ET₀ (64/64 PASS)
 
@@ -117,24 +140,24 @@ All mass balances close to 0.0000 mm. Water savings of 53-72% are consistent wit
 
 ---
 
-## 4. Phase 1: Rust BarraCuda (464 lib + 142 integration + 2 doc = 608 tests + 1354 atlas checks)
+## 4. Phase 1: Rust BarraCuda (491 tests + 570 validation + 1393 atlas checks, 27 binaries)
 
 ### 4.1 Module Structure
 
 | Module | Functions | Validation Checks | Unit Tests |
 |--------|----------|:-----------------:|:----------:|
-| `eco::evapotranspiration` | 22 FAO-56 functions + Hargreaves, sunshine Rs, monthly G | 31 | 25 |
-| `eco::crop` | CropType enum (10 crops), FAO-56 Table 12 Kc, Eq. 62 climate adj. | — | 7 |
+| `eco::evapotranspiration` | 22 FAO-56 functions + Hargreaves, sunshine Rs, monthly G, Thornthwaite | 31 | 25 |
+| `eco::crop` | CropType enum (10 crops), FAO-56 Table 12 Kc, Eq. 62 climate adj., GDD, kc_from_gdd | — | 7 |
 | `eco::sensor_calibration` | SoilWatch 10 VWC, irrigation recommendation, multi-layer | 21 | 8 |
-| `eco::soil_moisture` | Topp eq, inverse, PAW, SoilTexture, SoilHydraulicProps | 25 | 10 |
+| `eco::soil_moisture` | Topp eq, inverse, PAW, SoilTexture, SoilHydraulicProps, Saxton-Rawls pedotransfer | 25 | 10 |
 | `eco::water_balance` | WaterBalanceState, RunoffModel, simulate_season | 13 | 8 |
 | `io::csv_ts` | TimeseriesData columnar parser, streaming BufReader | 11 | 6 |
 | `error` | AirSpringError enum (Io, CsvParse, JsonParse, InvalidInput, Barracuda) | — | — |
 | `testutil` | RMSE, MBE, R², IA, NSE, synthetic data generators | — | 6 |
-| **Integration tests** | Cross-module pipelines, determinism, error paths, crop↔balance | — | 142 |
-| **Forge** | metalForge absorbed upstream (53 unit + 11 doc) | — | 64 |
-| **Doc-tests** | Inline documentation examples | — | 2 |
-| **Total** | 464 lib + 142 integration + 2 doc | — | 608 |
+| **Integration tests** | Cross-module pipelines, determinism, error paths, crop↔balance | — | 134 |
+| **Forge** | metalForge absorbed upstream (6/6 modules) | — | — |
+| **Doc-tests** | Inline documentation examples | — | 10 |
+| **Total** | 491 tests | — | 491 |
 
 ### 4.2 Python-Rust Parity
 
@@ -163,6 +186,11 @@ All mass balances close to 0.0000 mm. Water savings of 53-72% are consistent wit
 | validate_water_balance | 13/13 | Mass balance 0.0000 (3 scenarios), Ks bounds, MI summer |
 | validate_sensor_calibration | 21/21 | SoilWatch 10 VWC, irrigation model, Dong 2024 field results |
 | validate_real_data | 23/23 | Real data pipeline, Open-Meteo ET₀ |
+| validate_priestley_taylor | 32/32 | PT analytical, Uccle cross-val, climate gradient |
+| validate_et0_intercomparison | 36/36 | PM/PT/HG, 6 stations, R², bias, RMSE |
+| validate_thornthwaite | 50/50 | Thornthwaite monthly ET₀ |
+| validate_gdd | 26/26 | GDD accumulation, kc_from_gdd |
+| validate_pedotransfer | 58/58 | Saxton-Rawls 2006 θs/θr/Ks |
 | cross_validate | 75 values | Python↔Rust JSON harness (benchmark JSON) |
 | simulate_season | — | Full growing-season pipeline |
 
@@ -235,5 +263,5 @@ The same BarraCuda/ToadStool infrastructure supports both domains. The key share
 
 ---
 
-*February 2026 — 474 Python + 608 Rust tests + 1354 atlas checks (464 lib + 142 integration + 2 doc), 22 validation binaries all pass,
+*February 2026 — 594 Python + 491 Rust tests + 570 validation + 1393 atlas checks, 27 binaries all pass,
 15,300 station-days (100 stations) real data, 75/75 cross-validation match, zero synthetic*
