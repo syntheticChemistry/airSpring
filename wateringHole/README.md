@@ -1,13 +1,13 @@
 # airSpring wateringHole
 
-**Updated**: February 25, 2026
+**Updated**: February 26, 2026
 **Purpose**: Spring-local handoffs to ToadStool/BarraCuda and cross-spring provenance
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V010** | [AIRSPRING_V010_TOADSTOOL_SYNC_FEB26_2026.md](handoffs/AIRSPRING_V010_TOADSTOOL_SYNC_FEB26_2026.md) | 2026-02-26 | ToadStool sync S65: 774 shaders, sovereign compiler, df64 transcendentals, stats metrics absorption |
+| **V011** | [AIRSPRING_V011_FULL_REWIRE_ABSORPTION_HANDOFF_FEB26_2026.md](handoffs/AIRSPRING_V011_FULL_REWIRE_ABSORPTION_HANDOFF_FEB26_2026.md) | 2026-02-26 | Full cross-spring rewiring: eco::diversity, gpu::mc_et0, stats re-exports, absorption roadmap for ToadStool team |
 
 ## Cross-Spring Documents
 
@@ -21,6 +21,8 @@
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_V010_TOADSTOOL_SYNC_FEB26_2026.md` | v0.4.3: ToadStool S60–S65 sync, stats rewired, sovereign compiler regression, 582 tests |
+| `handoffs/archive/AIRSPRING_V009_EVOLUTION_HANDOFF_FEB25_2026.md` | v0.4.2: Full evolution handoff, 758→774 shaders, 601 tests, 18 binaries |
 | `handoffs/archive/AIRSPRING_V008_TOADSTOOL_SYNC_HANDOFF_FEB25_2026.md` | v0.4.2: ToadStool S62 sync, 585 tests, cross-spring provenance |
 | `handoffs/archive/AIRSPRING_V007_LINT_MIGRATION_COVERAGE_HANDOFF_FEB25_2026.md` | v0.4.2: 555 tests, 97.58% coverage, lint migration, evolution readiness |
 | `handoffs/archive/AIRSPRING_V006_DEEP_AUDIT_ABSORPTION_HANDOFF_FEB25_2026.md` | v0.4.2+: Deep audit pass 1, 96.84% coverage, testutil split |

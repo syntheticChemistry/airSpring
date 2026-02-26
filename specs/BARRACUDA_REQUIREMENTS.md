@@ -1,6 +1,6 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: February 25, 2026 (v0.4.2 — 433 lib + 115 integration, 8 GPU orchestrators)
+**Last Updated**: February 25, 2026 (v0.4.3 — 456 lib + 126 integration, 9 GPU orchestrators)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
 **ToadStool HEAD**: `17932267` (S65 — sovereign compiler, df64 transcendentals, stats metrics absorption, 774 WGSL shaders)
 

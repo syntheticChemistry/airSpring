@@ -1,6 +1,6 @@
 # Cross-Spring Shader Evolution — airSpring Provenance
 
-**Updated**: February 26, 2026 (v0.4.2, ToadStool HEAD `17932267`)
+**Updated**: February 26, 2026 (v0.4.3, ToadStool HEAD `17932267`)
 
 ## Summary
 

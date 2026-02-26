@@ -1,7 +1,7 @@
 # airSpring Specifications
 
-**Last Updated**: February 25, 2026
-**Status**: Phase 0-3 complete — 400/400 Python + 601 Rust tests + 75/75 cross-validation + 8 GPU orchestrators + 69x CPU speedup
+**Last Updated**: February 26, 2026
+**Status**: Phase 0-3 complete — 400/400 Python + 635 Rust tests + 75/75 cross-validation + 9 GPU orchestrators + 69x CPU speedup
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling
 
 ---
@@ -12,10 +12,10 @@
 |--------|-------|
 | Phase 0 (Python) | 400/400 PASS — 13 experiments (FAO-56, soil, IoT, WB, dual Kc, cover crops, regional ET₀, Richards, biochar, 60yr WB, yield, CW2D) |
 | Phase 0+ (Real data) | 918 station-days, R²=0.967 across 6 Michigan stations |
-| Phase 1 (Rust) | 601 tests — 18 binaries, 433 lib + 115 integration + 53 forge |
+| Phase 1 (Rust) | 635 tests — 18 binaries, 456 lib + 126 integration + 53 forge |
 | Phase 1.5 (CPU benchmark) | Rust 69x faster than Python (geometric mean, 20x–502x) |
 | Phase 2 (Cross-validation) | 75/75 Python↔Rust match within 1e-5 (includes Richards + isotherm) |
-| Phase 3 (GPU) | 8 orchestrators wired, 20 evolution gaps (8A+11B+1C) |
+| Phase 3 (GPU) | 9 orchestrators wired, cross-spring S64 fully rewired |
 | Faculty | Dong (BAE, MSU — new lab 2026) |
 | Handoff | V010 in `wateringHole/handoffs/` |
 

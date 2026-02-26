@@ -1,6 +1,6 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: February 25, 2026 (v0.4.2 — 433 lib + 115 integration)
+**Last Updated**: February 25, 2026 (v0.4.3 — 456 lib + 126 integration)
 **ToadStool PIN**: `17932267` (S65 — sovereign compiler, df64 transcendentals, stats metrics absorption, 774 WGSL shaders)
 **License**: AGPL-3.0-or-later
 
@@ -129,7 +129,7 @@ These exist in ToadStool/BarraCuda but airSpring hasn't needed them yet:
 | `cargo fmt --check` | **Clean** |
 | `cargo clippy -- -D warnings` | **0 warnings** (pedantic via `[lints.clippy]`) |
 | `cargo doc --no-deps` | **Builds**, 0 warnings |
-| `cargo test` | **601 total** (433 lib + 115 integration + 53 forge) |
+| `cargo test` | **635 total** (456 lib + 126 integration + 53 forge) |
 | `cargo llvm-cov --lib` | **97.55%** line coverage |
 | `unsafe` code | **Zero** |
 | `unwrap()` in lib | **Zero** (all in `#[cfg(test)]`) |

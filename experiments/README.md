@@ -1,7 +1,7 @@
 # airSpring Experiments
 
-**Updated**: February 25, 2026
-**Status**: 13 experiments, 400/400 Python + 601 Rust (433 lib + 115 integration + 53 forge) + 75/75 cross-validation + 8 GPU orchestrators
+**Updated**: February 26, 2026
+**Status**: 13 experiments, 400/400 Python + 635 Rust (456 lib + 126 integration + 53 forge) + 75/75 cross-validation + 9 GPU orchestrators
 
 ---
 
@@ -23,25 +23,25 @@
 | 008 | Yield Response to Water Stress (FAO-56 Ch 10) | Irrigation | **Complete** | Python + Rust CPU | `eco::yield_response` | 32+32 |
 | 012 | CW2D Richards Extension (Dong 2019) | Environmental | **Complete** | Python + Rust CPU | `eco::richards` (CW2D media) | 24+24 |
 
-**Grand Total**: 400 Python + 433 Rust lib + 115 integration + 53 forge = **601 Rust tests** + 75 cross-validation values + 8 GPU orchestrators
+**Grand Total**: 400 Python + 456 Rust lib + 126 integration + 53 forge = **635 Rust tests** + 75 cross-validation values + 9 GPU orchestrators
 
 ---
 
-## Test Breakdown (v0.4.2)
+## Test Breakdown (v0.4.3)
 
 | Category | Tests | Source |
 |----------|:-----:|--------|
-| Lib (unit) | 433 | `cargo test --lib` |
+| Lib (unit) | 456 | `cargo test --lib` (incl. diversity 11, mc\_et0 7, stats re-exports 7) |
 | Eco integration | 33 | `tests/eco_integration.rs` |
 | GPU functional | 21 | `tests/gpu_integration.rs` |
 | GPU evolution | 6 | `tests/gpu_evolution.rs` |
 | GPU determinism | 4 | `tests/gpu_determinism.rs` |
-| Cross-spring evolution | 18 | `tests/cross_spring_evolution.rs` |
-| Stats integration | 11 | `tests/stats_integration.rs` |
-| I/O + errors | 20 | `tests/io_and_errors.rs` |
+| Cross-spring evolution | 29 | `tests/cross_spring_evolution.rs` (incl. S64 §7–§10 + benchmarks) |
+| Stats integration | 20 | `tests/stats_integration.rs` |
+| I/O + errors | 11 | `tests/io_and_errors.rs` |
 | Doc tests | 2 | `cargo test --doc` |
 | Forge | 53 | `metalForge/forge/` |
-| **Total** | **601** | |
+| **Total** | **635** | |
 
 ---
 
@@ -297,8 +297,8 @@ python3 scripts/bench_compare.py                # Side-by-side report
 
 ## GPU Benchmark: CPU vs GPU Orchestrators
 
-The GPU benchmark measures throughput for 8 GPU orchestrators wired through
-ToadStool's shader evolution (608 WGSL shaders, 46 cross-spring absorptions):
+The GPU benchmark measures throughput for 9 GPU orchestrators wired through
+ToadStool's shader evolution (774 WGSL shaders, 46+ cross-spring absorptions):
 
 | Orchestrator | CPU (items/s) | Notes |
 |---|---:|---|

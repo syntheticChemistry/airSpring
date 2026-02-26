@@ -42,7 +42,7 @@
 //! - [`tolerances`] — Centralized validation tolerances (`barracuda::tolerances` pattern, S52)
 //! - [`testutil`] — Synthetic data generators, `IA`, `NSE`, `RMSE`, `MBE`, R², Spearman, bootstrap CI
 //!
-//! # `BarraCuda` Integration (`ToadStool` S62+, 650+ WGSL shaders)
+//! # `BarraCuda` Integration (`ToadStool` S65, 774 WGSL shaders)
 //!
 //! Directly uses `barracuda` primitives for:
 //! - `tolerances::Tolerance` + `check()` → centralized validation (S52, neuralSpring pattern)

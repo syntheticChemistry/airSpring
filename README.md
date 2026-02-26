@@ -2,7 +2,7 @@
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
 **Date**: February 26, 2026
-**Version**: 0.4.2
+**Version**: 0.4.3
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -12,28 +12,28 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → GPU (ToadStool shaders) → metalForge (mixed hardware) → Penny Irrigation
 ```
 
-## Current Status (v0.4.2)
+## Current Status (v0.4.3)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **400/400 PASS** | FAO-56, soil, IoT, water balance, dual Kc, cover crops, Richards, biochar, yield, CW2D, 60yr WB |
 | Phase 0+: Real data pipeline | **918 station-days** | ET₀ R²=0.967 vs Open-Meteo (6 Michigan stations) |
-| Phase 1: Rust validation | **601 tests** | 18 binaries, 433 unit + 115 integration + 53 forge |
+| Phase 1: Rust validation | **635 tests** | 18 binaries, 456 unit + 126 integration + 53 forge |
 | Phase 1.5: CPU Benchmark | **69x faster** | Rust vs Python geometric mean (20x–502x range) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
-| Phase 3: GPU bridge | **8 orchestrators** | 20 evolution gaps (8A+11B+1C) |
+| Phase 3: GPU bridge | **9 orchestrators** | S64 cross-spring rewired (diversity, MC ET₀, stats) |
 | Phase 4: Penny Irrigation | Vision | Sovereign, consumer hardware |
 
 ### Code Quality
 
 | Check | Status |
 |-------|--------|
-| `cargo test` | 433 barracuda + 53 forge + 115 integration = **601 total**, 0 failures |
+| `cargo test` | 456 barracuda + 53 forge + 126 integration = **635 total**, 0 failures |
 | `cargo clippy -- -D warnings` | **0 warnings** (pedantic) |
 | `cargo fmt --check` | **Clean** |
 | `cargo doc` | **Builds** |
 | `cargo llvm-cov --lib` | **97.55%** line coverage |
-| Test breakdown | 433 unit, 33 eco, 21 GPU, 6 evolution, 4 determinism, 18 cross-spring, 20 stats, 11 I/O, 2 doc |
+| Test breakdown | 456 unit, 33 eco, 21 GPU, 6 evolution, 4 determinism, 29 cross-spring, 20 stats, 11 I/O, 2 doc |
 
 ## Evolution Architecture: Write → Absorb → Lean
 
@@ -57,18 +57,19 @@ airSpring domain code (`eco::`) is validated against papers, then wrapped by GPU
 
 ### Cross-Spring Shader Evolution
 
-ToadStool contains **774 WGSL shaders** across 41+ categories. airSpring uses 5 shared shader families and contributed **3 upstream fixes** that benefit ALL Springs:
+ToadStool contains **774 WGSL shaders** across 41+ categories. airSpring uses 6 shared shader families, contributed **3 upstream fixes**, and had its **stats metrics absorbed upstream** (S64):
 
 | Spring | Shaders | What airSpring Gets | What airSpring Gave Back |
 |--------|---------|--------------------|-----------------------|
-| **hotSpring** | 56 | df64 core, pow/exp/log/trig f64 — VG retention, atmospheric pressure | TS-001: `pow_f64` fractional exponent fix |
-| **wetSpring** | 25 | kriging_f64, fused_map_reduce, moving_window, ridge_regression | TS-004: reduce buffer N≥1024 fix |
-| **neuralSpring** | 20 | nelder_mead, multi_start_nelder_mead, ValidationHarness | TS-003: acos precision boundary fix |
-| **airSpring** | — | Domain consumer | Richards PDE → absorbed upstream (S40) |
+| **hotSpring** | 56 | df64 core, pow/exp/log/trig f64, df64\_transcendentals — VG, atmospheric | TS-001: `pow_f64` fractional exponent fix |
+| **wetSpring** | 25 | kriging\_f64, fused\_map\_reduce, moving\_window, ridge, **diversity metrics** | TS-004: reduce buffer N≥1024 fix |
+| **neuralSpring** | 20 | nelder\_mead, multi\_start, ValidationHarness | TS-003: acos precision boundary fix |
+| **groundSpring** | — | **MC ET₀ uncertainty propagation shader** | — |
+| **airSpring** | — | Domain consumer + stats absorbed upstream | Richards PDE (S40), stats metrics (S64) |
 
-46 cross-spring absorptions (S51-S57). See `specs/CROSS_SPRING_EVOLUTION.md`.
+46+ cross-spring absorptions (S51-S65). See `specs/CROSS_SPRING_EVOLUTION.md`.
 
-### BarraCuda Integration (8 GPU orchestrators)
+### BarraCuda Integration (9 GPU orchestrators)
 
 | airSpring Module | BarraCuda Primitive | Origin | Status |
 |-----------------|--------------------|----|---|
@@ -79,9 +80,10 @@ ToadStool contains **774 WGSL shaders** across 41+ categories. airSpring uses 5 
 | `gpu::stream` | `ops::moving_window_stats` | wetSpring S28+ | **Wired** |
 | `gpu::richards` | `pde::richards::solve_richards` | airSpring→ToadStool S40 | **Wired** |
 | `gpu::isotherm` | `optimize::nelder_mead` + `multi_start` | neuralSpring | **Wired** |
+| `gpu::mc_et0` | `mc_et0_propagate_f64.wgsl` (CPU mirror) | groundSpring S64 | **Wired** (new) |
 | `eco::correction::fit_ridge` | `linalg::ridge::ridge_regression` | wetSpring ESN | **Wired** |
 
-Also wired: `validation::ValidationHarness` (neuralSpring), `stats::pearson`, `spearman`, `bootstrap_ci` (shared).
+Also wired: `validation::ValidationHarness` (neuralSpring), `stats::pearson`, `spearman`, `bootstrap_ci`, `stats::diversity` (wetSpring S64), `stats::metrics` re-exports (airSpring→upstream S64).
 
 Evolution gaps: 20 total (8 Tier A integrated, 11 Tier B ready, 1 Tier C pending).
 See `barracuda/src/gpu/evolution_gaps.rs` for the full roadmap.
@@ -174,11 +176,11 @@ airSpring/
 │   ├── cw2d/                    # CW2D Richards extension (24/24)
 │   ├── long_term_wb/            # 60-year water balance (10/10)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1: Rust validation (433 lib + 115 integration, 18 binaries)
+├── barracuda/                   # Phase 1: Rust validation (456 lib + 126 integration, 18 binaries)
 │   ├── src/
-│   │   ├── eco/                 # Domain modules (10 validated against papers)
+│   │   ├── eco/                 # Domain modules (11 validated against papers, incl. diversity)
 │   │   ├── io/                  # csv_ts (streaming columnar IoT parser)
-│   │   ├── gpu/                 # ToadStool/BarraCuda GPU bridge (8 orchestrators)
+│   │   ├── gpu/                 # ToadStool/BarraCuda GPU bridge (9 orchestrators)
 │   │   ├── error.rs             # AirSpringError enum
 │   │   ├── validation.rs        # Re-exports barracuda::validation::ValidationHarness
 │   │   ├── testutil/            # IA, NSE, RMSE, MBE, R², Pearson r, bootstrap CI
@@ -194,7 +196,7 @@ airSpring/
 │   │   ├── gpu_determinism.rs   # Bit-identical rerun validation
 │   │   ├── io_and_errors.rs     # CSV parsing, error variants
 │   │   └── stats_integration.rs # Statistical metrics cross-validation
-│   └── Cargo.toml               # v0.4.2
+│   └── Cargo.toml               # v0.4.3
 ├── metalForge/                  # Upstream absorption staging (→ barracuda)
 │   └── forge/                   # airspring-forge v0.2.0 (53 tests, 6 modules)
 ├── specs/                       # Specifications and requirements
@@ -258,7 +260,8 @@ AGPL-3.0-or-later
 
 ---
 
-*February 25, 2026 — v0.4.2. 13 experiments, 400/400 Python, 601 Rust tests,
+*February 26, 2026 — v0.4.3. 13 experiments, 400/400 Python, 635 Rust tests,
 18 binaries, 75/75 cross-validation, 918 real station-days. Rust 69x faster
-than Python (geometric mean). 8 GPU orchestrators, 774 WGSL shaders.
+than Python (geometric mean). 9 GPU orchestrators, 774 WGSL shaders.
+Cross-spring S64 fully rewired (diversity, MC ET₀, stats).
 Pure Rust + BarraCuda. AGPL-3.0-or-later.*

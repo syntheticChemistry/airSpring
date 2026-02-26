@@ -24,7 +24,7 @@
 //! | `testutil` | `gpu::reduce` | `fused_map_reduce_f64.wgsl` | Seasonal stats | A (ready) |
 //! | `io::csv_ts` | `gpu::stream` | `moving_window.wgsl` | Stream smoothing | A (ready) |
 //!
-//! # Current Inventory (February 26, 2026 — v0.4.2, synced to `ToadStool` HEAD `17932267`)
+//! # Current Inventory (February 26, 2026 — v0.4.3, synced to `ToadStool` HEAD `17932267`)
 //!
 //! `ToadStool` S42–S62: 170 commits, 46 cross-spring absorptions, 4,224+ tests.
 //! All four airSpring issues (TS-001 through TS-004) resolved in **S54**.

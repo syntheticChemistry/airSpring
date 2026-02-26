@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
-**Updated**: February 25, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.4.2)
-**Status**: 13 experiments, 400/400 Python + 601 Rust tests + 75/75 cross-validation + 8 GPU orchestrators + 69x CPU speedup
+**Updated**: February 26, 2026
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.4.3)
+**Status**: 13 experiments, 400/400 Python + 635 Rust tests + 75/75 cross-validation + 9 GPU orchestrators + 69x CPU speedup
 
 ---
 
@@ -11,8 +11,8 @@
 ```
 Phase 0   Python/R baselines    — reproduce paper results with original tools (400/400)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (433 lib + 115 integration tests, 18 binaries, 97.55% coverage)
-Phase 2   BarraCuda GPU         — 8 orchestrators wired (cross-spring shader evolution)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (456 lib + 126 integration tests, 18 binaries, 97.55% coverage)
+Phase 2   BarraCuda GPU         — 9 orchestrators wired (cross-spring S64 fully rewired)
 Phase 3   metalForge            — mixed CPU/GPU/NPU, 6 modules (2 absorbed, 4 pending)
 Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($600 GPU)
 ```
@@ -21,7 +21,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 
 | Faculty | Institution | Track | Papers | Experiments | Checks | Domain |
 |---------|------------|-------|:------:|:-----------:|:------:|--------|
-| Dong | MSU BAE | Irrigation & Soil | 8+ | 13 | 400+601 | ET₀, soil moisture, IoT, water balance, dual Kc, cover crops, Richards, biochar, yield, CW2D |
+| Dong | MSU BAE | Irrigation & Soil | 8+ | 13 | 400+635 | ET₀, soil moisture, IoT, water balance, dual Kc, cover crops, Richards, biochar, yield, CW2D |
 
 ## Faculty: Younsuk Dong, PhD
 
@@ -80,7 +80,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | `BatchedRichards` | `pde::richards::solve_richards` | airSpring→ToadStool S40 absorption | **Wired** |
 | `fit_*_nm/global` | `optimize::nelder_mead` + `multi_start` | neuralSpring optimizer | **Wired** |
 
-### CPU Benchmarks (v0.4.2) — Rust 69x Faster Than Python
+### CPU Benchmarks (v0.4.3) — Rust 69x Faster Than Python
 
 | Operation | Rust Throughput | Speedup vs Python | Cross-Spring Provenance |
 |-----------|----------------|:-----------------:|------------------------|

@@ -2,7 +2,7 @@
 
 **Last Updated**: February 25, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 13 completed (400/400 Python + 433 lib + 115 integration + 8 GPU orchestrators). All completed papers use open data and systems.
+**Status**: 13 completed (400/400 Python + 456 lib + 126 integration + 9 GPU orchestrators). All completed papers use open data and systems.
 
 ---
 
