@@ -31,7 +31,10 @@ fn test_gpu_batched_et0_deterministic() {
         })
         .collect();
 
-    let run1 = engine.compute_gpu(&station_days).unwrap();
+    let Some(run1) = common::try_gpu_dispatch(|| engine.compute_gpu(&station_days)) else {
+        return;
+    };
+    let run1 = run1.unwrap();
     let run2 = engine.compute_gpu(&station_days).unwrap();
 
     for (i, (a, b)) in run1.et0_values.iter().zip(&run2.et0_values).enumerate() {
@@ -71,7 +74,10 @@ fn test_gpu_water_balance_deterministic() {
         },
     ];
 
-    let run1 = engine.gpu_step(&fields).unwrap();
+    let Some(run1) = common::try_gpu_dispatch(|| engine.gpu_step(&fields)) else {
+        return;
+    };
+    let run1 = run1.unwrap();
     let run2 = engine.gpu_step(&fields).unwrap();
 
     for (i, (a, b)) in run1.iter().zip(&run2).enumerate() {

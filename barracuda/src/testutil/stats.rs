@@ -2,10 +2,18 @@
 //! Validation metrics: RMSE, MBE, R², IA, NSE, Pearson/Spearman correlation,
 //! variance, and standard deviation.
 //!
-//! These wrap `barracuda::stats` primitives where possible and provide
-//! additional metrics (IA, NSE, MBE) ported from the Python baselines.
+//! # Upstream absorption (`ToadStool` S64)
 //!
-//! Staged for upstream absorption — see `metalForge/forge/src/metrics.rs`.
+//! `barracuda::stats::metrics` now provides `rmse`, `mbe`, `nash_sutcliffe`,
+//! `r_squared` (SS-based), `index_of_agreement`, `hit_rate`, `mean`,
+//! `percentile`, `dot`, `l2_norm` — absorbed from this module in S64.
+//!
+//! This module delegates `rmse` and `mbe` to upstream. `nash_sutcliffe` and
+//! `index_of_agreement` keep local implementations because our edge-case
+//! convention differs: we return 1.0 for constant-observation perfect match
+//! (mathematically correct) while upstream returns 0.0 (division guard).
+//!
+//! Pearson `r_squared` remains local (Pearson r² vs. upstream SS-based R²).
 
 use crate::len_f64;
 
@@ -22,6 +30,7 @@ pub fn pearson_r(x: &[f64], y: &[f64]) -> f64 {
 /// Compute Pearson R² between observed and simulated data.
 ///
 /// Uses barracuda's `pearson_correlation` primitive for cross-validation.
+/// Note: upstream `barracuda::stats::metrics::r_squared` is SS-based (= NSE).
 ///
 /// # Errors
 ///
@@ -36,48 +45,26 @@ pub fn r_squared(observed: &[f64], simulated: &[f64]) -> crate::error::Result<f6
 
 /// Compute Root Mean Square Error (RMSE).
 ///
-/// RMSE = sqrt(Σ(obs - sim)² / n)
+/// Delegates to `barracuda::stats::metrics::rmse` (absorbed from this module, S64).
 ///
 /// # Panics
 ///
 /// Panics if `observed` and `simulated` have different lengths.
 #[must_use]
 pub fn rmse(observed: &[f64], simulated: &[f64]) -> f64 {
-    assert_eq!(
-        observed.len(),
-        simulated.len(),
-        "Vectors must be same length"
-    );
-    let n = len_f64(observed);
-    let sum_sq: f64 = observed
-        .iter()
-        .zip(simulated.iter())
-        .map(|(o, s)| (o - s).powi(2))
-        .sum();
-    (sum_sq / n).sqrt()
+    barracuda::stats::rmse(observed, simulated)
 }
 
 /// Compute Mean Bias Error (MBE).
 ///
-/// MBE = Σ(sim - obs) / n
+/// Delegates to `barracuda::stats::metrics::mbe` (absorbed from this module, S64).
 ///
 /// # Panics
 ///
 /// Panics if `observed` and `simulated` have different lengths.
 #[must_use]
 pub fn mbe(observed: &[f64], simulated: &[f64]) -> f64 {
-    assert_eq!(
-        observed.len(),
-        simulated.len(),
-        "Vectors must be same length"
-    );
-    let n = len_f64(observed);
-    let sum_bias: f64 = observed
-        .iter()
-        .zip(simulated.iter())
-        .map(|(o, s)| s - o)
-        .sum();
-    sum_bias / n
+    barracuda::stats::mbe(observed, simulated)
 }
 
 /// Index of Agreement (Willmott, 1981).

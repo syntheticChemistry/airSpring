@@ -17,7 +17,7 @@
 | Phase 2 (Cross-validation) | 75/75 Python↔Rust match within 1e-5 (includes Richards + isotherm) |
 | Phase 3 (GPU) | 8 orchestrators wired, 20 evolution gaps (8A+11B+1C) |
 | Faculty | Dong (BAE, MSU — new lab 2026) |
-| Handoff | V009 in `wateringHole/handoffs/` |
+| Handoff | V010 in `wateringHole/handoffs/` |
 
 ---
 
@@ -88,7 +88,7 @@ Re-run `scripts/run_all_baselines.sh` at the respective commits to verify.
 `../whitePaper/STUDY.md` → `../CONTROL_EXPERIMENT_STATUS.md` → BARRACUDA_REQUIREMENTS.md
 
 **Cross-spring evolution** (15 min):
-CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/AIRSPRING_V009_*.md`
+CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/AIRSPRING_V010_*.md`
 
 ---
 

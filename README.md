@@ -47,7 +47,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
   barracuda::ops/linalg/stats/pde/optimize (GPU dispatch + CPU fallback)
        │
        ▼
-  ToadStool WGSL shaders (f64 precision on GPU, 758 shaders)
+  ToadStool WGSL shaders (f64 precision on GPU, 774 shaders)
        │
        ▼
   metalForge (mixed CPU + GPU + future NPU)
@@ -57,7 +57,7 @@ airSpring domain code (`eco::`) is validated against papers, then wrapped by GPU
 
 ### Cross-Spring Shader Evolution
 
-ToadStool contains **758 WGSL shaders** across 41+ categories. airSpring uses 5 shared shader families and contributed **3 upstream fixes** that benefit ALL Springs:
+ToadStool contains **774 WGSL shaders** across 41+ categories. airSpring uses 5 shared shader families and contributed **3 upstream fixes** that benefit ALL Springs:
 
 | Spring | Shaders | What airSpring Gets | What airSpring Gave Back |
 |--------|---------|--------------------|-----------------------|
@@ -207,7 +207,7 @@ airSpring/
 │   └── STUDY.md                 # Full results narrative
 ├── experiments/                 # Experiment protocols and results (13 complete)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
-│   └── handoffs/                # Versioned (V009 active)
+│   └── handoffs/                # Versioned (V010 active)
 ├── CHANGELOG.md                 # Keep-a-Changelog versioned history
 ├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
 └── LICENSE                      # AGPL-3.0-or-later
@@ -250,7 +250,7 @@ airSpring/
 | `whitePaper/STUDY.md` | Full results narrative |
 | `whitePaper/METHODOLOGY.md` | Validation protocol |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V009 active) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V010 active) |
 
 ## License
 
@@ -260,5 +260,5 @@ AGPL-3.0-or-later
 
 *February 25, 2026 — v0.4.2. 13 experiments, 400/400 Python, 601 Rust tests,
 18 binaries, 75/75 cross-validation, 918 real station-days. Rust 69x faster
-than Python (geometric mean). 8 GPU orchestrators, 758 WGSL shaders.
+than Python (geometric mean). 8 GPU orchestrators, 774 WGSL shaders.
 Pure Rust + BarraCuda. AGPL-3.0-or-later.*

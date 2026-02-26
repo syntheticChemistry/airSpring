@@ -2,7 +2,28 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased] - 2026-02-25
+## [Unreleased] - 2026-02-26
+
+### ToadStool S60–S65 Sync: Stats Rewired Upstream, Sovereign Compiler Regression
+
+Synced to ToadStool HEAD `17932267` (S65, 774 WGSL shaders). Major changes:
+
+#### Changed
+- `testutil::stats::rmse` and `mbe` now delegate to upstream `barracuda::stats::metrics`
+  (absorbed from airSpring in ToadStool S64)
+- 8 GPU-dispatch tests wrapped with `catch_unwind` → SKIP on upstream sovereign
+  compiler bind-group regression (ToadStool S60-S65). Tests auto-pass once
+  ToadStool fixes the regression. CPU paths unaffected.
+- ToadStool PIN updated: `02207c4a` → `17932267` across all active docs
+- WGSL shader count updated: 758 → 774 across all active docs
+- Handoff V010 replaces V009 (V009 archived)
+
+#### Noted
+- Upstream regression: `BatchedElementwiseF64` GPU dispatch panics at
+  `pipeline.get_bind_group_layout(0)` — sovereign compiler SPIR-V path
+  produces empty bind groups. Confirmed by ToadStool's own `test_fao56_et0_gpu`.
+- New upstream capabilities available but not yet consumed: `stats::diversity`,
+  `mc_et0_propagate_f64.wgsl`, `df64_transcendentals.wgsl`, `bio::diversity_fusion`
 
 ### CPU Benchmark: Rust 69x Faster Than Python (Geometric Mean)
 

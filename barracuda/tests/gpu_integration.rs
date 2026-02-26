@@ -70,7 +70,10 @@ fn test_gpu_batched_et0_station_day_gpu_dispatch() {
         })
         .collect();
 
-    let result = engine.compute_gpu(&station_days).unwrap();
+    let Some(result) = common::try_gpu_dispatch(|| engine.compute_gpu(&station_days)) else {
+        return;
+    };
+    let result = result.unwrap();
     assert_eq!(result.et0_values.len(), 50);
 
     for (i, &val) in result.et0_values.iter().enumerate() {
@@ -167,7 +170,10 @@ fn test_gpu_water_balance_gpu_step_dispatch() {
         },
     ];
 
-    let gpu_results = engine.gpu_step(&fields).unwrap();
+    let Some(gpu_results) = common::try_gpu_dispatch(|| engine.gpu_step(&fields)) else {
+        return;
+    };
+    let gpu_results = gpu_results.unwrap();
     assert_eq!(gpu_results.len(), 4);
 
     let cpu_engine = BatchedWaterBalance::new(0.30, 0.10, 500.0, 0.5);

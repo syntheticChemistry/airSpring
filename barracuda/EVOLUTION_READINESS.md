@@ -1,7 +1,7 @@
 # airSpring BarraCuda — Evolution Readiness
 
 **Last Updated**: February 25, 2026 (v0.4.2 — 433 lib + 115 integration)
-**ToadStool PIN**: `02207c4a` (S62+ — 170 commits, 46 absorptions, 4,224+ core tests, 758 WGSL shaders)
+**ToadStool PIN**: `17932267` (S65 — sovereign compiler, df64 transcendentals, stats metrics absorption, 774 WGSL shaders)
 **License**: AGPL-3.0-or-later
 
 ---

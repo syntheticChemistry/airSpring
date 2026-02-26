@@ -24,7 +24,7 @@
 //! | `testutil` | `gpu::reduce` | `fused_map_reduce_f64.wgsl` | Seasonal stats | A (ready) |
 //! | `io::csv_ts` | `gpu::stream` | `moving_window.wgsl` | Stream smoothing | A (ready) |
 //!
-//! # Current Inventory (February 25, 2026 — v0.4.2, synced to `ToadStool` HEAD `02207c4a`)
+//! # Current Inventory (February 26, 2026 — v0.4.2, synced to `ToadStool` HEAD `17932267`)
 //!
 //! `ToadStool` S42–S62: 170 commits, 46 cross-spring absorptions, 4,224+ tests.
 //! All four airSpring issues (TS-001 through TS-004) resolved in **S54**.
@@ -282,7 +282,7 @@ pub const GAPS: &[EvolutionGap] = &[
 ///
 /// These were communicated to the `ToadStool` team and fixed in the
 /// February 16, 2026 unified handoff. `ToadStool` has since evolved to
-/// `02207c4a` (S62+), absorbing cross-spring content from all Springs.
+/// `17932267` (S65), absorbing cross-spring content from all Springs.
 pub const TOADSTOOL_ISSUES: &[ToadStoolIssue] = &[
     ToadStoolIssue {
         id: "TS-001",

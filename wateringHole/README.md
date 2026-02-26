@@ -7,13 +7,13 @@
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V009** | [AIRSPRING_V009_EVOLUTION_HANDOFF_FEB25_2026.md](handoffs/AIRSPRING_V009_EVOLUTION_HANDOFF_FEB25_2026.md) | 2026-02-25 | Full evolution handoff: 758 shaders, 601 tests, cross-spring observations, updated absorption roadmap |
+| **V010** | [AIRSPRING_V010_TOADSTOOL_SYNC_FEB26_2026.md](handoffs/AIRSPRING_V010_TOADSTOOL_SYNC_FEB26_2026.md) | 2026-02-26 | ToadStool sync S65: 774 shaders, sovereign compiler, df64 transcendentals, stats metrics absorption |
 
 ## Cross-Spring Documents
 
 | File | Purpose |
 |------|---------|
-| `../specs/CROSS_SPRING_EVOLUTION.md` | 758 WGSL shader provenance (hotSpring/wetSpring/neuralSpring/airSpring) |
+| `../specs/CROSS_SPRING_EVOLUTION.md` | 774 WGSL shader provenance (hotSpring/wetSpring/neuralSpring/airSpring) |
 | `../barracuda/EVOLUTION_READINESS.md` | Tier A/B/C status, absorbed/stays-local, quality gates |
 | `../metalForge/ABSORPTION_MANIFEST.md` | 4 ready modules with signatures, tests, post-absorption rewiring |
 
