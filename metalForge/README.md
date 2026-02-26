@@ -1,37 +1,38 @@
 # metalForge — airSpring Upstream Contributions
 
-**Date**: February 25, 2026
-**Crate**: `airspring-forge` v0.2.0
+**Date**: February 26, 2026
+**Crate**: `airspring-forge` v0.2.0 (vestigial — all modules absorbed upstream)
 **License**: AGPL-3.0-or-later
 
 ---
 
 ## Philosophy
 
-metalForge is where airSpring stages domain primitives for upstream
-absorption into `barracuda` (ToadStool).  Following hotSpring's pattern:
+metalForge is where airSpring staged domain primitives for upstream
+absorption into `barracuda` (ToadStool). Following hotSpring's pattern:
 
 ```
 Write locally → Validate against benchmarks → Hand off to ToadStool → Absorb → Lean on upstream
 ```
 
-Springs don't import each other.  They contribute to the shared compute
-infrastructure through metalForge, and the ToadStool team absorbs what's
-general enough for cross-domain use.
+**Status: COMPLETE.** All 6 metalForge modules have been absorbed upstream.
+The forge crate remains as a fossil record (53 tests) but is no longer
+in the active dependency graph. airSpring now leans on upstream primitives.
 
 ## What's Here
 
 ### `forge/` — Rust crate (`airspring-forge`)
 
-Four absorption-ready modules extracted from airSpring's validated
-pipeline.  Pure Rust, zero dependencies, 53/53 tests pass.
+Six modules, all absorbed upstream. Pure Rust, zero dependencies, 53/53 tests pass.
 
-| Module | Functions | Upstream target | Status |
-|--------|-----------|----------------|--------|
-| `metrics` | `rmse`, `mbe`, `nash_sutcliffe`, `index_of_agreement`, `coefficient_of_determination` | `barracuda::stats::metrics` | Ready |
-| `regression` | `fit_linear`, `fit_quadratic`, `fit_exponential`, `fit_logarithmic`, `fit_all` + `FitResult::predict()` | `barracuda::stats::regression` | Ready |
-| `moving_window_f64` | `moving_window_stats` (mean, variance, min, max) | `barracuda::ops::moving_window_stats_f64` | Ready |
-| `hydrology` | `hargreaves_et0`, `hargreaves_et0_batch`, `crop_coefficient`, `soil_water_balance` | `barracuda::ops::hydrology` | Ready |
+| Module | Functions | Absorbed Into | When |
+|--------|-----------|--------------|------|
+| `metrics` | `rmse`, `mbe`, `nash_sutcliffe`, `index_of_agreement`, `coefficient_of_determination` | `barracuda::stats::metrics` | **S64** |
+| `regression` | `fit_linear`, `fit_quadratic`, `fit_exponential`, `fit_logarithmic`, `fit_all` + `FitResult::predict()` | `barracuda::stats::regression` | **S66** (R-S66-001) |
+| `moving_window_f64` | `moving_window_stats` (mean, variance, min, max) | `barracuda::stats::moving_window_f64` | **S66** (R-S66-003) |
+| `hydrology` | `hargreaves_et0`, `hargreaves_et0_batch`, `crop_coefficient`, `soil_water_balance` | `barracuda::stats::hydrology` | **S66** (R-S66-002) |
+| `van_genuchten` | VG retention, conductivity, capacity | `barracuda::pde::richards::SoilParams` | **S40+S66** |
+| `isotherm` | Langmuir/Freundlich linearized fits | `barracuda::eco::isotherm` (via NM) | **S64** |
 
 ### Provenance
 

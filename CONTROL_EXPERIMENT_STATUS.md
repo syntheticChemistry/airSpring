@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-02-26 (v0.4.5 — 16 experiments, 474 Python + 719 Rust, 21 binaries, 69x CPU speedup)
+**Updated**: 2026-02-26 (v0.4.5 — 16 experiments, 474 Python + 725 Rust, 21 binaries, 69x CPU speedup)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -65,7 +65,8 @@ for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   validate_sensor_calibration validate_real_data cross_validate \
   validate_dual_kc validate_cover_crop validate_regional_et0 \
   validate_richards validate_biochar validate_long_term_wb \
-  validate_yield validate_cw2d; do
+  validate_yield validate_cw2d validate_scheduling \
+  validate_lysimeter validate_sensitivity; do
   cargo run --release --bin $bin
 done
 

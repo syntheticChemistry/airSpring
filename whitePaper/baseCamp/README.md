@@ -13,7 +13,7 @@ Phase 0   Python/R baselines    — reproduce paper results with original tools 
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
 Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (464 lib + 132 integration tests, 21 binaries, 96.81% coverage)
 Phase 2   BarraCuda GPU         — 11 Tier A modules wired (cross-spring S65 fully rewired)
-Phase 3   metalForge            — mixed CPU/GPU/NPU, 6 modules (2 absorbed, 4 pending)
+Phase 3   metalForge            — Write→Absorb→Lean complete, 6/6 modules absorbed upstream
 Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($600 GPU)
 ```
 
@@ -97,8 +97,8 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | Document | Purpose |
 |----------|---------|
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C breakdown, absorbed vs stays-local, quality gates |
-| `metalForge/ABSORPTION_MANIFEST.md` | 4 modules ready for upstream (metrics, regression, moving_window_f64, hydrology) |
-| `wateringHole/handoffs/` | V015 active handoff — S66 sync, all metalForge absorbed |
+| `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
+| `wateringHole/handoffs/` | V016 active handoff — S66 validation, P0 resolved, absorption candidates |
 | `specs/CROSS_SPRING_EVOLUTION.md` | 774 WGSL shader provenance across all Springs |
 
 ### Next Steps (Dong Lab)
@@ -106,9 +106,9 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 - **Paper 12+**: Multi-sensor calibration network (awaiting field data from new lab)
 - **Paper 13+**: Full IoT irrigation with forecast integration (awaiting field data)
 - **GPU validation**: Move Richards and isotherm to pure GPU via ToadStool shaders
-- **metalForge absorption**: 4 modules (metrics, regression, moving_window_f64, hydrology) → barracuda upstream
-- **metalForge mixed hardware**: CPU+GPU+NPU dispatch demonstration
-- **Weighing lysimeter**: Dong & Hansen (2023) load cell → direct ET (ready for Exp 016)
+- **metalForge absorption**: COMPLETE — 6/6 modules absorbed upstream (S64+S66)
+- **metalForge mixed hardware**: CPU+GPU+NPU dispatch demonstration (future)
+- **Weighing lysimeter**: Dong & Hansen (2023) load cell → direct ET (Exp 016 complete)
 - **Coverage**: 96.81% → target 98%+ (remaining gaps: GPU-dependent code paths)
 
 ### What Good Science Looks Like

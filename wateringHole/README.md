@@ -7,8 +7,7 @@
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V015** | [AIRSPRING_V015_TOADSTOOL_S66_SYNC_HANDOFF_FEB26_2026.md](handoffs/AIRSPRING_V015_TOADSTOOL_S66_SYNC_HANDOFF_FEB26_2026.md) | 2026-02-26 | **current** — S66 sync: all metalForge absorbed, evolution_gaps updated, V013 items resolved |
-| V014 | [AIRSPRING_V014_TOADSTOOL_EXPERIMENT_BUILDOUT_HANDOFF_FEB26_2026.md](handoffs/AIRSPRING_V014_TOADSTOOL_EXPERIMENT_BUILDOUT_HANDOFF_FEB26_2026.md) | 2026-02-26 | v0.4.5 experiment buildout (retained for GPU promotion roadmap) |
+| **V016** | [AIRSPRING_V016_TOADSTOOL_S66_VALIDATION_HANDOFF_FEB26_2026.md](handoffs/AIRSPRING_V016_TOADSTOOL_S66_VALIDATION_HANDOFF_FEB26_2026.md) | 2026-02-26 | **current** — S66 validation complete: P0 resolved, 8 cross-spring tests, benchmarks updated, absorption candidates, cross-spring learnings |
 
 ## Cross-Spring Documents
 
@@ -16,12 +15,14 @@
 |------|---------|
 | `../specs/CROSS_SPRING_EVOLUTION.md` | 774 WGSL shader provenance (hotSpring/wetSpring/neuralSpring/airSpring) |
 | `../barracuda/EVOLUTION_READINESS.md` | Tier A/B/C status, absorbed/stays-local, quality gates |
-| `../metalForge/ABSORPTION_MANIFEST.md` | 4 ready modules with signatures, tests, post-absorption rewiring |
+| `../metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66), post-absorption leaning status |
 
 ## Archive
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_V015_TOADSTOOL_S66_SYNC_HANDOFF_FEB26_2026.md` | v0.4.5: S66 sync — all metalForge absorbed, evolution_gaps updated |
+| `handoffs/archive/AIRSPRING_V014_TOADSTOOL_EXPERIMENT_BUILDOUT_HANDOFF_FEB26_2026.md` | v0.4.5: 3 new experiments, GPU promotion roadmap |
 | `handoffs/archive/AIRSPRING_V013_TOADSTOOL_ABSORPTION_HANDOFF_FEB26_2026.md` | v0.4.5: Absorption candidates (all resolved by S66) |
 | `handoffs/archive/AIRSPRING_V012_TOADSTOOL_S65_REWIRE_HANDOFF_FEB26_2026.md` | v0.4.4: S65 primitive rewiring: CN f64, brent+norm_ppf, 11 Tier A, 643 tests |
 | `handoffs/archive/AIRSPRING_V011_FULL_REWIRE_ABSORPTION_HANDOFF_FEB26_2026.md` | v0.4.3: Full cross-spring rewiring: diversity, MC ET₀, stats re-exports, absorption roadmap |

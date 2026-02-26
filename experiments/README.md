@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: February 26, 2026
-**Status**: 16 experiments, 474/474 Python + 719 Rust (464 lib + 126 integration + 53 forge) + 75/75 cross-validation + 11 Tier A modules
+**Status**: 16 experiments, 474/474 Python + 725 Rust (464 lib + 132 integration + 53 forge) + 75/75 cross-validation + 11 Tier A modules
 
 ---
 
@@ -22,8 +22,11 @@
 | 015 | 60-Year Water Balance (Wooster OH, ERA5) | Integration | **Complete** | Python + Rust CPU | `eco::water_balance`, Hargreaves | 10+11 |
 | 008 | Yield Response to Water Stress (FAO-56 Ch 10) | Irrigation | **Complete** | Python + Rust CPU | `eco::yield_response` | 32+32 |
 | 012 | CW2D Richards Extension (Dong 2019) | Environmental | **Complete** | Python + Rust CPU | `eco::richards` (CW2D media) | 24+24 |
+| 014 | Irrigation Scheduling Optimization | Precision Ag | **Complete** | Python + Rust CPU | `eco::water_balance`, `eco::yield_response` | 25+28 |
+| 016 | Lysimeter ET Direct Measurement | IoT | **Complete** | Python + Rust CPU | mass→ET, temp compensation | 26+25 |
+| 017 | ET₀ Sensitivity Analysis (OAT) | Precision Ag | **Complete** | Python + Rust CPU | `eco::evapotranspiration` | 23+23 |
 
-**Grand Total**: 474 Python + 464 Rust lib + 126 integration + 53 forge = **719 Rust tests** + 75 cross-validation values + 11 Tier A modules
+**Grand Total**: 474 Python + 464 Rust lib + 132 integration + 53 forge = **725 Rust tests** + 75 cross-validation values + 11 Tier A modules
 
 ---
 
@@ -36,12 +39,12 @@
 | GPU functional | 21 | `tests/gpu_integration.rs` |
 | GPU evolution | 6 | `tests/gpu_evolution.rs` |
 | GPU determinism | 4 | `tests/gpu_determinism.rs` |
-| Cross-spring evolution | 29 | `tests/cross_spring_evolution.rs` (incl. S64 §7–§10 + benchmarks) |
+| Cross-spring evolution | 37 | `tests/cross_spring_evolution.rs` (S64 §7–§10 + S66 §11–§12 + benchmarks) |
 | Stats integration | 20 | `tests/stats_integration.rs` |
 | I/O + errors | 11 | `tests/io_and_errors.rs` |
 | Doc tests | 2 | `cargo test --doc` |
-| Forge | 53 | `metalForge/forge/` |
-| **Total** | **719** | |
+| Forge | 53 | `metalForge/forge/` (vestigial — all absorbed upstream) |
+| **Total** | **725** | |
 
 ---
 

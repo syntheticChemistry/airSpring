@@ -214,7 +214,7 @@ airSpring/
 │   └── STUDY.md                 # Full results narrative
 ├── experiments/                 # Experiment protocols and results (16 complete)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
-│   └── handoffs/                # Versioned (V015 active)
+│   └── handoffs/                # Versioned (V016 active)
 ├── CHANGELOG.md                 # Keep-a-Changelog versioned history
 ├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
 └── LICENSE                      # AGPL-3.0-or-later
@@ -250,14 +250,14 @@ airSpring/
 | `CHANGELOG.md` | Versioned change history |
 | `CONTROL_EXPERIMENT_STATUS.md` | Detailed experiment results |
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C GPU evolution, absorbed/stays-local |
-| `metalForge/ABSORPTION_MANIFEST.md` | 4 modules ready for upstream absorption |
+| `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance |
 | `specs/BARRACUDA_REQUIREMENTS.md` | GPU kernel requirements |
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue |
 | `whitePaper/STUDY.md` | Full results narrative |
 | `whitePaper/METHODOLOGY.md` | Validation protocol |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V015 active) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V016 active) |
 
 ## License
 

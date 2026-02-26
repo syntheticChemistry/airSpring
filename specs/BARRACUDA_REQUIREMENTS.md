@@ -2,7 +2,7 @@
 
 **Last Updated**: February 26, 2026 (v0.4.5 — 464 lib + 126 integration, 11 Tier A modules)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
-**ToadStool HEAD**: `17932267` (S65 — sovereign compiler, df64 transcendentals, stats metrics absorption, 774 WGSL shaders)
+**ToadStool HEAD**: `045103a7` (S66 — cross-spring absorption, regression/hydrology/moving_window_f64, explicit BGL, 774 WGSL shaders)
 
 ---
 

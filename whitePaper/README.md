@@ -32,7 +32,7 @@ The study answers four questions:
    Answer: yes (validation complete) — Rust BarraCuda passes 725 tests across 21 binaries (96.81% coverage). A cross-validation harness confirms 75/75 Python-Rust value matches within 1e-5 tolerance. 11 Tier A modules wired to ToadStool/BarraCuda primitives including Richards PDE, isotherm fitting, MC ET₀ uncertainty (parametric CI via `norm_ppf`), VG pressure head inversion (via `brent`), and agroecological diversity. S66 resolves the P0 GPU dispatch blocker — GPU-first paths now stable. CPU benchmarks: 12.5M ET₀/s, 38.9M VG θ/s, 175K NM fits/s.
 
 4. **Can the math be truly portable across hardware?**
-   In progress — metalForge stages 6 absorption-ready modules for upstream barracuda integration following hotSpring's Write → Absorb → Lean pattern. 2 modules already absorbed upstream (van_genuchten into pde::richards, isotherm into optimize). GPU wiring proves the compute is hardware-portable; metalForge will demonstrate mixed CPU/GPU/NPU dispatch.
+   Complete — all 6 metalForge modules absorbed upstream into barracuda (S64: metrics; S66: regression, hydrology, moving_window_f64; S40: van_genuchten; S64: isotherm). airSpring now leans on upstream primitives following the Write → Absorb → Lean cycle. GPU wiring proves the compute is hardware-portable; metalForge demonstrates the cross-system absorption pattern.
 
 ---
 
@@ -118,5 +118,5 @@ No institutional access required. No proprietary software. AGPL-3.0 licensed.
 ## Next Phase: GPU Validation & metalForge
 
 See `specs/PAPER_REVIEW_QUEUE.md` for the full paper queue and compute pipeline.
-See `wateringHole/handoffs/` for the latest ToadStool/BarraCuda handoff (V015).
+See `wateringHole/handoffs/` for the latest ToadStool/BarraCuda handoff (V016).
 See `CHANGELOG.md` for the full evolution history.

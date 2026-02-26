@@ -1,17 +1,19 @@
 # Cross-Spring Shader Evolution — airSpring Provenance
 
-**Updated**: February 26, 2026 (v0.4.5, ToadStool HEAD `17932267`)
+**Updated**: February 26, 2026 (v0.4.5, ToadStool HEAD `045103a7` — S66)
 
 ## Summary
 
 ToadStool's BarraCuda runtime contains **774 WGSL shaders** across 41+ categories,
-built through **46 cross-spring absorptions** (sessions S51-S57). Each Spring
+built through **46+ cross-spring absorptions** (sessions S51-S66). Each Spring
 contributes domain-specific GPU primitives that benefit the entire ecosystem.
 
-airSpring uses **5 shared shaders** directly, contributed **3 critical fixes**
-(TS-001, TS-003, TS-004), and had its **stats metrics absorbed upstream** (S64).
+airSpring uses **5 shared shader families** directly, contributed **3 critical fixes**
+(TS-001, TS-003, TS-004), had its **stats metrics absorbed upstream** (S64), and
+completed the Write→Absorb→Lean cycle with **metalForge fully absorbed** (S66).
+S66 resolved the P0 GPU dispatch blocker via explicit `BindGroupLayout` (R-S66-041).
 
-### S60–S65 Cross-Spring Absorption Wave (Feb 2026)
+### S60–S66 Cross-Spring Absorption Wave (Feb 2026)
 
 | Session | What Was Absorbed | Origin Spring | airSpring Impact |
 |---------|-------------------|---------------|------------------|
@@ -232,4 +234,4 @@ m/z tolerance search.
 
 **Tier C (1 item):** HTTP/JSON data client.
 
-See `gpu::evolution_gaps` module for full structured inventory (20 gaps total).
+See `gpu::evolution_gaps` module for full structured inventory (23 gaps total: 11 Tier A, 11 Tier B, 1 Tier C).

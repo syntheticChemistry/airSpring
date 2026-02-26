@@ -2,7 +2,7 @@
 
 **Last Updated**: February 26, 2026 (v0.4.5 — 464 lib + 132 integration)
 **ToadStool PIN**: `045103a7` (S66 — cross-spring absorption, regression/hydrology/moving_window_f64, multi-precision WGSL)
-**Handoff**: V015 (ToadStool S66 sync — all metalForge absorbed, evolution_gaps updated)
+**Handoff**: V016 (S66 validation complete — P0 resolved, 8 cross-spring tests, absorption candidates)
 **License**: AGPL-3.0-or-later
 
 ---

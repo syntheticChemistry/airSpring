@@ -1,7 +1,7 @@
 # airSpring → ToadStool Handoff V015: S66 Sync — All metalForge Absorbed
 
 **Date**: February 26, 2026
-**From**: airSpring v0.4.5 — 16 experiments, 474 Python + 719 Rust checks, 21 binaries
+**From**: airSpring v0.4.5 — 16 experiments, 474 Python + 725 Rust checks, 21 binaries
 **To**: ToadStool / BarraCuda core team
 **ToadStool PIN**: `045103a7` (S66 — cross-spring absorption wave)
 **Supersedes**: V013 (archived — all absorption items resolved), V014 (retained for experiment GPU roadmap)
@@ -13,8 +13,9 @@
 ToadStool S66 absorbed **all four pending metalForge modules** (regression, hydrology,
 moving_window_f64, metrics expansion) plus re-exported `spearman_correlation`,
 added 8 named `SoilParams` constants, `mae`/`hill`/`monod`, `shannon_from_frequencies`,
-and `rawr_mean`. airSpring has pulled S66, validated against it (643 cargo tests +
-17 validation binaries = 473 binary checks, all PASS), and updated all provenance docs.
+and `rawr_mean`. airSpring has pulled S66, validated against it (649 cargo tests +
+21 validation binaries = 515 binary checks, all PASS), and updated all provenance docs.
+S66 also resolved the P0 GPU dispatch blocker (R-S66-041 explicit BGL).
 
 **metalForge is now fully absorbed.** The forge crate remains as a fossil record
 (53 tests) but is not in the dependency graph.
@@ -89,8 +90,8 @@ Items N2-N5 from V013 are **closed** (resolved by S66).
 |------|--------|
 | `cargo fmt --check` | **Clean** |
 | `cargo clippy --workspace -- -D warnings` | **0 warnings** |
-| `cargo test --workspace` | **643** cargo tests PASS |
-| Validation binaries | **17/17** PASS (473 checks) |
+| `cargo test --workspace` | **649** cargo tests PASS (464 lib + 132 integration + 53 forge) |
+| Validation binaries | **21/21** PASS (515 checks) |
 | Python controls | **474/474** PASS (16 experiments) |
 | Cross-validation | **75/75** match (tol=1e-5) |
 | Coverage | **96.81%** lines (lib) |
