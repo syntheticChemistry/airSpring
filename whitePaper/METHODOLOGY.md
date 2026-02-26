@@ -168,13 +168,13 @@ All experiments run on a single consumer workstation:
 | IoT Pipeline | SoilWatch 10 + irrigation correct | — | CSV stats + calibration match | ≤1e-5 tolerance |
 | Water Balance | Mass balance < 0.001 mm | Savings per Dong (2024) | Mass balance match Python | ≤1e-5 tolerance |
 
-### Grand Total: 400 Python + 635 Rust Tests + 918 Real Data Points
+### Grand Total: 400 Python + 643 Rust Tests + 918 Real Data Points
 
 | Phase | Checks | Description |
 |-------|:------:|-------------|
 | Phase 0 (Python control) | 400 | 13 experiments: FAO-56, soil, IoT, water balance, dual Kc, cover crops, regional ET₀, Richards, biochar, 60yr WB, yield response, CW2D |
 | Phase 1 (Rust validation) | 439 | 18 binaries: same benchmarks validated in Rust |
-| Phase 1 (Rust tests) | 635 | 456 lib + 126 integration + 53 forge |
+| Phase 1 (Rust tests) | 643 | 464 lib + 126 integration + 53 forge |
 | Phase 1.5 (CPU benchmark) | — | Rust 69x faster than Python (geometric mean, 20x–502x) |
 | Phase 2 (Cross-validation) | 75 | Python↔Rust identical outputs (tol=1e-5) |
 | **Total** | **400 + 439 + 635 + 75** | **All pass** |

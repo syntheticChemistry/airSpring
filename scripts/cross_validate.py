@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 #!/usr/bin/env python3
 """
 airSpring Phase 2 — Python side of the cross-validation harness.

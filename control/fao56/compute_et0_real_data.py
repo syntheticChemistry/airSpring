@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 #!/usr/bin/env python3
 """
 Compute FAO-56 Penman-Monteith ET₀ on REAL Michigan weather data.

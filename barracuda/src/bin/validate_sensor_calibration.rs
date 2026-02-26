@@ -116,6 +116,11 @@ fn validate_irrigation(v: &mut ValidationHarness, bm: &serde_json::Value) {
         EXACT_TOL,
     );
 
+    // Analytical multi-layer IR via Dong et al. (2024) Eq. 1 applied per layer:
+    //   Layer 1: (0.12 − 0.08) × 30 = 1.2 cm
+    //   Layer 2: (0.15 − 0.10) × 30 = 1.5 cm
+    //   Layer 3: (0.18 − 0.12) × 30 = 1.8 cm
+    //   Total = 4.5 cm (exact arithmetic)
     let layers = [
         sc::SoilLayer {
             field_capacity: 0.12,

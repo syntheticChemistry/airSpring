@@ -10,7 +10,8 @@
     "baseline_script": "control/cw2d/cw2d_richards.py",
     "baseline_command": "python control/cw2d/cw2d_richards.py",
     "python_version": "3.10.12",
-    "reproduction_note": "Re-run baseline_command to regenerate expected values",
+    "baseline_commit": "af1eb97",
+    "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
     "references": [
       "Dong et al. (2019) J Sustainable Water in the Built Environment 5(4):04019005",
       "Šimůnek et al. (2012) HYDRUS software for simulating the movement of water, heat, and multiple solutes in variably saturated media",

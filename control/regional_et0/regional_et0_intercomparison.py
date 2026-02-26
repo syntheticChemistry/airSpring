@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 #!/usr/bin/env python3
 """
 airSpring Experiment 010 — Regional ET₀ Intercomparison (Michigan Microclimates)

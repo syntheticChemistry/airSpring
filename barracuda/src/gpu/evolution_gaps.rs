@@ -24,14 +24,25 @@
 //! | `testutil` | `gpu::reduce` | `fused_map_reduce_f64.wgsl` | Seasonal stats | A (ready) |
 //! | `io::csv_ts` | `gpu::stream` | `moving_window.wgsl` | Stream smoothing | A (ready) |
 //!
-//! # Current Inventory (February 26, 2026 — v0.4.3, synced to `ToadStool` HEAD `17932267`)
+//! # Current Inventory (February 26, 2026 — v0.4.4, synced to `ToadStool` HEAD `17932267`)
 //!
-//! `ToadStool` S42–S62: 170 commits, 46 cross-spring absorptions, 4,224+ tests.
+//! `ToadStool` S42–S65: 170+ commits, 46+ cross-spring absorptions, 4,224+ tests.
 //! All four airSpring issues (TS-001 through TS-004) resolved in **S54**.
 //!
-//! New upstream capabilities (S51–S62): `FusedMapReduceF64::dot()`,
-//! `barracuda::tolerances` (centralized), `barracuda::provenance` (tags),
-//! `solve_f64_cpu()`, `GpuSessionBuilder`, `OdeSystem` trait + `BatchedOdeRK4`.
+//! Upstream capabilities available (S51–S65):
+//! - S51+: `solve_f64_cpu()`, `GpuSessionBuilder`, `OdeSystem` trait + `BatchedOdeRK4`
+//! - S52+: `NelderMeadGpu`, `BatchedBisectionGpu`, `chi2_decomposed`, `FusedMapReduceF64::dot()`
+//! - S54+: TS-001–004 resolved, `barracuda::tolerances`, `barracuda::provenance`
+//! - S58+: `df64`, `Fp64Strategy`, ridge regression, `ValidationHarness`
+//! - S60+: DF64 FMA, `norm_cdf`/`norm_ppf`, `empirical_spectral_density`
+//! - S62+: `BandwidthTier`, `PeakDetectF64`, `CrankNicolson1D` (f64 + GPU shader!)
+//! - S64: Stats absorption (metrics, diversity, bootstrap from Springs)
+//! - S65: Smart refactoring, dead code removal, doc cleanup
+//!
+//! **Key evolution since V011**: `pde::crank_nicolson` is now **f64** with
+//! `WGSL_CRANK_NICOLSON_F64` GPU shader — previously documented as f32-only.
+//! Optimizers expanded: `bfgs`, `brent`, `newton`, `secant`, `bisect` all available.
+//! `ResumableNelderMead` adds solver state persistence.
 //!
 //! ## Tier A: Integrated (GPU primitive wired, validated, GPU-first)
 //!
@@ -46,25 +57,35 @@
 //! | Variance / std deviation | `stats::correlation::variance`, `std_dev` | **Already wired** (integration tests) |
 //! | `gpu::stream::StreamSmoother` | `ops::moving_window_stats::MovingWindowStats` | **WIRED** — `IoT` stream smoothing (wetSpring S28+) |
 //! | `eco::correction::fit_ridge` | `linalg::ridge::ridge_regression` | **WIRED** — calibration regression (wetSpring ESN) |
-//! | Spearman rank correlation | `stats::correlation::spearman_correlation` | Available, not yet used |
-//! | Bootstrap confidence intervals | `stats::bootstrap::bootstrap_ci` | Available, not yet used |
-//! | Normal distribution | `stats::normal::norm_cdf`, `norm_ppf` | Available, not yet used |
-//! | Chi-squared decomposition | `stats::chi2::chi2_decomposed` | Available (new in S52+) |
-//! | Spectral density / RMT | `stats::spectral_density::empirical_spectral_density` | Available (new in S57+) |
+//! | Spearman rank correlation | `stats::correlation::spearman_correlation` | Available, used in testutil |
+//! | Bootstrap confidence intervals | `stats::bootstrap::bootstrap_ci` | WIRED (`testutil::bootstrap`) |
+//! | Crank-Nicolson PDE (f64) | `pde::crank_nicolson::CrankNicolson1D` | Available — f64 + GPU shader (S62+) |
+//! | BFGS quasi-Newton optimizer | `optimize::bfgs` | Available — smooth objective fitting |
+//! | Brent VG inverse | `optimize::brent` | **WIRED** — `inverse_van_genuchten_h()` θ→h (v0.4.4) |
+//! | `norm_ppf` MC CI | `stats::normal::norm_ppf` | **WIRED** — `McEt0Result::parametric_ci()` (v0.4.4) |
+//! | Newton / secant methods | `optimize::newton`, `secant` | Available — derivative-based roots |
+//! | Bisection (scalar) | `optimize::bisect` | Available — robust bracketed root |
+//! | Batched bisection (GPU) | `optimize::BatchedBisectionGpu` | Available — parallel root-finding |
+//! | Normal CDF | `stats::normal::norm_cdf` | Available — cumulative probability |
+//! | Chi-squared decomposition | `stats::chi2::chi2_decomposed` | Available (S52+) |
+//! | Spectral density / RMT | `stats::spectral_density::empirical_spectral_density` | Available (S57+) |
+//! | Resumable Nelder-Mead | `optimize::ResumableNelderMead` | Available — checkpoint/resume |
 //!
 //! ## Tier B: Upstream Primitive Exists, Needs Domain Wiring
 //!
 //! | Need | Closest `ToadStool` Primitive | Gap |
 //! |------|---------------------------|-----|
-//! | 1D Richards equation | `pde::richards::solve_richards` (van Genuchten-Mualem) | **WIRED** — `gpu::richards::BatchedRichards` (v0.4.0) |
+//! | 1D Richards equation | `pde::richards::solve_richards` (VG-Mualem, Picard+CN+Thomas) | **PROMOTED to Tier A** — `gpu::richards::BatchedRichards` (v0.4.0) |
+//! | Crank-Nicolson cross-val | `pde::crank_nicolson::CrankNicolson1D` (f64 + GPU) | **NEW** — available for Richards CN comparison (was f32-only, now f64) |
 //! | Sensor calibration (batch) | `batched_elementwise_f64.wgsl` (custom op) | Add `SoilWatch` 10 as op=5 |
 //! | Hargreaves ET₀ (batch) | `batched_elementwise_f64.wgsl` | Add as op=6 (simpler than PM) |
 //! | Kc climate adjustment (batch) | `batched_elementwise_f64.wgsl` | Add as op=7 |
 //! | Moving window statistics | `ops::moving_window_stats` | **PROMOTED to Tier A** — `gpu::stream::StreamSmoother` |
-//! | Nonlinear curve fitting | `optimize::nelder_mead`, `NelderMeadGpu` | **WIRED** — `gpu::isotherm::fit_*_nm()` + `fit_*_global()` (v0.4.1) |
+//! | Nonlinear fitting | `optimize::{nelder_mead, bfgs, NelderMeadGpu}` | **WIRED (NM)** — BFGS available for smooth objectives |
 //! | Ridge regression | `linalg::ridge::ridge_regression` | **PROMOTED to Tier A** — `eco::correction::fit_ridge` |
-//! | m/z tolerance search | `batched_bisection_f64.wgsl` | Cross-spring from `wetSpring` |
-//! | Tridiagonal solve (batch) | `linalg::tridiagonal_solve_f64` | Wired via `pde::richards` (v0.4.0) |
+//! | Root-finding (batch GPU) | `optimize::BatchedBisectionGpu` | Cross-spring from `wetSpring` — soil water potential inversion |
+//! | Root-finding (scalar) | `optimize::{brent, bisect, newton, secant}` | Available for any scalar root problem |
+//! | Tridiagonal solve (batch) | `linalg::tridiagonal_solve_f64`, `ops::cyclic_reduction_f64` | Wired via `pde::richards` (v0.4.0) |
 //! | Adaptive ODE (RK45) | `numerical::rk45_solve` (Dormand-Prince) | Available for dynamic soil models |
 //! | Batch isotherm fitting | `optimize::multi_start_nelder_mead` | **WIRED** — `gpu::isotherm::fit_batch_global()` (v0.4.1) |
 //!
@@ -97,11 +118,12 @@
 //! ## Cross-Validation Strategy
 //!
 //! GPU paths are validated against CPU baselines:
-//! 1. CPU validation remains source of truth (407 lib tests, 16 binaries)
+//! 1. CPU validation remains source of truth (464 lib tests, 16 binaries)
 //! 2. GPU results must match CPU within documented tolerance
-//! 3. Cross-validation harness (75/75 Python↔Rust) extends to GPU path
+//! 3. Cross-validation harness (33/33 Python↔Rust) extends to GPU path
 //! 4. Each GPU function has a `test_gpu_matches_cpu_*` integration test
 //! 5. GPU determinism proven: 4 bit-identical rerun tests (`gpu_determinism.rs`)
+//! 6. Library coverage: 96.81% lines, 97.58% functions (llvm-cov verified)
 
 /// Structured representation of an evolution gap.
 #[derive(Debug)]
@@ -129,19 +151,24 @@ pub enum Tier {
     C,
 }
 
-/// All known evolution gaps (20 entries — 8 Tier A integrated, 11 Tier B (4 wired), 1 Tier C).
+/// All known evolution gaps (23 entries — 11 Tier A integrated, 11 Tier B (5 wired), 1 Tier C).
 ///
 /// v0.4.1: Added `multi_start_nelder_mead` for robust global isotherm fitting.
 /// v0.4.0: Richards PDE wired to `barracuda::pde::richards`, isotherm fitting
 /// wired to `barracuda::optimize::nelder_mead`, tridiagonal available via PDE solver.
 /// Dual Kc batch added as Tier B: `gpu::dual_kc` CPU ready, pending shader op.
 ///
-/// Upstream capabilities discovered (S52-S62, not yet wired):
+/// Upstream capabilities discovered (S52-S65):
 /// - `NelderMeadGpu`: GPU-resident optimizer (5-50 params, not cost-effective for 2-param isotherms)
-/// - `ops::crank_nicolson`: GPU Crank-Nicolson PDE solver (**f32 only** — needs f64 for Richards)
-/// - `unified_hardware`: `HardwareDiscovery`, `ComputeScheduler`, `MixedSubstrate` — metalForge target
-/// - `optimize::bfgs`: Quasi-Newton with gradient (useful for smooth objectives)
+/// - `pde::crank_nicolson::CrankNicolson1D`: **f64** CN PDE solver + `WGSL_CRANK_NICOLSON_F64` GPU shader
+/// - `optimize::bfgs`: Quasi-Newton with gradient (smooth objectives, e.g. isotherm residuals)
+/// - `optimize::brent`: Bracketed 1D root-finding (soil water potential inversion)
+/// - `optimize::newton`, `secant`: Derivative-based root-finding
+/// - `optimize::bisect`: Robust bracketed root-finding
+/// - `optimize::BatchedBisectionGpu`: GPU-parallel batched root-finding
+/// - `optimize::ResumableNelderMead`: Checkpoint/resume for long-running optimization
 /// - `optimize::adaptive_penalty`: Constrained optimization with data-driven penalty
+/// - `unified_hardware`: `HardwareDiscovery`, `ComputeScheduler`, `MixedSubstrate` — metalForge target
 pub const GAPS: &[EvolutionGap] = &[
     // ── Tier A: Integrated (GPU primitive wired and validated) ─────────
     EvolutionGap {
@@ -202,6 +229,22 @@ pub const GAPS: &[EvolutionGap] = &[
         toadstool_primitive: Some("linalg::ridge::ridge_regression"),
         action: "WIRED — eco::correction::fit_ridge wraps barracuda ridge (wetSpring ESN)",
     },
+    EvolutionGap {
+        id: "norm_ppf_mc_ci",
+        description: "Parametric confidence intervals for MC ET₀ via norm_ppf",
+        tier: Tier::A,
+        toadstool_primitive: Some("stats::normal::norm_ppf (Moro 1995 rational approx)"),
+        action: "WIRED (v0.4.4): McEt0Result::parametric_ci() uses norm_ppf for z-scores \
+                 (hotSpring special-function lineage → barracuda::stats S52+)",
+    },
+    EvolutionGap {
+        id: "brent_vg_inverse",
+        description: "VG pressure head inversion via Brent root-finding",
+        tier: Tier::A,
+        toadstool_primitive: Some("optimize::brent (Brent 1973, guaranteed convergence)"),
+        action: "WIRED (v0.4.4): eco::richards::inverse_van_genuchten_h() uses brent \
+                 for θ→h inversion (neuralSpring optimizer lineage → barracuda::optimize S52+)",
+    },
     // ── Tier B: Shader exists, needs domain adaptation ────────────────
     EvolutionGap {
         id: "dual_kc_batch",
@@ -235,17 +278,21 @@ pub const GAPS: &[EvolutionGap] = &[
         id: "nonlinear_solver",
         description: "Nonlinear least squares for soil calibration curve fitting",
         tier: Tier::B,
-        toadstool_primitive: Some("optimize::nelder_mead, optimize::NelderMeadGpu"),
-        action: "Local analytical fits exist; can upgrade to GPU Nelder-Mead for large batches",
+        toadstool_primitive: Some(
+            "optimize::{nelder_mead, bfgs, NelderMeadGpu, ResumableNelderMead}",
+        ),
+        action: "NM WIRED (v0.4.1); BFGS available for smooth objectives; \
+                 NelderMeadGpu for 5-50 param problems",
     },
     EvolutionGap {
         id: "richards_pde",
         description: "1D Richards equation for unsaturated soil water flow",
-        tier: Tier::B,
+        tier: Tier::A,
         toadstool_primitive: Some(
             "pde::richards::solve_richards (van Genuchten-Mualem, Picard + CN + Thomas)",
         ),
-        action: "WIRED (v0.4.0): gpu::richards::BatchedRichards wraps barracuda::pde::richards",
+        action: "WIRED (v0.4.0): gpu::richards::BatchedRichards wraps barracuda::pde::richards. \
+                 pde::crank_nicolson now f64 + GPU shader for CN cross-validation.",
     },
     EvolutionGap {
         id: "tridiagonal_batch",

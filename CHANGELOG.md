@@ -2,7 +2,41 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased] - 2026-02-26
+## [0.4.4] - 2026-02-26
+
+### ToadStool S65 Deep Rewiring: brent + norm_ppf + CN f64 + Benchmarks
+
+Complete rewiring to modern ToadStool/BarraCuda S65 primitives with deep
+integration of cross-spring optimizers and precision math.
+
+#### Added
+- **`McEt0Result::parametric_ci()`** — parametric confidence intervals for MC
+  ET₀ using `barracuda::stats::normal::norm_ppf` (Moro 1995 rational
+  approximation, hotSpring precision lineage). Complements empirical percentiles.
+- **`eco::richards::inverse_van_genuchten_h()`** — VG pressure head inversion
+  (θ→h) using `barracuda::optimize::brent` (Brent 1973 guaranteed-convergence
+  root-finder, neuralSpring optimizer lineage). 1.4M–3.1M inversions/sec.
+- **`gpu::richards::solve_cn_diffusion()`** — Crank-Nicolson f64 cross-validation
+  via `barracuda::pde::crank_nicolson::CrankNicolson1D` (now f64 + GPU shader,
+  previously documented as f32-only).
+- 2 new parametric CI tests, 4 VG inverse round-trip tests, 1 CN diffusion test
+- Benchmark sections for MC ET₀ CI (4.2M samples/sec) and Brent VG inverse
+- Richards PDE promoted to Tier A in evolution_gaps.rs
+
+#### Changed
+- Tier A count: 9 → 11 (added norm_ppf CI, brent VG inverse)
+- Evolution gaps: 21 → 23 entries
+- Library tests: 458 → 464 (total: 637 → 643)
+- Library coverage: 96.79% → 96.81% lines
+- V011 → V012 handoff (V011 archived)
+- All docs updated to v0.4.4 with current test counts
+
+#### Cross-Spring Provenance
+- **hotSpring → airSpring**: `norm_ppf` (Moro 1995) enables analytic z-score CI
+- **neuralSpring → airSpring**: `brent` (Brent 1973) enables monotone root-finding
+- **airSpring → ToadStool**: Richards PDE + isotherm patterns validated, CN f64 confirmed
+
+## [Unreleased]
 
 ### Modern System Rewiring: Cross-Spring S64 Absorption Complete
 

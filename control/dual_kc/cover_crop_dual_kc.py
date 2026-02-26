@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 #!/usr/bin/env python3
 """
 airSpring Experiment 011 — Dual Kc for Cover Crops + No-Till Mulch Effects

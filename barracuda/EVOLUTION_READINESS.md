@@ -1,7 +1,8 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: February 25, 2026 (v0.4.3 — 456 lib + 126 integration)
-**ToadStool PIN**: `17932267` (S65 — sovereign compiler, df64 transcendentals, stats metrics absorption, 774 WGSL shaders)
+**Last Updated**: February 26, 2026 (v0.4.4 — 464 lib + 126 integration)
+**ToadStool PIN**: `17932267` (S65 — sovereign compiler, df64 transcendentals, stats absorption, 774 WGSL shaders)
+**Handoff**: V012 (rewired to S65 primitives, CN f64 integrated, optimizer inventory expanded)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -23,10 +24,11 @@ validate against papers, hand off to ToadStool/BarraCuda, lean on upstream.
 
 | Module | Target | Tests | Provenance |
 |--------|--------|:-----:|------------|
-| `forge::metrics` | `barracuda::stats::metrics` | 11 | Dong 2020, 918 station-days |
+| `forge::metrics` | `barracuda::stats::metrics` | 11 | **ABSORBED S64** — now leaning on upstream |
 | `forge::regression` | `barracuda::stats::regression` | 11 | Dong 2020 sensor corrections |
 | `forge::moving_window` | `barracuda::ops::moving_window_stats_f64` | 7 | IoT sensor smoothing (f64) |
 | `forge::hydrology` | `barracuda::ops::hydrology` | 13 | FAO-56, Hargreaves 1985 |
+| `forge::isotherm` | `barracuda::ops::isotherm` | 5 | Langmuir/Freundlich linearized fits |
 
 See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation details.
 
@@ -44,7 +46,7 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 
 ## GPU Evolution Tiers
 
-### Tier A: Integrated (8 modules — GPU primitive wired, validated)
+### Tier A: Integrated (11 modules — GPU primitive wired, validated)
 
 | airSpring Module | BarraCuda Primitive | Status |
 |-----------------|--------------------|----|
@@ -54,8 +56,11 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 | `gpu::reduce::SeasonalReducer` | `ops::fused_map_reduce_f64` | **GPU N≥1024** |
 | `gpu::stream::StreamSmoother` | `ops::moving_window_stats` | **WIRED** |
 | `eco::correction::fit_ridge` | `linalg::ridge::ridge_regression` | **WIRED** |
-| `gpu::richards::BatchedRichards` | `pde::richards::solve_richards` | **WIRED** |
+| `gpu::richards::BatchedRichards` | `pde::richards::solve_richards` | **WIRED** (+ CN f64 cross-val) |
 | `gpu::isotherm::fit_*_nm/global` | `optimize::nelder_mead` + `multi_start` | **WIRED** |
+| `eco::diversity` | `stats::diversity` (Shannon, Simpson, Bray-Curtis) | **LEANING** (S64) |
+| `gpu::mc_et0::parametric_ci` | `stats::normal::norm_ppf` | **WIRED** (v0.4.4) — hotSpring precision lineage |
+| `eco::richards::inverse_van_genuchten_h` | `optimize::brent` | **WIRED** (v0.4.4) — neuralSpring optimizer lineage |
 
 ### Tier B: Upstream Exists, Needs Domain Wiring (11 items, 4 wired)
 
@@ -70,8 +75,11 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 | Tridiagonal solve batch | `linalg::tridiagonal_solve_f64` | Low |
 | Adaptive ODE (RK45) | `numerical::rk45_solve` | Low |
 | m/z tolerance search | `batched_bisection_f64.wgsl` (wetSpring) | Low |
-| Crank-Nicolson f64 | `ops::crank_nicolson` (**f32 only — needs f64**) | Medium |
+| Crank-Nicolson PDE | `pde::crank_nicolson::CrankNicolson1D` (f64 + GPU shader!) | **WIRED** (v0.4.4) |
 | BFGS optimizer | `optimize::bfgs` | Low |
+| Brent VG inverse | `optimize::brent` | **WIRED** (v0.4.4) |
+| bisect/Newton/secant | `optimize::{bisect, newton, secant}` | Low |
+| Batched bisection GPU | `optimize::BatchedBisectionGpu` | Low |
 
 ### Tier C: Needs New Primitive (1 item)
 
@@ -81,7 +89,7 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 
 ---
 
-## ToadStool S42–S62 Evolution (170 commits)
+## ToadStool S42–S65 Evolution (170+ commits)
 
 ToadStool underwent massive evolution since S42. Key milestones:
 
@@ -96,29 +104,49 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | S56 | Final absorptions, idiomatic Rust | All 46 items complete |
 | S57 | +47 tests, coverage push | 4,224+ core tests |
 | S58-S59 | df64, Fp64Strategy, ridge, ValidationHarness | Cross-spring quality |
-| S62 | BandwidthTier, PeakDetectF64, infrastructure | Performance primitives |
+| S60 | DF64 FMA, transcendentals, CN fix, Cholesky SPD | Math precision |
+| S61-63 | Sovereign compiler, SPIR-V passthrough, `CrankNicolson1D` **f64** | **CN now f64!** |
+| S64 | Stats absorption (metrics, diversity from Springs), `chrono` removed | Diversity leaning |
+| S65 | Smart refactoring, dead code removal, doc cleanup | Stabilization |
 
-## Upstream Capabilities Available (Not Yet Wired)
+## Upstream Capabilities — Wired and Available
 
-These exist in ToadStool/BarraCuda but airSpring hasn't needed them yet:
+### Wired (using in production)
+
+| Capability | Module | Wired In | Status |
+|-----------|--------|----------|--------|
+| `barracuda::tolerances` | `tolerances` | v0.3.6 | **LEANING** — re-exported |
+| `barracuda::validation::ValidationHarness` | `validation` | v0.3.6 | **LEANING** — all 18 binaries |
+| `pde::richards::solve_richards` | `pde` | v0.4.0 | **WIRED** — `gpu::richards` |
+| `pde::crank_nicolson::CrankNicolson1D` | `pde` | v0.4.4 | **WIRED** — CN f64 diffusion cross-val |
+| `optimize::nelder_mead` | `optimize` | v0.4.1 | **WIRED** — isotherm fitting |
+| `optimize::multi_start_nelder_mead` | `optimize` | v0.4.1 | **WIRED** — global isotherm search |
+| `stats::diversity::*` | `stats` | v0.4.3 | **LEANING** — `eco::diversity` delegates |
+| `stats::metrics::*` | `stats` | v0.4.3 | **LEANING** — `testutil::stats` delegates |
+| `stats::normal::norm_ppf` | `stats` | v0.4.4 | **WIRED** — `McEt0Result::parametric_ci()` |
+| `optimize::brent` | `optimize` | v0.4.4 | **WIRED** — `inverse_van_genuchten_h()` θ→h inversion |
+
+### Available (not yet needed)
 
 | Capability | Module | Added In | Potential Use |
 |-----------|--------|----------|---------------|
 | `FusedMapReduceF64::dot(a, b)` | `ops` | S51 | GPU dot product convenience |
-| `barracuda::tolerances` | `tolerances` | S52 | Centralized tolerance with justification |
 | `barracuda::provenance` | `provenance` | S52 | 12 `ProvenanceTag` consts for origin tracking |
 | `solve_f64_cpu()` | `linalg::solve` | S51 | Gaussian elimination + partial pivoting |
 | `GpuSessionBuilder` | `session` | S52 | Pre-warmed GPU sessions |
 | `OdeSystem` + `BatchedOdeRK4` | `numerical` | S51 | Generic ODE with WGSL template |
-| `NelderMeadGpu` | `optimize` | S52+ | GPU-resident NM (5-50 params) |
-| `crank_nicolson` | `ops`/`pde` | S46+ | Implicit PDE solver (**f32 only** — Richards needs f64) |
-| `unified_hardware` | `unified_hardware` | S52 | `HardwareDiscovery`, `ComputeScheduler` — metalForge target |
-| `bfgs` | `optimize` | S52+ | Quasi-Newton with gradient |
+| `NelderMeadGpu` | `optimize` | S52+ | GPU-resident NM (5-50 params, not cost-effective for 2-param) |
+| `ResumableNelderMead` | `optimize` | S52+ | Checkpoint/resume for long-running optimizers |
+| `bfgs` | `optimize` | S52+ | Quasi-Newton with gradient (smooth objectives) |
+| `bisect` | `optimize` | S52+ | Robust bracketed root-finding |
+| `newton` / `secant` | `optimize` | S52+ | Derivative-based root-finding |
+| `BatchedBisectionGpu` | `optimize` | S52+ | GPU-parallel batched root-finding |
 | `adaptive_penalty` | `optimize` | S52+ | Constrained optimization with penalty |
+| `unified_hardware` | `unified_hardware` | S52 | `HardwareDiscovery`, `ComputeScheduler` — metalForge target |
 | `chi2_decomposed` | `stats` | S52 | Chi-squared goodness-of-fit |
 | `spectral_density` | `stats` | S57 | RMT spectral analysis |
-| `normal::norm_cdf/ppf` | `stats` | S52+ | Normal distribution CDF/quantile |
-| `spearman_correlation` | `stats::correlation` | S52+ | Rank correlation (fn exists, not re-exported from mod) |
+| `normal::norm_cdf` | `stats` | S52+ | Normal cumulative distribution |
+| `spearman_correlation` | `stats::correlation` | S52+ | Rank correlation (exists, not re-exported from `stats/mod.rs`) |
 
 ---
 
@@ -129,8 +157,8 @@ These exist in ToadStool/BarraCuda but airSpring hasn't needed them yet:
 | `cargo fmt --check` | **Clean** |
 | `cargo clippy -- -D warnings` | **0 warnings** (pedantic via `[lints.clippy]`) |
 | `cargo doc --no-deps` | **Builds**, 0 warnings |
-| `cargo test` | **635 total** (456 lib + 126 integration + 53 forge) |
-| `cargo llvm-cov --lib` | **97.55%** line coverage |
+| `cargo test` | **643 total** (464 lib + 126 integration + 53 forge) |
+| `cargo llvm-cov --lib` | **96.81%** line coverage (97.58% functions) |
 | `unsafe` code | **Zero** |
 | `unwrap()` in lib | **Zero** (all in `#[cfg(test)]`) |
 | Files > 1000 lines | **Zero** (max: 845 lines) |
@@ -149,6 +177,8 @@ These exist in ToadStool/BarraCuda but airSpring hasn't needed them yet:
 | `ridge_regression` | wetSpring | Sensor correction pipeline |
 | `nelder_mead`, `multi_start` | neuralSpring | Isotherm fitting |
 | `ValidationHarness` | neuralSpring | All 16 validation binaries |
+| `norm_ppf` (Moro 1995) | hotSpring | MC ET₀ parametric confidence intervals |
+| `brent` (Brent 1973) | neuralSpring | VG pressure head inversion (θ→h) |
 | `pde::richards` | airSpring → upstream | 1D Richards equation (absorbed S40) |
 
 ### airSpring Contributions Back

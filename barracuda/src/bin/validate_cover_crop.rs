@@ -101,18 +101,32 @@ fn validate_mulch_factor_ordering(v: &mut ValidationHarness) {
     }
 }
 
+fn f64_vec(arr: &serde_json::Value) -> Vec<f64> {
+    arr.as_array()
+        .expect("expected JSON array")
+        .iter()
+        .map(|v| v.as_f64().expect("expected f64 in array"))
+        .collect()
+}
+
 fn validate_notill_vs_conventional(v: &mut ValidationHarness, bench: &serde_json::Value) {
     println!();
     validation::section("No-till vs conventional: rye→corn transition");
 
+    let scenario = &bench["validation_checks"]["no_till_conserves_water"]["scenario"];
+    let els = &scenario["evap_layer_state"];
     let state = EvaporationLayerState {
-        de: 0.0,
-        tew: 22.5,
-        rew: 9.0,
+        de: json_f64(els, &["de"]).expect("de"),
+        tew: json_f64(els, &["tew"]).expect("tew"),
+        rew: json_f64(els, &["rew"]).expect("rew"),
     };
 
-    let et0_daily = [4.0, 4.5, 4.2, 5.0, 5.5, 5.0, 4.8];
-    let precip_daily = [10.0, 0.0, 0.0, 0.0, 0.0, 8.0, 0.0];
+    let et0_daily = f64_vec(&scenario["et0_daily"]);
+    let precip_daily = f64_vec(&scenario["precip_daily"]);
+    let kcb = json_f64(scenario, &["kcb"]).expect("kcb");
+    let kc_max_val = json_f64(scenario, &["kc_max"]).expect("kc_max");
+    let few = json_f64(scenario, &["few"]).expect("few");
+    let mf = json_f64(scenario, &["mulch_factor"]).expect("mulch_factor");
 
     let inputs: Vec<DualKcInput> = et0_daily
         .iter()
@@ -124,9 +138,9 @@ fn validate_notill_vs_conventional(v: &mut ValidationHarness, bench: &serde_json
         })
         .collect();
 
-    let (conv, conv_final) = dual_kc::simulate_dual_kc(&inputs, 0.15, 1.20, 1.0, &state);
+    let (conv, conv_final) = dual_kc::simulate_dual_kc(&inputs, kcb, kc_max_val, few, &state);
     let (notill, notill_final) =
-        dual_kc::simulate_dual_kc_mulched(&inputs, 0.15, 1.20, 1.0, 0.40, &state);
+        dual_kc::simulate_dual_kc_mulched(&inputs, kcb, kc_max_val, few, mf, &state);
 
     let conv_et: f64 = conv.iter().map(|o| o.etc).sum();
     let notill_et: f64 = notill.iter().map(|o| o.etc).sum();

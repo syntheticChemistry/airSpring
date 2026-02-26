@@ -8,6 +8,8 @@
 //! - van Genuchten (1980) SSSA J 44:892-898
 //! - Richards (1931) Physics 1:318-333
 
+use barracuda::optimize::brent;
+
 use crate::error::{AirSpringError, Result};
 
 /// Pressure head clipping range (cm) to avoid numerical blowup.
@@ -132,6 +134,43 @@ pub fn van_genuchten_capacity(h: f64, theta_r: f64, theta_s: f64, alpha: f64, n_
     let dse_dh = m * n_vg * alpha.powf(n_vg) * h_safe.powf(n_vg - 1.0) / denom;
     let result = (theta_s - theta_r) * dse_dh;
     result.clamp(CAPACITY_FLOOR, CAPACITY_CEIL)
+}
+
+/// Inverse Van Genuchten: find pressure head `h` (cm) for a target moisture θ.
+///
+/// Solves θ(h) − `θ_target` = 0 using Brent's root-finding method
+/// (`barracuda::optimize::brent`, neuralSpring optimizer lineage).
+///
+/// # Cross-Spring Provenance
+///
+/// | Primitive | Origin | Purpose |
+/// |-----------|--------|---------|
+/// | `brent` | Brent (1973) via `barracuda::optimize` S52+ | Guaranteed-convergence root-finder |
+/// | `van_genuchten_theta` | van Genuchten (1980), airSpring | Forward VG retention curve |
+///
+/// Brent's method combines bisection's reliability with inverse-quadratic
+/// interpolation speed. For VG inversion, convergence is typically < 10
+/// iterations since the retention curve is smooth and monotone on (−∞, 0).
+///
+/// Returns `None` if `θ_target` is outside \[θr, θs\] or Brent fails.
+#[must_use]
+pub fn inverse_van_genuchten_h(
+    theta_target: f64,
+    theta_r: f64,
+    theta_s: f64,
+    alpha: f64,
+    n_vg: f64,
+) -> Option<f64> {
+    if theta_target >= theta_s {
+        return Some(0.0);
+    }
+    if theta_target <= theta_r {
+        return None;
+    }
+
+    let f = |h: f64| van_genuchten_theta(h, theta_r, theta_s, alpha, n_vg) - theta_target;
+
+    brent(f, H_CLIP_MIN, -1e-6, 1e-8, 100).ok().map(|r| r.root)
 }
 
 /// Solve tridiagonal system Ax = d using Thomas algorithm.
@@ -838,6 +877,52 @@ mod tests {
                 assert!(
                     (-10_100.0..=110.0).contains(&h),
                     "profile {i} node {j} h={h}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_inverse_vg_round_trip_silt_loam() {
+        let (theta_r, theta_s, alpha, n_vg) = (0.067, 0.45, 0.02, 1.41);
+        for &h_orig in &[-1.0, -10.0, -50.0, -100.0, -500.0, -1000.0, -5000.0] {
+            let theta = van_genuchten_theta(h_orig, theta_r, theta_s, alpha, n_vg);
+            let h_inv = inverse_van_genuchten_h(theta, theta_r, theta_s, alpha, n_vg)
+                .expect("should invert");
+            let theta_check = van_genuchten_theta(h_inv, theta_r, theta_s, alpha, n_vg);
+            assert!(
+                (theta_check - theta).abs() < 1e-6,
+                "Round-trip θ at h={h_orig}: expected {theta:.6}, got {theta_check:.6}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_inverse_vg_saturated_returns_zero() {
+        let h = inverse_van_genuchten_h(0.45, 0.067, 0.45, 0.02, 1.41);
+        assert_eq!(h, Some(0.0), "θ=θs should map to h=0");
+    }
+
+    #[test]
+    fn test_inverse_vg_below_residual_returns_none() {
+        assert!(inverse_van_genuchten_h(0.01, 0.067, 0.45, 0.02, 1.41).is_none());
+    }
+
+    #[test]
+    fn test_inverse_vg_multiple_soil_types() {
+        let soils = [
+            ("sand", 0.045, 0.43, 0.145, 2.68),
+            ("clay", 0.068, 0.38, 0.008, 1.09),
+            ("loam", 0.078, 0.43, 0.036, 1.56),
+        ];
+        for (name, theta_r, theta_s, alpha, n_vg) in soils {
+            let h_test = -100.0;
+            let theta = van_genuchten_theta(h_test, theta_r, theta_s, alpha, n_vg);
+            if let Some(h_inv) = inverse_van_genuchten_h(theta, theta_r, theta_s, alpha, n_vg) {
+                let theta_rt = van_genuchten_theta(h_inv, theta_r, theta_s, alpha, n_vg);
+                assert!(
+                    (theta_rt - theta).abs() < 1e-5,
+                    "{name}: round-trip fail θ={theta:.6} → h={h_inv:.2} → θ={theta_rt:.6}"
                 );
             }
         }

@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 #!/usr/bin/env python3
 """
 airSpring Experiment 009 — FAO-56 Chapter 7: Dual Crop Coefficient (Kcb + Ke)

@@ -8,24 +8,29 @@
 //! `van_genuchten_f64.wgsl` shader uses hotSpring precision math (`pow_f64`,
 //! `exp_f64`) for water retention curve evaluation.
 //!
-//! # Two API Levels
+//! # Three API Levels
 //!
-//! | API | GPU? | Backend |
-//! |-----|:----:|---------|
-//! | [`solve_batch_cpu`] | No | `eco::richards::solve_richards_1d` (Picard + Thomas) |
-//! | [`BatchedRichards::solve_upstream`] | Yes | `barracuda::pde::richards::solve_richards` (Crank-Nicolson) |
+//! | API | Backend | Time Scheme |
+//! |-----|---------|-------------|
+//! | [`solve_batch_cpu`] | `eco::richards` (Picard + Thomas) | Implicit Euler |
+//! | [`BatchedRichards::solve_upstream`] | `barracuda::pde::richards` | Crank-Nicolson |
+//! | [`BatchedRichards::solve_cn_diffusion`] | `barracuda::pde::crank_nicolson` | Crank-Nicolson (linear) |
 //!
-//! # GPU Path
+//! # Upstream PDE Solvers
 //!
-//! Wraps [`barracuda::pde::richards::solve_richards`] which uses Picard iteration
-//! with Crank-Nicolson time discretization. The upstream solver operates on
-//! [`barracuda::pde::richards::SoilParams`] which uses `k_sat` in cm/s (not cm/day).
+//! **`pde::richards`**: Full nonlinear Richards with Picard + CN + Thomas algorithm.
+//! Operates on [`barracuda::pde::richards::SoilParams`] (`k_sat` in cm/s).
+//!
+//! **`pde::crank_nicolson`** (S62+, now f64): Standalone linear diffusion CN solver
+//! with `WGSL_CRANK_NICOLSON_F64` GPU shader + `cyclic_reduction_f64.wgsl` parallel
+//! tridiagonal solve. Useful for linearised Richards comparison and thermal diffusion.
 //!
 //! # CPU Path
 //!
 //! Uses the validated `eco::richards` module directly (implicit Euler + Picard),
 //! preserving exact validation fidelity.
 
+use barracuda::pde::crank_nicolson::{CrankNicolsonConfig, HeatEquation1D};
 use barracuda::pde::richards as pde_richards;
 
 use crate::eco::richards::{self, VanGenuchtenParams};
@@ -171,6 +176,49 @@ impl BatchedRichards {
 
         Ok((cpu_theta, upstream_theta))
     }
+
+    /// Solve linearised diffusion using `barracuda::pde::crank_nicolson` (f64).
+    ///
+    /// Treats soil water movement as constant-coefficient diffusion with
+    /// diffusivity `D` = `K_sat` / (θs - θr). This is a simplification of Richards
+    /// that ignores nonlinear conductivity but provides a useful comparison
+    /// baseline and exercises the standalone CN solver (S62+, f64 + GPU shader).
+    ///
+    /// Returns the final moisture profile (θ values at each node).
+    ///
+    /// # Errors
+    ///
+    /// Returns an error string if the solver fails or parameters are invalid.
+    pub fn solve_cn_diffusion(req: &RichardsRequest) -> Result<Vec<f64>, String> {
+        let d_cm_per_s = (req.params.ks / 86_400.0) / (req.params.theta_s - req.params.theta_r);
+        let dx = req.depth_cm / (req.n_nodes.saturating_sub(1).max(1)) as f64;
+        let dt_s = req.dt_days * 86_400.0;
+        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+        let n_steps = (req.duration_days / req.dt_days).ceil() as usize;
+
+        let cn_config = CrankNicolsonConfig::new(d_cm_per_s, dx, dt_s, req.n_nodes)
+            .with_boundary_conditions(req.h_initial, req.h_initial);
+
+        let initial = vec![req.h_initial; req.n_nodes];
+        let mut solver = HeatEquation1D::new(cn_config, &initial).map_err(|e| format!("{e}"))?;
+        let h_final = solver.advance(n_steps).map_err(|e| format!("{e}"))?;
+
+        let theta: Vec<f64> = h_final
+            .iter()
+            .map(|&h| {
+                pde_richards::SoilParams {
+                    theta_s: req.params.theta_s,
+                    theta_r: req.params.theta_r,
+                    alpha: req.params.alpha,
+                    n: req.params.n_vg,
+                    k_sat: req.params.ks / 86_400.0,
+                }
+                .theta(h)
+            })
+            .collect();
+
+        Ok(theta)
+    }
 }
 
 #[cfg(test)]
@@ -235,6 +283,56 @@ mod tests {
         let r = result.unwrap();
         assert_eq!(r.h.len(), 20);
         assert!(r.time_steps_completed > 0);
+    }
+
+    #[test]
+    fn test_upstream_pressure_head_boundary() {
+        let req = RichardsRequest {
+            params: sand(),
+            depth_cm: 100.0,
+            n_nodes: 20,
+            h_initial: -5.0,
+            h_top: -10.0,
+            zero_flux_top: false,
+            bottom_free_drain: false,
+            duration_days: 0.1,
+            dt_days: 0.01,
+        };
+        let result = BatchedRichards::solve_upstream(&req);
+        assert!(
+            result.is_ok(),
+            "upstream solve with PressureHead BCs failed: {result:?}"
+        );
+        let r = result.unwrap();
+        assert_eq!(r.h.len(), 20);
+        assert!(r.time_steps_completed > 0);
+    }
+
+    #[test]
+    fn test_cn_diffusion_produces_physical_theta() {
+        let req = RichardsRequest {
+            params: sand(),
+            depth_cm: 100.0,
+            n_nodes: 20,
+            h_initial: -5.0,
+            h_top: -5.0,
+            zero_flux_top: true,
+            bottom_free_drain: true,
+            duration_days: 0.1,
+            dt_days: 0.01,
+        };
+        let theta = BatchedRichards::solve_cn_diffusion(&req);
+        assert!(theta.is_ok(), "CN diffusion failed: {theta:?}");
+        let theta = theta.unwrap();
+        assert_eq!(theta.len(), 20);
+        for (i, &t) in theta.iter().enumerate() {
+            assert!(
+                t >= req.params.theta_r - 1e-6 && t <= req.params.theta_s + 1e-6,
+                "CN θ[{i}]={t:.4} outside [{:.3}, {:.3}]",
+                req.params.theta_r,
+                req.params.theta_s
+            );
+        }
     }
 
     #[test]

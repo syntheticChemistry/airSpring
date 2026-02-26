@@ -11,7 +11,7 @@
         "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
         "baseline_commit": "3afc229",
         "references": [
-            "Kumari, Dong & Safferman (2025) Phosphorus adsorption and recovery from waste streams using biochar. Applied Water Science 15(7):162",
+            "Kumari, Dong & Safferman (2025) Phosphorus adsorption and recovery from waste streams using biochar. Applied Water Science 15(7):162. DOI: 10.1007/s13201-025-02162-x",
             "Langmuir (1918) The adsorption of gases on plane surfaces. J Am Chem Soc 40:1361-1403",
             "Freundlich (1906) Über die Adsorption in Lösungen. Z Phys Chem 57:385-470",
             "Yao et al. (2011) Biochar from anaerobically digested sugar beet tailings: characterization and phosphate removal. J Environ Qual 40:767-774",

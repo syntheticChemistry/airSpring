@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: February 26, 2026
-**Status**: 13 experiments, 400/400 Python + 635 Rust (456 lib + 126 integration + 53 forge) + 75/75 cross-validation + 9 GPU orchestrators
+**Status**: 13 experiments, 400/400 Python + 643 Rust (464 lib + 126 integration + 53 forge) + 75/75 cross-validation + 11 Tier A modules
 
 ---
 
@@ -23,15 +23,15 @@
 | 008 | Yield Response to Water Stress (FAO-56 Ch 10) | Irrigation | **Complete** | Python + Rust CPU | `eco::yield_response` | 32+32 |
 | 012 | CW2D Richards Extension (Dong 2019) | Environmental | **Complete** | Python + Rust CPU | `eco::richards` (CW2D media) | 24+24 |
 
-**Grand Total**: 400 Python + 456 Rust lib + 126 integration + 53 forge = **635 Rust tests** + 75 cross-validation values + 9 GPU orchestrators
+**Grand Total**: 400 Python + 464 Rust lib + 126 integration + 53 forge = **643 Rust tests** + 75 cross-validation values + 11 Tier A modules
 
 ---
 
-## Test Breakdown (v0.4.3)
+## Test Breakdown (v0.4.4)
 
 | Category | Tests | Source |
 |----------|:-----:|--------|
-| Lib (unit) | 456 | `cargo test --lib` (incl. diversity 11, mc\_et0 7, stats re-exports 7) |
+| Lib (unit) | 464 | `cargo test --lib` (incl. diversity 11, mc\_et0 9, stats re-exports 7) |
 | Eco integration | 33 | `tests/eco_integration.rs` |
 | GPU functional | 21 | `tests/gpu_integration.rs` |
 | GPU evolution | 6 | `tests/gpu_evolution.rs` |
@@ -41,7 +41,7 @@
 | I/O + errors | 11 | `tests/io_and_errors.rs` |
 | Doc tests | 2 | `cargo test --doc` |
 | Forge | 53 | `metalForge/forge/` |
-| **Total** | **635** | |
+| **Total** | **643** | |
 
 ---
 
@@ -297,7 +297,7 @@ python3 scripts/bench_compare.py                # Side-by-side report
 
 ## GPU Benchmark: CPU vs GPU Orchestrators
 
-The GPU benchmark measures throughput for 9 GPU orchestrators wired through
+The GPU benchmark measures throughput for 11 Tier A wired modules through
 ToadStool's shader evolution (774 WGSL shaders, 46+ cross-spring absorptions):
 
 | Orchestrator | CPU (items/s) | Notes |

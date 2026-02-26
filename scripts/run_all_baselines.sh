@@ -1,9 +1,22 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
 # ==========================================================================
-# airSpring Phase 0 — Run All Python/R Baseline Validations
+# Phase 0 — Run All Python/R Baseline Validations
 #
 # Each experiment script exits 0 on all-PASS, non-zero on any FAIL.
 # This script runs all baselines and reports the overall result.
+#
+# Prerequisites:
+#   pip install -r control/requirements.txt
+#   Exp 015 requires cached weather data:
+#     control/long_term_wb/data/wooster_era5_1960_2023.json
+#   (Generated on first run of: python control/long_term_wb/long_term_water_balance.py
+#    which downloads from Open-Meteo ERA5 archive — requires internet.)
+#
+# Benchmark JSON files are hand-authored reference data with provenance
+# metadata (source papers, digitization dates, commit hashes). They are
+# NOT auto-generated. To update benchmarks after modifying models, edit
+# the JSON files directly and update the provenance fields.
 #
 # Usage:
 #   bash scripts/run_all_baselines.sh

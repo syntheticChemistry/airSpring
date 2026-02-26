@@ -442,7 +442,7 @@ mod tests {
 
     #[test]
     fn test_parse_csv_file_not_found() {
-        let result = parse_csv(Path::new("/tmp/nonexistent_airspring_test.csv"), None);
+        let result = parse_csv(Path::new("/tmp/nonexistent_csv_ts_test.csv"), None);
         assert!(result.is_err());
     }
 

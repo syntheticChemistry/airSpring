@@ -30,6 +30,7 @@
 use airspring_barracuda::eco::evapotranspiration::{self as et, DailyEt0Input};
 use airspring_barracuda::eco::isotherm;
 use airspring_barracuda::eco::richards::{self, VanGenuchtenParams};
+use airspring_barracuda::gpu::mc_et0::{self, Et0Uncertainties};
 use airspring_barracuda::gpu::{isotherm as gpu_iso, kriging, reduce, stream};
 use std::time::Instant;
 
@@ -331,6 +332,86 @@ fn bench_vg_theta() {
     }
 }
 
+fn bench_mc_et0_ci() {
+    println!();
+    println!("── MC ET₀ + Parametric CI (norm_ppf, hotSpring precision → S52+) ──");
+    println!("  norm_ppf (Moro 1995) enables analytic z-score confidence intervals.");
+    println!(
+        "  {:>8}  {:>12}  {:>12}  {:>10}  {:>10}",
+        "N_MC", "CPU (µs)", "samples/s", "CI₉₀ width", "P₅-P₉₅"
+    );
+
+    let input = DailyEt0Input {
+        tmin: 12.3,
+        tmax: 21.5,
+        tmean: Some(16.9),
+        solar_radiation: 22.07,
+        wind_speed_2m: 2.078,
+        actual_vapour_pressure: 1.409,
+        elevation_m: 100.0,
+        latitude_deg: 50.80,
+        day_of_year: 187,
+    };
+    let unc = Et0Uncertainties::default();
+
+    for &n in &[100_u32, 500, 2_000, 10_000] {
+        let n_usize = n as usize;
+        let (cpu_us, _) = time_fn(
+            || {
+                let r = mc_et0::mc_et0_cpu(&input, &unc, n_usize, 42);
+                r.et0_mean
+            },
+            WARMUP,
+            MEASURE,
+        );
+        let r = mc_et0::mc_et0_cpu(&input, &unc, n_usize, 42);
+        let (ci_lo, ci_hi) = r.parametric_ci(0.90);
+        let samples_sec = f64::from(n) / (cpu_us / 1_000_000.0);
+        println!(
+            "  {n:>8}  {cpu_us:>12.1}  {samples_sec:>12.0}  {ci_w:>10.4}  {emp_w:>10.4}",
+            ci_w = ci_hi - ci_lo,
+            emp_w = r.et0_p95 - r.et0_p05,
+        );
+    }
+}
+
+fn bench_brent_vg_inverse() {
+    println!();
+    println!("── VG Pressure Head Inversion (brent, neuralSpring optimizer → S52+) ──");
+    println!("  Brent (1973) root-finder: guaranteed convergence for θ(h) inversion.");
+    println!(
+        "  {:>12}  {:>8}  {:>12}  {:>12}",
+        "Soil", "N", "CPU (µs)", "inversions/s"
+    );
+
+    let soils: &[(&str, f64, f64, f64, f64)] = &[
+        ("sand", 0.045, 0.43, 0.145, 2.68),
+        ("silt_loam", 0.067, 0.45, 0.02, 1.41),
+        ("clay", 0.068, 0.38, 0.008, 1.09),
+    ];
+
+    for &(name, theta_r, theta_s, alpha, n_vg) in soils {
+        let n = 1000_i32;
+        let thetas: Vec<f64> = (0..n)
+            .map(|i| theta_r + (theta_s - theta_r) * (f64::from(i) + 1.0) / f64::from(n + 1))
+            .collect();
+        let (cpu_us, _) = time_fn(
+            || {
+                thetas
+                    .iter()
+                    .filter_map(|&t| {
+                        richards::inverse_van_genuchten_h(t, theta_r, theta_s, alpha, n_vg)
+                    })
+                    .sum()
+            },
+            WARMUP,
+            MEASURE,
+        );
+        let inv_sec = f64::from(n) / (cpu_us / 1_000_000.0);
+        println!("  {name:>12}  {n:>8}  {cpu_us:>12.1}  {inv_sec:>12.0}");
+    }
+}
+
 fn run_all_benchmarks() {
     bench_et0();
     bench_reduce();
@@ -340,6 +421,8 @@ fn run_all_benchmarks() {
     bench_richards();
     bench_isotherm();
     bench_vg_theta();
+    bench_mc_et0_ci();
+    bench_brent_vg_inverse();
 }
 
 fn main() {
@@ -370,15 +453,18 @@ fn main() {
     println!("  neuralSpring (20 shaders) → ML/optimization");
     println!("    nelder_mead: neuralSpring optimizer → airSpring isotherm fitting");
     println!("    multi_start_nelder_mead: LHS → airSpring global isotherm search");
+    println!("    brent: neuralSpring root-finder → airSpring VG θ→h inversion (v0.4.4)");
     println!("    ValidationHarness: neuralSpring S59 → all 16 airSpring binaries");
     println!();
-    println!("  airSpring (3 fixes contributed) → Domain validation");
+    println!("  airSpring (3 fixes + 2 wirings) → Domain validation");
     println!("    TS-001 pow_f64: fractional exponents → fixed for ALL Springs");
     println!("    TS-003 acos precision: trig boundary values → fixed for ALL Springs");
     println!("    TS-004 reduce buffer: N≥1024 dispatch → stabilized for ALL Springs");
     println!("    Richards PDE: airSpring validated, absorbed into barracuda (S40)");
+    println!("    norm_ppf→parametric_ci: hotSpring precision → MC ET₀ analytic CI (v0.4.4)");
+    println!("    brent→inverse_vg: neuralSpring solver → VG pressure head inversion (v0.4.4)");
     println!();
     println!("  608 WGSL shaders, 46 cross-spring absorptions (S51-S57),");
-    println!("  8 GPU orchestrators in airSpring, zero duplication.");
+    println!("  11 Tier A wired modules in airSpring, zero duplication.");
     println!("═══════════════════════════════════════════════════════════════════════");
 }

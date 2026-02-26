@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-02-25 (v0.4.3 — 13 experiments, 400 Python + 635 Rust, 18 binaries, 69x CPU speedup)
+**Updated**: 2026-02-26 (v0.4.4 — 13 experiments, 400 Python + 643 Rust, 18 binaries, 69x CPU speedup)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -54,7 +54,12 @@ bash scripts/run_all_baselines.sh
 # 5. Optionally run R ANOVA (requires R >= 4.0)
 # Rscript control/iot_irrigation/anova_irrigation.R
 
-# 6. Run Rust validation binaries (439 checks across 18 binaries)
+# 6. Pre-cache ERA5 data for Exp 015 (60-year water balance)
+#    Downloads ~23 MB from Open-Meteo ERA5 archive (one-time).
+#    Cached to: control/long_term_wb/data/wooster_era5_1960_2023.json
+python control/long_term_wb/long_term_water_balance.py
+
+# 7. Run Rust validation binaries (439 checks across 18 binaries)
 cd barracuda
 for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   validate_sensor_calibration validate_real_data cross_validate \
@@ -64,11 +69,11 @@ for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   cargo run --release --bin $bin
 done
 
-# 7. Run Phase 2 cross-validation (75 values, Python vs Rust)
+# 8. Run Phase 2 cross-validation (75 values, Python vs Rust)
 cd .. && python3 scripts/cross_validate.py > /tmp/py.json
 cd barracuda && cargo run --release --bin cross_validate > /tmp/rs.json
 
-# 8. Run full season simulation demo
+# 9. Run full season simulation demo
 cargo run --release --bin simulate_season
 ```
 
@@ -572,7 +577,7 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026 — Updated: February 25, 2026 (v0.4.3)*
-*13 experiments, 400/400 Python, 635 Rust tests, 18 binaries, 75/75 cross-validation.*
-*Rust 69x faster than Python (geometric mean). 9 GPU orchestrators.*
+*Initialized: February 16, 2026 — Updated: February 26, 2026 (v0.4.4)*
+*13 experiments, 400/400 Python, 643 Rust tests, 18 binaries, 75/75 cross-validation.*
+*Rust 69x faster than Python (geometric mean). 11 Tier A wired modules.*
 *Quality: zero .unwrap(), zero unsafe, zero clippy pedantic warnings. AGPL-3.0-or-later.*

@@ -9,6 +9,7 @@
 //! Python control: `control/regional_et0/regional_et0_intercomparison.py`
 //! (61/61 PASS)
 
+use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 
 // ─── Validation thresholds (citation-based justification) ─────────────────────
@@ -164,13 +165,15 @@ fn load_and_compute(
     end: &str,
 ) -> Option<StationResult> {
     let csv_path = data_dir.join(format!("{}_{start}_{end}_daily.csv", meta.id));
-    let content = std::fs::read_to_string(&csv_path).ok()?;
+    let file = std::fs::File::open(&csv_path).ok()?;
+    let reader = BufReader::new(file);
+    let mut line_iter = reader.lines();
 
-    let mut lines = content.lines();
-    let header_line = lines.next()?;
-    let headers: Vec<&str> = header_line.split(',').collect();
+    let header_line = line_iter.next()?.ok()?;
+    let headers: Vec<String> = header_line.split(',').map(String::from).collect();
+    let n_cols = headers.len();
 
-    let col_idx = |name: &str| headers.iter().position(|h| *h == name);
+    let col_idx = |name: &str| headers.iter().position(|h| h == name);
 
     let i_date = col_idx("date")?;
     let i_tmax = col_idx("tmax_c")?;
@@ -185,9 +188,10 @@ fn load_and_compute(
     let mut et0_rust = Vec::new();
     let mut et0_om = Vec::new();
 
-    for line in lines {
+    for line_result in line_iter {
+        let Ok(line) = line_result else { continue };
         let fields: Vec<&str> = line.split(',').collect();
-        if fields.len() < headers.len() {
+        if fields.len() < n_cols {
             continue;
         }
 
@@ -383,9 +387,9 @@ fn check_cross_station_correlation(v: &mut ValidationHarness, results: &[Station
 }
 
 fn main() {
-    let start = std::env::var("AIRSPRING_SEASON_START").unwrap_or_else(|_| "2023-05-01".into());
-    let end = std::env::var("AIRSPRING_SEASON_END").unwrap_or_else(|_| "2023-09-30".into());
-    let data_dir = std::env::var("AIRSPRING_DATA_DIR").map_or_else(
+    let start = std::env::var("ET0_SEASON_START").unwrap_or_else(|_| "2023-05-01".into());
+    let end = std::env::var("ET0_SEASON_END").unwrap_or_else(|_| "2023-09-30".into());
+    let data_dir = std::env::var("ET0_DATA_DIR").map_or_else(
         |_| {
             Path::new(env!("CARGO_MANIFEST_DIR"))
                 .parent()

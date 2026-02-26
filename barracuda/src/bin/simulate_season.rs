@@ -254,17 +254,17 @@ fn main() {
 
     let crop = CropType::Corn.coefficients();
     let soil = SoilTexture::SandyLoam.hydraulic_properties();
-    let n_days: usize = env_usize("AIRSPRING_SEASON_DAYS", 90);
+    let n_days: usize = env_usize("WB_SEASON_DAYS", 90);
     let n_days_u32 = u32::try_from(n_days).expect("season length fits u32");
     let n_days_f = n_days as f64;
-    let latitude_deg: f64 = env_f64("AIRSPRING_LATITUDE", 42.77);
-    let elevation_m = env_f64("AIRSPRING_ELEVATION", 256.0);
-    let doy_start: u32 = env_u32("AIRSPRING_DOY_START", 152);
-    let seed: u64 = std::env::var("AIRSPRING_SEED")
+    let latitude_deg: f64 = env_f64("WB_LATITUDE", 42.77);
+    let elevation_m = env_f64("WB_ELEVATION", 256.0);
+    let doy_start: u32 = env_u32("WB_DOY_START", 152);
+    let seed: u64 = std::env::var("WB_SEED")
         .ok()
         .and_then(|s| s.parse().ok())
         .unwrap_or(42);
-    let location_name = std::env::var("AIRSPRING_LOCATION").unwrap_or_else(|_| "Lansing MI".into());
+    let location_name = std::env::var("WB_LOCATION").unwrap_or_else(|_| "Lansing MI".into());
     let root_zone_mm = crop.root_depth_m * 1000.0;
 
     println!("  Crop:      {} (Kc_mid = {:.2})", crop.name, crop.kc_mid);
@@ -278,8 +278,8 @@ fn main() {
         doy_start + n_days_u32 - 1
     );
     println!("  Location:  {location_name} ({latitude_deg}°N, {elevation_m}m)");
-    println!("  Config:    AIRSPRING_LATITUDE, AIRSPRING_ELEVATION, AIRSPRING_DOY_START,");
-    println!("             AIRSPRING_SEASON_DAYS, AIRSPRING_SEED, AIRSPRING_LOCATION\n");
+    println!("  Config:    WB_LATITUDE, WB_ELEVATION, WB_DOY_START,");
+    println!("             WB_SEASON_DAYS, WB_SEED, WB_LOCATION\n");
 
     let mut rng = Rng::new(seed);
     let (et0_series, precip_series) =

@@ -74,16 +74,16 @@ const DEFAULT_STATIONS: &[&str] = &[
 const MASS_BALANCE_TOLERANCE: f64 = 0.01;
 
 /// Default date range for growing season CSV filenames.
-/// Override with `AIRSPRING_SEASON_START` and `AIRSPRING_SEASON_END` env vars.
+/// Override with `ET0_SEASON_START` and `ET0_SEASON_END` env vars.
 const DEFAULT_SEASON_START: &str = "2023-05-01";
 const DEFAULT_SEASON_END: &str = "2023-09-30";
 
 /// Minimum acceptable R² for ET₀ vs Open-Meteo.
-/// Override with `AIRSPRING_MIN_R2` env var.
+/// Override with `ET0_MIN_R2` env var.
 const DEFAULT_MIN_R2: f64 = 0.90;
 
 /// Maximum acceptable RMSE (mm/day) for ET₀ vs Open-Meteo.
-/// Override with `AIRSPRING_MAX_RMSE` env var.
+/// Override with `ET0_MAX_RMSE` env var.
 const DEFAULT_MAX_RMSE: f64 = 1.5;
 
 /// Runtime configuration discovered from environment.
@@ -98,19 +98,19 @@ struct RuntimeConfig {
 
 impl RuntimeConfig {
     fn discover() -> Self {
-        let season_start = std::env::var("AIRSPRING_SEASON_START")
-            .unwrap_or_else(|_| DEFAULT_SEASON_START.to_string());
-        let season_end = std::env::var("AIRSPRING_SEASON_END")
-            .unwrap_or_else(|_| DEFAULT_SEASON_END.to_string());
-        let min_r2 = std::env::var("AIRSPRING_MIN_R2")
+        let season_start =
+            std::env::var("ET0_SEASON_START").unwrap_or_else(|_| DEFAULT_SEASON_START.to_string());
+        let season_end =
+            std::env::var("ET0_SEASON_END").unwrap_or_else(|_| DEFAULT_SEASON_END.to_string());
+        let min_r2 = std::env::var("ET0_MIN_R2")
             .ok()
             .and_then(|v| v.parse().ok())
             .unwrap_or(DEFAULT_MIN_R2);
-        let max_rmse = std::env::var("AIRSPRING_MAX_RMSE")
+        let max_rmse = std::env::var("ET0_MAX_RMSE")
             .ok()
             .and_then(|v| v.parse().ok())
             .unwrap_or(DEFAULT_MAX_RMSE);
-        let data_dir = std::env::var("AIRSPRING_DATA_DIR").map_or_else(
+        let data_dir = std::env::var("ET0_DATA_DIR").map_or_else(
             |_| {
                 Path::new(env!("CARGO_MANIFEST_DIR"))
                     .parent()
@@ -120,7 +120,7 @@ impl RuntimeConfig {
             },
             std::path::PathBuf::from,
         );
-        let stations = std::env::var("AIRSPRING_STATIONS").map_or_else(
+        let stations = std::env::var("ET0_STATIONS").map_or_else(
             |_| Self::discover_stations(&data_dir, &season_start, &season_end),
             |s| s.split(',').map(|x| x.trim().to_string()).collect(),
         );
@@ -462,7 +462,7 @@ fn main() {
         println!("═══════════════════════════════════════════════════════════");
         println!("  [SKIP] No real data at {}", config.data_dir.display());
         println!("  Run: python scripts/download_open_meteo.py --all-stations");
-        println!("  Or set AIRSPRING_DATA_DIR to an existing data directory.");
+        println!("  Or set ET0_DATA_DIR to an existing data directory.");
         println!("═══════════════════════════════════════════════════════════");
         std::process::exit(0);
     }
@@ -482,8 +482,8 @@ fn main() {
     println!(
         "  Stations: {} ({})\n",
         config.stations.len(),
-        if std::env::var("AIRSPRING_STATIONS").is_ok() {
-            "from AIRSPRING_STATIONS"
+        if std::env::var("ET0_STATIONS").is_ok() {
+            "from ET0_STATIONS"
         } else if config
             .stations
             .iter()

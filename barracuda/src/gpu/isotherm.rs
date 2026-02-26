@@ -17,9 +17,21 @@
 //! | [`fit_langmuir_nm`] / [`fit_freundlich_nm`] | `barracuda::optimize::nelder_mead` | Matching scipy |
 //! | [`fit_langmuir_global`] / [`fit_freundlich_global`] | `barracuda::optimize::multi_start_nelder_mead` | Robust global search |
 //!
-//! GPU path via `NelderMeadGpu` available for large batch fitting (5+ parameters)
-//! when `ToadStool` integrates batch dispatch. For 2-parameter isotherms, CPU NM
-//! is already faster than GPU round-trip overhead.
+//! # Upstream Optimizer Inventory (S65)
+//!
+//! | Optimizer | Status | Notes |
+//! |-----------|--------|-------|
+//! | `nelder_mead` | **WIRED** | Derivative-free, 2-param isotherms |
+//! | `multi_start_nelder_mead` | **WIRED** | LHS global search |
+//! | `NelderMeadGpu` | Available | GPU-resident, 5-50 params |
+//! | `ResumableNelderMead` | Available | Checkpoint/resume |
+//! | `bfgs` | Available | Quasi-Newton (smooth objectives) |
+//! | `brent` | Available | 1D root-finding |
+//! | `adaptive_penalty` | Available | Constrained optimization |
+//!
+//! For 2-parameter isotherms, CPU NM outperforms GPU round-trip overhead.
+//! BFGS would require numerical gradients for the isotherm SSR objective — not
+//! beneficial over NM for 2 parameters, but useful for multi-adsorbate models.
 //!
 //! # Strategy
 //!

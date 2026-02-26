@@ -10,7 +10,8 @@
     "baseline_script": "control/yield_response/yield_response.py",
     "baseline_command": "python control/yield_response/yield_response.py",
     "python_version": "3.10.12",
-    "reproduction_note": "Re-run baseline_command to regenerate expected values",
+    "baseline_commit": "af1eb97",
+    "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
     "references": [
       "Allen et al. (1998) FAO Irrigation and Drainage Paper 56, Chapter 10",
       "Stewart (1977) Optimizing Crop Production through Control of Water and Salinity Levels in the Soil",

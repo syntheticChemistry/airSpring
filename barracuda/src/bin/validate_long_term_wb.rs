@@ -21,8 +21,16 @@ use std::path::Path;
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/long_term_wb/benchmark_long_term_wb.json");
 
-/// Mass balance tolerance (mm) — FAO-56 Chapter 8.
-/// Tolerance for Rust Hargreaves vs Open-Meteo ET₀ (different methods).
+/// Tolerance (%) for Rust Hargreaves vs Open-Meteo ET₀.
+///
+/// This is NOT a Python↔Rust fidelity check — it compares two fundamentally
+/// different ET₀ estimation methods:
+/// - Rust: Hargreaves (temperature-only, Eq. 52 of FAO-56)
+/// - Open-Meteo: ERA5 reanalysis-based FAO-56 Penman-Monteith
+///
+/// Literature reports Hargreaves vs PM disagreement of 10–30% depending on
+/// aridity and season (Hargreaves & Allen, 2003; Droogers & Allen, 2002).
+/// 25% accommodates seasonal and continental variability.
 const ET0_CROSS_TOL_PCT: f64 = 25.0;
 
 /// Growing season: May 1 - Sep 30 (inclusive).

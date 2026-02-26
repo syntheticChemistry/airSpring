@@ -6,8 +6,15 @@
 //! - Column statistics (mean, std, min, max)
 //! - Round-trip fidelity (generate → write → parse → compare)
 //!
-//! Provenance: Synthetic data with analytically known properties.
-//! Temperature: 25 ± 8 °C diurnal cycle → mean = 25.0, min = 17.0, max = 33.0.
+//! Provenance: Synthetic data from `testutil::generate_synthetic_iot_data(168)`
+//! with analytically known properties (deterministic, seed-free — same output
+//! on every run). No Python baseline: this validates the Rust CSV parser and
+//! statistics engine against known mathematical properties of the generator.
+//!
+//! Generator properties (from `testutil/generators.rs`):
+//! - Temperature: 25 ± 8 °C sinusoidal diurnal → mean ≈ 25.0, min ≈ 17.0, max ≈ 33.0
+//! - PAR: bell curve peaking at ~1800 µmol/m²/s during midday, 0 at night
+//! - Soil moisture: base 0.25 m³/m³ with ±0.05 diurnal variation
 
 use airspring_barracuda::io::csv_ts;
 use airspring_barracuda::testutil::generate_synthetic_iot_data;
@@ -94,7 +101,7 @@ fn validate_csv_round_trip(
     println!();
     validation::section("CSV round-trip (generate → write → stream-parse → compare)");
 
-    let tmp_path = std::env::temp_dir().join("airspring_test_iot.csv");
+    let tmp_path = std::env::temp_dir().join("iot_csv_roundtrip_test.csv");
     {
         let mut f =
             std::fs::File::create(&tmp_path).expect("failed to create temp CSV for round-trip");

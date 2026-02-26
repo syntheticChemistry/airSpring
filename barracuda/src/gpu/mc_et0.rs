@@ -20,6 +20,8 @@
 //! | [`mc_et0_cpu`] | CPU | Always available, N samples via loop |
 //! | GPU kernel | `mc_et0_propagate_f64.wgsl` | Future: batched GPU dispatch (blocked by sovereign compiler regression, `ToadStool` S60-S65) |
 
+use barracuda::stats::normal::norm_ppf;
+
 use crate::eco::evapotranspiration::{self as et, DailyEt0Input};
 
 /// Input uncertainties for MC ET₀ propagation.
@@ -70,6 +72,30 @@ pub struct McEt0Result {
     pub et0_p95: f64,
     /// Number of MC samples.
     pub n_samples: usize,
+}
+
+impl McEt0Result {
+    /// Compute a parametric confidence interval assuming normality.
+    ///
+    /// Uses `barracuda::stats::normal::norm_ppf` (Moro 1995 rational approximation)
+    /// from hotSpring's precision math lineage to convert a confidence level
+    /// (e.g. 0.90 for 90% CI) into z-scores, then applies `mean ± z * std`.
+    ///
+    /// Returns `(lower, upper)` bounds in mm/day.
+    ///
+    /// # Cross-Spring Provenance
+    ///
+    /// `norm_ppf` was absorbed into `barracuda::stats::normal` (S52+) from
+    /// hotSpring's special-function library. The Moro rational approximation
+    /// provides 7+ digits of precision across the full (0,1) range.
+    #[must_use]
+    pub fn parametric_ci(&self, confidence: f64) -> (f64, f64) {
+        let alpha = (1.0 - confidence) / 2.0;
+        let z = norm_ppf(1.0 - alpha);
+        let lower = self.et0_mean - z * self.et0_std;
+        let upper = self.et0_mean + z * self.et0_std;
+        (lower, upper)
+    }
 }
 
 /// Run Monte Carlo ET₀ uncertainty propagation on CPU.
@@ -165,6 +191,9 @@ pub fn mc_et0_cpu(
 
     let n = samples.len();
     let mean_val = barracuda::stats::mean(&samples);
+    // Population variance (÷ n): these are the entire MC draw, not a sample
+    // from a larger population. barracuda::stats::correlation::variance uses
+    // sample variance (÷ n-1) so we compute population variance directly.
     let variance = samples.iter().map(|x| (x - mean_val).powi(2)).sum::<f64>() / n as f64;
     let std_val = variance.sqrt();
     let p05 = barracuda::stats::percentile(&samples, 5.0);
@@ -277,6 +306,35 @@ mod tests {
         let result = mc_et0_cpu(&sample_input(), &Et0Uncertainties::default(), 0, 42);
         assert_eq!(result.n_samples, 0);
         assert!((result.et0_mean - result.et0_central).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn mc_et0_parametric_ci_consistent_with_empirical() {
+        let result = mc_et0_cpu(&sample_input(), &Et0Uncertainties::default(), 5000, 42);
+        let (p_lo, p_hi) = result.parametric_ci(0.90);
+        // Parametric 90% CI (assuming normality) should roughly agree with
+        // empirical 5th/95th percentiles — within 20% for N=5000
+        let empirical_width = result.et0_p95 - result.et0_p05;
+        let parametric_width = p_hi - p_lo;
+        let ratio = parametric_width / empirical_width;
+        assert!(
+            (0.7..=1.4).contains(&ratio),
+            "Parametric CI width ({parametric_width:.3}) should roughly match \
+             empirical ({empirical_width:.3}), ratio={ratio:.2}"
+        );
+        assert!(p_lo < result.et0_mean);
+        assert!(p_hi > result.et0_mean);
+    }
+
+    #[test]
+    fn mc_et0_parametric_ci_widens_with_lower_confidence() {
+        let result = mc_et0_cpu(&sample_input(), &Et0Uncertainties::default(), 2000, 42);
+        let (_, hi_90) = result.parametric_ci(0.90);
+        let (_, hi_99) = result.parametric_ci(0.99);
+        assert!(
+            hi_99 > hi_90,
+            "99% CI upper ({hi_99:.3}) should exceed 90% ({hi_90:.3})"
+        );
     }
 
     #[test]

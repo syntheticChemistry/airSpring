@@ -117,6 +117,16 @@
     },
     "no_till_conserves_water": {
       "_description": "No-till should result in lower seasonal ET (due to reduced evaporation) and higher soil moisture",
+      "scenario": {
+        "_provenance": "Representative 7-day spring transition scenario. ET₀ and precipitation values from typical Michigan early-May conditions (baseline_command at baseline_commit).",
+        "et0_daily": [4.0, 4.5, 4.2, 5.0, 5.5, 5.0, 4.8],
+        "precip_daily": [10.0, 0.0, 0.0, 0.0, 0.0, 8.0, 0.0],
+        "evap_layer_state": { "de": 0.0, "tew": 22.5, "rew": 9.0 },
+        "kcb": 0.15,
+        "kc_max": 1.20,
+        "few": 1.0,
+        "mulch_factor": 0.40
+      },
       "expected_et_reduction_pct": { "min": 5, "max": 50, "_note": "5-15% full season; up to 50% during initial stage when Ke dominates" }
     }
   }

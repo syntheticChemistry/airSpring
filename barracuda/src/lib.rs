@@ -57,6 +57,8 @@
 //! - `ops::moving_window_stats` → `IoT` stream smoothing (wetSpring monitoring)
 //! - `pde::richards::solve_richards` → upstream Richards PDE (airSpring → `ToadStool` S40)
 //! - `optimize::nelder_mead` → nonlinear isotherm fitting (`neuralSpring` S62)
+//! - `stats::normal::norm_ppf` → parametric MC ET₀ confidence intervals (hotSpring S52+)
+//! - `optimize::brent` → VG pressure head inversion θ→h (neuralSpring S52+)
 //! - `validation::ValidationHarness` → 16 validation binaries (`neuralSpring` → `ToadStool` S59)
 
 pub mod eco;
