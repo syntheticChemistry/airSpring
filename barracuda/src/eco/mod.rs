@@ -3,6 +3,7 @@
 
 pub mod correction;
 pub mod crop;
+pub mod diversity;
 pub mod dual_kc;
 pub mod evapotranspiration;
 pub mod isotherm;

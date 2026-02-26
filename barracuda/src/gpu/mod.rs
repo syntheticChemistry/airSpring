@@ -17,6 +17,7 @@
 //! | [`stream`] | `IoT` stream smoothing (sliding window) | **GPU** (`MovingWindowStats`, wetSpring) |
 //! | [`richards`] | 1D Richards equation (vadose zone) | **Tier B** (`pde::richards`) |
 //! | [`isotherm`] | Batch isotherm fitting (biochar) | **Tier B** (`nelder_mead` + `multi_start`) |
+//! | [`mc_et0`] | Monte Carlo ET₀ uncertainty bands | **CPU** (GPU kernel available, blocked by S60-S65 regression) |
 //! | [`evolution_gaps`] | Living roadmap of CPU→GPU gaps | Documentation only |
 //!
 //! # `ToadStool` Issues — All RESOLVED
@@ -51,6 +52,7 @@ pub mod et0;
 pub mod evolution_gaps;
 pub mod isotherm;
 pub mod kriging;
+pub mod mc_et0;
 pub mod reduce;
 pub mod richards;
 pub mod stream;

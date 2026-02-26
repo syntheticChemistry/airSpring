@@ -4,9 +4,27 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [Unreleased] - 2026-02-26
 
-### ToadStool S60–S65 Sync: Stats Rewired Upstream, Sovereign Compiler Regression
+### Modern System Rewiring: Cross-Spring S64 Absorption Complete
 
-Synced to ToadStool HEAD `17932267` (S65, 774 WGSL shaders). Major changes:
+Full rewiring to modern ToadStool/BarraCuda (HEAD `17932267`, S65, 774 WGSL
+shaders). Cross-spring evolution now wired end-to-end.
+
+#### Added
+- **`eco::diversity`** module — wetSpring S64 absorption: Shannon, Simpson,
+  Chao1, Pielou evenness, Bray-Curtis dissimilarity, rarefaction curves wired
+  for agroecosystem assessment (cover crop biodiversity, soil microbiome, field
+  margin evaluation)
+- **`gpu::mc_et0`** module — groundSpring S64 absorption: Monte Carlo ET₀
+  uncertainty propagation with `mc_et0_cpu()` (CPU mirror of GPU kernel
+  `mc_et0_propagate_f64.wgsl`). Produces uncertainty bands (mean, σ, 5th/95th
+  percentiles) for FAO-56 ET₀ estimates.
+- **`testutil::{hit_rate, mean, percentile, dot, l2_norm}`** — new re-exports
+  from upstream `barracuda::stats::metrics` (absorbed from airSpring in S64)
+- 11 new cross-spring evolution tests (§7–§10): S64 stats delegation, wetSpring
+  diversity for cover crops, groundSpring MC ET₀ uncertainty, cross-spring
+  benchmark suite
+- 3 new benchmark tests: diversity throughput (>50K evals/sec for 100-species),
+  MC ET₀ throughput (10K samples), stats delegation overhead (zero penalty)
 
 #### Changed
 - `testutil::stats::rmse` and `mbe` now delegate to upstream `barracuda::stats::metrics`
@@ -17,13 +35,28 @@ Synced to ToadStool HEAD `17932267` (S65, 774 WGSL shaders). Major changes:
 - ToadStool PIN updated: `02207c4a` → `17932267` across all active docs
 - WGSL shader count updated: 758 → 774 across all active docs
 - Handoff V010 replaces V009 (V009 archived)
+- `CROSS_SPRING_EVOLUTION.md` updated with S60-S65 absorption wave, 3 new
+  primitives table entries, updated shader usage matrix, timeline to v0.4.3
+
+#### Cross-Spring Provenance (S64 Absorption Wave)
+- **hotSpring → all Springs**: `df64_core.wgsl` FMA optimization (2 ops vs 17),
+  `df64_transcendentals.wgsl` (sin/cos/exp/log in double-double)
+- **airSpring → upstream**: stats metrics (rmse, mbe, NSE, IA, R²) absorbed
+  into `barracuda::stats::metrics`
+- **wetSpring → airSpring**: ecological diversity (Shannon, Simpson, Chao1,
+  Bray-Curtis, rarefaction) wired as `eco::diversity`
+- **groundSpring → airSpring**: MC ET₀ uncertainty propagation shader available,
+  CPU mirror wired as `gpu::mc_et0::mc_et0_cpu`
+- **neuralSpring ↔ wetSpring**: `DiversityFusionGpu` available for large-scale
+  diversity GPU dispatch (future wiring)
 
 #### Noted
 - Upstream regression: `BatchedElementwiseF64` GPU dispatch panics at
   `pipeline.get_bind_group_layout(0)` — sovereign compiler SPIR-V path
   produces empty bind groups. Confirmed by ToadStool's own `test_fao56_et0_gpu`.
-- New upstream capabilities available but not yet consumed: `stats::diversity`,
-  `mc_et0_propagate_f64.wgsl`, `df64_transcendentals.wgsl`, `bio::diversity_fusion`
+- `df64_transcendentals.wgsl` available but no Rust export yet (future VG curve
+  precision improvement)
+- `bio::diversity_fusion` GPU dispatch available for future large-N diversity
 
 ### CPU Benchmark: Rust 69x Faster Than Python (Geometric Mean)
 

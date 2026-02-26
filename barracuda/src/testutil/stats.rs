@@ -202,6 +202,39 @@ pub fn std_deviation(data: &[f64]) -> crate::error::Result<f64> {
         .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))
 }
 
+// ── Upstream re-exports (`ToadStool` S64) ────────────────────────────
+
+/// Hit rate: fraction of entries where observed and modeled agree on threshold
+/// exceedance. Delegates to `barracuda::stats::hit_rate`.
+#[must_use]
+pub fn hit_rate(observed: &[f64], simulated: &[f64], threshold: f64) -> f64 {
+    barracuda::stats::hit_rate(observed, simulated, threshold)
+}
+
+/// Arithmetic mean. Delegates to `barracuda::stats::mean`.
+#[must_use]
+pub fn mean(values: &[f64]) -> f64 {
+    barracuda::stats::mean(values)
+}
+
+/// Interpolated percentile (0–100 scale). Delegates to `barracuda::stats::percentile`.
+#[must_use]
+pub fn percentile(values: &[f64], p: f64) -> f64 {
+    barracuda::stats::percentile(values, p)
+}
+
+/// CPU dot product: Σ aᵢ·bᵢ. Delegates to `barracuda::stats::dot`.
+#[must_use]
+pub fn dot(a: &[f64], b: &[f64]) -> f64 {
+    barracuda::stats::dot(a, b)
+}
+
+/// CPU L2 norm: sqrt(Σ xᵢ²). Delegates to `barracuda::stats::l2_norm`.
+#[must_use]
+pub fn l2_norm(xs: &[f64]) -> f64 {
+    barracuda::stats::l2_norm(xs)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -505,5 +538,46 @@ mod tests {
             std_deviation(&data).is_err(),
             "single element should return Err"
         );
+    }
+
+    // ── Upstream re-exports (S64) ────────────────────────────────────────
+
+    #[test]
+    fn hit_rate_perfect() {
+        let obs = [0.0, 5.0, 0.0, 3.0];
+        assert!((hit_rate(&obs, &obs, 0.1) - 1.0).abs() < 1e-12);
+    }
+
+    #[test]
+    fn hit_rate_known_mismatch() {
+        let obs = [0.0, 5.0, 0.0, 3.0];
+        let sim = [0.0, 4.0, 0.0, 0.0];
+        assert!((hit_rate(&obs, &sim, 0.1) - 0.75).abs() < 1e-12);
+    }
+
+    #[test]
+    fn mean_known() {
+        assert!((mean(&[2.0, 4.0, 6.0]) - 4.0).abs() < 1e-12);
+    }
+
+    #[test]
+    fn mean_empty() {
+        assert!(mean(&[]).abs() < 1e-12);
+    }
+
+    #[test]
+    fn percentile_median() {
+        let vals = [1.0, 2.0, 3.0, 4.0, 5.0];
+        assert!((percentile(&vals, 50.0) - 3.0).abs() < 1e-12);
+    }
+
+    #[test]
+    fn dot_known() {
+        assert!((dot(&[1.0, 2.0, 3.0], &[4.0, 5.0, 6.0]) - 32.0).abs() < 1e-12);
+    }
+
+    #[test]
+    fn l2_norm_known() {
+        assert!((l2_norm(&[3.0, 4.0]) - 5.0).abs() < 1e-12);
     }
 }

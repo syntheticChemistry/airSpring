@@ -25,6 +25,6 @@ pub mod stats;
 pub use bootstrap::bootstrap_rmse;
 pub use generators::generate_synthetic_iot_data;
 pub use stats::{
-    coefficient_of_determination, index_of_agreement, mbe, nash_sutcliffe, pearson_r, r_squared,
-    rmse, spearman_r, std_deviation, variance,
+    coefficient_of_determination, dot, hit_rate, index_of_agreement, l2_norm, mbe, mean,
+    nash_sutcliffe, pearson_r, percentile, r_squared, rmse, spearman_r, std_deviation, variance,
 };

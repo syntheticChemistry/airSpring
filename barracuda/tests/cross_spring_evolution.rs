@@ -485,3 +485,244 @@ fn benchmark_isotherm_nm_throughput_reasonable() {
          neuralSpring optimize::nelder_mead powers the simplex search"
     );
 }
+
+// ── §7 — ToadStool S64: Cross-Spring Stats Absorption ─────────────────
+
+#[test]
+fn s64_stats_rmse_delegates_to_upstream() {
+    let obs = [1.0, 2.0, 3.0, 4.0, 5.0];
+    let sim = [1.1, 2.1, 2.9, 4.2, 4.8];
+    let local = airspring_barracuda::testutil::rmse(&obs, &sim);
+    let upstream = barracuda::stats::rmse(&obs, &sim);
+    assert!(
+        (local - upstream).abs() < f64::EPSILON,
+        "airSpring testutil::rmse should delegate to upstream barracuda::stats::rmse; \
+         local={local} upstream={upstream} — stats absorbed in S64"
+    );
+}
+
+#[test]
+fn s64_stats_mbe_delegates_to_upstream() {
+    let obs = [5.0, 6.0, 7.0];
+    let sim = [4.0, 5.5, 7.5];
+    let local = airspring_barracuda::testutil::mbe(&obs, &sim);
+    let upstream = barracuda::stats::mbe(&obs, &sim);
+    assert!(
+        (local - upstream).abs() < f64::EPSILON,
+        "airSpring testutil::mbe should delegate to upstream; \
+         local={local} upstream={upstream} — stats absorbed in S64"
+    );
+}
+
+#[test]
+fn s64_stats_new_reexports_from_upstream() {
+    let data = [1.0, 2.0, 3.0, 4.0, 5.0];
+    let m = airspring_barracuda::testutil::mean(&data);
+    assert!(
+        (m - 3.0).abs() < 1e-12,
+        "mean re-export from barracuda::stats::mean (S64 absorption)"
+    );
+
+    let d = airspring_barracuda::testutil::dot(&data, &data);
+    assert!(
+        (d - 55.0).abs() < 1e-12,
+        "dot re-export from barracuda::stats::dot (S64 absorption)"
+    );
+
+    let l2 = airspring_barracuda::testutil::l2_norm(&data);
+    assert!(
+        (l2 - 55.0_f64.sqrt()).abs() < 1e-12,
+        "l2_norm re-export from barracuda::stats::l2_norm (S64 absorption)"
+    );
+}
+
+// ── §8 — wetSpring S64: Diversity Metrics for Agroecology ─────────────
+
+#[test]
+fn s64_wetspring_diversity_shannon_for_cover_crops() {
+    use airspring_barracuda::eco::diversity;
+
+    let cover_mix = [120.0, 85.0, 45.0, 30.0, 20.0];
+    let monoculture = [300.0, 0.0, 0.0, 0.0, 0.0];
+
+    let h_mix = diversity::shannon(&cover_mix);
+    let h_mono = diversity::shannon(&monoculture);
+
+    assert!(
+        h_mix > 1.0 && h_mono < 0.01,
+        "wetSpring diversity::shannon wired for agroecology: \
+         5-species cover crop mix H'={h_mix} > monoculture H'={h_mono}"
+    );
+}
+
+#[test]
+fn s64_wetspring_diversity_bray_curtis_field_comparison() {
+    use airspring_barracuda::eco::diversity;
+
+    let field_a = [120.0, 85.0, 45.0, 30.0, 20.0];
+    let field_b = [90.0, 100.0, 55.0, 25.0, 30.0];
+    let field_c = [0.0, 0.0, 0.0, 0.0, 300.0];
+
+    let bc_similar = diversity::bray_curtis(&field_a, &field_b);
+    let bc_different = diversity::bray_curtis(&field_a, &field_c);
+
+    assert!(
+        bc_similar < bc_different,
+        "wetSpring Bray-Curtis: similar fields BC={bc_similar} < different fields BC={bc_different}"
+    );
+}
+
+#[test]
+fn s64_wetspring_alpha_diversity_comprehensive() {
+    use airspring_barracuda::eco::diversity;
+
+    let counts = [120.0, 85.0, 45.0, 30.0, 20.0];
+    let ad = diversity::alpha_diversity(&counts);
+
+    assert!((ad.observed - 5.0).abs() < 1e-10, "observed species = 5");
+    assert!(ad.shannon > 1.0, "Shannon H' > 1.0 for 5-species mix");
+    assert!(ad.simpson > 0.5, "Simpson D > 0.5 for multi-species");
+    assert!(ad.chao1 >= 5.0, "Chao1 >= observed");
+    assert!(
+        (0.0..=1.0).contains(&ad.evenness),
+        "Pielou J' in [0,1]: wetSpring bio diversity absorbed in S64"
+    );
+}
+
+// ── §9 — groundSpring S64: MC ET₀ Uncertainty Propagation ────────────
+
+#[test]
+fn s64_groundspring_mc_et0_uncertainty_bands() {
+    use airspring_barracuda::eco::evapotranspiration::DailyEt0Input;
+    use airspring_barracuda::gpu::mc_et0::{mc_et0_cpu, Et0Uncertainties};
+
+    let input = DailyEt0Input {
+        tmin: 12.3,
+        tmax: 21.5,
+        tmean: Some(16.9),
+        solar_radiation: 22.07,
+        wind_speed_2m: 2.078,
+        actual_vapour_pressure: 1.409,
+        elevation_m: 100.0,
+        latitude_deg: 50.80,
+        day_of_year: 187,
+    };
+
+    let result = mc_et0_cpu(&input, &Et0Uncertainties::default(), 2000, 42);
+
+    assert!(
+        result.et0_std > 0.05 && result.et0_std < 2.0,
+        "MC ET₀ should show measurable uncertainty: σ={} — \
+         groundSpring mc_et0_propagate_f64.wgsl absorbed in S64",
+        result.et0_std
+    );
+    assert!(
+        result.et0_p05 < result.et0_central && result.et0_p95 > result.et0_central,
+        "90% CI [{}, {}] should bracket central ET₀={}",
+        result.et0_p05,
+        result.et0_p95,
+        result.et0_central
+    );
+}
+
+#[test]
+fn s64_groundspring_mc_et0_deterministic_seed() {
+    use airspring_barracuda::eco::evapotranspiration::DailyEt0Input;
+    use airspring_barracuda::gpu::mc_et0::{mc_et0_cpu, Et0Uncertainties};
+
+    let input = DailyEt0Input {
+        tmin: 15.0,
+        tmax: 28.0,
+        tmean: None,
+        solar_radiation: 18.5,
+        wind_speed_2m: 1.5,
+        actual_vapour_pressure: 1.2,
+        elevation_m: 200.0,
+        latitude_deg: 35.0,
+        day_of_year: 200,
+    };
+
+    let r1 = mc_et0_cpu(&input, &Et0Uncertainties::default(), 500, 99);
+    let r2 = mc_et0_cpu(&input, &Et0Uncertainties::default(), 500, 99);
+    assert!(
+        (r1.et0_mean - r2.et0_mean).abs() < f64::EPSILON,
+        "MC ET₀ must be deterministic for same seed — \
+         mirrors GPU kernel's xoshiro128** reproducibility"
+    );
+}
+
+// ── §10 — Cross-Spring Benchmark: Modern System Throughput ────────────
+
+#[test]
+fn benchmark_diversity_throughput() {
+    use airspring_barracuda::eco::diversity;
+    use std::time::Instant;
+
+    let counts: Vec<f64> = (1..=100).map(|i| f64::from(i) * 1.5).collect();
+
+    let start = Instant::now();
+    for _ in 0..10_000 {
+        let _ = diversity::alpha_diversity(&counts);
+    }
+    let elapsed = start.elapsed();
+
+    assert!(
+        elapsed.as_millis() < 2000,
+        "10K alpha diversity computations (100 species) should complete in <2s; \
+         wetSpring bio/diversity.rs absorbed in S64, took {elapsed:?}"
+    );
+}
+
+#[test]
+fn benchmark_mc_et0_throughput() {
+    use airspring_barracuda::eco::evapotranspiration::DailyEt0Input;
+    use airspring_barracuda::gpu::mc_et0::{mc_et0_cpu, Et0Uncertainties};
+    use std::time::Instant;
+
+    let input = DailyEt0Input {
+        tmin: 12.3,
+        tmax: 21.5,
+        tmean: Some(16.9),
+        solar_radiation: 22.07,
+        wind_speed_2m: 2.078,
+        actual_vapour_pressure: 1.409,
+        elevation_m: 100.0,
+        latitude_deg: 50.80,
+        day_of_year: 187,
+    };
+
+    let start = Instant::now();
+    let result = mc_et0_cpu(&input, &Et0Uncertainties::default(), 10_000, 42);
+    let elapsed = start.elapsed();
+
+    assert!(
+        elapsed.as_millis() < 5000,
+        "10K MC ET₀ samples should complete in <5s (CPU mirror of \
+         groundSpring mc_et0_propagate_f64.wgsl); took {elapsed:?}"
+    );
+    assert_eq!(result.n_samples, 10_000);
+}
+
+#[test]
+fn benchmark_stats_reexport_throughput() {
+    use airspring_barracuda::testutil;
+    use std::time::Instant;
+
+    let a: Vec<f64> = (0..10_000).map(f64::from).collect();
+    let b: Vec<f64> = (0..10_000).map(|i| f64::from(i) + 0.1).collect();
+
+    let start = Instant::now();
+    for _ in 0..1_000 {
+        let _ = testutil::rmse(&a, &b);
+        let _ = testutil::mbe(&a, &b);
+        let _ = testutil::dot(&a, &b);
+        let _ = testutil::l2_norm(&a);
+    }
+    let elapsed = start.elapsed();
+
+    assert!(
+        elapsed.as_millis() < 2000,
+        "4K metric computations (10K-element vectors) should complete in <2s; \
+         upstream delegation (S64) should not add overhead; took {elapsed:?}"
+    );
+}

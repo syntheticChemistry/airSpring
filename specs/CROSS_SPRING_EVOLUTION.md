@@ -8,8 +8,20 @@ ToadStool's BarraCuda runtime contains **774 WGSL shaders** across 41+ categorie
 built through **46 cross-spring absorptions** (sessions S51-S57). Each Spring
 contributes domain-specific GPU primitives that benefit the entire ecosystem.
 
-airSpring uses **5 shared shaders** directly and contributed **3 critical fixes**
-(TS-001, TS-003, TS-004) that improved precision and stability for all Springs.
+airSpring uses **5 shared shaders** directly, contributed **3 critical fixes**
+(TS-001, TS-003, TS-004), and had its **stats metrics absorbed upstream** (S64).
+
+### S60–S65 Cross-Spring Absorption Wave (Feb 2026)
+
+| Session | What Was Absorbed | Origin Spring | airSpring Impact |
+|---------|-------------------|---------------|------------------|
+| S60 | DF64 FMA + transcendentals | hotSpring | `df64_core.wgsl` now uses FMA (2 ops vs 17); `df64_transcendentals.wgsl` adds sin/cos/exp/log in double-double |
+| S64 | Stats metrics (rmse, mbe, NSE, IA, R², hit\_rate, mean, percentile) | **airSpring** → upstream | Our `testutil::stats` functions now live in `barracuda::stats::metrics` |
+| S64 | Ecological diversity (Shannon, Simpson, Chao1, Bray-Curtis, rarefaction) | wetSpring | New `eco::diversity` module wired in airSpring |
+| S64 | MC ET₀ propagation shader | groundSpring → `ToadStool` | `mc_et0_propagate_f64.wgsl` available for GPU uncertainty bands |
+| S64 | Bio GPU ops (diversity\_fusion, batched\_multinomial) | wetSpring | Available for future large-scale diversity GPU dispatch |
+| S61-63 | Sovereign compiler (SPIR-V passthrough) | `ToadStool` core | Regression: breaks `BatchedElementwiseF64` GPU dispatch (P0 fix needed) |
+| S65 | Smart refactoring + dead code removal | `ToadStool` core | Cleaner upstream codebase |
 
 ---
 
@@ -80,14 +92,19 @@ Key contributions to ecosystem: Multi-head attention decomposition, mixed-hardwa
 inference infrastructure, and the `nelder_mead` optimizer. airSpring's `gpu::isotherm`
 module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 
-### airSpring — Precision Agriculture (5 shaders used, 3 fixes contributed)
+### airSpring — Precision Agriculture (6 shader families used, 3 fixes contributed, stats absorbed)
 
 **Shaders used:**
-- `bray_curtis_f64` — sensor similarity metrics
+- `bray_curtis_f64` — sensor similarity + agroecological diversity (via `eco::diversity`)
 - `kriging_f64` — soil moisture spatial interpolation
 - `batched_elementwise_f64` — ET₀ and water balance batch GPU
 - `fused_map_reduce_f64` — seasonal aggregation statistics
 - `moving_window.wgsl` — IoT sensor stream smoothing
+- `mc_et0_propagate_f64.wgsl` — Monte Carlo ET₀ uncertainty (GPU kernel available, CPU wired)
+
+**Functions absorbed upstream (S64):**
+- `rmse`, `mbe`, `nash_sutcliffe`, `r_squared`, `index_of_agreement` → `barracuda::stats::metrics`
+- airSpring's `testutil::stats::rmse` and `mbe` now delegate to upstream
 
 **Fixes contributed upstream:**
 - **TS-001** `pow_f64`: fractional exponents returned 0.0 → fixed with
@@ -110,6 +127,9 @@ module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 | `moving_window` | | x | | x | Environmental monitoring & IoT stream smoothing |
 | `math_f64` | x | x | x | x | Shared f64 math; TS-003 `acos` fix from airSpring |
 | `df64_core` | x | x | x | x | Double-float precision foundation (hotSpring origin) |
+| `df64_transcendentals` | x | | | *(future)* | sin/cos/exp/log in double-double — hotSpring S60 |
+| `mc_et0_propagate_f64` | | | | x | MC uncertainty propagation — groundSpring → S64 |
+| `diversity_fusion` | | x | x | *(future)* | Fused Shannon+Simpson+evenness GPU dispatch |
 
 ---
 
@@ -130,6 +150,9 @@ module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 | `testutil::r_squared` | `stats::pearson_correlation` | Shared | WIRED |
 | `testutil::spearman_r` | `stats::spearman_correlation` | Shared | WIRED |
 | `testutil::bootstrap_rmse` | `stats::bootstrap_ci` | Shared | WIRED |
+| `testutil::{hit_rate,mean,percentile,dot,l2_norm}` | `stats::metrics::*` | airSpring → S64 absorption | **WIRED** (new, v0.4.3) |
+| `eco::diversity::*` | `stats::diversity::*` | wetSpring → S64 absorption | **WIRED** (new, v0.4.3) |
+| `gpu::mc_et0::mc_et0_cpu` | `mc_et0_propagate_f64.wgsl` (CPU mirror) | groundSpring → S64 | **WIRED** (new, v0.4.3) |
 
 ---
 
@@ -152,6 +175,8 @@ module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 | Feb 25 | airSpring v0.4.0: Richards + isotherm + 60yr WB | `gpu::richards` wired to pde::richards, `gpu::isotherm` wired to optimize::nelder_mead, 75/75 cross-validation |
 | Feb 25 | airSpring v0.4.1: ToadStool S52-S62 sync | multi_start_nelder_mead wired, global isotherm fitting (LHS), 323 tests |
 | Feb 25 | airSpring v0.4.2: GPU integration + benchmarks | Richards/isotherm GPU integration tests, cross-spring benchmark suite, 328 tests |
+| Feb 26 | ToadStool S60-S65 pulled | 234 files changed, df64 FMA, stats absorption, diversity, MC ET₀, sovereign compiler regression |
+| Feb 26 | airSpring v0.4.3: Modern rewiring | Stats delegate to upstream, `eco::diversity` wired (wetSpring), `gpu::mc_et0` wired (groundSpring), 571 tests |
 
 ---
 
@@ -162,13 +187,14 @@ module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 | **hotSpring** | 56 | df64 core, pow/exp/log/trig f64 — enables VG retention, atmospheric pressure | TS-001 pow_f64 fix (airSpring uncovered) |
 | **wetSpring** | 25 | kriging_f64, fused_map_reduce, moving_window, ridge_regression | TS-004 reduce buffer fix (airSpring stabilized for all) |
 | **neuralSpring** | 20 | nelder_mead, multi_start_nelder_mead, ValidationHarness | TS-003 acos precision fix (airSpring found boundary issue) |
-| **airSpring** | — | Domain consumer | Richards PDE → absorbed upstream (S40) |
+| **groundSpring** | — | MC ET₀ propagation shader (S64), uncertainty quantification | — |
+| **airSpring** | — | Domain consumer | Richards PDE (S40), stats metrics (S64) absorbed upstream |
 
-774 WGSL shaders in ToadStool, 46 cross-spring absorptions (S51-S57). airSpring uses 5 shader families + contributed 3 critical fixes. Zero shader duplication.
+774 WGSL shaders in ToadStool, 46+ cross-spring absorptions (S51-S65). airSpring uses 6 shader families + contributed 3 critical fixes + stats metrics absorbed upstream. Zero shader duplication.
 
 ---
 
-## Benchmark Summary (CPU baselines, `--release`, v0.4.2)
+## Benchmark Summary (CPU baselines, `--release`, v0.4.3)
 
 | Operation | N | Time (µs) | Throughput | Provenance |
 |-----------|---|-----------|------------|------------|
@@ -182,6 +208,9 @@ module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 | Isotherm (linearized) | 9 pts | 0.1 | 8.3M fits/sec | airSpring eco::isotherm |
 | Isotherm (NM 1-start) | 9 pts | 5.7 | 175K fits/sec | neuralSpring nelder_mead |
 | Isotherm (NM 8×LHS) | 9 pts | 23.5 | 42.5K fits/sec | neuralSpring multi_start_nelder_mead |
+| **Alpha diversity** | **100 species** | **< 200** | **> 50K evals/sec** | **wetSpring S64 diversity absorption** |
+| **MC ET₀ (uncertainty)** | **10K samples** | **< 5,000,000** | **> 2K propagations/sec** | **groundSpring S64 mc_et0_propagate** |
+| **Stats delegation** | **10K vectors ×4** | **< 2,000,000** | **> 2K metric/sec** | **airSpring→upstream S64 absorption** |
 
 ---
 

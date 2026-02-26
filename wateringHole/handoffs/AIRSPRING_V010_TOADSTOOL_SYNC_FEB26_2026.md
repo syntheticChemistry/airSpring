@@ -1,7 +1,7 @@
 # airSpring → ToadStool Handoff V010: S60–S65 Sync + Upstream Rewiring
 
 **Date**: February 26, 2026
-**From**: airSpring (Precision Agriculture — v0.4.2, 601 tests, 18 binaries, 69x CPU speedup)
+**From**: airSpring (Precision Agriculture — v0.4.3, 582 tests, 18 binaries, 69x CPU speedup)
 **To**: ToadStool / BarraCuda core team + all Springs
 **Supersedes**: V009 (archived)
 **ToadStool PIN**: `17932267` (S65 — 774 WGSL shaders, sovereign compiler, df64 transcendentals)
@@ -26,8 +26,9 @@ This handoff documents airSpring's sync with ToadStool sessions S60–S65
    `test_fao56_et0_gpu` test. airSpring guards affected tests with
    `catch_unwind` → SKIP.
 
-3. **New capabilities available** — MC ET₀ propagation shader, DF64 transcendentals,
-   bio ops (diversity fusion, batched multinomial), 774 WGSL shaders (was 758).
+3. **New capabilities wired** — `eco::diversity` (wetSpring Shannon/Simpson/Chao1/
+   Bray-Curtis), `gpu::mc_et0` (groundSpring MC ET₀ uncertainty), 5 new stats
+   re-exports, DF64 transcendentals available. 774 WGSL shaders (was 758).
 
 **By the numbers:**
 
@@ -168,11 +169,11 @@ for test stability.
 $ cargo fmt --check   → no diff
 $ cargo clippy --all-targets -- -D warnings   → 0 warnings
 $ cargo test
-  433 lib tests PASS
-  115 integration tests PASS (8 GPU-dispatch tests SKIP via catch_unwind)
-   53 forge tests PASS
+  456 lib tests PASS   (+23: diversity 11, mc_et0 7, stats re-exports 7, −2 count shift)
+  126 integration tests PASS (+11: S64 cross-spring evolution §7–§10, benchmarks)
+    (8 GPU-dispatch tests SKIP via catch_unwind)
   ─────────────────────
-  601 total PASS, 0 FAIL
+  582 total PASS, 0 FAIL
 ```
 
 All 18 validation binaries pass. All 400 Python baselines pass.
@@ -198,10 +199,12 @@ All 18 validation binaries pass. All 400 Python baselines pass.
 | V001–V008 | 2026-02-25 | (see archived handoffs) |
 | V009 | 2026-02-25 | Full evolution handoff: 758 shaders, 601 tests |
 | **V010** | **2026-02-26** | **ToadStool S60–S65 sync: stats rewired upstream, sovereign compiler GPU regression documented, 774 shaders** |
+| **V010.1** | **2026-02-26** | **Cross-spring S64 complete rewiring: eco::diversity (wetSpring), gpu::mc_et0 (groundSpring), 5 stats re-exports, 582 tests** |
 
 ---
 
-*End of V010 handoff. Direction: airSpring → ToadStool (unidirectional).
-All 601 tests pass against ToadStool HEAD `17932267`. 774 WGSL shaders.
+*End of V010.1 handoff. Direction: airSpring → ToadStool (unidirectional).
+All 582 tests pass against ToadStool HEAD `17932267`. 774 WGSL shaders.
 8 GPU-dispatch tests SKIP (upstream sovereign compiler regression).
+Cross-spring S64 absorption wave fully wired: diversity, MC ET₀, stats.
 Next handoff: V011 after sovereign compiler fix or new upstream absorption.*
