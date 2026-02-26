@@ -16,11 +16,13 @@
 //! - [`eco::water_balance`] — Field-scale water budget (standalone + stateful APIs)
 //! - [`eco::richards`] — 1D Richards equation solver (van Genuchten-Mualem hydraulics)
 //!
-//! # GPU Acceleration (all `ToadStool` issues RESOLVED — S54, Feb 2026)
+//! # GPU Acceleration (all `ToadStool` issues RESOLVED — S54, Feb 2026; S68 universal precision)
 //!
 //! Cross-spring shader provenance: hotSpring precision math (`pow_f64`,
-//! `acos_f64`, `math_f64.wgsl`), wetSpring bio primitives (`moving_window`,
-//! `kriging_f64`), neuralSpring optimizer (`nelder_mead`, `ValidationHarness`).
+//! `acos_f64`, `math_f64.wgsl`, `df64_core.wgsl`), wetSpring bio primitives
+//! (`moving_window`, `kriging_f64`, Shannon/Simpson diversity), neuralSpring
+//! optimizer (`nelder_mead`, `ValidationHarness`), groundSpring uncertainty
+//! (`mc_et0_propagate_f64`). S68: all 334+ shaders f64-canonical.
 //!
 //! - [`gpu::et0`] — **GPU-first** batched ET₀ via `BatchedElementwiseF64::fao56_et0_batch()`
 //! - [`gpu::water_balance`] — **GPU-step** + CPU season via `BatchedElementwiseF64::water_balance_batch()`
@@ -42,7 +44,7 @@
 //! - [`tolerances`] — Centralized validation tolerances (`barracuda::tolerances` pattern, S52)
 //! - [`testutil`] — Synthetic data generators, `IA`, `NSE`, `RMSE`, `MBE`, R², Spearman, bootstrap CI
 //!
-//! # `BarraCuda` Integration (`ToadStool` S65, 774 WGSL shaders)
+//! # `BarraCuda` Integration (`ToadStool` S68, 774+ WGSL shaders, universal f64 precision)
 //!
 //! Directly uses `barracuda` primitives for:
 //! - `tolerances::Tolerance` + `check()` → centralized validation (S52, neuralSpring pattern)

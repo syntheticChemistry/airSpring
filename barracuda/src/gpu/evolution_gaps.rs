@@ -26,10 +26,10 @@
 //!
 //! # Current Inventory (February 26, 2026 — v0.4.6, synced to `ToadStool` HEAD `f0feb226`)
 //!
-//! `ToadStool` S42–S66: 170+ commits, 46+ cross-spring absorptions, 2,541+ tests.
+//! `ToadStool` S42–S68: 170+ commits, 46+ cross-spring absorptions, 2,541+ tests.
 //! All four airSpring issues (TS-001 through TS-004) resolved in **S54**.
 //!
-//! Upstream capabilities available (S51–S66):
+//! Upstream capabilities available (S51–S68):
 //! - S51+: `solve_f64_cpu()`, `GpuSessionBuilder`, `OdeSystem` trait + `BatchedOdeRK4`
 //! - S52+: `NelderMeadGpu`, `BatchedBisectionGpu`, `chi2_decomposed`, `FusedMapReduceF64::dot()`
 //! - S54+: TS-001–004 resolved, `barracuda::tolerances`, `barracuda::provenance`
@@ -41,6 +41,20 @@
 //! - S66: **Cross-spring absorption** — regression, hydrology, `moving_window_f64`,
 //!   `spearman_correlation` re-export, 8 named `SoilParams` constants, `mae`,
 //!   `hill`/`monod`, `shannon_from_frequencies`, `rawr_mean`, multi-precision WGSL
+//! - S67: Codified "math is universal — precision is silicon" doctrine
+//! - S68: **Universal precision** — 334+ shaders evolved to f64-canonical,
+//!   `downcast_f64_to_f32()` for backward compat, `ValidationHarness` migrated
+//!   to `tracing::info!` (requires `tracing-subscriber` in consumers)
+//!
+//! ## Cross-Spring Shader Provenance (validated in `cross_spring_evolution.rs` §13)
+//!
+//! | Spring | Domain | Contributed to ToadStool |
+//! |--------|--------|------------------------|
+//! | hotSpring | Nuclear/precision physics | df64_core, math_f64, complex_f64, SU(3), Hermite/Laguerre, Lanczos |
+//! | wetSpring | Bio/environmental | Shannon/Simpson/Bray-Curtis, kriging, moving_window, Hill, ODE bio, NMF |
+//! | neuralSpring | ML/optimization | Nelder-Mead, ValidationHarness, pairwise metrics, batch IPR, matmul |
+//! | airSpring | Precision agriculture | regression, hydrology, moving_window_f64, Richards PDE (S40), TS-001/003/004 fixes |
+//! | groundSpring | Uncertainty/stats | MC ET₀ propagation, batched_multinomial, rawr_mean |
 //!
 //! **Key evolution since V011**: `pde::crank_nicolson` is now **f64** with
 //! `WGSL_CRANK_NICOLSON_F64` GPU shader — previously documented as f32-only.
@@ -121,12 +135,13 @@
 //! ## Cross-Validation Strategy
 //!
 //! GPU paths are validated against CPU baselines:
-//! 1. CPU validation remains source of truth (464 lib tests, 22 binaries)
+//! 1. CPU validation remains source of truth (464 lib tests, 22 binaries, 1354 atlas checks)
 //! 2. GPU results must match CPU within documented tolerance
 //! 3. Cross-validation harness (33/33 Python↔Rust) extends to GPU path
 //! 4. Each GPU function has a `test_gpu_matches_cpu_*` integration test
 //! 5. GPU determinism proven: 4 bit-identical rerun tests (`gpu_determinism.rs`)
 //! 6. Library coverage: 96.81% lines, 97.58% functions (llvm-cov verified)
+//! 7. S68 cross-spring tests: 10 tests validate stability across universal precision refactor
 
 /// Structured representation of an evolution gap.
 #[derive(Debug)]

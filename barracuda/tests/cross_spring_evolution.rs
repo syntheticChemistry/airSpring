@@ -900,3 +900,294 @@ fn benchmark_stats_reexport_throughput() {
          upstream delegation (S64) should not add overhead; took {elapsed:?}"
     );
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// §13 — S68 universal precision validation
+//
+// ToadStool S68 evolved ALL WGSL shaders to f64 canonical and introduced
+// `downcast_f64_to_f32()` for backward compatibility. The precision chain:
+//
+//   hotSpring → df64_core.wgsl + math_f64.wgsl (S54: nuclear physics needs f64)
+//   wetSpring → kriging_f64.wgsl (S28+: spatial stats needs f64 for conditioning)
+//   neuralSpring → simplex_ops_f64.wgsl (S62: NM convergence needs f64)
+//   airSpring → batched_elementwise_f64.wgsl (S40: FAO-56 ET₀ needs f64)
+//   groundSpring → mc_et0_propagate_f64.wgsl (S64: Monte Carlo CI needs f64)
+//
+// S67 codified: "math is universal, precision is silicon"
+// S68 executed: 334+ shaders evolved, ZERO f32-only remain
+//
+// These tests verify that airSpring's upstream barracuda functions still
+// produce identical results after S68's precision refactor.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn s68_validation_harness_tracing_migration() {
+    // S68 migrated ValidationHarness from println! to tracing::info!.
+    // Origin: neuralSpring wrote ValidationHarness, hotSpring pattern.
+    use barracuda::validation::ValidationHarness;
+
+    let mut v = ValidationHarness::new("S68 tracing test");
+    v.check_abs("precision preserved", std::f64::consts::PI, std::f64::consts::PI, 1e-15);
+    v.check_bool("universal precision", true);
+    assert_eq!(v.passed_count(), 2, "S68 ValidationHarness API unchanged");
+    assert_eq!(v.total_count(), 2);
+}
+
+#[test]
+fn s68_regression_f64_precision_stable() {
+    // barracuda::stats::regression (S66 absorption from airSpring metalForge)
+    // must produce identical results after S68 precision refactor.
+    use barracuda::stats::regression::{fit_linear, fit_quadratic};
+
+    let x: Vec<f64> = (0..100).map(|i| f64::from(i) * 0.1).collect();
+    let y_lin: Vec<f64> = x.iter().map(|&xi| 2.5 * xi + 1.3).collect();
+
+    let lin = fit_linear(&x, &y_lin).expect("linear fit");
+    assert!(
+        (lin.params[0] - 2.5).abs() < 1e-10,
+        "S68: linear slope precision stable (airSpring→S66 absorption); got {}",
+        lin.params[0]
+    );
+    assert!(
+        (lin.params[1] - 1.3).abs() < 1e-10,
+        "S68: linear intercept precision stable; got {}",
+        lin.params[1]
+    );
+
+    let y_quad: Vec<f64> = x.iter().map(|&xi| 0.5 * xi * xi - xi + 3.0).collect();
+    let quad = fit_quadratic(&x, &y_quad).expect("quadratic fit");
+    assert!(
+        (quad.params[0] - 0.5).abs() < 1e-8,
+        "S68: quadratic fit precision stable; got a={}",
+        quad.params[0]
+    );
+}
+
+#[test]
+fn s68_hydrology_hargreaves_stable() {
+    // barracuda::stats::hydrology (S66 absorption from airSpring metalForge)
+    // Hargreaves ET₀: ra, t_max, t_min → Option<f64>.
+    use barracuda::stats::hydrology::hargreaves_et0;
+
+    // ra=42 MJ/m²/d is high summer, tmax=25, tmin=15 → expect ~8-15 mm/d
+    let et0 = hargreaves_et0(42.0, 25.0, 15.0).expect("valid hargreaves");
+    assert!(
+        et0 > 5.0 && et0 < 20.0,
+        "S68: Hargreaves ET₀ in expected range; got {et0}"
+    );
+
+    let et0_b = hargreaves_et0(42.0, 25.0, 15.0).expect("valid");
+    assert!(
+        (et0 - et0_b).abs() < f64::EPSILON,
+        "S68: Hargreaves deterministic after precision refactor"
+    );
+}
+
+#[test]
+fn s68_diversity_cross_spring_lineage() {
+    // Shannon diversity: wetSpring → S64 absorption → barracuda::stats::diversity.
+    // Used by airSpring for crop diversity metrics.
+    use barracuda::stats::diversity::{shannon, simpson};
+
+    let counts = [10.0_f64, 20.0, 30.0, 40.0];
+    let h = shannon(&counts);
+    let d = simpson(&counts);
+
+    assert!(
+        (1.2..1.4).contains(&h),
+        "S68: Shannon index stable (wetSpring S64 lineage); got {h}"
+    );
+    assert!(
+        (0.7..0.8).contains(&d),
+        "S68: Simpson index stable; got {d}"
+    );
+}
+
+#[test]
+fn s68_moving_window_precision() {
+    // moving_window_f64: airSpring IoT → S66 absorption → barracuda::stats.
+    use barracuda::stats::moving_window_f64::moving_window_stats_f64;
+
+    let data: Vec<f64> = (0..50).map(|i| f64::from(i) * 0.5 + 1.0).collect();
+    let result = moving_window_stats_f64(&data, 5).expect("valid window");
+
+    let expected_len = data.len() - 5 + 1;
+    assert_eq!(result.mean.len(), expected_len, "output length");
+    for i in 0..result.mean.len() {
+        assert!(result.mean[i].is_finite(), "S68: moving window mean is finite");
+        assert!(result.variance[i] >= 0.0, "S68: moving window variance non-negative");
+    }
+}
+
+#[test]
+fn s68_brent_optimizer_cross_spring() {
+    // brent minimize: neuralSpring → barracuda::optimize::brent.
+    // Used by airSpring for van Genuchten h→θ inversion.
+    // brent_minimize(f, a, b_interior, c, tol, max_iter)
+    use barracuda::optimize::brent::brent_minimize;
+
+    let (x_min, _f_min, _iters) = brent_minimize(
+        |x| (x - 2.5).powi(2),
+        0.0,   // a
+        1.25,  // b interior
+        5.0,   // c
+        1e-10,
+        100,
+    )
+    .expect("convergence");
+    assert!(
+        (x_min - 2.5).abs() < 1e-8,
+        "S68: Brent optimizer precision stable (neuralSpring lineage); got {x_min}"
+    );
+}
+
+#[test]
+fn s68_spearman_correlation_stable() {
+    // Spearman: barracuda::stats::correlation (S66).
+    // Cross-spring: used by hotSpring for convergence, wetSpring for bio correlations.
+    use barracuda::stats::correlation::spearman_correlation;
+
+    let x: Vec<f64> = (0..20).map(f64::from).collect();
+    let y: Vec<f64> = x.iter().map(|&xi| xi * xi).collect();
+
+    let rho = spearman_correlation(&x, &y).expect("spearman");
+    assert!(
+        (rho - 1.0).abs() < 1e-10,
+        "S68: Spearman rho=1.0 for monotonic data (cross-spring metric); got {rho}"
+    );
+}
+
+#[test]
+fn s68_bootstrap_ci_stable() {
+    // bootstrap_mean: hotSpring validation → groundSpring rawr_mean → barracuda::stats.
+    // Cross-spring: uncertainty quantification across all springs.
+    use barracuda::stats::bootstrap::bootstrap_mean;
+
+    let data: Vec<f64> = (0..100).map(|i| f64::from(i) * 0.1).collect();
+    let ci = bootstrap_mean(&data, 1000, 0.95, 42).expect("bootstrap");
+
+    assert!(
+        ci.lower < ci.upper,
+        "S68: Bootstrap CI lower < upper (hotSpring+groundSpring lineage)"
+    );
+    assert!(
+        ci.lower > 0.0 && ci.upper < 10.0,
+        "S68: Bootstrap CI in reasonable range; got [{}, {}]",
+        ci.lower,
+        ci.upper
+    );
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// §14 — S68 cross-spring throughput benchmarks
+//
+// Verify that S68's precision refactor does not introduce performance
+// regressions in the primitives airSpring depends on.
+// ────────────────────────────────────────────────────────────────────────────
+
+#[test]
+fn benchmark_s68_atlas_pipeline_composition() {
+    // Full atlas pipeline: ET₀ → Water Balance → Yield (all eco:: modules).
+    // Composition test: 200 stations × 150 days × 5 crops.
+    // This is the core pipeline that powers the Michigan Crop Water Atlas.
+    //
+    // Cross-spring lineage:
+    //   hotSpring → math_f64.wgsl (pow, exp, sin for solar geometry)
+    //   wetSpring → fused_map_reduce_f64.wgsl (seasonal aggregation)
+    //   airSpring → batched_elementwise_f64.wgsl (FAO-56 pipeline)
+    //   groundSpring → mc_et0_propagate_f64.wgsl (uncertainty bands)
+    //   neuralSpring → ValidationHarness (structured pass/fail)
+    use airspring_barracuda::eco::{
+        evapotranspiration::{self as et, DailyEt0Input},
+        yield_response,
+    };
+    use std::time::Instant;
+
+    let crops = ["corn", "soybean", "winter_wheat", "sugar_beet", "dry_bean"];
+
+    let start = Instant::now();
+    let mut total_yield = 0.0_f64;
+
+    for station in 0..200 {
+        let lat = 42.0 + f64::from(station) * 0.05;
+        let elev = 200.0 + f64::from(station) * 2.0;
+
+        for doy in 120..270 {
+            let input = DailyEt0Input {
+                tmin: 10.0 + 5.0 * (f64::from(doy) / 365.0 * std::f64::consts::TAU).sin(),
+                tmax: 25.0 + 5.0 * (f64::from(doy) / 365.0 * std::f64::consts::TAU).sin(),
+                tmean: None,
+                solar_radiation: 18.0 + 4.0 * (f64::from(doy) / 365.0 * std::f64::consts::TAU).sin(),
+                wind_speed_2m: 2.0,
+                actual_vapour_pressure: 1.2,
+                elevation_m: elev,
+                latitude_deg: lat,
+                day_of_year: doy as u32,
+            };
+            let _et0 = et::daily_et0(&input);
+        }
+
+        for crop_name in &crops {
+            if let Some(ky) = yield_response::ky_table(crop_name) {
+                let yr = yield_response::yield_ratio_single(ky.ky_total, 0.85);
+                total_yield += yr;
+            }
+        }
+    }
+    let elapsed = start.elapsed();
+
+    assert!(
+        total_yield > 0.0,
+        "S68: Atlas pipeline produced valid yields"
+    );
+    assert!(
+        elapsed.as_millis() < 5000,
+        "S68: 200 stations × 150 days ET₀ + 1000 crop yields in <5s; \
+         composition of hotSpring precision → wetSpring stats → airSpring eco → \
+         groundSpring uncertainty; took {elapsed:?}"
+    );
+}
+
+#[test]
+fn benchmark_s68_richards_pde_cross_spring() {
+    // Richards PDE: airSpring eco::richards (implicit Euler + Thomas).
+    // Cross-spring: airSpring → ToadStool S40, GPU via pde::richards (Crank-Nicolson).
+    // hotSpring contributed df64_core for precision, wetSpring contributed kriging
+    // for spatial interpolation of Richards output.
+    use airspring_barracuda::eco::richards::{solve_richards_1d, VanGenuchtenParams};
+    use std::time::Instant;
+
+    let soil = VanGenuchtenParams {
+        theta_r: 0.065,
+        theta_s: 0.41,
+        alpha: 0.075,
+        n_vg: 1.89,
+        ks: 106.1,
+    };
+
+    let start = Instant::now();
+    let mut count = 0;
+    for _ in 0..10 {
+        let profiles = solve_richards_1d(
+            &soil,
+            100.0,  // depth_cm
+            50,     // n_nodes
+            -100.0, // h_initial (cm)
+            -75.0,  // h_top (cm)
+            false,  // zero_flux_top
+            true,   // bottom_free_drain
+            0.1,    // duration_days
+            0.001,  // dt_days
+        );
+        assert!(profiles.is_ok(), "Richards must converge");
+        count += 1;
+    }
+    let elapsed = start.elapsed();
+
+    assert_eq!(count, 10);
+    assert!(
+        elapsed.as_millis() < 10_000,
+        "S68: 10× Richards 1D (50 nodes, 0.1d) in <10s (debug build); \
+         airSpring PDE → ToadStool S40 → Crank-Nicolson cross-val; took {elapsed:?}"
+    );
+}

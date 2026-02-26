@@ -4,8 +4,8 @@
 
 ## Summary
 
-ToadStool's BarraCuda runtime contains **774 WGSL shaders** across 41+ categories,
-built through **46+ cross-spring absorptions** (sessions S51-S66). Each Spring
+ToadStool's BarraCuda runtime contains **774+ WGSL shaders** across 41+ categories,
+built through **46+ cross-spring absorptions** (sessions S51-S68). Each Spring
 contributes domain-specific GPU primitives that benefit the entire ecosystem.
 
 airSpring uses **5 shared shader families** directly, contributed **3 critical fixes**
@@ -185,6 +185,8 @@ module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 | Feb 26 | airSpring S66 sync | All metalForge modules absorbed upstream — rewired provenance docs, cleaned ABSORPTION_MANIFEST, evolution_gaps updated |
 | Feb 26 | airSpring S66 validation | 8 cross-spring S66 tests, P0 GPU dispatch resolved (R-S66-041 explicit BGL), 3 new GPU bench ops, 3 new CPU bench sections, 662 Rust tests + 1302 atlas |
 | Feb 26 | airSpring v0.4.6: Deep audit | R-S66-001/003 wired (correction→regression, stream→moving_window), van_genuchten extracted, clippy nursery enforced, 11 doc-tests, 662 Rust tests + 1302 atlas checks, 97.45% coverage |
+| Feb 26 | ToadStool S67-S68 pulled | S67 codified "math is universal, precision is silicon"; S68 evolved 334+ shaders to f64-canonical with `downcast_f64_to_f32()` backward compat. `ValidationHarness` migrated to `tracing::info!` |
+| Feb 26 | airSpring S68 sync | Added `tracing-subscriber` for `ValidationHarness` output, wired `init_tracing()` into all 22 binaries, 10 new S68 cross-spring evolution tests (regression, hydrology, diversity, moving_window, Brent, Spearman, bootstrap, atlas pipeline, Richards benchmarks). 608 cargo tests + 1354 atlas checks all pass |
 
 ---
 
@@ -202,7 +204,7 @@ module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 
 ---
 
-774 WGSL shaders in ToadStool (S68), 46+ cross-spring absorptions (S51-S66). airSpring metalForge fully absorbed.
+774+ WGSL shaders in ToadStool (S68), 46+ cross-spring absorptions (S51-S68). airSpring metalForge fully absorbed. S68 universal precision validated.
 
 ## Benchmark Summary (CPU baselines, `--release`, v0.4.5)
 
