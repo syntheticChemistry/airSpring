@@ -24,6 +24,10 @@ data/
 *.csv.gz
 *.nc
 
+# Generated benchmark artifacts
+scripts/bench_python_results.json
+scripts/bench_comparison.json
+
 # OS
 .DS_Store
 Thumbs.db

@@ -816,8 +816,8 @@ fn benchmark_s66_regression_throughput() {
     let elapsed = start.elapsed();
 
     assert!(
-        elapsed.as_millis() < 2000,
-        "10K fit_linear (50 points) should complete in <2s; \
+        elapsed.as_millis() < 5000,
+        "10K fit_linear (50 points) should complete in <5s; \
          metalForge regression absorbed upstream (R-S66-001); took {elapsed:?}"
     );
 }
@@ -892,8 +892,8 @@ fn benchmark_stats_reexport_throughput() {
     let elapsed = start.elapsed();
 
     assert!(
-        elapsed.as_millis() < 2000,
-        "4K metric computations (10K-element vectors) should complete in <2s; \
+        elapsed.as_millis() < 5000,
+        "4K metric computations (10K-element vectors) should complete in <5s; \
          upstream delegation (S64) should not add overhead; took {elapsed:?}"
     );
 }

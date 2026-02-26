@@ -10,7 +10,7 @@
 #   pip install -r control/requirements.txt
 #   Exp 015 requires cached weather data:
 #     control/long_term_wb/data/wooster_era5_1960_2023.json
-#   (Generated on first run of: python control/long_term_wb/long_term_water_balance.py
+#   (Generated on first run of: python3 control/long_term_wb/long_term_water_balance.py
 #    which downloads from Open-Meteo ERA5 archive — requires internet.)
 #
 # Benchmark JSON files are hand-authored reference data with provenance
@@ -62,17 +62,17 @@ echo "======================================================================"
 # --- Experiment 001: FAO-56 Penman-Monteith ---
 run_baseline \
     "Exp 001: FAO-56 Penman-Monteith (Python)" \
-    "python control/fao56/penman_monteith.py"
+    "python3 control/fao56/penman_monteith.py"
 
 # --- Experiment 002: Soil Sensor Calibration ---
 run_baseline \
     "Exp 002: Soil Sensor Calibration (Python)" \
-    "python control/soil_sensors/calibration_dong2020.py"
+    "python3 control/soil_sensors/calibration_dong2020.py"
 
 # --- Experiment 003: IoT Irrigation Pipeline (Python part) ---
 run_baseline \
     "Exp 003: IoT Irrigation Pipeline (Python)" \
-    "python control/iot_irrigation/calibration_dong2024.py"
+    "python3 control/iot_irrigation/calibration_dong2024.py"
 
 # --- Experiment 003: IoT Irrigation ANOVA (R part) ---
 if command -v Rscript &>/dev/null; then
@@ -88,42 +88,62 @@ fi
 # --- Experiment 004: Water Balance ---
 run_baseline \
     "Exp 004: FAO-56 Water Balance (Python)" \
-    "python control/water_balance/fao56_water_balance.py"
+    "python3 control/water_balance/fao56_water_balance.py"
 
 # --- Experiment 006: Richards Equation (van Genuchten) ---
 run_baseline \
     "Exp 006: Richards Equation (Python)" \
-    "python control/richards/richards_1d.py"
+    "python3 control/richards/richards_1d.py"
 
 # --- Experiment 007: Biochar Isotherms (Kumari et al. 2025) ---
 run_baseline \
     "Exp 007: Biochar Isotherms (Python)" \
-    "python control/biochar/biochar_isotherms.py"
+    "python3 control/biochar/biochar_isotherms.py"
 
 # --- Experiment 008: Yield Response to Water Stress ---
 run_baseline \
     "Exp 008: Yield Response (Python)" \
-    "python control/yield_response/yield_response.py"
+    "python3 control/yield_response/yield_response.py"
 
 # --- Experiment 009: Dual Kc (FAO-56 Ch 7) ---
 run_baseline \
     "Exp 009: Dual Crop Coefficient (Python)" \
-    "python control/dual_kc/dual_crop_coefficient.py"
+    "python3 control/dual_kc/dual_crop_coefficient.py"
 
 # --- Experiment 011: Cover Crops + No-Till (FAO-56 Ch 11) ---
 run_baseline \
     "Exp 011: Cover Crop Dual Kc (Python)" \
-    "python control/dual_kc/cover_crop_dual_kc.py"
+    "python3 control/dual_kc/cover_crop_dual_kc.py"
 
 # --- Experiment 012: CW2D Richards Extension ---
 run_baseline \
     "Exp 012: CW2D Richards (Python)" \
-    "python control/cw2d/cw2d_richards.py"
+    "python3 control/cw2d/cw2d_richards.py"
+
+# --- Experiment 010: Regional ET₀ Intercomparison ---
+run_baseline \
+    "Exp 010: Regional ET₀ Intercomparison (Python)" \
+    "python3 control/regional_et0/regional_et0_intercomparison.py"
+
+# --- Experiment 014: Irrigation Scheduling Pipeline ---
+run_baseline \
+    "Exp 014: Irrigation Scheduling Pipeline (Python)" \
+    "python3 control/scheduling/irrigation_scheduling.py"
 
 # --- Experiment 015: 60-Year Water Balance ---
 run_baseline \
     "Exp 015: 60-Year Water Balance (Python)" \
-    "python control/long_term_wb/long_term_water_balance.py"
+    "python3 control/long_term_wb/long_term_water_balance.py"
+
+# --- Experiment 016: Lysimeter ET Validation ---
+run_baseline \
+    "Exp 016: Lysimeter ET Validation (Python)" \
+    "python3 control/lysimeter/lysimeter_et.py"
+
+# --- Experiment 017: ET₀ Sensitivity Analysis ---
+run_baseline \
+    "Exp 017: ET₀ Sensitivity Analysis (Python)" \
+    "python3 control/sensitivity/et0_sensitivity.py"
 
 # =====================================================================
 # REAL DATA PIPELINE (requires API/internet — optional but preferred)
@@ -137,20 +157,20 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 # --- Download real weather: Open-Meteo (free, no key) ---
 run_baseline \
     "Data: Open-Meteo historical weather (2023 growing season)" \
-    "python scripts/download_open_meteo.py --all-stations --growing-season 2023" \
+    "python3 scripts/download_open_meteo.py --all-stations --growing-season 2023" \
     "optional"
 
 # --- Download real weather: OpenWeatherMap (needs key in testing-secrets/) ---
 run_baseline \
     "Data: OpenWeatherMap current + forecast" \
-    "python scripts/download_enviroweather.py --all-stations" \
+    "python3 scripts/download_enviroweather.py --all-stations" \
     "optional"
 
 # --- Compute ET₀ on real data ---
 if [ -d data/open_meteo ]; then
     run_baseline \
         "Compute: FAO-56 ET₀ on real Michigan data" \
-        "python control/fao56/compute_et0_real_data.py --all-stations"
+        "python3 control/fao56/compute_et0_real_data.py --all-stations"
 else
     echo "  [SKIP] ET₀ on real data — run Open-Meteo download first"
     SKIP=$((SKIP + 1))
@@ -160,7 +180,7 @@ fi
 if [ -d data/et0_results ]; then
     run_baseline \
         "Compute: Water balance on real Michigan data" \
-        "python control/water_balance/simulate_real_data.py"
+        "python3 control/water_balance/simulate_real_data.py"
 else
     echo "  [SKIP] Water balance on real data — run ET₀ computation first"
     SKIP=$((SKIP + 1))
