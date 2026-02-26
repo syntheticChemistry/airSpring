@@ -59,7 +59,7 @@ bash scripts/run_all_baselines.sh
 #    Cached to: control/long_term_wb/data/wooster_era5_1960_2023.json
 python control/long_term_wb/long_term_water_balance.py
 
-# 7. Run Rust validation binaries (439 checks across 18 binaries)
+# 7. Run Rust validation binaries (515 checks across 21 binaries)
 cd barracuda
 for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   validate_sensor_calibration validate_real_data cross_validate \
@@ -224,7 +224,7 @@ BEFORE evolving to Rust/BarraCuda.
 | `control/water_balance/fao56_water_balance.py` | FAO-56 Chapter 8 | 18/18 | TAW/RAW (3), Ks bounds (5), dry-down mass balance (2), irrigated mass balance (3), MI summer 535mm ET (3), heavy rain DP (2) |
 | `control/iot_irrigation/anova_irrigation.R` | Dong et al. 2024 (R v4.3.1) | — | Written, awaiting R install; one-way ANOVA on blueberry/tomato yield |
 
-**Total Python: 400/400 checks PASS, 13/13 experiments PASS**
+**Total Python: 474/474 checks PASS, 16/16 experiments PASS**
 **R ANOVA: script written, 1 skip (R not installed)**
 
 Tools used: numpy, scipy (curve_fit, solve_ivp), json (benchmarks), base Python math.
@@ -261,10 +261,13 @@ Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2, Stewart 1977, CW2D media params)
 | validate_long_term_wb | T1 | 11/11 | 64-year Wooster OH, Hargreaves ET₀, decade trends |
 | validate_yield | T1 | 32/32 | Stewart 1977, FAO-56 Table 24, multi-stage, WUE, scheduling |
 | validate_cw2d | T2 | 24/24 | CW2D media (gravel, organic), VG retention, mass balance |
+| validate_scheduling | T1 | 28/28 | 5 strategies, mass balance, yield ordering, WUE |
+| validate_lysimeter | T1 | 25/25 | Mass-to-ET, temp compensation, calibration, diurnal |
+| validate_sensitivity | T1 | 23/23 | OAT ±10%, 3 climatic zones, monotonicity, ranking |
 
-**Total Rust: 439/439 validation checks PASS, 635 tests (456 lib + 126 integration + 53 forge) PASS**
+**Total Rust: 515/515 validation checks PASS, 643 tests (464 lib + 126 integration + 53 forge) PASS**
 **Phase 2 cross-validation: 75/75 MATCH (Python↔Rust, tol=1e-5)**
-**Phase 3 GPU-first: 8 orchestrators wired, 4/4 ToadStool issues RESOLVED**
+**Phase 3 GPU-first: 11 orchestrators wired, 4/4 ToadStool issues RESOLVED**
 **CPU benchmarks: ET₀ 12.7M station-days/s, dual Kc 59M days/s, mulched Kc 64M days/s**
 **Quality: zero `.unwrap()`, zero `panic!()`, zero `unsafe`, zero clippy pedantic warnings, all tolerances named `const`**
 
@@ -509,9 +512,9 @@ Chapter 7, separating transpiration from soil evaporation for precision scheduli
 
 ```
 Track 1 (Precision Agriculture):
-  Phase 0  [COMPLETE]: Python baselines — 400/400 PASS (13 experiments)
+  Phase 0  [COMPLETE]: Python baselines — 474/474 PASS (16 experiments)
   Phase 0+ [COMPLETE]: Real data pipeline — 918 station-days, ET₀ R²=0.97
-  Phase 1  [COMPLETE]: Rust validation — 635 tests (456 lib + 126 integration + 53 forge), 18 binaries
+  Phase 1  [COMPLETE]: Rust validation — 719 checks (464 lib + 126 integration + 53 forge + 76 binary), 21 binaries
   Phase 1.5[COMPLETE]: CPU benchmark — Rust 69x faster than Python (geometric mean)
   Phase 2  [COMPLETE]: Cross-validation — 75/75 MATCH (Python↔Rust, tol=1e-5)
   Phase 3  [COMPLETE]: GPU bridge — 8 orchestrators wired to ToadStool primitives
@@ -577,7 +580,7 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026 — Updated: February 26, 2026 (v0.4.4)*
-*13 experiments, 400/400 Python, 643 Rust tests, 18 binaries, 75/75 cross-validation.*
+*Initialized: February 16, 2026 — Updated: February 26, 2026 (v0.4.5)*
+*16 experiments, 474/474 Python, 719 Rust checks, 21 binaries, 75/75 cross-validation.*
 *Rust 69x faster than Python (geometric mean). 11 Tier A wired modules.*
 *Quality: zero .unwrap(), zero unsafe, zero clippy pedantic warnings. AGPL-3.0-or-later.*

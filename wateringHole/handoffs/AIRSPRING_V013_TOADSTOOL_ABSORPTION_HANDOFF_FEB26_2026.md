@@ -1,7 +1,7 @@
 # airSpring → ToadStool Handoff V013: Absorption Candidates + Cross-Spring Learnings
 
 **Date**: February 26, 2026
-**From**: airSpring (Precision Agriculture — v0.4.4, 643 tests, 18 binaries, 375 validation checks)
+**From**: airSpring (Precision Agriculture — v0.4.5, 719 tests, 21 binaries, 474 validation checks)
 **To**: ToadStool / BarraCuda core team
 **Supersedes**: V012 (retained in archive)
 **ToadStool PIN**: `17932267` (S65 — 774 WGSL shaders)
@@ -16,8 +16,8 @@ documents **what airSpring can contribute back** to the shared BarraCuda crate,
 **what patterns we validated** that other Springs should adopt, and **what we learned**
 about cross-spring evolution that is relevant to ToadStool's ongoing development.
 
-11 Tier A modules wired. 643 tests pass. 96.81% library coverage. Zero unsafe code.
-69x geometric mean CPU speedup over Python. All 15 validation binaries pass (375 checks).
+11 Tier A modules wired. 719 checks pass (643 cargo + 76 binary). 96.81% library coverage. Zero unsafe code.
+69x geometric mean CPU speedup over Python. All 21 validation binaries pass (515 checks).
 
 ---
 
@@ -132,7 +132,7 @@ Spring using `BatchedElementwiseF64`.
 
 ---
 
-## Part 5: Benchmark Results (v0.4.4)
+## Part 5: Benchmark Results (v0.4.5)
 
 ### CPU Throughput
 
@@ -155,7 +155,7 @@ Spring using `BatchedElementwiseF64`.
 | `cargo doc --no-deps` | 0 warnings |
 | `cargo test` | 643 total (464 lib + 126 integration + 53 forge) |
 | `cargo llvm-cov --lib` | 96.81% lines, 97.58% functions |
-| Validation binaries | 15/15 PASS (375 checks) |
+| Validation binaries | 21/21 PASS (515 checks) |
 | Cross-validation | 75/75 MATCH (tol=1e-5) |
 | `unsafe` code | Zero |
 | `unwrap()` in lib | Zero |

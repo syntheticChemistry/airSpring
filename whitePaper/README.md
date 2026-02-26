@@ -54,6 +54,9 @@ The study answers four questions:
 | 60-Year Water Balance | OSU Triplett, ERA5 | 10/10 | Decadal stability, mass balance, climate trends |
 | Yield Response | Stewart 1977, FAO-56 Ch 10 | 32/32 | Ky table, single/multi-stage, WUE, scheduling |
 | CW2D Richards | Dong et al. 2019, HYDRUS | 24/24 | Gravel/organic VG, infiltration, mass balance |
+| Scheduling Optimization | Ali, Dong & Lavely 2024 | 25/25 | 5 strategies, mass balance, yield ordering, WUE |
+| Lysimeter ET | Dong & Hansen 2023 | 26/26 | Mass-to-ET, temp compensation, calibration R² |
+| ET₀ Sensitivity | Gong et al. 2006 methodology | 23/23 | OAT ±10%, 3 climatic zones, monotonicity |
 
 ### Phase 0+ (Real Data): 918 station-days, R²=0.967
 
@@ -83,6 +86,9 @@ The study answers four questions:
 | validate_long_term_wb | 11/11 | 60-year ET₀, water balance, climate |
 | validate_yield | 32/32 | Stewart 1977, Ky table, multi-stage, WUE |
 | validate_cw2d | 24/24 | CW2D media, VG retention, mass balance |
+| validate_scheduling | 28/28 | 5 strategies, mass balance, yield ordering |
+| validate_lysimeter | 25/25 | Mass-to-ET, calibration, diurnal pattern |
+| validate_sensitivity | 23/23 | OAT ±10%, 3 climatic zones, ranking |
 | cross_validate | 75 values | Python↔Rust JSON harness |
 
 ### Phase 2 (Cross-validation): 75/75 MATCH
@@ -112,5 +118,5 @@ No institutional access required. No proprietary software. AGPL-3.0 licensed.
 ## Next Phase: GPU Validation & metalForge
 
 See `specs/PAPER_REVIEW_QUEUE.md` for the full paper queue and compute pipeline.
-See `wateringHole/handoffs/` for the latest ToadStool/BarraCuda handoff (V012).
+See `wateringHole/handoffs/` for the latest ToadStool/BarraCuda handoff (V014).
 See `CHANGELOG.md` for the full evolution history.

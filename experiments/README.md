@@ -236,6 +236,36 @@ geographic consistency, 15-station-pair temporal correlations.
 
 **GPU**: Reuses `gpu::richards::BatchedRichards` — CW2D parameters work with existing GPU pipeline.
 
+### Exp 014: Irrigation Scheduling Optimization
+
+**Paper**: Ali, Dong & Lavely (2024) *Irrigation scheduling optimization for corn yield.* Ag Water Mgmt 306:109148
+
+**Control**: `control/scheduling/irrigation_scheduling.py` — 25/25 checks. 5-strategy comparison (rainfed, MAD 50/60/70%, growth-stage), mass balance closure < 1e-13 mm, yield ordering monotonicity, WUE analysis.
+
+**Rust**: `barracuda/src/bin/validate_scheduling.rs` — 28/28 checks. Deterministic weather (sinusoidal ET₀ + periodic rain). Composes `eco::water_balance` + `eco::yield_response` into full scheduling pipeline.
+
+**Key Result**: Growth-stage scheduling achieves best WUE (22.3 kg/ha/mm) by targeting irrigation to critical mid-season period. Full "Penny Irrigation" precursor pipeline.
+
+### Exp 016: Lysimeter ET Direct Measurement
+
+**Paper**: Dong & Hansen (2023) *Affordable weighing lysimeter design.* Smart Ag Tech 4:100147
+
+**Control**: `control/lysimeter/lysimeter_et.py` — 26/26 checks. Mass-to-ET conversion, temperature compensation (α=2.5 g/°C), data quality filtering, load cell calibration (R²=0.9999), diurnal ET pattern, synthetic daily comparison.
+
+**Rust**: `barracuda/src/bin/validate_lysimeter.rs` — 25/25 checks. Deterministic synthetic comparison (r=0.974, RMSE=0.106 mm).
+
+**Key Result**: Direct ET measurement ground truth for equation-based ET₀ calibration.
+
+### Exp 017: ET₀ Sensitivity Analysis
+
+**Paper**: Gong et al. (2006) *Sensitivity of PM ET₀.* Ag Water Mgmt 86:57-63
+
+**Control**: `control/sensitivity/et0_sensitivity.py` — 23/23 checks. OAT ±10% perturbation of 6 variables across 3 climatic zones (humid, arid, tropical). Monotonicity, elasticity bounds, symmetry, multi-site ranking.
+
+**Rust**: `barracuda/src/bin/validate_sensitivity.rs` — 23/23 checks. Uses `barracuda::eco::evapotranspiration` directly.
+
+**Key Result**: Solar radiation and wind consistently dominate across all climates. Complements groundSpring Exp 003 (humidity at 66% of MC variance).
+
 ---
 
 ## Naming Convention
@@ -246,9 +276,12 @@ Experiments follow `NNN_name` format:
 - `008`: Yield response to water stress (Stewart 1977 / FAO-56 Ch 10)
 - `009`–`011`: Dual Kc, regional ET₀, cover crops + no-till
 - `012`: CW2D Richards extension (Dong 2019)
+- `014`: Irrigation scheduling optimization (Ali, Dong & Lavely 2024)
 - `015`: Long-term water balance reconstruction
+- `016`: Lysimeter ET measurement (Dong & Hansen 2023)
+- `017`: ET₀ sensitivity analysis (Gong 2006 methodology)
 
-Gaps (013-014) are reserved for future experiments. See `specs/PAPER_REVIEW_QUEUE.md`.
+Gap (013) reserved for future experiments. See `specs/PAPER_REVIEW_QUEUE.md`.
 
 ## Adding a New Experiment
 

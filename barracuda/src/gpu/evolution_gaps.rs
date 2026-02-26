@@ -24,7 +24,7 @@
 //! | `testutil` | `gpu::reduce` | `fused_map_reduce_f64.wgsl` | Seasonal stats | A (ready) |
 //! | `io::csv_ts` | `gpu::stream` | `moving_window.wgsl` | Stream smoothing | A (ready) |
 //!
-//! # Current Inventory (February 26, 2026 — v0.4.4, synced to `ToadStool` HEAD `17932267`)
+//! # Current Inventory (February 26, 2026 — v0.4.5, synced to `ToadStool` HEAD `17932267`)
 //!
 //! `ToadStool` S42–S65: 170+ commits, 46+ cross-spring absorptions, 4,224+ tests.
 //! All four airSpring issues (TS-001 through TS-004) resolved in **S54**.
@@ -61,8 +61,8 @@
 //! | Bootstrap confidence intervals | `stats::bootstrap::bootstrap_ci` | WIRED (`testutil::bootstrap`) |
 //! | Crank-Nicolson PDE (f64) | `pde::crank_nicolson::CrankNicolson1D` | Available — f64 + GPU shader (S62+) |
 //! | BFGS quasi-Newton optimizer | `optimize::bfgs` | Available — smooth objective fitting |
-//! | Brent VG inverse | `optimize::brent` | **WIRED** — `inverse_van_genuchten_h()` θ→h (v0.4.4) |
-//! | `norm_ppf` MC CI | `stats::normal::norm_ppf` | **WIRED** — `McEt0Result::parametric_ci()` (v0.4.4) |
+//! | Brent VG inverse | `optimize::brent` | **WIRED** — `inverse_van_genuchten_h()` θ→h (v0.4.5) |
+//! | `norm_ppf` MC CI | `stats::normal::norm_ppf` | **WIRED** — `McEt0Result::parametric_ci()` (v0.4.5) |
 //! | Newton / secant methods | `optimize::newton`, `secant` | Available — derivative-based roots |
 //! | Bisection (scalar) | `optimize::bisect` | Available — robust bracketed root |
 //! | Batched bisection (GPU) | `optimize::BatchedBisectionGpu` | Available — parallel root-finding |
@@ -234,7 +234,7 @@ pub const GAPS: &[EvolutionGap] = &[
         description: "Parametric confidence intervals for MC ET₀ via norm_ppf",
         tier: Tier::A,
         toadstool_primitive: Some("stats::normal::norm_ppf (Moro 1995 rational approx)"),
-        action: "WIRED (v0.4.4): McEt0Result::parametric_ci() uses norm_ppf for z-scores \
+        action: "WIRED (v0.4.5): McEt0Result::parametric_ci() uses norm_ppf for z-scores \
                  (hotSpring special-function lineage → barracuda::stats S52+)",
     },
     EvolutionGap {
@@ -242,7 +242,7 @@ pub const GAPS: &[EvolutionGap] = &[
         description: "VG pressure head inversion via Brent root-finding",
         tier: Tier::A,
         toadstool_primitive: Some("optimize::brent (Brent 1973, guaranteed convergence)"),
-        action: "WIRED (v0.4.4): eco::richards::inverse_van_genuchten_h() uses brent \
+        action: "WIRED (v0.4.5): eco::richards::inverse_van_genuchten_h() uses brent \
                  for θ→h inversion (neuralSpring optimizer lineage → barracuda::optimize S52+)",
     },
     // ── Tier B: Shader exists, needs domain adaptation ────────────────

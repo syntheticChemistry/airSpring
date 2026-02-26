@@ -453,7 +453,7 @@ fn main() {
     println!("  neuralSpring (20 shaders) → ML/optimization");
     println!("    nelder_mead: neuralSpring optimizer → airSpring isotherm fitting");
     println!("    multi_start_nelder_mead: LHS → airSpring global isotherm search");
-    println!("    brent: neuralSpring root-finder → airSpring VG θ→h inversion (v0.4.4)");
+    println!("    brent: neuralSpring root-finder → airSpring VG θ→h inversion (v0.4.5)");
     println!("    ValidationHarness: neuralSpring S59 → all 16 airSpring binaries");
     println!();
     println!("  airSpring (3 fixes + 2 wirings) → Domain validation");
@@ -461,8 +461,8 @@ fn main() {
     println!("    TS-003 acos precision: trig boundary values → fixed for ALL Springs");
     println!("    TS-004 reduce buffer: N≥1024 dispatch → stabilized for ALL Springs");
     println!("    Richards PDE: airSpring validated, absorbed into barracuda (S40)");
-    println!("    norm_ppf→parametric_ci: hotSpring precision → MC ET₀ analytic CI (v0.4.4)");
-    println!("    brent→inverse_vg: neuralSpring solver → VG pressure head inversion (v0.4.4)");
+    println!("    norm_ppf→parametric_ci: hotSpring precision → MC ET₀ analytic CI (v0.4.5)");
+    println!("    brent→inverse_vg: neuralSpring solver → VG pressure head inversion (v0.4.5)");
     println!();
     println!("  608 WGSL shaders, 46 cross-spring absorptions (S51-S57),");
     println!("  11 Tier A wired modules in airSpring, zero duplication.");

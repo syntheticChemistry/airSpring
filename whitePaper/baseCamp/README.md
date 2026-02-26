@@ -80,7 +80,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | `BatchedRichards` | `pde::richards::solve_richards` | airSpring→ToadStool S40 absorption | **Wired** |
 | `fit_*_nm/global` | `optimize::nelder_mead` + `multi_start` | neuralSpring optimizer | **Wired** |
 
-### CPU Benchmarks (v0.4.4) — Rust 69x Faster Than Python
+### CPU Benchmarks (v0.4.5) — Rust 69x Faster Than Python
 
 | Operation | Rust Throughput | Speedup vs Python | Cross-Spring Provenance |
 |-----------|----------------|:-----------------:|------------------------|
@@ -98,7 +98,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 |----------|---------|
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C breakdown, absorbed vs stays-local, quality gates |
 | `metalForge/ABSORPTION_MANIFEST.md` | 4 modules ready for upstream (metrics, regression, moving_window_f64, hydrology) |
-| `wateringHole/handoffs/` | V012 active handoff — full evolution + absorption roadmap |
+| `wateringHole/handoffs/` | V014 active handoff — full evolution + absorption roadmap |
 | `specs/CROSS_SPRING_EVOLUTION.md` | 774 WGSL shader provenance across all Springs |
 
 ### Next Steps (Dong Lab)

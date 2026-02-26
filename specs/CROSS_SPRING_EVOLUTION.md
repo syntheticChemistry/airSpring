@@ -177,7 +177,8 @@ module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 | Feb 25 | airSpring v0.4.2: GPU integration + benchmarks | Richards/isotherm GPU integration tests, cross-spring benchmark suite, 328 tests |
 | Feb 26 | ToadStool S60-S65 pulled | 234 files changed, df64 FMA, stats absorption, diversity, MC ET₀, sovereign compiler regression |
 | Feb 26 | airSpring v0.4.3: Modern rewiring | Stats delegate to upstream, `eco::diversity` wired (wetSpring), `gpu::mc_et0` wired (groundSpring), 571 tests |
-| Feb 26 | airSpring v0.4.4: Deep S65 rewiring | `norm_ppf` → parametric CI, `brent` → VG inverse, CN f64 cross-val, 11 Tier A, 719 tests |
+| Feb 26 | airSpring v0.4.4: Deep S65 rewiring | `norm_ppf` → parametric CI, `brent` → VG inverse, CN f64 cross-val, 11 Tier A |
+| Feb 26 | airSpring v0.4.5: Experiment buildout | 3 new experiments (scheduling, lysimeter, sensitivity), 474/474 Python, 719 Rust checks, 21 binaries |
 
 ---
 
@@ -195,7 +196,7 @@ module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 
 ---
 
-## Benchmark Summary (CPU baselines, `--release`, v0.4.4)
+## Benchmark Summary (CPU baselines, `--release`, v0.4.5)
 
 | Operation | N | Time (µs) | Throughput | Provenance |
 |-----------|---|-----------|------------|------------|

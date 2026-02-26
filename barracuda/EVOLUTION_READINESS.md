@@ -2,7 +2,7 @@
 
 **Last Updated**: February 26, 2026 (v0.4.5 — 464 lib + 126 integration)
 **ToadStool PIN**: `17932267` (S65 — sovereign compiler, df64 transcendentals, stats absorption, 774 WGSL shaders)
-**Handoff**: V012 (rewired to S65 primitives, CN f64 integrated, optimizer inventory expanded)
+**Handoff**: V014 (v0.4.5 experiment buildout, 3 new experiments, GPU promotion roadmap)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -59,8 +59,8 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 | `gpu::richards::BatchedRichards` | `pde::richards::solve_richards` | **WIRED** (+ CN f64 cross-val) |
 | `gpu::isotherm::fit_*_nm/global` | `optimize::nelder_mead` + `multi_start` | **WIRED** |
 | `eco::diversity` | `stats::diversity` (Shannon, Simpson, Bray-Curtis) | **LEANING** (S64) |
-| `gpu::mc_et0::parametric_ci` | `stats::normal::norm_ppf` | **WIRED** (v0.4.4) — hotSpring precision lineage |
-| `eco::richards::inverse_van_genuchten_h` | `optimize::brent` | **WIRED** (v0.4.4) — neuralSpring optimizer lineage |
+| `gpu::mc_et0::parametric_ci` | `stats::normal::norm_ppf` | **WIRED** — hotSpring precision lineage |
+| `eco::richards::inverse_van_genuchten_h` | `optimize::brent` | **WIRED** — neuralSpring optimizer lineage |
 
 ### Tier B: Upstream Exists, Needs Domain Wiring (11 items, 4 wired)
 
@@ -75,9 +75,9 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 | Tridiagonal solve batch | `linalg::tridiagonal_solve_f64` | Low |
 | Adaptive ODE (RK45) | `numerical::rk45_solve` | Low |
 | m/z tolerance search | `batched_bisection_f64.wgsl` (wetSpring) | Low |
-| Crank-Nicolson PDE | `pde::crank_nicolson::CrankNicolson1D` (f64 + GPU shader!) | **WIRED** (v0.4.4) |
+| Crank-Nicolson PDE | `pde::crank_nicolson::CrankNicolson1D` (f64 + GPU shader!) | **WIRED** |
 | BFGS optimizer | `optimize::bfgs` | Low |
-| Brent VG inverse | `optimize::brent` | **WIRED** (v0.4.4) |
+| Brent VG inverse | `optimize::brent` | **WIRED** |
 | bisect/Newton/secant | `optimize::{bisect, newton, secant}` | Low |
 | Batched bisection GPU | `optimize::BatchedBisectionGpu` | Low |
 
