@@ -18,7 +18,7 @@
 //! | API | Backend | Use Case |
 //! |-----|---------|----------|
 //! | [`mc_et0_cpu`] | CPU | Always available, N samples via loop |
-//! | GPU kernel | `mc_et0_propagate_f64.wgsl` | Future: batched GPU dispatch (blocked by sovereign compiler regression, `ToadStool` S60-S65) |
+//! | GPU kernel | `mc_et0_propagate_f64.wgsl` | Available: sovereign compiler regression resolved (S66+) |
 
 use barracuda::stats::normal::norm_ppf;
 

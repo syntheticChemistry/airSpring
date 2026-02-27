@@ -24,12 +24,25 @@
 //! | `testutil` | `gpu::reduce` | `fused_map_reduce_f64.wgsl` | Seasonal stats | A (ready) |
 //! | `io::csv_ts` | `gpu::stream` | `moving_window.wgsl` | Stream smoothing | A (ready) |
 //!
-//! # Current Inventory (February 26, 2026 — v0.4.6, synced to `ToadStool` HEAD `f0feb226`)
+//! # Current Inventory (February 27, 2026 — v0.5.0, synced to `ToadStool` HEAD `e96576ee`)
 //!
-//! `ToadStool` S42–S68: 170+ commits, 46+ cross-spring absorptions, 2,541+ tests.
+//! `ToadStool` S42–S68+: 170+ commits, 46+ cross-spring absorptions, 2,546+ tests, 703 WGSL shaders.
 //! All four airSpring issues (TS-001 through TS-004) resolved in **S54**.
+//! P0 GPU dispatch blocker resolved in **S66** (explicit `BindGroupLayout`).
 //!
-//! Upstream capabilities available (S51–S68):
+//! ## Universal Precision Architecture (S67–S68)
+//!
+//! All WGSL shaders are **f64 canonical** — written in f64, compiled to target
+//! precision via `compile_shader_universal(source, precision, label)`:
+//! - `Precision::F64` → native builtins (Titan V, A100)
+//! - `Precision::Df64` → double-float f32-pair ~48-bit (consumer GPUs)
+//! - `Precision::F32` → downcast via `downcast_f64_to_f32()` (backward compat)
+//! - `Precision::F16` → downcast via `downcast_f64_to_f16()` (edge inference)
+//!
+//! `Fp64Strategy::Native` vs `Fp64Strategy::Hybrid` is auto-selected per-device
+//! by `GpuDriverProfile::fp64_strategy()` based on f64:f32 throughput ratio.
+//!
+//! Upstream capabilities available (S51–S68+):
 //! - S51+: `solve_f64_cpu()`, `GpuSessionBuilder`, `OdeSystem` trait + `BatchedOdeRK4`
 //! - S52+: `NelderMeadGpu`, `BatchedBisectionGpu`, `chi2_decomposed`, `FusedMapReduceF64::dot()`
 //! - S54+: TS-001–004 resolved, `barracuda::tolerances`, `barracuda::provenance`
@@ -40,11 +53,13 @@
 //! - S65: Smart refactoring, dead code removal, doc cleanup
 //! - S66: **Cross-spring absorption** — regression, hydrology, `moving_window_f64`,
 //!   `spearman_correlation` re-export, 8 named `SoilParams` constants, `mae`,
-//!   `hill`/`monod`, `shannon_from_frequencies`, `rawr_mean`, multi-precision WGSL
+//!   `hill`/`monod`, `shannon_from_frequencies`, `rawr_mean`, multi-precision WGSL.
+//!   **P0 fix**: explicit `BindGroupLayout` replaces `layout: None` + `get_bind_group_layout(0)`.
 //! - S67: Codified "math is universal — precision is silicon" doctrine
-//! - S68: **Universal precision** — 334+ shaders evolved to f64-canonical,
-//!   `downcast_f64_to_f32()` for backward compat, `ValidationHarness` migrated
-//!   to `tracing::info!` (requires `tracing-subscriber` in consumers)
+//! - S68: **Universal precision** — 296 f32-only shaders removed, all f64 canonical,
+//!   `downcast_f64_to_f32()` for backward compat, `op_preamble()` for abstract math,
+//!   `df64_rewrite.rs` naga IR rewrite. `ValidationHarness` migrated to `tracing::info!`.
+//! - S68+: GPU device-lost resilience, root doc cleanup, archive stale scripts
 //!
 //! ## Cross-Spring Shader Provenance (validated in `cross_spring_absorption.rs` §13)
 //!
@@ -135,13 +150,13 @@
 //! ## Cross-Validation Strategy
 //!
 //! GPU paths are validated against CPU baselines:
-//! 1. CPU validation remains source of truth (464 lib tests, 22 binaries, 1354 atlas checks)
+//! 1. CPU validation remains source of truth (515 lib tests, 51 binaries, 1393 atlas checks)
 //! 2. GPU results must match CPU within documented tolerance
 //! 3. Cross-validation harness (33/33 Python↔Rust) extends to GPU path
 //! 4. Each GPU function has a `test_gpu_matches_cpu_*` integration test
 //! 5. GPU determinism proven: 4 bit-identical rerun tests (`gpu_determinism.rs`)
-//! 6. Library coverage: 96.81% lines, 97.58% functions (llvm-cov verified)
-//! 7. S68 cross-spring tests: 10 tests validate stability across universal precision refactor
+//! 6. Titan V live validation: 24/24 GPU parity tests PASS (0.04% seasonal tolerance)
+//! 7. S68+ universal precision: f64 canonical shaders compile to any precision target
 
 /// Structured representation of an evolution gap.
 #[derive(Debug)]
@@ -171,24 +186,25 @@ pub enum Tier {
 
 /// All known evolution gaps (23 entries — 11 Tier A integrated, 11 Tier B (5 wired), 1 Tier C).
 ///
-/// v0.4.1: Added `multi_start_nelder_mead` for robust global isotherm fitting.
-/// v0.4.0: Richards PDE wired to `barracuda::pde::richards`, isotherm fitting
-/// wired to `barracuda::optimize::nelder_mead`, tridiagonal available via PDE solver.
-/// Dual Kc batch added as Tier B: `gpu::dual_kc` CPU ready, pending shader op.
+/// v0.5.0: Synced to ToadStool S68+ (e96576ee). Universal precision architecture
+/// means all GPU dispatch is precision-agnostic: f64 on Titan V, Df64 on consumer
+/// GPUs, f32 fallback. S60-S65 sovereign compiler regression **RESOLVED** (S66+).
 ///
-/// Upstream capabilities discovered (S52-S66):
-/// - `NelderMeadGpu`: GPU-resident optimizer (5-50 params, not cost-effective for 2-param isotherms)
-/// - `pde::crank_nicolson::CrankNicolson1D`: **f64** CN PDE solver + `WGSL_CRANK_NICOLSON_F64` GPU shader
-/// - `optimize::bfgs`: Quasi-Newton with gradient (smooth objectives, e.g. isotherm residuals)
-/// - `optimize::brent`: Bracketed 1D root-finding (soil water potential inversion)
-/// - `optimize::newton`, `secant`: Derivative-based root-finding
-/// - `optimize::bisect`: Robust bracketed root-finding
-/// - `optimize::BatchedBisectionGpu`: GPU-parallel batched root-finding
+/// Key upstream capabilities (S52-S68+):
+/// - `compile_shader_universal(source, precision, label)`: One shader → any precision
+/// - `Fp64Strategy::Native/Hybrid`: Auto-selected per-device
+/// - `op_preamble()`: Abstract math ops for precision-parametric shaders
+/// - `probe_f64_builtins(device)`, `probe_f64_throughput_ratio(device)`: Hardware probing
+/// - `NelderMeadGpu`: GPU-resident optimizer (5-50 params)
+/// - `BatchedBisectionGpu`: GPU-parallel batched root-finding
+/// - `UnidirectionalPipeline`: Fire-and-forget GPU streaming, eliminates round-trip overhead
+/// - `StatefulPipeline`: GPU-resident iterative solvers (minimal readback)
+/// - `MultiDevicePool`: Multi-GPU dispatch with load balancing
+/// - `pde::crank_nicolson::CrankNicolson1D`: **f64** CN PDE solver + GPU shader
+/// - `optimize::{bfgs, brent, newton, secant, bisect}`: Full optimizer suite
 /// - `optimize::ResumableNelderMead`: Checkpoint/resume for long-running optimization
 /// - `optimize::adaptive_penalty`: Constrained optimization with data-driven penalty
-/// - `unified_hardware`: `HardwareDiscovery`, `ComputeScheduler`, `MixedSubstrate` — metalForge target
-/// - S66: Explicit `BindGroupLayout` (R-S66-041) — **resolves P0 GPU dispatch blocker**
-///   (`BatchedElementwiseF64` no longer uses `layout: None` + `get_bind_group_layout(0)`)
+/// - `unified_hardware`: `HardwareDiscovery`, `ComputeScheduler`, `MixedSubstrate`
 pub const GAPS: &[EvolutionGap] = &[
     // ── Tier A: Integrated (GPU primitive wired and validated) ─────────
     EvolutionGap {

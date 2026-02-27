@@ -1,8 +1,8 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: February 27, 2026 (v0.5.0 — 645 tests, 97.06% coverage)
-**ToadStool PIN**: S68 HEAD (`89356efa` — universal f64, ValidationHarness tracing, LazyLock shader constants, CPU feature-gate fix)
-**Handoff**: V028 (ToadStool absorption + GPU live — 47 barracuda + 4 forge binaries, 1393 atlas checks, Titan V GPU live 24/24 PASS, metalForge live hardware 17/17 PASS)
+**Last Updated**: February 27, 2026 (v0.5.0 — 515 lib tests, 51 binaries)
+**ToadStool PIN**: S68+ HEAD (`e96576ee` — universal f64 canonical, dual-layer precision, device-lost resilience, 703 WGSL shaders)
+**Handoff**: V029 (ToadStool S68+ sync — universal precision architecture, `try_gpu` catch_unwind removed, evolution gaps updated)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -92,7 +92,7 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 
 ---
 
-## ToadStool S42–S68 Evolution (180+ commits)
+## ToadStool S42–S68+ Evolution (180+ commits)
 
 ToadStool underwent massive evolution since S42. Key milestones:
 
@@ -111,7 +111,10 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | S61-63 | Sovereign compiler, SPIR-V passthrough, `CrankNicolson1D` **f64** | **CN now f64!** |
 | S64 | Stats absorption (metrics, diversity from Springs), `chrono` removed | Diversity leaning |
 | S65 | Smart refactoring, dead code removal, doc cleanup | Stabilization |
-| S66 | **Cross-spring absorption**: regression, hydrology, moving_window_f64, spearman re-export, 8 SoilParams, mae/hill/monod, multi-precision WGSL | **All metalForge absorbed** |
+| S66 | **Cross-spring absorption** + **P0 fix**: explicit BGL, regression, hydrology, 8 SoilParams | **All metalForge absorbed** |
+| S67 | **Universal precision doctrine**: "math is universal — precision is silicon" | Architecture alignment |
+| S68 | **296 f32-only shaders removed** — all f64 canonical, `op_preamble()`, `df64_rewrite.rs` naga IR | Pure math shaders |
+| S68+ | GPU device-lost resilience, root doc cleanup, archive stale scripts | Stability |
 
 ## Upstream Capabilities — Wired and Available
 
@@ -139,7 +142,7 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `solve_f64_cpu()` | `linalg::solve` | S51 | Gaussian elimination + partial pivoting |
 | `GpuSessionBuilder` | `session` | S52 | Pre-warmed GPU sessions |
 | `OdeSystem` + `BatchedOdeRK4` | `numerical` | S51 | Generic ODE with WGSL template |
-| `NelderMeadGpu` | `optimize` | S52+ | GPU-resident NM (5-50 params, not cost-effective for 2-param) |
+| `NelderMeadGpu` | `optimize` | S52+ | GPU-resident NM (5-50 params) |
 | `ResumableNelderMead` | `optimize` | S52+ | Checkpoint/resume for long-running optimizers |
 | `bfgs` | `optimize` | S52+ | Quasi-Newton with gradient (smooth objectives) |
 | `bisect` | `optimize` | S52+ | Robust bracketed root-finding |
@@ -151,6 +154,15 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `spectral_density` | `stats` | S57 | RMT spectral analysis |
 | `normal::norm_cdf` | `stats` | S52+ | Normal cumulative distribution |
 | `spearman_correlation` | `stats::correlation` | S66 (R-S66-005) | Rank correlation — **now re-exported** from `stats/mod.rs` |
+| `compile_shader_universal` | `shaders` | S68 | One f64 source → F16/F32/F64/Df64 target |
+| `Fp64Strategy::Native/Hybrid` | `device` | S58+ | Auto precision per GPU (ratio ≤2.5 → Native, else Hybrid) |
+| `probe_f64_builtins` | `device` | S58+ | Hardware f64 builtin capability probing |
+| `probe_f64_throughput_ratio` | `device` | S58+ | f64:f32 throughput ratio → F64Tier |
+| `UnidirectionalPipeline` | `staging` | S52+ | Fire-and-forget streaming, eliminates round-trip overhead |
+| `StatefulPipeline` | `staging` | S52+ | GPU-resident iterative solvers (minimal readback) |
+| `MultiDevicePool` | `multi_gpu` | S52+ | Multi-GPU dispatch with load balancing |
+| `ShaderTemplate` | `shaders` | S68 | `{{SCALAR}}`/`{{VEC2}}` templated precision-generic shaders |
+| `compile_op_shader` | `shaders` | S68 | Inject `op_preamble` for abstract math ops |
 
 ---
 
@@ -161,8 +173,7 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `cargo fmt --check` | **Clean** |
 | `cargo clippy --all-targets` | **0 warnings** (pedantic + nursery via `[lints.clippy]`, `--all-targets` clean) |
 | `cargo doc --no-deps` | **Builds**, 0 warnings |
-| `cargo test --lib` | **645 total** (lib + doc + validation) |
-| `cargo llvm-cov --lib` | **97.06%** line coverage |
+| `cargo test --lib` | **515 passed** (lib + doc + integration) |
 | `unsafe` code | **Zero** |
 | `unwrap()` in lib | **Zero** (all in `#[cfg(test)]` or validation-binary JSON helpers) |
 | Files > 1000 lines | **Zero** (max src: 834 `eco/evapotranspiration.rs` after Thornthwaite extraction) |
@@ -170,6 +181,7 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | GPU live (Titan V) | **24/24 PASS** (0.04% seasonal parity, `BARRACUDA_GPU_ADAPTER=titan`) |
 | metalForge live | **17/17 PASS** (5 substrates, 14 workloads route) |
 | GPU dispatch (P0 blocker) | **RESOLVED** — S66 explicit BGL (R-S66-041) |
+| try_gpu catch_unwind debt | **REMOVED** — S66+ resolved sovereign compiler regression |
 | Cross-validation | **75/75 MATCH** (tol=1e-5) |
 
 ---
@@ -223,9 +235,23 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `barracuda::ml::esn` | wetSpring V61 | ESN reservoir for time-series IoT | Proposed |
 | `batched_multinomial.wgsl` | groundSpring V10 | Rarefaction for diversity GPU | Proposed |
 
-### S68 HEAD Sync (89356efa)
+### S68+ HEAD Sync (e96576ee)
 
-Synced from `f0feb226` → `89356efa` (1 commit). CPU feature-gate fix:
-- `wgsl_hessian_column()`, `WGSL_HISTOGRAM`, `WGSL_BOOTSTRAP_MEAN_F64` gated with `#[cfg(feature = "gpu")]`
-- No impact on airSpring (we use default features which include gpu)
-- Revalidation: 499/499 tests, 0 clippy, 97.06% coverage — all green
+Synced from `89356efa` → `e96576ee` (2 commits):
+- `92679172`: Root docs cleaned, stale scripts/docs archived to fossil
+- `e96576ee`: GPU device-lost resilience for standalone testing
+
+**Universal precision architecture** now fully available:
+- `compile_shader_universal(source, precision, label)` → one f64 source compiles to F16/F32/F64/Df64
+- `Fp64Strategy::Native` (Titan V, A100) vs `Fp64Strategy::Hybrid` (RTX 4070, consumer GPUs)
+- `op_preamble()` → abstract math ops (`op_add`, `op_mul`, etc.) resolve per precision
+- `df64_rewrite.rs` → naga IR rewrite transforms f64 infix → DF64 bridge calls
+- 703 WGSL shaders total (497 f32 downcast, 182 native f64, 21 df64, 2 df64 infra)
+
+**airSpring cleanup**:
+- Removed `try_gpu` catch_unwind from `gpu::et0` and `gpu::water_balance` tests (S60-S65 regression resolved)
+- Updated `gpu::mod.rs` architecture docs for universal precision
+- Updated `gpu::evolution_gaps.rs` inventory for S68+ capabilities
+- Updated `gpu::mc_et0` doc — sovereign compiler regression resolved (S66+)
+
+Revalidation: 515/515 tests, 0 clippy, all green

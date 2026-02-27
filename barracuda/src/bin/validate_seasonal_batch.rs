@@ -25,7 +25,7 @@ const BENCHMARK_JSON: &str =
 fn seasonal_value(doy: u32, vmin: f64, vmax: f64) -> f64 {
     let phase_doy = 196.0_f64;
     let frac = (2.0 * std::f64::consts::PI * (f64::from(doy) - phase_doy + 91.25) / 365.0).sin();
-    let mid = (vmin + vmax) / 2.0;
+    let mid = f64::midpoint(vmin, vmax);
     let amp = (vmax - vmin) / 2.0;
     mid + amp * frac
 }
