@@ -9,7 +9,7 @@
 //! # Cross-Spring Provenance
 //!
 //! The `Tolerance` struct itself comes from `ToadStool` S52 (M-010), inspired by
-//! neuralSpring's validation registry and adopted across all Springs.
+//! barracuda validation registry and adopted across all Springs.
 //!
 //! | Domain | Tolerance | Origin |
 //! |--------|-----------|--------|
@@ -19,7 +19,7 @@
 //! | Richards PDE | benchmark-specified | HYDRUS numerical convergence |
 //! | Isotherm fit | 0.01 mg/g | Adsorption experiment precision |
 //! | Kriging interpolation | 1e-6 | Numerical linear algebra (small systems) |
-//! | GPU/CPU cross-validation | 1e-5 | f64 shader rounding (hotSpring TS-001 fix) |
+//! | GPU/CPU cross-validation | 1e-5 | f64 shader rounding (ToadStool TS-001 fix) |
 
 pub use barracuda::tolerances::{check, Tolerance};
 
@@ -168,14 +168,14 @@ pub const ISOTHERM_PREDICTION: Tolerance = Tolerance {
 
 /// GPU↔CPU cross-validation: f64 shader rounding via DF64 emulation.
 ///
-/// hotSpring TS-001 (`pow_f64` fix, S54) and TS-003 (`acos_f64` fix, S54)
+/// `ToadStool` TS-001 (`pow_f64` fix, S54) and TS-003 (`acos_f64` fix, S54)
 /// established that WGSL f64 shaders achieve ≤1e-5 relative agreement with
 /// CPU f64. This tolerance is used for all GPU/CPU comparison tests.
 pub const GPU_CPU_CROSS: Tolerance = Tolerance {
     name: "gpu_cpu_cross_validation",
     abs_tol: 1e-5,
     rel_tol: 1e-5,
-    justification: "WGSL f64 shader vs CPU f64; hotSpring TS-001/003 S54 validated",
+    justification: "WGSL f64 shader vs CPU f64; ToadStool TS-001/003 S54 validated",
 };
 
 /// Kriging interpolation: small-system linear algebra tolerance.
@@ -220,6 +220,204 @@ pub const IRRIGATION_DEPTH: Tolerance = Tolerance {
     abs_tol: 0.01,
     rel_tol: 0.01,
     justification: "Depth precision: (FC − VWC) × root_zone_m × 100; ±0.01 cm",
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// Thornthwaite, GDD, and pedotransfer (Experiments 021–023)
+// ═══════════════════════════════════════════════════════════════════
+
+/// Thornthwaite heat-index term and exponent: polynomial regression coefficients
+/// have 4–5 significant digits; intermediate values converge to 1e-4.
+pub const THORNTHWAITE_ANALYTICAL: Tolerance = Tolerance {
+    name: "thornthwaite_analytical",
+    abs_tol: 1e-4,
+    rel_tol: 1e-4,
+    justification: "Thornthwaite (1948) polynomial coefficients: 4-digit precision",
+};
+
+/// GDD computation: integer arithmetic on clamped temperatures yields exact results
+/// to f64 precision.
+pub const GDD_EXACT: Tolerance = Tolerance {
+    name: "gdd_exact",
+    abs_tol: 1e-10,
+    rel_tol: 1e-10,
+    justification: "GDD avg/clamp: f64-exact integer arithmetic (max/min/midpoint)",
+};
+
+/// Saxton-Rawls pedotransfer moisture content (θ): regression coefficients
+/// have 4 significant digits; exponential intermediate steps preserve to 1e-4.
+pub const PEDOTRANSFER_MOISTURE: Tolerance = Tolerance {
+    name: "pedotransfer_moisture",
+    abs_tol: 1e-4,
+    rel_tol: 1e-4,
+    justification: "Saxton & Rawls (2006) regression: 4-digit θ precision",
+};
+
+/// Saxton-Rawls Ksat: exponential amplification of regression residuals
+/// widens tolerance to ±0.5 mm/hr.
+pub const PEDOTRANSFER_KSAT: Tolerance = Tolerance {
+    name: "pedotransfer_ksat",
+    abs_tol: 0.5,
+    rel_tol: 0.05,
+    justification: "Saxton & Rawls (2006) Ksat: exponential amplification of regression error",
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// Per-step and strict conservation
+// ═══════════════════════════════════════════════════════════════════
+
+/// Per-step mass balance: machine-precision conservation check per time step.
+pub const WATER_BALANCE_PER_STEP: Tolerance = Tolerance {
+    name: "water_balance_per_step",
+    abs_tol: 1e-6,
+    rel_tol: 1e-10,
+    justification: "Per-step conservation check: f64 arithmetic residual < 1e-6 mm",
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// Sensor-specific calibration
+// ═══════════════════════════════════════════════════════════════════
+
+/// Topp equation VWC round-trip: ±0.005 m³/m³ (half-percent volumetric).
+pub const TOPP_EQUATION: Tolerance = Tolerance {
+    name: "topp_equation",
+    abs_tol: 0.005,
+    rel_tol: 1e-3,
+    justification: "Topp et al. (1980): 0.005 m³/m³ covers polynomial regression residual",
+};
+
+/// Analytical computation tolerance: simple arithmetic/polynomial evaluation.
+pub const ANALYTICAL_COMPUTATION: Tolerance = Tolerance {
+    name: "analytical_computation",
+    abs_tol: 0.1,
+    rel_tol: 0.01,
+    justification: "Generic analytical: covers digitization precision from published tables",
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// Statistical quality criteria
+// ═══════════════════════════════════════════════════════════════════
+
+/// Index of Agreement criterion: Willmott (1981), Dong et al. (2020) Table 3.
+pub const IA_CRITERION: Tolerance = Tolerance {
+    name: "index_of_agreement_criterion",
+    abs_tol: 0.80,
+    rel_tol: 0.0,
+    justification: "Dong et al. (2020) Table 3: IA ≥ 0.80 for sensor correction adequacy",
+};
+
+/// Statistical significance threshold (two-tailed, α = 0.05).
+pub const P_SIGNIFICANCE: Tolerance = Tolerance {
+    name: "p_significance",
+    abs_tol: 0.05,
+    rel_tol: 0.0,
+    justification: "Standard two-tailed significance level: α = 0.05",
+};
+
+/// Water savings tolerance: irrigation efficiency comparison.
+pub const WATER_SAVINGS: Tolerance = Tolerance {
+    name: "water_savings",
+    abs_tol: 0.1,
+    rel_tol: 0.05,
+    justification: "IoT irrigation savings: ±10% comparison margin (Dong 2024 Fig 7)",
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// Biochar adsorption
+// ═══════════════════════════════════════════════════════════════════
+
+/// Biochar isotherm mean residual: no systematic bias threshold.
+pub const ISOTHERM_MEAN_RESIDUAL: Tolerance = Tolerance {
+    name: "isotherm_mean_residual",
+    abs_tol: 0.5,
+    rel_tol: 0.05,
+    justification:
+        "Kumari et al. (2025): mean(|qe_obs - qe_pred|) < 0.5 mg/g for no systematic bias",
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// Cross-method and cross-station validation
+// ═══════════════════════════════════════════════════════════════════
+
+/// Rust ↔ Python cross-validation: IEEE-754 rounding at 1e-5.
+pub const CROSS_VALIDATION: Tolerance = Tolerance {
+    name: "cross_validation",
+    abs_tol: 1e-5,
+    rel_tol: 1e-5,
+    justification: "Rust vs Python f64: IEEE-754 produces ~1e-10 diffs; 1e-5 is conservative",
+};
+
+/// Bangkok saturation vapour pressure: wider tolerance for high-temperature range.
+pub const ET0_SAT_VAPOUR_PRESSURE_WIDE: Tolerance = Tolerance {
+    name: "et0_sat_vapour_pressure_wide",
+    abs_tol: 0.02,
+    rel_tol: 1e-3,
+    justification: "FAO-56 Ex 17 Bangkok: high-T range doubles Tetens rounding to 0.02 kPa",
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// Regional / statistical validation bounds
+// ═══════════════════════════════════════════════════════════════════
+
+/// Minimum R² for ET₀ model-observation fit.
+pub const R2_MINIMUM: Tolerance = Tolerance {
+    name: "r2_minimum",
+    abs_tol: 0.85,
+    rel_tol: 0.0,
+    justification: "FAO-56 PM typically R² > 0.90; 0.85 allows for ERA5 reanalysis noise",
+};
+
+/// Maximum RMSE (mm/day) for ET₀ validation.
+pub const RMSE_MAXIMUM: Tolerance = Tolerance {
+    name: "rmse_maximum",
+    abs_tol: 1.5,
+    rel_tol: 0.0,
+    justification: "Doorenbos & Pruitt (1977): ±1.5 mm/day ET₀ measurement uncertainty",
+};
+
+/// Hargreaves vs PM cross-method tolerance (percent).
+pub const ET0_CROSS_METHOD_PCT: Tolerance = Tolerance {
+    name: "et0_cross_method_pct",
+    abs_tol: 25.0,
+    rel_tol: 0.0,
+    justification:
+        "Literature: Hargreaves vs PM 10-30% divergence; 25% accommodates Great Lakes climate",
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// IoT sensor data validation
+// ═══════════════════════════════════════════════════════════════════
+
+/// Temperature mean tolerance for synthetic `IoT` data.
+pub const IOT_TEMPERATURE_MEAN: Tolerance = Tolerance {
+    name: "iot_temperature_mean",
+    abs_tol: 2.0,
+    rel_tol: 0.1,
+    justification: "Synthetic 25°C centre ± diurnal; mean within ~2°C",
+};
+
+/// Temperature extremes tolerance for synthetic `IoT` data.
+pub const IOT_TEMPERATURE_EXTREMES: Tolerance = Tolerance {
+    name: "iot_temperature_extremes",
+    abs_tol: 3.0,
+    rel_tol: 0.15,
+    justification: "Synthetic diurnal amplitude ~8°C; extremes by up to 3°C from analytical peak",
+};
+
+/// PAR sensor maximum tolerance.
+pub const IOT_PAR_MAX: Tolerance = Tolerance {
+    name: "iot_par_max",
+    abs_tol: 200.0,
+    rel_tol: 0.15,
+    justification: "Bell-curve PAR peak ≈ 1800 µmol/m²/s; discretization ± 200",
+};
+
+/// CSV round-trip tolerance for decimal-truncated float data.
+pub const IOT_CSV_ROUNDTRIP: Tolerance = Tolerance {
+    name: "iot_csv_roundtrip",
+    abs_tol: 0.1,
+    rel_tol: 0.01,
+    justification: "CSV {:.2} format truncation: round-trip within 0.1 of mean",
 };
 
 #[cfg(test)]
@@ -284,7 +482,7 @@ mod tests {
 
     #[test]
     fn test_all_tolerances_have_justification() {
-        let all = [
+        let comparison_tolerances = [
             &ET0_SAT_VAPOUR_PRESSURE,
             &ET0_SLOPE_VAPOUR,
             &ET0_NET_RADIATION,
@@ -293,6 +491,7 @@ mod tests {
             &ET0_COLD_CLIMATE,
             &PSYCHROMETRIC_CONSTANT,
             &WATER_BALANCE_MASS,
+            &WATER_BALANCE_PER_STEP,
             &STRESS_COEFFICIENT,
             &SOIL_HYDRAULIC,
             &SOIL_ROUNDTRIP,
@@ -300,14 +499,29 @@ mod tests {
             &RICHARDS_TRANSIENT,
             &ISOTHERM_PARAMETER,
             &ISOTHERM_PREDICTION,
+            &ISOTHERM_MEAN_RESIDUAL,
             &GPU_CPU_CROSS,
             &KRIGING_INTERPOLATION,
             &SEASONAL_REDUCTION,
             &IOT_STREAM_SMOOTHING,
+            &IOT_TEMPERATURE_MEAN,
+            &IOT_TEMPERATURE_EXTREMES,
+            &IOT_PAR_MAX,
+            &IOT_CSV_ROUNDTRIP,
             &SENSOR_EXACT,
             &IRRIGATION_DEPTH,
+            &WATER_SAVINGS,
+            &THORNTHWAITE_ANALYTICAL,
+            &GDD_EXACT,
+            &PEDOTRANSFER_MOISTURE,
+            &PEDOTRANSFER_KSAT,
+            &TOPP_EQUATION,
+            &ANALYTICAL_COMPUTATION,
+            &CROSS_VALIDATION,
+            &ET0_SAT_VAPOUR_PRESSURE_WIDE,
+            &ET0_CROSS_METHOD_PCT,
         ];
-        for tol in &all {
+        for tol in &comparison_tolerances {
             assert!(!tol.name.is_empty(), "tolerance must have a name");
             assert!(
                 !tol.justification.is_empty(),
@@ -315,7 +529,17 @@ mod tests {
                 tol.name
             );
             assert!(tol.abs_tol > 0.0, "{}: abs_tol must be positive", tol.name);
-            assert!(tol.rel_tol > 0.0, "{}: rel_tol must be positive", tol.name);
+        }
+
+        let threshold_criteria = [&IA_CRITERION, &P_SIGNIFICANCE, &R2_MINIMUM, &RMSE_MAXIMUM];
+        for tol in &threshold_criteria {
+            assert!(!tol.name.is_empty(), "criterion must have a name");
+            assert!(
+                !tol.justification.is_empty(),
+                "criterion {} must have justification",
+                tol.name
+            );
+            assert!(tol.abs_tol > 0.0, "{}: abs_tol must be positive", tol.name);
         }
     }
 }

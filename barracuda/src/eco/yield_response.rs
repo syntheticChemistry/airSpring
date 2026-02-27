@@ -132,6 +132,24 @@ pub fn ky_table(crop: &str) -> Option<YieldResponseFactor> {
             ky_total: 1.10,
             stages: None,
         }),
+        "winter_wheat" | "wheat_winter" => Some(YieldResponseFactor {
+            ky_total: 1.00,
+            stages: Some(vec![
+                (0.20, 0.30), // vegetative
+                (0.60, 0.20), // flowering
+                (0.50, 0.25), // yield formation
+                (0.10, 0.25), // ripening
+            ]),
+        }),
+        "dry_bean" => Some(YieldResponseFactor {
+            ky_total: 1.15,
+            stages: Some(vec![
+                (0.20, 0.25), // vegetative
+                (1.10, 0.25), // flowering
+                (0.75, 0.25), // yield formation
+                (0.20, 0.25), // ripening
+            ]),
+        }),
         "sugarcane" => Some(YieldResponseFactor {
             ky_total: 1.20,
             stages: Some(vec![(0.75, 0.35), (0.50, 0.15), (1.00, 0.35), (0.10, 0.15)]),
@@ -249,6 +267,8 @@ mod tests {
             "potato",
             "tomato",
             "alfalfa",
+            "winter_wheat",
+            "dry_bean",
             "sugarcane",
             "apple",
             "blueberry",

@@ -19,6 +19,8 @@ pub enum AirSpringError {
     InvalidInput(String),
     /// Errors propagated from barracuda primitives.
     Barracuda(String),
+    /// NPU errors (discovery, DMA, inference).
+    Npu(String),
 }
 
 impl fmt::Display for AirSpringError {
@@ -29,6 +31,7 @@ impl fmt::Display for AirSpringError {
             Self::JsonParse(e) => write!(f, "JSON parse error: {e}"),
             Self::InvalidInput(msg) => write!(f, "Invalid input: {msg}"),
             Self::Barracuda(msg) => write!(f, "barracuda error: {msg}"),
+            Self::Npu(msg) => write!(f, "NPU error: {msg}"),
         }
     }
 }
@@ -38,7 +41,7 @@ impl std::error::Error for AirSpringError {
         match self {
             Self::Io(e) => Some(e),
             Self::JsonParse(e) => Some(e),
-            _ => None,
+            Self::CsvParse(_) | Self::InvalidInput(_) | Self::Barracuda(_) | Self::Npu(_) => None,
         }
     }
 }
@@ -111,6 +114,19 @@ mod tests {
     #[test]
     fn test_csv_error_no_source() {
         let err = AirSpringError::CsvParse("col missing".into());
+        assert!(std::error::Error::source(&err).is_none());
+    }
+
+    #[test]
+    fn test_npu_display() {
+        let err = AirSpringError::Npu("no device found".into());
+        assert!(format!("{err}").contains("NPU error"));
+        assert!(format!("{err}").contains("no device found"));
+    }
+
+    #[test]
+    fn test_npu_no_source() {
+        let err = AirSpringError::Npu("discovery failed".into());
         assert!(std::error::Error::source(&err).is_none());
     }
 

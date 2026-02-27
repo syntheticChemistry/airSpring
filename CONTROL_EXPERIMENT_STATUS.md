@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-02-26 (v0.4.8 — 22 experiments, 594 Python + 491 Rust tests + 570 validation + 1393 atlas checks, 27 binaries, 69x CPU speedup, 97.45% coverage)
+**Updated**: 2026-02-27 (v0.5.0 — 44 experiments, 1054 Python + 645 Rust tests + 1024 validation + 1393 atlas checks, 47 barracuda + 4 forge binaries, 69x CPU speedup, **Titan V GPU live dispatch** (24/24 PASS), AKD1000 NPU live, metalForge live hardware probe (5 substrates), CPU↔GPU 0.04% parity, clippy pedantic, 7 ET₀ methods)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -59,7 +59,7 @@ bash scripts/run_all_baselines.sh
 #    Cached to: control/long_term_wb/data/wooster_era5_1960_2023.json
 python control/long_term_wb/long_term_water_balance.py
 
-# 7. Run Rust validation binaries (570+1393 checks across 27 binaries)
+# 7. Run Rust validation binaries (853+1393 checks across 37 binaries)
 cd barracuda
 for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   validate_sensor_calibration validate_real_data cross_validate \
@@ -68,9 +68,17 @@ for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   validate_yield validate_cw2d validate_scheduling \
   validate_lysimeter validate_sensitivity validate_atlas \
   validate_priestley_taylor validate_et0_intercomparison \
-  validate_thornthwaite validate_gdd validate_pedotransfer; do
+  validate_thornthwaite validate_gdd validate_pedotransfer \
+  validate_nass_yield validate_forecast validate_scan_moisture \
+  validate_multicrop validate_ameriflux validate_hargreaves \
+  validate_diversity; do
   cargo run --release --bin $bin
 done
+
+# 7b. Run NPU validation (requires --features npu and AKD1000 hardware)
+# cargo run --release --features npu --bin validate_npu_eco
+# cargo run --release --features npu --bin validate_npu_funky_eco
+# cargo run --release --features npu --bin validate_npu_high_cadence
 
 # 8. Run Phase 2 cross-validation (75 values, Python vs Rust)
 cd .. && python3 scripts/cross_validate.py > /tmp/py.json
@@ -227,7 +235,7 @@ BEFORE evolving to Rust/BarraCuda.
 | `control/water_balance/fao56_water_balance.py` | FAO-56 Chapter 8 | 18/18 | TAW/RAW (3), Ks bounds (5), dry-down mass balance (2), irrigated mass balance (3), MI summer 535mm ET (3), heavy rain DP (2) |
 | `control/iot_irrigation/anova_irrigation.R` | Dong et al. 2024 (R v4.3.1) | — | Written, awaiting R install; one-way ANOVA on blueberry/tomato yield |
 
-**Total Python: 594/594 checks PASS, 22/22 baseline experiments PASS**
+**Total Python: 808/808 checks PASS, 32/32 baseline experiments PASS**
 **Exp 018 Atlas: 1393/1393 Rust checks PASS (100-station full Michigan, 10 crops, cross-validated vs Python)**
 **R ANOVA: script written, 1 skip (R not installed)**
 
@@ -274,9 +282,11 @@ Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2, Stewart 1977, CW2D media params)
 | validate_gdd | T1 | 26/26 | GDD accumulation, kc_from_gdd, phenology |
 | validate_pedotransfer | T1 | 58/58 | Saxton-Rawls 2006, θs/θr/Ks from texture |
 
-**Total Rust: 570 validation + 1393 atlas checks PASS, 491 tests PASS**
+**Total Rust: 853 validation + 1393 atlas checks PASS, 499 lib tests PASS**
 **Phase 2 cross-validation: 75/75 MATCH (Python↔Rust, tol=1e-5)**
 **Phase 3 GPU-first: 11 orchestrators wired, 4/4 ToadStool issues RESOLVED**
+**Phase 3.5 NPU edge: AKD1000 live, 3 experiments, 95/95 NPU checks, ~48µs inference**
+**Phase 3.7 metalForge mixed: CPU+GPU+NPU substrate routing, 14 eco workloads, 26 forge tests**
 **CPU benchmarks: ET₀ 12.7M station-days/s, dual Kc 59M days/s, mulched Kc 64M days/s**
 **Quality: zero `.unwrap()`, zero `panic!()`, zero `unsafe`, zero clippy pedantic warnings, all tolerances named `const`**
 
@@ -494,11 +504,58 @@ organic θs=0.60).
 - [x] Reuses `eco::richards` with CW2D media parameters
 - [x] `validate_cw2d` binary: 24/24 checks
 
+### Experiment 013: (Unassigned)
+
+Number 013 is reserved. Skipped in original numbering to avoid confusion
+with superseded experiment draft.
+
+### Experiment 014: Irrigation Scheduling Pipeline — PHASE 0+1 COMPLETE
+
+**Goal**: Complete "Penny Irrigation" pipeline comparison — 5 strategies
+(fixed, threshold, MAD50, MAD30, rainfed) with deterministic weather.
+
+**Phase 0 (Python baseline — 28/28 PASS):**
+- [x] Deterministic sinusoidal ET₀ + periodic rainfall
+- [x] 5 scheduling strategies × mass balance + yield ordering
+- [x] WUE comparison, irrigation efficiency metrics
+
+**Rust (Phase 1 — 28/28 PASS):**
+- [x] `validate_scheduling` binary: 28/28 checks vs benchmark JSON
+- [x] Ali, Dong & Lavely (2024) Ag Water Mgmt 306:109148
+
 ### Deferred: Agrivoltaics PAR — NOT STARTED
 
 **Goal**: Model photosynthetically active radiation interception under solar
 panel arrays for dual-use agriculture. Deferred until MSU Solar Farm data identified.
 (Originally Experiment 008; renumbered to avoid conflict with Yield Response.)
+
+### Experiment 016: Lysimeter ET Direct Measurement — PHASE 0+1 COMPLETE
+
+**Goal**: Validate lysimeter mass-to-ET conversion pipeline — load cell
+calibration, thermal drift correction, rain rejection, diurnal patterns.
+
+**Phase 0 (Python baseline — 22/22 PASS):**
+- [x] Mass-to-ET conversion, temperature compensation
+- [x] Data quality filtering, load cell calibration
+- [x] Hourly diurnal ET pattern, daily comparison vs ET₀
+
+**Rust (Phase 1 — 22/22 PASS):**
+- [x] `validate_lysimeter` binary: 22/22 checks vs benchmark JSON
+- [x] Dong & Hansen (2023) Smart Ag Tech 4:100147
+
+### Experiment 017: ET₀ Sensitivity Analysis — PHASE 0+1 COMPLETE
+
+**Goal**: OAT (one-at-a-time) ±10% perturbation of 6 input variables
+across 3 climatic conditions (humid, arid, continental).
+
+**Phase 0 (Python baseline — 30/30 PASS):**
+- [x] Baseline ET₀ for 3 climates
+- [x] Monotonicity, elasticity bounds, symmetry
+- [x] Ranking consistency (Gong et al. 2006)
+
+**Rust (Phase 1 — 30/30 PASS):**
+- [x] `validate_sensitivity` binary: 30/30 checks vs benchmark JSON
+- [x] Allen et al. (1998) FAO-56 Ch 4; Gong et al. (2006)
 
 ### Experiment 018: Michigan Crop Water Atlas — ACTIVE
 
@@ -607,6 +664,238 @@ properties (θs, θr, Ks) from texture (sand, clay, organic matter).
 
 ---
 
+### Experiment 024: NASS Yield Validation — PHASE 0+1 COMPLETE
+
+**Goal**: Validate the full airSpring pipeline (ET₀ → water balance → Stewart
+yield response) against physically consistent targets using Michigan crops,
+soils, and climate. Prepares infrastructure for scoring against real USDA NASS
+county-level yields when API access is available.
+
+**Phase 0 (Python baseline — 41/41 PASS):**
+- [x] Ky table consistency for 5 Michigan crops (FAO-56 Table 24)
+- [x] Drought response monotonicity (normal → mild → moderate → severe)
+- [x] Soil sensitivity (sandy_loam < loam < clay_loam under drought)
+- [x] Multi-year variability (20 years, corn on loam)
+- [x] Crop ranking (soybean > corn under drought, all in [0,1])
+- [x] Mass balance conservation (ETa ≤ ETc)
+
+**Rust (Phase 1 — 40/40 PASS):**
+- [x] `eco::yield_response` extended: `winter_wheat`, `dry_bean` added to `ky_table`
+- [x] `validate_nass_yield` binary: 40/40 checks
+- [x] NASS download script ready (`scripts/download_usda_nass.py`)
+
+---
+
+### Experiment 025: Forecast Scheduling Hindcast — PHASE 0+1 COMPLETE
+
+**Goal**: Evaluate 5-day weather forecast-driven irrigation scheduling vs
+perfect-knowledge scheduling (Exp 014). Tests forecast degradation, horizon
+sensitivity, and mass balance under stochastic forecast noise.
+
+**Phase 0 (Python baseline — 19/19 PASS):**
+- [x] Forecast vs perfect knowledge (yield gap, irrigation ratio)
+- [x] Noise sensitivity (low → extreme)
+- [x] Horizon impact (1, 3, 5, 7 days)
+- [x] Mass balance conservation
+- [x] Forecast vs rainfed (yield improvement, stress reduction)
+
+**Rust (Phase 1 — 19/19 PASS):**
+- [x] `validate_forecast` binary: 19/19 checks
+- [x] Deterministic RNG for reproducibility
+
+---
+
+### Experiment 026: USDA SCAN Soil Moisture Validation — PHASE 0+1 COMPLETE
+
+**Goal**: Validate Richards 1D solver against published USDA SCAN soil moisture
+profiles and Carsel & Parrish (1988) van Genuchten parameters for 3 representative
+Michigan soil textures (sand, silt loam, clay).
+
+**Phase 0 (Python baseline — 34/34 PASS):**
+- [x] VG retention curves match analytical Eq. 1 (8 test cases)
+- [x] Mualem-VG conductivity K/Ks ratios (6 test cases)
+- [x] Richards solver bounded θ profiles (3 soils × 3 checks)
+- [x] Ks and K(h) ordering: sand > silt_loam > clay
+- [x] Seasonal θ within SCAN-published ranges (3 soils × 2 seasons)
+- [x] Depth-dependent response to infiltration
+
+**Rust (Phase 1 — 34/34 PASS):**
+- [x] `validate_scan_moisture` binary: 34/34 checks
+- [x] Uses `eco::richards` + `eco::van_genuchten` library modules
+
+---
+
+### Experiment 027: Multi-Crop Water Budget Validation — PHASE 0+1 COMPLETE
+
+**Goal**: Exercise full FAO-56 pipeline (ET₀ → dual Kc → water balance → Stewart
+yield response) across 5 major Michigan crops with deterministic synthetic weather.
+Each crop×season is an independent GPU-parallelizable work unit.
+
+**Phase 0 (Python baseline — 47/47 PASS):**
+- [x] Single Kc irrigated water balance (5 crops × 2 checks)
+- [x] Rainfed scenario: stress, yield, zero irrigation (5 crops × 3 checks)
+- [x] Drought hierarchy: Potato drop > WinterWheat (shallow roots + high Ky)
+- [x] Irrigated yield >= rainfed for all 5 crops
+- [x] Dual Kc evaporation layer Ke > 0 (5 crops × 2 checks)
+- [x] Crop-water productivity ETa/yield in [200, 1200] mm
+
+**Rust (Phase 1 — 47/47 PASS):**
+- [x] `validate_multicrop` binary: 47/47 checks
+- [x] Uses `eco::water_balance` + `eco::yield_response` library modules
+
+---
+
+### Experiment 028: NPU Edge Inference for Agriculture — PHASE 1 COMPLETE
+
+**Goal**: Integrate BrainChip AKD1000 NPU via ToadStool `akida-driver` for edge
+inference workloads in agricultural monitoring. Validates int8 quantization fidelity,
+feature encoding for 3 crop/irrigation/anomaly classifiers, and live DMA round-trips.
+
+**metalForge forge crate** (`metalForge/forge/` — 26 tests, 21 validation checks):
+- [x] Substrate abstraction: CPU, GPU, NPU runtime discovery
+- [x] Capability-based dispatch: GPU > NPU > CPU priority routing
+- [x] 14 eco workloads: 9 GPU-absorbed, 3 NPU-native, 2 CPU-only
+- [x] Live inventory: i9-12900K, RTX 4070, TITAN V, AKD1000 all discovered
+- [x] All NPU workloads route to AKD1000 (quant int8)
+- [x] All GPU workloads route to RTX 4070 (f64 + shader)
+
+**barracuda NPU module** (`npu.rs`, feature-gated — 35/35 checks):
+- [x] `akida-driver` dependency (optional, `--features npu`)
+- [x] `NpuHandle`: discover, load, infer, raw DMA
+- [x] int8 quantization round-trip: <0.01 error on [0,1], <3mm on [0,300]
+- [x] Crop stress classifier: 4 features (depletion, ETa/ETc, θ, Ks) → 2 classes
+- [x] Irrigation decision: 6 features (ET₀, θ, TAW, stage, Ks, rain_prob) → 3 classes
+- [x] Sensor anomaly: 3 features (reading, mean, σ) → 2 classes
+- [x] Live AKD1000: 80 NPs, 10 MB SRAM, 0.5 GB/s PCIe
+- [x] DMA inference: ~84µs crop stress, ~64µs irrigation decision
+
+---
+
+### Experiment 029: Funky NPU for Agricultural IoT — PHASE 1 COMPLETE
+
+**Goal**: Demonstrate advanced AKD1000 capabilities for Dong's LOCOMOS-style
+field-deployed IoT systems. Bridge from lab compute to edge-sovereign agriculture.
+
+**S1 — Streaming Soil Moisture (6/6 PASS):**
+- 500-step synthetic sensor stream at 15-min cadence (5-day irrigation cycle)
+- Semi-trained FC classifier: normal/stressed/anomaly detection
+- CPU throughput: 2.6M Hz; **live AKD1000: 20,545 Hz, mean 48.7 µs, P99 68.9 µs**
+
+**S2 — Seasonal Weight Evolution (4/4 PASS):**
+- (1+1)-ES adapts crop stress weights across 3 seasonal phases (early/mid/late)
+- Fitness: 47–61% → 96–98% (monotonically non-decreasing)
+- Demonstrates online readout adaptation without full retraining
+
+**S3 — Multi-Crop Crosstalk (6/6 PASS):**
+- Rapid switching between corn/soybean/potato classifiers (100 rounds × 3 crops)
+- All responses deterministically stable (CPU); DMA path verified (live NPU)
+- Crops produce distinct responses — no classifier confusion
+
+**S4 — LOCOMOS Power Budget (7/7 PASS):**
+- 96 readings/day at 15-min cadence, Pi Zero 2 W + AKD1000
+- Daily energy: 2.53 Wh (505 mAh @ 5V) — 18650 battery feasible
+- 5W solar panel provides 20 Wh/day — 8× surplus
+- **NPU saves 10.7× active energy vs cloud round-trip**
+- NPU energy: 0.0009% of active cycle — negligible
+- Cost breakeven: 20 months ($99 NPU vs $60/yr cloud)
+
+**S5 — Noise Resilience (3/3 PASS):**
+- Anderson-style sweep: σ = 0.000 to 0.150 VWC
+- Classification robust across all noise levels (74.5–78.5%)
+
+**Live AKD1000 (6/6 PASS):** 500 streaming DMA round-trips, P99 < 1 ms
+
+---
+
+### Experiment 029b: High-Cadence NPU Streaming Pipeline — PHASE 1 COMPLETE
+
+**Goal**: Build out the cadence revolution — since NPU inference costs 0.0009%
+of active cycle energy, increase sensor cadence from 15-min to 1-min and burst.
+
+**S1 — Multi-Sensor Fusion (4/4 PASS):**
+- 6-feature input (θ + T + EC + depletion + hour + days_since_irr) → 4 classes
+- Single inference classifies full field state (normal/water_stress/salt_stress/anomaly)
+
+**S2 — 1-Minute Cadence (5/5 PASS):**
+- 1,440 readings/day (full 24-hour simulation at 1-min intervals)
+- **Daily energy at 1-min: 2.6 Wh** (NPU share: 0.0009%)
+- 13 state transitions detected across diurnal cycle
+
+**S3 — Burst Mode (4/4 PASS):**
+- 180 readings at 10-sec intervals (30-min irrigation event)
+- Infiltration front detected (θ̄ rises from 0.20 to 0.26)
+
+**S4 — Ensemble Classification (3/3 PASS):**
+- 10 weight sets per reading, consensus voting
+- Projected NPU ensemble: 480 µs (10 × 48 µs)
+
+**S5 — Sliding Window Anomaly (2/2 PASS):**
+- 60-reading buffer, 3-consecutive trigger threshold
+- Correctly fires on 3-glitch sequence, ignores single glitch
+
+**S6 — Weight Hot-Swap (3/3 PASS):**
+- 5 crops (corn/soybean/potato/tomato/blueberry) × 50 rounds
+- Projected NPU: 540 µs for 5-crop round-robin
+
+**Live AKD1000 (7/7 PASS):**
+- 1,440 DMA round-trips: mean 47.6 µs, P99 64.2 µs, 21,023 Hz
+- Weight hot-swap: 23.5 µs mean per crop load
+
+---
+
+### Experiment 030: AmeriFlux Eddy Covariance ET — PHASE 0+1 COMPLETE
+
+**Goal**: Validate airSpring FAO-56 PM ET₀ against direct eddy covariance ET
+measurements from the AmeriFlux network (Baldocchi 2003). Provides ground truth
+from energy balance closure — the "gold standard" for ET validation.
+
+**Phase 0 (Python baseline — 27/27 PASS):**
+- [x] AmeriFlux flux tower data parsing and quality filtering
+- [x] Energy balance closure checks (Rn - G ≈ H + LE)
+- [x] ET₀ vs eddy covariance ET comparison (R², RMSE, bias)
+- [x] Seasonal and diurnal pattern analysis
+
+**Rust (Phase 1 — 27/27 PASS):**
+- [x] `validate_ameriflux` binary: 27/27 checks
+- [x] Uses `eco::evapotranspiration` FAO-56 PM + Hargreaves
+
+---
+
+### Experiment 031: Hargreaves-Samani Temperature ET₀ — PHASE 0+1 COMPLETE
+
+**Goal**: Validate temperature-only ET₀ estimation (Hargreaves & Samani 1985,
+FAO-56 Eq. 52) for data-sparse environments where full PM inputs are unavailable.
+
+**Phase 0 (Python baseline — 24/24 PASS):**
+- [x] Hargreaves ET₀ analytical checks (climate gradient)
+- [x] Cross-validation vs PM (R², bias correction)
+- [x] Temperature sensitivity and latitude effects
+- [x] Monthly and seasonal totals
+
+**Rust (Phase 1 — 24/24 PASS):**
+- [x] `validate_hargreaves` binary: 24/24 checks
+- [x] Uses `eco::evapotranspiration::hargreaves_et0()`
+
+---
+
+### Experiment 032: Ecological Diversity Indices — PHASE 0+1 COMPLETE
+
+**Goal**: Validate ecological diversity metrics (Shannon, Simpson, Chao1,
+Pielou evenness, Bray-Curtis dissimilarity, rarefaction curves) for agroecosystem
+assessment — cover crop biodiversity, soil microbiome, field margin evaluation.
+
+**Phase 0 (Python baseline — 22/22 PASS):**
+- [x] Shannon, Simpson, richness index validation
+- [x] Pielou evenness (normalized Shannon)
+- [x] Bray-Curtis dissimilarity (pairwise)
+- [x] Rarefaction curve generation
+
+**Rust (Phase 1 — 22/22 PASS):**
+- [x] `validate_diversity` binary: 22/22 checks
+- [x] Uses `eco::diversity` (wired to `barracuda::stats::diversity` from wetSpring S64)
+
+---
+
 ### Experiment 009: FAO-56 Dual Crop Coefficient — PHASE 0 COMPLETE
 
 **Goal**: Implement the dual crop coefficient approach (Kcb + Ke) from FAO-56
@@ -628,12 +917,14 @@ Chapter 7, separating transpiration from soil evaporation for precision scheduli
 
 ```
 Track 1 (Precision Agriculture):
-  Phase 0  [COMPLETE]: Python baselines — 594/594 PASS (22 experiments)
+  Phase 0  [COMPLETE]: Python baselines — 808/808 PASS (32 experiments)
   Phase 0+ [COMPLETE]: Real data pipeline — 918 station-days, ET₀ R²=0.97
-  Phase 1  [COMPLETE]: Rust validation — 491 tests + 570 validation + 1393 atlas checks, 27 binaries
+  Phase 1  [COMPLETE]: Rust validation — 499 tests + 853 validation + 1393 atlas checks, 37 binaries
   Phase 1.5[COMPLETE]: CPU benchmark — Rust 69x faster than Python (geometric mean)
   Phase 2  [COMPLETE]: Cross-validation — 75/75 MATCH (Python↔Rust, tol=1e-5)
   Phase 3  [COMPLETE]: GPU bridge — 11 Tier A modules wired to ToadStool primitives
+  Phase 3.5[COMPLETE]: NPU edge — AKD1000 live, 3 experiments, ~48µs inference
+  Phase 3.7[COMPLETE]: metalForge mixed — CPU+GPU+NPU substrate routing, 14 eco workloads
   Phase 4:             Penny irrigation (sovereign, consumer hardware)
 
 Track 2 (Environmental Systems):
@@ -696,7 +987,8 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026 — Updated: February 26, 2026 (v0.4.8)*
-*22 experiments, 594/594 Python, 491 Rust tests + 570 validation + 1393 atlas checks, 27 binaries, 75/75 cross-validation, 100 Michigan stations.*
-*Rust 69x faster than Python (geometric mean). 11 Tier A wired modules. 97.45% coverage.*
+*Initialized: February 16, 2026 — Updated: February 27, 2026 (v0.5.0)*
+*32 experiments, 808/808 Python, 499 Rust tests + 853 validation + 1393 atlas checks, 38 binaries, 75/75 cross-validation, 100 Michigan stations.*
+*Rust 69x faster than Python (geometric mean). 11 Tier A GPU modules. AKD1000 NPU live (3 experiments).*
+*metalForge mixed hardware dispatch (CPU+GPU+NPU). ToadStool S68 synced.*
 *Quality: zero .unwrap(), zero unsafe, zero clippy pedantic + nursery warnings. AGPL-3.0-or-later.*

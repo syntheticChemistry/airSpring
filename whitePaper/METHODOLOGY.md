@@ -1,6 +1,7 @@
 # Validation Methodology
 
 **Purpose**: Document the multi-phase validation approach used in the airSpring study
+**Version**: v0.5.0
 **See also**: [STUDY.md](STUDY.md) for complete results
 
 ---
@@ -39,7 +40,7 @@ Re-implement the same computations in pure Rust using BarraCuda. Compare:
 - **Reproducibility**: Deterministic results
 - **GPU readiness**: Architecture suitable for ToadStool GPU acceleration
 - **Code quality**: Zero clippy pedantic and nursery warnings, proper error types, idiomatic Rust
-- **Binaries**: 27 binaries (24 validate_*, 2 bench_*, cross_validate, simulate_season)
+- **Binaries**: 51 binaries (47 barracuda + 4 forge)
 
 ### Phase 2: Cross-Validation (Python↔Rust)
 
@@ -168,18 +169,18 @@ All experiments run on a single consumer workstation:
 | IoT Pipeline | SoilWatch 10 + irrigation correct | — | CSV stats + calibration match | ≤1e-5 tolerance |
 | Water Balance | Mass balance < 0.001 mm | Savings per Dong (2024) | Mass balance match Python | ≤1e-5 tolerance |
 
-### Grand Total: 594 Python + 491 Rust Tests + 570 Validation + 1393 Atlas + 15,300 Real Data Points
+### Grand Total: 1054 Python + 645 Rust Tests + 946 Validation + 1393 Atlas + 15,300 Real Data Points
 
 | Phase | Checks | Description |
 |-------|:------:|-------------|
-| Phase 0 (Python control) | 594 | 22 experiments: FAO-56, soil, IoT, water balance, dual Kc, cover crops, regional ET₀, Richards, biochar, 60yr WB, yield, CW2D, scheduling, lysimeter, sensitivity, PT ET₀, ET₀ intercomparison, Thornthwaite, GDD, pedotransfer |
-| Phase 1 (Rust validation) | 27 binaries | All pass: same benchmarks validated in Rust |
-| Phase 1 (Rust tests) | 491 | lib + integration + doc |
-| Phase 1 (Rust validation checks) | 570 | validate_* binaries |
+| Phase 0 (Python control) | 1054 | 44 experiments: FAO-56, soil, IoT, water balance, dual Kc, cover crops, regional ET₀, Richards, biochar, 60yr WB, yield, CW2D, scheduling, lysimeter, sensitivity, PT ET₀, ET₀ intercomparison, Thornthwaite, GDD, pedotransfer |
+| Phase 1 (Rust validation) | 51 binaries | All pass: same benchmarks validated in Rust |
+| Phase 1 (Rust tests) | 645 | lib + integration + doc |
+| Phase 1 (Rust validation checks) | 946 | validate_* binaries (excluding atlas) |
 | Phase 1 (Atlas validation) | 1393 | 100 Michigan stations × 13 checks each |
 | Phase 1.5 (CPU benchmark) | — | Rust 69x faster than Python (geometric mean, 20x–502x) |
 | Phase 2 (Cross-validation) | 75 + 690 | Python↔Rust identical (tol=1e-5); 690 crop-station yield pairs within 0.01 |
-| **Total** | **594 + 491 + 570 + 1393 + 75** | **All pass** |
+| **Total** | **1054 + 645 + 946 + 1393 + 75** | **All pass** |
 | Phase 0+ (Real data) | 15,300 station-days | R²=0.967, 100 Michigan stations, zero synthetic |
 
 ---

@@ -1,0 +1,102 @@
+{
+  "_provenance": {
+    "method": "AmeriFlux/FLUXNET eddy covariance ET validation",
+    "baseline_script": "control/ameriflux_et/ameriflux_et_validation.py",
+    "baseline_commit": "fad2e1b",
+    "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
+    "baseline_command": "python3 control/ameriflux_et/ameriflux_et_validation.py",
+    "python_version": "3.10",
+    "created": "2026-02-26",
+    "references": [
+      "Baldocchi (2003) Global Change Biology 9(4):479-492, DOI:10.1046/j.1365-2486.2003.00629.x",
+      "Allen et al. (1998) FAO-56: Crop evapotranspiration",
+      "Wilson et al. (2002) Ag Forest Met 113:223-243, DOI:10.1016/S0168-1923(02)00109-0",
+      "AmeriFlux: https://ameriflux.lbl.gov/ (US-Ne1/2/3 Mead NE, US-Bo1/2 Bondville IL)"
+    ],
+    "notes": [
+      "Exp 030: Model-vs-measurement validation of FAO-56 ET₀ × Kc against EC towers",
+      "Test cases use published midwestern summer conditions + analytical LE→ET math",
+      "ET₀×Kc vs EC comparison uses representative EC-measured ET from Mead/Bondville literature",
+      "Energy balance closure set to typical 0.85-0.92 per Wilson et al. (2002)"
+    ]
+  },
+  "validation_checks": {
+    "le_to_et_conversion": {
+      "description": "Convert latent heat flux LE (W/m²) to ET (mm/day): ET = LE × 0.0864 / λ",
+      "test_cases": [
+        {"le_w_m2": 0.0,   "expected_et_mm_day": 0.0,    "tolerance": 1e-10},
+        {"le_w_m2": 28.36, "expected_et_mm_day": 1.0001,   "tolerance": 0.001},
+        {"le_w_m2": 56.71, "expected_et_mm_day": 1.9999,  "tolerance": 0.001},
+        {"le_w_m2": 100.0, "expected_et_mm_day": 3.5265,  "tolerance": 0.001},
+        {"le_w_m2": 170.0, "expected_et_mm_day": 5.9951,  "tolerance": 0.001},
+        {"le_w_m2": 250.0, "expected_et_mm_day": 8.8163,  "tolerance": 0.001}
+      ]
+    },
+    "energy_balance_closure": {
+      "description": "EBC ratio = (H+LE)/(Rn-G). Typical EC towers: 0.80-0.95 (Wilson 2002)",
+      "test_cases": [
+        {"rn": 300.0, "g": 30.0, "h": 80.0, "le": 150.0, "expected_closure": 0.8519, "tolerance": 0.001},
+        {"rn": 400.0, "g": 40.0, "h": 100.0, "le": 230.0, "expected_closure": 0.9167, "tolerance": 0.001},
+        {"rn": 500.0, "g": 50.0, "h": 50.0,  "le": 350.0, "expected_closure": 0.8889, "tolerance": 0.001},
+        {"rn": 250.0, "g": 20.0, "h": 120.0, "le": 80.0,  "expected_closure": 0.8696, "tolerance": 0.001}
+      ]
+    },
+    "bowen_ratio": {
+      "description": "β = H/LE. Low β (<0.5) → irrigated/wet; high β (>2) → arid",
+      "test_cases": [
+        {"h": 50.0,  "le": 200.0, "expected_beta": 0.25,  "tolerance": 0.001},
+        {"h": 100.0, "le": 150.0, "expected_beta": 0.6667, "tolerance": 0.001},
+        {"h": 200.0, "le": 80.0,  "expected_beta": 2.5,    "tolerance": 0.001},
+        {"h": 30.0,  "le": 250.0, "expected_beta": 0.12,   "tolerance": 0.001}
+      ]
+    },
+    "priestley_taylor_alpha": {
+      "description": "Back-calculate α from measured ET: α = ET / [Δ/(Δ+γ) × (Rn-G)]. Literature: α ≈ 1.26",
+      "test_cases": [
+        {"et_measured_mm": 4.0, "delta": 0.145, "gamma": 0.067, "rn_minus_g_mm": 4.62, "expected_alpha": 1.2659, "tolerance": 0.01},
+        {"et_measured_mm": 5.5, "delta": 0.189, "gamma": 0.067, "rn_minus_g_mm": 5.97, "expected_alpha": 1.2479, "tolerance": 0.01},
+        {"et_measured_mm": 2.0, "delta": 0.100, "gamma": 0.067, "rn_minus_g_mm": 2.83, "expected_alpha": 1.1802, "tolerance": 0.01}
+      ]
+    },
+    "et0_kc_vs_ec": {
+      "description": "FAO-56 ET₀ × Kc vs representative EC-measured ET for Midwest summer conditions",
+      "test_cases": [
+        {
+          "label": "Mead NE irrigated corn (US-Ne1), mid-July, Kc=1.20",
+          "tmin": 20.0, "tmax": 33.0, "rh_mean": 65.0, "u2": 2.5,
+          "rn_mj": 18.0, "g_mj": 0.5, "altitude": 361.0,
+          "kc": 1.20, "et_measured_mm": 7.0, "max_abs_diff": 2.0
+        },
+        {
+          "label": "Bondville IL corn-soy (US-Bo1), mid-July, Kc=1.15",
+          "tmin": 19.0, "tmax": 31.0, "rh_mean": 70.0, "u2": 2.0,
+          "rn_mj": 16.5, "g_mj": 0.4, "altitude": 213.0,
+          "kc": 1.15, "et_measured_mm": 6.2, "max_abs_diff": 2.0
+        },
+        {
+          "label": "Mead NE rainfed corn (US-Ne3), mid-July, Kc=1.10",
+          "tmin": 20.0, "tmax": 34.0, "rh_mean": 60.0, "u2": 2.8,
+          "rn_mj": 18.5, "g_mj": 0.6, "altitude": 361.0,
+          "kc": 1.10, "et_measured_mm": 5.5, "max_abs_diff": 2.5
+        },
+        {
+          "label": "Mead NE irrigated soybean (US-Ne2), mid-August, Kc=1.15",
+          "tmin": 18.0, "tmax": 30.0, "rh_mean": 68.0, "u2": 2.2,
+          "rn_mj": 15.0, "g_mj": 0.3, "altitude": 361.0,
+          "kc": 1.15, "et_measured_mm": 5.0, "max_abs_diff": 2.0
+        }
+      ]
+    },
+    "seasonal_consistency": {
+      "description": "Structural checks on seasonal ET patterns (must hold for any valid EC data)",
+      "test_cases": [
+        {"label": "Summer ET > winter ET for temperate sites", "expected": true},
+        {"label": "Irrigated ET >= rainfed ET for same crop and weather", "expected": true},
+        {"label": "Corn peak Kc (1.15-1.20) higher than soybean peak Kc (1.10-1.15)", "expected": true},
+        {"label": "Energy balance closure ratio in [0.70, 1.10] for credible towers", "expected": true},
+        {"label": "Bowen ratio < 1.0 for irrigated midwestern summer", "expected": true},
+        {"label": "LE dominates energy partition (LE > H) in growing season", "expected": true}
+      ]
+    }
+  }
+}

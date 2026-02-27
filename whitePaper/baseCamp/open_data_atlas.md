@@ -6,7 +6,7 @@
 **Dependencies:** Existing validated models only — no new code required
 **Cross-Spring:** None (airSpring standalone)
 
-**Operational:** 100 stations, 1354/1354 checks, 15,300 station-days (`validate_atlas` binary).
+**Operational:** 100 stations, 1393/1393 checks, 15,300 station-days (`validate_atlas` binary).
 
 ---
 
@@ -67,7 +67,7 @@ Total new data: < 1GB. No API keys required.
 3. ~~Run `validate_atlas` across all stations (1354/1354 checks)~~ ✓
 4. Store results with NestGate provenance (when available) or local JSON
 
-**Delivered:** 100 stations, 15,300 station-days, 1354/1354 atlas checks PASS.
+**Delivered:** 100 stations, 15,300 station-days, 1393/1393 atlas checks PASS.
 
 ### Phase 2: Multi-crop water budgets
 1. Digitize FAO-56 Kc for 40+ Michigan-relevant crops

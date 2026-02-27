@@ -1,0 +1,98 @@
+{
+    "experiment": "Exp 037 — ET₀ Ensemble Consensus (7-Method Weighted)",
+    "description": "Combine 6 daily ET₀ methods into a weighted consensus estimate. Data-adaptive: weights reflect available input data. Thornthwaite excluded (monthly method, requires annual heat index). Full-weather stations use 6 methods; temperature-only stations use 2 (Hargreaves + Hamon).",
+    "method": "Equal-weight mean of available daily ET₀ methods, with data-availability gating",
+    "references": [
+        "Allen et al. (1998) FAO-56 — Penman-Monteith as benchmark",
+        "Oudin et al. (2005) Which potential evapotranspiration input for a lumped rainfall-runoff model? J Hydrol 303:290-306",
+        "Droogers & Allen (2002) Estimating reference evapotranspiration under inaccurate data conditions, Irrig Drain Syst 16:33-45"
+    ],
+    "validation_checks": {
+        "full_weather_ensemble": {
+            "description": "All 7 methods available — full weather station data",
+            "test_cases": [
+                {
+                    "label": "Ithaca July (FAO-56 Example 18)",
+                    "tmin": 12.3, "tmax": 21.5, "tmean": 16.9,
+                    "rs_mj": 22.07, "wind_speed_2m": 2.078,
+                    "e_a": 1.409, "rh_pct": 66.5,
+                    "elevation_m": 100.0, "latitude_deg": 50.8,
+                    "day_of_year": 187, "day_length_hours": 16.1,
+                    "pm_reference": 3.88,
+                    "tolerance": 1.5,
+                    "note": "Ensemble naturally diverges from PM (Hargreaves pull); 1.5 mm/day tolerance"
+                },
+                {
+                    "label": "Hot arid (T=35, Rs=28, low RH)",
+                    "tmin": 25.0, "tmax": 35.0, "tmean": 30.0,
+                    "rs_mj": 28.0, "wind_speed_2m": 3.0,
+                    "e_a": 1.5, "rh_pct": 30.0,
+                    "elevation_m": 50.0, "latitude_deg": 30.0,
+                    "day_of_year": 200, "day_length_hours": 14.0,
+                    "tolerance": 1.5
+                },
+                {
+                    "label": "Cool humid (T=10, Rs=8, high RH)",
+                    "tmin": 5.0, "tmax": 15.0, "tmean": 10.0,
+                    "rs_mj": 8.0, "wind_speed_2m": 1.5,
+                    "e_a": 0.9, "rh_pct": 80.0,
+                    "elevation_m": 200.0, "latitude_deg": 55.0,
+                    "day_of_year": 100, "day_length_hours": 14.5,
+                    "tolerance": 0.5
+                }
+            ]
+        },
+        "temperature_only_ensemble": {
+            "description": "Only temperature available — Hargreaves + Hamon active",
+            "test_cases": [
+                {
+                    "label": "Summer T=25 (temp only)",
+                    "tmin": 20.0, "tmax": 30.0, "tmean": 25.0,
+                    "elevation_m": 100.0,
+                    "latitude_deg": 42.0, "day_of_year": 180,
+                    "day_length_hours": 15.0,
+                    "tolerance": 2.0,
+                    "note": "Wider tolerance — temperature-only methods diverge more"
+                },
+                {
+                    "label": "Winter T=0 (temp only)",
+                    "tmin": -5.0, "tmax": 5.0, "tmean": 0.0,
+                    "elevation_m": 100.0,
+                    "latitude_deg": 42.0, "day_of_year": 15,
+                    "day_length_hours": 9.2,
+                    "tolerance": 1.0
+                }
+            ]
+        },
+        "method_ranking": {
+            "description": "Verify ensemble captures spread and consensus",
+            "test_cases": [
+                {
+                    "label": "Spread should be positive",
+                    "tmean": 20.0, "rs_mj": 15.0, "rh_pct": 60.0,
+                    "elevation_m": 100.0, "latitude_deg": 45.0,
+                    "day_of_year": 150, "day_length_hours": 15.0,
+                    "tmin": 15.0, "tmax": 25.0,
+                    "wind_speed_2m": 2.0, "e_a": 1.2,
+                    "check": "spread_positive"
+                },
+                {
+                    "label": "Consensus within individual method range",
+                    "tmean": 20.0, "rs_mj": 15.0, "rh_pct": 60.0,
+                    "elevation_m": 100.0, "latitude_deg": 45.0,
+                    "day_of_year": 150, "day_length_hours": 15.0,
+                    "tmin": 15.0, "tmax": 25.0,
+                    "wind_speed_2m": 2.0, "e_a": 1.2,
+                    "check": "consensus_in_range"
+                }
+            ]
+        },
+        "monotonicity": {
+            "description": "Ensemble ET₀ increases with temperature",
+            "test_cases": [
+                { "base_tmean": 10.0, "step_tmean": 20.0, "rs_mj": 15.0, "rh_pct": 60.0, "elevation_m": 100.0, "latitude_deg": 45.0, "day_of_year": 180, "day_length_hours": 15.0, "tmin_offset": -5.0, "tmax_offset": 5.0, "wind_speed_2m": 2.0, "e_a": 1.0 },
+                { "base_tmean": 20.0, "step_tmean": 30.0, "rs_mj": 15.0, "rh_pct": 60.0, "elevation_m": 100.0, "latitude_deg": 45.0, "day_of_year": 180, "day_length_hours": 15.0, "tmin_offset": -5.0, "tmax_offset": 5.0, "wind_speed_2m": 2.0, "e_a": 1.5 }
+            ]
+        }
+    }
+}

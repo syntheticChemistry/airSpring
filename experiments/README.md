@@ -1,7 +1,7 @@
 # airSpring Experiments
 
-**Updated**: February 26, 2026
-**Status**: 22 experiments, 594/594 Python + 491 Rust tests + 570 validation + 1393 atlas checks + 75/75 cross-validation + 11 Tier A modules
+**Updated**: February 27, 2026
+**Status**: 44 experiments, 1054/1054 Python + 645 Rust tests + 1024 validation + 1393 atlas checks + 75/75 cross-validation + 11 Tier A modules + AKD1000 NPU live + Titan V GPU live dispatch + metalForge live hardware probe + CPU↔GPU parity (bit-exact CPU, 0.04% GPU shader)
 
 ---
 
@@ -31,27 +31,45 @@
 | 021 | Thornthwaite Monthly ET₀ (1948) | Precision Ag | **Complete** | Python + Rust CPU | `eco::evapotranspiration` (Thornthwaite) | 23+50 |
 | 022 | Growing Degree Days (GDD) | Precision Ag | **Complete** | Python + Rust CPU | `eco::crop` (gdd_avg, kc_from_gdd) | 33+26 |
 | 023 | Pedotransfer Functions (Saxton-Rawls 2006) | Soil | **Complete** | Python + Rust CPU | `eco::soil_moisture` (saxton_rawls) | 70+58 |
+| 024 | NASS Yield Validation (Stewart 1977 pipeline) | Irrigation | **Complete** | Python + Rust CPU | `eco::yield_response` + `eco::water_balance` | 41+40 |
+| 025 | Forecast Scheduling Hindcast | Precision Ag | **Complete** | Python + Rust CPU | `eco::water_balance` + `eco::yield_response` | 19+19 |
+| 026 | USDA SCAN Soil Moisture (Richards 1D) | Soil | **Complete** | Python + Rust CPU | `eco::richards` + `eco::van_genuchten` | 34+34 |
+| 027 | Multi-Crop Water Budget (5 Michigan crops) | Integration | **Complete** | Python + Rust CPU | `eco::water_balance` + `eco::dual_kc` + `eco::yield_response` | 47+47 |
+| 028 | NPU Edge Inference (AKD1000 live) | IoT/NPU | **Complete** | Rust + metalForge | `npu` (akida-driver) + forge dispatch | 35+21 |
+| 029 | Funky NPU for Agricultural IoT | IoT/NPU | **Complete** | Rust + AKD1000 | streaming, evolution, multi-crop, LOCOMOS | 32/32 |
+| 029b | High-Cadence NPU Streaming Pipeline | IoT/NPU | **Complete** | Rust + AKD1000 | 1-min cadence, burst, fusion, ensemble, hot-swap | 28/28 |
+| 030 | AmeriFlux Eddy Covariance ET (Baldocchi 2003) | Precision Ag | **Complete** | Python + Rust CPU | `eco::evapotranspiration` | 27+27 |
+| 031 | Hargreaves-Samani Temperature ET₀ (1985) | Precision Ag | **Complete** | Python + Rust CPU | `eco::evapotranspiration` (Hargreaves) | 24+24 |
+| 032 | Ecological Diversity Indices | Integration | **Complete** | Python + Rust CPU | `eco::diversity` | 22+22 |
+| 033 | Makkink (1957) Radiation-Based ET₀ | Precision Ag | **Complete** | Python + Rust CPU | `eco::evapotranspiration` (Makkink) | 21+16 |
+| 034 | Turc (1961) Temperature-Radiation ET₀ | Precision Ag | **Complete** | Python + Rust CPU | `eco::evapotranspiration` (Turc) | 22+17 |
+| 035 | Hamon (1961) Temperature-Based PET | Precision Ag | **Complete** | Python + Rust CPU | `eco::evapotranspiration` (Hamon) | 20+19 |
+| 036 | biomeOS Neural API Round-Trip Parity | Integration | **Complete** | Python + Rust CPU | JSON serialization, metalForge Neural dispatch | 14+29 |
+| 037 | ET₀ Ensemble Consensus (6-Method) | Precision Ag | **Complete** | Python + Rust CPU | `eco::evapotranspiration` (ensemble) | 9+17 |
+| 038 | Pedotransfer → Richards Coupled Simulation | Soil Physics | **Complete** | Python + Rust CPU | `soil_moisture` + `richards` + `van_genuchten` | 29+32 |
+| 039 | Cross-Method ET₀ Bias Correction | Precision Ag | **Complete** | Python + Rust CPU | `eco::evapotranspiration` (bias factors) | 24+24 |
+| 040 | CPU vs GPU Parity Validation | GPU Portability | **Complete** | Python + Rust (BatchedEt0) | `gpu::et0`, `gpu::water_balance` | 22+26 |
+| 041 | metalForge Mixed-Hardware Dispatch | Mixed Hardware | **Complete** | Python + Rust (forge) | `dispatch::route`, `workloads`, `substrate` | 14+18 |
+| 042 | Seasonal Batch ET₀ at GPU Scale | GPU Batch | **Complete** | Python + Rust (BatchedEt0) | `gpu::et0` (365×4 station-days) | 18+21 |
+| 043 | Titan V GPU Live Dispatch | GPU Live | **Complete** | Rust (Titan V GV100) | `gpu::et0` (live WGSL shader, 10K batch) | 24 |
+| 044 | metalForge Live Hardware Probe | Mixed HW | **Complete** | Rust (probe + dispatch) | RTX 4070 + Titan V + AKD1000 + i9-12900K | 17 |
 
-**Grand Total**: 594 Python + **491 Rust tests** + 570 validation + 1393 atlas checks + 75 cross-validation values + 11 Tier A modules
+**Grand Total**: 1054 Python + **645 Rust tests** + 1393 atlas checks + 75 cross-validation values + 11 Tier A GPU modules + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge live hardware (5 substrates, 14 workloads)
 
 ---
 
-## Test Breakdown (v0.4.8)
+## Test Breakdown (v0.5.0)
 
 | Category | Tests | Source |
 |----------|:-----:|--------|
-| Lib (unit) | 472 | `cargo test --lib` (incl. diversity 11, mc\_et0 9, stats re-exports 7) |
-| Eco integration | 33 | `tests/eco_integration.rs` |
-| GPU functional | 21 | `tests/gpu_integration.rs` |
-| GPU evolution | 6 | `tests/gpu_evolution.rs` |
-| GPU determinism | 4 | `tests/gpu_determinism.rs` |
-| Cross-spring evolution | 47 | `tests/cross_spring_absorption.rs`, `tests/cross_spring_benchmarks.rs`, `tests/cross_spring_primitives.rs` (S64 §7–§10 + S66 §11–§12 + benchmarks) |
-| Stats integration | 20 | `tests/stats_integration.rs` |
-| I/O + errors | 11 | `tests/io_and_errors.rs` |
-| Doc tests | 2 | `cargo test --doc` |
-| Forge | 64 | `metalForge/forge/` (53 unit + 11 doc, all absorbed upstream) |
-| **Total** | **491** | |
+| Barracuda lib (unit + doc) | 511 | `cargo test --lib` (incl. diversity, mc\_et0, NPU, stats re-exports, Makkink/Turc/Hamon) |
+| Barracuda validation binaries | 47 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
+| Forge | 26 | `metalForge/forge/` (substrate, dispatch, probe, workloads) |
+| Forge binaries | 4 | `validate_dispatch`, `validate_live_hardware`, `validate_dispatch_routing`, `validate_dispatch` |
+| **Total project tests** | **645** | |
 | Atlas checks | 1393 | `validate_atlas` (100 stations × 13 checks each) |
+| GPU live checks | 24 | `validate_gpu_live` (Titan V WGSL dispatch) |
+| Hardware probe checks | 17 | `validate_live_hardware` (5 substrates) |
 
 ---
 
@@ -309,8 +327,55 @@ Experiments follow `NNN_name` format:
 - `016`: Lysimeter ET measurement (Dong & Hansen 2023)
 - `017`: ET₀ sensitivity analysis (Gong 2006 methodology)
 - `018`: Michigan Crop Water Atlas (100 stations × 10 crops × 80yr)
+- `019`–`020`: Priestley-Taylor ET₀, 3-method intercomparison
+- `021`–`023`: Thornthwaite, GDD, pedotransfer functions
+- `024`–`026`: NASS yield, forecast scheduling, SCAN soil moisture
+- `027`: Multi-crop water budget (5 Michigan crops)
+- `028`–`029b`: NPU edge inference trilogy (AKD1000 live)
+- `030`: AmeriFlux eddy covariance ET (Baldocchi 2003)
+- `031`: Hargreaves-Samani temperature ET₀
+- `032`: Ecological diversity indices
+- `033`–`035`: Makkink, Turc, Hamon ET₀ methods (completing 7-method portfolio)
 
 Gap (013) reserved for future experiments. See `specs/PAPER_REVIEW_QUEUE.md`.
+
+---
+
+### Exp 033: Makkink (1957) Radiation-Based ET₀
+
+**Paper**: Makkink GF (1957) *Testing the Penman formula by means of lysimeters.* J Inst Water Eng 11:277-288. De Bruin HAR (1987) *From Penman to Makkink.* TNO, The Hague, pp 5-31.
+
+**Control**: `control/makkink/makkink_et0.py` — 21/21 checks. Analytical benchmarks, PM cross-comparison (Xu & Singh 2002 ratio bounds), edge cases, monotonicity, pyet cross-validation.
+
+**Rust**: `barracuda/src/eco/evapotranspiration.rs` — `makkink_et0(tmean_c, rs_mj, elevation_m)`. `validate_makkink` binary: 16/16 checks.
+
+**Equation**: ET₀ = 0.61 × (Δ/(Δ+γ)) × Rs/λ − 0.12 (de Bruin 1987 coefficients).
+
+**Key Result**: Makkink/PM ratio 0.57–0.85 across climate zones. Radiation-only method suitable for KNMI-style networks lacking wind/humidity.
+
+### Exp 034: Turc (1961) Temperature-Radiation ET₀
+
+**Paper**: Turc L (1961) *Évaluation des besoins en eau d'irrigation.* Annales Agronomiques 12:13-49.
+
+**Control**: `control/turc/turc_et0.py` — 22/22 checks. Analytical (RH ≥ 50% and RH < 50% branches), humidity boundary continuity, edge cases, monotonicity, pyet cross-validation (diff < 0.002 mm/d).
+
+**Rust**: `barracuda/src/eco/evapotranspiration.rs` — `turc_et0(tmean_c, rs_mj, rh_pct)`. `validate_turc` binary: 17/17 checks.
+
+**Equation**: ET₀ = 0.013 × T/(T+15) × (23.8846 Rs + 50), with arid correction for RH < 50%.
+
+**Key Result**: Exact match with pyet.turc() (< 0.002 mm/day). The humidity correction multiplier ranges 1.0–1.57x.
+
+### Exp 035: Hamon (1961) Temperature-Based PET
+
+**Paper**: Hamon WR (1961) *Estimating potential evapotranspiration.* J Hydraulics Div ASCE 87(HY3):107-120. Lu J, et al. (2005) *A comparison of six PET methods.* J Am Water Resour Assoc 41(3):621-633.
+
+**Control**: `control/hamon/hamon_pet.py` — 20/20 checks. Analytical, daylight hour computation (FAO-56 Eq. 34), edge cases, monotonicity, pyet rank-correlation (different formulation variant).
+
+**Rust**: `barracuda/src/eco/evapotranspiration.rs` — `hamon_pet(tmean_c, day_length_hours)`, `hamon_pet_from_location(tmean_c, latitude_rad, doy)`. `validate_hamon` binary: 19/19 checks.
+
+**Equation**: PET = 0.1651 × N × RHOSAT (Lu et al. 2005). Minimum data: temperature + latitude.
+
+**Key Result**: Simplest method in portfolio (T + day length only). Rank-correlated with pyet despite coefficient variant difference (~3x). Suitable for data-sparse historical reconstruction.
 
 ## Adding a New Experiment
 

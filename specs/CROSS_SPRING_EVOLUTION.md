@@ -1,6 +1,6 @@
 # Cross-Spring Shader Evolution — airSpring Provenance
 
-**Updated**: February 26, 2026 (v0.4.8, ToadStool HEAD `f0feb226` — S68)
+**Updated**: February 27, 2026 (v0.5.0, ToadStool HEAD `89356efa` — S68)
 
 ## Summary
 
@@ -189,6 +189,9 @@ module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 | Feb 26 | airSpring S68 sync | Added `tracing-subscriber` for `ValidationHarness` output, wired `init_tracing()` into all 22 binaries, 10 new S68 cross-spring evolution tests (regression, hydrology, diversity, moving_window, Brent, Spearman, bootstrap, atlas pipeline, Richards benchmarks). 608 cargo tests + 1354 atlas checks all pass |
 | Feb 26 | airSpring v0.4.7: PT + intercomparison | Priestley-Taylor ET₀ (Exp 019), 3-method intercomparison (Exp 020). 24 binaries, 616 Rust tests + 1393 atlas. Cross-spring test files split: `cross_spring_absorption.rs`, `cross_spring_benchmarks.rs`, `cross_spring_primitives.rs` |
 | Feb 26 | airSpring v0.4.8: Thornthwaite + GDD + pedotransfer | Thornthwaite monthly ET₀ (Exp 021), GDD phenology (Exp 022), Saxton-Rawls pedotransfer (Exp 023). 22 experiments, 594/594 Python, 491 Rust tests + 570 validation + 1393 atlas, 27 binaries. V022 handoff |
+| Feb 26 | airSpring v0.4.11: NASS yield, forecast, SCAN, multicrop, NPU trilogy, AmeriFlux, Hargreaves, diversity | 32 experiments, 808/808 Python, 499 Rust tests + 853 validation + 1393 atlas, 38 binaries. AKD1000 NPU live. metalForge mixed hardware |
+| Feb 27 | airSpring v0.4.12: Debt resolution, clippy pedantic, tolerance centralization, CI coverage gate, primal self-knowledge | V024 handoff: error type evolution, NPU convergence (3 Springs), barracuda delegation inventory |
+| Feb 27 | airSpring v0.5.0: 12 new experiments (Exp 033-044), Titan V GPU live, metalForge live hardware | 44 experiments, 1054/1054 Python, 645 Rust tests + 1393 atlas, 51 binaries. Titan V 24/24 PASS (0.04% seasonal parity). metalForge 5 live substrates (RTX 4070 + Titan V + AKD1000 + i9-12900K). V028 ToadStool absorption handoff |
 
 ---
 

@@ -2,7 +2,7 @@
 
 **Status**: Working draft — reviewed for PII, suitable for public repository
 **Purpose**: Document the replication of precision agriculture computational methods on consumer hardware using BarraCuda
-**Date**: February 2026 (v0.4.8)
+**Date**: February 2026 (v0.5.0)
 
 ---
 
@@ -23,13 +23,13 @@ airSpring replicates published precision irrigation, soil science, and environme
 The study answers four questions:
 
 1. **Can published agricultural science be independently reproduced using open tools?**
-   Answer: yes — 594/594 Python checks pass against digitized paper benchmarks (FAO-56 examples, Dong 2020 soil sensor data, Dong 2024 IoT irrigation, Richards equation, biochar isotherms, yield response, CW2D, 60-year water balance, Priestley-Taylor ET₀, ET₀ 3-method intercomparison, Thornthwaite, GDD, pedotransfer).
+   Answer: yes — 1054/1054 Python checks pass against digitized paper benchmarks (FAO-56 examples, Dong 2020 soil sensor data, Dong 2024 IoT irrigation, Richards equation, biochar isotherms, yield response, CW2D, 60-year water balance, Priestley-Taylor ET₀, ET₀ 3-method intercomparison, Thornthwaite, GDD, pedotransfer).
 
 2. **Can open data replace institutional weather station access?**
    Answer: yes — Open-Meteo (free, no key, 80+ years) provides real historical Michigan weather at 10km resolution. Our FAO-56 ET₀ matches Open-Meteo's independent computation with R²=0.967 across 15,300 station-days. NOAA CDO and OpenWeatherMap supplement with GHCND daily records and real-time forecasts.
 
 3. **Can Rust + WebGPU replace Python/Excel for precision agriculture?**
-   Answer: yes (validation complete) — Rust BarraCuda passes 491 tests + 570 validation + 1393 atlas checks across 27 binaries (97.45% coverage, pedantic + nursery 0 warnings). A cross-validation harness confirms 75/75 Python-Rust value matches within 1e-5 tolerance; 690 crop-station yield pairs within 0.01. 11 Tier A modules wired to ToadStool/BarraCuda primitives including Richards PDE, isotherm fitting, MC ET₀ uncertainty (parametric CI via `norm_ppf`), VG pressure head inversion (via `brent`), and agroecological diversity. S66 resolves the P0 GPU dispatch blocker — GPU-first paths now stable. CPU benchmarks: 12.7M ET₀/s, 35.8M VG θ/s, 175K NM fits/s.
+   Answer: yes (validation complete) — Rust BarraCuda passes 645 tests + 946 validation + 1393 atlas checks across 51 binaries (97.06% coverage, pedantic + nursery 0 warnings). A cross-validation harness confirms 75/75 Python-Rust value matches within 1e-5 tolerance; 690 crop-station yield pairs within 0.01. 11 Tier A modules wired to ToadStool/BarraCuda primitives including Richards PDE, isotherm fitting, MC ET₀ uncertainty (parametric CI via `norm_ppf`), VG pressure head inversion (via `brent`), and agroecological diversity. S66 resolves the P0 GPU dispatch blocker — GPU-first paths now stable. CPU benchmarks: 12.7M ET₀/s, 35.8M VG θ/s, 175K NM fits/s.
 
 4. **Can the math be truly portable across hardware?**
    Complete — all 6 metalForge modules absorbed upstream into barracuda (S64: metrics; S66: regression, hydrology, moving_window_f64; S40: van_genuchten; S64: isotherm). airSpring now leans on upstream primitives following the Write → Absorb → Lean cycle. GPU wiring proves the compute is hardware-portable; metalForge demonstrates the cross-system absorption pattern.
@@ -38,7 +38,7 @@ The study answers four questions:
 
 ## Key Results
 
-### Phase 0 (Python Control): 594/594 checks pass (22 experiments)
+### Phase 0 (Python Control): 1054/1054 checks pass (44 experiments)
 
 | Experiment | Paper | Checks | Key Validation |
 |------------|-------|:------:|----------------|
@@ -62,6 +62,13 @@ The study answers four questions:
 | Thornthwaite ET₀ | Thornthwaite 1948 | 23/23 | Monthly heat index, temperature-based ET₀ |
 | Growing Degree Days | Phenology standard | 33/33 | GDD accumulation, kc_from_gdd |
 | Pedotransfer (Saxton-Rawls) | Saxton & Rawls 2006 | 70/70 | θs/θr/Ks from texture |
+| NASS Yield Validation | Stewart 1977 pipeline | 41/41 | Drought ranking, 5 MI crops |
+| Forecast Scheduling | Hindcast vs perfect knowledge | 19/19 | Noise sensitivity, mass balance |
+| USDA SCAN Soil Moisture | Carsel & Parrish + SCAN | 34/34 | Richards vs in-situ θ profiles |
+| Multi-Crop Water Budget | FAO-56 full pipeline | 47/47 | 5 crops, irrigated/rainfed/dual Kc |
+| AmeriFlux ET (Baldocchi) | Baldocchi 2003 | 27/27 | Eddy covariance gold standard |
+| Hargreaves-Samani ET₀ | Hargreaves & Samani 1985 | 24/24 | Temperature-only ET₀ |
+| Ecological Diversity | Shannon/Simpson/Chao1 | 22/22 | Agroecosystem diversity indices |
 
 ### Phase 0+ (Real Data): 15,300 station-days, R²=0.967
 
@@ -73,7 +80,7 @@ The study answers four questions:
 | West Olive (blueberry) | 0.257 | 0.963 | 639.1 mm | 635.2 mm |
 | **Overall** | **0.267** | **0.967** | — | — |
 
-### Phase 1 (Rust BarraCuda): 491 tests + 570 validation + 1393 atlas checks, 27 binaries, 97.45% coverage
+### Phase 1 (Rust BarraCuda): 645 tests + 946 validation + 1393 atlas checks, 51 binaries, 97.06% coverage
 
 | Binary | Checks | Key Validation |
 |--------|:------:|----------------|
@@ -100,6 +107,17 @@ The study answers four questions:
 | validate_gdd | 26/26 | GDD accumulation, kc_from_gdd |
 | validate_pedotransfer | 58/58 | Saxton-Rawls 2006 θs/θr/Ks |
 | validate_atlas | 1393/1393 | 100 Michigan stations, ValidationHarness checks |
+| validate_nass_yield | 40/40 | Stewart pipeline, drought ranking, 5 MI crops |
+| validate_forecast | 19/19 | Forecast vs perfect knowledge, noise sensitivity |
+| validate_scan_moisture | 34/34 | Richards 1D vs SCAN in-situ profiles |
+| validate_multicrop | 47/47 | 5-crop water budget, irrigated/rainfed/dual Kc |
+| validate_npu_eco | 35/35 | AKD1000 crop stress/irrigation/anomaly |
+| validate_npu_funky_eco | 32/32 | NPU streaming, evolution, LOCOMOS power |
+| validate_npu_high_cadence | 28/28 | NPU 1-min cadence, burst, fusion, ensemble |
+| validate_ameriflux | 27/27 | AmeriFlux eddy covariance ET |
+| validate_hargreaves | 24/24 | Hargreaves-Samani temperature-based ET₀ |
+| validate_diversity | 22/22 | Shannon, Simpson, Chao1, Bray-Curtis |
+| validate_dispatch_routing | 21/21 | metalForge CPU+GPU+NPU dispatch (forge) |
 | cross_validate | 75 values | Python↔Rust JSON harness |
 
 ### Phase 2 (Cross-validation): 75/75 MATCH + 690 crop-station yield pairs within 0.01
@@ -129,5 +147,5 @@ No institutional access required. No proprietary software. AGPL-3.0 licensed.
 ## Next Phase: GPU Validation & metalForge
 
 See `specs/PAPER_REVIEW_QUEUE.md` for the full paper queue and compute pipeline.
-See `wateringHole/handoffs/` for the latest ToadStool/BarraCuda handoff (V022 Thornthwaite + GDD + pedotransfer).
+See `wateringHole/handoffs/` for the latest ToadStool/BarraCuda handoff (V028 ToadStool absorption + Titan V).
 See `CHANGELOG.md` for the full evolution history.

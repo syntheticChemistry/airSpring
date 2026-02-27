@@ -1,6 +1,6 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: February 26, 2026 (v0.4.8 — 491 lib tests, 27 binaries, 11 Tier A modules)
+**Last Updated**: February 27, 2026 (v0.5.0 — 499 lib tests, 37 barracuda + 1 forge binary, 11 Tier A modules, AKD1000 NPU live)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
 **ToadStool HEAD**: `f0feb226` (S68 — universal f64, ValidationHarness tracing, LazyLock shader constants)
 
@@ -8,7 +8,7 @@
 
 ## Current Kernel Usage
 
-### Phase 1: Validated in Rust CPU (22 experiments)
+### Phase 1: Validated in Rust CPU + NPU (27 experiments)
 
 | Kernel / Module | Rust Crate | Checks | Validation |
 |----------------|------------|:------:|------------|
@@ -31,6 +31,14 @@
 | Thornthwaite monthly ET₀ | `eco::evapotranspiration` | 50/50 | Heat index, 2-station monthly |
 | Growing Degree Days | `eco::crop` | 26/26 | GDD avg/clamp, Kc from GDD |
 | Saxton-Rawls pedotransfer | `eco::soil_moisture` | 58/58 | θ_wp/θ_fc/θ_s/Ksat, 8 textures |
+| NASS yield validation | `eco::yield_response` + `eco::water_balance` | 40/40 | Stewart pipeline, 5 crops, MI synthetic |
+| Forecast scheduling | `eco::water_balance` + `eco::yield_response` | 19/19 | Forecast vs perfect knowledge |
+| SCAN soil moisture | `eco::richards` + `eco::van_genuchten` | 34/34 | VG θ/K, Ks ordering, SCAN ranges |
+| Multi-crop water budget | `eco::water_balance` + `eco::dual_kc` + `eco::yield_response` | 47/47 | 5 crops, irrigated/rainfed/dual Kc |
+| **NPU edge inference** | **`npu` (feature-gated `akida-driver`)** | **35/35** | **AKD1000 live: crop stress, irrigation, anomaly** |
+| **Funky NPU IoT** | **`validate_npu_funky_eco`** | **32/32** | **Streaming, seasonal evolution, multi-crop crosstalk, LOCOMOS power, noise** |
+| **High-Cadence NPU** | **`validate_npu_high_cadence`** | **28/28** | **1-min cadence, burst mode, multi-sensor fusion, ensemble, weight hot-swap** |
+| **metalForge dispatch** | **`airspring-forge` crate** | **21/21** | **CPU/GPU/NPU routing, 14 eco workloads** |
 | Cross-validation harness | `validation` | 75/75 | Python↔Rust match (tol=1e-5) |
 
 ### Phase 2: GPU Orchestrators Wired (8 modules)
@@ -64,7 +72,7 @@ Note: `gpu::dual_kc::BatchedDualKc` has CPU orchestrator wired (Tier B → pendi
 
 ### Layer 1: BarraCuda CPU (validated, complete)
 
-All algorithms implemented in pure Rust. 491 lib tests, 27 binaries, 570 validation checks.
+All algorithms implemented in pure Rust. 493 lib tests, 29 binaries, 629 validation checks.
 This is the baseline for correctness — GPU and metalForge results must match.
 CPU benchmarks: 12.7M ET₀/s, 36.5M VG θ/s, 59M dual Kc/s, 57M Langmuir fits/s.
 

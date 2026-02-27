@@ -256,64 +256,88 @@ pub fn gdd_clamp(tmax: f64, tmin: f64, tbase: f64, tceil: f64) -> f64 {
 ///
 /// Returns a vector of cumulative GDD values, one per day.
 ///
-/// # Panics
+/// # Errors
 ///
-/// Panics if `daily_tmax` and `daily_tmin` have different lengths.
-#[must_use]
-pub fn accumulated_gdd_avg(daily_tmax: &[f64], daily_tmin: &[f64], tbase: f64) -> Vec<f64> {
-    assert_eq!(daily_tmax.len(), daily_tmin.len(), "arrays must match");
+/// Returns `InvalidInput` if `daily_tmax` and `daily_tmin` have different lengths.
+pub fn accumulated_gdd_avg(
+    daily_tmax: &[f64],
+    daily_tmin: &[f64],
+    tbase: f64,
+) -> crate::error::Result<Vec<f64>> {
+    if daily_tmax.len() != daily_tmin.len() {
+        return Err(crate::error::AirSpringError::InvalidInput(format!(
+            "tmax length {} != tmin length {}",
+            daily_tmax.len(),
+            daily_tmin.len()
+        )));
+    }
     let mut cum = Vec::with_capacity(daily_tmax.len());
     let mut total = 0.0;
     for (&tx, &tn) in daily_tmax.iter().zip(daily_tmin) {
         total += gdd_avg(tx, tn, tbase);
         cum.push(total);
     }
-    cum
+    Ok(cum)
 }
 
 /// Accumulate growing degree-days over a season using the clamped method.
 ///
-/// # Panics
+/// # Errors
 ///
-/// Panics if `daily_tmax` and `daily_tmin` have different lengths.
-#[must_use]
+/// Returns `InvalidInput` if `daily_tmax` and `daily_tmin` have different lengths.
 pub fn accumulated_gdd_clamp(
     daily_tmax: &[f64],
     daily_tmin: &[f64],
     tbase: f64,
     tceil: f64,
-) -> Vec<f64> {
-    assert_eq!(daily_tmax.len(), daily_tmin.len(), "arrays must match");
+) -> crate::error::Result<Vec<f64>> {
+    if daily_tmax.len() != daily_tmin.len() {
+        return Err(crate::error::AirSpringError::InvalidInput(format!(
+            "tmax length {} != tmin length {}",
+            daily_tmax.len(),
+            daily_tmin.len()
+        )));
+    }
     let mut cum = Vec::with_capacity(daily_tmax.len());
     let mut total = 0.0;
     for (&tx, &tn) in daily_tmax.iter().zip(daily_tmin) {
         total += gdd_clamp(tx, tn, tbase, tceil);
         cum.push(total);
     }
-    cum
+    Ok(cum)
 }
 
 /// Interpolate crop coefficient from cumulative GDD using stage thresholds.
 ///
 /// Linearly interpolates between Kc values defined at GDD breakpoints.
 ///
-/// # Panics
+/// # Errors
 ///
-/// Panics if `stages_gdd` and `kc_values` have different lengths.
-#[must_use]
-pub fn kc_from_gdd(cum_gdd: f64, stages_gdd: &[f64], kc_values: &[f64]) -> f64 {
-    assert_eq!(stages_gdd.len(), kc_values.len(), "stage/Kc array mismatch");
-    for i in 0..stages_gdd.len() - 1 {
+/// Returns `InvalidInput` if `stages_gdd` and `kc_values` have different lengths,
+/// or if `kc_values` is empty.
+pub fn kc_from_gdd(
+    cum_gdd: f64,
+    stages_gdd: &[f64],
+    kc_values: &[f64],
+) -> crate::error::Result<f64> {
+    if stages_gdd.len() != kc_values.len() {
+        return Err(crate::error::AirSpringError::InvalidInput(format!(
+            "stages_gdd length {} != kc_values length {}",
+            stages_gdd.len(),
+            kc_values.len()
+        )));
+    }
+    for i in 0..stages_gdd.len().saturating_sub(1) {
         if cum_gdd <= stages_gdd[i + 1] {
             let span = stages_gdd[i + 1] - stages_gdd[i];
             if span <= 0.0 {
-                return kc_values[i];
+                return Ok(kc_values[i]);
             }
             let frac = (cum_gdd - stages_gdd[i]) / span;
-            return frac.mul_add(kc_values[i + 1] - kc_values[i], kc_values[i]);
+            return Ok(frac.mul_add(kc_values[i + 1] - kc_values[i], kc_values[i]));
         }
     }
-    *kc_values.last().unwrap_or(&0.0)
+    Ok(kc_values.last().copied().unwrap_or(0.0))
 }
 
 #[cfg(test)]
@@ -386,7 +410,7 @@ mod tests {
     #[test]
     fn test_gdd_avg_basic() {
         assert!((gdd_avg(30.0, 20.0, 10.0) - 15.0).abs() < 1e-10);
-        assert_eq!(gdd_avg(8.0, 2.0, 10.0), 0.0);
+        assert!(gdd_avg(8.0, 2.0, 10.0).abs() < f64::EPSILON);
         assert!((gdd_avg(30.0, 10.0, 10.0) - 10.0).abs() < 1e-10);
     }
 
@@ -395,29 +419,41 @@ mod tests {
         assert!((gdd_clamp(40.0, 20.0, 10.0, 30.0) - 15.0).abs() < 1e-10);
         assert!((gdd_clamp(20.0, 5.0, 10.0, 30.0) - 5.0).abs() < 1e-10);
         assert!((gdd_clamp(40.0, 0.0, 10.0, 30.0) - 10.0).abs() < 1e-10);
-        assert_eq!(gdd_clamp(8.0, 2.0, 10.0, 30.0), 0.0);
+        assert!(gdd_clamp(8.0, 2.0, 10.0, 30.0).abs() < f64::EPSILON);
     }
 
     #[test]
     fn test_accumulated_gdd_constant() {
         let tmax = vec![30.0; 100];
         let tmin = vec![20.0; 100];
-        let cum = accumulated_gdd_avg(&tmax, &tmin, 10.0);
+        let cum = accumulated_gdd_avg(&tmax, &tmin, 10.0).unwrap();
         assert!((cum[99] - 1500.0).abs() < 1e-8);
+    }
+
+    #[test]
+    fn test_accumulated_gdd_length_mismatch() {
+        let result = accumulated_gdd_avg(&[30.0; 5], &[20.0; 3], 10.0);
+        assert!(result.is_err());
     }
 
     #[test]
     fn test_kc_from_gdd_corn() {
         let stages = vec![0.0, 200.0, 800.0, 2200.0, 2700.0];
         let kc_vals = vec![0.30, 0.30, 1.20, 1.20, 0.60];
-        assert!((kc_from_gdd(0.0, &stages, &kc_vals) - 0.30).abs() < 0.01);
-        assert!((kc_from_gdd(1500.0, &stages, &kc_vals) - 1.20).abs() < 0.01);
-        assert!((kc_from_gdd(2700.0, &stages, &kc_vals) - 0.60).abs() < 0.01);
+        assert!((kc_from_gdd(0.0, &stages, &kc_vals).unwrap() - 0.30).abs() < 0.01);
+        assert!((kc_from_gdd(1500.0, &stages, &kc_vals).unwrap() - 1.20).abs() < 0.01);
+        assert!((kc_from_gdd(2700.0, &stages, &kc_vals).unwrap() - 0.60).abs() < 0.01);
+    }
+
+    #[test]
+    fn test_kc_from_gdd_length_mismatch() {
+        let result = kc_from_gdd(100.0, &[0.0, 200.0], &[0.3]);
+        assert!(result.is_err());
     }
 
     #[test]
     fn test_gdd_monotonic() {
-        let cum = accumulated_gdd_avg(&[25.0; 50], &[15.0; 50], 10.0);
+        let cum = accumulated_gdd_avg(&[25.0; 50], &[15.0; 50], 10.0).unwrap();
         for i in 0..cum.len() - 1 {
             assert!(cum[i] <= cum[i + 1]);
         }

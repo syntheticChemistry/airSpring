@@ -202,28 +202,10 @@ pub fn fit_freundlich(ce: &[f64], qe: &[f64]) -> Option<IsothermFit> {
     })
 }
 
-/// Internal linear regression: y = slope*x + intercept.
-/// Returns (slope, intercept) or None if singular.
+/// Linear regression via barracuda, returning (slope, intercept).
 fn fit_linear_internal(x: &[f64], y: &[f64]) -> Option<(f64, f64)> {
-    let count = len_f64(x);
-    if x.len() < 2 || x.len() != y.len() {
-        return None;
-    }
-
-    let s_x: f64 = x.iter().sum();
-    let s_y: f64 = y.iter().sum();
-    let s_xx: f64 = x.iter().map(|&xi| xi * xi).sum();
-    let s_cross: f64 = x.iter().zip(y).map(|(&xi, &yi)| xi * yi).sum();
-
-    let det = count.mul_add(s_xx, -(s_x * s_x));
-    if det.abs() < SINGULARITY_GUARD {
-        return None;
-    }
-
-    let slope = count.mul_add(s_cross, -(s_x * s_y)) / det;
-    let intercept = s_xx.mul_add(s_y, -(s_x * s_cross)) / det;
-
-    Some((slope, intercept))
+    let fit = barracuda::stats::regression::fit_linear(x, y)?;
+    Some((fit.params[0], fit.params[1]))
 }
 
 fn goodness_of_fit<F: Fn(f64) -> f64>(ce: &[f64], qe: &[f64], predict: F) -> (f64, f64) {

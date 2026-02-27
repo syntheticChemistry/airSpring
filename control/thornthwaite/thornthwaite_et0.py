@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 #!/usr/bin/env python3
 """
 Exp 021: Thornthwaite Monthly ET₀ — Python Control Baseline
@@ -357,7 +358,8 @@ def generate_benchmark():
         "_provenance": {
             "method": "Thornthwaite (1948) monthly ET₀",
             "baseline_script": "control/thornthwaite/thornthwaite_et0.py",
-            "baseline_commit": "pending",
+            "baseline_commit": "fad2e1b",
+            "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
             "python_version": f"{sys.version_info.major}.{sys.version_info.minor}",
             "created": "2026-02-26",
             "references": [

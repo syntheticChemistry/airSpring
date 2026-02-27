@@ -1,7 +1,7 @@
 # Direct ET Validation via AmeriFlux Eddy Covariance
 
-**Date:** February 26, 2026
-**Status:** Planning
+**Date:** February 27, 2026
+**Status:** **Complete** — Exp 030, 27/27 Python + 27/27 Rust checks
 **Data Tier:** 2 (free with registration)
 **Dependencies:** Existing ET₀ module + AmeriFlux account
 **Cross-Spring:** None (airSpring standalone)

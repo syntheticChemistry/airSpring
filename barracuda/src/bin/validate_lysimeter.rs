@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 //! Validate lysimeter ET measurement pipeline (Exp 016).
 //!
 //! Benchmark: `control/lysimeter/benchmark_lysimeter.json`
@@ -13,15 +19,12 @@
 //!   5. Hourly diurnal ET pattern (sinusoidal, night ≈ 0)
 //!   6. Synthetic daily lysimeter vs ET₀ comparison
 
-use airspring_barracuda::validation::{self, json_str, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{
+    self, json_field, json_str, parse_benchmark_json, ValidationHarness,
+};
+use barracuda::stats::{pearson_correlation, regression::fit_linear, rmse};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/lysimeter/benchmark_lysimeter.json");
-
-fn f64_field(v: &serde_json::Value, key: &str) -> f64 {
-    v[key]
-        .as_f64()
-        .unwrap_or_else(|| panic!("missing f64 key '{key}'"))
-}
 
 /// Convert lysimeter mass change to ET depth (mm).
 /// Standard simplification: 1 kg water / 1 m² = 1 mm.
@@ -44,35 +47,6 @@ fn is_valid_reading(delta_g: f64, resolution_g: f64, rain_threshold_g: f64) -> b
         return false;
     }
     true
-}
-
-/// Simple least-squares linear fit: y = slope*x + intercept.
-fn linear_regression(x: &[f64], y: &[f64]) -> (f64, f64, f64) {
-    let n = x.len() as f64;
-    let sx: f64 = x.iter().sum();
-    let sy: f64 = y.iter().sum();
-    let sxx: f64 = x.iter().map(|xi| xi * xi).sum();
-    let sxy: f64 = x.iter().zip(y.iter()).map(|(xi, yi)| xi * yi).sum();
-
-    #[allow(clippy::suspicious_operation_groupings)] // n·Σx² − (Σx)² is correct least-squares
-    let denom = n.mul_add(sxx, -(sx * sx));
-    let slope = n.mul_add(sxy, -(sx * sy)) / denom;
-    let intercept = sy.mul_add(sxx, -(sx * sxy)) / denom;
-
-    let y_mean = sy / n;
-    let ss_tot: f64 = y.iter().map(|yi| (yi - y_mean).powi(2)).sum();
-    let ss_res: f64 = x
-        .iter()
-        .zip(y.iter())
-        .map(|(xi, yi)| (yi - (slope * xi + intercept)).powi(2))
-        .sum();
-    let r_squared = if ss_tot > 0.0 {
-        1.0 - ss_res / ss_tot
-    } else {
-        1.0
-    };
-
-    (slope, intercept, r_squared)
 }
 
 /// Fraction of daily ET at a given hour (sinusoidal diurnal pattern).
@@ -101,30 +75,6 @@ fn generate_synthetic_comparison(n_days: usize) -> (Vec<f64>, Vec<f64>) {
     (et0, et_lys)
 }
 
-fn pearson_r(a: &[f64], b: &[f64]) -> f64 {
-    let n = a.len() as f64;
-    let mean_a: f64 = a.iter().sum::<f64>() / n;
-    let mean_b: f64 = b.iter().sum::<f64>() / n;
-
-    let cov: f64 = a
-        .iter()
-        .zip(b.iter())
-        .map(|(ai, bi)| (ai - mean_a) * (bi - mean_b))
-        .sum::<f64>();
-    let std_a: f64 = a.iter().map(|ai| (ai - mean_a).powi(2)).sum::<f64>().sqrt();
-    let std_b: f64 = b.iter().map(|bi| (bi - mean_b).powi(2)).sum::<f64>().sqrt();
-
-    if std_a * std_b > 0.0 {
-        cov / (std_a * std_b)
-    } else {
-        0.0
-    }
-}
-
-fn rmse(a: &[f64], b: &[f64]) -> f64 {
-    barracuda::stats::rmse(a, b)
-}
-
 #[allow(clippy::too_many_lines)]
 fn main() {
     validation::init_tracing();
@@ -138,10 +88,10 @@ fn main() {
     let et_cases = &benchmark["validation_checks"]["mass_to_et_conversion"]["test_cases"];
     for tc in et_cases.as_array().expect("array") {
         let label = json_str(tc, "label");
-        let mass_kg = f64_field(tc, "mass_change_kg");
-        let area = f64_field(tc, "area_m2");
-        let expected = f64_field(tc, "expected_et_mm");
-        let tol = f64_field(tc, "tolerance");
+        let mass_kg = json_field(tc, "mass_change_kg");
+        let area = json_field(tc, "area_m2");
+        let expected = json_field(tc, "expected_et_mm");
+        let tol = json_field(tc, "tolerance");
         let computed = mass_to_et_mm(mass_kg, area);
         v.check_abs(label, computed, expected, tol);
     }
@@ -149,15 +99,15 @@ fn main() {
     // ── Temperature compensation ──
     validation::section("Temperature Compensation");
     let tc_params = &benchmark["temperature_compensation"];
-    let alpha = f64_field(tc_params, "alpha_g_per_c");
-    let t_ref = f64_field(tc_params, "t_ref_c");
+    let alpha = json_field(tc_params, "alpha_g_per_c");
+    let t_ref = json_field(tc_params, "t_ref_c");
     let temp_cases = &benchmark["validation_checks"]["temperature_compensation"]["test_cases"];
     for tc in temp_cases.as_array().expect("array") {
         let label = json_str(tc, "label");
-        let mass_raw = f64_field(tc, "mass_raw_kg");
-        let temp_c = f64_field(tc, "temp_c");
-        let expected = f64_field(tc, "expected_corr_kg");
-        let tol = f64_field(tc, "tolerance");
+        let mass_raw = json_field(tc, "mass_raw_kg");
+        let temp_c = json_field(tc, "temp_c");
+        let expected = json_field(tc, "expected_corr_kg");
+        let tol = json_field(tc, "tolerance");
         let computed = compensate_temperature(mass_raw, temp_c, alpha, t_ref);
         v.check_abs(label, computed, expected, tol);
     }
@@ -167,7 +117,7 @@ fn main() {
     let dq_cases = &benchmark["validation_checks"]["data_quality_filter"]["test_cases"];
     for tc in dq_cases.as_array().expect("array") {
         let label = json_str(tc, "label");
-        let delta_g = f64_field(tc, "delta_g");
+        let delta_g = json_field(tc, "delta_g");
         let expected = tc["expected_valid"].as_bool().expect("bool");
         let computed = is_valid_reading(delta_g, 10.0, 500.0);
         v.check_bool(
@@ -191,13 +141,15 @@ fn main() {
         .iter()
         .map(|v| v.as_f64().unwrap())
         .collect();
-    let (slope, intercept, r2) = linear_regression(&known, &measured);
-    let expected_r2 = f64_field(cal, "expected_r_squared");
-    let tol_r2 = f64_field(
+    let fit = fit_linear(&known, &measured).expect("calibration fit must succeed");
+    let slope = fit.params[0];
+    let intercept = fit.params[1];
+    let expected_r2 = json_field(cal, "expected_r_squared");
+    let tol_r2 = json_field(
         &benchmark["validation_checks"]["calibration_linearity"],
         "tolerance",
     );
-    v.check_abs("calibration R²", r2, expected_r2, tol_r2);
+    v.check_abs("calibration R²", fit.r_squared, expected_r2, tol_r2);
     v.check_bool("slope ∈ [0.995, 1.005]", (0.995..=1.005).contains(&slope));
     v.check_bool(
         "intercept ∈ [-0.02, 0.02]",
@@ -210,7 +162,7 @@ fn main() {
     for tc in hr_cases.as_array().expect("array") {
         let label = json_str(tc, "label");
         #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-        let hour = f64_field(tc, "hour") as u32;
+        let hour = json_field(tc, "hour") as u32;
         let frac = hourly_et_fraction(hour);
         if tc
             .get("expected_low")
@@ -235,7 +187,7 @@ fn main() {
     // ── Synthetic daily comparison ──
     validation::section("Synthetic Daily Comparison (deterministic)");
     let (et0, et_lys) = generate_synthetic_comparison(30);
-    let r = pearson_r(&et0, &et_lys);
+    let r = pearson_correlation(&et0, &et_lys).unwrap_or(0.0);
     let rms = rmse(&et0, &et_lys);
     v.check_bool(&format!("correlation r={r:.4} >= 0.80"), r >= 0.80);
     v.check_bool(&format!("RMSE={rms:.4} <= 1.0"), rms <= 1.0);

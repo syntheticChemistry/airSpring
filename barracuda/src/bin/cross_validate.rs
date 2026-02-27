@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 //! Phase 2 cross-validation: Rust side.
 //!
 //! Computes the same values as `scripts/cross_validate.py` using identical
@@ -19,6 +25,7 @@ use airspring_barracuda::eco::{
     soil_moisture as sm, water_balance,
 };
 use airspring_barracuda::testutil;
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{self, json_f64, ValidationHarness};
 use serde_json::json;
 
@@ -261,8 +268,8 @@ fn soil_and_sensor_values() -> serde_json::Value {
         "statistics": {
             "rmse": round6(testutil::rmse(&obs, &sim)),
             "mbe": round6(testutil::mbe(&obs, &sim)),
-            "ia": round6(testutil::index_of_agreement(&obs, &sim)),
-            "r2": round6(testutil::nash_sutcliffe(&obs, &sim)),
+            "ia": round6(testutil::index_of_agreement(&obs, &sim).unwrap_or(0.0)),
+            "r2": round6(testutil::nash_sutcliffe(&obs, &sim).unwrap_or(0.0)),
         },
         "svp_table": svp_results,
     })
@@ -356,13 +363,6 @@ fn merge_into(dest: &mut serde_json::Map<String, serde_json::Value>, src: &serde
     }
 }
 
-/// Cross-validation tolerance: Rust vs Python at 1e-5.
-///
-/// FAO-56 intermediates involve transcendental functions (exp, ln, pow, trig)
-/// where IEEE-754 rounding produces ~1e-10 differences. 1e-5 is conservative
-/// (5 orders above noise) and matches the Phase 2 cross-validation contract.
-const CROSS_TOL: f64 = 1e-5;
-
 fn run_json_mode() {
     let uccle = load_uccle_inputs();
     let mut output = uccle_core(&uccle).as_object().expect("core JSON").clone();
@@ -389,7 +389,12 @@ fn validate_section(
         for (key, val) in obj {
             if let Some(n) = val.as_f64() {
                 if let Some(exp) = expected.get(key).and_then(serde_json::Value::as_f64) {
-                    v.check_abs(&format!("{label}.{key}"), n, exp, CROSS_TOL);
+                    v.check_abs(
+                        &format!("{label}.{key}"),
+                        n,
+                        exp,
+                        tolerances::CROSS_VALIDATION.abs_tol,
+                    );
                 }
             } else if val.is_object() {
                 let nested_exp = expected.get(key).unwrap_or(&serde_json::Value::Null);
@@ -458,7 +463,12 @@ fn run_validation_mode() {
 
     if let Some(et0_exp) = json_f64(ex_expected, &["et0_mm_day"]) {
         let et0_rust = core["et0"]["et0_mm_day"].as_f64().unwrap_or(0.0);
-        v.check_abs("ET₀ vs FAO-56 Ex 18", et0_rust, et0_exp, CROSS_TOL);
+        v.check_abs(
+            "ET₀ vs FAO-56 Ex 18",
+            et0_rust,
+            et0_exp,
+            tolerances::CROSS_VALIDATION.abs_tol,
+        );
     }
 
     validation::section("Soil + sensor + statistics");

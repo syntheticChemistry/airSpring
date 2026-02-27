@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 //! Validate biochar adsorption isotherms against Python baseline.
 //!
 //! Benchmark source: `control/biochar/benchmark_biochar.json`
@@ -6,6 +12,7 @@
 //! Baseline: `control/biochar/biochar_isotherms.py` (14/14 PASS).
 
 use airspring_barracuda::eco::isotherm::{self, langmuir_rl};
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{
     self, json_array_opt, json_object_opt, parse_benchmark_json, ValidationHarness,
 };
@@ -13,9 +20,6 @@ use std::process;
 
 /// Benchmark JSON embedded at compile time for reproducibility.
 const BENCHMARK_JSON: &str = include_str!("../../../control/biochar/benchmark_biochar.json");
-
-/// Maximum mean residual (mg/g) for no systematic bias.
-const MAX_MEAN_RESIDUAL: f64 = 0.5;
 
 #[allow(clippy::too_many_lines)]
 fn main() {
@@ -296,7 +300,7 @@ fn main() {
                 .fold(0.0_f64, f64::max);
             v.check_bool(
                 &format!("{desc}: max |mean residual|={max_mean:.4} mg/g"),
-                max_mean < MAX_MEAN_RESIDUAL,
+                max_mean < tolerances::ISOTHERM_MEAN_RESIDUAL.abs_tol,
             );
         }
     }

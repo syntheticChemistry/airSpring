@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 #!/usr/bin/env python3
 """
 Exp 023: Pedotransfer Functions (Saxton & Rawls 2006) — Python Control Baseline
@@ -285,7 +286,8 @@ def generate_benchmark():
         "_provenance": {
             "method": "Saxton & Rawls (2006) pedotransfer functions",
             "baseline_script": "control/pedotransfer/saxton_rawls.py",
-            "baseline_commit": "pending",
+            "baseline_commit": "fad2e1b",
+            "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
             "python_version": f"{sys.version_info.major}.{sys.version_info.minor}",
             "created": "2026-02-26",
             "references": [

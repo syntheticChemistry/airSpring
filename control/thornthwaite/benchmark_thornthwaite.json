@@ -2,7 +2,8 @@
   "_provenance": {
     "method": "Thornthwaite (1948) monthly ET\u2080",
     "baseline_script": "control/thornthwaite/thornthwaite_et0.py",
-    "baseline_commit": "pending",
+    "baseline_commit": "fad2e1b",
+    "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
     "python_version": "3.10",
     "created": "2026-02-26",
     "references": [

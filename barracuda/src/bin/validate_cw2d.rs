@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 //! Validate Richards equation on constructed wetland media (HYDRUS CW2D parameters).
 //!
 //! Benchmark source: `control/cw2d/benchmark_cw2d.json`

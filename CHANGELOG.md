@@ -2,6 +2,210 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.5.0] - 2026-02-27
+
+### Titan V GPU Live Dispatch + metalForge Live Hardware + 12 New Experiments
+
+Major milestone: real GPU shader dispatch validated on NVIDIA TITAN V (GV100),
+metalForge live hardware probe discovering all substrates, and 12 new experiments
+completing the pipeline from paper → Python → Rust CPU → GPU live → mixed hardware.
+
+#### Added
+- **Exp 033: Makkink (1957) Radiation-Based ET₀** — Python: 21/21, Rust: 16/16
+- **Exp 034: Turc (1961) Temperature-Radiation ET₀** — Python: 22/22, Rust: 17/17
+- **Exp 035: Hamon (1961) Temperature-Based PET** — Python: 20/20, Rust: 19/19
+- **Exp 036: biomeOS Neural API Round-Trip Parity** — Python: 14/14, Rust: 29/29
+- **Exp 037: ET₀ Ensemble Consensus (6-Method)** — Python: 9/9, Rust: 17/17
+- **Exp 038: Pedotransfer → Richards Coupled Simulation** — Python: 29/29, Rust: 32/32
+- **Exp 039: Cross-Method ET₀ Bias Correction** — Python: 24/24, Rust: 24/24
+- **Exp 040: CPU vs GPU Parity Validation** — Python: 22/22, Rust: 26/26
+  - Proves `BatchedEt0` and `BatchedWaterBalance` CPU fallback is bit-identical to direct API
+- **Exp 041: metalForge Mixed-Hardware Dispatch** — Python: 14/14, Rust: 18/18
+  - All 14 workloads route correctly: GPU > NPU > Neural > CPU priority chain
+- **Exp 042: Seasonal Batch ET₀ at GPU Scale** — Python: 18/18, Rust: 21/21
+  - 365 × 4 station-days (1,460 total) in one `compute_gpu()` call, bit-exact consistency
+- **Exp 043: Titan V GPU Live Dispatch** — Rust: 24/24
+  - Real WGSL shader execution on NVIDIA TITAN V (GV100) via NVK/Mesa Vulkan
+  - GPU-CPU seasonal divergence: 0.04% (5,656 vs 5,658 mm), max daily 0.036 mm/day
+  - GPU-internal batch consistency: bit-exact (`max_diff=0.00e0`) across N=10 to N=10,000
+- **Exp 044: metalForge Live Hardware Probe** — Rust: 17/17
+  - Live discovery: RTX 4070 (f64, Vulkan) + TITAN V (f64, NVK Mesa) + AKD1000 NPU + i9-12900K
+  - All 14 workloads route to correct live substrates
+- `validate_gpu_live` binary: Titan V dispatch with `BARRACUDA_GPU_ADAPTER=titan`
+- `validate_live_hardware` binary: metalForge live probe of all 5 substrates
+- `validate_dispatch` binary: metalForge dispatch routing with synthetic inventories
+- `pollster` promoted to main dependency for GPU device creation in validation binaries
+- 12 new Python controls in `control/` directories
+- `wateringHole/SPRING_EVOLUTION_ISSUES.md` — 10 cross-primal issues for biomeOS/ToadStool
+
+#### Changed
+- Experiments: 32 → 44
+- Python checks: 808 → 1,054
+- Rust validation checks: 499 → 645
+- Barracuda binaries: 37 → 47
+- Forge binaries: 1 → 4
+- `run_all_baselines.sh` updated with all new experiments + GPU live phase
+- Version bumped to 0.5.0 (GPU live dispatch milestone)
+
+#### Quality Gates
+| Check | Status |
+|-------|--------|
+| Python baselines | **1054/1054 PASS** |
+| Rust validation | **645 checks**, 0 failures |
+| GPU live (Titan V) | **24/24 PASS**, 0.04% seasonal parity |
+| metalForge live | **17/17 PASS**, 5 substrates discovered |
+| clippy pedantic | **0 warnings** |
+
+## [0.4.12] - 2026-02-27
+
+### Modern Idiomatic Rust + Tolerance Centralization + CI Coverage
+
+Deep debt resolution: clippy pedantic enforcement across all compilation units,
+tolerance centralization, baseline commit pinning, error type evolution,
+capability-based NPU discovery, primal self-knowledge documentation, and
+llvm-cov coverage gate in CI.
+
+#### Added
+- `#![warn(clippy::pedantic)]` enforced on lib + all 37 binaries + integration tests
+- 20 new centralized tolerance constants in `tolerances.rs`:
+  `WATER_BALANCE_PER_STEP`, `TOPP_EQUATION`, `ANALYTICAL_COMPUTATION`,
+  `IA_CRITERION`, `P_SIGNIFICANCE`, `WATER_SAVINGS`, `ISOTHERM_MEAN_RESIDUAL`,
+  `CROSS_VALIDATION`, `ET0_SAT_VAPOUR_PRESSURE_WIDE`, `R2_MINIMUM`,
+  `RMSE_MAXIMUM`, `ET0_CROSS_METHOD_PCT`, `IOT_TEMPERATURE_MEAN`,
+  `IOT_TEMPERATURE_EXTREMES`, `IOT_PAR_MAX`, `IOT_CSV_ROUNDTRIP`
+- `cargo-llvm-cov` coverage gate (80% minimum) added to CI
+- `cast_sign_loss` allow added to Cargo.toml lints
+- Meta-test for all tolerance constants (comparison + threshold categories)
+
+#### Changed
+- 10 validation binaries migrated from local tolerance constants to `tolerances::*`
+- `gpu::richards` error types evolved: `Result<_, String>` → `crate::error::Result<_>`
+- `validate_soil` main() refactored into 3 domain helpers (too_many_lines fix)
+- metalForge `probe_npus()`: single `/dev/akida0` → runtime scan of all `/dev/akida*`
+- `validate_long_term_wb`: hardcoded weather cache → `LONG_TERM_WB_CACHE` env override
+- All module docs evolved to self-knowledge pattern (capabilities, not primal names)
+- 6 baseline commits pinned from "pending" to `fad2e1b` (hargreaves, thornthwaite, gdd, pedotransfer, diversity, ameriflux)
+- CI clippy upgraded to pedantic for both barracuda and metalForge
+
+#### Quality Gates
+| Check | Status |
+|-------|--------|
+| `cargo clippy --pedantic` | **0 warnings** (was 156) |
+| `cargo test` | **643 total** (499 lib + 144 binary/integration) |
+| `cargo fmt --check` | **Clean** |
+| `cargo doc` | **0 warnings** |
+| Forge tests | **26 passed** |
+| Python baselines | **808/808 PASS** |
+
+## [0.4.11] - 2026-02-26
+
+### AmeriFlux ET, Hargreaves, Diversity + metalForge NPU Dispatch
+
+Three new paper reproductions (Exp 030-032), completing the ET₀ gold standard,
+temperature-only ET₀, and ecological diversity portfolios. metalForge forge crate
+evolved to mixed hardware dispatch with substrate discovery, capability routing,
+and live AKD1000 NPU integration.
+
+#### Added
+- **Exp 030: AmeriFlux Eddy Covariance ET** (Baldocchi 2003)
+  - Direct ET measurement validation via AmeriFlux flux tower data
+  - Python: 27/27, Rust: 27/27 checks.
+- **Exp 031: Hargreaves-Samani Temperature ET₀** (Hargreaves & Samani 1985)
+  - Temperature-only ET₀ for data-sparse environments
+  - Python: 24/24, Rust: 24/24 checks.
+- **Exp 032: Ecological Diversity Indices**
+  - Shannon, Simpson, Chao1, Pielou, Bray-Curtis, rarefaction
+  - Python: 22/22, Rust: 22/22 checks.
+- `validate_ameriflux` binary: 27/27 checks
+- `validate_hargreaves` binary: 24/24 checks
+- `validate_diversity` binary: 22/22 checks
+- 3 new Python controls: `control/ameriflux_et/`, `control/hargreaves/`, `control/diversity/`
+
+#### Changed
+- Experiments: 29 → 32
+- Python checks: 735 → 808
+- Rust lib tests: 493 → 499
+- Rust validation checks: 780 → 853 (from binaries, excluding atlas)
+- Rust validation binaries: 35 → 37 (barracuda) + 1 forge = 38 total
+- Coverage: 97.06% line coverage
+
+#### metalForge Forge Evolution
+- Forge crate restructured: substrate discovery, capability-based dispatch, probe utilities
+- `dispatch.rs`: CPU > GPU > NPU priority routing for 14 eco workloads
+- `substrate.rs`: runtime hardware inventory (CPU, GPU, NPU)
+- `probe.rs`: hardware capability querying
+- `workloads.rs`: eco workload classification (9 GPU-absorbed, 3 NPU-native, 2 CPU-only)
+- `inventory.rs`: live device discovery (i9-12900K, RTX 4070, TITAN V, AKD1000)
+- `validate_dispatch_routing` binary: 21/21 dispatch routing checks
+- Forge tests: 26 (slimmed after NPU absorption)
+
+## [0.4.10] - 2026-02-26
+
+### Multi-Crop Budget + NPU Edge Inference + Funky IoT + High-Cadence Pipeline
+
+Four experiments completing the multi-crop water budget and the NPU agricultural
+IoT trilogy. BrainChip AKD1000 integration via ToadStool akida-driver with live
+DMA inference, streaming classification, and LOCOMOS power budget analysis.
+
+#### Added
+- **Exp 027: Multi-Crop Water Budget** (5 Michigan crops)
+  - FAO-56 pipeline: ET₀ → dual Kc → water balance → Stewart yield
+  - Python: 47/47, Rust: 47/47 checks.
+- **Exp 028: NPU Edge Inference** (AKD1000 live)
+  - int8 quantization, crop stress/irrigation/anomaly classifiers
+  - metalForge forge substrate + dispatch wiring
+  - Rust: 35/35 barracuda + 21/21 forge checks. Live AKD1000: 80 NPs, ~84µs inference.
+- **Exp 029: Funky NPU for Agricultural IoT** (streaming, evolution, LOCOMOS)
+  - 500-step streaming, seasonal weight evolution, multi-crop crosstalk
+  - LOCOMOS power budget: 2.53 Wh/day, 5W solar = 8× surplus, NPU 10.7× energy savings
+  - Rust: 32/32 checks. Live AKD1000: 20,545 Hz, P99 68.9 µs.
+- **Exp 029b: High-Cadence NPU Streaming Pipeline**
+  - 1-min cadence (1,440/day), burst mode (10-sec intervals), multi-sensor fusion
+  - Ensemble classification, sliding window anomaly, weight hot-swap (5 crops)
+  - Rust: 28/28 checks. Live AKD1000: 21,023 Hz, P99 64.2 µs.
+- `npu.rs`: feature-gated AKD1000 module (NpuHandle: discover, load, infer, raw DMA)
+- `validate_multicrop` binary: 47/47 checks
+- `validate_npu_eco` binary: 35/35 checks
+- `validate_npu_funky_eco` binary: 32/32 checks
+- `validate_npu_high_cadence` binary: 28/28 checks
+
+#### Changed
+- Experiments: 25 → 29 (027, 028, 029, 029b)
+- Python checks: 694 → 735
+- Rust validation binaries: 31 → 35 + 1 forge
+- Barracuda lib tests: 491 → 493
+
+## [0.4.9] - 2026-02-26
+
+### NASS Yield + Forecast Scheduling + SCAN Soil Moisture
+
+Three experiments extending the pipeline with USDA NASS yield validation,
+forecast-driven scheduling hindcast, and USDA SCAN in-situ soil moisture.
+
+#### Added
+- **Exp 024: NASS Yield Validation** (Stewart 1977 pipeline)
+  - Full airSpring pipeline vs physically consistent Michigan targets
+  - Drought response monotonicity, soil sensitivity, crop ranking
+  - Python: 41/41, Rust: 40/40 checks.
+- **Exp 025: Forecast Scheduling Hindcast**
+  - 5-day forecast-driven vs perfect-knowledge irrigation scheduling
+  - Noise sensitivity, horizon impact, mass balance under stochastic noise
+  - Python: 19/19, Rust: 19/19 checks.
+- **Exp 026: USDA SCAN Soil Moisture**
+  - Richards 1D vs Carsel & Parrish VG parameters for 3 MI soil textures
+  - VG retention, Mualem K, solver bounds, seasonal SCAN ranges
+  - Python: 34/34, Rust: 34/34 checks.
+- `eco::yield_response` extended: `winter_wheat`, `dry_bean` added to `ky_table`
+- `validate_nass_yield` binary: 40/40 checks
+- `validate_forecast` binary: 19/19 checks
+- `validate_scan_moisture` binary: 34/34 checks
+- 3 new Python controls: `control/nass_yield/`, `control/forecast_scheduling/`, `control/scan_moisture/`
+
+#### Changed
+- Experiments: 22 → 25
+- Python checks: 594 → 694
+- Rust validation binaries: 27 → 31
+
 ## [0.4.8] - 2026-02-26
 
 ### Experiment Buildout: Thornthwaite ET₀, GDD, Pedotransfer Functions
@@ -247,270 +451,6 @@ integration of cross-spring optimizers and precision math.
 - **hotSpring → airSpring**: `norm_ppf` (Moro 1995) enables analytic z-score CI
 - **neuralSpring → airSpring**: `brent` (Brent 1973) enables monotone root-finding
 - **airSpring → ToadStool**: Richards PDE + isotherm patterns validated, CN f64 confirmed
-
-## [Unreleased]
-
-### Modern System Rewiring: Cross-Spring S64 Absorption Complete
-
-Full rewiring to modern ToadStool/BarraCuda (HEAD `17932267`, S65, 774 WGSL
-shaders). Cross-spring evolution now wired end-to-end.
-
-#### Added
-- **`eco::diversity`** module — wetSpring S64 absorption: Shannon, Simpson,
-  Chao1, Pielou evenness, Bray-Curtis dissimilarity, rarefaction curves wired
-  for agroecosystem assessment (cover crop biodiversity, soil microbiome, field
-  margin evaluation)
-- **`gpu::mc_et0`** module — groundSpring S64 absorption: Monte Carlo ET₀
-  uncertainty propagation with `mc_et0_cpu()` (CPU mirror of GPU kernel
-  `mc_et0_propagate_f64.wgsl`). Produces uncertainty bands (mean, σ, 5th/95th
-  percentiles) for FAO-56 ET₀ estimates.
-- **`testutil::{hit_rate, mean, percentile, dot, l2_norm}`** — new re-exports
-  from upstream `barracuda::stats::metrics` (absorbed from airSpring in S64)
-- 11 new cross-spring evolution tests (§7–§10): S64 stats delegation, wetSpring
-  diversity for cover crops, groundSpring MC ET₀ uncertainty, cross-spring
-  benchmark suite
-- 3 new benchmark tests: diversity throughput (>50K evals/sec for 100-species),
-  MC ET₀ throughput (10K samples), stats delegation overhead (zero penalty)
-
-#### Changed
-- `testutil::stats::rmse` and `mbe` now delegate to upstream `barracuda::stats::metrics`
-  (absorbed from airSpring in ToadStool S64)
-- 8 GPU-dispatch tests wrapped with `catch_unwind` → SKIP on upstream sovereign
-  compiler bind-group regression (ToadStool S60-S65). Tests auto-pass once
-  ToadStool fixes the regression. CPU paths unaffected.
-- ToadStool PIN updated: `02207c4a` → `17932267` across all active docs
-- WGSL shader count updated: 758 → 774 across all active docs
-- Handoff V010 replaces V009 (V009 archived)
-- `CROSS_SPRING_EVOLUTION.md` updated with S60-S65 absorption wave, 3 new
-  primitives table entries, updated shader usage matrix, timeline to v0.4.3
-
-#### Cross-Spring Provenance (S64 Absorption Wave)
-- **hotSpring → all Springs**: `df64_core.wgsl` FMA optimization (2 ops vs 17),
-  `df64_transcendentals.wgsl` (sin/cos/exp/log in double-double)
-- **airSpring → upstream**: stats metrics (rmse, mbe, NSE, IA, R²) absorbed
-  into `barracuda::stats::metrics`
-- **wetSpring → airSpring**: ecological diversity (Shannon, Simpson, Chao1,
-  Bray-Curtis, rarefaction) wired as `eco::diversity`
-- **groundSpring → airSpring**: MC ET₀ uncertainty propagation shader available,
-  CPU mirror wired as `gpu::mc_et0::mc_et0_cpu`
-- **neuralSpring ↔ wetSpring**: `DiversityFusionGpu` available for large-scale
-  diversity GPU dispatch (future wiring)
-
-#### Noted
-- Upstream regression: `BatchedElementwiseF64` GPU dispatch panics at
-  `pipeline.get_bind_group_layout(0)` — sovereign compiler SPIR-V path
-  produces empty bind groups. Confirmed by ToadStool's own `test_fao56_et0_gpu`.
-- `df64_transcendentals.wgsl` available but no Rust export yet (future VG curve
-  precision improvement)
-- `bio::diversity_fusion` GPU dispatch available for future large-N diversity
-
-### CPU Benchmark: Rust 69x Faster Than Python (Geometric Mean)
-
-Full benchmark suite comparing Rust CPU (`--release`) against Python CPython
-scalar loops. Same algorithms, same f64 precision. Demonstrates BarraCuda is
-pure math — no interpreter overhead, no GIL, no boxing.
-
-#### Added
-- `bench_cpu_vs_python` extended with yield response, CW2D, WUE, season integration
-- `scripts/bench_python_baselines.py` — Python benchmark matching Rust workloads
-- `scripts/bench_compare.py` — automated Rust vs Python comparison report
-- `scripts/bench_python_results.json` + `scripts/bench_comparison.json` — raw data
-- Exp 008 + 012 added to `scripts/run_all_baselines.sh`
-
-#### Key Results
-- **Geometric mean speedup: 69x** (range: 20x ET₀ to 502x Richards PDE)
-- Yield single-stage: 1.08 billion evals/s (Rust) vs 13.4M (Python) = **81x**
-- Richards 50-node: 3,620/s (Rust) vs 7/s (Python) = **502x**
-- All 13 experiments produce identical f64 results in both languages
-
-### Exp 008 + Exp 012: Yield Response + CW2D Richards — 601 Tests, 18 Binaries
-
-Two new experiments built through full pipeline (Python → Rust CPU → validation):
-
-- **Exp 008**: FAO-56 yield response to water stress (Stewart 1977). New `eco::yield_response` module with `ky_table` (9 crops), single-stage and multi-stage yield models, WUE, scheduling comparison. 32/32 Python + 32/32 Rust (16 new unit tests).
-- **Exp 012**: CW2D Richards equation extension (Dong 2019). Validates existing Richards solver on constructed wetland media (gravel Ks=5000, organic θs=0.60). 24/24 Python + 24/24 Rust. No new Rust module (parameter-driven validation).
-
-#### Added
-- `eco::yield_response` module: `yield_ratio_single`, `yield_ratio_multistage`, `water_use_efficiency`, `ky_table` (FAO-56 Table 24)
-- `validate_yield` binary: 32/32 checks against Stewart 1977 + FAO-56 Ch 10
-- `validate_cw2d` binary: 24/24 checks against HYDRUS CW2D media parameters
-- `control/yield_response/` — Python baseline + benchmark JSON
-- `control/cw2d/` — Python baseline + benchmark JSON
-
-#### Changed
-- Lib tests: 417→433 (16 new yield_response unit tests)
-- Total Rust tests: 585→601 (2 new validation binaries)
-- Validation binaries: 16→18
-- Paper queue: 11→13 completed reproductions
-
-### Doc Cleanup + V009 Evolution Handoff — 758 Shaders, 585 Tests
-
-Corrected stale WGSL shader counts across all docs (608→758 actual, counted
-from ToadStool HEAD). Updated stale references (407→417 lib, 95→115
-integration, 0c477306→S54 session refs). Archived V008 handoff, created V009
-comprehensive evolution handoff for ToadStool/BarraCuda team covering: full
-BarraCuda integration map (14 primitives, 8 GPU orchestrators), 4 pending
-metalForge absorption modules (42 tests), cross-spring evolution observations,
-and updated action items (P0–P3). Aligned doc patterns with sibling Springs
-(wetSpring, hotSpring conventions).
-
-#### Changed
-- WGSL shader count corrected: 608→758 across README, specs, wateringHole, baseCamp
-- EVOLUTION_READINESS.md: `0c477306`→S54 session references for TS issues
-- experiments/README.md: added cross-spring evolution test row, updated status line
-- All active docs now reference V009 (supersedes V008)
-
-#### Added
-- V009 evolution handoff: `AIRSPRING_V009_EVOLUTION_HANDOFF_FEB25_2026.md`
-  — full BarraCuda integration map, domain learnings, cross-spring observations
-
-### ToadStool S62 Sync + Cross-Spring Evolution — 585 Tests, 97.55% Coverage
-
-ToadStool S42–S62 sync: reviewed 170 upstream commits, 46 cross-spring
-absorptions, 4,224+ ToadStool tests. All 4 airSpring issues (TS-001
-through TS-004) confirmed resolved in S54. Rewired to modern BarraCuda:
-`barracuda::tolerances` (S52) for domain-specific validation, cross-spring
-shader provenance documented in all GPU modules, 18 cross-spring evolution
-integration tests, 3 throughput benchmarks. V008 handoff to ToadStool team.
-
-Full codebase audit: benchmark provenance gaps closed, GPU test suite
-refactored by domain cohesion, validation.rs 100% covered, CSV parser
-streamlined, forge clippy hardened, baseline lineage documented, clippy
-lint configuration migrated to Cargo.toml. Zero unsafe, zero unwrap in
-lib, zero TODO/FIXME, all files under 850 lines.
-
-#### Added
-- **`tolerances.rs`**: 21 domain-specific validation tolerances using upstream
-  `barracuda::tolerances::Tolerance` struct (S52 M-010). Covers ET₀, water
-  balance, Richards PDE, isotherm fitting, GPU/CPU cross-validation, kriging,
-  IoT smoothing, sensor calibration. 100% coverage, 10 unit tests.
-- **`tests/cross_spring_evolution.rs`**: 18 integration tests documenting
-  cross-spring shader provenance — hotSpring precision math (pow_f64, exp,
-  acos), wetSpring bio primitives (kriging, reduce, moving_window, ridge),
-  neuralSpring optimizers (nelder_mead, ValidationHarness), airSpring
-  contributions back (TS-001/003/004, Richards PDE). 3 throughput benchmarks.
-- Cross-spring provenance doc comments in all 7 GPU modules (et0, water_balance,
-  kriging, reduce, stream, richards, isotherm)
-- 46 new unit+integration tests: 10 tolerances + 18 cross-spring + 18 prior —
-  lib total 407→417, integration 95→115, overall 555→585
-- `tests/common/mod.rs`: shared GPU device helpers and `device_or_skip!`
-  macro for integration tests
-- `tests/gpu_evolution.rs`: evolution gap catalog and ToadStool issue
-  tracking (6 tests, structural invariants, no GPU required)
-- `tests/gpu_determinism.rs`: bit-identical rerun validation across all
-  GPU orchestrators (4 tests)
-- Provenance `Provenance:` blocks to all 8 Python baseline scripts
-  (commit, benchmark output, reproduction command, date)
-- `reproduction_note` to `benchmark_long_term_wb.json`
-- `data_api_url` + `data_api_params` to `benchmark_long_term_wb.json`
-  for ERA5 Open-Meteo data accession
-- `repository` field to `benchmark_cover_crop_kc.json`
-- Baseline Commit Lineage table in `specs/README.md` (94cc51d, 3afc229)
-
-#### Changed
-- **Clippy lint config migrated to `[lints.clippy]` in Cargo.toml** (modern
-  Rust pattern, matches forge): `pedantic`, `module_name_repetitions`,
-  `must_use_candidate`, `return_self_not_must_use`, `cast_precision_loss`
-  moved from `#![warn/allow]` in lib.rs to Cargo.toml. ~28 redundant
-  per-item `#[allow(clippy::cast_precision_loss)]` removed across 14 files.
-- **`tests/gpu_integration.rs` refactored** (1076→754 lines): split by
-  domain cohesion into `gpu_integration.rs` (functional), `gpu_evolution.rs`
-  (metadata), `gpu_determinism.rs` (cross-cutting). All files under 1000.
-- `io/csv_ts.rs`: merged two-pass column_names+column_index build into
-  single pass with `HashMap::with_capacity`; simplified row iteration
-- `metalForge/forge/src/regression.rs`: added inline
-  `#[allow(clippy::many_single_char_names)]` on `fit_linear` so clippy
-  passes with both Cargo.toml lints and explicit `-D warnings` CLI flags
-
-#### Documentation
-- V008 wateringHole handoff: ToadStool S62 sync — 170 commits reviewed,
-  TS-001–004 confirmed resolved, 0 breaking changes, revalidation complete,
-  updated action items for metalForge absorption and `crank_nicolson_f64`
-- `barracuda/EVOLUTION_READINESS.md`: updated with ToadStool S42–S62 evolution
-  timeline, new upstream capabilities table (tolerances, provenance, dot, etc.)
-- V007 archived; wateringHole README updated to V008
-- README.md: document index expanded (EVOLUTION_READINESS, ABSORPTION_MANIFEST)
-- `evolution_gaps.rs`: updated inventory header to v0.4.2, added S42–S62 summary
-- All docs aligned to 417 lib + 115 integration + 53 forge = 585 total
-- experiments/README.md: added test breakdown table, "how to add experiments"
-  section, naming convention notes
-- baseCamp README: added evolution documents table, expanded next steps
-- BARRACUDA_REQUIREMENTS.md: version header updated to v0.4.2
-- `evolution_gaps.rs`: test count 319→417, determinism tests → `gpu_determinism.rs`
-
-#### Fixed
-- `benchmark_richards.json`, `benchmark_biochar.json`: `reproduction_note`
-  now includes "at baseline_commit" (aligned with other benchmarks)
-
-## [Unreleased] - 2026-02-25 (prior)
-
-### Deep Debt Cleanup, Idiomatic Rust, Module Refactoring, Coverage 97%
-
-Comprehensive audit and cleanup: zero clippy pedantic/nursery warnings,
-96.84% library line coverage (from 89%), all magic numbers named, hot-path
-allocations eliminated, benchmark provenance completed, evolution mapping
-documented, validation binaries hardened, and testutil split into focused
-submodules.
-
-#### Added
-- 120+ unit tests across 8 modules (testutil, validation, richards, reduce,
-  stream, kriging, et0, water_balance) — lib tests 231→371
-- `_tolerance_justification` field to all 9 benchmark JSONs with citation-based
-  rationale for every tolerance value
-- Tolerance fields to `benchmark_dual_kc.json` (previously had none)
-- `baseline_commit` to 3 benchmark JSONs (richards, biochar, long_term_wb)
-- `soil_textures` section to `benchmark_dong2020.json` with all 12 USDA textures
-- Shader Promotion Mapping table in `gpu/evolution_gaps.rs`
-  (Rust module → WGSL shader → pipeline stage → tier)
-- `validation.rs`: `json_str_opt`, `json_array_opt`, `json_object_opt` helpers
-  for safe optional JSON field access
-
-#### Changed
-- **`testutil.rs` → `testutil/` module directory**: split 766-line grab-bag into
-  `testutil/generators.rs` (IoT data), `testutil/stats.rs` (RMSE, MBE, IA, NSE,
-  R², Pearson, Spearman, variance, std_dev), `testutil/bootstrap.rs` (CI).
-  All re-exported from `testutil/mod.rs` — zero breaking changes.
-- `validate_richards.rs`, `validate_biochar.rs`: replaced all `.unwrap()` on
-  JSON field access with `json_f64`, `json_str_opt`, `json_array_opt`,
-  `json_object_opt` + `let...else` error handling with `process::exit(1)`
-- `eco/richards.rs`: `mass_balance_check` — removed `.unwrap()` on
-  `profiles.last()`, replaced with `let...else` guard; fixed misleading
-  `# Panics` doc (function returns 0.0, does not panic, on empty input)
-- `gpu/kriging.rs`: variance formula now uses variogram `range` parameter
-  instead of implicit range=1 — exponential variogram γ(h/range) is correct
-- `eco/richards.rs`: 8 named constants replace inline magic numbers
-  (VG_H_ABS_MAX, VG_POWF_MAX, SATURATED_CAPACITY, CAPACITY_H_MIN, etc.)
-- `eco/richards.rs`: Picard loop preallocates a/b/c/d, h_prev, h_old, q_buf
-  outside time-stepping loop — eliminates per-iteration allocations
-- `io/csv_ts.rs`: `column_stats` uses single-pass iterator fold instead of
-  allocating intermediate Vec for NaN filtering
-- `bench_airspring_gpu.rs`: `run_all_benchmarks` (197 lines) refactored into
-  8 focused benchmark functions (<100 lines each)
-- `validate_soil.rs`: texture FC/WP values loaded from benchmark JSON instead
-  of hardcoded — now validates all 12 USDA textures
-- `validate_regional_et0.rs`: `v.finish()` deduplicated from branches
-- All `a * b + c` patterns → `mul_add()` across 13+ locations (5 files)
-- All `if let Some(x) = ...` → `let...else` in GPU test code
-- metalForge README: test count 40→53 to match actual
-
-#### Documentation
-- README.md: updated test counts (371 lib + 97 integration = 521 total), coverage
-  (96.84%), testutil module directory in tree
-- whitePaper/STUDY.md: 468 tests, 75/75 cross-validation, 8 GPU orchestrators
-- whitePaper/METHODOLOGY.md: aligned Phase 1–3 numbers
-- whitePaper/baseCamp/README.md: updated faculty summary and test counts
-- experiments/README.md: aligned test counts with current workspace
-- specs/PAPER_REVIEW_QUEUE.md: added metalForge module mapping per paper
-- specs/BARRACUDA_REQUIREMENTS.md: updated test counts and Tier B wiring status
-- CONTROL_EXPERIMENT_STATUS.md: aligned all phase counts
-- wateringHole V006 handoff: deep audit results, absorption roadmap, shader
-  promotion mapping, paper controls matrix with CPU/GPU/metalForge columns
-- V005 handoff archived
-
-#### Fixed
-- `cargo clippy --pedantic --nursery`: 0 warnings (was 13+)
-- `cargo doc --no-deps`: 0 warnings (was 1 — unescaped `Vec<WeatherDay>`)
-- `cargo fmt --check`: clean
 
 ## [0.4.2] - 2026-02-25
 

@@ -239,8 +239,11 @@ pub fn soil_heat_flux_monthly(t_month: f64, t_month_prev: f64) -> f64 {
 ///
 /// `barracuda::stats::hydrology::hargreaves_et0(ra, t_max, t_min)` provides
 /// an equivalent (R-S66-002, absorbed from airSpring metalForge). This local
-/// version uses FAO-56-validated `(tmin, tmax, ra)` parameter convention and
-/// is kept for consistency with all existing validation binaries.
+/// version uses FAO-56 `(tmin, tmax, ra)` parameter order (matching the
+/// equation's written form: temperature terms first, radiation last). The
+/// upstream version uses `(ra, tmax, tmin)` for consistency with its batch
+/// API. Both produce identical results. This local version is retained for
+/// validation binary compatibility and FAO-56 code-review legibility.
 #[must_use]
 pub fn hargreaves_et0(tmin: f64, tmax: f64, ra_mm_day: f64) -> f64 {
     let tmean = f64::midpoint(tmin, tmax);
@@ -286,98 +289,271 @@ pub fn daily_et0_pt_and_pm(input: &DailyEt0Input) -> (f64, Et0Result) {
     (pt, pm_result)
 }
 
-// ── Thornthwaite (1948) monthly ET₀ ──────────────────────────────────
-
-/// Single-month contribution to the annual Thornthwaite heat index.
+/// Makkink (1957) radiation-based ET₀ estimate (mm/day).
 ///
-/// `i = (T/5)^1.514` for T > 0, else 0.
+/// ```text
+/// ET₀ = C₁ × (Δ/(Δ+γ)) × Rs/λ + C₂
+/// ```
+///
+/// A radiation-only method requiring solar radiation and temperature.
+/// Widely used in the Netherlands (KNMI standard) and Northern Europe.
+/// The de Bruin (1987) coefficients C₁=0.61, C₂=−0.12 are standard.
 ///
 /// # Reference
-/// Thornthwaite C.W. (1948) Geographical Review, 38(1):55-94.
+///
+/// Makkink GF (1957) J Inst Water Eng 11:277-288.
+/// de Bruin HAR (1987) From Penman to Makkink. TNO, The Hague, pp 5-31.
 #[must_use]
-pub fn monthly_heat_index_term(tmean_c: f64) -> f64 {
-    if tmean_c <= 0.0 {
+pub fn makkink_et0(tmean_c: f64, rs_mj: f64, elevation_m: f64) -> f64 {
+    const C1: f64 = 0.61;
+    const C2: f64 = -0.12;
+    const LAMBDA_MJ_KG: f64 = 2.45;
+    let pressure = atmospheric_pressure(elevation_m);
+    let gamma = psychrometric_constant(pressure);
+    let delta = vapour_pressure_slope(tmean_c);
+    C1.mul_add(delta / (delta + gamma) * (rs_mj / LAMBDA_MJ_KG), C2).max(0.0)
+}
+
+/// Turc (1961) temperature-radiation ET₀ estimate (mm/day).
+///
+/// ```text
+/// RH ≥ 50%: ET₀ = 0.013 × T/(T+15) × (23.8846 Rs + 50)
+/// RH <  50%: ET₀ × (1 + (50−RH)/70)
+/// ```
+///
+/// Requires temperature, solar radiation, and humidity. The conversion
+/// factor 23.8846 converts MJ/m²/day to cal/cm²/day.
+///
+/// # Reference
+///
+/// Turc L (1961) Annales Agronomiques 12:13-49.
+#[must_use]
+pub fn turc_et0(tmean_c: f64, rs_mj: f64, rh_pct: f64) -> f64 {
+    const MJ_TO_CAL_CM2: f64 = 23.8846;
+    let denom = tmean_c + 15.0;
+    if denom == 0.0 {
         return 0.0;
     }
-    (tmean_c / 5.0).powf(1.514)
-}
-
-/// Annual Thornthwaite heat index: I = Σ (Tᵢ/5)^1.514 for 12 months.
-#[must_use]
-pub fn annual_heat_index(monthly_temps: &[f64; 12]) -> f64 {
-    monthly_temps
-        .iter()
-        .map(|&t| monthly_heat_index_term(t))
-        .sum()
-}
-
-/// Thornthwaite exponent from annual heat index.
-///
-/// `a = 6.75×10⁻⁷·I³ − 7.71×10⁻⁵·I² + 1.792×10⁻²·I + 0.49239`
-#[must_use]
-pub fn thornthwaite_exponent(heat_index: f64) -> f64 {
-    let i = heat_index;
-    6.75e-7f64
-        .mul_add(i, -7.71e-5)
-        .mul_add(i, 1.792e-2)
-        .mul_add(i, 0.49239)
-}
-
-/// Unadjusted monthly Thornthwaite ET₀ (mm/month for a 30-day month with 12-hr daylight).
-///
-/// For T > 26.5°C, applies the Willmott et al. (1985) high-temperature correction.
-#[must_use]
-pub fn thornthwaite_unadjusted_et0(tmean_c: f64, heat_index: f64, exponent_a: f64) -> f64 {
-    if tmean_c <= 0.0 || heat_index <= 0.0 {
+    let t_factor = tmean_c / denom;
+    if t_factor < 0.0 {
         return 0.0;
     }
-    if tmean_c >= 26.5 {
-        #[allow(clippy::suboptimal_flops)]
-        return (-415.85 + 32.24 * tmean_c - 0.43 * tmean_c * tmean_c).max(0.0);
+    let rs_cal = MJ_TO_CAL_CM2.mul_add(rs_mj, 50.0);
+    let mut et0 = 0.013 * t_factor * rs_cal;
+    if rh_pct < 50.0 {
+        et0 *= 1.0 + (50.0 - rh_pct) / 70.0;
     }
-    16.0 * (10.0 * tmean_c / heat_index).powf(exponent_a)
+    et0.max(0.0)
 }
 
-/// Mean daylight hours for a month at a given latitude.
+/// Hamon (1961) temperature-based PET estimate (mm/day).
 ///
-/// Averages [`daylight_hours`] over every day in the month.
+/// ```text
+/// PET = 0.1651 × N × RHOSAT × KPEC
+/// RHOSAT = 216.7 × e_s / (T + 273.3)  [g/m³]
+/// ```
+///
+/// The simplest ET₀ method — requires only temperature and day length.
+/// Appropriate for data-sparse deployments and long-term reconstruction
+/// from temperature-only records.
+///
+/// Uses `KPEC = 1.0` per Lu et al. (2005).
+///
+/// # Reference
+///
+/// Hamon WR (1961) J Hydraulics Div ASCE 87(HY3):107-120.
+/// Lu J, et al. (2005) J Am Water Resour Assoc 41(3):621-633.
 #[must_use]
-pub fn mean_daylight_hours_for_month(latitude_deg: f64, month_index: usize) -> f64 {
-    const DAYS_IN_MONTH: [u32; 12] = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    let doy_start: u32 = DAYS_IN_MONTH[..month_index].iter().sum::<u32>() + 1;
-    let days = DAYS_IN_MONTH[month_index];
-    let total: f64 = (0..days)
-        .map(|d| daylight_hours(latitude_deg.to_radians(), doy_start + d))
-        .sum();
-    total / f64::from(days)
+pub fn hamon_pet(tmean_c: f64, day_length_hours: f64) -> f64 {
+    if tmean_c < 0.0 || day_length_hours <= 0.0 {
+        return 0.0;
+    }
+    let es = saturation_vapour_pressure(tmean_c);
+    let rhosat = 216.7 * es / (tmean_c + 273.3);
+    0.1651 * day_length_hours * rhosat
 }
 
-/// Full Thornthwaite monthly ET₀ (mm/month) for 12 months.
-///
-/// Applies daylight-hour and month-length corrections to the unadjusted estimate.
-///
-/// # Arguments
-/// * `monthly_temps` — 12 mean monthly temperatures (°C), Jan–Dec
-/// * `latitude_deg` — Station latitude (degrees)
-///
-/// # Returns
-/// Array of 12 monthly ET₀ values (mm/month), adjusted for daylight and month length.
+/// Hamon PET from geographic location (computes day length internally).
 #[must_use]
-pub fn thornthwaite_monthly_et0(monthly_temps: &[f64; 12], latitude_deg: f64) -> [f64; 12] {
-    const DAYS_IN_MONTH: [u32; 12] = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    let hi = annual_heat_index(monthly_temps);
-    if hi <= 0.0 {
-        return [0.0; 12];
+pub fn hamon_pet_from_location(tmean_c: f64, latitude_rad: f64, day_of_year: u32) -> f64 {
+    if tmean_c < 0.0 {
+        return 0.0;
     }
-    let a = thornthwaite_exponent(hi);
-    let mut result = [0.0; 12];
-    for m in 0..12 {
-        let pet_unadj = thornthwaite_unadjusted_et0(monthly_temps[m], hi, a);
-        let n_hours = mean_daylight_hours_for_month(latitude_deg, m);
-        let d = f64::from(DAYS_IN_MONTH[m]);
-        result[m] = (pet_unadj * (n_hours / 12.0) * (d / 30.0)).max(0.0);
+    let n = daylight_hours(latitude_rad, day_of_year);
+    hamon_pet(tmean_c, n)
+}
+
+// Thornthwaite (1948) monthly ET₀ has moved to `eco::thornthwaite`.
+// Re-exported for backward compatibility.
+pub use super::thornthwaite::{
+    annual_heat_index, mean_daylight_hours_for_month, monthly_heat_index_term,
+    thornthwaite_exponent, thornthwaite_monthly_et0, thornthwaite_unadjusted_et0,
+};
+
+// ── Ensemble consensus ───────────────────────────────────────────────
+
+/// Input data for a multi-method ET₀ ensemble computation.
+///
+/// All fields are optional; the ensemble uses whichever methods
+/// the available data supports.
+pub struct EnsembleInput {
+    /// Minimum temperature (°C). Enables PM, PT, Hargreaves.
+    pub tmin: Option<f64>,
+    /// Maximum temperature (°C). Enables PM, PT, Hargreaves.
+    pub tmax: Option<f64>,
+    /// Mean temperature (°C). Enables Makkink, Turc, Hamon.
+    pub tmean: Option<f64>,
+    /// Solar radiation Rs (MJ/m²/day). Enables PM, PT, Makkink, Turc.
+    pub rs_mj: Option<f64>,
+    /// Wind speed at 2 m (m/s). Enables PM.
+    pub wind_speed_2m: Option<f64>,
+    /// Actual vapour pressure ea (kPa). Enables PM, PT.
+    pub actual_vapour_pressure: Option<f64>,
+    /// Relative humidity (%). Enables Turc humidity correction.
+    pub rh_pct: Option<f64>,
+    /// Elevation above sea level (m).
+    pub elevation_m: f64,
+    /// Latitude (decimal degrees, positive = North).
+    pub latitude_deg: f64,
+    /// Day of year (1–366).
+    pub day_of_year: u32,
+    /// Day length (hours). Enables Hamon. Computed from lat/doy if absent.
+    pub day_length_hours: Option<f64>,
+}
+
+/// Result of a multi-method ET₀ ensemble.
+pub struct EnsembleResult {
+    /// Equal-weight mean of available methods (mm/day).
+    pub consensus: f64,
+    /// Max − min of individual method estimates.
+    pub spread: f64,
+    /// Number of methods that contributed.
+    pub n_methods: u8,
+    /// Individual method results (NaN if method was not applicable).
+    pub pm: f64,
+    pub pt: f64,
+    pub hargreaves: f64,
+    pub makkink: f64,
+    pub turc: f64,
+    pub hamon: f64,
+}
+
+/// Compute a multi-method ET₀ ensemble from available data.
+///
+/// Uses 6 daily ET₀ methods (Thornthwaite excluded — it's monthly).
+/// Methods are gated by data availability: PM and PT need full weather,
+/// Makkink/Turc need radiation, Hargreaves/Hamon need only temperature.
+///
+/// Returns a consensus estimate (equal-weight mean) and method spread.
+#[must_use]
+pub fn et0_ensemble(input: &EnsembleInput) -> EnsembleResult {
+    let tmean = input
+        .tmean
+        .or_else(|| {
+            input
+                .tmin
+                .zip(input.tmax)
+                .map(|(lo, hi)| f64::midpoint(lo, hi))
+        })
+        .unwrap_or(f64::NAN);
+
+    let has_full = input.tmin.is_some()
+        && input.tmax.is_some()
+        && input.rs_mj.is_some()
+        && input.wind_speed_2m.is_some()
+        && input.actual_vapour_pressure.is_some()
+        && tmean.is_finite();
+    let has_rad = input.rs_mj.is_some() && tmean.is_finite();
+
+    let pm = if has_full {
+        let inp = DailyEt0Input {
+            tmin: input.tmin.unwrap_or(0.0),
+            tmax: input.tmax.unwrap_or(0.0),
+            tmean: Some(tmean),
+            solar_radiation: input.rs_mj.unwrap_or(0.0),
+            wind_speed_2m: input.wind_speed_2m.unwrap_or(0.0),
+            actual_vapour_pressure: input.actual_vapour_pressure.unwrap_or(0.0),
+            elevation_m: input.elevation_m,
+            latitude_deg: input.latitude_deg,
+            day_of_year: input.day_of_year,
+        };
+        daily_et0(&inp).et0
+    } else {
+        f64::NAN
+    };
+
+    let pt = if has_full {
+        let daily_input = DailyEt0Input {
+            tmin: input.tmin.unwrap_or(0.0),
+            tmax: input.tmax.unwrap_or(0.0),
+            tmean: Some(tmean),
+            solar_radiation: input.rs_mj.unwrap_or(0.0),
+            wind_speed_2m: input.wind_speed_2m.unwrap_or(0.0),
+            actual_vapour_pressure: input.actual_vapour_pressure.unwrap_or(0.0),
+            elevation_m: input.elevation_m,
+            latitude_deg: input.latitude_deg,
+            day_of_year: input.day_of_year,
+        };
+        let (pt_val, _pm) = daily_et0_pt_and_pm(&daily_input);
+        pt_val
+    } else {
+        f64::NAN
+    };
+
+    let mak = if has_rad {
+        makkink_et0(tmean, input.rs_mj.unwrap_or(0.0), input.elevation_m)
+    } else {
+        f64::NAN
+    };
+
+    let trc = if has_rad && input.rh_pct.is_some() {
+        turc_et0(tmean, input.rs_mj.unwrap_or(0.0), input.rh_pct.unwrap_or(60.0))
+    } else {
+        f64::NAN
+    };
+
+    let hg = if input.tmin.is_some() && input.tmax.is_some() {
+        let ra = extraterrestrial_radiation(
+            input.latitude_deg.to_radians(),
+            input.day_of_year,
+        );
+        hargreaves_et0(input.tmin.unwrap_or(0.0), input.tmax.unwrap_or(0.0), ra)
+    } else {
+        f64::NAN
+    };
+
+    let dl = input
+        .day_length_hours
+        .unwrap_or_else(|| daylight_hours(input.latitude_deg.to_radians(), input.day_of_year));
+    let ham = if tmean.is_finite() && tmean >= 0.0 && dl > 0.0 {
+        hamon_pet(tmean, dl)
+    } else {
+        f64::NAN
+    };
+
+    let methods = [pm, pt, hg, mak, trc, ham];
+    let valid: Vec<f64> = methods.iter().copied().filter(|v| v.is_finite() && *v >= 0.0).collect();
+
+    let n = valid.len();
+    if n == 0 {
+        return EnsembleResult {
+            consensus: 0.0,
+            spread: 0.0,
+            n_methods: 0,
+            pm, pt, hargreaves: hg, makkink: mak, turc: trc, hamon: ham,
+        };
     }
-    result
+
+    let consensus = valid.iter().sum::<f64>() / n as f64;
+    let min_v = valid.iter().copied().fold(f64::INFINITY, f64::min);
+    let max_v = valid.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+
+    EnsembleResult {
+        consensus,
+        spread: max_v - min_v,
+        n_methods: n as u8,
+        pm, pt, hargreaves: hg, makkink: mak, turc: trc, hamon: ham,
+    }
 }
 
 // ── Wind speed adjustment ─────────────────────────────────────────────
@@ -899,84 +1075,6 @@ mod tests {
     }
 
     #[test]
-    fn test_thornthwaite_heat_index_term() {
-        let hi = monthly_heat_index_term(25.0);
-        assert!((hi - 11.435).abs() < 0.01, "5^1.514 ≈ 11.435: got {hi}");
-        assert_eq!(monthly_heat_index_term(-5.0), 0.0);
-        assert_eq!(monthly_heat_index_term(0.0), 0.0);
-    }
-
-    #[test]
-    fn test_thornthwaite_annual_heat_index() {
-        let hi = annual_heat_index(&[25.0; 12]);
-        assert!((hi - 137.22).abs() < 0.5, "12 × 11.435 ≈ 137.22: got {hi}");
-    }
-
-    #[test]
-    fn test_thornthwaite_freezing_zero() {
-        let et0 = thornthwaite_monthly_et0(&[-10.0; 12], 42.0);
-        assert!(et0.iter().all(|&e| e == 0.0));
-    }
-
-    #[test]
-    fn test_thornthwaite_summer_gt_winter() {
-        let temps = [
-            -3.2, -2.1, 2.8, 9.1, 15.4, 21.3, 23.8, 22.5, 18.9, 12.1, 5.3, 0.8,
-        ];
-        let et0 = thornthwaite_monthly_et0(&temps, 42.73);
-        let summer: f64 = et0[5..8].iter().sum();
-        let winter = et0[0] + et0[1] + et0[11];
-        assert!(summer > winter, "summer={summer:.1} winter={winter:.1}");
-    }
-
-    #[test]
-    fn test_thornthwaite_annual_range() {
-        let temps = [
-            -3.2, -2.1, 2.8, 9.1, 15.4, 21.3, 23.8, 22.5, 18.9, 12.1, 5.3, 0.8,
-        ];
-        let et0 = thornthwaite_monthly_et0(&temps, 42.73);
-        let annual: f64 = et0.iter().sum();
-        assert!(
-            (400.0..=900.0).contains(&annual),
-            "annual ET₀={annual:.0} not in [400,900]"
-        );
-    }
-
-    #[test]
-    fn test_thornthwaite_monotonicity() {
-        let mut prev = 0.0_f64;
-        for t in [10.0, 15.0, 20.0, 25.0, 30.0] {
-            let et0 = thornthwaite_monthly_et0(&[t; 12], 42.0);
-            let annual: f64 = et0.iter().sum();
-            assert!(annual > prev, "annual should increase: T={t} → {annual:.0}");
-            prev = annual;
-        }
-    }
-
-    #[test]
-    fn test_thornthwaite_tropical() {
-        let et0 = thornthwaite_monthly_et0(&[28.0; 12], 5.0);
-        let annual: f64 = et0.iter().sum();
-        assert!(
-            (1000.0..=2000.0).contains(&annual),
-            "tropical annual={annual:.0}"
-        );
-    }
-
-    #[test]
-    fn test_thornthwaite_single_warm_month() {
-        let mut temps = [-5.0; 12];
-        temps[6] = 20.0;
-        let et0 = thornthwaite_monthly_et0(&temps, 42.0);
-        assert!(et0[6] > 0.0, "warm month should have ET₀>0");
-        for (i, &e) in et0.iter().enumerate() {
-            if i != 6 {
-                assert_eq!(e, 0.0, "month {i} should be 0");
-            }
-        }
-    }
-
-    #[test]
     fn test_priestley_taylor_cross_validate_pm() {
         let input = DailyEt0Input {
             tmin: 12.3,
@@ -994,6 +1092,179 @@ mod tests {
         assert!(
             (0.85..=1.25).contains(&ratio),
             "PT/PM ratio should be 0.85-1.25 for humid climate (Uccle): ratio={ratio}"
+        );
+    }
+
+    #[test]
+    fn test_makkink_analytical() {
+        let et0 = makkink_et0(20.0, 15.0, 100.0);
+        assert!((et0 - 2.438).abs() < 0.01, "Makkink(20,15,100) = {et0}");
+        let et0_hot = makkink_et0(30.0, 25.0, 0.0);
+        assert!((et0_hot - 4.755).abs() < 0.01, "Makkink(30,25,0) = {et0_hot}");
+    }
+
+    #[test]
+    fn test_makkink_clamp_zero() {
+        assert!(makkink_et0(20.0, 0.0, 100.0) < f64::EPSILON, "Zero Rs → clamped to 0");
+    }
+
+    #[test]
+    fn test_makkink_monotonicity() {
+        let lo = makkink_et0(20.0, 10.0, 100.0);
+        let hi = makkink_et0(20.0, 20.0, 100.0);
+        assert!(hi > lo, "More radiation → more ET₀: {lo} < {hi}");
+    }
+
+    #[test]
+    fn test_turc_high_humidity() {
+        let et0 = turc_et0(20.0, 15.0, 70.0);
+        assert!((et0 - 3.033).abs() < 0.01, "Turc(20,15,70) = {et0}");
+    }
+
+    #[test]
+    fn test_turc_low_humidity_correction() {
+        let et0_humid = turc_et0(30.0, 25.0, 55.0);
+        let et0_dry = turc_et0(30.0, 25.0, 40.0);
+        assert!(et0_dry > et0_humid, "Drier air → higher ET₀");
+    }
+
+    #[test]
+    fn test_turc_negative_temp_clamp() {
+        assert!(turc_et0(-5.0, 3.0, 90.0) < f64::EPSILON, "Negative T → 0");
+    }
+
+    #[test]
+    fn test_turc_humidity_boundary_continuity() {
+        let at50 = turc_et0(20.0, 15.0, 50.0);
+        let at49 = turc_et0(20.0, 15.0, 49.99);
+        assert!((at50 - at49).abs() < 0.01, "Continuity at RH=50%: {at50} vs {at49}");
+    }
+
+    #[test]
+    fn test_hamon_analytical() {
+        let pet = hamon_pet(20.0, 14.0);
+        assert!((pet - 3.993).abs() < 0.01, "Hamon(20,14) = {pet}");
+    }
+
+    #[test]
+    fn test_hamon_clamp_negative_temp() {
+        assert!(hamon_pet(-5.0, 12.0) < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_hamon_clamp_zero_daylight() {
+        assert!(hamon_pet(20.0, 0.0) < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_hamon_from_location() {
+        let pet = hamon_pet_from_location(20.0, 42.0_f64.to_radians(), 172);
+        assert!(pet > 3.0 && pet < 6.0, "Hamon at 42°N midsummer: {pet}");
+    }
+
+    #[test]
+    fn test_hamon_monotonicity() {
+        let cool = hamon_pet(10.0, 14.0);
+        let warm = hamon_pet(30.0, 14.0);
+        assert!(warm > cool, "Warmer → more PET");
+        let short = hamon_pet(20.0, 10.0);
+        let long = hamon_pet(20.0, 16.0);
+        assert!(long > short, "Longer day → more PET");
+    }
+
+    // ── Ensemble consensus tests ────────────────────────────────────
+
+    #[test]
+    fn test_ensemble_full_weather() {
+        let input = EnsembleInput {
+            tmin: Some(12.3),
+            tmax: Some(21.5),
+            tmean: Some(16.9),
+            rs_mj: Some(22.07),
+            wind_speed_2m: Some(2.078),
+            actual_vapour_pressure: Some(1.409),
+            rh_pct: Some(66.5),
+            elevation_m: 100.0,
+            latitude_deg: 50.8,
+            day_of_year: 187,
+            day_length_hours: Some(16.1),
+        };
+        let r = et0_ensemble(&input);
+        assert_eq!(r.n_methods, 6, "Full weather should use 6 methods");
+        assert!(r.consensus > 0.0, "Consensus should be positive");
+        assert!(r.spread > 0.0, "Spread should be positive");
+        assert!(r.pm.is_finite(), "PM should compute");
+        assert!(r.pt.is_finite(), "PT should compute");
+        assert!(r.hargreaves.is_finite(), "Hargreaves should compute");
+        assert!(r.makkink.is_finite(), "Makkink should compute");
+        assert!(r.turc.is_finite(), "Turc should compute");
+        assert!(r.hamon.is_finite(), "Hamon should compute");
+    }
+
+    #[test]
+    fn test_ensemble_temp_only() {
+        let input = EnsembleInput {
+            tmin: Some(20.0),
+            tmax: Some(30.0),
+            tmean: None,
+            rs_mj: None,
+            wind_speed_2m: None,
+            actual_vapour_pressure: None,
+            rh_pct: None,
+            elevation_m: 100.0,
+            latitude_deg: 42.0,
+            day_of_year: 180,
+            day_length_hours: Some(15.0),
+        };
+        let r = et0_ensemble(&input);
+        assert!(r.n_methods >= 2, "Should use at least Hargreaves + Hamon");
+        assert!(r.consensus > 0.0);
+        assert!(r.pm.is_nan(), "PM needs full weather");
+        assert!(r.pt.is_nan(), "PT needs full weather");
+        assert!(r.makkink.is_nan(), "Makkink needs radiation");
+    }
+
+    #[test]
+    fn test_ensemble_monotonicity() {
+        let cool = et0_ensemble(&EnsembleInput {
+            tmin: Some(5.0), tmax: Some(15.0), tmean: Some(10.0),
+            rs_mj: Some(15.0), wind_speed_2m: Some(2.0),
+            actual_vapour_pressure: Some(1.0), rh_pct: Some(60.0),
+            elevation_m: 100.0, latitude_deg: 45.0, day_of_year: 180,
+            day_length_hours: Some(15.0),
+        });
+        let warm = et0_ensemble(&EnsembleInput {
+            tmin: Some(15.0), tmax: Some(25.0), tmean: Some(20.0),
+            rs_mj: Some(15.0), wind_speed_2m: Some(2.0),
+            actual_vapour_pressure: Some(1.5), rh_pct: Some(60.0),
+            elevation_m: 100.0, latitude_deg: 45.0, day_of_year: 180,
+            day_length_hours: Some(15.0),
+        });
+        assert!(
+            warm.consensus > cool.consensus,
+            "Warmer → higher ET₀: {} > {}",
+            warm.consensus,
+            cool.consensus
+        );
+    }
+
+    #[test]
+    fn test_ensemble_consensus_within_range() {
+        let r = et0_ensemble(&EnsembleInput {
+            tmin: Some(15.0), tmax: Some(25.0), tmean: Some(20.0),
+            rs_mj: Some(15.0), wind_speed_2m: Some(2.0),
+            actual_vapour_pressure: Some(1.2), rh_pct: Some(60.0),
+            elevation_m: 100.0, latitude_deg: 45.0, day_of_year: 150,
+            day_length_hours: Some(15.0),
+        });
+        let methods = [r.pm, r.pt, r.hargreaves, r.makkink, r.turc, r.hamon];
+        let valid: Vec<f64> = methods.iter().copied().filter(|v| v.is_finite()).collect();
+        let min_v = valid.iter().copied().fold(f64::INFINITY, f64::min);
+        let max_v = valid.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+        assert!(
+            r.consensus >= min_v && r.consensus <= max_v,
+            "Consensus {:.3} should be within [{:.3}, {:.3}]",
+            r.consensus, min_v, max_v
         );
     }
 }

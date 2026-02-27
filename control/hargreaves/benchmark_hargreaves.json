@@ -1,0 +1,97 @@
+{
+  "_provenance": {
+    "method": "Hargreaves-Samani (1985) temperature-only ET₀",
+    "baseline_script": "control/hargreaves/hargreaves_samani.py",
+    "baseline_commit": "fad2e1b",
+    "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
+    "baseline_command": "python3 control/hargreaves/hargreaves_samani.py",
+    "python_version": "3.10",
+    "created": "2026-02-26",
+    "references": [
+      "Hargreaves GH, Samani ZA (1985) Applied Eng Agric 1(2):96-99, DOI:10.13031/2013.26773",
+      "Allen et al. (1998) FAO-56 Eq. 52",
+      "Droogers & Allen (2002) Irrigation & Drainage Systems 16:33-45"
+    ]
+  },
+  "validation_checks": {
+    "analytical": {
+      "description": "Direct computation: ET₀ = 0.0023 × (Tmean + 17.8) × √ΔT × Ra",
+      "test_cases": [
+        {"tmin": 20.0, "tmax": 30.0, "ra_mm_day": 15.0, "expected_et0": 4.6694, "tolerance": 0.01},
+        {"tmin": 10.0, "tmax": 25.0, "ra_mm_day": 12.0, "expected_et0": 3.7734, "tolerance": 0.01},
+        {"tmin": 5.0,  "tmax": 15.0, "ra_mm_day": 8.0,  "expected_et0": 1.6176, "tolerance": 0.01},
+        {"tmin": 25.0, "tmax": 40.0, "ra_mm_day": 16.0, "expected_et0": 7.1690, "tolerance": 0.01},
+        {"tmin": 0.0,  "tmax": 10.0, "ra_mm_day": 6.0,  "expected_et0": 0.9950, "tolerance": 0.01},
+        {"tmin": 15.0, "tmax": 35.0, "ra_mm_day": 14.0, "expected_et0": 6.1633, "tolerance": 0.01},
+        {"tmin": -5.0, "tmax": 5.0,  "ra_mm_day": 4.0,  "expected_et0": 0.5179, "tolerance": 0.01}
+      ]
+    },
+    "ra_computation": {
+      "description": "Extraterrestrial radiation Ra (mm/day) from lat + DOY (FAO-56 Eq. 21)",
+      "test_cases": [
+        {"latitude": 42.0, "doy": 172, "expected_ra_mm": 17.106, "tolerance": 0.01},
+        {"latitude": 42.0, "doy": 1,   "expected_ra_mm": 5.141,  "tolerance": 0.01},
+        {"latitude": 42.0, "doy": 80,  "expected_ra_mm": 11.388, "tolerance": 0.01},
+        {"latitude": 42.0, "doy": 265, "expected_ra_mm": 11.146, "tolerance": 0.01},
+        {"latitude": 0.0,  "doy": 172, "expected_ra_mm": 13.619, "tolerance": 0.01},
+        {"latitude": 60.0, "doy": 172, "expected_ra_mm": 16.870, "tolerance": 0.01}
+      ]
+    },
+    "fao56_cross_comparison": {
+      "description": "HG vs PM cross-comparison for FAO-56 Table 2 reference cities (July conditions)",
+      "test_cases": [
+        {
+          "city": "Lansing MI (humid continental)",
+          "latitude": 42.77, "doy": 196,
+          "tmin": 17.0, "tmax": 29.0, "fao56_pm_et0": 4.5,
+          "max_ratio_diff": 0.35
+        },
+        {
+          "city": "Davis CA (Mediterranean)",
+          "latitude": 38.54, "doy": 196,
+          "tmin": 15.0, "tmax": 35.0, "fao56_pm_et0": 7.0,
+          "max_ratio_diff": 0.35
+        },
+        {
+          "city": "Phoenix AZ (arid)",
+          "latitude": 33.45, "doy": 196,
+          "tmin": 28.0, "tmax": 42.0, "fao56_pm_et0": 8.5,
+          "max_ratio_diff": 0.40
+        }
+      ]
+    },
+    "edge_cases": {
+      "description": "Boundary conditions and physical constraints",
+      "test_cases": [
+        {"label": "Zero Ra → zero ET₀", "tmin": 20.0, "tmax": 30.0, "ra_mm_day": 0.0, "check": "zero"},
+        {"label": "Tmax = Tmin → zero ET₀ (no diurnal range)", "tmin": 25.0, "tmax": 25.0, "ra_mm_day": 15.0, "check": "zero"},
+        {"label": "Tmax < Tmin → clamped to zero", "tmin": 30.0, "tmax": 20.0, "ra_mm_day": 15.0, "check": "zero"},
+        {"label": "Very hot day → positive ET₀", "tmin": 30.0, "tmax": 45.0, "ra_mm_day": 16.0, "check": "positive"},
+        {"label": "Subfreezing Tmean → still positive if Ra > 0 and ΔT > 0", "tmin": -10.0, "tmax": 2.0, "ra_mm_day": 5.0, "check": "positive"}
+      ]
+    },
+    "monotonicity": {
+      "description": "Physical monotonicity: higher T or wider ΔT → higher ET₀",
+      "test_cases": [
+        {
+          "label": "Higher Tmean (fixed ΔT, Ra) → higher ET₀",
+          "base": {"tmin": 15.0, "tmax": 25.0},
+          "increased": {"tmin": 20.0, "tmax": 30.0},
+          "ra_mm_day": 14.0
+        },
+        {
+          "label": "Wider ΔT (fixed Tmean, Ra) → higher ET₀",
+          "base": {"tmin": 20.0, "tmax": 30.0},
+          "increased": {"tmin": 15.0, "tmax": 35.0},
+          "ra_mm_day": 14.0
+        },
+        {
+          "label": "Summer vs winter temps → summer higher",
+          "base": {"tmin": 0.0, "tmax": 10.0},
+          "increased": {"tmin": 20.0, "tmax": 32.0},
+          "ra_mm_day": 12.0
+        }
+      ]
+    }
+  }
+}

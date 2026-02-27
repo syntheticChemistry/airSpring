@@ -1,8 +1,8 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: February 26, 2026 (v0.4.8 — 491 tests, 97.45% coverage)
-**ToadStool PIN**: S68 (universal f64, ValidationHarness tracing, LazyLock shader constants)
-**Handoff**: V022 (Thornthwaite + GDD + pedotransfer — 27 binaries, 570 validation + 1393 atlas checks)
+**Last Updated**: February 27, 2026 (v0.5.0 — 645 tests, 97.06% coverage)
+**ToadStool PIN**: S68 HEAD (`89356efa` — universal f64, ValidationHarness tracing, LazyLock shader constants, CPU feature-gate fix)
+**Handoff**: V028 (ToadStool absorption + GPU live — 47 barracuda + 4 forge binaries, 1393 atlas checks, Titan V GPU live 24/24 PASS, metalForge live hardware 17/17 PASS)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -16,7 +16,7 @@ validate against papers, hand off to ToadStool/BarraCuda, lean on upstream.
 
 | Module | Absorbed Into | When | Status |
 |--------|--------------|------|--------|
-| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all 27 binaries use upstream |
+| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all 37 binaries use upstream |
 | `van_genuchten` | `barracuda::pde::richards::SoilParams` | S40 | **Leaning** — `gpu::richards` bridges to upstream |
 | `isotherm NM` | `barracuda::optimize::nelder_mead` | S62 | **Leaning** — `gpu::isotherm` bridges to upstream |
 
@@ -92,7 +92,7 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 
 ---
 
-## ToadStool S42–S66 Evolution (180+ commits)
+## ToadStool S42–S68 Evolution (180+ commits)
 
 ToadStool underwent massive evolution since S42. Key milestones:
 
@@ -120,7 +120,7 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | Capability | Module | Wired In | Status |
 |-----------|--------|----------|--------|
 | `barracuda::tolerances` | `tolerances` | v0.3.6 | **LEANING** — re-exported |
-| `barracuda::validation::ValidationHarness` | `validation` | v0.3.6 | **LEANING** — all 27 binaries (incl. validate_atlas, 1393 checks) |
+| `barracuda::validation::ValidationHarness` | `validation` | v0.3.6 | **LEANING** — all 37 binaries (incl. validate_atlas, 1393 checks) |
 | `pde::richards::solve_richards` | `pde` | v0.4.0 | **WIRED** — `gpu::richards` |
 | `pde::crank_nicolson::CrankNicolson1D` | `pde` | v0.4.4 | **WIRED** — CN f64 diffusion cross-val |
 | `optimize::nelder_mead` | `optimize` | v0.4.1 | **WIRED** — isotherm fitting |
@@ -159,14 +159,16 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | Check | Status |
 |-------|--------|
 | `cargo fmt --check` | **Clean** |
-| `cargo clippy -- -D warnings` | **0 warnings** (pedantic + nursery via `[lints.clippy]`) |
+| `cargo clippy --all-targets` | **0 warnings** (pedantic + nursery via `[lints.clippy]`, `--all-targets` clean) |
 | `cargo doc --no-deps` | **Builds**, 0 warnings |
-| `cargo test` | **491 total** (lib + integration + doc-tests) |
-| `cargo llvm-cov --lib` | **97.45%** line coverage (97.58% functions) |
+| `cargo test --lib` | **645 total** (lib + doc + validation) |
+| `cargo llvm-cov --lib` | **97.06%** line coverage |
 | `unsafe` code | **Zero** |
 | `unwrap()` in lib | **Zero** (all in `#[cfg(test)]` or validation-binary JSON helpers) |
-| Files > 1000 lines | **Zero** (max src: 800 lines `eco/richards.rs`, max test: 698 lines `eco_integration.rs`) |
-| Validation binaries | **27/27 PASS** (570 checks + 1393 atlas) |
+| Files > 1000 lines | **Zero** (max src: 834 `eco/evapotranspiration.rs` after Thornthwaite extraction) |
+| Validation binaries | **47/47 PASS** (barracuda) + 4/4 PASS (forge) |
+| GPU live (Titan V) | **24/24 PASS** (0.04% seasonal parity, `BARRACUDA_GPU_ADAPTER=titan`) |
+| metalForge live | **17/17 PASS** (5 substrates, 14 workloads route) |
 | GPU dispatch (P0 blocker) | **RESOLVED** — S66 explicit BGL (R-S66-041) |
 | Cross-validation | **75/75 MATCH** (tol=1e-5) |
 
@@ -197,3 +199,33 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | TS-003: `acos` precision boundary | All Springs using trig in f64 shaders | S54 (H-012) |
 | TS-004: reduce buffer N≥1024 | All Springs using `FusedMapReduceF64` | S54 (H-013) |
 | Richards PDE | airSpring → `pde::richards` (S40) | upstream |
+
+---
+
+## Cross-Spring Sync (Feb 27, 2026)
+
+### Sibling Spring Handoff Review
+
+| Handoff | Date | ToadStool Baseline | Key Takeaways for airSpring |
+|---------|------|--------------------|-----------------------------|
+| wetSpring V61 | Feb 27 | S68 (`f0feb226`) | NPU inference bridge proposed (`barracuda::npu`); power-budget-aware dispatch; 79 ToadStool primitives in use |
+| neuralSpring V24 | Feb 27 | S68 (`f0feb226`) | `compile_shader_df64_streaming` proposed; `barracuda::nn` (MLP, LSTM, ESN); two-tier df64 precision validated |
+| groundSpring V10 | Feb 25 | S50–S62 | `if let Ok` + CPU fallback pattern (wateringHole standard); `mc_et0_propagate` ready; three-mode CI (local/barracuda/barracuda-gpu) |
+| ToadStool S61-63 | Feb 25 | S61–63 | Sovereign compiler; cyclic reduction for n≥2048; maximin LHS O(n); `erfc_deriv` public |
+
+### Pending Upstream Absorptions to Track
+
+| Primitive | Proposed By | Impact on airSpring | Status |
+|-----------|-------------|---------------------|--------|
+| `barracuda::npu` (NpuDispatch trait) | wetSpring V61 + airSpring V024 | Would replace our local `npu.rs` | Proposed |
+| `barracuda::nn` (MLP, LSTM, ESN) | neuralSpring V24 | ML/regime surrogates for crop modeling | Proposed |
+| `compile_shader_df64_streaming` | neuralSpring V24 | Simplify df64 shader compilation | Proposed |
+| `barracuda::ml::esn` | wetSpring V61 | ESN reservoir for time-series IoT | Proposed |
+| `batched_multinomial.wgsl` | groundSpring V10 | Rarefaction for diversity GPU | Proposed |
+
+### S68 HEAD Sync (89356efa)
+
+Synced from `f0feb226` → `89356efa` (1 commit). CPU feature-gate fix:
+- `wgsl_hessian_column()`, `WGSL_HISTOGRAM`, `WGSL_BOOTSTRAP_MEAN_F64` gated with `#[cfg(feature = "gpu")]`
+- No impact on airSpring (we use default features which include gpu)
+- Revalidation: 499/499 tests, 0 clippy, 97.06% coverage — all green

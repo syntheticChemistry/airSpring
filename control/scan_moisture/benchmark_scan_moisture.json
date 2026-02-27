@@ -1,0 +1,38 @@
+{
+  "_provenance": {
+    "method": "Richards 1D (van Genuchten-Mualem) vs USDA SCAN-published soil moisture ranges",
+    "baseline_script": "control/scan_moisture/scan_moisture_validation.py",
+    "baseline_commit": "fad2e1b",
+    "baseline_command": "python3 control/scan_moisture/scan_moisture_validation.py",
+    "python_version": "3.10",
+    "created": "2026-02-26",
+    "references": [
+      "Richards LA (1931) Physics 1:318-333",
+      "van Genuchten MTh (1980) SSSA J 44:892-898",
+      "Carsel RF, Parrish RS (1988) WRR 24:755-769",
+      "USDA SCAN: https://www.nrcs.usda.gov/wps/portal/wcc/home/snowClimateMonitoring/"
+    ],
+    "data_source": "Carsel & Parrish (1988) VG parameters (open literature), SCAN seasonal theta ranges (published)"
+  },
+  "retention_checks": [
+    {"soil": "sand",      "h_cm": -10,   "expected_theta": 0.2143, "tolerance": 0.005},
+    {"soil": "sand",      "h_cm": -100,  "expected_theta": 0.0493, "tolerance": 0.005},
+    {"soil": "sand",      "h_cm": -1000, "expected_theta": 0.0451, "tolerance": 0.005},
+    {"soil": "silt_loam", "h_cm": -10,   "expected_theta": 0.4392, "tolerance": 0.005},
+    {"soil": "silt_loam", "h_cm": -100,  "expected_theta": 0.3297, "tolerance": 0.005},
+    {"soil": "silt_loam", "h_cm": -1000, "expected_theta": 0.1787, "tolerance": 0.01},
+    {"soil": "clay",      "h_cm": -10,   "expected_theta": 0.3784, "tolerance": 0.005},
+    {"soil": "clay",      "h_cm": -100,  "expected_theta": 0.3654, "tolerance": 0.005}
+  ],
+  "conductivity_checks": [
+    {"soil": "sand",      "h_cm": 0,    "expected_K_ratio": 1.0,    "tolerance": 0.001},
+    {"soil": "sand",      "h_cm": -10,  "expected_K_ratio": 0.021,  "tolerance": 0.01,
+     "_note": "Sand K drops rapidly: Se≈0.44, K/Ks≈0.02"},
+    {"soil": "silt_loam", "h_cm": 0,    "expected_K_ratio": 1.0,    "tolerance": 0.001},
+    {"soil": "silt_loam", "h_cm": -100, "expected_K_ratio": 0.0065, "tolerance": 0.005,
+     "_note": "Silt loam at h=-100: Se≈0.69, K/Ks≈0.007"},
+    {"soil": "clay",      "h_cm": 0,    "expected_K_ratio": 1.0,    "tolerance": 0.001},
+    {"soil": "clay",      "h_cm": -100, "expected_K_ratio": 0.004,  "tolerance": 0.005,
+     "_note": "Clay at h=-100: Se≈0.95, K/Ks≈0.004 (very slow despite high Se)"}
+  ]
+}

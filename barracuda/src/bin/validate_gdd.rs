@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 //! Validate Growing Degree Days (GDD) against Python baseline (Exp 022).
 //!
 //! `McMaster` GS, Wilhelm WW (1997) "Growing degree-days: one equation,
@@ -7,6 +13,7 @@
 use airspring_barracuda::eco::crop::{
     accumulated_gdd_avg, accumulated_gdd_clamp, gdd_avg, gdd_clamp, kc_from_gdd, CropType,
 };
+use airspring_barracuda::tolerances::GDD_EXACT;
 use airspring_barracuda::validation::{self, parse_benchmark_json, ValidationHarness};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/gdd/benchmark_gdd.json");
@@ -43,7 +50,7 @@ fn validate_analytical(v: &mut ValidationHarness, bench: &serde_json::Value) {
             &format!("avg: Tmax={tmax}, Tmin={tmin}, Tbase={tbase}"),
             gdd_avg(tmax, tmin, tbase),
             expected,
-            1e-10,
+            GDD_EXACT.abs_tol,
         );
     }
 
@@ -61,7 +68,7 @@ fn validate_analytical(v: &mut ValidationHarness, bench: &serde_json::Value) {
             &format!("clamp: Tmax={tmax}, Tmin={tmin}, Tbase={tbase}, Tceil={tceil}"),
             gdd_clamp(tmax, tmin, tbase, tceil),
             expected,
-            1e-10,
+            GDD_EXACT.abs_tol,
         );
     }
 }
@@ -72,7 +79,7 @@ fn validate_accumulation(v: &mut ValidationHarness, bench: &serde_json::Value) {
     let acc = &bench["accumulation"];
     let tol = acc["tol"].as_f64().unwrap();
 
-    let cum_avg = accumulated_gdd_avg(&tmax, &tmin, 10.0);
+    let cum_avg = accumulated_gdd_avg(&tmax, &tmin, 10.0).expect("matched tmax/tmin");
     v.check_abs(
         "corn avg total GDD",
         *cum_avg.last().unwrap(),
@@ -80,7 +87,7 @@ fn validate_accumulation(v: &mut ValidationHarness, bench: &serde_json::Value) {
         tol,
     );
 
-    let cum_clamp = accumulated_gdd_clamp(&tmax, &tmin, 10.0, 30.0);
+    let cum_clamp = accumulated_gdd_clamp(&tmax, &tmin, 10.0, 30.0).expect("matched tmax/tmin");
     v.check_abs(
         "corn clamp total GDD",
         *cum_clamp.last().unwrap(),
@@ -88,7 +95,7 @@ fn validate_accumulation(v: &mut ValidationHarness, bench: &serde_json::Value) {
         tol,
     );
 
-    let cum_alfalfa = accumulated_gdd_avg(&tmax, &tmin, 5.0);
+    let cum_alfalfa = accumulated_gdd_avg(&tmax, &tmin, 5.0).expect("matched tmax/tmin");
     v.check_abs(
         "alfalfa avg total GDD",
         *cum_alfalfa.last().unwrap(),
@@ -126,7 +133,7 @@ fn validate_phenology(v: &mut ValidationHarness, bench: &serde_json::Value) {
     for tc in cases {
         let gdd = tc["gdd"].as_f64().unwrap();
         let expected = tc["expected_kc"].as_f64().unwrap();
-        let kc = kc_from_gdd(gdd, &corn.kc_stages_gdd, &corn.kc_values);
+        let kc = kc_from_gdd(gdd, &corn.kc_stages_gdd, &corn.kc_values).expect("matched stages/kc");
         v.check_abs(&format!("corn Kc at GDD={gdd:.0}"), kc, expected, tol);
     }
 }
@@ -134,7 +141,7 @@ fn validate_phenology(v: &mut ValidationHarness, bench: &serde_json::Value) {
 fn validate_pattern(v: &mut ValidationHarness, bench: &serde_json::Value) {
     validation::section("Seasonal pattern checks");
     let (tmax, tmin) = generate_season_data(bench);
-    let cum = accumulated_gdd_avg(&tmax, &tmin, 10.0);
+    let cum = accumulated_gdd_avg(&tmax, &tmin, 10.0).expect("matched tmax/tmin");
     let total = *cum.last().unwrap();
 
     let range = &bench["thresholds"]["corn_gdd_range"];
@@ -157,7 +164,7 @@ fn validate_pattern(v: &mut ValidationHarness, bench: &serde_json::Value) {
     );
 
     // Method comparison
-    let cum_clamp = accumulated_gdd_clamp(&tmax, &tmin, 10.0, 30.0);
+    let cum_clamp = accumulated_gdd_clamp(&tmax, &tmin, 10.0, 30.0).expect("matched tmax/tmin");
     let diff = (cum.last().unwrap() - cum_clamp.last().unwrap()).abs();
     let max_diff = bench["thresholds"]["method_diff_max"].as_f64().unwrap();
     v.check_bool(

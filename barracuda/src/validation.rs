@@ -3,10 +3,9 @@
 // include_str!. Library code never accesses the filesystem directly — callers
 // provide data. Runtime file access is isolated to io::csv_ts (accepts paths
 // from callers) and validation binaries.
-//! Shared validation infrastructure for hotSpring-pattern binaries.
+//! Shared validation infrastructure for structured validation binaries.
 //!
-//! Leans on [`barracuda::validation::ValidationHarness`] (absorbed upstream
-//! from `neuralSpring` → `ToadStool` Feb 2026) for structured pass/fail checks
+//! Leans on [`barracuda::validation::ValidationHarness`] for structured pass/fail checks
 //! with exit codes. airSpring adds JSON benchmark loading utilities on top.
 //!
 //! # Usage

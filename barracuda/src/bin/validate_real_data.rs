@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 //! Real data validation: compute ET₀ on Open-Meteo Michigan weather.
 //!
 //! Replaces `control/fao56/compute_et0_real_data.py` + `simulate_real_data.py`.
@@ -6,13 +12,14 @@
 //! and runs water balance simulations on real weather.
 //!
 //! This is the key proof that the Rust pipeline works on real, non-synthetic data.
-//! Uses `ValidationRunner` for hotSpring-pattern pass/fail and exit codes.
+//! Uses `ValidationRunner` for structured validation pass/fail and exit codes.
 
 use airspring_barracuda::eco::{
     evapotranspiration::{self as et, DailyEt0Input},
     water_balance::{DailyInput, WaterBalanceState},
 };
 use airspring_barracuda::testutil;
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{self, ValidationHarness};
 use std::io::BufRead;
 use std::path::Path;
@@ -69,9 +76,6 @@ const DEFAULT_STATIONS: &[&str] = &[
     "sparta",
     "west_olive",
 ];
-
-/// Mass balance tolerance (mm) — FAO-56 Chapter 8 conservation law.
-const MASS_BALANCE_TOLERANCE: f64 = 0.01;
 
 /// Default date range for growing season CSV filenames.
 /// Override with `ET0_SEASON_START` and `ET0_SEASON_END` env vars.
@@ -382,10 +386,11 @@ fn validate_scenario(scenario: &Scenario, config: &RuntimeConfig, v: &mut Valida
 
     v.check_bool(
         &format!(
-            "{} rainfed mass balance < {MASS_BALANCE_TOLERANCE} (err={rf_mb:.6})",
-            scenario.name
+            "{} rainfed mass balance < {} (err={rf_mb:.6})",
+            scenario.name,
+            tolerances::WATER_BALANCE_MASS.abs_tol
         ),
-        rf_mb < MASS_BALANCE_TOLERANCE,
+        rf_mb < tolerances::WATER_BALANCE_MASS.abs_tol,
     );
 
     // Irrigated (smart trigger)
@@ -394,10 +399,11 @@ fn validate_scenario(scenario: &Scenario, config: &RuntimeConfig, v: &mut Valida
 
     v.check_bool(
         &format!(
-            "{} irrigated mass balance < {MASS_BALANCE_TOLERANCE} (err={irr_mb:.6})",
-            scenario.name
+            "{} irrigated mass balance < {} (err={irr_mb:.6})",
+            scenario.name,
+            tolerances::WATER_BALANCE_MASS.abs_tol
         ),
-        irr_mb < MASS_BALANCE_TOLERANCE,
+        irr_mb < tolerances::WATER_BALANCE_MASS.abs_tol,
     );
 
     // Summary
@@ -506,7 +512,7 @@ fn main() {
         let overall_r2 = testutil::r_squared(&all_om_et0, &all_rust_et0).unwrap_or(0.0);
         let overall_rmse = testutil::rmse(&all_om_et0, &all_rust_et0);
         let overall_mbe = testutil::mbe(&all_om_et0, &all_rust_et0);
-        let overall_ia = testutil::index_of_agreement(&all_om_et0, &all_rust_et0);
+        let overall_ia = testutil::index_of_agreement(&all_om_et0, &all_rust_et0).unwrap_or(0.0);
 
         println!(
             "  {} station-days: R²={overall_r2:.4}, RMSE={overall_rmse:.4}, MBE={overall_mbe:.4}, IA={overall_ia:.4}",

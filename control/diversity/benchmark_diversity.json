@@ -1,0 +1,73 @@
+{
+  "_provenance": {
+    "method": "Ecological diversity indices (Shannon, Simpson, Chao1, Pielou, Bray-Curtis)",
+    "baseline_script": "control/diversity/diversity_indices.py",
+    "baseline_commit": "fad2e1b",
+    "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
+    "baseline_command": "python3 control/diversity/diversity_indices.py",
+    "python_version": "3.10",
+    "created": "2026-02-26",
+    "references": [
+      "Shannon CE (1948) Bell System Technical Journal 27(3):379-423",
+      "Simpson EH (1949) Nature 163:688",
+      "Chao A (1984) Scandinavian J Statistics 11(4):265-270",
+      "Pielou EC (1966) J Theoretical Biology 13:131-144",
+      "Bray JR, Curtis JT (1957) Ecological Monographs 27(4):325-349"
+    ],
+    "notes": [
+      "Exp 032: Ecological diversity for agroecosystem assessment",
+      "All expected values analytically derived from published formulas",
+      "Cover crop communities: 5-species mix, monoculture, perfectly even, sparse/rare-rich"
+    ]
+  },
+  "validation_checks": {
+    "shannon": {
+      "description": "Shannon entropy H' = −Σ pᵢ ln(pᵢ)",
+      "test_cases": [
+        {"label": "5-species cover crop mix (120,85,45,30,20)", "counts": [120,85,45,30,20], "expected": 1.419200, "tolerance": 1e-4},
+        {"label": "Monoculture (300,0,0,0,0)", "counts": [300,0,0,0,0], "expected": 0.0, "tolerance": 1e-10},
+        {"label": "Perfectly even 5-species (60 each)", "counts": [60,60,60,60,60], "expected": 1.609438, "tolerance": 1e-4},
+        {"label": "Sparse community (100,50,1,1,1,1,0,0,0,0)", "counts": [100,50,1,1,1,1,0,0,0,0], "expected": 0.776445, "tolerance": 1e-4},
+        {"label": "Even 10-species (10 each)", "counts": [10,10,10,10,10,10,10,10,10,10], "expected": 2.302585, "tolerance": 1e-4}
+      ]
+    },
+    "simpson": {
+      "description": "Simpson diversity D = 1 − Σ pᵢ²",
+      "test_cases": [
+        {"label": "5-species cover crop mix", "counts": [120,85,45,30,20], "expected": 0.722778, "tolerance": 1e-4},
+        {"label": "Monoculture → D=0", "counts": [300,0,0,0,0], "expected": 0.0, "tolerance": 1e-10},
+        {"label": "Perfectly even 5-species → D=0.80", "counts": [60,60,60,60,60], "expected": 0.800000, "tolerance": 1e-6},
+        {"label": "Sparse community", "counts": [100,50,1,1,1,1,0,0,0,0], "expected": 0.472761, "tolerance": 1e-4}
+      ]
+    },
+    "chao1": {
+      "description": "Chao1 richness: S_obs + f₁²/(2·f₂)",
+      "test_cases": [
+        {"label": "5-species mix (no rare → Chao1 = S_obs = 5)", "counts": [120,85,45,30,20], "expected": 5.0, "tolerance": 1e-6},
+        {"label": "Sparse with 4 singletons (f₁=4, f₂=0 → +f₁(f₁-1)/2 = 6)", "counts": [100,50,1,1,1,1,0,0,0,0], "expected": 12.0, "tolerance": 1e-6},
+        {"label": "10-species even (no rare → Chao1 = 10)", "counts": [10,10,10,10,10,10,10,10,10,10], "expected": 10.0, "tolerance": 1e-6},
+        {"label": "Community with singletons and doubletons (S=8)", "counts": [50,20,10,2,2,1,1,1,0], "expected": 9.0, "tolerance": 1e-6,
+         "_note": "Upstream barracuda Chao1 uses abundance-based variant"}
+      ]
+    },
+    "pielou": {
+      "description": "Pielou evenness J' = H' / ln(S)",
+      "test_cases": [
+        {"label": "5-species mix (J' = 1.4192/ln(5))", "counts": [120,85,45,30,20], "expected": 0.881799, "tolerance": 1e-4},
+        {"label": "Perfectly even → J'=1.0", "counts": [60,60,60,60,60], "expected": 1.000000, "tolerance": 1e-6},
+        {"label": "Sparse community (low evenness)", "counts": [100,50,1,1,1,1,0,0,0,0], "expected": 0.433342, "tolerance": 1e-4},
+        {"label": "Monoculture (S=1) → J'=0", "counts": [300,0,0,0,0], "expected": 0.0, "tolerance": 1e-10}
+      ]
+    },
+    "bray_curtis": {
+      "description": "Bray-Curtis dissimilarity BC = Σ|aᵢ−bᵢ| / Σ(aᵢ+bᵢ)",
+      "test_cases": [
+        {"label": "Mix vs monoculture (BC=0.60)", "sample_a": [120,85,45,30,20], "sample_b": [300,0,0,0,0], "expected": 0.600000, "tolerance": 1e-6},
+        {"label": "Mix vs even (BC=0.2833)", "sample_a": [120,85,45,30,20], "sample_b": [60,60,60,60,60], "expected": 0.283333, "tolerance": 1e-4},
+        {"label": "Identical samples (BC=0)", "sample_a": [120,85,45,30,20], "sample_b": [120,85,45,30,20], "expected": 0.0, "tolerance": 1e-10},
+        {"label": "No overlap (BC=1)", "sample_a": [100,50,0,0,0], "sample_b": [0,0,30,20,10], "expected": 1.0, "tolerance": 1e-10},
+        {"label": "Mono vs even (BC=0.80)", "sample_a": [300,0,0,0,0], "sample_b": [60,60,60,60,60], "expected": 0.800000, "tolerance": 1e-6}
+      ]
+    }
+  }
+}

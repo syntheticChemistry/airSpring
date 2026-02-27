@@ -1,0 +1,58 @@
+{
+  "_provenance": {
+    "method": "int8 quantization round-trip + NPU feature validation",
+    "baseline_type": "analytical",
+    "baseline_script": null,
+    "baseline_commit": "n/a — analytical expected values from quantization math",
+    "baseline_command": "n/a — expected values are mathematically derived",
+    "created": "2026-02-26",
+    "references": [
+      "BrainChip AKD1000 Datasheet (int8 quantization: val → i8 → f64 round-trip)",
+      "Dong et al. (2024) Smart Ag Tech 4:100147 (crop stress features)",
+      "FAO-56 Allen et al. (1998) (irrigation decision features)"
+    ],
+    "notes": [
+      "Exp 028: NPU Edge Inference for Agriculture",
+      "Expected values are analytical — quantization error bounded by 1/127 of range",
+      "Hardware tests (AKD1000 DMA) conditional on --features npu",
+      "Feature ranges from npu.rs: CropStressInput, IrrigationInput, MultiSensorInput"
+    ]
+  },
+  "experiments": {
+    "028": {
+      "name": "NPU Edge Inference for Agriculture",
+      "binary": "validate_npu_eco",
+      "checks": 28,
+      "sections": [
+        "int8 quantization round-trip (6 values + 3 boundary tests)",
+        "crop stress classifier features (6 comparisons)",
+        "irrigation decision features (6 comparisons)",
+        "sensor anomaly features (7 comparisons)",
+        "live NPU DMA inference (conditional)"
+      ]
+    },
+    "029": {
+      "name": "Funky NPU for Agricultural IoT",
+      "binary": "validate_npu_funky_eco",
+      "checks": 25,
+      "sections": [
+        "streaming soil moisture (EMA convergence)",
+        "seasonal weight evolution (drift tracking)",
+        "multi-crop crosstalk (per-crop weight isolation)",
+        "LOCOMOS power budget (energy per inference)",
+        "noise resilience (accuracy vs noise level)"
+      ]
+    },
+    "029b": {
+      "name": "High-Cadence NPU Streaming Pipeline",
+      "binary": "validate_npu_high_cadence",
+      "checks": 21,
+      "sections": [
+        "multi-sensor fusion (θ + T + EC)",
+        "cadence scaling (1-min to 10-sec burst)",
+        "seasonal transition detection (crop swap latency)",
+        "energy budget (active + sleep cycle)"
+      ]
+    }
+  }
+}

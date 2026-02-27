@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 //! Validate FAO-56 Penman-Monteith sensitivity analysis (Exp 017).
 //!
 //! Benchmark: `control/sensitivity/benchmark_sensitivity.json`
@@ -10,16 +16,12 @@
 //! ranking consistency across 3 climatic conditions.
 
 use airspring_barracuda::eco::evapotranspiration as et;
-use airspring_barracuda::validation::{self, json_str, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{
+    self, json_field, json_str, parse_benchmark_json, ValidationHarness,
+};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/sensitivity/benchmark_sensitivity.json");
-
-fn f64_field(v: &serde_json::Value, key: &str) -> f64 {
-    v[key]
-        .as_f64()
-        .unwrap_or_else(|| panic!("missing f64 key '{key}'"))
-}
 
 #[derive(Clone)]
 struct MeteoParams {
@@ -37,16 +39,16 @@ struct MeteoParams {
 impl MeteoParams {
     fn from_json(v: &serde_json::Value) -> Self {
         #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-        let doy = f64_field(v, "day_of_year") as u32;
+        let doy = json_field(v, "day_of_year") as u32;
         Self {
-            tmin_c: f64_field(v, "tmin_c"),
-            tmax_c: f64_field(v, "tmax_c"),
-            rh_min_pct: f64_field(v, "rh_min_pct"),
-            rh_max_pct: f64_field(v, "rh_max_pct"),
-            wind_2m_m_s: f64_field(v, "wind_2m_m_s"),
-            solar_rad_mj_m2_day: f64_field(v, "solar_rad_mj_m2_day"),
-            elevation_m: f64_field(v, "elevation_m"),
-            latitude_deg: f64_field(v, "latitude_deg"),
+            tmin_c: json_field(v, "tmin_c"),
+            tmax_c: json_field(v, "tmax_c"),
+            rh_min_pct: json_field(v, "rh_min_pct"),
+            rh_max_pct: json_field(v, "rh_max_pct"),
+            wind_2m_m_s: json_field(v, "wind_2m_m_s"),
+            solar_rad_mj_m2_day: json_field(v, "solar_rad_mj_m2_day"),
+            elevation_m: json_field(v, "elevation_m"),
+            latitude_deg: json_field(v, "latitude_deg"),
             day_of_year: doy,
         }
     }
@@ -192,13 +194,13 @@ fn main() {
         parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_sensitivity.json must parse");
 
     let baseline = MeteoParams::from_json(&benchmark["baseline_conditions"]);
-    let pct = f64_field(&benchmark, "perturbation_pct");
+    let pct = json_field(&benchmark, "perturbation_pct");
     let variables = benchmark["variables"].as_array().expect("variables array");
 
     validation::section("Baseline ET₀");
     let et0_base = compute_et0(&baseline);
-    let expected_et0 = f64_field(&benchmark["validation_checks"]["baseline_et0"], "expected");
-    let tol_et0 = f64_field(&benchmark["validation_checks"]["baseline_et0"], "tolerance");
+    let expected_et0 = json_field(&benchmark["validation_checks"]["baseline_et0"], "expected");
+    let tol_et0 = json_field(&benchmark["validation_checks"]["baseline_et0"], "tolerance");
     v.check_abs("FAO-56 Example 18 ET₀", et0_base, expected_et0, tol_et0);
 
     validation::section("Sensitivity Ranking");

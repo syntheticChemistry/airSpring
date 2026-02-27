@@ -1,0 +1,36 @@
+{
+  "_provenance": {
+    "method": "Stewart (1977) yield response vs Michigan climate variability",
+    "baseline_script": "control/nass_yield/nass_yield_validation.py",
+    "baseline_commit": "fad2e1b",
+    "baseline_command": "python3 control/nass_yield/nass_yield_validation.py",
+    "python_version": "3.10",
+    "created": "2026-02-26",
+    "references": [
+      "Stewart JI et al. (1977) Utah Water Research Lab, PRWG 151-1",
+      "Doorenbos J, Kassam AH (1979) FAO Irrig Drain Paper 33",
+      "Allen RG et al. (1998) FAO-56 Chapter 10, Table 24",
+      "USDA NASS Quick Stats: https://quickstats.nass.usda.gov/"
+    ],
+    "data_source": "FAO-56 Table 24 (Ky), synthetic Michigan weather (reproducible RNG)",
+    "_tolerance_justification": "Stewart model is empirical (Ky from field trials); yield ratios validated to 0.01 precision against analytical expectations"
+  },
+  "ky_table": {
+    "corn":         {"ky_total": 1.25, "ky_flower": 1.50},
+    "soybean":      {"ky_total": 0.85, "ky_flower": 0.80},
+    "winter_wheat": {"ky_total": 1.00, "ky_flower": 0.60},
+    "alfalfa":      {"ky_total": 1.10, "ky_flower": 0.70},
+    "dry_bean":     {"ky_total": 1.15, "ky_flower": 1.10}
+  },
+  "multi_year": {
+    "mean_yr_range": [0.30, 0.70],
+    "cv_range": [0.02, 0.35],
+    "mean_stress_range": [60.0, 140.0],
+    "_note": "20 years of rainfed corn on loam with variable drought. Low yield ratios are expected for rainfed conditions with no irrigation — Michigan corn achieves ~0.85-0.95 Ya/Ymax only with irrigation or in exceptionally wet years. Rainfed stress days are high because cumulative ET exceeds rainfall over the full 150-day season."
+  },
+  "thresholds": {
+    "yield_ratio_range": [0.0, 1.0],
+    "eta_etc_ratio_range": [0.0, 1.0],
+    "_tolerance_justification": "Physical bounds from Stewart equation: Ya/Ymax in [0,1], ETa/ETc in [0,1]"
+  }
+}

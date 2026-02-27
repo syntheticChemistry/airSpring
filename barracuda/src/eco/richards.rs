@@ -638,6 +638,7 @@ mod tests {
         assert!(err_pct < 10.0);
         // With zero flux top and free drainage, storage should decrease or stay similar
         let theta_init = van_genuchten_theta(-30.0, p.theta_r, p.theta_s, p.alpha, p.n_vg);
+        #[allow(clippy::cast_precision_loss)]
         let theta_final: f64 = profiles.last().unwrap().theta.iter().sum::<f64>()
             / profiles.last().unwrap().theta.len() as f64;
         assert!(theta_final <= theta_init + 0.05); // no significant inflow

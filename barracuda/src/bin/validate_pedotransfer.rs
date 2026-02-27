@@ -1,10 +1,17 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 //! Validate Saxton & Rawls (2006) pedotransfer functions against Python baseline (Exp 023).
 //!
 //! Saxton KE, Rawls WJ (2006) "Soil water characteristic estimates by texture
 //! and organic matter for hydrologic solutions." SSSAJ 70(5):1569-1578.
 
 use airspring_barracuda::eco::soil_moisture::{saxton_rawls, SaxtonRawlsInput};
+use airspring_barracuda::tolerances::{PEDOTRANSFER_KSAT, PEDOTRANSFER_MOISTURE};
 use airspring_barracuda::validation::{self, parse_benchmark_json, ValidationHarness};
 
 const BENCHMARK_JSON: &str =
@@ -27,26 +34,31 @@ fn validate_loam_intermediates(v: &mut ValidationHarness, bench: &serde_json::Va
         "loam: θ_wp",
         r.theta_wp,
         li["theta_1500"].as_f64().unwrap(),
-        1e-4,
+        PEDOTRANSFER_MOISTURE.abs_tol,
     );
     v.check_abs(
         "loam: θ_fc",
         r.theta_fc,
         li["theta_33"].as_f64().unwrap(),
-        1e-4,
+        PEDOTRANSFER_MOISTURE.abs_tol,
     );
     v.check_abs(
         "loam: θ_s",
         r.theta_s,
         li["theta_s"].as_f64().unwrap(),
-        1e-4,
+        PEDOTRANSFER_MOISTURE.abs_tol,
     );
-    v.check_abs("loam: λ", r.lambda, li["lambda"].as_f64().unwrap(), 1e-4);
+    v.check_abs(
+        "loam: λ",
+        r.lambda,
+        li["lambda"].as_f64().unwrap(),
+        PEDOTRANSFER_MOISTURE.abs_tol,
+    );
     v.check_abs(
         "loam: Ksat",
         r.ksat_mm_hr,
         li["ksat_mm_hr"].as_f64().unwrap(),
-        0.5,
+        PEDOTRANSFER_KSAT.abs_tol,
     );
 }
 

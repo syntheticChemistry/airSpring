@@ -1,0 +1,167 @@
+# airSpring Ecological Compute Pipeline Graph
+# Used by biomeOS to orchestrate airSpring science experiments
+# through the primal ecosystem: NestGate (data) → airSpring (science) → ToadStool (GPU)
+#
+# STATUS: Experimental (Feb 27, 2026)
+# Requires: Tower (BearDog + Songbird) + NestGate + ToadStool
+# Optional: metalForge (hardware dispatch), AKD1000 NPU
+#
+# Pipeline: Weather fetch → ET₀ compute → Water balance → Yield response → Store results
+#
+# Reference: models science_pipeline.toml from wetSpring
+# Capability domain: ecology (parallel to wetSpring's science domain)
+
+[graph]
+id = "airspring_eco_pipeline"
+description = "Ecological compute pipeline: weather → ET₀ → water balance → yield → results"
+coordination = "Sequential"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 1: ENSURE PREREQUISITES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[[nodes]]
+id = "check_nestgate"
+output = "nestgate_healthy"
+capabilities = ["storage"]
+
+[nodes.operation]
+name = "rpc_call"
+target = "nestgate"
+
+[nodes.operation.params]
+method = "health"
+params = {}
+
+[nodes.constraints]
+timeout_ms = 10000
+
+[[nodes]]
+id = "check_toadstool"
+output = "toadstool_healthy"
+capabilities = ["compute"]
+
+[nodes.operation]
+name = "rpc_call"
+target = "toadstool"
+
+[nodes.operation.params]
+method = "toadstool.health"
+params = {}
+
+[nodes.constraints]
+timeout_ms = 10000
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 2: DATA ACQUISITION (NestGate → Open-Meteo)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[[nodes]]
+id = "fetch_weather"
+depends_on = ["check_nestgate"]
+output = "weather_data"
+
+[nodes.operation]
+name = "capability_call"
+
+[nodes.operation.params]
+capability = "ecology.fetch_weather"
+params = { source = "open_meteo", latitude = "${LATITUDE}", longitude = "${LONGITUDE}", start_date = "${START_DATE}", end_date = "${END_DATE}", variables = ["temperature_2m_max", "temperature_2m_min", "shortwave_radiation_sum", "wind_speed_10m_max", "relative_humidity_2m_mean", "precipitation_sum"] }
+
+[nodes.constraints]
+timeout_ms = 30000
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 3: ET₀ COMPUTATION (7 methods)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[[nodes]]
+id = "compute_et0"
+depends_on = ["fetch_weather", "check_toadstool"]
+output = "et0_results"
+
+[nodes.operation]
+name = "capability_call"
+
+[nodes.operation.params]
+capability = "ecology.et0_compute"
+params = { weather_input = "${WEATHER_DATA}", methods = ["pm", "pt", "hargreaves", "thornthwaite", "makkink", "turc", "hamon"], elevation_m = "${ELEVATION}", latitude_deg = "${LATITUDE}", use_gpu = true }
+
+[nodes.constraints]
+timeout_ms = 120000
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 4: WATER BALANCE (FAO-56 Ch 8)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[[nodes]]
+id = "water_balance"
+depends_on = ["compute_et0"]
+output = "wb_results"
+
+[nodes.operation]
+name = "capability_call"
+
+[nodes.operation.params]
+capability = "ecology.water_balance"
+params = { et0_input = "${ET0_RESULTS}", crop = "${CROP}", soil_texture = "${SOIL_TEXTURE}", irrigation_strategy = "${IRRIGATION_STRATEGY}", use_gpu = true }
+
+[nodes.constraints]
+timeout_ms = 120000
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 5: YIELD RESPONSE (Stewart 1977)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[[nodes]]
+id = "yield_response"
+depends_on = ["water_balance"]
+output = "yield_results"
+
+[nodes.operation]
+name = "capability_call"
+
+[nodes.operation.params]
+capability = "ecology.yield_response"
+params = { wb_input = "${WB_RESULTS}", crop = "${CROP}", ky_source = "fao56_table24" }
+
+[nodes.constraints]
+timeout_ms = 60000
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 6: RESULTS STORAGE (NestGate)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[[nodes]]
+id = "store_results"
+depends_on = ["yield_response"]
+output = "results_stored"
+
+[nodes.operation]
+name = "rpc_call"
+target = "nestgate"
+
+[nodes.operation.params]
+method = "storage.store"
+params = { key = "ecology:results:${EXPERIMENT_ID}", value = "${YIELD_RESULTS_JSON}", family_id = "airspring" }
+
+[nodes.constraints]
+timeout_ms = 30000
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# VALIDATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[[nodes]]
+id = "validate_pipeline"
+depends_on = ["store_results"]
+output = "pipeline_validated"
+
+[nodes.operation]
+name = "health_check"
+
+[nodes.operation.params]
+check_nestgate = true
+check_toadstool = true
+check_results_integrity = true
+timeout_seconds = 30

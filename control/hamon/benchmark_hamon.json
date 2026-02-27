@@ -1,0 +1,65 @@
+{
+  "_provenance": {
+    "method": "Hamon (1961) temperature-based potential evapotranspiration",
+    "baseline_script": "control/hamon/hamon_pet.py",
+    "baseline_commit": "pending",
+    "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
+    "baseline_command": "python3 control/hamon/hamon_pet.py",
+    "python_version": "3.10",
+    "created": "2026-02-27",
+    "references": [
+      "Hamon WR (1961) Estimating potential evapotranspiration. J Hydraulics Div ASCE 87(HY3):107-120",
+      "Lu J, Sun G, McNulty SG, Amatya DM (2005) A comparison of six PET methods across the SE US. J Am Water Resour Assoc 41(3):621-633",
+      "Xu CY, Singh VP (2001) Evaluation of three complementary relationship ET₀ models. Water Resources Management 15:305-319"
+    ]
+  },
+  "equation": {
+    "description": "PET = 0.1651 × N × RHOSAT × KPEC",
+    "N_description": "Possible sunshine hours (daylight hours from solar geometry)",
+    "RHOSAT_description": "Saturated absolute humidity = 216.7 × e_s / (T + 273.3) [g/m³]",
+    "e_s_description": "e_s = 0.6108 × exp(17.27 × T / (T + 237.3)) [kPa]",
+    "KPEC": 1.0,
+    "note": "Some formulations use KPEC=1.2; we use 1.0 per Lu et al. (2005)"
+  },
+  "validation_checks": {
+    "analytical": {
+      "description": "Direct computation from Hamon equation",
+      "test_cases": [
+        {"tmean": 20.0, "day_length_hours": 14.0, "expected_pet": 3.993, "tolerance": 0.01},
+        {"tmean": 30.0, "day_length_hours": 13.5, "expected_pet": 6.757, "tolerance": 0.01},
+        {"tmean": 10.0, "day_length_hours": 11.0, "expected_pet": 1.706, "tolerance": 0.01},
+        {"tmean": 25.0, "day_length_hours": 14.5, "expected_pet": 5.509, "tolerance": 0.01},
+        {"tmean":  5.0, "day_length_hours": 9.5,  "expected_pet": 1.065, "tolerance": 0.01},
+        {"tmean": 35.0, "day_length_hours": 15.0, "expected_pet": 9.787, "tolerance": 0.01}
+      ]
+    },
+    "day_length_computation": {
+      "description": "Daylight hours from latitude and day of year (FAO-56 Eq. 34)",
+      "test_cases": [
+        {"latitude": 42.0, "doy": 172, "expected_hours": 15.06, "tolerance": 0.05},
+        {"latitude": 42.0, "doy": 355, "expected_hours": 8.94,  "tolerance": 0.05},
+        {"latitude": 42.0, "doy": 80,  "expected_hours": 11.96, "tolerance": 0.05},
+        {"latitude": 0.0,  "doy": 172, "expected_hours": 12.00, "tolerance": 0.05},
+        {"latitude": 60.0, "doy": 172, "expected_hours": 18.49, "tolerance": 0.10}
+      ]
+    },
+    "edge_cases": {
+      "description": "Physical boundary conditions",
+      "test_cases": [
+        {"label": "T=0 → small PET", "tmean": 0.0, "day_length_hours": 12.0, "check": "positive"},
+        {"label": "T<0 → clamp to zero", "tmean": -10.0, "day_length_hours": 10.0, "check": "non_negative"},
+        {"label": "Very long day (Arctic summer)", "tmean": 15.0, "day_length_hours": 22.0, "check": "positive"},
+        {"label": "Short day (winter)", "tmean": 5.0, "day_length_hours": 8.0, "check": "positive"},
+        {"label": "Zero day length → zero PET", "tmean": 20.0, "day_length_hours": 0.0, "check": "zero"}
+      ]
+    },
+    "monotonicity": {
+      "description": "Physical monotonicity: warmer or longer day → more PET",
+      "test_cases": [
+        {"label": "Higher T → more PET", "base_t": 10.0, "high_t": 30.0, "day_length_hours": 14.0},
+        {"label": "Longer day → more PET", "base_dl": 10.0, "high_dl": 16.0, "tmean": 20.0},
+        {"label": "Summer vs winter", "base_t": 5.0, "base_dl": 9.0, "high_t": 25.0, "high_dl": 15.0}
+      ]
+    }
+  }
+}

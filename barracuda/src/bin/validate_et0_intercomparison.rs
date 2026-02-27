@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 //! Validate ET₀ three-method intercomparison (Exp 020).
 //!
 //! Computes PM, PT, and Hargreaves ET₀ on real Michigan Open-Meteo data

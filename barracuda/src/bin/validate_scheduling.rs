@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 //! Validate irrigation scheduling strategy comparison (Exp 014).
 //!
 //! Benchmark: `control/scheduling/benchmark_scheduling.json`
@@ -15,15 +21,9 @@ use airspring_barracuda::eco::water_balance;
 use airspring_barracuda::eco::yield_response::{
     clamp_yield_ratio, water_use_efficiency, yield_ratio_single,
 };
-use airspring_barracuda::validation::{self, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/scheduling/benchmark_scheduling.json");
-
-fn f64_field(v: &serde_json::Value, key: &str) -> f64 {
-    v[key]
-        .as_f64()
-        .unwrap_or_else(|| panic!("missing f64 key '{key}'"))
-}
 
 /// Deterministic Michigan-like weather: sinusoidal ET₀ + periodic rain.
 fn generate_deterministic_weather(n: usize) -> (Vec<f64>, Vec<f64>) {
@@ -151,10 +151,10 @@ fn validate_analytical(v: &mut ValidationHarness, benchmark: &serde_json::Value)
     let checks = &benchmark["validation_checks"]["analytical_checks"]["test_cases"];
     for tc in checks.as_array().expect("array") {
         let label = tc["label"].as_str().unwrap();
-        let ky = f64_field(tc, "ky");
-        let eta_etc = f64_field(tc, "eta_etc");
-        let expected = f64_field(tc, "expected_yield_ratio");
-        let tol = f64_field(tc, "tolerance");
+        let ky = json_field(tc, "ky");
+        let eta_etc = json_field(tc, "eta_etc");
+        let expected = json_field(tc, "expected_yield_ratio");
+        let tol = json_field(tc, "tolerance");
         let computed = clamp_yield_ratio(yield_ratio_single(ky, eta_etc));
         v.check_abs(label, computed, expected, tol);
     }
@@ -229,7 +229,7 @@ fn validate_results(
     );
 
     validation::section("Water Use Efficiency");
-    let target_yield = f64_field(&benchmark["season_parameters"], "target_yield_kg_ha");
+    let target_yield = json_field(&benchmark["season_parameters"], "target_yield_kg_ha");
     for (name, r) in strategies {
         let ya = r.yield_ratio * target_yield;
         let total_water = r.total_precip + r.total_irrigation;
@@ -250,16 +250,16 @@ fn main() {
     let crop = &benchmark["crop_parameters"];
     let soil = &benchmark["soil_parameters"];
     #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-    let season_len = f64_field(&benchmark["season_parameters"], "length_days") as usize;
+    let season_len = json_field(&benchmark["season_parameters"], "length_days") as usize;
 
-    let taw = f64_field(soil, "taw_mm");
-    let raw = f64_field(soil, "raw_mm");
+    let taw = json_field(soil, "taw_mm");
+    let raw = json_field(soil, "raw_mm");
     let (et0, precip) = generate_deterministic_weather(season_len);
     let kc = kc_schedule(
         season_len,
-        f64_field(crop, "kc_ini"),
-        f64_field(crop, "kc_mid"),
-        f64_field(crop, "kc_end"),
+        json_field(crop, "kc_ini"),
+        json_field(crop, "kc_mid"),
+        json_field(crop, "kc_end"),
     );
 
     println!(
@@ -278,8 +278,8 @@ fn main() {
         kc: &kc,
         taw,
         raw,
-        ky: f64_field(crop, "ky_total"),
-        irrig_depth: f64_field(&benchmark["season_parameters"], "irrigation_depth_mm"),
+        ky: json_field(crop, "ky_total"),
+        irrig_depth: json_field(&benchmark["season_parameters"], "irrigation_depth_mm"),
     };
 
     let rainfed = simulate_strategy(&cfg, &|_, _, _| false);

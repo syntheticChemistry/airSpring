@@ -115,7 +115,7 @@ pub fn van_genuchten_capacity(h: f64, theta_r: f64, theta_s: f64, alpha: f64, n_
 /// Inverse Van Genuchten: find pressure head `h` (cm) for a target moisture θ.
 ///
 /// Solves θ(h) − `θ_target` = 0 using Brent's root-finding method
-/// (`barracuda::optimize::brent`, neuralSpring optimizer lineage).
+/// (`barracuda::optimize::brent`).
 ///
 /// # Cross-Spring Provenance
 ///

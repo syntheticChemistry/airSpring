@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
 #!/usr/bin/env python3
 """
 Exp 022: Growing Degree Days (GDD) + Crop Phenology — Python Control Baseline
@@ -277,7 +278,8 @@ def generate_benchmark():
         "_provenance": {
             "method": "Growing Degree Days (McMaster & Wilhelm 1997)",
             "baseline_script": "control/gdd/growing_degree_days.py",
-            "baseline_commit": "pending",
+            "baseline_commit": "fad2e1b",
+            "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
             "python_version": f"{sys.version_info.major}.{sys.version_info.minor}",
             "created": "2026-02-26",
             "references": [

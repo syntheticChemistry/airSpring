@@ -8267,7 +8267,16 @@
     }
   },
   "provenance": {
-    "script": "/home/eastgate/Development/ecoPrimals/airSpring/control/atlas/atlas_water_budget.py",
-    "date": "2026-02-26"
+    "method": "FAO-56 crop water budget across Michigan atlas stations",
+    "script": "control/atlas/atlas_water_budget.py",
+    "baseline_commit": "fad2e1b",
+    "baseline_command": "python3 control/atlas/atlas_water_budget.py",
+    "date": "2026-02-26",
+    "data_source": "Open-Meteo ERA5 reanalysis (free, no API key)",
+    "references": [
+      "Allen RG et al. (1998) FAO-56: Crop Evapotranspiration",
+      "Stewart JI et al. (1977) Water Production Functions, ICID"
+    ],
+    "_tolerance_justification": "Mass balance tol 0.01 mm (FAO-56 Ch 8 conservation); ET0 R² > 0.85 vs PM baseline; per-station yield ratio within Stewart (1977) Ky bounds"
   }
 }

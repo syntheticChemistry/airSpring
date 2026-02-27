@@ -1,0 +1,169 @@
+# Cross-Primal Pipeline: Soil Moisture → Microbial Diversity
+# Demonstrates biomeOS orchestration across Springs:
+#   airSpring (ecology) → wetSpring (science) → ToadStool (GPU)
+#
+# STATUS: Experimental (Feb 27, 2026)
+# Requires: Tower + NestGate + ToadStool + airSpring + wetSpring
+#
+# Hypothesis: Soil moisture dynamics (FAO-56 water balance) drive
+# microbial community diversity. This pipeline computes θ(t) via
+# airSpring, then feeds the moisture time series to wetSpring's
+# diversity analysis to detect community shifts under drought stress.
+#
+# Reference: wetSpring science_pipeline.toml, airSpring eco_pipeline.toml
+
+[graph]
+id = "cross_primal_soil_microbiome"
+description = "Cross-Spring pipeline: airSpring soil moisture → wetSpring microbial diversity"
+coordination = "Sequential"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 1: PREREQUISITES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[[nodes]]
+id = "check_nestgate"
+output = "nestgate_healthy"
+capabilities = ["storage"]
+
+[nodes.operation]
+name = "rpc_call"
+target = "nestgate"
+
+[nodes.operation.params]
+method = "health"
+params = {}
+
+[nodes.constraints]
+timeout_ms = 10000
+
+[[nodes]]
+id = "check_toadstool"
+output = "toadstool_healthy"
+capabilities = ["compute"]
+
+[nodes.operation]
+name = "rpc_call"
+target = "toadstool"
+
+[nodes.operation.params]
+method = "toadstool.health"
+params = {}
+
+[nodes.constraints]
+timeout_ms = 10000
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 2: WEATHER DATA (NestGate → Open-Meteo)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[[nodes]]
+id = "fetch_weather"
+depends_on = ["check_nestgate"]
+output = "weather_data"
+
+[nodes.operation]
+name = "capability_call"
+
+[nodes.operation.params]
+capability = "ecology.fetch_weather"
+params = { source = "open_meteo", latitude = "${LATITUDE}", longitude = "${LONGITUDE}", start_date = "${START_DATE}", end_date = "${END_DATE}", variables = ["temperature_2m_max", "temperature_2m_min", "shortwave_radiation_sum", "precipitation_sum", "relative_humidity_2m_mean"] }
+
+[nodes.constraints]
+timeout_ms = 30000
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 3: SOIL MOISTURE SIMULATION (airSpring)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[[nodes]]
+id = "soil_moisture"
+depends_on = ["fetch_weather", "check_toadstool"]
+output = "moisture_time_series"
+
+[nodes.operation]
+name = "capability_call"
+
+[nodes.operation.params]
+capability = "ecology.water_balance"
+params = { weather_input = "${WEATHER_DATA}", crop = "${CROP}", soil_texture = "${SOIL_TEXTURE}", strategy = "rainfed", use_gpu = true }
+
+[nodes.constraints]
+timeout_ms = 120000
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 4: MICROBIAL DIVERSITY UNDER DROUGHT (wetSpring)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[[nodes]]
+id = "diversity_analysis"
+depends_on = ["soil_moisture"]
+output = "diversity_results"
+
+[nodes.operation]
+name = "capability_call"
+
+[nodes.operation.params]
+capability = "science.diversity"
+params = { input_source = "soil_moisture_coupling", moisture_series = "${MOISTURE_TIME_SERIES}", metrics = ["shannon", "simpson", "bray_curtis"], partition_by = "moisture_regime" }
+
+[nodes.constraints]
+timeout_ms = 600000
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 5: SPECTRAL ANALYSIS (wetSpring + GPU)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[[nodes]]
+id = "spectral_analysis"
+depends_on = ["diversity_analysis"]
+output = "spectral_results"
+
+[nodes.operation]
+name = "capability_call"
+
+[nodes.operation.params]
+capability = "science.anderson"
+params = { diversity_input = "${DIVERSITY_RESULTS}", lattice_dim = 2, lattice_sizes = [8, 10, 12], n_realizations = 4, use_gpu = true }
+
+[nodes.constraints]
+timeout_ms = 900000
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 6: STORE RESULTS (NestGate)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[[nodes]]
+id = "store_results"
+depends_on = ["spectral_results"]
+output = "results_stored"
+
+[nodes.operation]
+name = "rpc_call"
+target = "nestgate"
+
+[nodes.operation.params]
+method = "storage.store"
+params = { key = "cross_primal:soil_microbiome:${EXPERIMENT_ID}", value = "${SPECTRAL_RESULTS_JSON}", family_id = "airspring_x_wetspring" }
+
+[nodes.constraints]
+timeout_ms = 30000
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# VALIDATION
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[[nodes]]
+id = "validate_pipeline"
+depends_on = ["store_results"]
+output = "pipeline_validated"
+
+[nodes.operation]
+name = "health_check"
+
+[nodes.operation.params]
+check_nestgate = true
+check_toadstool = true
+check_results_integrity = true
+check_cross_primal_routing = true
+timeout_seconds = 30

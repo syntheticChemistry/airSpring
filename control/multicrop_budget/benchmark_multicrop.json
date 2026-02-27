@@ -1,0 +1,24 @@
+{
+  "_provenance": {
+    "method": "Multi-crop water budget: FAO-56 dual Kc + Stewart yield with synthetic Michigan weather",
+    "baseline_script": "control/multicrop_budget/multicrop_water_budget.py",
+    "baseline_commit": "fad2e1b",
+    "baseline_command": "python3 control/multicrop_budget/multicrop_water_budget.py",
+    "python_version": "3.10",
+    "created": "2026-02-26",
+    "references": [
+      "Allen RG et al. (1998) FAO Irrigation and Drainage Paper 56",
+      "Doorenbos J, Kassam AH (1979) FAO-33 Yield Response to Water",
+      "Stewart JI et al. (1977) Optimizing crop production through control of water"
+    ],
+    "crops": ["Corn", "Soybean", "WinterWheat", "DryBean", "Potato"],
+    "weather_seed": 42,
+    "soil": "silt_loam (FC=0.30, WP=0.12)"
+  },
+  "validation_thresholds": {
+    "irrigated_yield_range": [0.75, 1.0],
+    "rainfed_yield_range": [0.10, 0.95],
+    "water_productivity_range_mm": [200, 1200],
+    "dual_kc_yield_range": [0.60, 1.0]
+  }
+}

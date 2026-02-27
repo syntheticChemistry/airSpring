@@ -1,0 +1,66 @@
+{
+  "_provenance": {
+    "method": "Turc (1961) temperature-radiation ET₀",
+    "baseline_script": "control/turc/turc_et0.py",
+    "baseline_commit": "pending",
+    "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
+    "baseline_command": "python3 control/turc/turc_et0.py",
+    "python_version": "3.10",
+    "created": "2026-02-27",
+    "references": [
+      "Turc L (1961) Evaluation des besoins en eau d'irrigation. Annales Agronomiques 12:13-49",
+      "Jensen ME, Burman RD, Allen RG (1990) Evapotranspiration and Irrigation Water Requirements. ASCE Manual 70",
+      "Xu CY, Singh VP (2002) Cross comparison. Water Resources Management 16:197-219"
+    ]
+  },
+  "equation": {
+    "description_high_rh": "ET₀ = 0.013 × T/(T+15) × (23.8846 × Rs + 50)    [RH ≥ 50%]",
+    "description_low_rh":  "ET₀ = 0.013 × T/(T+15) × (23.8846 × Rs + 50) × (1 + (50−RH)/70)    [RH < 50%]",
+    "conversion_factor": 23.8846,
+    "note": "Rs in MJ/m²/day; factor 23.8846 converts to cal/cm²/day. T in °C."
+  },
+  "validation_checks": {
+    "analytical_high_rh": {
+      "description": "RH ≥ 50% — standard humidity form (no correction)",
+      "test_cases": [
+        {"tmean": 20.0, "rs_mj": 15.0, "rh": 70.0, "expected_et0": 3.033, "tolerance": 0.01},
+        {"tmean": 25.0, "rs_mj": 20.0, "rh": 60.0, "expected_et0": 4.287, "tolerance": 0.01},
+        {"tmean": 30.0, "rs_mj": 25.0, "rh": 55.0, "expected_et0": 5.608, "tolerance": 0.01},
+        {"tmean": 10.0, "rs_mj": 8.0,  "rh": 80.0, "expected_et0": 1.254, "tolerance": 0.01},
+        {"tmean": 15.0, "rs_mj": 12.0, "rh": 65.0, "expected_et0": 2.188, "tolerance": 0.01}
+      ]
+    },
+    "analytical_low_rh": {
+      "description": "RH < 50% — arid correction factor applied",
+      "test_cases": [
+        {"tmean": 30.0, "rs_mj": 25.0, "rh": 40.0, "expected_et0": 6.410, "tolerance": 0.01},
+        {"tmean": 35.0, "rs_mj": 28.0, "rh": 30.0, "expected_et0": 8.410, "tolerance": 0.01},
+        {"tmean": 25.0, "rs_mj": 20.0, "rh": 20.0, "expected_et0": 6.125, "tolerance": 0.01},
+        {"tmean": 20.0, "rs_mj": 15.0, "rh": 45.0, "expected_et0": 3.249, "tolerance": 0.01}
+      ]
+    },
+    "humidity_boundary": {
+      "description": "At RH=50%, both formulas should give the same result",
+      "test_cases": [
+        {"tmean": 20.0, "rs_mj": 15.0, "tolerance": 0.001}
+      ]
+    },
+    "edge_cases": {
+      "description": "Physical constraints and boundary conditions",
+      "test_cases": [
+        {"label": "Zero Rs → baseline from +50 term", "tmean": 20.0, "rs_mj": 0.0, "rh": 70.0, "check": "positive"},
+        {"label": "T=0 → zero (T/(T+15)=0)", "tmean": 0.0, "rs_mj": 5.0, "rh": 80.0, "check": "non_negative"},
+        {"label": "Negative T → clamp to zero", "tmean": -5.0, "rs_mj": 3.0, "rh": 90.0, "check": "non_negative"},
+        {"label": "Very low RH → large correction", "tmean": 30.0, "rs_mj": 25.0, "rh": 10.0, "check": "positive"}
+      ]
+    },
+    "monotonicity": {
+      "description": "Physical monotonicity constraints",
+      "test_cases": [
+        {"label": "More radiation → more ET₀", "base_rs": 10.0, "high_rs": 25.0, "tmean": 20.0, "rh": 70.0},
+        {"label": "Higher T → more ET₀", "base_t": 10.0, "high_t": 30.0, "rs_mj": 15.0, "rh": 70.0},
+        {"label": "Lower RH → more ET₀ (drier air)", "base_rh": 80.0, "low_rh": 30.0, "tmean": 25.0, "rs_mj": 20.0}
+      ]
+    }
+  }
+}

@@ -1,10 +1,17 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 //! Validate Thornthwaite (1948) monthly ET₀ against Python baseline (Exp 021).
 //!
 //! Thornthwaite C.W. (1948) "An approach toward a rational classification
 //! of climate." Geographical Review, 38(1), 55-94.
 
 use airspring_barracuda::eco::evapotranspiration as et;
+use airspring_barracuda::tolerances::THORNTHWAITE_ANALYTICAL;
 use airspring_barracuda::validation::{self, parse_benchmark_json, ValidationHarness};
 
 const BENCHMARK_JSON: &str =
@@ -29,7 +36,7 @@ fn validate_analytical(v: &mut ValidationHarness, bench: &serde_json::Value) {
         "heat_index_term(25°C)",
         hi_25,
         an["heat_index_25C"].as_f64().unwrap(),
-        1e-4,
+        THORNTHWAITE_ANALYTICAL.abs_tol,
     );
 
     let hi_annual = et::annual_heat_index(&[25.0; 12]);
@@ -37,7 +44,7 @@ fn validate_analytical(v: &mut ValidationHarness, bench: &serde_json::Value) {
         "annual_heat_index(uniform 25°C)",
         hi_annual,
         an["heat_index_annual_uniform_25C"].as_f64().unwrap(),
-        1e-3,
+        THORNTHWAITE_ANALYTICAL.abs_tol * 10.0,
     );
 
     let a = et::thornthwaite_exponent(hi_annual);
@@ -45,7 +52,7 @@ fn validate_analytical(v: &mut ValidationHarness, bench: &serde_json::Value) {
         "exponent(uniform 25°C)",
         a,
         an["exponent_uniform_25C"].as_f64().unwrap(),
-        1e-4,
+        THORNTHWAITE_ANALYTICAL.abs_tol,
     );
 
     let pet_unadj = et::thornthwaite_unadjusted_et0(25.0, hi_annual, a);
@@ -57,7 +64,7 @@ fn validate_analytical(v: &mut ValidationHarness, bench: &serde_json::Value) {
     );
 
     let freezing = et::thornthwaite_unadjusted_et0(-5.0, 50.0, 1.5);
-    v.check_abs("freezing → 0", freezing, 0.0, 1e-12);
+    v.check_abs("freezing → 0", freezing, 0.0, f64::EPSILON);
 }
 
 fn validate_station(v: &mut ValidationHarness, bench: &serde_json::Value, key: &str) {
@@ -72,7 +79,7 @@ fn validate_station(v: &mut ValidationHarness, bench: &serde_json::Value, key: &
         &format!("{key}: heat_index"),
         hi,
         station["heat_index"].as_f64().unwrap(),
-        0.01,
+        THORNTHWAITE_ANALYTICAL.abs_tol * 100.0,
     );
 
     let a = et::thornthwaite_exponent(hi);
@@ -80,7 +87,7 @@ fn validate_station(v: &mut ValidationHarness, bench: &serde_json::Value, key: &
         &format!("{key}: exponent_a"),
         a,
         station["exponent_a"].as_f64().unwrap(),
-        1e-4,
+        THORNTHWAITE_ANALYTICAL.abs_tol,
     );
 
     let et0 = et::thornthwaite_monthly_et0(&temps, lat);
@@ -135,7 +142,7 @@ fn validate_edge_cases(v: &mut ValidationHarness, bench: &serde_json::Value) {
     let frozen_temps = parse_monthly_temps(&edges["all_frozen"]["monthly_tmean_c"]);
     let et0_frozen = et::thornthwaite_monthly_et0(&frozen_temps, 45.0);
     let annual_frozen: f64 = et0_frozen.iter().sum();
-    v.check_abs("all_frozen → 0", annual_frozen, 0.0, 1e-12);
+    v.check_abs("all_frozen → 0", annual_frozen, 0.0, f64::EPSILON);
 
     let tropical_temps = parse_monthly_temps(&edges["tropical_uniform"]["monthly_tmean_c"]);
     let tropical_lat = edges["tropical_uniform"]["latitude"].as_f64().unwrap();

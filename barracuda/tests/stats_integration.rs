@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![allow(clippy::cast_precision_loss)]
 //! Statistical primitives integration tests for airSpring `BarraCuda`.
 //!
 //! Cross-validates `airSpring` testutil and `csv_ts::column_stats` against
@@ -74,7 +75,7 @@ fn test_testutil_perfect_correlation() {
 #[test]
 fn test_index_of_agreement_perfect() {
     let obs = vec![1.0, 2.0, 3.0, 4.0, 5.0];
-    let ia = testutil::index_of_agreement(&obs, &obs);
+    let ia = testutil::index_of_agreement(&obs, &obs).unwrap();
     assert!((ia - 1.0).abs() < 1e-10, "IA (perfect) = {ia}");
 }
 
@@ -82,7 +83,7 @@ fn test_index_of_agreement_perfect() {
 fn test_index_of_agreement_constant_bias() {
     let obs = vec![0.10, 0.15, 0.20, 0.25, 0.30];
     let pred: Vec<f64> = obs.iter().map(|&x| x + 0.02).collect();
-    let ia = testutil::index_of_agreement(&obs, &pred);
+    let ia = testutil::index_of_agreement(&obs, &pred).unwrap();
     assert!(ia > 0.95, "IA (constant +0.02 bias) = {ia}");
 }
 
@@ -90,7 +91,7 @@ fn test_index_of_agreement_constant_bias() {
 fn test_index_of_agreement_matches_python() {
     let measured = vec![0.10, 0.15, 0.20, 0.25, 0.30];
     let predicted = vec![0.10, 0.15, 0.20, 0.25, 0.30];
-    let ia = testutil::index_of_agreement(&measured, &predicted);
+    let ia = testutil::index_of_agreement(&measured, &predicted).unwrap();
     assert!((ia - 1.0).abs() < 1e-10);
 
     let mbe_val = testutil::mbe(&measured, &predicted);
@@ -100,7 +101,7 @@ fn test_index_of_agreement_matches_python() {
 #[test]
 fn test_nash_sutcliffe_perfect() {
     let obs = vec![1.0, 2.0, 3.0, 4.0, 5.0];
-    let nse = testutil::nash_sutcliffe(&obs, &obs);
+    let nse = testutil::nash_sutcliffe(&obs, &obs).unwrap();
     assert!((nse - 1.0).abs() < 1e-10, "NSE (perfect) = {nse}");
 }
 
@@ -109,7 +110,7 @@ fn test_nash_sutcliffe_mean_predictor() {
     let obs = vec![1.0, 2.0, 3.0, 4.0, 5.0];
     let mean_val = 3.0;
     let pred = vec![mean_val; 5];
-    let nse = testutil::nash_sutcliffe(&obs, &pred);
+    let nse = testutil::nash_sutcliffe(&obs, &pred).unwrap();
     assert!(nse.abs() < 1e-10, "NSE (mean predictor) = {nse}");
 }
 
@@ -117,8 +118,8 @@ fn test_nash_sutcliffe_mean_predictor() {
 fn test_coefficient_of_determination_equals_nse() {
     let obs = vec![1.0, 3.0, 5.0, 7.0, 9.0];
     let pred = vec![1.2, 2.8, 5.1, 6.9, 9.2];
-    let r2 = testutil::coefficient_of_determination(&obs, &pred);
-    let nse = testutil::nash_sutcliffe(&obs, &pred);
+    let r2 = testutil::coefficient_of_determination(&obs, &pred).unwrap();
+    let nse = testutil::nash_sutcliffe(&obs, &pred).unwrap();
     assert!(
         (r2 - nse).abs() < f64::EPSILON,
         "R² and NSE should be identical: R²={r2}, NSE={nse}"
@@ -229,7 +230,7 @@ fn test_rmse_identical_vectors() {
 #[test]
 fn test_nash_sutcliffe_perfect_is_one() {
     let obs = [1.0, 2.0, 3.0, 4.0, 5.0];
-    let nse = testutil::nash_sutcliffe(&obs, &obs);
+    let nse = testutil::nash_sutcliffe(&obs, &obs).unwrap();
     assert!(
         (nse - 1.0).abs() < f64::EPSILON,
         "perfect match should give NSE=1.0"
@@ -239,7 +240,7 @@ fn test_nash_sutcliffe_perfect_is_one() {
 #[test]
 fn test_index_of_agreement_perfect_is_one() {
     let obs = [1.0, 2.0, 3.0, 4.0, 5.0];
-    let ia = testutil::index_of_agreement(&obs, &obs);
+    let ia = testutil::index_of_agreement(&obs, &obs).unwrap();
     assert!(
         (ia - 1.0).abs() < f64::EPSILON,
         "perfect match should give IA=1.0"

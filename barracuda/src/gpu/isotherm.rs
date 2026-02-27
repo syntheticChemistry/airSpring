@@ -3,8 +3,8 @@
 //!
 //! # Cross-Spring Provenance
 //!
-//! `nelder_mead` and `multi_start_nelder_mead` were developed in neuralSpring
-//! for neural architecture search and absorbed into `ToadStool` S62. airSpring
+//! `nelder_mead` and `multi_start_nelder_mead` come from `barracuda::optimize`
+//! (absorbed into `ToadStool` S62). airSpring
 //! uses these for 2-parameter isotherm fitting (Langmuir qm/KL, Freundlich
 //! Kf/n). The `NelderMeadGpu` variant (S52+) exists for 5-50 parameter
 //! problems but is not cost-effective for 2-parameter isotherms.
@@ -54,6 +54,7 @@ use crate::eco::isotherm::{self, IsothermFit};
 /// # Errors
 ///
 /// Returns `None` if optimization fails or data is insufficient.
+#[must_use]
 pub fn fit_langmuir_nm(ce: &[f64], qe: &[f64]) -> Option<IsothermFit> {
     if ce.len() < 2 || ce.len() != qe.len() {
         return None;
@@ -105,6 +106,7 @@ pub fn fit_langmuir_nm(ce: &[f64], qe: &[f64]) -> Option<IsothermFit> {
 /// # Errors
 ///
 /// Returns `None` if optimization fails or data is insufficient.
+#[must_use]
 pub fn fit_freundlich_nm(ce: &[f64], qe: &[f64]) -> Option<IsothermFit> {
     if ce.len() < 2 || ce.len() != qe.len() {
         return None;
@@ -158,6 +160,7 @@ pub fn fit_freundlich_nm(ce: &[f64], qe: &[f64]) -> Option<IsothermFit> {
 /// # Errors
 ///
 /// Returns `None` if optimization fails or data is insufficient.
+#[must_use]
 pub fn fit_langmuir_global(ce: &[f64], qe: &[f64], n_starts: usize) -> Option<IsothermFit> {
     if ce.len() < 2 || ce.len() != qe.len() {
         return None;
@@ -205,6 +208,7 @@ pub fn fit_langmuir_global(ce: &[f64], qe: &[f64], n_starts: usize) -> Option<Is
 /// # Errors
 ///
 /// Returns `None` if optimization fails or data is insufficient.
+#[must_use]
 pub fn fit_freundlich_global(ce: &[f64], qe: &[f64], n_starts: usize) -> Option<IsothermFit> {
     if ce.len() < 2 || ce.len() != qe.len() {
         return None;
@@ -247,6 +251,7 @@ pub fn fit_freundlich_global(ce: &[f64], qe: &[f64], n_starts: usize) -> Option<
 /// Batch-fit isotherms on CPU using linearized LS (`eco::isotherm`).
 ///
 /// Returns `(langmuir_fit, freundlich_fit)` for each dataset.
+#[must_use]
 pub fn fit_batch_cpu(
     datasets: &[(&[f64], &[f64])],
 ) -> Vec<(Option<IsothermFit>, Option<IsothermFit>)> {
@@ -264,6 +269,7 @@ pub fn fit_batch_cpu(
 /// Batch-fit isotherms using Nelder-Mead (`barracuda::optimize`).
 ///
 /// Returns `(langmuir_fit, freundlich_fit)` for each dataset.
+#[must_use]
 pub fn fit_batch_nm(
     datasets: &[(&[f64], &[f64])],
 ) -> Vec<(Option<IsothermFit>, Option<IsothermFit>)> {
@@ -276,6 +282,7 @@ pub fn fit_batch_nm(
 /// Batch-fit isotherms using multi-start Nelder-Mead (global search).
 ///
 /// Returns `(langmuir_fit, freundlich_fit)` for each dataset.
+#[must_use]
 pub fn fit_batch_global(
     datasets: &[(&[f64], &[f64])],
     n_starts: usize,

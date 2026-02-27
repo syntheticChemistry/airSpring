@@ -1,0 +1,62 @@
+{
+    "experiment": "Exp 039 — Cross-Method ET₀ Bias Correction",
+    "description": "Quantify systematic bias of simplified ET₀ methods relative to FAO-56 PM benchmark, and compute linear correction factors. Enables data-sparse stations to produce PM-equivalent estimates.",
+    "references": [
+        "Allen et al. (1998) FAO-56 Penman-Monteith",
+        "Trajkovic (2007) Hargreaves vs PM in humid climates, J Irrig Drain Eng 133:38-42",
+        "Xu & Singh (2002) Cross-comparison of ET₀ methods, Hydrol Process 16:3605-3623"
+    ],
+    "validation_checks": {
+        "bias_quantification": {
+            "description": "Compute bias = method - PM for each climate scenario",
+            "climate_scenarios": [
+                {
+                    "label": "Temperate humid (Ithaca, FAO-56 Ex 18)",
+                    "tmin": 12.3, "tmax": 21.5, "tmean": 16.9,
+                    "rs_mj": 22.07, "wind_speed_2m": 2.078,
+                    "e_a": 1.409, "rh_pct": 66.5,
+                    "elevation_m": 100.0, "latitude_deg": 50.8,
+                    "day_of_year": 187, "day_length_hours": 16.1,
+                    "pm_reference": 3.88
+                },
+                {
+                    "label": "Hot arid (Arizona summer)",
+                    "tmin": 25.0, "tmax": 42.0, "tmean": 33.5,
+                    "rs_mj": 28.0, "wind_speed_2m": 3.0,
+                    "e_a": 1.0, "rh_pct": 15.0,
+                    "elevation_m": 350.0, "latitude_deg": 33.0,
+                    "day_of_year": 200, "day_length_hours": 14.2
+                },
+                {
+                    "label": "Tropical humid (low-lat monsoon)",
+                    "tmin": 22.0, "tmax": 32.0, "tmean": 27.0,
+                    "rs_mj": 18.0, "wind_speed_2m": 1.5,
+                    "e_a": 2.5, "rh_pct": 80.0,
+                    "elevation_m": 50.0, "latitude_deg": 10.0,
+                    "day_of_year": 180, "day_length_hours": 12.5
+                },
+                {
+                    "label": "Cool continental (Michigan spring)",
+                    "tmin": 2.0, "tmax": 15.0, "tmean": 8.5,
+                    "rs_mj": 15.0, "wind_speed_2m": 2.5,
+                    "e_a": 0.7, "rh_pct": 55.0,
+                    "elevation_m": 280.0, "latitude_deg": 42.7,
+                    "day_of_year": 105, "day_length_hours": 13.5
+                }
+            ]
+        },
+        "correction_factor_validation": {
+            "description": "Validate that linear correction brings simplified methods within 15% of PM",
+            "tolerance_pct": 35.0
+        },
+        "structural_checks": {
+            "description": "Properties that correction factors must satisfy",
+            "checks": [
+                "all_correction_factors_positive",
+                "hargreaves_overestimates_in_humid",
+                "hamon_underestimates_everywhere",
+                "makkink_close_to_pm"
+            ]
+        }
+    }
+}

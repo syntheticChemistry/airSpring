@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 //! Validate `IoT` time series parser and statistics.
 //!
 //! Uses deterministic synthetic agricultural sensor data to validate:
@@ -18,27 +24,13 @@
 
 use airspring_barracuda::io::csv_ts;
 use airspring_barracuda::testutil::generate_synthetic_iot_data;
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{self, ValidationHarness};
 use std::io::Write;
-
-/// Tolerance for temperature mean (°C). Synthetic diurnal cycle 25±8 °C with
-/// small noise produces a mean within ~2 °C of the 25 °C centre.
-const TEMP_MEAN_TOL: f64 = 2.0;
-
-/// Tolerance for temperature min/max (°C). 8 °C amplitude plus noise can shift
-/// extremes by up to ~3 °C from the analytical 17/33 °C.
-const TEMP_EXTREMES_TOL: f64 = 3.0;
 
 /// Valid range for synthetic soil moisture sensor 1 (m³/m³).
 const SM1_VALID_MIN: f64 = 0.09;
 const SM1_VALID_MAX: f64 = 0.41;
-
-/// Tolerance for PAR max (µmol/m²/s). Bell-curve peak ≈ 1800 ± 200.
-const PAR_MAX_TOL: f64 = 200.0;
-
-/// Tolerance for CSV round-trip temperature mean (°C).
-/// Covers decimal truncation from {:.2} formatting in CSV write.
-const ROUNDTRIP_TEMP_TOL: f64 = 0.1;
 
 /// Validate sensor column statistics against analytically known properties.
 fn validate_sensor_stats(
@@ -55,9 +47,24 @@ fn validate_sensor_stats(
         temp_stats.mean, temp_stats.std_dev, temp_stats.min, temp_stats.max
     );
 
-    v.check_abs("Temp mean ≈ 25°C", temp_stats.mean, 25.0, TEMP_MEAN_TOL);
-    v.check_abs("Temp min ≈ 17°C", temp_stats.min, 17.0, TEMP_EXTREMES_TOL);
-    v.check_abs("Temp max ≈ 33°C", temp_stats.max, 33.0, TEMP_EXTREMES_TOL);
+    v.check_abs(
+        "Temp mean ≈ 25°C",
+        temp_stats.mean,
+        25.0,
+        tolerances::IOT_TEMPERATURE_MEAN.abs_tol,
+    );
+    v.check_abs(
+        "Temp min ≈ 17°C",
+        temp_stats.min,
+        17.0,
+        tolerances::IOT_TEMPERATURE_EXTREMES.abs_tol,
+    );
+    v.check_abs(
+        "Temp max ≈ 33°C",
+        temp_stats.max,
+        33.0,
+        tolerances::IOT_TEMPERATURE_EXTREMES.abs_tol,
+    );
 
     println!();
     validation::section("Soil moisture statistics");
@@ -86,7 +93,12 @@ fn validate_sensor_stats(
         par_stats.mean, par_stats.max
     );
 
-    v.check_abs("PAR max ≈ 1800", par_stats.max, 1800.0, PAR_MAX_TOL);
+    v.check_abs(
+        "PAR max ≈ 1800",
+        par_stats.max,
+        1800.0,
+        tolerances::IOT_PAR_MAX.abs_tol,
+    );
     v.check_bool("PAR has zero (nighttime)", par_stats.min < 1.0);
 
     temp_stats
@@ -143,7 +155,7 @@ fn validate_csv_round_trip(
                 "Round-trip temp mean",
                 parsed_temp.mean,
                 expected_temp_mean,
-                ROUNDTRIP_TEMP_TOL,
+                tolerances::IOT_CSV_ROUNDTRIP.abs_tol,
             );
         }
         Err(e) => {

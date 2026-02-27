@@ -170,8 +170,7 @@ pub fn fit_logarithmic(x: &[f64], y: &[f64]) -> Option<FittedModel> {
 ///
 /// Ridge regression minimizes ‖y − Xw‖² + λ‖w‖², producing more stable
 /// coefficients when features are correlated or data is noisy. This wraps
-/// the CPU-only `barracuda::linalg::ridge::ridge_regression` (absorbed from
-/// `wetSpring` ESN calibration, S52+).
+/// the CPU-only `barracuda::linalg::ridge::ridge_regression` (S52+).
 ///
 /// Returns `Some(FittedModel)` with `ModelType::Linear` and the ridge-fit
 /// coefficients [slope, intercept], or `None` if the fit fails.

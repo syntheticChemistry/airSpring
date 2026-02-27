@@ -1,0 +1,79 @@
+{
+    "experiment": "Exp 036 — biomeOS Neural API Round-Trip Parity",
+    "description": "Validate that ecological compute via biomeOS capability.call produces identical results to direct barracuda library calls. This establishes that the orchestration layer introduces zero numerical drift.",
+    "method": "Round-trip parity: compute ET₀ via direct Rust call, then via Neural API, compare bit-exact",
+    "references": [
+        "biomeOS Neural API Routing Specification",
+        "biomeOS Capability Translation Architecture",
+        "airSpring BIOMEOS_CAPABILITIES.md"
+    ],
+    "capability_domain": "ecology",
+    "validation_checks": {
+        "et0_round_trip": {
+            "description": "ET₀ computation via Neural API should match direct computation exactly",
+            "test_cases": [
+                {
+                    "method": "pm",
+                    "params": {
+                        "tmin": 12.3, "tmax": 21.5, "tmean": 16.9,
+                        "solar_radiation": 22.07, "wind_speed_2m": 2.078,
+                        "actual_vapour_pressure": 1.409, "elevation_m": 100.0,
+                        "latitude_deg": 50.8, "day_of_year": 187
+                    },
+                    "tolerance": 1e-10,
+                    "note": "Bit-exact parity expected; tolerance is for JSON float serialization"
+                },
+                {
+                    "method": "hargreaves",
+                    "params": {
+                        "tmin": 12.3, "tmax": 21.5,
+                        "ra_mj": 40.55
+                    },
+                    "tolerance": 1e-10
+                },
+                {
+                    "method": "makkink",
+                    "params": {
+                        "tmean": 20.0, "rs_mj": 15.0, "elevation_m": 100.0
+                    },
+                    "tolerance": 1e-10
+                },
+                {
+                    "method": "turc",
+                    "params": {
+                        "tmean": 20.0, "rs_mj": 15.0, "rh": 70.0
+                    },
+                    "tolerance": 1e-10
+                },
+                {
+                    "method": "hamon",
+                    "params": {
+                        "tmean": 20.0, "day_length_hours": 14.0
+                    },
+                    "tolerance": 1e-10
+                }
+            ]
+        },
+        "capability_discovery": {
+            "description": "Neural API should discover ecology capabilities",
+            "expected_capabilities": [
+                "ecology.et0_pm",
+                "ecology.et0_hargreaves",
+                "ecology.et0_makkink",
+                "ecology.et0_turc",
+                "ecology.et0_hamon",
+                "ecology.water_balance",
+                "ecology.yield_response"
+            ]
+        },
+        "health_check": {
+            "description": "Neural API health endpoint should respond",
+            "expected_fields": ["status", "primals"]
+        },
+        "substrate_detection": {
+            "description": "metalForge should detect Neural substrate when biomeOS is running",
+            "expected_kind": "Neural",
+            "expected_capabilities": ["f64", "f32", "reduce", "neural-api"]
+        }
+    }
+}

@@ -1,0 +1,114 @@
+{
+    "experiment": "Exp 038 — Pedotransfer → Richards Coupled Simulation",
+    "description": "Saxton-Rawls pedotransfer derives Van Genuchten parameters from soil texture, then Richards PDE simulates the wetting/drying profile. Validates the full pipeline from texture to moisture dynamics.",
+    "references": [
+        "Saxton KE, Rawls WJ (2006) Soil Sci Soc Am J 70:1569-1578",
+        "van Genuchten MT (1980) SSSA J 44:892-898",
+        "Carsel & Parrish (1988) WRR 24:755-769"
+    ],
+    "validation_checks": {
+        "pedotransfer_to_vg": {
+            "description": "Saxton-Rawls → Van Genuchten parameter mapping for standard USDA textures",
+            "test_cases": [
+                {
+                    "label": "Sandy loam (65% sand, 10% clay, 2% OM)",
+                    "sand": 0.65, "clay": 0.10, "om_pct": 2.0,
+                    "vg_reference": {
+                        "note": "Saxton-Rawls → VG for Sandy Loam; wider than CP88 class means",
+                        "theta_r_range": [0.02, 0.12],
+                        "theta_s_range": [0.35, 0.50],
+                        "alpha_range": [0.005, 0.30],
+                        "n_range": [1.1, 2.5],
+                        "ks_range": [20, 300]
+                    }
+                },
+                {
+                    "label": "Clay loam (30% sand, 35% clay, 3% OM)",
+                    "sand": 0.30, "clay": 0.35, "om_pct": 3.0,
+                    "vg_reference": {
+                        "note": "Saxton-Rawls → VG for Clay Loam; pedotransfer residual differs from CP88",
+                        "theta_r_range": [0.05, 0.25],
+                        "theta_s_range": [0.40, 0.55],
+                        "alpha_range": [0.005, 0.10],
+                        "n_range": [1.05, 1.8],
+                        "ks_range": [1, 50]
+                    }
+                },
+                {
+                    "label": "Silt loam (15% sand, 20% clay, 4% OM)",
+                    "sand": 0.15, "clay": 0.20, "om_pct": 4.0,
+                    "vg_reference": {
+                        "note": "Saxton-Rawls → VG for Silt Loam; SR wilting point as residual",
+                        "theta_r_range": [0.03, 0.18],
+                        "theta_s_range": [0.40, 0.56],
+                        "alpha_range": [0.005, 0.10],
+                        "n_range": [1.1, 1.8],
+                        "ks_range": [2, 120]
+                    }
+                }
+            ]
+        },
+        "richards_wetting": {
+            "description": "Richards PDE simulation with pedotransfer-derived VG parameters — wetting front",
+            "test_cases": [
+                {
+                    "label": "Sandy loam wetting (10-day, h_top=-50cm)",
+                    "sand": 0.65, "clay": 0.10, "om_pct": 2.0,
+                    "depth_cm": 100.0, "n_nodes": 21,
+                    "h_initial": -200.0, "h_top": -50.0,
+                    "duration_days": 10.0, "dt_days": 0.1,
+                    "checks": {
+                        "final_theta_top_above_initial": true,
+                        "profile_monotonic_decrease_with_depth": true,
+                        "mass_balance_error_below": 0.05
+                    }
+                },
+                {
+                    "label": "Clay loam slow wetting (5-day, h_top=-100cm)",
+                    "sand": 0.30, "clay": 0.35, "om_pct": 3.0,
+                    "depth_cm": 100.0, "n_nodes": 21,
+                    "h_initial": -500.0, "h_top": -100.0,
+                    "duration_days": 5.0, "dt_days": 0.1,
+                    "checks": {
+                        "final_theta_top_above_initial": true,
+                        "profile_monotonic_decrease_with_depth": true,
+                        "mass_balance_error_below": 0.05
+                    }
+                }
+            ]
+        },
+        "richards_drainage": {
+            "description": "Free drainage from near-saturation",
+            "test_cases": [
+                {
+                    "label": "Sandy loam free drainage (7-day)",
+                    "sand": 0.65, "clay": 0.10, "om_pct": 2.0,
+                    "depth_cm": 100.0, "n_nodes": 21,
+                    "h_initial": -50.0,
+                    "duration_days": 7.0, "dt_days": 0.05,
+                    "zero_flux_top": true,
+                    "bottom_free_drain": true,
+                    "checks": {
+                        "final_theta_below_initial": true,
+                        "cumulative_drainage_positive": true,
+                        "mass_balance_error_below": 0.05
+                    }
+                }
+            ]
+        },
+        "texture_sensitivity": {
+            "description": "Moisture dynamics differ by texture — sandier soils drain faster",
+            "test_cases": [
+                {
+                    "label": "Sandy drains faster than clay (free drainage 5-day)",
+                    "sandy": { "sand": 0.65, "clay": 0.10, "om_pct": 2.0 },
+                    "clayey": { "sand": 0.30, "clay": 0.35, "om_pct": 3.0 },
+                    "depth_cm": 100.0, "n_nodes": 21,
+                    "h_initial": -50.0,
+                    "duration_days": 5.0, "dt_days": 0.05,
+                    "check": "sandy_drains_more"
+                }
+            ]
+        }
+    }
+}

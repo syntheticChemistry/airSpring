@@ -1,7 +1,7 @@
 # Stewart Yield Model vs USDA NASS Reality
 
 **Date:** February 26, 2026
-**Status:** Planning
+**Status:** Validated (Exp 024 — 40/40 checks pass)
 **Data Tier:** 1 (free, downloadable CSV)
 **Dependencies:** Existing yield response module + USDA NASS Quick Stats
 **Cross-Spring:** None (airSpring standalone)

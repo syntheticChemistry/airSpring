@@ -13,8 +13,9 @@ dependencies = [
 
 [[package]]
 name = "airspring-barracuda"
-version = "0.4.8"
+version = "0.5.0"
 dependencies = [
+ "akida-driver",
  "barracuda",
  "pollster",
  "serde_json",

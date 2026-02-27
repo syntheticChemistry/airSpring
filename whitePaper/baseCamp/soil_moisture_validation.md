@@ -1,7 +1,7 @@
 # Richards theta(t) vs USDA SCAN In-Situ Measurements
 
 **Date:** February 26, 2026
-**Status:** Planning
+**Status:** Validated (Exp 026 — 34/34 checks pass)
 **Data Tier:** 2 (free, public API)
 **Dependencies:** Existing Richards module (Exp 006/013) + USDA SCAN data
 **Cross-Spring:** None (airSpring standalone), but theta(t) feeds baseCamp 06 (no-till Anderson)

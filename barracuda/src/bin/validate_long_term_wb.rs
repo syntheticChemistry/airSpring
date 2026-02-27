@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 #![allow(clippy::doc_markdown)] // paths in doc comments
 //! Experiment 015: 60-year water balance validation.
 //!
@@ -15,23 +21,12 @@ use airspring_barracuda::eco::{
     evapotranspiration::{extraterrestrial_radiation, hargreaves_et0},
     water_balance::{self as wb, DailyInput, WaterBalanceState},
 };
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{self, json_f64, parse_benchmark_json, ValidationHarness};
 use std::path::Path;
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/long_term_wb/benchmark_long_term_wb.json");
-
-/// Tolerance (%) for Rust Hargreaves vs Open-Meteo ET₀.
-///
-/// This is NOT a Python↔Rust fidelity check — it compares two fundamentally
-/// different ET₀ estimation methods:
-/// - Rust: Hargreaves (temperature-only, Eq. 52 of FAO-56)
-/// - Open-Meteo: ERA5 reanalysis-based FAO-56 Penman-Monteith
-///
-/// Literature reports Hargreaves vs PM disagreement of 10–30% depending on
-/// aridity and season (Hargreaves & Allen, 2003; Droogers & Allen, 2002).
-/// 25% accommodates seasonal and continental variability.
-const ET0_CROSS_TOL_PCT: f64 = 25.0;
 
 /// Growing season: May 1 - Sep 30 (inclusive).
 const SEASON_START_MONTH: u32 = 5;
@@ -548,9 +543,10 @@ fn validate_et0_cross(v: &mut ValidationHarness, results: &[SeasonResult]) {
 
     v.check_bool(
         &format!(
-            "Rust Hargreaves vs Open-Meteo ET₀ within {ET0_CROSS_TOL_PCT}%: {pct_diff:.1}% diff"
+            "Rust Hargreaves vs Open-Meteo ET₀ within {}%: {pct_diff:.1}% diff",
+            tolerances::ET0_CROSS_METHOD_PCT.abs_tol
         ),
-        pct_diff <= ET0_CROSS_TOL_PCT,
+        pct_diff <= tolerances::ET0_CROSS_METHOD_PCT.abs_tol,
     );
 }
 
@@ -573,13 +569,18 @@ fn main() {
     let kc = coeffs.kc_mid;
     let irrig_depth_mm = 25.0;
 
-    let cache_path = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .parent()
-        .expect("manifest parent")
-        .join("control")
-        .join("long_term_wb")
-        .join("data")
-        .join("wooster_era5_1960_2023.json");
+    let cache_path = std::env::var("LONG_TERM_WB_CACHE").map_or_else(
+        |_| {
+            Path::new(env!("CARGO_MANIFEST_DIR"))
+                .parent()
+                .expect("manifest parent")
+                .join("control")
+                .join("long_term_wb")
+                .join("data")
+                .join("wooster_era5_1960_2023.json")
+        },
+        std::path::PathBuf::from,
+    );
 
     if !cache_path.exists() {
         println!("═══════════════════════════════════════════════════════════");

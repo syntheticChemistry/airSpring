@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 //! Validate `SoilWatch` 10 sensor calibration and irrigation model
 //! against published values from Dong et al. (2024).
 //!
@@ -7,23 +13,8 @@
 //! Digitized: 2026-02-16, commit: initial airSpring.
 
 use airspring_barracuda::eco::sensor_calibration as sc;
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{self, ValidationHarness};
-
-/// Exact-match tolerance for polynomial/analytical computations.
-const EXACT_TOL: f64 = 1e-10;
-
-/// Irrigation recommendation tolerance (cm). Justified by depth precision
-/// of typical VWC sensors (±0.01 m³/m³ at 30 cm depth → ±0.3 cm IR).
-const IR_TOL: f64 = 0.01;
-
-/// Index of Agreement criterion from Dong et al. (2020) Table 3.
-const IA_CRITERION: f64 = 0.80;
-
-/// Statistical significance threshold (standard two-tailed, α=0.05).
-const P_SIGNIFICANT: f64 = 0.05;
-
-/// Water savings tolerance (percentage points).
-const SAVINGS_TOL: f64 = 0.1;
 
 /// Helper: extract `f64` from a JSON value by key (single level).
 fn jf(val: &serde_json::Value, key: &str) -> f64 {
@@ -47,7 +38,7 @@ fn validate_soilwatch10(v: &mut ValidationHarness, bm: &serde_json::Value) {
             &format!("VWC(RC={rc:.0}) vs JSON coefficients"),
             computed,
             expected,
-            EXACT_TOL,
+            tolerances::SENSOR_EXACT.abs_tol,
         );
     }
 
@@ -101,19 +92,24 @@ fn validate_irrigation(v: &mut ValidationHarness, bm: &serde_json::Value) {
     let expected_ir = jf(ir_example, "expected_ir_cm");
 
     let computed_ir = sc::irrigation_recommendation(fc, vwc, depth);
-    v.check_abs("IR (sandy soil example)", computed_ir, expected_ir, IR_TOL);
+    v.check_abs(
+        "IR (sandy soil example)",
+        computed_ir,
+        expected_ir,
+        tolerances::IRRIGATION_DEPTH.abs_tol,
+    );
 
     v.check_abs(
         "IR at field capacity",
         sc::irrigation_recommendation(0.12, 0.12, 30.0),
         0.0,
-        EXACT_TOL,
+        tolerances::SENSOR_EXACT.abs_tol,
     );
     v.check_abs(
         "IR above field capacity",
         sc::irrigation_recommendation(0.12, 0.15, 30.0),
         0.0,
-        EXACT_TOL,
+        tolerances::SENSOR_EXACT.abs_tol,
     );
 
     // Analytical multi-layer IR via Dong et al. (2024) Eq. 1 applied per layer:
@@ -139,7 +135,12 @@ fn validate_irrigation(v: &mut ValidationHarness, bm: &serde_json::Value) {
         },
     ];
     let total_ir = sc::multi_layer_irrigation(&layers);
-    v.check_abs("Multi-layer IR (3 depths)", total_ir, 4.5, IR_TOL);
+    v.check_abs(
+        "Multi-layer IR (3 depths)",
+        total_ir,
+        4.5,
+        tolerances::IRRIGATION_DEPTH.abs_tol,
+    );
 }
 
 /// Validate sensor performance criteria (Table 2) and field demonstrations.
@@ -166,8 +167,11 @@ fn validate_performance_and_demos(v: &mut ValidationHarness, bm: &serde_json::Va
                 mbe.abs() <= mbe_thresh,
             );
             v.check_bool(
-                &format!("{soil}: IA={ia:.2} > {IA_CRITERION} (criteria)"),
-                ia > IA_CRITERION,
+                &format!(
+                    "{soil}: IA={ia:.2} > {} (criteria)",
+                    tolerances::IA_CRITERION.abs_tol
+                ),
+                ia > tolerances::IA_CRITERION.abs_tol,
             );
         }
     }
@@ -185,31 +189,48 @@ fn validate_performance_and_demos(v: &mut ValidationHarness, bm: &serde_json::Va
 
     let yield_p = jf(&bb["anova_results"], "yield_p_value");
     v.check_bool(
-        &format!("Blueberry yield p={yield_p} < {P_SIGNIFICANT} (significant)"),
-        yield_p < P_SIGNIFICANT,
+        &format!(
+            "Blueberry yield p={yield_p} < {} (significant)",
+            tolerances::P_SIGNIFICANCE.abs_tol
+        ),
+        yield_p < tolerances::P_SIGNIFICANCE.abs_tol,
     );
 
     let bw_p = jf(&bb["anova_results"], "berry_weight_p_value");
     v.check_bool(
-        &format!("Blueberry berry weight p={bw_p} < {P_SIGNIFICANT} (significant)"),
-        bw_p < P_SIGNIFICANT,
+        &format!(
+            "Blueberry berry weight p={bw_p} < {} (significant)",
+            tolerances::P_SIGNIFICANCE.abs_tol
+        ),
+        bw_p < tolerances::P_SIGNIFICANCE.abs_tol,
     );
 
     let tom = &bm["tomato_demonstration"];
     let count_p = jf(&tom["anova_results"], "marketable_count_p_value");
     v.check_bool(
-        &format!("Tomato count p={count_p} > {P_SIGNIFICANT} (not significant — same yield)"),
-        count_p > P_SIGNIFICANT,
+        &format!(
+            "Tomato count p={count_p} > {} (not significant — same yield)",
+            tolerances::P_SIGNIFICANCE.abs_tol
+        ),
+        count_p > tolerances::P_SIGNIFICANCE.abs_tol,
     );
 
     let weight_p = jf(&tom["anova_results"], "weight_p_value");
     v.check_bool(
-        &format!("Tomato weight p={weight_p} > {P_SIGNIFICANT} (not significant — same quality)"),
-        weight_p > P_SIGNIFICANT,
+        &format!(
+            "Tomato weight p={weight_p} > {} (not significant — same quality)",
+            tolerances::P_SIGNIFICANCE.abs_tol
+        ),
+        weight_p > tolerances::P_SIGNIFICANCE.abs_tol,
     );
 
     let water_savings = jf(tom, "water_savings_pct");
-    v.check_abs("Tomato water savings (%)", water_savings, 30.0, SAVINGS_TOL);
+    v.check_abs(
+        "Tomato water savings (%)",
+        water_savings,
+        30.0,
+        tolerances::WATER_SAVINGS.abs_tol,
+    );
 }
 
 fn main() {

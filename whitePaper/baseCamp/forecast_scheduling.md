@@ -1,7 +1,7 @@
 # Predictive Irrigation with Weather Forecasts
 
 **Date:** February 26, 2026
-**Status:** Planning
+**Status:** Validated (Exp 025 — 19/19 checks pass)
 **Data Tier:** 2 (API key, already in testing-secrets/)
 **Dependencies:** Existing scheduling pipeline (Exp 014) + OpenWeatherMap forecast API
 **Cross-Spring:** None (airSpring standalone)

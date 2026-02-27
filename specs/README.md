@@ -1,7 +1,7 @@
 # airSpring Specifications
 
-**Last Updated**: February 26, 2026
-**Status**: Phase 0-3 complete — 594/594 Python + 491 Rust tests + 570 validation + 1393 atlas checks + 75/75 cross-validation + 11 Tier A modules + 69x CPU speedup (v0.4.8)
+**Last Updated**: February 27, 2026
+**Status**: Phase 0-3 complete — 808/808 Python + 645 Rust tests + 1393 atlas checks + 75/75 cross-validation + 11 Tier A modules + AKD1000 NPU live + 69x CPU speedup (v0.5.0)
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling
 
 ---
@@ -10,14 +10,14 @@
 
 | Metric | Value |
 |--------|-------|
-| Phase 0 (Python) | 594/594 PASS — 22 experiments (FAO-56, soil, IoT, WB, dual Kc, cover crops, regional ET₀, Richards, biochar, 60yr WB, yield, CW2D, scheduling, lysimeter, sensitivity, Priestley-Taylor, 3-method intercomparison, Thornthwaite, GDD, pedotransfer) |
+| Phase 0 (Python) | 808/808 PASS — 32 experiments (FAO-56, soil, IoT, WB, dual Kc, cover crops, regional ET₀, Richards, biochar, 60yr WB, yield, CW2D, scheduling, lysimeter, sensitivity, Priestley-Taylor, 3-method intercomparison, Thornthwaite, GDD, pedotransfer) |
 | Phase 0+ (Real data) | 15,300 station-days, R²=0.967 across 100 Michigan stations |
-| Phase 1 (Rust) | 491 tests + 570 validation + 1393 atlas — 27 binaries |
+| Phase 1 (Rust) | 645 tests + 1393 atlas — 51 binaries (47 barracuda + 4 forge) |
 | Phase 1.5 (CPU benchmark) | Rust 69x faster than Python (geometric mean, 20x–502x) |
 | Phase 2 (Cross-validation) | 75/75 Python↔Rust match within 1e-5; 690 crop-station yield pairs within 0.01 |
 | Phase 3 (GPU) | 11 Tier A modules wired, cross-spring S68 fully rewired |
 | Faculty | Dong (BAE, MSU — new lab 2026) |
-| Handoff | V022 (Thornthwaite+GDD+pedotransfer) in `wateringHole/handoffs/` |
+| Handoff | V024 (debt resolution + barracuda absorption) in `wateringHole/handoffs/` |
 
 ---
 
@@ -39,7 +39,7 @@
 |----------|----------|-------------|
 | CONTROL_EXPERIMENT_STATUS.md | `../` | Detailed experiment logs and check counts |
 | CHANGELOG.md | `../` | Evolution history (Keep a Changelog format) |
-| experiments/README.md | `../experiments/` | Experiment index (22 completed) |
+| experiments/README.md | `../experiments/` | Experiment index (44 completed) |
 | whitePaper/baseCamp/README.md | `../whitePaper/baseCamp/` | Per-faculty research briefings |
 | whitePaper/STUDY.md | `../whitePaper/` | Full study results |
 | whitePaper/METHODOLOGY.md | `../whitePaper/` | Multi-phase validation protocol |
@@ -94,7 +94,7 @@ Re-run `scripts/run_all_baselines.sh` at the respective commits to verify.
 `../whitePaper/STUDY.md` → `../CONTROL_EXPERIMENT_STATUS.md` → BARRACUDA_REQUIREMENTS.md
 
 **Cross-spring evolution** (15 min):
-CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/AIRSPRING_V022_*.md`
+CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/AIRSPRING_V024_*.md`
 
 ---
 

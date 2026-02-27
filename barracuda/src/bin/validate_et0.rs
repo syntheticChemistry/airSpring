@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 //! Validate FAO-56 Penman-Monteith ET₀ against published examples.
 //!
 //! Benchmark source: `control/fao56/benchmark_fao56.json`
@@ -6,37 +12,11 @@
 //! Digitized: 2026-02-16, commit: initial airSpring.
 
 use airspring_barracuda::eco::evapotranspiration::{self as et, DailyEt0Input};
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{self, json_f64, parse_benchmark_json, ValidationHarness};
 
 /// Benchmark JSON embedded at compile time for reproducibility.
 const BENCHMARK_JSON: &str = include_str!("../../../control/fao56/benchmark_fao56.json");
-
-/// Tolerance for saturation vapour pressure es (kPa).
-/// FAO-56 Table 2.3 publishes es to 2 decimal places; 0.01 kPa covers rounding.
-const ES_TOL: f64 = 0.01;
-
-/// Tolerance for vapour-pressure deficit VPD (kPa).
-/// VPD = es − ea accumulates rounding from both terms; 0.02 kPa justified.
-const VPD_TOL: f64 = 0.02;
-
-/// Tolerance for net radiation Rn (MJ/m²/day).
-/// FAO-56 Example 18 publishes Rn to 1 decimal place.
-const RN_TOL: f64 = 0.5;
-
-/// Tolerance for Bangkok mean es vs. FAO-56 Example 17 (kPa).
-const BANGKOK_ES_TOL: f64 = 0.02;
-
-/// Tolerance for vapour-pressure slope Δ (kPa/°C).
-/// FAO-56 Table 2.4 publishes to 3 decimal places.
-const BANGKOK_DELTA_TOL: f64 = 0.005;
-
-/// Tolerance for psychrometric constant γ (kPa/°C).
-/// FAO-56 Equation 8 precision at given pressure.
-const BANGKOK_GAMMA_TOL: f64 = 0.001;
-
-/// Tolerance for cold-condition boundary ET₀ (mm/day).
-/// Near-zero ET₀ is acceptable; 0.5 mm/day covers low-radiation conditions.
-const COLD_ET0_TOL: f64 = 0.5;
 
 /// Validate SVP Table 2.3 against benchmark data.
 fn validate_svp_table(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
@@ -51,7 +31,7 @@ fn validate_svp_table(v: &mut ValidationHarness, benchmark: &serde_json::Value) 
         benchmark,
         &["saturation_vapour_pressure_table", "tolerance_kpa"],
     )
-    .unwrap_or(ES_TOL);
+    .unwrap_or(tolerances::ET0_SAT_VAPOUR_PRESSURE.abs_tol);
 
     for entry in svp_table {
         let temp = entry
@@ -81,7 +61,7 @@ fn validate_delta_table(v: &mut ValidationHarness, benchmark: &serde_json::Value
         benchmark,
         &["slope_vapour_pressure_table", "tolerance_kpa_per_c"],
     )
-    .unwrap_or(BANGKOK_DELTA_TOL);
+    .unwrap_or(tolerances::ET0_SLOPE_VAPOUR.abs_tol);
 
     for entry in delta_table {
         let temp = entry
@@ -148,9 +128,24 @@ fn validate_uccle(v: &mut ValidationHarness, benchmark: &serde_json::Value) -> f
     let pub_rn = json_f64(uccle, &["intermediates", "rn_mj_m2_day"])
         .expect("Uccle: intermediates.rn_mj_m2_day");
 
-    v.check_abs("Uccle es", result_uc.es, pub_es, ES_TOL);
-    v.check_abs("Uccle VPD", result_uc.vpd, pub_vpd, VPD_TOL);
-    v.check_abs("Uccle Rn", result_uc.rn, pub_rn, RN_TOL);
+    v.check_abs(
+        "Uccle es",
+        result_uc.es,
+        pub_es,
+        tolerances::ET0_SAT_VAPOUR_PRESSURE.abs_tol,
+    );
+    v.check_abs(
+        "Uccle VPD",
+        result_uc.vpd,
+        pub_vpd,
+        tolerances::ET0_VPD.abs_tol,
+    );
+    v.check_abs(
+        "Uccle Rn",
+        result_uc.rn,
+        pub_rn,
+        tolerances::ET0_NET_RADIATION.abs_tol,
+    );
     v.check_abs("Uccle ET₀", result_uc.et0, expected_et0_uc, tol_et0_uc);
 
     result_uc.et0
@@ -170,21 +165,36 @@ fn validate_bangkok(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     let pub_es_bk =
         json_f64(bangkok, &["intermediates", "es_kpa"]).expect("Bangkok: intermediates.es_kpa");
     let calc_es_bk = et::mean_saturation_vapour_pressure(tmin_bk, tmax_bk);
-    v.check_abs("Bangkok es", calc_es_bk, pub_es_bk, BANGKOK_ES_TOL);
+    v.check_abs(
+        "Bangkok es",
+        calc_es_bk,
+        pub_es_bk,
+        tolerances::ET0_SAT_VAPOUR_PRESSURE_WIDE.abs_tol,
+    );
 
     let pub_delta_bk = json_f64(bangkok, &["intermediates", "delta_kpa_per_c"])
         .expect("Bangkok: intermediates.delta_kpa_per_c");
     let tmean_bk =
         json_f64(bangkok, &["intermediates", "tmean_c"]).expect("Bangkok: intermediates.tmean_c");
     let calc_delta_bk = et::vapour_pressure_slope(tmean_bk);
-    v.check_abs("Bangkok Δ", calc_delta_bk, pub_delta_bk, BANGKOK_DELTA_TOL);
+    v.check_abs(
+        "Bangkok Δ",
+        calc_delta_bk,
+        pub_delta_bk,
+        tolerances::ET0_SLOPE_VAPOUR.abs_tol,
+    );
 
     let pub_gamma_bk = json_f64(bangkok, &["intermediates", "gamma_kpa_per_c"])
         .expect("Bangkok: intermediates.gamma_kpa_per_c");
     let pub_p_bk = json_f64(bangkok, &["intermediates", "pressure_kpa"])
         .expect("Bangkok: intermediates.pressure_kpa");
     let calc_gamma_bk = et::psychrometric_constant(pub_p_bk);
-    v.check_abs("Bangkok γ", calc_gamma_bk, pub_gamma_bk, BANGKOK_GAMMA_TOL);
+    v.check_abs(
+        "Bangkok γ",
+        calc_gamma_bk,
+        pub_gamma_bk,
+        tolerances::PSYCHROMETRIC_CONSTANT.abs_tol,
+    );
 }
 
 /// Validate boundary conditions (cold, high altitude, positivity).
@@ -204,7 +214,12 @@ fn validate_boundaries(v: &mut ValidationHarness, uccle_et0: f64) {
         day_of_year: 355,
     };
     let result_cold = et::daily_et0(&cold);
-    v.check_abs("Cold ET₀ ≥ 0", result_cold.et0, 0.0, COLD_ET0_TOL);
+    v.check_abs(
+        "Cold ET₀ ≥ 0",
+        result_cold.et0,
+        0.0,
+        tolerances::ET0_COLD_CLIMATE.abs_tol,
+    );
 
     let p_high = et::atmospheric_pressure(3000.0);
     let p_sea = et::atmospheric_pressure(0.0);

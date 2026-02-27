@@ -1,27 +1,29 @@
 # baseCamp: Per-Faculty Research Briefings
 
-**Updated**: February 26, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.4.8)
-**Status**: 22 experiments, 594/594 Python + 491 Rust tests + 570 validation + 1393 atlas checks + 75/75 cross-validation + 11 Tier A modules + 69x CPU speedup
+**Updated**: February 27, 2026
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.5.0)
+**Status**: 44 experiments, 1054/1054 Python + 645 Rust tests + 1393 atlas checks + 75/75 cross-validation + 11 Tier A modules + Titan V GPU live + AKD1000 NPU live + metalForge live hardware (5 substrates) + 69x CPU speedup
 
 ---
 
 ## Evolution Path
 
 ```
-Phase 0   Python/R baselines    — reproduce paper results with original tools (594/594)
+Phase 0   Python/R baselines    — reproduce paper results with original tools (1054/1054)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (491 tests, 570 validation + 1393 atlas, 27 binaries, 97.45% coverage)
-Phase 2   BarraCuda GPU         — 11 Tier A modules wired (cross-spring S68 fully rewired)
-Phase 3   metalForge            — Write→Absorb→Lean complete, 6/6 modules absorbed upstream
-Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($600 GPU)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (645 tests, 1393 atlas, 47+4 binaries, 97.06% coverage)
+Phase 2   BarraCuda GPU bridge  — 11 Tier A modules wired (cross-spring S68 fully rewired)
+Phase 3   GPU live dispatch     — Titan V validated (24/24 PASS, 0.04% seasonal parity, 10K batch)
+Phase 3.5 NPU edge             — AKD1000 live: 3 experiments, ~48µs inference, LOCOMOS power budget
+Phase 3.7 metalForge live      — RTX 4070 + Titan V + AKD1000 + i9-12900K discovered, 14 workloads route
+Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($600 GPU + $99 NPU)
 ```
 
 ## Faculty Summary
 
 | Faculty | Institution | Track | Papers | Experiments | Checks | Domain |
 |---------|------------|-------|:------:|:-----------:|:------:|--------|
-| Dong | MSU BAE | Irrigation & Soil | 10+ | 22 | 594+570 | ET₀, soil moisture, IoT, water balance, dual Kc, cover crops, Richards, biochar, yield, CW2D, Thornthwaite, GDD, pedotransfer |
+| Dong | MSU BAE | Irrigation & Soil | 10+ | 44 | 1054+645 | ET₀ (7 methods), soil, IoT, WB, dual Kc, Richards, yield, ensemble, bias correction, GPU parity, metalForge dispatch |
 
 ## Faculty: Younsuk Dong, PhD
 
@@ -54,8 +56,30 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | 20 | Thornthwaite (1948) monthly ET₀ | 0→CPU | 23+50 | Temperature-based heat index |
 | 21 | Growing Degree Days (GDD) | 0→CPU | 33+26 | Phenology, kc_from_gdd |
 | 22 | Saxton & Rawls (2006) pedotransfer | 0→CPU | 70+58 | θs/θr/Ks from texture |
+| 23 | NASS Yield Validation (Stewart 1977) — Exp 024 | 0→CPU | 41+40 | FAO-56 Table 24 + synthetic MI weather |
+| 24 | Forecast Scheduling Hindcast — Exp 025 | 0→CPU | 19+19 | Synthetic (deterministic RNG) |
+| 25 | USDA SCAN Soil Moisture (Richards 1D) — Exp 026 | 0→CPU | 34+34 | Carsel & Parrish (1988) + SCAN (open) |
+| 26 | Multi-Crop Water Budget (5 crops) — Exp 027 | 0→CPU | 47+47 | FAO-56 Tables 12/17/24 + synthetic (open) |
+| 27 | NPU Edge Inference (AKD1000) — Exp 028 | 1 | 35+21 | BrainChip AKD1000 (live hardware) |
+| 28 | Funky NPU for Agricultural IoT — Exp 029 | 1 | 32/32 | AKD1000 live (streaming, evolution, LOCOMOS power) |
+| 29 | High-Cadence NPU Pipeline — Exp 029b | 1 | 28/28 | AKD1000 live (1-min cadence, burst, fusion, hot-swap) |
+| 30 | AmeriFlux Eddy Covariance ET (Baldocchi 2003) — Exp 030 | 0→CPU | 27+27 | AmeriFlux (free registration) |
+| 31 | Hargreaves-Samani (1985) Temperature ET₀ — Exp 031 | 0→CPU | 24+24 | FAO-56 Eq. 52 (open literature) |
+| 32 | Ecological Diversity Indices — Exp 032 | 0→CPU | 22+22 | Analytical (published formulas) |
+| 33 | Makkink (1957) Radiation-Based ET₀ — Exp 033 | 0→CPU | 21+16 | Lysimeter + de Bruin 1987 |
+| 34 | Turc (1961) Temperature-Radiation ET₀ — Exp 034 | 0→CPU | 22+17 | Annales Agronomiques + pyet |
+| 35 | Hamon (1961) Temperature-Based PET — Exp 035 | 0→CPU | 20+19 | Lu et al. 2005 (T + day length) |
+| 36 | biomeOS Neural API Round-Trip — Exp 036 | 0→CPU | 14+29 | JSON-RPC 2.0 parity |
+| 37 | ET₀ Ensemble Consensus (6-Method) — Exp 037 | 0→CPU | 9+17 | PM/PT/HG/Mak/Turc/Hamon |
+| 38 | Pedotransfer → Richards Coupling — Exp 038 | 0→CPU | 29+32 | Saxton-Rawls → VG → Richards |
+| 39 | Cross-Method ET₀ Bias Correction — Exp 039 | 0→CPU | 24+24 | Linear correction factors |
+| 40 | CPU vs GPU Parity — Exp 040 | 0→GPU | 22+26 | Bit-identical CPU fallback |
+| 41 | metalForge Mixed-Hardware Dispatch — Exp 041 | 0→GPU | 14+18 | 14 workloads, priority chain |
+| 42 | Seasonal Batch ET₀ at GPU Scale — Exp 042 | 0→GPU | 18+21 | 1,460 station-days batch |
+| 43 | Titan V GPU Live Dispatch — Exp 043 | GPU | 24 | WGSL shader on GV100, 0.04% parity |
+| 44 | metalForge Live Hardware Probe — Exp 044 | GPU+NPU | 17 | 5 substrates discovered live |
 
-### Rust Validation (Phase 1) — 27 binaries
+### Rust Validation (Phase 1+3) — 47 barracuda + 4 forge = 51 binaries
 
 | Binary | Checks | Modules Exercised |
 |--------|:------:|-------------------|
@@ -74,10 +98,26 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | `validate_yield` | 32 | Stewart 1977, Ky table, multi-stage, WUE, scheduling |
 | `validate_cw2d` | 24 | CW2D media, VG retention, mass balance |
 | `validate_atlas` | 1393/1393 | 100 Michigan stations × 13 checks each |
+| `validate_scheduling` | 28 | 5 irrigation strategies, mass balance, yield ordering |
+| `validate_lysimeter` | 25 | mass→ET, temp compensation, calibration, diurnal |
+| `validate_sensitivity` | 23 | OAT ±10%, 3 climatic zones, monotonicity, ranking |
+| `validate_priestley_taylor` | 32 | PT α=1.26, analytical, cross-val vs PM |
+| `validate_et0_intercomparison` | 36 | PM/PT/HG, 6 MI stations, R², bias, RMSE |
 | `validate_thornthwaite` | 50 | Thornthwaite monthly ET₀ |
 | `validate_gdd` | 26 | GDD accumulation, kc_from_gdd |
 | `validate_pedotransfer` | 58 | Saxton-Rawls 2006 |
+| `validate_nass_yield` | 40 | Stewart pipeline, 5 MI crops, drought ranking |
+| `validate_forecast` | 19 | Forecast vs perfect knowledge, noise sensitivity |
+| `validate_scan_moisture` | 34 | Richards vs SCAN, VG θ/K, 3 soil textures |
+| `validate_multicrop` | 47 | 5-crop water budget, irrigated/rainfed/dual Kc |
+| `validate_npu_eco` | 35 | AKD1000 crop stress/irrigation/anomaly classifiers |
+| `validate_npu_funky_eco` | 32 | Streaming, evolution, LOCOMOS power, multi-crop |
+| `validate_npu_high_cadence` | 28 | 1-min cadence, burst, fusion, ensemble, hot-swap |
+| `validate_ameriflux` | 27 | AmeriFlux eddy covariance ET validation |
+| `validate_hargreaves` | 24 | Hargreaves-Samani temperature-based ET₀ |
+| `validate_diversity` | 22 | Shannon, Simpson, richness diversity indices |
 | `cross_validate` | 75 | Python↔Rust exact match (tol=1e-5) |
+| `validate_dispatch_routing` | 21 | metalForge CPU+GPU+NPU dispatch routing (forge) |
 
 ### GPU Orchestrators (Phase 2) — 11 Tier A wired
 
@@ -92,7 +132,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | `BatchedRichards` | `pde::richards::solve_richards` | airSpring→ToadStool S40 absorption | **Wired** |
 | `fit_*_nm/global` | `optimize::nelder_mead` + `multi_start` | neuralSpring optimizer | **Wired** |
 
-### CPU Benchmarks (v0.4.8) — Rust 69x Faster Than Python
+### CPU Benchmarks (v0.5.0) — Rust 69x Faster Than Python
 
 | Operation | Rust Throughput | Speedup vs Python | Cross-Spring Provenance |
 |-----------|----------------|:-----------------:|------------------------|
@@ -110,18 +150,16 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 |----------|---------|
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C breakdown, absorbed vs stays-local, quality gates |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
-| `wateringHole/handoffs/` | V022 active handoff — Thornthwaite, GDD, pedotransfer, S68 sync |
+| `wateringHole/handoffs/` | V027 active — GPU parity + dispatch + Titan V live |
 | `specs/CROSS_SPRING_EVOLUTION.md` | 774 WGSL shader provenance across all Springs |
 
 ### Next Steps (Dong Lab)
 
+- **GPU at scale**: Profile `compute_gpu()` at N=100K+ (multi-year regional grids, crossover point)
+- **Richards + isotherm on GPU**: Move remaining Tier B modules to pure GPU via ToadStool shaders
+- **biomeOS integration**: Neural API `capability.call` for cross-primal compute orchestration
 - **Paper 12+**: Multi-sensor calibration network (awaiting field data from new lab)
-- **Paper 13+**: Full IoT irrigation with forecast integration (awaiting field data)
-- **GPU validation**: Move Richards and isotherm to pure GPU via ToadStool shaders
-- **metalForge absorption**: COMPLETE — 6/6 modules absorbed upstream (S64+S66)
-- **metalForge mixed hardware**: CPU+GPU+NPU dispatch demonstration (future)
-- **Weighing lysimeter**: Dong & Hansen (2023) load cell → direct ET (Exp 016 complete)
-- **Coverage**: 97.45% → target 98%+ (remaining gaps: GPU-dependent code paths)
+- **Coverage**: 97.06% → target 98%+ (remaining gaps: GPU-dependent code paths)
 
 ### What Good Science Looks Like
 
@@ -139,20 +177,23 @@ $200 sensor, Open-Meteo weather data, and a $600 GPU running BarraCuda.
 
 ## Extension Explorations
 
-With 22 paper reproductions validated and the full Python → Rust CPU → GPU pipeline
-operational, airSpring can now extend beyond reproduction into new science. These
-explorations use the validated stack to answer questions the original papers did not.
+With 44 experiments validated and the full Python → Rust CPU → Titan V GPU live →
+metalForge mixed hardware pipeline proven, airSpring can now extend beyond
+reproduction into new science. These explorations use the validated stack to answer
+questions the original papers did not.
 
 | File | Title | Data Tier | Status |
 |------|-------|:---------:|--------|
 | [open_data_atlas.md](open_data_atlas.md) | Michigan Crop Water Atlas (80yr, 100 stations) | Tier 1 (free) | **Complete** — 1393/1393 atlas checks, 15,300 station-days |
-| [yield_validation.md](yield_validation.md) | Stewart Yield Model vs USDA NASS Reality | Tier 1 (free) | Planning |
-| [et_gold_standard.md](et_gold_standard.md) | Direct ET Validation via AmeriFlux Eddy Covariance | Tier 2 (registration) | Planning |
-| [forecast_scheduling.md](forecast_scheduling.md) | Predictive Irrigation with Weather Forecasts | Tier 2 (API key) | Planning |
-| [soil_moisture_validation.md](soil_moisture_validation.md) | Richards theta(t) vs USDA SCAN In-Situ | Tier 2 (free) | Planning |
+| [yield_validation.md](yield_validation.md) | Stewart Yield Model vs USDA NASS Reality | Tier 1 (free) | **Validated** — Exp 024, 40/40 Rust checks |
+| [et_gold_standard.md](et_gold_standard.md) | Direct ET Validation via AmeriFlux Eddy Covariance | Tier 2 (registration) | **Complete** — Exp 030, 27+27 checks |
+| [forecast_scheduling.md](forecast_scheduling.md) | Predictive Irrigation with Weather Forecasts | Tier 2 (API key) | **Validated** — Exp 025, 19/19 Rust checks |
+| [soil_moisture_validation.md](soil_moisture_validation.md) | Richards theta(t) vs USDA SCAN In-Situ | Tier 2 (free) | **Validated** — Exp 026, 34/34 Rust checks |
+| [npu_iot_locomos.md](npu_iot_locomos.md) | NPU-Accelerated Agricultural IoT (LOCOMOS → Edge Sovereign) | Tier 0 (hardware) | **Validated** — Exp 028+029, 32+35+21 checks, live AKD1000 |
 
 Cross-spring explorations (no-till Anderson coupling, soil microbiome response)
-are documented in `gen3/baseCamp/06_notill_anderson.md`.
+are documented in `ecoPrimals/whitePaper/gen3/baseCamp/06_notill_anderson.md`.
+NPU agricultural IoT is in `ecoPrimals/whitePaper/gen3/baseCamp/08_npu_agricultural_iot.md`.
 
 ### Data Extension Roadmap
 

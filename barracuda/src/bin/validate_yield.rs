@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 //! Validate yield response model against FAO-56 Table 24 and Stewart (1977).
 //!
 //! Benchmark source: `control/yield_response/benchmark_yield_response.json`

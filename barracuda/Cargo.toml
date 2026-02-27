@@ -1,12 +1,16 @@
 [package]
 name = "airspring-barracuda"
-version = "0.4.8"
+version = "0.5.0"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
-description = "Ecological & agricultural science pipelines — Rust + GPU via BarraCuda/ToadStool"
+description = "Ecological & agricultural science pipelines — Rust + GPU + NPU via BarraCuda/ToadStool"
 
 [workspace]
+
+[features]
+default = []
+npu = ["dep:akida-driver"]
 
 [dependencies]
 # BarraCuda: GPU-promotion target. airSpring validates that Rust baselines
@@ -23,16 +27,23 @@ serde_json = "1"
 # We init a simple fmt subscriber so harness output is visible.
 tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
 
+# Async runtime for WgpuDevice initialization in validation binaries.
+pollster = "0.3"
+
+# BrainChip AKD1000 NPU driver — pure Rust, optional.
+akida-driver = { path = "../../phase1/toadstool/crates/neuromorphic/akida-driver", optional = true }
+
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }
 nursery = { level = "warn", priority = -1 }
 module_name_repetitions = "allow"
 must_use_candidate = "allow"
 return_self_not_must_use = "allow"
+# Agricultural science operates on f64 throughout; usize→f64 casts for
+# sample counts and loop indices are exact for N < 2^53.
 cast_precision_loss = "allow"
-# Scientific computing: usize/u64→f64 casts are ubiquitous for array indices
-# and lengths that never exceed 2^52.
 cast_possible_truncation = "allow"
+cast_sign_loss = "allow"
 
 [dev-dependencies]
 # Async runtime for WgpuDevice initialisation in integration tests.
@@ -146,3 +157,83 @@ path = "src/bin/validate_gdd.rs"
 [[bin]]
 name = "validate_pedotransfer"
 path = "src/bin/validate_pedotransfer.rs"
+
+[[bin]]
+name = "validate_nass_yield"
+path = "src/bin/validate_nass_yield.rs"
+
+[[bin]]
+name = "validate_forecast"
+path = "src/bin/validate_forecast.rs"
+
+[[bin]]
+name = "validate_scan_moisture"
+path = "src/bin/validate_scan_moisture.rs"
+
+[[bin]]
+name = "validate_multicrop"
+path = "src/bin/validate_multicrop.rs"
+
+[[bin]]
+name = "validate_npu_eco"
+path = "src/bin/validate_npu_eco.rs"
+
+[[bin]]
+name = "validate_npu_funky_eco"
+path = "src/bin/validate_npu_funky_eco.rs"
+
+[[bin]]
+name = "validate_npu_high_cadence"
+path = "src/bin/validate_npu_high_cadence.rs"
+
+[[bin]]
+name = "validate_ameriflux"
+path = "src/bin/validate_ameriflux.rs"
+
+[[bin]]
+name = "validate_hargreaves"
+path = "src/bin/validate_hargreaves.rs"
+
+[[bin]]
+name = "validate_diversity"
+path = "src/bin/validate_diversity.rs"
+
+[[bin]]
+name = "validate_makkink"
+path = "src/bin/validate_makkink.rs"
+
+[[bin]]
+name = "validate_turc"
+path = "src/bin/validate_turc.rs"
+
+[[bin]]
+name = "validate_hamon"
+path = "src/bin/validate_hamon.rs"
+
+[[bin]]
+name = "validate_neural_api"
+path = "src/bin/validate_neural_api.rs"
+
+[[bin]]
+name = "validate_et0_ensemble"
+path = "src/bin/validate_et0_ensemble.rs"
+
+[[bin]]
+name = "validate_pedotransfer_richards"
+path = "src/bin/validate_pedotransfer_richards.rs"
+
+[[bin]]
+name = "validate_et0_bias"
+path = "src/bin/validate_et0_bias.rs"
+
+[[bin]]
+name = "validate_cpu_gpu_parity"
+path = "src/bin/validate_cpu_gpu_parity.rs"
+
+[[bin]]
+name = "validate_seasonal_batch"
+path = "src/bin/validate_seasonal_batch.rs"
+
+[[bin]]
+name = "validate_gpu_live"
+path = "src/bin/validate_gpu_live.rs"

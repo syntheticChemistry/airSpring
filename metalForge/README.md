@@ -1,29 +1,50 @@
-# metalForge — airSpring Upstream Contributions
+# metalForge — airSpring Cross-System Compute Dispatch
 
-**Date**: February 26, 2026
-**Crate**: `airspring-forge` v0.2.0 (vestigial — all modules absorbed upstream)
+> **ACTIVE**: Cross-system dispatch (CPU + GPU + NPU + biomeOS Neural API).
+> Original 6 domain modules were absorbed into `barracuda` (ToadStool S64–S66).
+> The forge crate is now the **dispatch + integration layer**: substrate
+> discovery, capability-based routing, and biomeOS Neural API bridge.
+
+**Date**: February 27, 2026
+**Crate**: `airspring-forge` v0.1.0 (dispatch layer: 32 tests + 1 binary)
 **License**: AGPL-3.0-or-later
 
 ---
 
 ## Philosophy
 
-metalForge is where airSpring staged domain primitives for upstream
-absorption into `barracuda` (ToadStool). Following hotSpring's pattern:
+metalForge serves two purposes:
+
+1. **Upstream staging**: Domain primitives validated locally, then handed off
+   to barracuda/ToadStool for absorption (Phase 1 — complete).
+2. **Cross-system dispatch**: Runtime substrate discovery and capability-based
+   routing across CPU, GPU, NPU, and biomeOS Neural API (Phase 2 — active).
 
 ```
-Write locally → Validate against benchmarks → Hand off to ToadStool → Absorb → Lean on upstream
+Write locally → Validate → Hand off → Absorb → Lean on upstream → Dispatch across systems
 ```
 
-**Status: COMPLETE.** All 6 metalForge modules have been absorbed upstream.
-The forge crate remains as a fossil record (64 tests) but is no longer
-in the active dependency graph. airSpring now leans on upstream primitives.
+**Phase 1 Status: COMPLETE.** All 6 domain modules absorbed upstream.
+**Phase 2 Status: ACTIVE.** Substrate probe, dispatch routing, and Neural API bridge operational.
 
 ## What's Here
 
 ### `forge/` — Rust crate (`airspring-forge`)
 
-Six modules, all absorbed upstream. Pure Rust, zero dependencies, 64/64 tests pass.
+Active dispatch layer + absorbed domain modules. 32/32 tests pass, zero clippy warnings.
+
+#### Active Modules (dispatch + integration)
+
+| Module | Purpose | Status |
+|--------|---------|--------|
+| `substrate` | Substrate abstraction (GPU, NPU, CPU, Neural) | **Active** |
+| `probe` | Runtime hardware discovery (wgpu, procfs, devfs) | **Active** |
+| `inventory` | Unified device inventory (all substrate types) | **Active** |
+| `dispatch` | Capability-based routing (GPU > NPU > Neural > CPU) | **Active** |
+| `workloads` | airSpring workload definitions (ET₀, WB, Richards, NPU) | **Active** |
+| `neural` | biomeOS Neural API bridge (`capability.call` over Unix socket) | **Experimental** |
+
+#### Absorbed Modules (fossil record, validated upstream)
 
 | Module | Functions | Absorbed Into | When |
 |--------|-----------|--------------|------|
@@ -49,16 +70,29 @@ All implementations are validated against published benchmarks:
 - **Hydrology**: Hargreaves & Samani (1985), FAO-56 (Allen et al. 1998),
   918 station-days, cross-validated with Python ETo library
 
+## biomeOS Neural API Integration (Exp 036)
+
+The `neural` module provides a minimal JSON-RPC 2.0 client that talks to
+biomeOS's Neural API over Unix sockets. Zero external async dependencies —
+uses `std::os::unix::net::UnixStream` for synchronous communication.
+
+- **Discovery**: 4-tier socket resolution (env → XDG → /run → /tmp)
+- **Interface**: `capability.call(domain, operation, args)` → JSON response
+- **Substrate**: `SubstrateKind::Neural` sits between NPU and CPU in dispatch priority
+- **Parity**: Exp 036 validates JSON round-trip introduces zero numerical drift (29/29 PASS)
+
+See `specs/BIOMEOS_CAPABILITIES.md` for the full ecology capability registry.
+
 ## Relationship to hotSpring's metalForge
 
 | | hotSpring metalForge | airSpring metalForge |
 |--|----------------------|----------------------|
-| **Focus** | Hardware characterization, substrate discovery, capability dispatch | Statistical metrics, regression, hydrology, signal processing |
-| **Upstream target** | `barracuda::device::unified` | `barracuda::stats::*`, `barracuda::ops::*` |
+| **Focus** | Hardware characterization, substrate discovery, capability dispatch | Cross-system dispatch + biomeOS Neural API bridge |
+| **Upstream target** | `barracuda::device::unified` | `barracuda::stats::*`, Neural API |
 | **Crate** | `hotspring-forge` | `airspring-forge` |
-| **Dependencies** | barracuda, wgpu, tokio | None (pure Rust) |
-| **Modules** | substrate, probe, inventory, dispatch, bridge | metrics, regression, moving_window_f64, hydrology |
-| **Tests** | Hardware probing, bridge seam | 64 tests (53 unit + 11 doc), numerical correctness |
+| **Dependencies** | barracuda, wgpu, tokio | wgpu, serde_json |
+| **Modules** | substrate, probe, inventory, dispatch, bridge | substrate, probe, inventory, dispatch, workloads, neural |
+| **Tests** | Hardware probing, bridge seam | 32 tests (31 unit + 1 doc), dispatch + neural |
 
 ## Cross-Spring Absorption Candidates
 
@@ -78,6 +112,7 @@ These airSpring patterns may benefit other springs:
 
 ```
 cargo fmt   — clean
-cargo clippy --all-targets — zero warnings (pedantic)
-cargo test  — 64/64 pass (11 metrics + 12 regression + 7 moving_window + 13 hydrology + 5 van_genuchten + 5 isotherm)
+cargo clippy --all-targets — zero warnings (pedantic + nursery)
+cargo test  — 32/32 pass (7 dispatch + 5 neural + 5 probe + 5 substrate + 5 workloads + 2 inventory + 1 doc + 2 bin)
+unsafe code — 0 (uid discovery via /proc/self/status, not libc::getuid)
 ```

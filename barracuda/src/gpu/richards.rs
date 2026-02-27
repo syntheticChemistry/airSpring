@@ -5,7 +5,7 @@
 //!
 //! The Richards PDE solver was **contributed by airSpring** (absorbed upstream in
 //! S40), making it one of airSpring's direct contributions to `ToadStool`. The
-//! `van_genuchten_f64.wgsl` shader uses hotSpring precision math (`pow_f64`,
+//! `van_genuchten_f64.wgsl` shader uses barracuda f64 precision math (`pow_f64`,
 //! `exp_f64`) for water retention curve evaluation.
 //!
 //! # Three API Levels
@@ -74,10 +74,11 @@ pub struct RichardsRequest {
 
 /// Solve a batch of Richards problems on CPU using `eco::richards`.
 ///
-/// Returns one `Vec<RichardsProfile>` per request (or an error message).
+/// Returns one `Vec<RichardsProfile>` per request (or an error).
+#[must_use]
 pub fn solve_batch_cpu(
     requests: &[RichardsRequest],
-) -> Vec<Result<Vec<richards::RichardsProfile>, String>> {
+) -> Vec<crate::error::Result<Vec<richards::RichardsProfile>>> {
     requests
         .iter()
         .map(|req| {
@@ -92,7 +93,6 @@ pub fn solve_batch_cpu(
                 req.duration_days,
                 req.dt_days,
             )
-            .map_err(|e| e.to_string())
         })
         .collect()
 }
@@ -111,8 +111,10 @@ impl BatchedRichards {
     ///
     /// # Errors
     ///
-    /// Returns an error string if the solver fails.
-    pub fn solve_upstream(req: &RichardsRequest) -> Result<pde_richards::RichardsResult, String> {
+    /// Returns `AirSpringError::Barracuda` if the upstream solver fails.
+    pub fn solve_upstream(
+        req: &RichardsRequest,
+    ) -> crate::error::Result<pde_richards::RichardsResult> {
         let soil = to_barracuda_params(&req.params);
         let dz = req.depth_cm / (req.n_nodes as f64);
         let dt_s = req.dt_days * 86_400.0;
@@ -142,7 +144,7 @@ impl BatchedRichards {
         };
 
         pde_richards::solve_richards(&config, &h0, n_steps, top_bc, bottom_bc)
-            .map_err(|e| e.to_string())
+            .map_err(|e| crate::error::AirSpringError::Barracuda(e.to_string()))
     }
 
     /// Compare CPU (`eco::richards`) and upstream (`barracuda::pde`) for validation.
@@ -151,8 +153,8 @@ impl BatchedRichards {
     ///
     /// # Errors
     ///
-    /// Returns an error string if either solver fails.
-    pub fn cross_validate(req: &RichardsRequest) -> Result<(Vec<f64>, Vec<f64>), String> {
+    /// Returns `AirSpringError` if either solver fails.
+    pub fn cross_validate(req: &RichardsRequest) -> crate::error::Result<(Vec<f64>, Vec<f64>)> {
         let cpu_profiles = richards::solve_richards_1d(
             &req.params,
             req.depth_cm,
@@ -163,8 +165,7 @@ impl BatchedRichards {
             req.bottom_free_drain,
             req.duration_days,
             req.dt_days,
-        )
-        .map_err(|e| e.to_string())?;
+        )?;
 
         let cpu_theta = cpu_profiles
             .last()
@@ -188,8 +189,8 @@ impl BatchedRichards {
     ///
     /// # Errors
     ///
-    /// Returns an error string if the solver fails or parameters are invalid.
-    pub fn solve_cn_diffusion(req: &RichardsRequest) -> Result<Vec<f64>, String> {
+    /// Returns `AirSpringError::Barracuda` if the solver fails or parameters are invalid.
+    pub fn solve_cn_diffusion(req: &RichardsRequest) -> crate::error::Result<Vec<f64>> {
         let d_cm_per_s = (req.params.ks / 86_400.0) / (req.params.theta_s - req.params.theta_r);
         let dx = req.depth_cm / (req.n_nodes.saturating_sub(1).max(1)) as f64;
         let dt_s = req.dt_days * 86_400.0;
@@ -200,8 +201,11 @@ impl BatchedRichards {
             .with_boundary_conditions(req.h_initial, req.h_initial);
 
         let initial = vec![req.h_initial; req.n_nodes];
-        let mut solver = HeatEquation1D::new(cn_config, &initial).map_err(|e| format!("{e}"))?;
-        let h_final = solver.advance(n_steps).map_err(|e| format!("{e}"))?;
+        let mut solver = HeatEquation1D::new(cn_config, &initial)
+            .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
+        let h_final = solver
+            .advance(n_steps)
+            .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
 
         let theta: Vec<f64> = h_final
             .iter()

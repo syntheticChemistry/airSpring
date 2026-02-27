@@ -7,7 +7,7 @@
 //!
 //! # Provenance
 //!
-//! `moving_window.wgsl` was contributed by `wetSpring` for environmental
+//! `moving_window.wgsl` provides sliding-window stream smoothing for environmental
 //! monitoring (S28+), absorbed into `ToadStool` ops, and now wired here for
 //! `IoT` sensor stream smoothing — a cross-spring benefit.
 //!
@@ -45,7 +45,7 @@ pub struct SmoothedSeries {
 
 /// GPU-backed sliding window smoother for `IoT` sensor streams.
 ///
-/// Wraps `ToadStool`'s `MovingWindowStats` (f32 GPU shader, `wetSpring` provenance)
+/// Wraps `ToadStool`'s `MovingWindowStats` (f32 GPU shader, sliding-window stream smoothing)
 /// with f64 conversion for airSpring's precision requirements.
 pub struct StreamSmoother {
     inner: MovingWindowStats,
@@ -53,6 +53,7 @@ pub struct StreamSmoother {
 
 impl StreamSmoother {
     /// Create a new stream smoother backed by the given GPU device.
+    #[must_use]
     pub fn new(device: Arc<WgpuDevice>) -> Self {
         Self {
             inner: MovingWindowStats::new(device),
@@ -102,6 +103,7 @@ impl StreamSmoother {
 /// Delegates to `barracuda::stats::moving_window_stats_f64` (R-S66-003).
 /// Used when no GPU is available or for small datasets where GPU dispatch
 /// overhead exceeds computation time.
+#[must_use]
 pub fn smooth_cpu(data: &[f64], window_size: usize) -> Option<SmoothedSeries> {
     let result = barracuda::stats::moving_window_stats_f64(data, window_size)?;
     let len = result.mean.len();
@@ -279,6 +281,7 @@ mod tests {
             .collect();
         let result = smooth_cpu(&data, 10).unwrap();
         let input_var = crate::gpu::reduce::sample_variance(&data);
+        #[allow(clippy::cast_precision_loss)]
         let output_var_mean: f64 =
             result.variance.iter().sum::<f64>() / result.variance.len() as f64;
         // Smoothed output should have lower average variance per window

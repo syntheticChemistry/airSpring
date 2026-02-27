@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 //! Benchmark airSpring GPU operations vs CPU baselines.
 //!
 //! Measures wall-clock time for all GPU orchestrators and CPU fallbacks across
@@ -94,6 +100,7 @@ fn time_fn<F: FnMut() -> f64>(mut f: F, warmup: usize, measure: usize) -> (f64, 
         checksum += f();
     }
     let elapsed_us = start.elapsed().as_micros();
+    #[allow(clippy::cast_precision_loss)]
     let per_call_us = elapsed_us as f64 / measure as f64;
     (per_call_us, checksum)
 }
@@ -105,6 +112,7 @@ fn bench_et0() {
     for &n in &[10, 100, 1_000, 10_000] {
         let inputs = make_station_days(n);
         let (cpu_us, _) = time_fn(|| bench_et0_cpu(&inputs), WARMUP, MEASURE);
+        #[allow(clippy::cast_precision_loss)]
         let ops_per_sec = (n as f64) / (cpu_us / 1_000_000.0);
         println!("  {n:>8}  {cpu_us:>12.1}  {ops_per_sec:>12.0}");
     }

@@ -1,0 +1,72 @@
+{
+  "_provenance": {
+    "method": "Makkink (1957) radiation-based ET₀, de Bruin (1987) coefficients",
+    "baseline_script": "control/makkink/makkink_et0.py",
+    "baseline_commit": "pending",
+    "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
+    "baseline_command": "python3 control/makkink/makkink_et0.py",
+    "python_version": "3.10",
+    "created": "2026-02-27",
+    "references": [
+      "Makkink GF (1957) Testing the Penman formula by means of lysimeters. J Inst Water Eng 11:277-288",
+      "de Bruin HAR (1987) From Penman to Makkink. In: Evaporation and Weather, TNO, The Hague, pp 5-31",
+      "Xu CY, Singh VP (2002) Cross comparison of empirical equations. Water Resources Management 16:197-219"
+    ]
+  },
+  "equation": {
+    "description": "ET₀ = C1 × (Δ/(Δ+γ)) × Rs/λ + C2",
+    "C1": 0.61,
+    "C2": -0.12,
+    "lambda_MJ_per_kg": 2.45
+  },
+  "validation_checks": {
+    "analytical": {
+      "description": "Direct computation from Makkink equation with de Bruin (1987) coefficients",
+      "test_cases": [
+        {"tmean": 20.0, "rs_mj": 15.0, "elevation_m": 100.0, "expected_et0": 2.438, "tolerance": 0.01},
+        {"tmean": 30.0, "rs_mj": 25.0, "elevation_m": 0.0,   "expected_et0": 4.755, "tolerance": 0.01},
+        {"tmean": 10.0, "rs_mj": 8.0,  "elevation_m": 200.0, "expected_et0": 0.987, "tolerance": 0.01},
+        {"tmean": 25.0, "rs_mj": 20.0, "elevation_m": 50.0,  "expected_et0": 3.555, "tolerance": 0.01},
+        {"tmean":  5.0, "rs_mj": 5.0,  "elevation_m": 500.0, "expected_et0": 0.489, "tolerance": 0.01},
+        {"tmean": 35.0, "rs_mj": 28.0, "elevation_m": 0.0,   "expected_et0": 5.609, "tolerance": 0.01},
+        {"tmean": 15.0, "rs_mj": 12.0, "elevation_m": 100.0, "expected_et0": 1.740, "tolerance": 0.01}
+      ]
+    },
+    "pm_cross_comparison": {
+      "description": "Makkink vs FAO-56 PM ratio should be in [0.4, 1.0] per Xu & Singh (2002)",
+      "test_cases": [
+        {"label": "Humid continental (Lansing MI Jul)", "tmean": 23.0, "rs_mj": 22.0, "elevation_m": 260.0, "approx_pm_et0": 4.5, "min_ratio": 0.4, "max_ratio": 1.0},
+        {"label": "Tropical (Bangkok Jul)", "tmean": 28.3, "rs_mj": 22.9, "elevation_m": 2.0, "approx_pm_et0": 5.72, "min_ratio": 0.4, "max_ratio": 1.0},
+        {"label": "Maritime (Uccle Belgium Jul)", "tmean": 16.5, "rs_mj": 14.5, "elevation_m": 100.0, "approx_pm_et0": 3.88, "min_ratio": 0.4, "max_ratio": 1.0}
+      ]
+    },
+    "edge_cases": {
+      "description": "Physical constraints",
+      "test_cases": [
+        {"label": "Zero Rs → negative → clamp to 0", "tmean": 20.0, "rs_mj": 0.0, "elevation_m": 100.0, "check": "non_negative"},
+        {"label": "Very cold → still computable", "tmean": -5.0, "rs_mj": 3.0, "elevation_m": 100.0, "check": "non_negative"},
+        {"label": "High altitude", "tmean": 15.0, "rs_mj": 18.0, "elevation_m": 3000.0, "check": "positive"},
+        {"label": "Peak summer radiation → high ET₀", "tmean": 30.0, "rs_mj": 30.0, "elevation_m": 0.0, "check": "positive"}
+      ]
+    },
+    "monotonicity": {
+      "description": "Higher Rs or higher T → higher ET₀",
+      "test_cases": [
+        {"label": "More radiation → more ET₀", "base_rs": 10.0, "high_rs": 20.0, "tmean": 20.0, "elevation_m": 100.0},
+        {"label": "Higher temperature → more ET₀ (via Δ/(Δ+γ))", "base_t": 10.0, "high_t": 30.0, "rs_mj": 15.0, "elevation_m": 100.0}
+      ]
+    },
+    "pyet_cross_validation": {
+      "description": "Cross-validate against pyet.makkink() for 5 test conditions",
+      "tolerance": 0.50,
+      "note": "pyet uses slightly different Makkink coefficients; wider tolerance for cross-library validation",
+      "test_conditions": [
+        {"tmean": 20.0, "rs_mj": 15.0, "elevation_m": 100.0},
+        {"tmean": 30.0, "rs_mj": 25.0, "elevation_m": 0.0},
+        {"tmean": 10.0, "rs_mj": 8.0,  "elevation_m": 200.0},
+        {"tmean": 25.0, "rs_mj": 20.0, "elevation_m": 50.0},
+        {"tmean":  5.0, "rs_mj": 5.0,  "elevation_m": 500.0}
+      ]
+    }
+  }
+}

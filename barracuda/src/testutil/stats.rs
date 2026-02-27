@@ -75,17 +75,23 @@ pub fn mbe(observed: &[f64], simulated: &[f64]) -> f64 {
 /// Ported from the Python baseline (`control/soil_sensors/calibration_dong2020.py`
 /// `compute_ia`).  Values range from 0.0 (no agreement) to 1.0 (perfect).
 ///
-/// # Panics
+/// # Errors
 ///
-/// Panics if `observed` and `simulated` have different lengths or are empty.
-#[must_use]
-pub fn index_of_agreement(observed: &[f64], simulated: &[f64]) -> f64 {
-    assert_eq!(
-        observed.len(),
-        simulated.len(),
-        "Vectors must be same length"
-    );
-    assert!(!observed.is_empty(), "Vectors must not be empty");
+/// Returns `InvalidInput` if `observed` and `simulated` have different lengths
+/// or are empty.
+pub fn index_of_agreement(observed: &[f64], simulated: &[f64]) -> crate::error::Result<f64> {
+    if observed.len() != simulated.len() {
+        return Err(crate::error::AirSpringError::InvalidInput(format!(
+            "observed length {} != simulated length {}",
+            observed.len(),
+            simulated.len()
+        )));
+    }
+    if observed.is_empty() {
+        return Err(crate::error::AirSpringError::InvalidInput(
+            "vectors must not be empty".into(),
+        ));
+    }
 
     let n = len_f64(observed);
     let mean_obs: f64 = observed.iter().sum::<f64>() / n;
@@ -103,9 +109,9 @@ pub fn index_of_agreement(observed: &[f64], simulated: &[f64]) -> f64 {
         .sum();
 
     if denominator == 0.0 {
-        return 1.0;
+        return Ok(1.0);
     }
-    1.0 - numerator / denominator
+    Ok(1.0 - numerator / denominator)
 }
 
 /// Nash-Sutcliffe Efficiency (NSE).
@@ -115,17 +121,23 @@ pub fn index_of_agreement(observed: &[f64], simulated: &[f64]) -> f64 {
 /// Widely used in hydrology (Nash & Sutcliffe, 1970). NSE = 1.0 is perfect
 /// agreement; NSE < 0 means the model is worse than using the mean.
 ///
-/// # Panics
+/// # Errors
 ///
-/// Panics if `observed` and `simulated` have different lengths or are empty.
-#[must_use]
-pub fn nash_sutcliffe(observed: &[f64], simulated: &[f64]) -> f64 {
-    assert_eq!(
-        observed.len(),
-        simulated.len(),
-        "Vectors must be same length"
-    );
-    assert!(!observed.is_empty(), "Vectors must not be empty");
+/// Returns `InvalidInput` if `observed` and `simulated` have different lengths
+/// or are empty.
+pub fn nash_sutcliffe(observed: &[f64], simulated: &[f64]) -> crate::error::Result<f64> {
+    if observed.len() != simulated.len() {
+        return Err(crate::error::AirSpringError::InvalidInput(format!(
+            "observed length {} != simulated length {}",
+            observed.len(),
+            simulated.len()
+        )));
+    }
+    if observed.is_empty() {
+        return Err(crate::error::AirSpringError::InvalidInput(
+            "vectors must not be empty".into(),
+        ));
+    }
 
     let n = len_f64(observed);
     let mean_obs: f64 = observed.iter().sum::<f64>() / n;
@@ -139,9 +151,9 @@ pub fn nash_sutcliffe(observed: &[f64], simulated: &[f64]) -> f64 {
     let ss_tot: f64 = observed.iter().map(|o| (o - mean_obs).powi(2)).sum();
 
     if ss_tot == 0.0 {
-        return 1.0;
+        return Ok(1.0);
     }
-    1.0 - ss_res / ss_tot
+    Ok(1.0 - ss_res / ss_tot)
 }
 
 /// Coefficient of determination (R²) using sum-of-squares method.
@@ -151,11 +163,14 @@ pub fn nash_sutcliffe(observed: &[f64], simulated: &[f64]) -> f64 {
 /// Unlike [`r_squared`], which wraps barracuda's Pearson R, this uses the
 /// standard regression definition: it can be negative if the model is poor.
 ///
-/// # Panics
+/// # Errors
 ///
-/// Panics if `observed` and `simulated` have different lengths or are empty.
-#[must_use]
-pub fn coefficient_of_determination(observed: &[f64], simulated: &[f64]) -> f64 {
+/// Returns `InvalidInput` if `observed` and `simulated` have different lengths
+/// or are empty.
+pub fn coefficient_of_determination(
+    observed: &[f64],
+    simulated: &[f64],
+) -> crate::error::Result<f64> {
     nash_sutcliffe(observed, simulated)
 }
 
@@ -395,7 +410,7 @@ mod tests {
     #[test]
     fn index_of_agreement_perfect_is_one() {
         let obs = [1.0, 2.0, 3.0, 4.0, 5.0];
-        let ia = index_of_agreement(&obs, &obs);
+        let ia = index_of_agreement(&obs, &obs).unwrap();
         assert!((ia - 1.0).abs() < f64::EPSILON, "IA={ia}");
     }
 
@@ -403,7 +418,7 @@ mod tests {
     fn index_of_agreement_constant_obs_denominator_zero_returns_one() {
         let obs = [5.0, 5.0, 5.0];
         let sim = [5.0, 5.0, 5.0];
-        let ia = index_of_agreement(&obs, &sim);
+        let ia = index_of_agreement(&obs, &sim).unwrap();
         assert!((ia - 1.0).abs() < f64::EPSILON, "IA={ia}");
     }
 
@@ -411,7 +426,7 @@ mod tests {
     fn index_of_agreement_negative_values() {
         let obs = [-2.0, -1.0, 0.0, 1.0, 2.0];
         let sim = [-2.0, -1.0, 0.0, 1.0, 2.0];
-        let ia = index_of_agreement(&obs, &sim);
+        let ia = index_of_agreement(&obs, &sim).unwrap();
         assert!((ia - 1.0).abs() < 1e-10, "IA={ia}");
     }
 
@@ -419,8 +434,19 @@ mod tests {
     fn index_of_agreement_poor_model() {
         let obs = [1.0, 2.0, 3.0, 4.0, 5.0];
         let sim = [5.0, 4.0, 3.0, 2.0, 1.0];
-        let ia = index_of_agreement(&obs, &sim);
+        let ia = index_of_agreement(&obs, &sim).unwrap();
         assert!((0.0..1.0).contains(&ia), "IA={ia}");
+    }
+
+    #[test]
+    fn index_of_agreement_length_mismatch() {
+        assert!(index_of_agreement(&[1.0, 2.0], &[1.0]).is_err());
+    }
+
+    #[test]
+    fn index_of_agreement_empty() {
+        let empty: &[f64] = &[];
+        assert!(index_of_agreement(empty, empty).is_err());
     }
 
     // ── Nash-Sutcliffe ───────────────────────────────────────────────────
@@ -428,7 +454,7 @@ mod tests {
     #[test]
     fn nash_sutcliffe_perfect_is_one() {
         let obs = [1.0, 2.0, 3.0, 4.0, 5.0];
-        let nse = nash_sutcliffe(&obs, &obs);
+        let nse = nash_sutcliffe(&obs, &obs).unwrap();
         assert!((nse - 1.0).abs() < f64::EPSILON, "NSE={nse}");
     }
 
@@ -436,7 +462,7 @@ mod tests {
     fn nash_sutcliffe_constant_obs_ss_tot_zero_returns_one() {
         let obs = [3.0, 3.0, 3.0];
         let sim = [3.0, 3.0, 3.0];
-        let nse = nash_sutcliffe(&obs, &sim);
+        let nse = nash_sutcliffe(&obs, &sim).unwrap();
         assert!((nse - 1.0).abs() < f64::EPSILON, "NSE={nse}");
     }
 
@@ -444,7 +470,7 @@ mod tests {
     fn nash_sutcliffe_worse_than_mean_negative() {
         let obs = [1.0, 2.0, 3.0, 4.0, 5.0];
         let sim = [5.0, 4.0, 3.0, 2.0, 1.0];
-        let nse = nash_sutcliffe(&obs, &sim);
+        let nse = nash_sutcliffe(&obs, &sim).unwrap();
         assert!(
             nse < 0.0,
             "NSE should be negative for inverted model, got {nse}"
@@ -456,8 +482,19 @@ mod tests {
         let obs = [1.0, 2.0, 3.0, 4.0, 5.0];
         let mean = 3.0;
         let pred = vec![mean; 5];
-        let nse = nash_sutcliffe(&obs, &pred);
+        let nse = nash_sutcliffe(&obs, &pred).unwrap();
         assert!(nse.abs() < 1e-10, "NSE (mean predictor)={nse}");
+    }
+
+    #[test]
+    fn nash_sutcliffe_length_mismatch() {
+        assert!(nash_sutcliffe(&[1.0, 2.0], &[1.0]).is_err());
+    }
+
+    #[test]
+    fn nash_sutcliffe_empty() {
+        let empty: &[f64] = &[];
+        assert!(nash_sutcliffe(empty, empty).is_err());
     }
 
     // ── Spearman r ───────────────────────────────────────────────────────
@@ -491,8 +528,8 @@ mod tests {
     fn coefficient_of_determination_equals_nse() {
         let obs = [1.0, 3.0, 5.0, 7.0, 9.0];
         let sim = [1.1, 2.9, 5.2, 6.8, 9.1];
-        let r2 = coefficient_of_determination(&obs, &sim);
-        let nse = nash_sutcliffe(&obs, &sim);
+        let r2 = coefficient_of_determination(&obs, &sim).unwrap();
+        let nse = nash_sutcliffe(&obs, &sim).unwrap();
         assert!((r2 - nse).abs() < f64::EPSILON, "R²={r2} NSE={nse}");
     }
 
@@ -500,7 +537,7 @@ mod tests {
     fn coefficient_of_determination_can_be_negative() {
         let obs = [1.0, 2.0, 3.0, 4.0, 5.0];
         let sim = [5.0, 4.0, 3.0, 2.0, 1.0];
-        let r2 = coefficient_of_determination(&obs, &sim);
+        let r2 = coefficient_of_determination(&obs, &sim).unwrap();
         assert!(r2 < 0.0, "poor model R²={r2}");
     }
 

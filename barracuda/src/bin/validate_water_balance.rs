@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 //! Validate water balance model against analytical solutions and mass conservation.
 //!
 //! Benchmark source: `control/water_balance/benchmark_water_balance.json`
@@ -14,24 +20,12 @@
 //! All thresholds sourced from benchmark JSON.
 
 use airspring_barracuda::eco::water_balance::{self as wb, DailyInput, WaterBalanceState};
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{self, json_f64, parse_benchmark_json, ValidationHarness};
 
 /// Benchmark JSON embedded at compile time for reproducibility.
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/water_balance/benchmark_water_balance.json");
-
-/// Per-step tolerance must be machine-precision level (< 1e-6).
-const PER_STEP_STRICT: f64 = 1e-6;
-
-/// Simulation-level mass balance tolerance (mm).
-/// Floating-point accumulation over 30–92 daily steps can reach ~1e-3 to 1e-2.
-/// 0.01 mm error over a 500 mm season = 0.002%, well within measurement noise.
-const SIM_MASS_BALANCE_TOL: f64 = 0.01;
-
-/// Tolerance for Ks at mid-stress point. The analytical Ks = 0.5 exactly,
-/// but mid-depletion is computed via `f64::midpoint` which is exact for
-/// power-of-2 denominators; 0.01 covers any residual.
-const KS_MIDPOINT_TOL: f64 = 0.01;
 
 /// Validate analytical stress coefficient (Ks) at key depletion points.
 fn validate_stress_coefficient(v: &mut ValidationHarness) {
@@ -55,7 +49,7 @@ fn validate_stress_coefficient(v: &mut ValidationHarness) {
         "Ks at mid-stress",
         state_mid.stress_coefficient(),
         0.5,
-        KS_MIDPOINT_TOL,
+        tolerances::STRESS_COEFFICIENT.abs_tol,
     );
 
     let mut state_wp = WaterBalanceState::new(0.33, 0.13, 600.0, 0.5);
@@ -82,7 +76,12 @@ fn validate_mass_balance(v: &mut ValidationHarness) {
     let (final_state, outputs) = wb::simulate_season(&state, &dry_inputs);
     let error = wb::mass_balance_check(&dry_inputs, &outputs, initial_dep, final_state.depletion);
 
-    v.check_abs("Mass balance error (dry)", error, 0.0, SIM_MASS_BALANCE_TOL);
+    v.check_abs(
+        "Mass balance error (dry)",
+        error,
+        0.0,
+        tolerances::WATER_BALANCE_MASS.abs_tol,
+    );
     v.check_bool("Depletion increased", final_state.depletion > initial_dep);
 
     let stressed_days = outputs.iter().filter(|o| o.ks < 1.0).count();
@@ -125,7 +124,7 @@ fn validate_mass_balance(v: &mut ValidationHarness) {
         "Mass balance error (irrigated)",
         error_irr,
         0.0,
-        SIM_MASS_BALANCE_TOL,
+        tolerances::WATER_BALANCE_MASS.abs_tol,
     );
     v.check_bool("Total ET > 0", total_et > 0.0);
 }
@@ -176,7 +175,12 @@ fn validate_michigan(v: &mut ValidationHarness, mi_et_mid: f64, mi_et_tol: f64) 
     println!("  Final θv: {:.3} m³/m³", mi_final.current_theta());
     println!("  Benchmark range: mid={mi_et_mid:.0}, tol=±{mi_et_tol:.0}");
 
-    v.check_abs("MI mass balance", mi_error, 0.0, SIM_MASS_BALANCE_TOL);
+    v.check_abs(
+        "MI mass balance",
+        mi_error,
+        0.0,
+        tolerances::WATER_BALANCE_MASS.abs_tol,
+    );
     v.check_abs("MI season ET range", mi_total_et, mi_et_mid, mi_et_tol);
     v.check_bool("MI stress days > 0", mi_stress_days > 0);
 }
@@ -191,7 +195,7 @@ fn main() {
     let per_step_tol = json_f64(&benchmark, &["mass_balance_test", "tolerance"])
         .expect("benchmark must have mass_balance_test.tolerance");
     assert!(
-        per_step_tol < PER_STEP_STRICT,
+        per_step_tol < tolerances::WATER_BALANCE_PER_STEP.abs_tol,
         "per-step tolerance from benchmark should be strict: {per_step_tol}"
     );
 

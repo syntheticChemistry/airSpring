@@ -1,26 +1,37 @@
 # airSpring wateringHole
 
-**Updated**: February 26, 2026
+**Updated**: February 27, 2026
 **Purpose**: Spring-local handoffs to ToadStool/BarraCuda and cross-spring provenance
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V022** | [AIRSPRING_V022_THORNTHWAITE_GDD_PEDOTRANSFER_HANDOFF_FEB26_2026.md](handoffs/AIRSPRING_V022_THORNTHWAITE_GDD_PEDOTRANSFER_HANDOFF_FEB26_2026.md) | 2026-02-26 | **current** — Thornthwaite ET₀, GDD, Saxton-Rawls pedotransfer (22 papers, 594 Python, 491 Rust, 570 validation, 27 binaries) |
+| **V028** | [AIRSPRING_V028_TOADSTOOL_ABSORPTION_TITAN_V_HANDOFF_FEB27_2026.md](handoffs/AIRSPRING_V028_TOADSTOOL_ABSORPTION_TITAN_V_HANDOFF_FEB27_2026.md) | 2026-02-27 | **current** — ToadStool absorption: Titan V live learnings, f64 trig precision, batch scaling, 7 ET₀ methods, Tier B candidates |
+| **V027** | [AIRSPRING_V027_GPU_PARITY_DISPATCH_HANDOFF_FEB27_2026.md](handoffs/AIRSPRING_V027_GPU_PARITY_DISPATCH_HANDOFF_FEB27_2026.md) | 2026-02-27 | CPU↔GPU parity (bit-identical), metalForge dispatch, seasonal batch, Titan V + metalForge live hardware |
 
 ## Cross-Spring Documents
 
 | File | Purpose |
 |------|---------|
 | `../specs/CROSS_SPRING_EVOLUTION.md` | 774+ WGSL shader provenance (hotSpring/wetSpring/neuralSpring/airSpring/groundSpring) |
+| `../specs/BIOMEOS_CAPABILITIES.md` | Ecology capability domain for biomeOS Neural API |
+| `../specs/NUCLEUS_INTEGRATION.md` | NUCLEUS deployment: graphs, workloads, Neural API bridge |
+| `../graphs/airspring_eco_pipeline.toml` | biomeOS deployment graph: weather → ET₀ → WB → yield |
+| `../graphs/cross_primal_soil_microbiome.toml` | Cross-Spring pipeline: airSpring θ(t) → wetSpring diversity |
 | `../barracuda/EVOLUTION_READINESS.md` | Tier A/B/C status, absorbed/stays-local, quality gates |
 | `../metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66), post-absorption leaning status |
+| `../../wateringHole/SPRING_EVOLUTION_ISSUES.md` | **Shared** — Cross-primal issues for biomeOS and Spring teams |
 
 ## Archive
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_V026_ENSEMBLE_COUPLING_HANDOFF_FEB27_2026.md` | v0.4.15: ET₀ ensemble, pedotransfer-Richards coupling, bias correction |
+| `handoffs/archive/AIRSPRING_V025_BIOMEOS_NEURAL_API_HANDOFF_FEB27_2026.md` | v0.4.13: biomeOS Neural API bridge, ecology capability domain |
+| `handoffs/archive/AIRSPRING_V024_DEBT_RESOLUTION_BARRACUDA_ABSORPTION_HANDOFF_FEB27_2026.md` | v0.4.12: Debt resolution + barracuda absorption |
+| `handoffs/archive/AIRSPRING_V023_COMPREHENSIVE_EVOLUTION_HANDOFF_FEB26_2026.md` | v0.4.11: Comprehensive evolution: 32 papers, NPU, metalForge mixed hardware |
+| `handoffs/archive/AIRSPRING_V022_THORNTHWAITE_GDD_PEDOTRANSFER_HANDOFF_FEB26_2026.md` | v0.4.8: Thornthwaite ET₀, GDD, Saxton-Rawls pedotransfer (22 papers) |
 | `handoffs/archive/AIRSPRING_V021_PT_INTERCOMPARISON_EVOLUTION_HANDOFF_FEB26_2026.md` | v0.4.7: Priestley-Taylor ET₀ + 3-method intercomparison (18 papers) |
 | `handoffs/archive/AIRSPRING_V019_S68_UNIVERSAL_PRECISION_SYNC_HANDOFF_FEB26_2026.md` | v0.4.6: S68 universal f64 precision sync |
 | `handoffs/archive/AIRSPRING_V020_CROSS_SPRING_EVOLUTION_HANDOFF_FEB26_2026.md` | v0.4.6: Cross-spring evolution: 14 primitives, 47 tests, 5-spring shader lineage |
@@ -48,8 +59,11 @@
 
 Handoff files follow: `AIRSPRING_V{NNN}_{TOPIC}_HANDOFF_{DATE}.md`
 
-Direction: airSpring → ToadStool (unidirectional). airSpring is a consumer of
-BarraCuda primitives; handoffs communicate what we learned, what we need, and
-what we can contribute back.
+Direction: airSpring → ToadStool, biomeOS (unidirectional). airSpring is a consumer
+of BarraCuda primitives and a provider of ecology capabilities; handoffs
+communicate what we learned, what we need, and what we can contribute back.
+
+Cross-primal issues go to `../../wateringHole/SPRING_EVOLUTION_ISSUES.md`
+(the shared ecosystem issues tracker).
 
 Superseded handoffs move to `handoffs/archive/` (kept as fossil record).

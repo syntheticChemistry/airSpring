@@ -1,4 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![warn(clippy::pedantic)]
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 #![allow(clippy::doc_markdown)]
 //! Experiment 018: Michigan Crop Water Atlas.
 //!
@@ -26,6 +32,7 @@ use airspring_barracuda::eco::{
     yield_response,
 };
 use airspring_barracuda::testutil;
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{self, ValidationHarness};
 use std::io::BufRead;
 use std::path::Path;
@@ -45,7 +52,6 @@ const ALL_CROPS: &[(CropType, &str, f64)] = &[
 
 const DEFAULT_YEAR_START: u32 = 1945;
 const DEFAULT_YEAR_END: u32 = 2024;
-const MASS_BALANCE_TOL: f64 = 0.01;
 const SEASON_START_DOY: u32 = 121; // May 1
 const SEASON_END_DOY: u32 = 273; // Sep 30
 
@@ -410,7 +416,10 @@ fn process_station(
         for (day, &et0) in days.iter().zip(&et0_series) {
             *yearly.entry(day.year).or_default() += et0;
         }
-        yearly.values().sum::<f64>() / yearly.len().max(1) as f64
+        #[allow(clippy::cast_precision_loss)]
+        {
+            yearly.values().sum::<f64>() / yearly.len().max(1) as f64
+        }
     };
 
     let mut crop_results = Vec::new();
@@ -483,10 +492,11 @@ fn write_summary_csv(results: &[StationResult], out_dir: &Path) {
 fn validate_station(station_id: &str, result: &StationResult, v: &mut ValidationHarness) {
     v.check_bool(
         &format!(
-            "{station_id} mass balance < {MASS_BALANCE_TOL} (err={:.6})",
+            "{station_id} mass balance < {} (err={:.6})",
+            tolerances::WATER_BALANCE_MASS.abs_tol,
             result.mb_max_error
         ),
-        result.mb_max_error < MASS_BALANCE_TOL,
+        result.mb_max_error < tolerances::WATER_BALANCE_MASS.abs_tol,
     );
 
     if result.et0_r2_vs_openmeteo.is_finite() {
@@ -528,6 +538,7 @@ fn validate_atlas_summary(results: &[StationResult], v: &mut ValidationHarness) 
     }
 
     let n = results.len();
+    #[allow(clippy::cast_precision_loss)]
     let mean_et0 = results.iter().map(|r| r.mean_annual_et0).sum::<f64>() / n as f64;
     let total_station_days: usize = results.iter().map(|r| r.n_days).sum();
     let total_station_years: usize = results.iter().map(|r| r.n_years).sum();
