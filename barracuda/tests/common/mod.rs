@@ -16,7 +16,6 @@ pub fn try_create_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevic
 /// which panicked on `BatchedElementwiseF64` dispatch. S66 switched to explicit
 /// `BindGroupLayout` (R-S66-041), resolving the P0 blocker. Retained as a
 /// defensive wrapper for future shader regressions.
-#[allow(dead_code)]
 pub fn try_gpu_dispatch<T>(f: impl FnOnce() -> T) -> Option<T> {
     std::panic::catch_unwind(std::panic::AssertUnwindSafe(f)).map_or_else(
         |_| {

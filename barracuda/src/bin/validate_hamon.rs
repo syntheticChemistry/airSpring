@@ -50,12 +50,7 @@ fn validate_day_length(v: &mut ValidationHarness, benchmark: &serde_json::Value)
         let expected = json_field(tc, "expected_hours");
         let tol = json_field(tc, "tolerance");
         let computed = daylight_hours(lat.to_radians(), doy);
-        v.check_abs(
-            &format!("N(lat={lat}°,DOY={doy})"),
-            computed,
-            expected,
-            tol,
-        );
+        v.check_abs(&format!("N(lat={lat}°,DOY={doy})"), computed, expected, tol);
     }
 }
 
@@ -111,8 +106,7 @@ fn main() {
     validation::banner("Exp 035: Hamon (1961) Temperature-Based PET");
 
     let mut v = ValidationHarness::new("Hamon PET");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_hamon.json must parse");
+    let benchmark = parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_hamon.json must parse");
 
     validate_analytical(&mut v, &benchmark);
     validate_day_length(&mut v, &benchmark);

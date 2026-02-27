@@ -234,7 +234,7 @@ pub fn fit_correction_equations(
 
 fn goodness_of_fit<F: Fn(f64) -> f64>(x: &[f64], y: &[f64], predict: F) -> (f64, f64) {
     let n = len_f64(y);
-    let mean_y: f64 = y.iter().sum::<f64>() / n;
+    let mean_y: f64 = barracuda::stats::mean(y);
 
     let ss_res: f64 = x
         .iter()

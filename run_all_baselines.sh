@@ -64,6 +64,13 @@ run_python control/et0_bias_correction/et0_bias_correction.py
 run_python control/cpu_gpu_parity/cpu_gpu_parity.py
 run_python control/metalforge_dispatch/metalforge_dispatch.py
 run_python control/seasonal_batch_et0/seasonal_batch_et0.py
+run_python control/nass_yield/nass_yield_validation.py
+run_python control/forecast_scheduling/forecast_scheduling.py
+run_python control/scan_moisture/scan_moisture_validation.py
+run_python control/ameriflux_et/ameriflux_et_validation.py
+run_python control/hargreaves/hargreaves_samani.py
+run_python control/diversity/diversity_indices.py
+run_python control/anderson_coupling/anderson_coupling.py
 
 echo ""
 echo "━━━ Phase 1: Rust Validation Binaries ━━━"
@@ -97,6 +104,14 @@ run_rust validate_et0_bias
 run_rust validate_cpu_gpu_parity
 run_rust validate_seasonal_batch
 
+run_rust validate_anderson
+run_rust validate_regional_et0
+run_rust validate_real_data
+run_rust validate_iot
+run_rust validate_ameriflux
+run_rust validate_hargreaves
+run_rust validate_diversity
+
 echo ""
 echo "━━━ Phase 1+: Data-Dependent Validations ━━━"
 echo ""
@@ -105,6 +120,7 @@ run_rust validate_multicrop
 run_rust validate_nass_yield
 run_rust validate_scan_moisture
 run_rust validate_atlas
+run_rust validate_atlas_stream
 
 echo ""
 echo "━━━ Phase 1++: metalForge Validation ━━━"
@@ -123,6 +139,8 @@ else
     echo "  FAIL"
     FAIL=1
 fi
+
+run_rust validate_pure_gpu
 
 echo ""
 echo "━━━ Phase 3: GPU Live Dispatch (Titan V) ━━━"

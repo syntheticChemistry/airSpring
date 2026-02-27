@@ -210,7 +210,7 @@ fn fit_linear_internal(x: &[f64], y: &[f64]) -> Option<(f64, f64)> {
 
 fn goodness_of_fit<F: Fn(f64) -> f64>(ce: &[f64], qe: &[f64], predict: F) -> (f64, f64) {
     let n = len_f64(qe);
-    let mean_qe: f64 = qe.iter().sum::<f64>() / n;
+    let mean_qe: f64 = barracuda::stats::mean(qe);
 
     let ss_res: f64 = ce
         .iter()

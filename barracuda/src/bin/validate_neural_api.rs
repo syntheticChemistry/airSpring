@@ -28,8 +28,7 @@ use airspring_barracuda::eco::evapotranspiration::{
 };
 use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
 
-const BENCHMARK_JSON: &str =
-    include_str!("../../../control/neural_api/benchmark_neural_api.json");
+const BENCHMARK_JSON: &str = include_str!("../../../control/neural_api/benchmark_neural_api.json");
 
 fn validate_direct_compute(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Direct Compute — barracuda library");
@@ -43,11 +42,7 @@ fn validate_direct_compute(v: &mut ValidationHarness, benchmark: &serde_json::Va
             &format!("{method}: direct compute produces finite result"),
             computed.is_finite(),
         );
-        v.check_lower(
-            &format!("{method}: direct compute >= 0"),
-            computed,
-            0.0,
-        );
+        v.check_lower(&format!("{method}: direct compute >= 0"), computed, 0.0);
     }
 }
 
@@ -137,8 +132,17 @@ fn validate_substrate_detection(v: &mut ValidationHarness, benchmark: &serde_jso
             &format!("capability '{label}' is a recognized metalForge capability"),
             matches!(
                 label,
-                "f64" | "f32" | "reduce" | "neural-api" | "shader" | "quant" | "batch"
-                    | "weight-mut" | "cpu" | "simd" | "timestamps"
+                "f64"
+                    | "f32"
+                    | "reduce"
+                    | "neural-api"
+                    | "shader"
+                    | "quant"
+                    | "batch"
+                    | "weight-mut"
+                    | "cpu"
+                    | "simd"
+                    | "timestamps"
             ),
         );
     }

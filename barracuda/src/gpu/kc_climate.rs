@@ -1,0 +1,257 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+//! Batched Kc climate adjustment GPU orchestrator (Tier B — pending op absorption).
+//!
+//! FAO-56 Eq. 62 adjusts tabulated crop coefficients for local wind and humidity:
+//!
+//! ```text
+//! Kc_adj = Kc_table + [0.04(u2 - 2) - 0.004(RH_min - 45)] × (h/3)^0.3
+//! ```
+//!
+//! # Two API Levels
+//!
+//! | API | Device? | Backend |
+//! |-----|:-------:|---------|
+//! | [`BatchedKcClimate::compute`] | No | CPU via `eco::crop::adjust_kc_for_climate` |
+//! | [`BatchedKcClimate::compute_gpu`] | Yes | GPU via `BatchedElementwiseF64` (pending) |
+//!
+//! # GPU Readiness
+//!
+//! The CPU path is fully validated against FAO-56 Eq. 62. The GPU interface
+//! is wired and ready for `ToadStool` absorption. Once `ToadStool` adds
+//! `kc_climate_batch` (stride=4: `[kc_table, u2, rh_min, crop_height_m]`),
+//! the GPU path activates automatically.
+//!
+//! # Reference
+//!
+//! Allen RG et al. (1998) FAO Irrigation and Drainage Paper 56, Eq. 62.
+
+use std::sync::Arc;
+
+use barracuda::device::WgpuDevice;
+use barracuda::ops::batched_elementwise_f64::BatchedElementwiseF64;
+
+use crate::eco::crop;
+
+/// Per-day input for batched Kc climate adjustment.
+///
+/// Stride-4 layout for future GPU shader: `[kc_table, u2, rh_min, crop_height_m]`.
+#[derive(Debug, Clone, Copy)]
+pub struct KcClimateDay {
+    /// Tabulated Kc from FAO-56 Table 12.
+    pub kc_table: f64,
+    /// Mean wind speed at 2 m (m/s).
+    pub u2: f64,
+    /// Mean minimum relative humidity (%).
+    pub rh_min: f64,
+    /// Crop height (m).
+    pub crop_height_m: f64,
+}
+
+/// Backend selection for batched Kc climate adjustment.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum Backend {
+    /// Validated CPU path (always available).
+    #[default]
+    Cpu,
+    /// GPU path via `BatchedElementwiseF64` (pending `ToadStool` absorption).
+    Gpu,
+}
+
+/// Result from a batched Kc climate adjustment computation.
+#[derive(Debug, Clone)]
+pub struct BatchedKcClimateResult {
+    /// Adjusted Kc values, one per input row.
+    pub kc_values: Vec<f64>,
+    /// Which backend was actually used.
+    pub backend_used: Backend,
+}
+
+/// Batched Kc climate adjustment orchestrator.
+///
+/// Computes FAO-56 Eq. 62 for N station-days in a single call.
+/// Currently CPU-only (Tier B). When `ToadStool` absorbs the Kc climate op,
+/// the GPU engine activates automatically.
+pub struct BatchedKcClimate {
+    backend: Backend,
+    #[allow(dead_code)]
+    gpu_engine: Option<BatchedElementwiseF64>,
+}
+
+impl std::fmt::Debug for BatchedKcClimate {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("BatchedKcClimate")
+            .field("backend", &self.backend)
+            .field("gpu_engine", &self.gpu_engine.is_some())
+            .finish()
+    }
+}
+
+impl BatchedKcClimate {
+    /// Create with GPU engine (Tier B — currently falls back to CPU).
+    ///
+    /// Once `ToadStool` absorbs `kc_climate_batch` (stride=4), this path
+    /// will dispatch to the GPU shader automatically.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `BatchedElementwiseF64` cannot be initialised.
+    pub fn gpu(device: Arc<WgpuDevice>) -> crate::error::Result<Self> {
+        let engine = BatchedElementwiseF64::new(device)
+            .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
+        Ok(Self {
+            backend: Backend::Gpu,
+            gpu_engine: Some(engine),
+        })
+    }
+
+    /// Create with CPU fallback (always safe, no device needed).
+    #[must_use]
+    pub const fn cpu() -> Self {
+        Self {
+            backend: Backend::Cpu,
+            gpu_engine: None,
+        }
+    }
+
+    /// Compute Kc climate adjustment for a batch of station-days.
+    ///
+    /// Currently always uses CPU (Tier B — GPU pending). When `ToadStool`
+    /// absorbs the Kc climate op, this method will dispatch to GPU automatically.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the GPU dispatch fails (future).
+    pub fn compute_gpu(
+        &self,
+        inputs: &[KcClimateDay],
+    ) -> crate::error::Result<BatchedKcClimateResult> {
+        let kc_values = Self::compute_cpu_batch(inputs);
+        Ok(BatchedKcClimateResult {
+            kc_values,
+            backend_used: Backend::Cpu,
+        })
+    }
+
+    /// Compute Kc climate adjustment using the validated CPU path.
+    #[must_use]
+    pub fn compute(&self, inputs: &[KcClimateDay]) -> BatchedKcClimateResult {
+        BatchedKcClimateResult {
+            kc_values: Self::compute_cpu_batch(inputs),
+            backend_used: Backend::Cpu,
+        }
+    }
+
+    fn compute_cpu_batch(inputs: &[KcClimateDay]) -> Vec<f64> {
+        inputs
+            .iter()
+            .map(|day| {
+                crop::adjust_kc_for_climate(
+                    day.kc_table,
+                    day.u2,
+                    day.rh_min,
+                    day.crop_height_m,
+                )
+            })
+            .collect()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn sample_day() -> KcClimateDay {
+        KcClimateDay {
+            kc_table: 1.20,
+            u2: 2.0,
+            rh_min: 45.0,
+            crop_height_m: 2.0,
+        }
+    }
+
+    #[test]
+    fn single_day() {
+        let engine = BatchedKcClimate::cpu();
+        let result = engine.compute(&[sample_day()]);
+        assert_eq!(result.kc_values.len(), 1);
+        assert!(
+            (result.kc_values[0] - 1.20).abs() < 0.001,
+            "no adjustment at standard conditions: {:.3}",
+            result.kc_values[0]
+        );
+        assert_eq!(result.backend_used, Backend::Cpu);
+    }
+
+    #[test]
+    fn windy_drier() {
+        let engine = BatchedKcClimate::cpu();
+        let day = KcClimateDay {
+            kc_table: 1.20,
+            u2: 4.0,
+            rh_min: 30.0,
+            crop_height_m: 2.0,
+        };
+        let result = engine.compute(&[day]);
+        assert!(
+            result.kc_values[0] > 1.20,
+            "higher wind/lower RH increases Kc: {:.3}",
+            result.kc_values[0]
+        );
+    }
+
+    #[test]
+    fn multiple_days() {
+        let engine = BatchedKcClimate::cpu();
+        let inputs: Vec<KcClimateDay> = (0..100)
+            .map(|i| KcClimateDay {
+                rh_min: f64::from(i).mul_add(0.1, 40.0),
+                ..sample_day()
+            })
+            .collect();
+        let result = engine.compute(&inputs);
+        assert_eq!(result.kc_values.len(), 100);
+        for &val in &result.kc_values {
+            assert!(val >= 0.0, "Kc should be non-negative: {val}");
+        }
+    }
+
+    #[test]
+    fn empty_batch() {
+        let engine = BatchedKcClimate::cpu();
+        let result = engine.compute(&[]);
+        assert!(result.kc_values.is_empty());
+    }
+
+    #[test]
+    fn deterministic() {
+        let engine = BatchedKcClimate::cpu();
+        let inputs = vec![sample_day(); 50];
+        let r1 = engine.compute(&inputs);
+        let r2 = engine.compute(&inputs);
+        for (a, b) in r1.kc_values.iter().zip(&r2.kc_values) {
+            assert!((a - b).abs() < f64::EPSILON);
+        }
+    }
+
+    #[test]
+    fn compute_gpu_fallback() {
+        let engine = BatchedKcClimate::cpu();
+        let result = engine.compute_gpu(&[sample_day()]).unwrap();
+        assert_eq!(result.kc_values.len(), 1);
+        assert!((result.kc_values[0] - 1.20).abs() < 0.001);
+        assert_eq!(result.backend_used, Backend::Cpu);
+    }
+
+    #[test]
+    fn debug_format() {
+        let engine = BatchedKcClimate::cpu();
+        let dbg = format!("{engine:?}");
+        assert!(dbg.contains("BatchedKcClimate"));
+        assert!(dbg.contains("Cpu"));
+    }
+
+    #[test]
+    fn default_backend_is_cpu() {
+        assert_eq!(Backend::default(), Backend::Cpu);
+    }
+}

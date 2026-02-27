@@ -19,6 +19,31 @@
 
 use airspring_barracuda::validation::{self, ValidationHarness};
 
+const BENCHMARK_JSON: &str =
+    include_str!("../../../control/npu_eco/benchmark_npu_eco.json");
+
+fn validate_benchmark_provenance(v: &mut ValidationHarness) {
+    validation::section("Benchmark Provenance");
+
+    let bench =
+        validation::parse_benchmark_json(BENCHMARK_JSON).expect("benchmark JSON must parse");
+
+    let experiments = validation::json_object_opt(&bench, &["experiments"]);
+    v.check_bool("experiments has 3 entries", experiments.is_some_and(|e| e.len() == 3));
+
+    let binary = validation::json_str_opt(&bench, &["experiments", "028", "binary"]);
+    v.check_bool("028 binary == validate_npu_eco", binary == Some("validate_npu_eco"));
+
+    let name = validation::json_str_opt(&bench, &["experiments", "028", "name"]);
+    v.check_bool(
+        "028 name contains NPU Edge Inference",
+        name.is_some_and(|n| n.contains("NPU Edge Inference")),
+    );
+
+    let method = validation::json_str_opt(&bench, &["_provenance", "method"]);
+    v.check_bool("provenance method non-empty", method.is_some_and(|s| !s.is_empty()));
+}
+
 fn quantize_i8(val: f64, lo: f64, hi: f64) -> i8 {
     let normalized = ((val - lo) / (hi - lo)).clamp(0.0, 1.0);
     #[allow(clippy::cast_possible_truncation)]
@@ -259,6 +284,8 @@ fn main() {
     validate_crop_stress_features(&mut v);
     validate_irrigation_features(&mut v);
     validate_sensor_anomaly_features(&mut v);
+
+    validate_benchmark_provenance(&mut v);
 
     #[cfg(feature = "npu")]
     validate_npu_hardware(&mut v);

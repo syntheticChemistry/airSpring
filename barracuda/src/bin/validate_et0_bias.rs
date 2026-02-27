@@ -69,11 +69,7 @@ fn compute_bias_table(scenarios: &[serde_json::Value]) -> Vec<BiasRow> {
 
 fn correction_factor(table: &[BiasRow], method: fn(&BiasRow) -> f64) -> f64 {
     let pm_sum: f64 = table.iter().filter(|r| r.pm > 0.0).map(|r| r.pm).sum();
-    let method_sum: f64 = table
-        .iter()
-        .filter(|r| method(r) > 0.0)
-        .map(method)
-        .sum();
+    let method_sum: f64 = table.iter().filter(|r| method(r) > 0.0).map(method).sum();
     if method_sum > 0.0 {
         pm_sum / method_sum
     } else {
@@ -123,7 +119,10 @@ fn validate_correction_factors(v: &mut ValidationHarness, benchmark: &serde_json
             let corrected = val * factor;
             let err_pct = ((corrected - row.pm) / row.pm).abs() * 100.0;
             v.check_bool(
-                &format!("{}: {} corrected err={err_pct:.1}% < {tol_pct}%", row.label, name),
+                &format!(
+                    "{}: {} corrected err={err_pct:.1}% < {tol_pct}%",
+                    row.label, name
+                ),
                 err_pct < tol_pct,
             );
         }

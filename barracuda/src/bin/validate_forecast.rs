@@ -145,12 +145,11 @@ fn generate_forecast(
     (fc_et0, fc_precip)
 }
 
-#[allow(dead_code)]
 struct SimResult {
     total_eta_mm: f64,
     total_etc_mm: f64,
     total_irrigation_mm: f64,
-    total_dp_mm: f64,
+    _total_dp_mm: f64,
     stress_days: usize,
     yield_ratio: f64,
     eta_etc_ratio: f64,
@@ -242,7 +241,7 @@ fn simulate_forecast_scheduling(
         total_eta_mm: sum_actual,
         total_etc_mm: sum_potential,
         total_irrigation_mm: sum_irrig,
-        total_dp_mm: sum_dp,
+        _total_dp_mm: sum_dp,
         stress_days: stress_day_count,
         yield_ratio,
         eta_etc_ratio,
@@ -299,7 +298,7 @@ fn simulate_perfect_knowledge(et0: &[f64], precip: &[f64], kc: &[f64]) -> SimRes
         total_eta_mm: sum_actual,
         total_etc_mm: sum_potential,
         total_irrigation_mm: sum_irrig,
-        total_dp_mm: sum_dp,
+        _total_dp_mm: sum_dp,
         stress_days: stress_day_count,
         yield_ratio,
         eta_etc_ratio,
@@ -348,7 +347,7 @@ fn simulate_rainfed(et0: &[f64], precip: &[f64], kc: &[f64]) -> SimResult {
         total_eta_mm: sum_actual,
         total_etc_mm: sum_potential,
         total_irrigation_mm: 0.0,
-        total_dp_mm: sum_dp,
+        _total_dp_mm: sum_dp,
         stress_days: stress_day_count,
         yield_ratio,
         eta_etc_ratio,

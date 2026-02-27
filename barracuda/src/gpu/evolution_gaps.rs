@@ -17,14 +17,20 @@
 //! |---|---|---|---|---|
 //! | `eco::evapotranspiration` | `gpu::et0` | `batched_elementwise_f64.wgsl` (op=0) | ET₀ computation | A (ready) |
 //! | `eco::water_balance` | `gpu::water_balance` | `batched_elementwise_f64.wgsl` (op=1) | Daily water balance | B (needs `BatchedStatefulF64`) |
-//! | `eco::dual_kc` | `gpu::dual_kc` | Pending (op=8) | Crop coefficient | B (needs conditional shader) |
+//! | `eco::dual_kc` | `gpu::dual_kc` | `batched_elementwise_f64.wgsl` (op=8) | Crop coefficient | B→A (wired, pending absorption) |
 //! | `eco::soil_moisture` | `gpu::kriging` | `kriging_f64.wgsl` | Spatial interpolation | A (ready) |
 //! | `eco::richards` | `gpu::richards` | `pde_richards.wgsl` | PDE solve | A (ready) |
 //! | `eco::isotherm` | `gpu::isotherm` | `nelder_mead.wgsl` | Isotherm fitting | B (needs batch NM) |
 //! | `testutil` | `gpu::reduce` | `fused_map_reduce_f64.wgsl` | Seasonal stats | A (ready) |
+//! | `eco::sensor_calibration` | `gpu::sensor_calibration` | `batched_elementwise_f64.wgsl` (op=5) | Sensor VWC | B→A (wired, pending absorption) |
+//! | `eco::evapotranspiration` (HG) | `gpu::hargreaves` | `batched_elementwise_f64.wgsl` (op=6) | Hargreaves ET₀ | B→A (wired, pending absorption) |
+//! | `eco::crop` (Kc adj) | `gpu::kc_climate` | `batched_elementwise_f64.wgsl` (op=7) | Kc climate adjust | B→A (wired, pending absorption) |
+//! | `eco::*` (pipeline) | `gpu::seasonal_pipeline` | Chained ops 0→7→1→yield | Seasonal pipeline | B (CPU chained) |
+//! | `eco::*` (stream) | `gpu::atlas_stream` | `UnidirectionalPipeline` (pending) | Regional atlas | B (CPU chained) |
+//! | `eco::*` (MC) | `gpu::mc_et0` | `mc_et0_propagate_f64.wgsl` (pending) | MC uncertainty | B (wired, pending shader) |
 //! | `io::csv_ts` | `gpu::stream` | `moving_window.wgsl` | Stream smoothing | A (ready) |
 //!
-//! # Current Inventory (February 27, 2026 — v0.5.0, synced to `ToadStool` HEAD `e96576ee`)
+//! # Current Inventory (February 27, 2026 — v0.5.2, synced to `ToadStool` HEAD `e96576ee`)
 //!
 //! `ToadStool` S42–S68+: 170+ commits, 46+ cross-spring absorptions, 2,546+ tests, 703 WGSL shaders.
 //! All four airSpring issues (TS-001 through TS-004) resolved in **S54**.
@@ -184,9 +190,10 @@ pub enum Tier {
     C,
 }
 
-/// All known evolution gaps (23 entries — 11 Tier A integrated, 11 Tier B (5 wired), 1 Tier C).
+/// All known evolution gaps (23+6 entries — 11 Tier A integrated, 11 Tier B (9 wired) + 6 new orchestrators, 1 Tier C).
 ///
-/// v0.5.0: Synced to `ToadStool` S68+ (e96576ee). Universal precision architecture
+/// v0.5.2: 4 Tier B GPU orchestrators wired (ops 5-8), seasonal pipeline, atlas stream, MC GPU.
+/// Synced to `ToadStool` S68+ (e96576ee). Universal precision architecture
 /// means all GPU dispatch is precision-agnostic: f64 on Titan V, Df64 on consumer
 /// GPUs, f32 fallback. S60-S65 sovereign compiler regression **RESOLVED** (S66+).
 ///
@@ -286,29 +293,33 @@ pub const GAPS: &[EvolutionGap] = &[
         id: "dual_kc_batch",
         description: "Batched dual Kc (Ke + ETc) across M fields per timestep",
         tier: Tier::B,
-        toadstool_primitive: Some("batched_elementwise_f64.wgsl (custom op)"),
-        action: "GPU orchestrator wired (gpu::dual_kc), CPU validated — add Ke as op=8 in shader",
+        toadstool_primitive: Some("batched_elementwise_f64.wgsl (op=8, stride=9)"),
+        action: "WIRED (v0.5.2): gpu::dual_kc with_gpu() + step_gpu() — CPU fallback, \
+                 GPU auto-activates on ToadStool absorption of op=8",
     },
     EvolutionGap {
         id: "sensor_calibration_batch",
         description: "Batch sensor calibration (SoilWatch 10) via custom op",
         tier: Tier::B,
-        toadstool_primitive: Some("batched_elementwise_f64.wgsl (custom op)"),
-        action: "Add SoilWatch 10 calibration as op=5 in batched shader",
+        toadstool_primitive: Some("batched_elementwise_f64.wgsl (op=5, stride=1)"),
+        action: "WIRED (v0.5.2): gpu::sensor_calibration::BatchedSensorCal — CPU fallback, \
+                 GPU auto-activates on ToadStool absorption of op=5",
     },
     EvolutionGap {
         id: "hargreaves_batch",
         description: "Hargreaves ET₀ as batch GPU op (simpler than PM, fewer inputs)",
         tier: Tier::B,
-        toadstool_primitive: Some("batched_elementwise_f64.wgsl"),
-        action: "Add as op=6 — needs only tmax, tmin, Ra (no humidity/wind)",
+        toadstool_primitive: Some("batched_elementwise_f64.wgsl (op=6, stride=4)"),
+        action: "WIRED (v0.5.2): gpu::hargreaves::BatchedHargreaves — CPU fallback, \
+                 GPU auto-activates on ToadStool absorption of op=6",
     },
     EvolutionGap {
         id: "kc_climate_adjust",
         description: "Kc climate adjustment (FAO-56 Eq. 62) as batch GPU op",
         tier: Tier::B,
-        toadstool_primitive: Some("batched_elementwise_f64.wgsl"),
-        action: "Add as op=7 — function of wind speed and RH_min",
+        toadstool_primitive: Some("batched_elementwise_f64.wgsl (op=7, stride=4)"),
+        action: "WIRED (v0.5.2): gpu::kc_climate::BatchedKcClimate — CPU fallback, \
+                 GPU auto-activates on ToadStool absorption of op=7",
     },
     EvolutionGap {
         id: "nonlinear_solver",
@@ -350,6 +361,31 @@ pub const GAPS: &[EvolutionGap] = &[
         tier: Tier::B,
         toadstool_primitive: Some("optimize::nelder_mead, multi_start_nelder_mead, NelderMeadGpu"),
         action: "WIRED (v0.4.1): gpu::isotherm::{fit_*_nm, fit_*_global, fit_batch_global}",
+    },
+    // ── Tier B (new v0.5.2): Pipeline & streaming orchestrators ──────
+    EvolutionGap {
+        id: "seasonal_pipeline",
+        description: "Chained ET₀→Kc→WB→Yield pipeline (zero CPU round-trips target)",
+        tier: Tier::B,
+        toadstool_primitive: Some("PipelineBuilder (chains ops 0→7→1→yield)"),
+        action: "WIRED (v0.5.2): gpu::seasonal_pipeline::SeasonalPipeline — CPU chained, \
+                 GPU per-stage or fully pipelined when ToadStool absorbs all ops",
+    },
+    EvolutionGap {
+        id: "atlas_stream",
+        description: "Streaming multi-year regional ET₀ for 100+ stations",
+        tier: Tier::B,
+        toadstool_primitive: Some("UnidirectionalPipeline (fire-and-forget GPU streaming)"),
+        action: "WIRED (v0.5.2): gpu::atlas_stream::AtlasStream — CPU batch, \
+                 true GPU streaming when UnidirectionalPipeline available",
+    },
+    EvolutionGap {
+        id: "mc_et0_gpu",
+        description: "Monte Carlo ET₀ uncertainty propagation on GPU",
+        tier: Tier::B,
+        toadstool_primitive: Some("mc_et0_propagate_f64.wgsl (xoshiro + Box-Muller)"),
+        action: "WIRED (v0.5.2): gpu::mc_et0::mc_et0_gpu() — CPU fallback, \
+                 GPU activates when WGSL_MC_ET0_PROPAGATE_F64 wired",
     },
     // ── Tier C: Needs new primitive ──────────────────────────────────
     EvolutionGap {

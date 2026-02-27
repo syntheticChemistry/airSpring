@@ -27,14 +27,46 @@ use airspring_barracuda::validation::{self, json_f64, parse_benchmark_json, Vali
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/water_balance/benchmark_water_balance.json");
 
+/// Soil parameters for water balance validation (from benchmark JSON).
+struct SoilParams {
+    theta_fc: f64,
+    theta_wp: f64,
+    root_depth_mm: f64,
+    depletion_fraction_p: f64,
+}
+
+fn parse_soil_params(benchmark: &serde_json::Value, scenario: &str) -> SoilParams {
+    let base = ["validation_soil_parameters", scenario];
+    SoilParams {
+        theta_fc: json_f64(benchmark, &[base[0], base[1], "theta_fc"])
+            .unwrap_or_else(|| panic!("benchmark must have validation_soil_parameters.{scenario}.theta_fc")),
+        theta_wp: json_f64(benchmark, &[base[0], base[1], "theta_wp"])
+            .unwrap_or_else(|| panic!("benchmark must have validation_soil_parameters.{scenario}.theta_wp")),
+        root_depth_mm: json_f64(benchmark, &[base[0], base[1], "root_depth_mm"])
+            .unwrap_or_else(|| panic!("benchmark must have validation_soil_parameters.{scenario}.root_depth_mm")),
+        depletion_fraction_p: json_f64(benchmark, &[base[0], base[1], "depletion_fraction_p"])
+            .unwrap_or_else(|| panic!("benchmark must have validation_soil_parameters.{scenario}.depletion_fraction_p")),
+    }
+}
+
 /// Validate analytical stress coefficient (Ks) at key depletion points.
-fn validate_stress_coefficient(v: &mut ValidationHarness) {
+fn validate_stress_coefficient(v: &mut ValidationHarness, soil: &SoilParams) {
     validation::section("Stress coefficient Ks (FAO-56 Eq. 84, analytical)");
 
-    let state_fc = WaterBalanceState::new(0.33, 0.13, 600.0, 0.5);
+    let state_fc = WaterBalanceState::new(
+        soil.theta_fc,
+        soil.theta_wp,
+        soil.root_depth_mm,
+        soil.depletion_fraction_p,
+    );
     v.check_abs("Ks at FC", state_fc.stress_coefficient(), 1.0, f64::EPSILON);
 
-    let mut state_raw = WaterBalanceState::new(0.33, 0.13, 600.0, 0.5);
+    let mut state_raw = WaterBalanceState::new(
+        soil.theta_fc,
+        soil.theta_wp,
+        soil.root_depth_mm,
+        soil.depletion_fraction_p,
+    );
     state_raw.depletion = state_raw.raw;
     v.check_abs(
         "Ks at RAW boundary",
@@ -43,7 +75,12 @@ fn validate_stress_coefficient(v: &mut ValidationHarness) {
         f64::EPSILON,
     );
 
-    let mut state_mid = WaterBalanceState::new(0.33, 0.13, 600.0, 0.5);
+    let mut state_mid = WaterBalanceState::new(
+        soil.theta_fc,
+        soil.theta_wp,
+        soil.root_depth_mm,
+        soil.depletion_fraction_p,
+    );
     state_mid.depletion = f64::midpoint(state_mid.taw, state_mid.raw);
     v.check_abs(
         "Ks at mid-stress",
@@ -52,17 +89,27 @@ fn validate_stress_coefficient(v: &mut ValidationHarness) {
         tolerances::STRESS_COEFFICIENT.abs_tol,
     );
 
-    let mut state_wp = WaterBalanceState::new(0.33, 0.13, 600.0, 0.5);
+    let mut state_wp = WaterBalanceState::new(
+        soil.theta_fc,
+        soil.theta_wp,
+        soil.root_depth_mm,
+        soil.depletion_fraction_p,
+    );
     state_wp.depletion = state_wp.taw;
     v.check_abs("Ks at WP", state_wp.stress_coefficient(), 0.0, f64::EPSILON);
 }
 
 /// Validate mass balance for dry-down and irrigated scenarios.
-fn validate_mass_balance(v: &mut ValidationHarness) {
+fn validate_mass_balance(v: &mut ValidationHarness, soil: &SoilParams) {
     println!();
     validation::section("Mass balance: dry-down scenario (RO = 0, FAO-56 default)");
 
-    let state = WaterBalanceState::new(0.30, 0.10, 500.0, 0.5);
+    let state = WaterBalanceState::new(
+        soil.theta_fc,
+        soil.theta_wp,
+        soil.root_depth_mm,
+        soil.depletion_fraction_p,
+    );
     let initial_dep = state.depletion;
     let dry_inputs: Vec<DailyInput> = (0..30)
         .map(|_| DailyInput {
@@ -93,7 +140,12 @@ fn validate_mass_balance(v: &mut ValidationHarness) {
     println!();
     validation::section("Mass balance: irrigated scenario");
 
-    let state_irr = WaterBalanceState::new(0.30, 0.10, 500.0, 0.5);
+    let state_irr = WaterBalanceState::new(
+        soil.theta_fc,
+        soil.theta_wp,
+        soil.root_depth_mm,
+        soil.depletion_fraction_p,
+    );
     let initial_dep_irr = state_irr.depletion;
     let irr_inputs: Vec<DailyInput> = (0..60)
         .map(|day| DailyInput {
@@ -130,13 +182,21 @@ fn validate_mass_balance(v: &mut ValidationHarness) {
 }
 
 /// Validate Michigan summer seasonal simulation against benchmark ET range.
-fn validate_michigan(v: &mut ValidationHarness, mi_et_mid: f64, mi_et_tol: f64) {
+fn validate_michigan(v: &mut ValidationHarness, soil: &SoilParams, mi_et_mid: f64, mi_et_tol: f64) {
     println!();
     validation::section("Michigan summer (June–August, silt loam, rainfed)");
-    println!("  Soil: silt loam (FC=0.33, WP=0.13), 600 mm root zone");
+    println!(
+        "  Soil: silt loam (FC={}, WP={}), {} mm root zone",
+        soil.theta_fc, soil.theta_wp, soil.root_depth_mm
+    );
     println!("  Crop: mid-season corn (Kc=1.05)");
 
-    let mi_state = WaterBalanceState::new(0.33, 0.13, 600.0, 0.5);
+    let mi_state = WaterBalanceState::new(
+        soil.theta_fc,
+        soil.theta_wp,
+        soil.root_depth_mm,
+        soil.depletion_fraction_p,
+    );
     let mi_initial = mi_state.depletion;
     let mi_inputs: Vec<DailyInput> = (0..92)
         .map(|day| {
@@ -210,9 +270,13 @@ fn main() {
     let mi_et_mid = f64::midpoint(mi_et_low, mi_et_high);
     let mi_et_tol = (mi_et_high - mi_et_low) / 2.0;
 
-    validate_stress_coefficient(&mut v);
-    validate_mass_balance(&mut v);
-    validate_michigan(&mut v, mi_et_mid, mi_et_tol);
+    let soil_stress = parse_soil_params(&benchmark, "stress_coefficient");
+    let soil_mass = parse_soil_params(&benchmark, "mass_balance");
+    let soil_mi = parse_soil_params(&benchmark, "michigan_summer");
+
+    validate_stress_coefficient(&mut v, &soil_stress);
+    validate_mass_balance(&mut v, &soil_mass);
+    validate_michigan(&mut v, &soil_mi, mi_et_mid, mi_et_tol);
 
     v.finish();
 }

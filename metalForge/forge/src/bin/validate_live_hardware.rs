@@ -41,10 +41,7 @@ fn main() {
         println!(
             "    {} [{}] f64={} timestamps={}",
             gpu.identity.name,
-            gpu.identity
-                .backend
-                .as_deref()
-                .unwrap_or("?"),
+            gpu.identity.backend.as_deref().unwrap_or("?"),
             gpu.properties.has_f64,
             gpu.properties.has_timestamps,
         );
@@ -116,10 +113,7 @@ fn main() {
         println!(
             "    {} at {}",
             npu.identity.name,
-            npu.identity
-                .device_node
-                .as_deref()
-                .unwrap_or("?"),
+            npu.identity.device_node.as_deref().unwrap_or("?"),
         );
     }
 

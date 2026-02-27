@@ -482,7 +482,8 @@ mod tests {
 
     #[test]
     fn test_all_tolerances_have_justification() {
-        let comparison_tolerances = [
+        let all_tolerances: &[&Tolerance] = &[
+            // ET₀ and atmospheric (FAO-56)
             &ET0_SAT_VAPOUR_PRESSURE,
             &ET0_SLOPE_VAPOUR,
             &ET0_NET_RADIATION,
@@ -490,39 +491,57 @@ mod tests {
             &ET0_VPD,
             &ET0_COLD_CLIMATE,
             &PSYCHROMETRIC_CONSTANT,
+            // Water balance and soil moisture
             &WATER_BALANCE_MASS,
             &WATER_BALANCE_PER_STEP,
             &STRESS_COEFFICIENT,
             &SOIL_HYDRAULIC,
             &SOIL_ROUNDTRIP,
+            // Richards equation
             &RICHARDS_STEADY,
             &RICHARDS_TRANSIENT,
+            // Isotherm fitting
             &ISOTHERM_PARAMETER,
             &ISOTHERM_PREDICTION,
             &ISOTHERM_MEAN_RESIDUAL,
+            // GPU/CPU cross-validation
             &GPU_CPU_CROSS,
             &KRIGING_INTERPOLATION,
             &SEASONAL_REDUCTION,
             &IOT_STREAM_SMOOTHING,
-            &IOT_TEMPERATURE_MEAN,
-            &IOT_TEMPERATURE_EXTREMES,
-            &IOT_PAR_MAX,
-            &IOT_CSV_ROUNDTRIP,
+            // Sensor calibration
             &SENSOR_EXACT,
             &IRRIGATION_DEPTH,
-            &WATER_SAVINGS,
+            // Thornthwaite, GDD, pedotransfer
             &THORNTHWAITE_ANALYTICAL,
             &GDD_EXACT,
             &PEDOTRANSFER_MOISTURE,
             &PEDOTRANSFER_KSAT,
+            // Per-step and sensor-specific
             &TOPP_EQUATION,
             &ANALYTICAL_COMPUTATION,
+            // Statistical quality criteria
+            &IA_CRITERION,
+            &P_SIGNIFICANCE,
+            &WATER_SAVINGS,
+            // Cross-method and cross-station
             &CROSS_VALIDATION,
             &ET0_SAT_VAPOUR_PRESSURE_WIDE,
+            &R2_MINIMUM,
+            &RMSE_MAXIMUM,
             &ET0_CROSS_METHOD_PCT,
+            // IoT sensor data validation
+            &IOT_TEMPERATURE_MEAN,
+            &IOT_TEMPERATURE_EXTREMES,
+            &IOT_PAR_MAX,
+            &IOT_CSV_ROUNDTRIP,
         ];
-        for tol in &comparison_tolerances {
-            assert!(!tol.name.is_empty(), "tolerance must have a name");
+        for tol in all_tolerances {
+            assert!(
+                !tol.name.is_empty(),
+                "tolerance {} must have a name",
+                tol.name
+            );
             assert!(
                 !tol.justification.is_empty(),
                 "tolerance {} must have justification",
@@ -530,16 +549,11 @@ mod tests {
             );
             assert!(tol.abs_tol > 0.0, "{}: abs_tol must be positive", tol.name);
         }
-
-        let threshold_criteria = [&IA_CRITERION, &P_SIGNIFICANCE, &R2_MINIMUM, &RMSE_MAXIMUM];
-        for tol in &threshold_criteria {
-            assert!(!tol.name.is_empty(), "criterion must have a name");
-            assert!(
-                !tol.justification.is_empty(),
-                "criterion {} must have justification",
-                tol.name
-            );
-            assert!(tol.abs_tol > 0.0, "{}: abs_tol must be positive", tol.name);
-        }
+        // Ensure we cover every defined tolerance (41 total)
+        assert_eq!(
+            all_tolerances.len(),
+            41,
+            "test must include every tolerance constant defined in this file"
+        );
     }
 }

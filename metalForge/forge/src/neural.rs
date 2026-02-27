@@ -80,6 +80,7 @@ impl NeuralBridge {
     /// Discover the Neural API socket using biomeOS 5-tier resolution.
     ///
     /// Returns `None` if biomeOS is not running (no socket found).
+    #[must_use]
     pub fn discover() -> Option<Self> {
         let path = resolve_socket()?;
         Some(Self {
@@ -131,10 +132,7 @@ impl NeuralBridge {
     /// # Errors
     ///
     /// Returns `NeuralError` on connection or protocol failure.
-    pub fn discover_capability(
-        &self,
-        capability: &str,
-    ) -> Result<serde_json::Value, NeuralError> {
+    pub fn discover_capability(&self, capability: &str) -> Result<serde_json::Value, NeuralError> {
         let id = REQUEST_ID.fetch_add(1, Ordering::Relaxed);
         let request = serde_json::json!({
             "jsonrpc": "2.0",
@@ -169,12 +167,8 @@ impl NeuralBridge {
         &self.socket_path
     }
 
-    fn send_request(
-        &self,
-        request: &serde_json::Value,
-    ) -> Result<serde_json::Value, NeuralError> {
-        let mut stream = UnixStream::connect(&self.socket_path)
-            .map_err(NeuralError::Connection)?;
+    fn send_request(&self, request: &serde_json::Value) -> Result<serde_json::Value, NeuralError> {
+        let mut stream = UnixStream::connect(&self.socket_path).map_err(NeuralError::Connection)?;
         stream
             .set_read_timeout(Some(self.timeout))
             .map_err(NeuralError::Connection)?;
@@ -182,8 +176,8 @@ impl NeuralBridge {
             .set_write_timeout(Some(self.timeout))
             .map_err(NeuralError::Connection)?;
 
-        let mut payload = serde_json::to_string(request)
-            .map_err(|e| NeuralError::Json(e.to_string()))?;
+        let mut payload =
+            serde_json::to_string(request).map_err(|e| NeuralError::Json(e.to_string()))?;
         payload.push('\n');
         stream
             .write_all(payload.as_bytes())
@@ -255,7 +249,9 @@ fn resolve_socket() -> Option<PathBuf> {
 
     // Tier 3: /run/user/{uid} — derive from XDG_RUNTIME_DIR or procfs
     let uid = uid_from_runtime_dir();
-    let p = PathBuf::from(format!("/run/user/{uid}/biomeos/neural-api-{family_id}.sock"));
+    let p = PathBuf::from(format!(
+        "/run/user/{uid}/biomeos/neural-api-{family_id}.sock"
+    ));
     if p.exists() {
         return Some(p);
     }

@@ -53,15 +53,8 @@ fn validate_full_weather(v: &mut ValidationHarness, benchmark: &serde_json::Valu
         let result = et0_ensemble(&input);
         let tol = json_field(tc, "tolerance");
 
-        v.check_bool(
-            &format!("{label}: n_methods >= 5"),
-            result.n_methods >= 5,
-        );
-        v.check_lower(
-            &format!("{label}: consensus > 0"),
-            result.consensus,
-            0.0,
-        );
+        v.check_bool(&format!("{label}: n_methods >= 5"), result.n_methods >= 5);
+        v.check_lower(&format!("{label}: consensus > 0"), result.consensus, 0.0);
 
         if let Some(pm_ref) = opt_field(tc, "pm_reference") {
             v.check_abs(
@@ -82,14 +75,8 @@ fn validate_temp_only(v: &mut ValidationHarness, benchmark: &serde_json::Value) 
         let input = build_input(tc);
         let result = et0_ensemble(&input);
 
-        v.check_bool(
-            &format!("{label}: n_methods >= 2"),
-            result.n_methods >= 2,
-        );
-        v.check_bool(
-            &format!("{label}: consensus >= 0"),
-            result.consensus >= 0.0,
-        );
+        v.check_bool(&format!("{label}: n_methods >= 2"), result.n_methods >= 2);
+        v.check_bool(&format!("{label}: consensus >= 0"), result.consensus >= 0.0);
         v.check_bool(
             &format!("{label}: PM is NaN (no radiation data)"),
             result.pm.is_nan(),
@@ -108,11 +95,7 @@ fn validate_method_ranking(v: &mut ValidationHarness, benchmark: &serde_json::Va
 
         match check {
             "spread_positive" => {
-                v.check_lower(
-                    &format!("{label}: spread > 0"),
-                    result.spread,
-                    0.0,
-                );
+                v.check_lower(&format!("{label}: spread > 0"), result.spread, 0.0);
             }
             "consensus_in_range" => {
                 let methods = [
@@ -123,8 +106,7 @@ fn validate_method_ranking(v: &mut ValidationHarness, benchmark: &serde_json::Va
                     result.turc,
                     result.hamon,
                 ];
-                let valid: Vec<f64> =
-                    methods.iter().copied().filter(|x| x.is_finite()).collect();
+                let valid: Vec<f64> = methods.iter().copied().filter(|x| x.is_finite()).collect();
                 let min_v = valid.iter().copied().fold(f64::INFINITY, f64::min);
                 let max_v = valid.iter().copied().fold(f64::NEG_INFINITY, f64::max);
                 v.check_bool(

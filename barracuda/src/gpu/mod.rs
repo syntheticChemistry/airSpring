@@ -11,10 +11,12 @@
 //! |--------|---------|---------|
 //! | [`device_info`] | Precision probing, `Fp64Strategy`, provenance | Device + cross-spring |
 //! | [`et0`] | Batched FAO-56 ET₀ for `N` station-days | **GPU-first** (`BatchedElementwiseF64`) |
+//! | [`hargreaves`] | Batched Hargreaves-Samani ET₀ (temp-only) | **CPU** (Tier B → op=6 pending) |
 //! | [`water_balance`] | Batched season simulation + GPU step | **GPU-step** + CPU season |
 //! | [`dual_kc`] | Batched dual Kc (`Ke` + `ETc`) for M fields | **CPU** (Tier B → GPU pending) |
 //! | [`kriging`] | Soil moisture spatial interpolation | **Integrated** (`KrigingF64`) |
 //! | [`reduce`] | Seasonal aggregation statistics | **GPU** for N≥1024 (`FusedMapReduceF64`) |
+//! | [`sensor_calibration`] | Batched `SoilWatch` 10 VWC calibration | **CPU** (Tier B → op=5 pending) |
 //! | [`stream`] | `IoT` stream smoothing (sliding window) | **GPU** (`MovingWindowStats`, wetSpring) |
 //! | [`richards`] | 1D Richards equation (vadose zone) | **Wired** (`pde::richards`) |
 //! | [`isotherm`] | Batch isotherm fitting (biochar) | **Wired** (`nelder_mead` + `multi_start`) |
@@ -65,14 +67,19 @@
 //! native pair  down   down
 //! ```
 
+pub mod atlas_stream;
 pub mod device_info;
 pub mod dual_kc;
 pub mod et0;
 pub mod evolution_gaps;
+pub mod hargreaves;
 pub mod isotherm;
+pub mod kc_climate;
 pub mod kriging;
 pub mod mc_et0;
 pub mod reduce;
 pub mod richards;
+pub mod seasonal_pipeline;
+pub mod sensor_calibration;
 pub mod stream;
 pub mod water_balance;

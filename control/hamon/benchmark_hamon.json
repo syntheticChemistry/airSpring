@@ -2,7 +2,7 @@
   "_provenance": {
     "method": "Hamon (1961) temperature-based potential evapotranspiration",
     "baseline_script": "control/hamon/hamon_pet.py",
-    "baseline_commit": "pending",
+    "baseline_commit": "c080031",
     "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
     "baseline_command": "python3 control/hamon/hamon_pet.py",
     "python_version": "3.10",

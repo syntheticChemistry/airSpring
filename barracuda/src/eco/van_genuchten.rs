@@ -148,3 +148,165 @@ pub fn inverse_van_genuchten_h(
 
     brent(f, H_CLIP_MIN, -1e-6, 1e-8, 100).ok().map(|r| r.root)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Carsel & Parrish (1988) WRR 24:755-769 Table 1 — sand.
+    const SAND: VanGenuchtenParams = VanGenuchtenParams {
+        theta_r: 0.045,
+        theta_s: 0.43,
+        alpha: 0.145,
+        n_vg: 2.68,
+        ks: 712.8,
+    };
+
+    /// Carsel & Parrish (1988) WRR 24:755-769 Table 1 — loam.
+    const LOAM: VanGenuchtenParams = VanGenuchtenParams {
+        theta_r: 0.078,
+        theta_s: 0.43,
+        alpha: 0.036,
+        n_vg: 1.56,
+        ks: 24.96,
+    };
+
+    /// Carsel & Parrish (1988) WRR 24:755-769 Table 1 — clay.
+    const CLAY: VanGenuchtenParams = VanGenuchtenParams {
+        theta_r: 0.068,
+        theta_s: 0.38,
+        alpha: 0.008,
+        n_vg: 1.09,
+        ks: 4.8,
+    };
+
+    const TOL: f64 = 1e-10;
+
+    #[test]
+    fn theta_at_saturation_returns_theta_s() {
+        let p = SAND;
+        let theta = van_genuchten_theta(0.0, p.theta_r, p.theta_s, p.alpha, p.n_vg);
+        assert!(
+            (theta - p.theta_s).abs() < TOL,
+            "θ(h=0) = {theta} should equal θ_s = {}",
+            p.theta_s
+        );
+    }
+
+    #[test]
+    fn theta_at_very_negative_h_returns_near_theta_r() {
+        let p = SAND;
+        let h = -1e4;
+        let theta = van_genuchten_theta(h, p.theta_r, p.theta_s, p.alpha, p.n_vg);
+        assert!(
+            (theta - p.theta_r).abs() < 0.01,
+            "θ(h={h}) = {theta} should be ≈ θ_r = {}",
+            p.theta_r
+        );
+    }
+
+    #[test]
+    fn k_at_saturation_returns_k_sat() {
+        let p = SAND;
+        let k = van_genuchten_k(0.0, p.ks, p.theta_r, p.theta_s, p.alpha, p.n_vg);
+        assert!(
+            (k - p.ks).abs() < TOL,
+            "K(h=0) = {k} should equal Ks = {}",
+            p.ks
+        );
+    }
+
+    #[test]
+    fn k_at_very_dry_returns_near_zero() {
+        let p = SAND;
+        let h = -1e4;
+        let k = van_genuchten_k(h, p.ks, p.theta_r, p.theta_s, p.alpha, p.n_vg);
+        assert!(k < 1e-6, "K(h={h}) = {k} should be near zero");
+    }
+
+    #[test]
+    fn inverse_h_round_trip() {
+        let p = SAND;
+        let theta_mid = f64::midpoint(p.theta_r, p.theta_s);
+        let h = inverse_van_genuchten_h(theta_mid, p.theta_r, p.theta_s, p.alpha, p.n_vg)
+            .expect("inverse should succeed for θ in (θr, θs)");
+        let theta_back = van_genuchten_theta(h, p.theta_r, p.theta_s, p.alpha, p.n_vg);
+        assert!(
+            (theta_back - theta_mid).abs() < 1e-6,
+            "round-trip: θ={theta_mid} → h={h} → θ={theta_back}"
+        );
+    }
+
+    #[test]
+    fn carsel_parrish_sand_retention() {
+        let p = SAND;
+        assert!(
+            (van_genuchten_theta(-10.0, p.theta_r, p.theta_s, p.alpha, p.n_vg) - 0.2143).abs()
+                < 0.001,
+            "sand θ(-10) ≈ 0.2143"
+        );
+        assert!(
+            (van_genuchten_theta(-100.0, p.theta_r, p.theta_s, p.alpha, p.n_vg) - 0.0493).abs()
+                < 0.001,
+            "sand θ(-100) ≈ 0.0493"
+        );
+    }
+
+    #[test]
+    fn carsel_parrish_loam_retention() {
+        let p = LOAM;
+        let theta_0 = van_genuchten_theta(0.0, p.theta_r, p.theta_s, p.alpha, p.n_vg);
+        assert!((theta_0 - p.theta_s).abs() < TOL, "loam θ(0) = θ_s");
+        let theta_dry = van_genuchten_theta(-500.0, p.theta_r, p.theta_s, p.alpha, p.n_vg);
+        assert!(
+            theta_dry > p.theta_r && theta_dry < p.theta_s,
+            "loam θ(-500) in (θr, θs)"
+        );
+    }
+
+    #[test]
+    fn carsel_parrish_clay_retention() {
+        let p = CLAY;
+        assert!(
+            (van_genuchten_theta(-100.0, p.theta_r, p.theta_s, p.alpha, p.n_vg) - 0.3654).abs()
+                < 0.005,
+            "clay θ(-100) ≈ 0.3654"
+        );
+    }
+
+    #[test]
+    fn monotonicity_increasing_h_gives_increasing_theta() {
+        let p = SAND;
+        let heads: [f64; 8] = [-5000.0, -1000.0, -500.0, -100.0, -50.0, -10.0, -1.0, 0.0];
+        let thetas: Vec<f64> = heads
+            .iter()
+            .map(|&h| van_genuchten_theta(h, p.theta_r, p.theta_s, p.alpha, p.n_vg))
+            .collect();
+        for i in 1..thetas.len() {
+            assert!(
+                thetas[i] >= thetas[i - 1],
+                "monotonicity: θ(h={}) = {} should be ≥ θ(h={}) = {}",
+                heads[i],
+                thetas[i],
+                heads[i - 1],
+                thetas[i - 1]
+            );
+        }
+    }
+
+    #[test]
+    fn boundary_se_theta_s_equals_one() {
+        let p = SAND;
+        let theta_s = p.theta_s;
+        let se = (theta_s - p.theta_r) / (p.theta_s - p.theta_r);
+        assert!((se - 1.0).abs() < TOL, "Se(θ_s) = {se} should equal 1.0");
+    }
+
+    #[test]
+    fn boundary_se_theta_r_equals_zero() {
+        let p = SAND;
+        let theta_r = p.theta_r;
+        let se = (theta_r - p.theta_r) / (p.theta_s - p.theta_r);
+        assert!(se.abs() < TOL, "Se(θ_r) = {se} should equal 0.0");
+    }
+}

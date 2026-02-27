@@ -22,6 +22,12 @@ References:
   - de Bruin HAR (1987) From Penman to Makkink, TNO, The Hague, pp 5-31
   - Xu CY, Singh VP (2002) Water Resources Management 16:197-219
 
+Provenance:
+  Baseline commit: c080031
+  Benchmark output: control/makkink/benchmark_makkink.json
+  Reproduction: python control/makkink/makkink_et0.py
+  Created: 2026-02-27
+
 Data: Analytical (published equations). Open-Meteo for cross-comparison.
 """
 import json

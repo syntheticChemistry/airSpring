@@ -40,8 +40,16 @@ fn main() {
     print_provenance_report();
 
     let device = device_info::try_f64_device();
+    print_device_report(device.as_ref());
 
-    if let Some(ref dev) = device {
+    let (pass, fail) = run_all_benchmarks(device.as_ref());
+    print_summary(pass, fail);
+
+    std::process::exit(i32::from(fail > 0));
+}
+
+fn print_device_report(device: Option<&Arc<WgpuDevice>>) {
+    if let Some(dev) = device {
         let report = device_info::probe_device(dev);
         println!("\n── Device Precision Report ──────────────────────────────────");
         println!("{report}");
@@ -49,134 +57,191 @@ fn main() {
     } else {
         println!("  [No f64-capable GPU found — CPU-only benchmarks]\n");
     }
+}
 
-    println!("── Benchmark Results ────────────────────────────────────────\n");
+fn run_bench(
+    pass: &mut u32,
+    fail: &mut u32,
+    name: &str,
+    origin: &str,
+    body: impl FnOnce() -> bool,
+) {
+    let t0 = Instant::now();
+    let ok = body();
+    let elapsed = t0.elapsed();
+    let status = if ok { "PASS" } else { "FAIL" };
+    if ok {
+        *pass += 1;
+    } else {
+        *fail += 1;
+    }
+    println!(
+        "  [{status}] {:<40} {:>8.2}ms  ({})",
+        name,
+        elapsed.as_secs_f64() * 1000.0,
+        origin
+    );
+}
 
+fn run_all_benchmarks(device: Option<&Arc<WgpuDevice>>) -> (u32, u32) {
     let mut pass = 0u32;
     let mut fail = 0u32;
 
-    macro_rules! bench {
-        ($name:expr, $origin:expr, $body:expr) => {{
-            let t0 = Instant::now();
-            let ok = $body;
-            let elapsed = t0.elapsed();
-            let status = if ok { "PASS" } else { "FAIL" };
-            if ok {
-                pass += 1;
-            } else {
-                fail += 1;
-            }
-            println!(
-                "  [{status}] {:<40} {:>8.2}ms  ({})",
-                $name,
-                elapsed.as_secs_f64() * 1000.0,
-                $origin
-            );
-        }};
-    }
+    println!("── Benchmark Results ────────────────────────────────────────\n");
 
-    // ── ET₀ (hotSpring math_f64.wgsl → airSpring domain) ────────────────
-    bench!(
+    run_et0_benchmarks(device, &mut pass, &mut fail);
+    run_water_balance_benchmarks(device, &mut pass, &mut fail);
+    run_reduce_benchmarks(device, &mut pass, &mut fail);
+    run_stream_benchmarks(device, &mut pass, &mut fail);
+    run_richards_benchmarks(&mut pass, &mut fail);
+    run_isotherm_benchmarks(&mut pass, &mut fail);
+    run_mc_et0_benchmarks(&mut pass, &mut fail);
+
+    (pass, fail)
+}
+
+fn run_et0_benchmarks(device: Option<&Arc<WgpuDevice>>, pass: &mut u32, fail: &mut u32) {
+    run_bench(
+        pass,
+        fail,
         "ET₀ CPU baseline (N=365)",
         "hotSpring math_f64",
-        bench_et0_cpu(365)
+        || bench_et0_cpu(365),
     );
-    bench!(
+    run_bench(
+        pass,
+        fail,
         "ET₀ CPU batch (N=10000)",
         "hotSpring math_f64",
-        bench_et0_cpu(10_000)
+        || bench_et0_cpu(10_000),
     );
-    if let Some(ref dev) = device {
-        bench!(
+    if let Some(dev) = device {
+        run_bench(
+            pass,
+            fail,
             "ET₀ GPU (N=365)",
             "hotSpring→ToadStool→GPU",
-            bench_et0_gpu(dev, 365)
+            || bench_et0_gpu(dev, 365),
         );
-        bench!(
+        run_bench(
+            pass,
+            fail,
             "ET₀ GPU (N=10000)",
             "hotSpring→ToadStool→GPU",
-            bench_et0_gpu(dev, 10_000)
+            || bench_et0_gpu(dev, 10_000),
         );
-        bench!(
+        run_bench(
+            pass,
+            fail,
             "ET₀ CPU↔GPU parity (N=200)",
             "cross-spring validation",
-            bench_et0_parity(dev, 200)
+            || bench_et0_parity(dev, 200),
         );
     }
+}
 
-    // ── Water Balance (airSpring domain + hotSpring precision) ────────────
-    bench!(
+fn run_water_balance_benchmarks(device: Option<&Arc<WgpuDevice>>, pass: &mut u32, fail: &mut u32) {
+    run_bench(
+        pass,
+        fail,
         "Water Balance CPU season (180d)",
         "airSpring domain",
-        bench_wb_cpu_season(180)
+        || bench_wb_cpu_season(180),
     );
-    if let Some(ref dev) = device {
-        bench!(
+    if let Some(dev) = device {
+        run_bench(
+            pass,
+            fail,
             "Water Balance GPU step (N=500)",
             "airSpring→ToadStool→GPU",
-            bench_wb_gpu_step(dev, 500)
+            || bench_wb_gpu_step(dev, 500),
         );
     }
+}
 
-    // ── Seasonal Reduce (wetSpring fused_map_reduce) ─────────────────────
-    if let Some(ref dev) = device {
-        bench!(
+fn run_reduce_benchmarks(device: Option<&Arc<WgpuDevice>>, pass: &mut u32, fail: &mut u32) {
+    if let Some(dev) = device {
+        run_bench(
+            pass,
+            fail,
             "Seasonal Reduce GPU (N=2000)",
             "wetSpring→ToadStool→GPU",
-            bench_reduce_gpu(dev, 2000)
+            || bench_reduce_gpu(dev, 2000),
         );
     }
+}
 
-    // ── Stream Smoothing (wetSpring moving_window) ───────────────────────
-    bench!(
+fn run_stream_benchmarks(device: Option<&Arc<WgpuDevice>>, pass: &mut u32, fail: &mut u32) {
+    run_bench(
+        pass,
+        fail,
         "Stream Smoothing CPU (N=500, w=24)",
         "wetSpring moving_window",
-        bench_stream_cpu(500, 24)
+        || bench_stream_cpu(500, 24),
     );
-    if let Some(ref dev) = device {
-        bench!(
+    if let Some(dev) = device {
+        run_bench(
+            pass,
+            fail,
             "Stream Smoothing GPU (N=500, w=24)",
             "wetSpring→ToadStool→GPU",
-            bench_stream_gpu(dev, 500, 24)
+            || bench_stream_gpu(dev, 500, 24),
         );
     }
+}
 
-    // ── Richards PDE (airSpring→upstream S40, hotSpring CN f64) ──────────
-    bench!(
+fn run_richards_benchmarks(pass: &mut u32, fail: &mut u32) {
+    run_bench(
+        pass,
+        fail,
         "Richards CPU (sand, 0.1d)",
         "airSpring→ToadStool S40",
-        bench_richards_cpu()
+        bench_richards_cpu,
     );
-    bench!(
+    run_bench(
+        pass,
+        fail,
         "Richards upstream CN (sand, 0.1d)",
         "hotSpring CN f64 S62",
-        bench_richards_upstream()
+        bench_richards_upstream,
     );
-    bench!(
+    run_bench(
+        pass,
+        fail,
         "Richards CN diffusion (sand, 0.1d)",
         "hotSpring CN f64 S62",
-        bench_richards_cn_diffusion()
+        bench_richards_cn_diffusion,
     );
+}
 
-    // ── Isotherm Fitting (neuralSpring nelder_mead) ──────────────────────
-    bench!(
+fn run_isotherm_benchmarks(pass: &mut u32, fail: &mut u32) {
+    run_bench(
+        pass,
+        fail,
         "Isotherm NM (Langmuir, wood char)",
         "neuralSpring nelder_mead",
-        bench_isotherm_nm()
+        bench_isotherm_nm,
     );
-    bench!(
+    run_bench(
+        pass,
+        fail,
         "Isotherm Global (LHS, 8 starts)",
         "neuralSpring multi_start_NM",
-        bench_isotherm_global()
+        bench_isotherm_global,
     );
+}
 
-    // ── MC ET₀ (groundSpring MC + hotSpring norm_ppf) ────────────────────
-    bench!(
+fn run_mc_et0_benchmarks(pass: &mut u32, fail: &mut u32) {
+    run_bench(
+        pass,
+        fail,
         "MC ET₀ CPU (N=5000, parametric CI)",
         "groundSpring MC + hotSpring norm_ppf",
-        bench_mc_et0()
+        bench_mc_et0,
     );
+}
 
+fn print_summary(pass: u32, fail: u32) {
     println!("\n── Summary ─────────────────────────────────────────────────\n");
     println!("  Total:  {} benchmarks", pass + fail);
     println!("  PASS:   {pass}");
@@ -185,8 +250,6 @@ fn main() {
         println!("\n  All cross-spring GPU paths validated.");
     }
     println!();
-
-    std::process::exit(i32::from(fail > 0));
 }
 
 fn print_provenance_report() {
@@ -257,7 +320,7 @@ fn sample_et0_input(doy: u32) -> DailyEt0Input {
 fn bench_et0_cpu(n: usize) -> bool {
     let engine = BatchedEt0::cpu();
     let inputs: Vec<DailyEt0Input> = (0..n)
-        .map(|i| sample_et0_input(1 + (i as u32 % 365)))
+        .map(|i| sample_et0_input(1 + (u32::try_from(i).unwrap_or(0) % 365)))
         .collect();
     let result = engine.compute(&inputs);
     result.et0_values.len() == n && result.et0_values.iter().all(|v| v.is_finite() && *v > 0.0)
@@ -272,13 +335,14 @@ fn bench_et0_gpu(device: &Arc<WgpuDevice>, n: usize) -> bool {
         }
     };
     let inputs: Vec<StationDay> = (0..n)
-        .map(|i| sample_station_day(1 + (i as u32 % 365)))
+        .map(|i| sample_station_day(1 + (u32::try_from(i).unwrap_or(0) % 365)))
         .collect();
     match engine.compute_gpu(&inputs) {
         Ok(result) => {
             // NVK polyfill exp/log can produce small negative ET₀ for cold winter days
             let all_finite = result.et0_values.iter().all(|v| v.is_finite());
-            let mean_positive = result.et0_values.iter().sum::<f64>() / n as f64 > 0.0;
+            let n_f64 = f64::from(u32::try_from(n).unwrap_or(0));
+            let mean_positive = result.et0_values.iter().sum::<f64>() / n_f64 > 0.0;
             result.et0_values.len() == n && all_finite && mean_positive
         }
         Err(e) => {
@@ -289,21 +353,18 @@ fn bench_et0_gpu(device: &Arc<WgpuDevice>, n: usize) -> bool {
 }
 
 fn bench_et0_parity(device: &Arc<WgpuDevice>, n: usize) -> bool {
-    let gpu_engine = match BatchedEt0::gpu(Arc::clone(device)) {
-        Ok(e) => e,
-        Err(_) => return false,
+    let Ok(gpu_engine) = BatchedEt0::gpu(Arc::clone(device)) else {
+        return false;
     };
     let cpu_engine = BatchedEt0::cpu();
     let inputs: Vec<StationDay> = (0..n)
-        .map(|i| sample_station_day(100 + i as u32))
+        .map(|i| sample_station_day(100 + u32::try_from(i).unwrap_or(0)))
         .collect();
-    let gpu_result = match gpu_engine.compute_gpu(&inputs) {
-        Ok(r) => r,
-        Err(_) => return false,
+    let Ok(gpu_result) = gpu_engine.compute_gpu(&inputs) else {
+        return false;
     };
-    let cpu_result = match cpu_engine.compute_gpu(&inputs) {
-        Ok(r) => r,
-        Err(_) => return false,
+    let Ok(cpu_result) = cpu_engine.compute_gpu(&inputs) else {
+        return false;
     };
     if gpu_result.et0_values.len() != cpu_result.et0_values.len() {
         return false;

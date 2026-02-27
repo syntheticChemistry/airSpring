@@ -66,6 +66,7 @@ impl std::fmt::Display for DevicePrecisionReport {
 ///
 /// Combines `GpuDriverProfile` (for `Fp64Strategy`) with `probe_f64_builtins`
 /// (for native f64 builtin availability).
+#[must_use]
 pub fn probe_device(device: &WgpuDevice) -> DevicePrecisionReport {
     let profile = GpuDriverProfile::from_device(device);
     let builtins = pollster::block_on(barracuda::device::probe::probe_f64_builtins(device));
@@ -106,7 +107,9 @@ pub fn try_f64_device() -> Option<Arc<WgpuDevice>> {
 pub const PROVENANCE: &[ShaderProvenance] = &[
     ShaderProvenance {
         shader: "math_f64.wgsl",
-        primitives: &["pow_f64", "exp_f64", "log_f64", "sin_f64", "cos_f64", "acos_f64"],
+        primitives: &[
+            "pow_f64", "exp_f64", "log_f64", "sin_f64", "cos_f64", "acos_f64",
+        ],
         origin: "hotSpring",
         domain: "Lattice QCD f64 precision",
         evolved_by: &["airSpring (TS-001 pow_f64 fix, TS-003 acos precision)"],

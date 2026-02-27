@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-02-27 (v0.5.1 — 45 experiments, 1109 Python + 651 Rust tests + 1024 validation + 1393 atlas checks, 50 barracuda + 4 forge binaries, **25.9× Rust-vs-Python speedup** (8/8 parity), **Titan V GPU live dispatch** (24/24 PASS), AKD1000 NPU live, metalForge live hardware probe (5 substrates), CPU↔GPU 0.04% parity, clippy pedantic, 7 ET₀ methods, Anderson cross-spring coupling)
+**Updated**: 2026-02-27 (v0.5.2 — 45 experiments, 1109 Python + 584 lib + 31 forge tests, 51 barracuda + 4 forge = 55 binaries, **25.9× Rust-vs-Python speedup** (8/8 parity), **Titan V GPU live dispatch** (24/24 PASS), AKD1000 NPU live, metalForge live (5 substrates, 18 workloads, 29/29 cross-system), 4 Tier B GPU orchestrators, seasonal pipeline (73/73, 12 stations, 4800 results), CPU↔GPU 0.04% parity, clippy pedantic, 7 ET₀ methods, Anderson cross-spring coupling)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -59,7 +59,7 @@ bash run_all_baselines.sh
 #    Cached to: control/long_term_wb/data/wooster_era5_1960_2023.json
 python control/long_term_wb/long_term_water_balance.py
 
-# 7. Run Rust validation binaries (853+1393 checks across 37 binaries)
+# 7. Run Rust validation binaries (853+1393 checks across 55 binaries)
 cd barracuda
 for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   validate_sensor_calibration validate_real_data cross_validate \
@@ -896,6 +896,26 @@ assessment — cover crop biodiversity, soil microbiome, field margin evaluation
 
 ---
 
+### Experiment 046: Atlas Stream Real Data Validation — PHASE 1 COMPLETE
+
+**Goal**: Wire partially downloaded 80-year Open-Meteo ERA5 station data through
+the new `AtlasStream` and `SeasonalPipeline` GPU orchestrators. End-to-end
+integration test for the full airSpring agricultural pipeline on real data.
+
+**Phase 1 (Rust — 73/73 PASS):**
+- [x] Discover 80yr CSVs in `data/open_meteo/` (12 stations available)
+- [x] Parse Open-Meteo CSVs by column name → `WeatherDay` structs
+- [x] Filter to growing season (DOY 121-273), batch by station
+- [x] Process through `AtlasStream::new().process_batch()` with 5 crop types
+- [x] Validate: ≥1 station, ≥50 valid seasons, result count = stations × crops
+- [x] Mass balance < 1 mm (observed ~2e-13 mm)
+- [x] Mean yield ratio in [0.3, 1.0], mean daily ET₀ in [2, 8] mm
+- **12 stations**, **4800 crop-year results**, **73/73 PASS**
+
+**Binary**: `validate_atlas_stream`
+
+---
+
 ### Experiment 009: FAO-56 Dual Crop Coefficient — PHASE 0 COMPLETE
 
 **Goal**: Implement the dual crop coefficient approach (Kcb + Ke) from FAO-56
@@ -919,12 +939,15 @@ Chapter 7, separating transpiration from soil evaporation for precision scheduli
 Track 1 (Precision Agriculture):
   Phase 0  [COMPLETE]: Python baselines — 1109/1109 PASS (45 experiments)
   Phase 0+ [COMPLETE]: Real data pipeline — 15,300 station-days, ET₀ R²=0.97
-  Phase 1  [COMPLETE]: Rust validation — 651 tests + 1393 atlas checks, 54 binaries
+  Phase 1  [COMPLETE]: Rust validation — 584 lib + 31 forge tests, 55 binaries
   Phase 1.5[COMPLETE]: CPU benchmark — Rust 25.9× faster than Python (8/8 parity)
   Phase 2  [COMPLETE]: Cross-validation — 75/75 MATCH (Python↔Rust, tol=1e-5)
+  Phase 2.5[COMPLETE]: Tier B GPU — 4 orchestrators wired (ops 5-8, pending ToadStool absorption)
+  Phase 2.6[COMPLETE]: Seasonal pipeline — ET₀→Kc→WB→Yield chained, 73/73 real data (12 stations)
   Phase 3  [COMPLETE]: GPU bridge — 11 Tier A modules wired to ToadStool primitives
   Phase 3.5[COMPLETE]: NPU edge — AKD1000 live, 3 experiments, ~48µs inference
-  Phase 3.7[COMPLETE]: metalForge mixed — CPU+GPU+NPU substrate routing, 14 eco workloads
+  Phase 3.7[COMPLETE]: metalForge mixed — CPU+GPU+NPU substrate routing, 18 eco workloads
+  Phase 3.8[COMPLETE]: Cross-system routing — 29/29 PASS, NUCLEUS atomic ready
   Phase 4:             Penny irrigation (sovereign, consumer hardware)
 
 Track 2 (Environmental Systems):
@@ -987,8 +1010,8 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026 — Updated: February 27, 2026 (v0.5.1)*
-*45 experiments, 1109/1109 Python, 651 Rust tests + 1393 atlas checks, 54 binaries, 75/75 cross-validation, 100 Michigan stations.*
-*Rust 25.9× faster than Python (8/8 parity). 11 Tier A GPU modules. AKD1000 NPU live (3 experiments).*
-*metalForge mixed hardware dispatch (CPU+GPU+NPU). ToadStool S68 synced.*
+*Initialized: February 16, 2026 — Updated: February 27, 2026 (v0.5.2)*
+*45 experiments, 1109/1109 Python, 584 lib + 31 forge tests, 55 binaries, 75/75 cross-validation, 100 Michigan stations.*
+*Rust 25.9× faster than Python (8/8 parity). 11 Tier A + 4 Tier B GPU orchestrators. AKD1000 NPU live (3 experiments).*
+*Seasonal pipeline 73/73 PASS (12 stations, 4800 results). metalForge 18 workloads, 29/29 cross-system.*
 *Quality: zero .unwrap(), zero unsafe, zero clippy pedantic + nursery warnings. AGPL-3.0-or-later.*

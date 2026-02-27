@@ -2,7 +2,7 @@
   "_provenance": {
     "method": "Turc (1961) temperature-radiation ET₀",
     "baseline_script": "control/turc/turc_et0.py",
-    "baseline_commit": "pending",
+    "baseline_commit": "c080031",
     "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
     "baseline_command": "python3 control/turc/turc_et0.py",
     "python_version": "3.10",

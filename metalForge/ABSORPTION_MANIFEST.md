@@ -1,6 +1,6 @@
 # Absorption Manifest — airSpring → barracuda
 
-**Date**: February 27, 2026 (updated v0.5.1 — V030 active handoff, forge evolved to mixed hardware dispatch)
+**Date**: February 27, 2026 (updated v0.5.2 — V052 active handoff, forge evolved to mixed hardware dispatch, 18 workloads, 29/29 cross-system)
 **Source**: `metalForge/forge/` (airspring-forge v0.2.0)
 **Target**: `barracuda` (ToadStool crate)
 **Absorption Status**: 6/6 absorbed upstream — ALL modules absorbed as of S66
@@ -110,11 +110,26 @@ Linearized initial guess functions remain local in `eco::isotherm` (domain-speci
 ## metalForge Status
 
 The `metalForge/forge/` crate is now **vestigial** — all 6 modules have upstream
-equivalents in barracuda. The crate is retained as a fossil record with provenance:
-53 tests validate the original implementations that were absorbed upstream.
+equivalents in barracuda. The crate is retained as a fossil record with provenance
+and as the staging area for cross-system routing validation (18 eco workloads).
 
-The forge crate is NOT in airSpring's dependency graph (no `use airspring_forge::`).
-It can be archived or removed at any time without affecting the build.
+The forge crate validates dispatch routing (GPU > NPU > CPU) and cross-system
+hardware probing. 31 tests covering substrate discovery + capability routing + 4 Tier B local workloads.
+
+---
+
+## Tier B Local Workloads (v0.5.2)
+
+4 new workloads added for Tier B GPU orchestrators pending ToadStool absorption:
+
+| Workload | Op | Description | Substrate |
+|----------|-----|-------------|-----------|
+| `SensorCalibration` | 5 | SoilWatch 10 VWC calibration | CPU (pending GPU) |
+| `HargreavesBatch` | 6 | Hargreaves-Samani ET₀ | CPU (pending GPU) |
+| `KcClimateAdjust` | 7 | FAO-56 Eq. 62 climate correction | CPU (pending GPU) |
+| `DualKcBatch` | 8 | Ke evaporation layer | CPU (pending GPU) |
+
+These workloads auto-activate GPU dispatch upon ToadStool absorption of ops 5-8.
 
 ---
 
@@ -123,5 +138,6 @@ It can be archived or removed at any time without affecting the build.
 ```
 cargo fmt   — clean
 cargo clippy --all-targets — zero warnings (pedantic)
-cargo test  — 53/53 pass (forge), 608/608 pass (barracuda workspace: 464+142+2)
+cargo test  — 31/31 pass (forge), 584/584 pass (barracuda lib)
+metalForge cross-system routing — 29/29 PASS (18 workloads × dispatch checks)
 ```

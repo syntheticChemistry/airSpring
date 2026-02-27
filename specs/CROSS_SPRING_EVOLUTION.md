@@ -1,6 +1,6 @@
 # Cross-Spring Shader Evolution — airSpring Provenance
 
-**Updated**: February 27, 2026 (v0.5.1, ToadStool HEAD `e96576ee` — S68+)
+**Updated**: February 27, 2026 (v0.5.2, ToadStool HEAD `e96576ee` — S68+)
 
 ## Summary
 
@@ -193,6 +193,7 @@ module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 | Feb 27 | airSpring v0.4.12: Debt resolution, clippy pedantic, tolerance centralization, CI coverage gate, primal self-knowledge | V024 handoff: error type evolution, NPU convergence (3 Springs), barracuda delegation inventory |
 | Feb 27 | airSpring v0.5.0: 12 new experiments (Exp 033-044), Titan V GPU live, metalForge live hardware | 44 experiments, 1054 Python, 645 Rust tests + 1393 atlas, 51 binaries. Titan V 24/24 PASS (0.04% seasonal parity). metalForge 5 live substrates. V028 ToadStool absorption handoff |
 | Feb 27 | airSpring v0.5.1: Anderson coupling (Exp 045), CPU benchmark, documentation sweep | 45 experiments, 1109 Python, 651 Rust tests + 1393 atlas, 54 binaries. 25.9× Rust-vs-Python (8/8 parity). `eco::anderson` coupling chain (θ→S_e→d_eff→QS). V030 evolution handoff |
+| Feb 27 | airSpring v0.5.2: 4 Tier B GPU orchestrators + seasonal pipeline + atlas stream | 584 lib + 31 forge tests, 55 binaries. Ops 5-8 wired (sensor cal, Hargreaves, Kc climate, dual Kc). Seasonal pipeline chained ET₀→Kc→WB→Yield. Atlas stream 73/73 PASS (12 stations, 4800 results). metalForge 18 workloads, 29/29 cross-system. V052 ToadStool/NestGate/biomeOS handoffs |
 
 ---
 
@@ -234,13 +235,14 @@ module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 
 ## Remaining Evolution Gaps
 
-**Tier B (11 items):** Richards PDE GPU shader (CPU wired via `gpu::richards`),
+**Tier B (14 items, 9 wired):** Richards PDE GPU shader (CPU wired via `gpu::richards`),
 batch Nelder-Mead (CPU wired via `gpu::isotherm`), VG θ/K batch (new op),
-dual Kc batch (op=8, GPU orchestrator wired, pending shader),
-sensor calibration batch, Hargreaves batch, Kc climate adjustment,
-isotherm batch fitting, tridiagonal solve, adaptive RK45 ODE,
-m/z tolerance search.
+dual Kc batch (op=8, **WIRED** v0.5.2), sensor calibration batch (op=5, **WIRED** v0.5.2),
+Hargreaves batch (op=6, **WIRED** v0.5.2), Kc climate adjustment (op=7, **WIRED** v0.5.2),
+seasonal pipeline (**WIRED** v0.5.2, CPU chained), atlas stream (**WIRED** v0.5.2),
+MC ET₀ GPU (**WIRED** v0.5.2), isotherm batch fitting, tridiagonal solve,
+adaptive RK45 ODE, m/z tolerance search.
 
 **Tier C (1 item):** HTTP/JSON data client.
 
-See `gpu::evolution_gaps` module for full structured inventory (23 gaps total: 11 Tier A, 11 Tier B, 1 Tier C).
+See `gpu::evolution_gaps` module for full structured inventory (26 gaps total: 11 Tier A, 14 Tier B (9 wired), 1 Tier C).

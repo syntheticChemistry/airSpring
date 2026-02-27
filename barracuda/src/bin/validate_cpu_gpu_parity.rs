@@ -205,8 +205,15 @@ fn validate_backend_selection(v: &mut ValidationHarness, _benchmark: &serde_json
     // Without a WgpuDevice, BatchedEt0::cpu() should always report CPU backend
     let batcher = BatchedEt0::cpu();
     let station = StationDay {
-        tmax: 25.0, tmin: 15.0, rh_max: 80.0, rh_min: 40.0,
-        wind_2m: 2.0, rs: 20.0, elevation: 100.0, latitude: 45.0, doy: 180,
+        tmax: 25.0,
+        tmin: 15.0,
+        rh_max: 80.0,
+        rh_min: 40.0,
+        wind_2m: 2.0,
+        rs: 20.0,
+        elevation: 100.0,
+        latitude: 45.0,
+        doy: 180,
     };
     let result = batcher.compute_gpu(&[station]).expect("cpu fallback");
     v.check_bool(
@@ -215,17 +222,18 @@ fn validate_backend_selection(v: &mut ValidationHarness, _benchmark: &serde_json
     );
 
     // CPU fallback produces positive ET₀
-    v.check_lower(
-        "CPU fallback produces valid ET₀",
-        result.et0_values[0],
-        0.0,
-    );
+    v.check_lower("CPU fallback produces valid ET₀", result.et0_values[0], 0.0);
 
     // BatchedWaterBalance::new() without GPU also works
     let bwb = BatchedWaterBalance::new(0.35, 0.15, 1000.0, 0.55);
     let field = FieldDayInput {
-        dr_prev: 30.0, precipitation: 10.0, irrigation: 0.0,
-        etc: 5.0, taw: 120.0, raw: 60.0, p: 0.55,
+        dr_prev: 30.0,
+        precipitation: 10.0,
+        irrigation: 0.0,
+        etc: 5.0,
+        taw: 120.0,
+        raw: 60.0,
+        p: 0.55,
     };
     let wb_result = bwb.gpu_step(&[field]).expect("wb cpu fallback");
     v.check_bool(

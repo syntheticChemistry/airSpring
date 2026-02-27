@@ -141,8 +141,8 @@ pub fn coupling_chain(theta: f64, theta_r: f64, theta_s: f64) -> CouplingResult 
 
 /// Batch coupling for a θ(t) time series.
 #[must_use]
-pub fn coupling_series(thetas: &[f64], theta_r: f64, theta_s: f64) -> Vec<CouplingResult> {
-    thetas
+pub fn coupling_series(theta_series: &[f64], theta_r: f64, theta_s: f64) -> Vec<CouplingResult> {
+    theta_series
         .iter()
         .map(|&theta| coupling_chain(theta, theta_r, theta_s))
         .collect()

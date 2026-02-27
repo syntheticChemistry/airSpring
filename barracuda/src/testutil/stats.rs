@@ -16,8 +16,6 @@
 //!
 //! Pearson `r_squared` remains local (Pearson r² vs. upstream SS-based R²).
 
-use crate::len_f64;
-
 /// Compute Pearson correlation coefficient r.
 ///
 /// Uses barracuda's `pearson_correlation` primitive. Returns 0.0
@@ -93,8 +91,7 @@ pub fn index_of_agreement(observed: &[f64], simulated: &[f64]) -> crate::error::
         ));
     }
 
-    let n = len_f64(observed);
-    let mean_obs: f64 = observed.iter().sum::<f64>() / n;
+    let mean_obs: f64 = barracuda::stats::mean(observed);
 
     let numerator: f64 = observed
         .iter()
@@ -139,8 +136,7 @@ pub fn nash_sutcliffe(observed: &[f64], simulated: &[f64]) -> crate::error::Resu
         ));
     }
 
-    let n = len_f64(observed);
-    let mean_obs: f64 = observed.iter().sum::<f64>() / n;
+    let mean_obs: f64 = barracuda::stats::mean(observed);
 
     let ss_res: f64 = observed
         .iter()

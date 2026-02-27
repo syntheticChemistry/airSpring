@@ -1,6 +1,6 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: February 27, 2026 (v0.5.1 — 527 lib tests, 50 barracuda + 4 forge binaries, 11 Tier A modules, AKD1000 NPU live, 25.9× CPU speedup)
+**Last Updated**: February 27, 2026 (v0.5.2 — 584 lib tests, 50 barracuda + 4 forge binaries, 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + atlas stream + MC GPU, AKD1000 NPU live, 25.9× CPU speedup)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
 **ToadStool HEAD**: `e96576ee` (S68 — universal f64, ValidationHarness tracing, LazyLock shader constants)
 
@@ -38,11 +38,11 @@
 | **NPU edge inference** | **`npu` (feature-gated `akida-driver`)** | **35/35** | **AKD1000 live: crop stress, irrigation, anomaly** |
 | **Funky NPU IoT** | **`validate_npu_funky_eco`** | **32/32** | **Streaming, seasonal evolution, multi-crop crosstalk, LOCOMOS power, noise** |
 | **High-Cadence NPU** | **`validate_npu_high_cadence`** | **28/28** | **1-min cadence, burst mode, multi-sensor fusion, ensemble, weight hot-swap** |
-| **metalForge dispatch** | **`airspring-forge` crate** | **21/21** | **CPU/GPU/NPU routing, 14 eco workloads** |
+| **metalForge dispatch** | **`airspring-forge` crate** | **29/29** | **CPU/GPU/NPU routing, 18 eco workloads, cross-system** |
 | **Anderson coupling** | **`eco::anderson`** | **55+95** | **θ→S_e→d_eff→QS regime (cross-spring)** |
 | Cross-validation harness | `validation` | 75/75 | Python↔Rust match (tol=1e-5) |
 
-### Phase 2: GPU Orchestrators Wired (8 modules)
+### Phase 2: GPU Orchestrators Wired (8 Tier A + 4 Tier B + 3 pipeline)
 
 | Orchestrator | BarraCuda Primitive | Status | Provenance |
 |-------------|--------------------|----|---|
@@ -54,8 +54,13 @@
 | `eco::correction::fit_ridge` | `linalg::ridge::ridge_regression` | **Wired** | wetSpring ESN |
 | `gpu::richards::BatchedRichards` | `pde::richards::solve_richards` | **Wired** (v0.4.0) | airSpring → upstream |
 | `gpu::isotherm::fit_*_nm` | `optimize::nelder_mead` | **Wired** (v0.4.0) | airSpring → upstream |
-
-Note: `gpu::dual_kc::BatchedDualKc` has CPU orchestrator wired (Tier B → pending shader).
+| `gpu::hargreaves::BatchedHargreaves` | `batched_elementwise_f64` (op=6, pending) | **Wired** (v0.5.2, Tier B) | FAO-56 Eq. 52 |
+| `gpu::kc_climate::BatchedKcClimate` | `batched_elementwise_f64` (op=7, pending) | **Wired** (v0.5.2, Tier B) | FAO-56 Eq. 62 |
+| `gpu::dual_kc::BatchedDualKc` | `batched_elementwise_f64` (op=8, pending) | **Wired** (v0.5.2, Tier B) | airSpring v0.5.2 |
+| `gpu::sensor_calibration::BatchedSensorCal` | `batched_elementwise_f64` (op=5, pending) | **Wired** (v0.5.2, Tier B) | Dong et al. 2024 |
+| `gpu::seasonal_pipeline::SeasonalPipeline` | Chains ops 0→7→1→yield | **CPU chained** (v0.5.2) | Zero round-trip target |
+| `gpu::atlas_stream::AtlasStream` | `UnidirectionalPipeline` (pending) | **CPU chained** (v0.5.2) | Multi-year regional |
+| `gpu::mc_et0::mc_et0_gpu` | `mc_et0_propagate_f64.wgsl` (pending) | **Wired** (v0.5.2, Tier B) | groundSpring xoshiro |
 
 ### Phase 2: Stats & Validation
 
@@ -73,7 +78,7 @@ Note: `gpu::dual_kc::BatchedDualKc` has CPU orchestrator wired (Tier B → pendi
 
 ### Layer 1: BarraCuda CPU (validated, complete)
 
-All algorithms implemented in pure Rust. 527 lib tests, 50 binaries, 651 total checks.
+All algorithms implemented in pure Rust. 584 lib tests, 50 binaries, 651 total checks.
 This is the baseline for correctness — GPU and metalForge results must match.
 CPU benchmarks: 25.9× geometric mean speedup vs Python (8/8 parity).
 
@@ -90,19 +95,26 @@ eco::crop               → validated gdd_avg/clamp(), accumulated_gdd(), kc_fro
 io::csv_ts              → validated parse(), TimeseriesData
 ```
 
-### Layer 2: BarraCuda GPU (wired, 8 orchestrators)
+### Layer 2: BarraCuda GPU (wired, 15 orchestrators)
 
 GPU dispatch for batch operations. CPU fallback available for all.
 
 ```
-gpu::et0           → BatchedEt0::gpu()             → fao56_et0_batch()         [op=0]
-gpu::water_balance → BatchedWaterBalance::gpu_step()→ water_balance_batch()     [op=1]
-gpu::kriging       → KrigingInterpolator::new()     → KrigingF64               [spatial]
-gpu::reduce        → SeasonalReducer::new()         → FusedMapReduceF64        [N≥1024]
-gpu::stream        → StreamSmoother::new()          → MovingWindowStats         [sliding]
-gpu::richards      → BatchedRichards::solve_upstream()→ pde::richards           [Tier B]
-gpu::isotherm      → fit_langmuir_nm/freundlich_nm  → optimize::nelder_mead    [Tier B]
-eco::correction    → fit_ridge()                    → ridge_regression          [CPU]
+gpu::et0                → BatchedEt0::gpu()              → fao56_et0_batch()         [op=0, Tier A]
+gpu::water_balance      → BatchedWaterBalance::gpu_step() → water_balance_batch()     [op=1, Tier A]
+gpu::kriging            → KrigingInterpolator::new()      → KrigingF64               [spatial, Tier A]
+gpu::reduce             → SeasonalReducer::new()          → FusedMapReduceF64        [N≥1024, Tier A]
+gpu::stream             → StreamSmoother::new()           → MovingWindowStats         [sliding, Tier A]
+gpu::richards           → BatchedRichards::solve()        → pde::richards             [Tier A]
+gpu::isotherm           → fit_langmuir_nm/freundlich_nm   → optimize::nelder_mead    [Tier A]
+eco::correction         → fit_ridge()                     → ridge_regression          [CPU]
+gpu::sensor_calibration → BatchedSensorCal::compute_gpu() → batched_elementwise (op=5) [Tier B]
+gpu::hargreaves         → BatchedHargreaves::compute_gpu()→ batched_elementwise (op=6) [Tier B]
+gpu::kc_climate         → BatchedKcClimate::compute_gpu() → batched_elementwise (op=7) [Tier B]
+gpu::dual_kc            → BatchedDualKc::step_gpu()       → batched_elementwise (op=8) [Tier B]
+gpu::seasonal_pipeline  → SeasonalPipeline::run_season()  → chained ops 0→7→1→yield   [CPU chained]
+gpu::atlas_stream       → AtlasStream::process_batch()    → UnidirectionalPipeline     [CPU chained]
+gpu::mc_et0             → mc_et0_gpu()                    → mc_et0_propagate_f64.wgsl  [Tier B]
 ```
 
 ### Layer 3: metalForge Mixed Hardware (staged, 64 tests)
@@ -127,21 +139,23 @@ Mixed hardware extensions (future):
 
 ## Remaining Gaps
 
-### Tier B — Ready to Wire (11 items)
+### Tier B — Ready to Wire (5 remaining, 6 resolved in v0.5.2)
 
 | Need | Primitive | Status | Effort |
 |------|----------|--------|:------:|
-| **Dual Kc batch (Ke)** | `batched_elementwise_f64` (op=8) | CPU orchestrator wired | Low |
+| ~~Dual Kc batch (Ke)~~ | `batched_elementwise_f64` (op=8) | **WIRED** (v0.5.2) | — |
 | **VG θ/K batch** | `batched_elementwise_f64` (new op) | eco::richards validated | Low |
 | **Batch Nelder-Mead** | `NelderMeadGpu` | CPU NM wired via gpu::isotherm | Medium |
-| Sensor batch calibration | `batched_elementwise_f64` (op=5) | — | Low |
-| Hargreaves ET₀ batch | `batched_elementwise_f64` (op=6) | — | Low |
-| Kc climate adjustment | `batched_elementwise_f64` (op=7) | — | Low |
+| ~~Sensor batch calibration~~ | `batched_elementwise_f64` (op=5) | **WIRED** (v0.5.2) | — |
+| ~~Hargreaves ET₀ batch~~ | `batched_elementwise_f64` (op=6) | **WIRED** (v0.5.2) | — |
+| ~~Kc climate adjustment~~ | `batched_elementwise_f64` (op=7) | **WIRED** (v0.5.2) | — |
 | Richards PDE (GPU) | WGSL van_genuchten_f64 shader | **Wired** via gpu::richards | — |
 | Tridiagonal solve | `linalg::tridiagonal_solve_f64` | Available upstream | Low |
 | Adaptive ODE (RK45) | `numerical::rk45_solve` | Available upstream | Low |
 | Isotherm batch fitting | `NelderMeadGpu` batch | **Wired** via gpu::isotherm fit_*_nm | — |
 | m/z tolerance search | `batched_bisection_f64.wgsl` | Cross-spring from wetSpring | Low |
+
+**New in v0.5.2**: Seasonal pipeline (chained), atlas stream, MC ET₀ GPU path — see Phase 2 table.
 
 ### Tier C — Needs New Primitive (1 item)
 
@@ -180,4 +194,4 @@ Run `cargo run --release --bin bench_cpu_vs_python` for current numbers.
 | TS-003 | `acos`/`sin` precision drift in f64 WGSL shaders | **RESOLVED** (S54 — H-012) |
 | TS-004 | `FusedMapReduceF64` buffer conflict for N≥1024 | **RESOLVED** (S54 — H-013) |
 
-See `barracuda/src/gpu/evolution_gaps.rs` for the full 20-gap roadmap.
+See `barracuda/src/gpu/evolution_gaps.rs` for the full 26-gap roadmap (v0.5.2).

@@ -15,6 +15,8 @@ pub enum AirSpringError {
     CsvParse(String),
     /// JSON parsing errors (benchmark files).
     JsonParse(serde_json::Error),
+    /// Benchmark JSON structure errors (missing keys, wrong types).
+    BenchmarkParse(String),
     /// Invalid input (out of range, wrong dimensions).
     InvalidInput(String),
     /// Errors propagated from barracuda primitives.
@@ -29,6 +31,7 @@ impl fmt::Display for AirSpringError {
             Self::Io(e) => write!(f, "I/O error: {e}"),
             Self::CsvParse(msg) => write!(f, "CSV parse error: {msg}"),
             Self::JsonParse(e) => write!(f, "JSON parse error: {e}"),
+            Self::BenchmarkParse(msg) => write!(f, "Benchmark parse error: {msg}"),
             Self::InvalidInput(msg) => write!(f, "Invalid input: {msg}"),
             Self::Barracuda(msg) => write!(f, "barracuda error: {msg}"),
             Self::Npu(msg) => write!(f, "NPU error: {msg}"),
@@ -41,7 +44,11 @@ impl std::error::Error for AirSpringError {
         match self {
             Self::Io(e) => Some(e),
             Self::JsonParse(e) => Some(e),
-            Self::CsvParse(_) | Self::InvalidInput(_) | Self::Barracuda(_) | Self::Npu(_) => None,
+            Self::CsvParse(_)
+            | Self::BenchmarkParse(_)
+            | Self::InvalidInput(_)
+            | Self::Barracuda(_)
+            | Self::Npu(_) => None,
         }
     }
 }

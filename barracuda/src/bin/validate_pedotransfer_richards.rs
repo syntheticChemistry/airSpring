@@ -27,11 +27,7 @@ const BENCHMARK_JSON: &str =
     include_str!("../../../control/pedotransfer_richards/benchmark_pedotransfer_richards.json");
 
 fn sr_to_vg(sand: f64, clay: f64, om_pct: f64) -> VanGenuchtenParams {
-    let sr = saxton_rawls(&SaxtonRawlsInput {
-        sand,
-        clay,
-        om_pct,
-    });
+    let sr = saxton_rawls(&SaxtonRawlsInput { sand, clay, om_pct });
 
     let n_vg = (sr.lambda + 1.0).max(1.05);
     let m = 1.0 - 1.0 / n_vg;
@@ -109,26 +105,21 @@ fn validate_vg_retention(v: &mut ValidationHarness, benchmark: &serde_json::Valu
     let tests = &benchmark["validation_checks"]["pedotransfer_to_vg"]["test_cases"];
     for tc in tests.as_array().expect("array") {
         let label = tc["label"].as_str().unwrap_or("test");
-        let vg = sr_to_vg(json_field(tc, "sand"), json_field(tc, "clay"), json_field(tc, "om_pct"));
+        let vg = sr_to_vg(
+            json_field(tc, "sand"),
+            json_field(tc, "clay"),
+            json_field(tc, "om_pct"),
+        );
 
         let theta_sat = van_genuchten_theta(0.0, vg.theta_r, vg.theta_s, vg.alpha, vg.n_vg);
-        v.check_abs(
-            &format!("{label}: θ(0)=θ_s"),
-            theta_sat,
-            vg.theta_s,
-            1e-6,
-        );
+        v.check_abs(&format!("{label}: θ(0)=θ_s"), theta_sat, vg.theta_s, 1e-6);
 
         let k_sat = van_genuchten_k(0.0, vg.ks, vg.theta_r, vg.theta_s, vg.alpha, vg.n_vg);
         v.check_abs(&format!("{label}: K(0)=Ks"), k_sat, vg.ks, 1e-6);
 
         let theta_wet = van_genuchten_theta(-50.0, vg.theta_r, vg.theta_s, vg.alpha, vg.n_vg);
         let theta_dry = van_genuchten_theta(-500.0, vg.theta_r, vg.theta_s, vg.alpha, vg.n_vg);
-        v.check_lower(
-            &format!("{label}: θ(-50) > θ(-500)"),
-            theta_wet,
-            theta_dry,
-        );
+        v.check_lower(&format!("{label}: θ(-50) > θ(-500)"), theta_wet, theta_dry);
     }
 }
 
@@ -137,7 +128,11 @@ fn validate_richards_wetting(v: &mut ValidationHarness, benchmark: &serde_json::
     let tests = &benchmark["validation_checks"]["richards_wetting"]["test_cases"];
     for tc in tests.as_array().expect("array") {
         let label = tc["label"].as_str().unwrap_or("test");
-        let vg = sr_to_vg(json_field(tc, "sand"), json_field(tc, "clay"), json_field(tc, "om_pct"));
+        let vg = sr_to_vg(
+            json_field(tc, "sand"),
+            json_field(tc, "clay"),
+            json_field(tc, "om_pct"),
+        );
 
         let h_init = json_field(tc, "h_initial");
         let h_top = json_field(tc, "h_top");
@@ -146,7 +141,9 @@ fn validate_richards_wetting(v: &mut ValidationHarness, benchmark: &serde_json::
         let duration = json_field(tc, "duration_days");
         let dt = json_field(tc, "dt_days");
 
-        match solve_richards_1d(&vg, depth, n_nodes, h_init, h_top, false, false, duration, dt) {
+        match solve_richards_1d(
+            &vg, depth, n_nodes, h_init, h_top, false, false, duration, dt,
+        ) {
             Ok(profiles) => {
                 let initial_theta_top =
                     van_genuchten_theta(h_init, vg.theta_r, vg.theta_s, vg.alpha, vg.n_vg);
@@ -178,7 +175,11 @@ fn validate_richards_drainage(v: &mut ValidationHarness, benchmark: &serde_json:
     let tests = &benchmark["validation_checks"]["richards_drainage"]["test_cases"];
     for tc in tests.as_array().expect("array") {
         let label = tc["label"].as_str().unwrap_or("test");
-        let vg = sr_to_vg(json_field(tc, "sand"), json_field(tc, "clay"), json_field(tc, "om_pct"));
+        let vg = sr_to_vg(
+            json_field(tc, "sand"),
+            json_field(tc, "clay"),
+            json_field(tc, "om_pct"),
+        );
 
         let h_init = json_field(tc, "h_initial");
         let depth = json_field(tc, "depth_cm");
@@ -186,7 +187,9 @@ fn validate_richards_drainage(v: &mut ValidationHarness, benchmark: &serde_json:
         let duration = json_field(tc, "duration_days");
         let dt = json_field(tc, "dt_days");
 
-        match solve_richards_1d(&vg, depth, n_nodes, h_init, h_init, true, true, duration, dt) {
+        match solve_richards_1d(
+            &vg, depth, n_nodes, h_init, h_init, true, true, duration, dt,
+        ) {
             Ok(profiles) => {
                 let drain = cumulative_drainage(&vg, &profiles, dt);
                 let total_drain = drain.last().copied().unwrap_or(0.0);
@@ -238,8 +241,20 @@ fn validate_texture_sensitivity(v: &mut ValidationHarness, benchmark: &serde_jso
             vg_clay.ks,
         );
 
-        let theta_s = van_genuchten_theta(-100.0, vg_sand.theta_r, vg_sand.theta_s, vg_sand.alpha, vg_sand.n_vg);
-        let theta_c = van_genuchten_theta(-100.0, vg_clay.theta_r, vg_clay.theta_s, vg_clay.alpha, vg_clay.n_vg);
+        let theta_s = van_genuchten_theta(
+            -100.0,
+            vg_sand.theta_r,
+            vg_sand.theta_s,
+            vg_sand.alpha,
+            vg_sand.n_vg,
+        );
+        let theta_c = van_genuchten_theta(
+            -100.0,
+            vg_clay.theta_r,
+            vg_clay.theta_s,
+            vg_clay.alpha,
+            vg_clay.n_vg,
+        );
         v.check_lower(
             &format!("{label}: θ_clay(-100) > θ_sand(-100)"),
             theta_c,

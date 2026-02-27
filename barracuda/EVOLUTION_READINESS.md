@@ -1,8 +1,8 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: February 27, 2026 (v0.5.1 — 527 lib tests, 54 binaries)
+**Last Updated**: February 27, 2026 (v0.5.2 — 584 lib tests, 55 binaries)
 **ToadStool PIN**: S68+ HEAD (`e96576ee` — universal f64 canonical, dual-layer precision, device-lost resilience, 703 WGSL shaders)
-**Handoff**: V030 (evolution handoff — Anderson coupling, CPU benchmark, documentation sweep)
+**Handoff**: V052 (Tier B ops 5-8, seasonal pipeline, atlas stream, NestGate data, biomeOS graphs)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -16,7 +16,7 @@ validate against papers, hand off to ToadStool/BarraCuda, lean on upstream.
 
 | Module | Absorbed Into | When | Status |
 |--------|--------------|------|--------|
-| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all 37 binaries use upstream |
+| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all 55 binaries use upstream |
 | `van_genuchten` | `barracuda::pde::richards::SoilParams` | S40 | **Leaning** — `gpu::richards` bridges to upstream |
 | `isotherm NM` | `barracuda::optimize::nelder_mead` | S62 | **Leaning** — `gpu::isotherm` bridges to upstream |
 
@@ -65,24 +65,24 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 | `gpu::mc_et0::parametric_ci` | `stats::normal::norm_ppf` | **WIRED** — hotSpring precision lineage |
 | `eco::richards::inverse_van_genuchten_h` | `optimize::brent` | **WIRED** — neuralSpring optimizer lineage |
 
-### Tier B: Upstream Exists, Needs Domain Wiring (11 items, 4 wired)
+### Tier B: Upstream Exists, Needs Domain Wiring (14 items, 9 wired)
 
-| Need | Closest Primitive | Effort |
-|------|-------------------|:------:|
-| Dual Kc batch (Ke) | `batched_elementwise_f64` (op=8) | Low |
-| VG θ/K batch | `batched_elementwise_f64` (new op) | Low |
-| Batch Nelder-Mead GPU | `NelderMeadGpu` | Medium |
-| Sensor batch calibration | `batched_elementwise_f64` (op=5) | Low |
-| Hargreaves ET₀ batch | `batched_elementwise_f64` (op=6) | Low |
-| Kc climate adjustment | `batched_elementwise_f64` (op=7) | Low |
-| Tridiagonal solve batch | `linalg::tridiagonal_solve_f64` | Low |
-| Adaptive ODE (RK45) | `numerical::rk45_solve` | Low |
-| m/z tolerance search | `batched_bisection_f64.wgsl` (wetSpring) | Low |
-| Crank-Nicolson PDE | `pde::crank_nicolson::CrankNicolson1D` (f64 + GPU shader!) | **WIRED** |
-| BFGS optimizer | `optimize::bfgs` | Low |
-| Brent VG inverse | `optimize::brent` | **WIRED** |
-| bisect/Newton/secant | `optimize::{bisect, newton, secant}` | Low |
-| Batched bisection GPU | `optimize::BatchedBisectionGpu` | Low |
+| Need | Closest Primitive | Effort | Status |
+|------|-------------------|:------:|--------|
+| Sensor batch calibration | `batched_elementwise_f64` (op=5) | Low | **WIRED** (v0.5.2) |
+| Hargreaves ET₀ batch | `batched_elementwise_f64` (op=6) | Low | **WIRED** (v0.5.2) |
+| Kc climate adjustment | `batched_elementwise_f64` (op=7) | Low | **WIRED** (v0.5.2) |
+| Dual Kc batch (Ke) | `batched_elementwise_f64` (op=8) | Low | **WIRED** (v0.5.2) |
+| Seasonal pipeline | Chains ops 0→7→1→yield | Low | **WIRED** (v0.5.2, CPU chained) |
+| Atlas stream | `UnidirectionalPipeline` (pending) | Low | **WIRED** (v0.5.2, CPU chained) |
+| MC ET₀ GPU | `mc_et0_propagate_f64.wgsl` + `norm_ppf` | Low | **WIRED** (v0.5.2) |
+| VG θ/K batch | `batched_elementwise_f64` (new op) | Low | |
+| Batch Nelder-Mead GPU | `NelderMeadGpu` | Medium | |
+| Crank-Nicolson PDE | `pde::crank_nicolson::CrankNicolson1D` (f64 + GPU shader!) | Low | **WIRED** |
+| Brent VG inverse | `optimize::brent` | Low | **WIRED** |
+| Tridiagonal solve batch | `linalg::tridiagonal_solve_f64` | Low | |
+| Adaptive ODE (RK45) | `numerical::rk45_solve` | Low | |
+| m/z tolerance search | `batched_bisection_f64.wgsl` (wetSpring) | Low | |
 
 ### Tier C: Needs New Primitive (1 item)
 
@@ -173,13 +173,14 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `cargo fmt --check` | **Clean** |
 | `cargo clippy --all-targets` | **0 warnings** (pedantic + nursery via `[lints.clippy]`, `--all-targets` clean) |
 | `cargo doc --no-deps` | **Builds**, 0 warnings |
-| `cargo test --lib` | **527 passed** (lib + doc + integration) |
+| `cargo test --lib` | **584 passed** (lib + doc + integration) |
 | `unsafe` code | **Zero** |
 | `unwrap()` in lib | **Zero** (all in `#[cfg(test)]` or validation-binary JSON helpers) |
 | Files > 1000 lines | **Zero** (max src: 834 `eco/evapotranspiration.rs` after Thornthwaite extraction) |
-| Validation binaries | **47/47 PASS** (barracuda) + 4/4 PASS (forge) |
+| Validation binaries | **51/51 PASS** (barracuda) + 4/4 PASS (forge) |
 | GPU live (Titan V) | **24/24 PASS** (0.04% seasonal parity, `BARRACUDA_GPU_ADAPTER=titan`) |
-| metalForge live | **17/17 PASS** (5 substrates, 14 workloads route) |
+| metalForge live | **29/29 PASS** (5 substrates, 18 workloads route) |
+| Atlas stream (real data) | **73/73 PASS** (12 stations, 4800 crop-year results) |
 | GPU dispatch (P0 blocker) | **RESOLVED** — S66 explicit BGL (R-S66-041) |
 | try_gpu catch_unwind debt | **REMOVED** — S66+ resolved sovereign compiler regression |
 | Cross-validation | **75/75 MATCH** (tol=1e-5) |
@@ -259,4 +260,4 @@ Synced from `89356efa` → `e96576ee` (2 commits):
 - Fixed `try_f64_device()` to use `WgpuDevice::from_env()` (respects `BARRACUDA_GPU_ADAPTER`)
 - Fixed clippy `manual_midpoint` in `validate_seasonal_batch.rs`
 
-Revalidation: 527/527 tests, 0 clippy, 16/16 bench_cross_spring (Titan V)
+Revalidation: 584/584 tests, 0 clippy, 73/73 atlas stream (real data), 29/29 metalForge cross-system

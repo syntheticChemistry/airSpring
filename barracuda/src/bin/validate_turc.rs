@@ -119,11 +119,20 @@ fn main() {
     validation::banner("Exp 034: Turc (1961) Temperature-Radiation ET₀");
 
     let mut v = ValidationHarness::new("Turc ET₀");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_turc.json must parse");
+    let benchmark = parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_turc.json must parse");
 
-    validate_analytical(&mut v, &benchmark, "analytical_high_rh", "Analytical (RH ≥ 50%)");
-    validate_analytical(&mut v, &benchmark, "analytical_low_rh", "Analytical (RH < 50%)");
+    validate_analytical(
+        &mut v,
+        &benchmark,
+        "analytical_high_rh",
+        "Analytical (RH ≥ 50%)",
+    );
+    validate_analytical(
+        &mut v,
+        &benchmark,
+        "analytical_low_rh",
+        "Analytical (RH < 50%)",
+    );
     validate_humidity_boundary(&mut v, &benchmark);
     validate_edge_cases(&mut v, &benchmark);
     validate_monotonicity(&mut v, &benchmark);

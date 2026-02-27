@@ -25,6 +25,10 @@ use airspring_barracuda::eco::thornthwaite;
 use airspring_barracuda::eco::van_genuchten;
 use airspring_barracuda::eco::water_balance;
 
+type BenchFn = Box<dyn Fn(usize) -> (f64, f64, String)>;
+
+type BenchEntry = (&'static str, &'static str, usize, BenchFn);
+
 struct BenchResult {
     name: &'static str,
     n: usize,
@@ -64,19 +68,22 @@ fn bench_fao56_et0(n: usize) -> (f64, f64, String) {
     (
         elapsed,
         result,
-        format!(
-            "Rust={result:.6}, Python={python_ref:.6}, diff={diff:.2e}, ok={ok}"
-        ),
+        format!("Rust={result:.6}, Python={python_ref:.6}, diff={diff:.2e}, ok={ok}"),
     )
 }
 
 fn bench_thornthwaite(n: usize) -> (f64, f64, String) {
-    let temps: [f64; 12] = [2.0, 4.0, 9.0, 14.0, 19.0, 24.0, 27.0, 26.0, 22.0, 15.0, 8.0, 3.0];
+    let temps: [f64; 12] = [
+        2.0, 4.0, 9.0, 14.0, 19.0, 24.0, 27.0, 26.0, 22.0, 15.0, 8.0, 3.0,
+    ];
     let lat = 42.0;
     let t0 = Instant::now();
     let mut result = [0.0_f64; 12];
     for _ in 0..n {
-        result = black_box(thornthwaite::thornthwaite_monthly_et0(black_box(&temps), lat));
+        result = black_box(thornthwaite::thornthwaite_monthly_et0(
+            black_box(&temps),
+            lat,
+        ));
     }
     let elapsed = t0.elapsed().as_secs_f64();
     let python_may: f64 = 98.774_974_121_825_71;
@@ -96,7 +103,11 @@ fn bench_hargreaves(n: usize) -> (f64, f64, String) {
     let t0 = Instant::now();
     let mut result = 0.0_f64;
     for _ in 0..n {
-        result = black_box(et::hargreaves_et0(black_box(19.6), black_box(34.8), black_box(38.5)));
+        result = black_box(et::hargreaves_et0(
+            black_box(19.6),
+            black_box(34.8),
+            black_box(38.5),
+        ));
     }
     let elapsed = t0.elapsed().as_secs_f64();
     let python_ref: f64 = 15.535_415_506_191_004;
@@ -222,70 +233,12 @@ fn bench_season_simulation(n: usize) -> (f64, f64, String) {
     (
         elapsed,
         final_dr,
-        format!(
-            "Rust={final_dr:.6}, Python={python_ref:.6}, diff={diff:.2e}, ok={ok}"
-        ),
+        format!("Rust={final_dr:.6}, Python={python_ref:.6}, diff={diff:.2e}, ok={ok}"),
     )
 }
 
-fn run_python_benchmarks() -> Vec<(String, f64)> {
-    let control_dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .parent()
-        .expect("CARGO_MANIFEST_DIR parent")
-        .join("control");
-    let script = control_dir.join("bench_python_timing.py");
-    if !script.exists() {
-        eprintln!(
-            "  [WARN] Python timing script not found at {}",
-            script.display()
-        );
-        return Vec::new();
-    }
-    let output = Command::new("python3")
-        .arg(&script)
-        .output()
-        .expect("Failed to run Python timing script");
-    if !output.status.success() {
-        eprintln!(
-            "  [WARN] Python benchmark failed: {}",
-            String::from_utf8_lossy(&output.stderr)
-        );
-        return Vec::new();
-    }
-    let json_str = String::from_utf8_lossy(&output.stdout);
-    let v: serde_json::Value = serde_json::from_str(&json_str).unwrap_or_default();
-    v["benchmarks"]
-        .as_array()
-        .map(|arr| {
-            arr.iter()
-                .filter_map(|b| Some((b["name"].as_str()?.to_string(), b["secs"].as_f64()?)))
-                .collect()
-        })
-        .unwrap_or_default()
-}
-
-fn main() {
-    eprintln!("═══════════════════════════════════════════════════════════");
-    eprintln!("  barracuda CPU vs Python — Pure Math Benchmark");
-    eprintln!("═══════════════════════════════════════════════════════════\n");
-
-    eprintln!("  Running Python benchmarks...");
-    let py_timings = run_python_benchmarks();
-    let py_lookup = |name: &str| -> f64 {
-        py_timings
-            .iter()
-            .find(|(n, _)| n == name)
-            .map_or(0.0, |(_, s)| *s)
-    };
-
-    eprintln!("  Running Rust benchmarks...\n");
-
-    let benchmarks: Vec<(
-        &str,
-        &str,
-        usize,
-        Box<dyn Fn(usize) -> (f64, f64, String)>,
-    )> = vec![
+fn build_benchmarks() -> Vec<BenchEntry> {
+    vec![
         (
             "fao56_et0",
             "FAO-56 PM ET₀",
@@ -334,12 +287,52 @@ fn main() {
             1_000,
             Box::new(bench_season_simulation),
         ),
-    ];
+    ]
+}
 
+fn run_python_benchmarks() -> Vec<(String, f64)> {
+    let control_dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .expect("CARGO_MANIFEST_DIR parent")
+        .join("control");
+    let script = control_dir.join("bench_python_timing.py");
+    if !script.exists() {
+        eprintln!(
+            "  [WARN] Python timing script not found at {}",
+            script.display()
+        );
+        return Vec::new();
+    }
+    let output = Command::new("python3")
+        .arg(&script)
+        .output()
+        .expect("Failed to run Python timing script");
+    if !output.status.success() {
+        eprintln!(
+            "  [WARN] Python benchmark failed: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        return Vec::new();
+    }
+    let json_str = String::from_utf8_lossy(&output.stdout);
+    let v: serde_json::Value = serde_json::from_str(&json_str).unwrap_or_default();
+    v["benchmarks"]
+        .as_array()
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|b| Some((b["name"].as_str()?.to_string(), b["secs"].as_f64()?)))
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+fn run_benchmarks(
+    benchmarks: &[BenchEntry],
+    py_lookup: impl Fn(&str) -> f64,
+) -> (Vec<BenchResult>, bool) {
     let mut results = Vec::new();
     let mut all_parity = true;
-
-    for (py_name, display_name, n, func) in &benchmarks {
+    for (py_name, display_name, n, func) in benchmarks {
         let (rust_secs, _value, detail) = func(*n);
         let python_secs = py_lookup(py_name);
         let speedup = if python_secs > 0.0 && rust_secs > 0.0 {
@@ -361,11 +354,14 @@ fn main() {
             parity_detail: detail,
         });
     }
+    (results, all_parity)
+}
 
+fn print_results(results: &[BenchResult], all_parity: bool) {
     eprintln!("┌──────────────────────────────┬────────┬──────────────┬──────────────┬──────────┬────────┐");
     eprintln!("│ Algorithm                    │      N │     Rust (s) │   Python (s) │  Speedup │ Parity │");
     eprintln!("├──────────────────────────────┼────────┼──────────────┼──────────────┼──────────┼────────┤");
-    for r in &results {
+    for r in results {
         let parity_str = if r.parity_ok { "  ✓   " } else { " FAIL " };
         eprintln!(
             "│ {:<28} │ {:>6} │ {:>12.6} │ {:>12.6} │ {:>6.1}× │{}│",
@@ -375,13 +371,17 @@ fn main() {
     eprintln!("└──────────────────────────────┴────────┴──────────────┴──────────────┴──────────┴────────┘");
 
     eprintln!("\n  Parity details:");
-    for r in &results {
+    for r in results {
         let icon = if r.parity_ok { "✓" } else { "✗" };
         eprintln!("    {icon} {}: {}", r.name, r.parity_detail);
     }
 
     let geo_mean_speedup = {
-        let valid: Vec<f64> = results.iter().filter(|r| r.speedup > 0.0).map(|r| r.speedup).collect();
+        let valid: Vec<f64> = results
+            .iter()
+            .filter(|r| r.speedup > 0.0)
+            .map(|r| r.speedup)
+            .collect();
         if valid.is_empty() {
             0.0
         } else {
@@ -402,4 +402,24 @@ fn main() {
         std::process::exit(1);
     }
     eprintln!("\n  [PASS] Pure Rust math is correct AND faster than Python");
+}
+
+fn main() {
+    eprintln!("═══════════════════════════════════════════════════════════");
+    eprintln!("  barracuda CPU vs Python — Pure Math Benchmark");
+    eprintln!("═══════════════════════════════════════════════════════════\n");
+
+    eprintln!("  Running Python benchmarks...");
+    let py_timings = run_python_benchmarks();
+    let py_lookup = |name: &str| -> f64 {
+        py_timings
+            .iter()
+            .find(|(n, _)| n == name)
+            .map_or(0.0, |(_, s)| *s)
+    };
+
+    eprintln!("  Running Rust benchmarks...\n");
+    let benchmarks = build_benchmarks();
+    let (results, all_parity) = run_benchmarks(&benchmarks, py_lookup);
+    print_results(&results, all_parity);
 }

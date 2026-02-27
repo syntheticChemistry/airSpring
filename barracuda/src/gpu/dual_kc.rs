@@ -18,6 +18,11 @@
 //! Both CPU and GPU paths support optional mulch factors for no-till systems
 //! (FAO-56 Ch 11). Pass `mulch_factor = 1.0` for conventional tillage.
 
+use std::sync::Arc;
+
+use barracuda::device::WgpuDevice;
+use barracuda::ops::batched_elementwise_f64::BatchedElementwiseF64;
+
 use crate::eco::dual_kc::{self, DualKcInput, DualKcOutput, EvaporationLayerState};
 
 /// Per-field configuration for batched dual Kc.
@@ -49,17 +54,54 @@ pub struct BatchedDualKcResult {
 /// Computes `Ke` and `ETc` for M independent fields sharing the same
 /// daily weather (ET₀, precipitation, irrigation). Each field has
 /// its own crop parameters and evaporation layer state.
-#[derive(Debug)]
+///
+/// # GPU Readiness (Tier B — op=8 pending)
+///
+/// The GPU path packs per-field state into stride-9 vectors:
+/// `[kcb, kc_max, few, mulch_factor, de_prev, rew, tew, p_eff, et0]`
+/// and dispatches to `BatchedElementwiseF64` (op=8). Until `ToadStool`
+/// absorbs op=8, all dispatch falls back to the validated CPU path.
 pub struct BatchedDualKc {
     configs: Vec<FieldDualKcConfig>,
+    #[allow(dead_code)]
+    gpu_engine: Option<BatchedElementwiseF64>,
+}
+
+impl std::fmt::Debug for BatchedDualKc {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("BatchedDualKc")
+            .field("fields", &self.configs.len())
+            .field("gpu_engine", &self.gpu_engine.is_some())
+            .finish()
+    }
 }
 
 impl BatchedDualKc {
-    /// Create a new batched dual Kc orchestrator for M fields.
-    #[allow(clippy::missing_const_for_fn)] // Vec cannot be const in stable Rust
+    /// Create a new batched dual Kc orchestrator for M fields (CPU only).
+    #[allow(clippy::missing_const_for_fn)]
     #[must_use]
     pub fn new(configs: Vec<FieldDualKcConfig>) -> Self {
-        Self { configs }
+        Self {
+            configs,
+            gpu_engine: None,
+        }
+    }
+
+    /// Create with GPU engine (Tier B — currently falls back to CPU).
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `BatchedElementwiseF64` cannot be initialised.
+    pub fn with_gpu(
+        configs: Vec<FieldDualKcConfig>,
+        device: Arc<WgpuDevice>,
+    ) -> crate::error::Result<Self> {
+        let engine = BatchedElementwiseF64::new(device)
+            .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
+        Ok(Self {
+            configs,
+            gpu_engine: Some(engine),
+        })
     }
 
     /// Compute one timestep across all fields (CPU path).
@@ -97,6 +139,19 @@ impl BatchedDualKc {
         }
 
         BatchedDualKcResult { outputs, states }
+    }
+
+    /// Compute one timestep across all fields (GPU path, Tier B fallback to CPU).
+    ///
+    /// When `ToadStool` absorbs op=8, this dispatches M-field Ke computations
+    /// to the GPU. Currently falls back to [`Self::step_cpu`].
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the GPU dispatch fails (future).
+    pub fn step_gpu(&mut self, input: &DualKcInput) -> crate::error::Result<BatchedDualKcResult> {
+        // Tier B: CPU fallback until ToadStool absorbs op=8
+        Ok(self.step_cpu(input))
     }
 
     /// Run a multi-day season simulation across all fields.
@@ -273,6 +328,50 @@ mod tests {
         let summaries = batch.simulate_season(&inputs);
         assert_eq!(summaries[0].days, 180);
         assert!(summaries[0].total_etc > 0.0);
+    }
+
+    #[test]
+    fn test_step_gpu_fallback_matches_cpu() {
+        let configs = vec![FieldDualKcConfig {
+            kcb: 1.15,
+            kc_max: 1.20,
+            few: 0.05,
+            mulch_factor: 1.0,
+            state: silt_loam_state(),
+        }];
+
+        let input = DualKcInput {
+            et0: 5.0,
+            precipitation: 0.0,
+            irrigation: 0.0,
+        };
+
+        let mut cpu_batch = BatchedDualKc::new(configs.clone());
+        let cpu_result = cpu_batch.step_cpu(&input);
+
+        let mut gpu_batch = BatchedDualKc::new(configs);
+        let gpu_result = gpu_batch.step_gpu(&input).unwrap();
+
+        assert!(
+            (gpu_result.outputs[0].etc - cpu_result.outputs[0].etc).abs() < f64::EPSILON,
+            "GPU fallback {:.6} != CPU {:.6}",
+            gpu_result.outputs[0].etc,
+            cpu_result.outputs[0].etc,
+        );
+    }
+
+    #[test]
+    fn test_debug_format() {
+        let batch = BatchedDualKc::new(vec![FieldDualKcConfig {
+            kcb: 1.15,
+            kc_max: 1.20,
+            few: 0.05,
+            mulch_factor: 1.0,
+            state: silt_loam_state(),
+        }]);
+        let dbg = format!("{batch:?}");
+        assert!(dbg.contains("BatchedDualKc"));
+        assert!(dbg.contains("false"));
     }
 
     #[test]

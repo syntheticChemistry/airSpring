@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.5.1"
+version = "0.5.2"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
@@ -235,12 +235,20 @@ name = "validate_seasonal_batch"
 path = "src/bin/validate_seasonal_batch.rs"
 
 [[bin]]
+name = "validate_pure_gpu"
+path = "src/bin/validate_pure_gpu.rs"
+
+[[bin]]
 name = "validate_gpu_live"
 path = "src/bin/validate_gpu_live.rs"
 
 [[bin]]
 name = "validate_anderson"
 path = "src/bin/validate_anderson.rs"
+
+[[bin]]
+name = "validate_atlas_stream"
+path = "src/bin/validate_atlas_stream.rs"
 
 [[bin]]
 name = "bench_cross_spring"

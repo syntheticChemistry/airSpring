@@ -2,7 +2,7 @@
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
 **Date**: February 27, 2026
-**Version**: 0.5.1
+**Version**: 0.5.2
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -13,30 +13,33 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → biomeOS (NUCLEUS atomics, deployment graphs) → Penny Irrigation
 ```
 
-## Current Status (v0.5.1)
+## Current Status (v0.5.2)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,109/1,109 PASS** | 45 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 7 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **651 tests** | 50 barracuda + 4 forge = 54 binaries |
+| Phase 1: Rust validation | **651 tests** | 51 barracuda + 4 forge = 55 binaries |
 | Phase 1.5: CPU Benchmark | **25.9× faster** | Rust vs Python geometric mean (6×–190× range, 8/8 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
+| Phase 2.5: Tier B GPU | **4 orchestrators wired** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) |
+| Phase 2.6: Seasonal pipeline | **73/73 PASS** | ET₀→Kc→WB→Yield chained, 12 stations, 4800 crop-year results |
 | Phase 3: GPU live dispatch | **Titan V validated** | 24/24 PASS, 0.04% seasonal parity, 10K batch scaling |
 | Phase 3.5: NPU edge | **AKD1000 live** | 3 experiments, 95/95 NPU checks, ~48µs inference |
-| Phase 3.7: metalForge live | **5 substrates discovered** | RTX 4070 + Titan V + AKD1000 + i9-12900K, 14 workloads route |
+| Phase 3.7: metalForge live | **5 substrates discovered** | RTX 4070 + Titan V + AKD1000 + i9-12900K, 18 workloads route |
+| Phase 3.8: Cross-system routing | **29/29 PASS** | GPU+NPU+CPU dispatch proven, NUCLEUS atomic ready |
 | Phase 4: Penny Irrigation | Vision | Sovereign, consumer hardware |
 
 ### Code Quality
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` | **527 passed**, 0 failures |
+| `cargo test --lib` | **584 passed**, 0 failures |
 | `cargo test --tests` | **20 passed** (integration) |
 | `cargo clippy (pedantic)` | **0 warnings** (pedantic + nursery) |
 | `cargo fmt --check` | **Clean** |
 | `cargo doc` | **Builds** |
-| Forge tests | 26 (metalForge/forge — absorption staging + NPU dispatch) |
+| Forge tests | 31 (metalForge/forge — absorption staging + NPU dispatch) |
 
 ### Hardware Validated
 
@@ -83,7 +86,7 @@ ToadStool contains **774 WGSL shaders** across 41+ categories (S68: 2,541+ barra
 
 46+ cross-spring absorptions (S51-S66). All metalForge absorbed. See `specs/CROSS_SPRING_EVOLUTION.md`.
 
-### BarraCuda Integration (11 Tier A modules)
+### BarraCuda Integration (11 Tier A + 4 Tier B + 3 pipeline)
 
 | airSpring Module | BarraCuda Primitive | Origin | Status |
 |-----------------|--------------------|----|---|
@@ -92,16 +95,22 @@ ToadStool contains **774 WGSL shaders** across 41+ categories (S68: 2,541+ barra
 | `gpu::kriging` | `ops::kriging_f64::KrigingF64` | barracuda | **Integrated** |
 | `gpu::reduce` | `ops::fused_map_reduce_f64` | barracuda | **GPU N≥1024** |
 | `gpu::stream` | `ops::moving_window_stats` | barracuda | **Wired** |
-| `gpu::richards` | `pde::richards::solve_richards` | barracuda::pde | **Wired** (+ CN f64 cross-val) |
+| `gpu::richards` | `pde::richards::solve_richards` | barracuda::pde | **Wired** |
 | `gpu::isotherm` | `optimize::nelder_mead` + `multi_start` | barracuda::optimize | **Wired** |
-| `gpu::mc_et0` | `mc_et0_propagate_f64.wgsl` + `norm_ppf` | barracuda | **Wired** (parametric CI) |
+| `gpu::mc_et0` | `mc_et0_propagate_f64.wgsl` + `norm_ppf` | barracuda | **Wired** (Tier B) |
+| `gpu::hargreaves` | `batched_elementwise_f64` (op=6, pending) | barracuda | **Wired** (Tier B) |
+| `gpu::kc_climate` | `batched_elementwise_f64` (op=7, pending) | barracuda | **Wired** (Tier B) |
+| `gpu::dual_kc` | `batched_elementwise_f64` (op=8, pending) | barracuda | **Wired** (Tier B) |
+| `gpu::sensor_calibration` | `batched_elementwise_f64` (op=5, pending) | barracuda | **Wired** (Tier B) |
+| `gpu::seasonal_pipeline` | Chains ops 0→7→1→yield | airSpring | **CPU chained** |
+| `gpu::atlas_stream` | `UnidirectionalPipeline` (pending) | airSpring | **CPU chained** |
 | `eco::correction::fit_ridge` | `linalg::ridge::ridge_regression` | barracuda::linalg | **Wired** |
 | `eco::richards::inverse_van_genuchten_h` | `optimize::brent` | barracuda::optimize | **Wired** |
 | `eco::diversity` | `stats::diversity` | barracuda::stats | **Leaning** |
 
 Also wired: `validation::ValidationHarness` (neuralSpring), `stats::pearson`, `spearman`, `bootstrap_ci`, `stats::metrics` re-exports (airSpring→upstream S64).
 
-Evolution gaps: 23 total (11 Tier A integrated, 11 Tier B ready, 1 Tier C pending). ToadStool S68 synced.
+Evolution gaps: 26 total (11 Tier A integrated, 14 Tier B (9 wired), 1 Tier C pending). ToadStool S68 synced.
 See `barracuda/src/gpu/evolution_gaps.rs` for the full roadmap.
 
 ### CPU Benchmarks: Rust vs Python (25.9× geometric mean speedup)
@@ -192,16 +201,16 @@ airSpring/
 │   ├── metalforge_dispatch/     # Mixed-hardware dispatch routing (14/14)
 │   ├── seasonal_batch_et0/      # 365×4 station-day batch (18/18)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (527 lib + 20 integration, 50 binaries)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (584 lib + 20 integration, 51 binaries)
 │   ├── src/
 │   │   ├── eco/                 # Domain modules (15 validated, 7 ET₀ methods + Anderson coupling)
 │   │   ├── gpu/                 # ToadStool/BarraCuda GPU bridge (11 Tier A modules + device_info)
 │   │   ├── npu.rs               # BrainChip AKD1000 NPU (feature-gated)
-│   │   └── bin/                 # validate_*, bench_*, cross_validate (50 total)
+│   │   └── bin/                 # validate_*, bench_*, cross_validate (51 total)
 │   ├── tests/                   # Integration tests (7+ files + common/)
-│   └── Cargo.toml               # v0.5.1
+│   └── Cargo.toml               # v0.5.2
 ├── metalForge/                  # Mixed hardware dispatch (CPU+GPU+NPU)
-│   └── forge/                   # airspring-forge (26 tests, 4 binaries, live hardware probe)
+│   └── forge/                   # airspring-forge (31 tests, 4 binaries, live hardware probe)
 ├── specs/                       # Specifications and requirements
 │   ├── PAPER_REVIEW_QUEUE.md    # Paper reproduction queue (45 complete)
 │   ├── BARRACUDA_REQUIREMENTS.md# GPU + NPU kernel requirements
@@ -237,12 +246,12 @@ airSpring/
 | `CHANGELOG.md` | Versioned change history |
 | `CONTROL_EXPERIMENT_STATUS.md` | Detailed experiment results (45 experiments) |
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C GPU evolution, absorbed/stays-local |
-| `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
+| `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66), 18 workloads |
 | `metalForge/forge/` | Mixed hardware dispatch: live probe + capability routing |
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance |
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (45 complete) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V030 evolution handoff active) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda/NestGate/biomeOS handoffs (V052 active) |
 
 ## License
 
@@ -250,11 +259,12 @@ AGPL-3.0-or-later
 
 ---
 
-*February 27, 2026 — v0.5.1. 45 experiments, 1109/1109 Python, 651 Rust tests,
-1393 atlas checks, 54 binaries, 75/75 cross-validation, 15,300 station-days.
-Rust 25.9× faster than Python (8/8 parity, geometric mean). 11 Tier A GPU modules.
+*February 27, 2026 — v0.5.2. 45 experiments, 1109/1109 Python, 584 lib + 31 forge tests,
+55 binaries, 75/75 cross-validation, 15,300 station-days, 73/73 real-data atlas stream.
+Rust 25.9× faster than Python (8/8 parity, geometric mean). 11 Tier A + 4 Tier B GPU orchestrators.
+Seasonal pipeline: ET₀→Kc→WB→Yield chained (12 stations, 4800 crop-year results).
 Titan V GPU live dispatch (24/24 PASS, 0.04% seasonal parity).
 AKD1000 NPU live (3 experiments, ~48µs inference).
-metalForge live hardware: RTX 4070 + Titan V + AKD1000 + i9-12900K (5 substrates, 14 workloads).
+metalForge live hardware: RTX 4070 + Titan V + AKD1000 + i9-12900K (5 substrates, 18 workloads, 29/29 cross-system).
 Anderson soil-moisture coupling (θ→S_e→d_eff→QS regime, 55+95 PASS).
 ToadStool S68 synced (774 WGSL). Pure Rust + BarraCuda. AGPL-3.0-or-later.*

@@ -37,6 +37,9 @@ use airspring_barracuda::validation::{self, ValidationHarness};
 use std::io::BufRead;
 use std::path::Path;
 
+const BENCHMARK_JSON: &str =
+    include_str!("../../../control/atlas/benchmark_atlas.json");
+
 const ALL_CROPS: &[(CropType, &str, f64)] = &[
     (CropType::Corn, "corn", 1.25),
     (CropType::Soybean, "soybean", 0.85),
@@ -563,6 +566,55 @@ fn validate_atlas_summary(results: &[StationResult], v: &mut ValidationHarness) 
     );
 }
 
+fn validate_against_benchmark(results: &[StationResult], v: &mut ValidationHarness) {
+    validation::section("Benchmark Cross-Check");
+
+    let bench =
+        validation::parse_benchmark_json(BENCHMARK_JSON).expect("atlas benchmark JSON must parse");
+
+    let Some(stations) = validation::json_object_opt(&bench, &["stations"]) else {
+        return;
+    };
+
+    v.check_bool(
+        &format!("benchmark has {} stations", stations.len()),
+        !stations.is_empty(),
+    );
+
+    let mut matched = 0_usize;
+    for result in results {
+        let station_key = result.station.to_lowercase();
+        let Some(station_json) = stations.get(&station_key) else {
+            continue;
+        };
+        matched += 1;
+
+        if let Some(benchmark_et0) = validation::json_f64(station_json, &["mean_annual_et0"]) {
+            v.check_abs(
+                &format!("{} annual ET₀ vs benchmark", result.station),
+                result.mean_annual_et0,
+                benchmark_et0,
+                1.0,
+            );
+        }
+
+        for crop in &result.crop_results {
+            if let Some(benchmark_yield) =
+                validation::json_f64(station_json, &["crops", crop.crop_name.as_str(), "mean_yield_ratio"])
+            {
+                v.check_abs(
+                    &format!("{}/{} yield ratio vs benchmark", result.station, crop.crop_name),
+                    crop.mean_yield_ratio,
+                    benchmark_yield,
+                    0.001,
+                );
+            }
+        }
+    }
+
+    println!("  Matched {matched}/{} stations against benchmark", results.len());
+}
+
 fn main() {
     validation::init_tracing();
     let config = AtlasConfig::discover();
@@ -629,6 +681,7 @@ fn main() {
 
     println!();
     validate_atlas_summary(&results, &mut v);
+    validate_against_benchmark(&results, &mut v);
     write_summary_csv(&results, &config.out_dir);
     println!();
 

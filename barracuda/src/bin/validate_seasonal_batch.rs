@@ -52,10 +52,7 @@ fn parse_stations(benchmark: &serde_json::Value) -> Vec<StationSpec> {
         .map(|st| {
             let range = |key: &str| -> (f64, f64) {
                 let arr = st[key].as_array().expect("range array");
-                (
-                    arr[0].as_f64().expect("f64"),
-                    arr[1].as_f64().expect("f64"),
-                )
+                (arr[0].as_f64().expect("f64"), arr[1].as_f64().expect("f64"))
             };
             StationSpec {
                 label: st["label"].as_str().unwrap_or("").to_string(),
@@ -67,12 +64,8 @@ fn parse_stations(benchmark: &serde_json::Value) -> Vec<StationSpec> {
                 rh_min_range: range("rh_min_range"),
                 wind_2m: json_field(st, "wind_2m"),
                 rs_range: range("rs_range"),
-                annual_et0_min: st["expected_annual_et0_mm"]["min"]
-                    .as_f64()
-                    .expect("min"),
-                annual_et0_max: st["expected_annual_et0_mm"]["max"]
-                    .as_f64()
-                    .expect("max"),
+                annual_et0_min: st["expected_annual_et0_mm"]["min"].as_f64().expect("min"),
+                annual_et0_max: st["expected_annual_et0_mm"]["max"].as_f64().expect("max"),
             }
         })
         .collect()
@@ -141,8 +134,7 @@ fn main() {
         annual_totals.push(annual);
 
         // Seasonal shape: summer > winter
-        let summer_mean: f64 =
-            et0_vals[152..244].iter().sum::<f64>() / 92.0;
+        let summer_mean: f64 = et0_vals[152..244].iter().sum::<f64>() / 92.0;
         let winter_days: Vec<f64> = et0_vals[0..59]
             .iter()
             .chain(et0_vals[334..365].iter())
@@ -185,9 +177,7 @@ fn main() {
     // Batch consistency: compute one station individually, compare to batch
     validation::section("Batch Consistency");
     let single_days = generate_year(&stations[0]);
-    let single_result = batcher
-        .compute_gpu(&single_days)
-        .expect("single compute");
+    let single_result = batcher.compute_gpu(&single_days).expect("single compute");
     let (s0, e0) = station_offsets[0];
     let batch_slice = &batch_result.et0_values[s0..e0];
     let all_match = single_result
@@ -199,16 +189,8 @@ fn main() {
 
     // Cross-station ordering: Arizona > Michigan > Pacific NW
     validation::section("Cross-Station Ordering");
-    v.check_lower(
-        "Arizona > Michigan",
-        annual_totals[1],
-        annual_totals[0],
-    );
-    v.check_lower(
-        "Michigan > Pacific NW",
-        annual_totals[0],
-        annual_totals[2],
-    );
+    v.check_lower("Arizona > Michigan", annual_totals[1], annual_totals[0]);
+    v.check_lower("Michigan > Pacific NW", annual_totals[0], annual_totals[2]);
 
     v.finish();
 }

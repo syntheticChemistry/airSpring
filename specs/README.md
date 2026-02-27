@@ -1,7 +1,7 @@
 # airSpring Specifications
 
 **Last Updated**: February 27, 2026
-**Status**: Phase 0-3 complete — 1109/1109 Python + 651 Rust tests + 1393 atlas checks + 75/75 cross-validation + 11 Tier A modules + AKD1000 NPU live + 25.9× CPU speedup (v0.5.1)
+**Status**: Phase 0-3 complete — 1109/1109 Python + 584 lib + 31 forge tests + 73/73 atlas stream + 75/75 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + AKD1000 NPU live + 25.9× CPU speedup + metalForge 18 workloads 29/29 (v0.5.2)
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling, Anderson coupling
 
 ---
@@ -12,12 +12,14 @@
 |--------|-------|
 | Phase 0 (Python) | 1109/1109 PASS — 45 experiments (FAO-56, soil, IoT, WB, dual Kc, cover crops, regional ET₀, Richards, biochar, 60yr WB, yield, CW2D, scheduling, lysimeter, sensitivity, Priestley-Taylor, 3-method intercomparison, Thornthwaite, GDD, pedotransfer, AmeriFlux, Hargreaves, diversity, multi-crop, NPU eco, forecast, SCAN moisture, NASS yield, Anderson coupling) |
 | Phase 0+ (Real data) | 15,300 station-days, R²=0.967 across 100 Michigan stations |
-| Phase 1 (Rust) | 651 tests + 1393 atlas — 54 binaries (50 barracuda + 4 forge) |
+| Phase 1 (Rust) | 584 lib + 31 forge tests — 55 binaries (51 barracuda + 4 forge) |
 | Phase 1.5 (CPU benchmark) | Rust 25.9× faster than Python (geometric mean, 8/8 parity) |
 | Phase 2 (Cross-validation) | 75/75 Python↔Rust match within 1e-5; 690 crop-station yield pairs within 0.01 |
-| Phase 3 (GPU) | 11 Tier A modules wired, cross-spring S68 fully rewired |
+| Phase 2.5 (Tier B GPU) | 4 Tier B orchestrators wired (ops 5-8), seasonal pipeline, atlas stream |
+| Phase 3 (GPU) | 11 Tier A + 4 Tier B modules wired, cross-spring S68 fully rewired |
+| Phase 3.8 (Cross-system) | metalForge 18 workloads, 29/29 cross-system routing (GPU+NPU+CPU) |
 | Faculty | Dong (BAE, MSU — new lab 2026) |
-| Handoff | V030 (evolution handoff + Anderson coupling) in `wateringHole/handoffs/` |
+| Handoff | V052 (Tier B ops 5-8, NestGate data, biomeOS graphs) in `wateringHole/handoffs/` |
 
 ---
 
@@ -94,7 +96,7 @@ Re-run `run_all_baselines.sh` at the respective commits to verify.
 `../whitePaper/STUDY.md` → `../CONTROL_EXPERIMENT_STATUS.md` → BARRACUDA_REQUIREMENTS.md
 
 **Cross-spring evolution** (15 min):
-CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/` (V030 active)
+CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/` (V052 active)
 
 ---
 

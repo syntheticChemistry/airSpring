@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: February 27, 2026
-**Status**: 45 experiments, 1109/1109 Python + 651 Rust tests + 1024 validation + 1393 atlas checks + 75/75 cross-validation + 11 Tier A modules + AKD1000 NPU live + Titan V GPU live dispatch + metalForge live hardware probe + CPU↔GPU parity (bit-exact CPU, 0.04% GPU shader) + **Rust 25.9× faster than Python** (8/8 parity)
+**Status**: 45 experiments, 1109/1109 Python + 584 lib + 31 forge tests + 73/73 atlas stream + 75/75 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + AKD1000 NPU live + Titan V GPU live dispatch + metalForge 18 workloads 29/29 cross-system + CPU↔GPU parity (bit-exact CPU, 0.04% GPU shader) + **Rust 25.9× faster than Python** (8/8 parity)
 
 ---
 
@@ -54,22 +54,25 @@
 | 043 | Titan V GPU Live Dispatch | GPU Live | **Complete** | Rust (Titan V GV100) | `gpu::et0` (live WGSL shader, 10K batch) | 24 |
 | 044 | metalForge Live Hardware Probe | Mixed HW | **Complete** | Rust (probe + dispatch) | RTX 4070 + Titan V + AKD1000 + i9-12900K | 17 |
 | 045 | Anderson Soil-Moisture Coupling | Cross-Spring | **Complete** | Python + Rust CPU | `eco::anderson` (θ→S_e→d_eff→QS regime) | 55+95 |
+| 046 | Atlas Stream Real Data Validation | Integration | **Complete** | Rust (80yr Open-Meteo) | `gpu::atlas_stream` + `gpu::seasonal_pipeline` | 73/73 |
 
-**Grand Total**: 1109 Python + **651 Rust tests** + 1393 atlas checks + 75 cross-validation values + 11 Tier A GPU modules + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge live hardware (5 substrates, 14 workloads)
+**Grand Total**: 1109 Python + **584 lib + 31 forge tests** + 73/73 atlas stream + 75 cross-validation values + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge (5 substrates, 18 workloads, 29/29 cross-system)
 
 ---
 
-## Test Breakdown (v0.5.1)
+## Test Breakdown (v0.5.2)
 
 | Category | Tests | Source |
 |----------|:-----:|--------|
-| Barracuda lib (unit + doc) | 527 | `cargo test --lib` (incl. anderson, diversity, mc\_et0, NPU, stats re-exports, Makkink/Turc/Hamon) |
-| Barracuda validation binaries | 50 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
-| Forge | 26 | `metalForge/forge/` (substrate, dispatch, probe, workloads) |
+| Barracuda lib (unit + doc) | 584 | `cargo test --lib` (incl. Tier B orchestrators, seasonal pipeline, atlas stream, anderson, diversity, mc\_et0, NPU, Makkink/Turc/Hamon) |
+| Barracuda validation binaries | 51 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
+| Forge | 31 | `metalForge/forge/` (substrate, dispatch, probe, workloads, cross-system routing) |
 | Forge binaries | 4 | `validate_dispatch`, `validate_live_hardware`, `validate_dispatch_routing` |
-| **Total project tests** | **651** | |
+| **Total project tests** | **584 lib + 31 forge** | |
+| Atlas stream (real data) | 73 | `validate_atlas_stream` (12 stations, 4800 crop-year results) |
 | Atlas checks | 1393 | `validate_atlas` (100 stations × 13 checks each) |
 | GPU live checks | 24 | `validate_gpu_live` (Titan V WGSL dispatch) |
+| Cross-system routing | 29 | `validate_dispatch` (18 workloads × dispatch checks) |
 | Hardware probe checks | 17 | `validate_live_hardware` (5 substrates) |
 | CPU vs Python parity | 8/8 | `bench_cpu_vs_python` (25.9× geometric mean speedup) |
 
@@ -338,8 +341,11 @@ Experiments follow `NNN_name` format:
 - `031`: Hargreaves-Samani temperature ET₀
 - `032`: Ecological diversity indices
 - `033`–`035`: Makkink, Turc, Hamon ET₀ methods (completing 7-method portfolio)
+- `036`–`044`: biomeOS Neural API, ensemble, pedotransfer-Richards coupling, CPU-GPU parity, metalForge dispatch, seasonal batch, Titan V live, live hardware
+- `045`: Anderson soil-moisture coupling (cross-spring)
+- `046`: Atlas stream real data validation (80yr Open-Meteo, seasonal pipeline + atlas stream)
 
-Gap (013) reserved for future experiments. See `specs/PAPER_REVIEW_QUEUE.md`.
+Gap (013) reserved. See `specs/PAPER_REVIEW_QUEUE.md`.
 
 ---
 

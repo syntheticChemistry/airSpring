@@ -23,6 +23,12 @@ References:
   - Lu J, Sun G, McNulty SG, Amatya DM (2005) J Am Water Resour Assoc 41(3):621-633
   - Xu CY, Singh VP (2001) Water Resources Management 15:305-319
 
+Provenance:
+  Baseline commit: c080031
+  Benchmark output: control/hamon/benchmark_hamon.json
+  Reproduction: python control/hamon/hamon_pet.py
+  Created: 2026-02-27
+
 Data: Analytical (published equations + FAO-56 solar geometry).
 """
 import json

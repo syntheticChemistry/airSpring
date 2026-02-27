@@ -85,6 +85,19 @@ pub fn json_f64(value: &serde_json::Value, path: &[&str]) -> Option<f64> {
 
 /// Extract a string from a JSON value with path context for error messages.
 ///
+/// # Errors
+///
+/// Returns `BenchmarkParse` if `key` is missing or the value is not a string.
+pub fn json_str_checked<'a>(tc: &'a serde_json::Value, key: &str) -> crate::error::Result<&'a str> {
+    tc.get(key).and_then(|v| v.as_str()).ok_or_else(|| {
+        crate::error::AirSpringError::BenchmarkParse(format!(
+            "benchmark JSON missing string key '{key}'"
+        ))
+    })
+}
+
+/// Extract a string from a JSON value with path context for error messages.
+///
 /// Intended for compile-time embedded benchmark JSON where the schema is known.
 ///
 /// # Panics
@@ -92,9 +105,22 @@ pub fn json_f64(value: &serde_json::Value, path: &[&str]) -> Option<f64> {
 /// Panics if `key` is missing from `tc` or if the value at `key` is not a string.
 #[must_use]
 pub fn json_str<'a>(tc: &'a serde_json::Value, key: &str) -> &'a str {
-    tc[key]
-        .as_str()
-        .unwrap_or_else(|| panic!("benchmark JSON missing string key '{key}'"))
+    json_str_checked(tc, key).unwrap_or_else(|e| panic!("{e}"))
+}
+
+/// Extract an f64 from a JSON test case.
+///
+/// # Errors
+///
+/// Returns `BenchmarkParse` if `key` is missing or the value is not an f64.
+pub fn json_field_checked(tc: &serde_json::Value, key: &str) -> crate::error::Result<f64> {
+    tc.get(key)
+        .and_then(serde_json::Value::as_f64)
+        .ok_or_else(|| {
+            crate::error::AirSpringError::BenchmarkParse(format!(
+                "benchmark JSON missing f64 key '{key}'"
+            ))
+        })
 }
 
 /// Extract an f64 from a JSON test case with descriptive panic.
@@ -106,9 +132,31 @@ pub fn json_str<'a>(tc: &'a serde_json::Value, key: &str) -> &'a str {
 /// Panics if `key` is missing from `tc` or if the value at `key` is not an f64.
 #[must_use]
 pub fn json_field(tc: &serde_json::Value, key: &str) -> f64 {
-    tc[key]
-        .as_f64()
-        .unwrap_or_else(|| panic!("benchmark JSON missing f64 key '{key}'"))
+    json_field_checked(tc, key).unwrap_or_else(|e| panic!("{e}"))
+}
+
+/// Extract a JSON array from a nested path.
+///
+/// # Errors
+///
+/// Returns `BenchmarkParse` if any key in `path` is missing or the final value is not an array.
+pub fn json_array_checked<'a>(
+    value: &'a serde_json::Value,
+    path: &[&str],
+) -> crate::error::Result<&'a Vec<serde_json::Value>> {
+    let mut current = value;
+    for &key in path {
+        current = current.get(key).ok_or_else(|| {
+            crate::error::AirSpringError::BenchmarkParse(format!(
+                "benchmark JSON missing key '{key}'"
+            ))
+        })?;
+    }
+    current.as_array().ok_or_else(|| {
+        crate::error::AirSpringError::BenchmarkParse(format!(
+            "benchmark JSON: expected array at {path:?}"
+        ))
+    })
 }
 
 /// Extract a JSON array with descriptive panic.
@@ -118,15 +166,7 @@ pub fn json_field(tc: &serde_json::Value, key: &str) -> f64 {
 /// Panics if any key in `path` is missing, or if the value at the final path is not an array.
 #[must_use]
 pub fn json_array<'a>(value: &'a serde_json::Value, path: &[&str]) -> &'a Vec<serde_json::Value> {
-    let mut current = value;
-    for &key in path {
-        current = current
-            .get(key)
-            .unwrap_or_else(|| panic!("benchmark JSON missing key '{key}'"));
-    }
-    current
-        .as_array()
-        .unwrap_or_else(|| panic!("benchmark JSON: expected array at {path:?}"))
+    json_array_checked(value, path).unwrap_or_else(|e| panic!("{e}"))
 }
 
 /// Extract a string from a nested JSON path; returns `None` if missing or not a string.
@@ -264,6 +304,23 @@ mod tests {
         let _ = json_str(&json, "num");
     }
 
+    #[test]
+    fn test_json_str_checked_ok() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"label": "ok"}"#).unwrap();
+        assert_eq!(json_str_checked(&json, "label").unwrap(), "ok");
+    }
+
+    #[test]
+    fn test_json_str_checked_missing() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"other": "x"}"#).unwrap();
+        let err = json_str_checked(&json, "missing").unwrap_err();
+        assert!(matches!(
+            err,
+            crate::error::AirSpringError::BenchmarkParse(_)
+        ));
+        assert!(format!("{err}").contains("missing string key"));
+    }
+
     // ── json_field ───────────────────────────────────────────────────────────
     #[test]
     fn test_json_field_valid() {
@@ -283,6 +340,22 @@ mod tests {
     fn test_json_field_non_number_value() {
         let json: serde_json::Value = serde_json::from_str(r#"{"str": "hello"}"#).unwrap();
         let _ = json_field(&json, "str");
+    }
+
+    #[test]
+    fn test_json_field_checked_ok() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"val": 42.5}"#).unwrap();
+        assert!((json_field_checked(&json, "val").unwrap() - 42.5).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_json_field_checked_missing() {
+        let json: serde_json::Value = serde_json::from_str(r#"{"other": 1.0}"#).unwrap();
+        let err = json_field_checked(&json, "missing").unwrap_err();
+        assert!(matches!(
+            err,
+            crate::error::AirSpringError::BenchmarkParse(_)
+        ));
     }
 
     // ── json_array ──────────────────────────────────────────────────────────

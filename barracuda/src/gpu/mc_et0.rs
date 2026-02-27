@@ -20,6 +20,9 @@
 //! | [`mc_et0_cpu`] | CPU | Always available, N samples via loop |
 //! | GPU kernel | `mc_et0_propagate_f64.wgsl` | Available: sovereign compiler regression resolved (S66+) |
 
+use std::sync::Arc;
+
+use barracuda::device::WgpuDevice;
 use barracuda::stats::normal::norm_ppf;
 
 use crate::eco::evapotranspiration::{self as et, DailyEt0Input};
@@ -207,6 +210,25 @@ pub fn mc_et0_cpu(
     }
 }
 
+/// Monte Carlo ET₀ uncertainty propagation (GPU path, Tier B).
+///
+/// When `ToadStool` wires `mc_et0_propagate_f64.wgsl`, this dispatches
+/// N MC samples to the GPU via Box-Muller + xoshiro128** kernel.
+/// Currently falls back to [`mc_et0_cpu`].
+///
+/// # Errors
+///
+/// Returns an error if the GPU dispatch fails (future).
+pub fn mc_et0_gpu(
+    _device: &Arc<WgpuDevice>,
+    base_input: &DailyEt0Input,
+    uncertainties: &Et0Uncertainties,
+    n_samples: usize,
+    seed: u64,
+) -> crate::error::Result<McEt0Result> {
+    Ok(mc_et0_cpu(base_input, uncertainties, n_samples, seed))
+}
+
 fn lehmer_next(state: &mut u64) -> f64 {
     *state = state.wrapping_mul(48_271).wrapping_rem(0x7FFF_FFFF);
     *state as f64 / f64::from(0x7FFF_FFFFu32)
@@ -333,6 +355,30 @@ mod tests {
             hi_99 > hi_90,
             "99% CI upper ({hi_99:.3}) should exceed 90% ({hi_90:.3})"
         );
+    }
+
+    #[test]
+    #[allow(clippy::float_cmp)]
+    fn test_mc_et0_gpu_fallback_matches_cpu() {
+        let Some(device) = try_device() else {
+            return;
+        };
+        let input = sample_input();
+        let unc = Et0Uncertainties::default();
+        let cpu_result = mc_et0_cpu(&input, &unc, 500, 42);
+        let gpu_result = mc_et0_gpu(&device, &input, &unc, 500, 42).unwrap();
+        assert_eq!(cpu_result.et0_central, gpu_result.et0_central);
+        assert_eq!(cpu_result.et0_mean, gpu_result.et0_mean);
+        assert_eq!(cpu_result.et0_std, gpu_result.et0_std);
+        assert_eq!(cpu_result.et0_p05, gpu_result.et0_p05);
+        assert_eq!(cpu_result.et0_p95, gpu_result.et0_p95);
+        assert_eq!(cpu_result.n_samples, gpu_result.n_samples);
+    }
+
+    fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
+        pollster::block_on(barracuda::device::WgpuDevice::new_f64_capable())
+            .ok()
+            .map(std::sync::Arc::new)
     }
 
     #[test]

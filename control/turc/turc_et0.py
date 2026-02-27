@@ -22,6 +22,12 @@ References:
   - Jensen ME, Burman RD, Allen RG (1990) ASCE Manual 70
   - Xu CY, Singh VP (2002) Water Resources Management 16:197-219
 
+Provenance:
+  Baseline commit: c080031
+  Benchmark output: control/turc/benchmark_turc.json
+  Reproduction: python control/turc/turc_et0.py
+  Created: 2026-02-27
+
 Data: Analytical (published equations).
 """
 import json

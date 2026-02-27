@@ -11,7 +11,7 @@
 //! Thornthwaite C.W. (1948) "An approach toward a rational classification
 //! of climate." Geographical Review 38(1):55–94.
 
-use super::evapotranspiration::daylight_hours;
+use super::solar::daylight_hours;
 
 /// Single-month contribution to the annual Thornthwaite heat index.
 ///

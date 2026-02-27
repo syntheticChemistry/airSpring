@@ -220,6 +220,52 @@ pub fn forecast_scheduling() -> EcoWorkload {
         .with_primitive("BatchedForecastF64")
 }
 
+// ── Tier B GPU orchestrators (pending ToadStool absorption) ──────────
+
+/// Hargreaves-Samani ET₀ batch — temperature-only ET₀ estimate.
+#[must_use]
+pub fn hargreaves_et0_batch() -> EcoWorkload {
+    EcoWorkload::new_static(ShaderOrigin::Local)
+        .named(
+            "hargreaves_et0_batch",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        )
+        .with_primitive("BatchedHargreavesF64")
+}
+
+/// Kc climate adjustment batch — FAO-56 Eq. 62 for wind/humidity.
+#[must_use]
+pub fn kc_climate_batch() -> EcoWorkload {
+    EcoWorkload::new_static(ShaderOrigin::Local)
+        .named(
+            "kc_climate_batch",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        )
+        .with_primitive("BatchedKcClimateF64")
+}
+
+/// Sensor calibration batch — `SoilWatch` 10 raw→VWC.
+#[must_use]
+pub fn sensor_calibration_batch() -> EcoWorkload {
+    EcoWorkload::new_static(ShaderOrigin::Local)
+        .named(
+            "sensor_calibration_batch",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        )
+        .with_primitive("BatchedSensorCalF64")
+}
+
+/// Seasonal pipeline — ET₀→Kc→WB→Yield chained pipeline.
+#[must_use]
+pub fn seasonal_pipeline() -> EcoWorkload {
+    EcoWorkload::new_static(ShaderOrigin::Local)
+        .named(
+            "seasonal_pipeline",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        )
+        .with_primitive("SeasonalPipelineF64")
+}
+
 // ── NPU-native classifiers ─────────────────────────────────────────
 
 /// Crop stress classifier — binary (stressed / healthy).
@@ -297,6 +343,11 @@ pub fn all_workloads() -> Vec<EcoWorkload> {
         gdd_accumulate(),
         dual_kc_batch(),
         forecast_scheduling(),
+        // Tier B GPU orchestrators (pending)
+        hargreaves_et0_batch(),
+        kc_climate_batch(),
+        sensor_calibration_batch(),
+        seasonal_pipeline(),
         // NPU-native classifiers
         crop_stress_classifier(),
         irrigation_decision(),
@@ -326,14 +377,14 @@ mod tests {
     #[test]
     fn all_workloads_has_entries() {
         let all = all_workloads();
-        assert_eq!(all.len(), 14, "14 eco workloads");
+        assert_eq!(all.len(), 18, "18 eco workloads");
     }
 
     #[test]
     fn origin_counts_match() {
         let (absorbed, local, npu_native, cpu_only) = origin_summary();
         assert_eq!(absorbed, 9, "9 absorbed GPU domains");
-        assert_eq!(local, 0, "0 local WGSL extensions");
+        assert_eq!(local, 4, "4 local WGSL extensions");
         assert_eq!(npu_native, 3, "3 NPU-native classifiers");
         assert_eq!(cpu_only, 2, "2 CPU-only domains");
     }

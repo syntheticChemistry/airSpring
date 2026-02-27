@@ -1,5 +1,5 @@
 {
-    "experiment": "Exp 041 — metalForge Mixed-Hardware Dispatch Validation",
+    "experiment": "Exp 041 \u2014 metalForge Mixed-Hardware Dispatch Validation",
     "description": "Validates metalForge's capability-based workload routing across GPU, NPU, CPU, and Neural API substrates. Demonstrates mixed-hardware dispatch: GPU for f64 batch compute, NPU for int8 inference, Neural API for ecosystem routing, CPU as universal fallback. Tests the dispatch priority chain: GPU > NPU > Neural > CPU.",
     "references": [
         "metalForge substrate model (forge/src/substrate.rs)",
@@ -10,33 +10,144 @@
         "workload_routing": {
             "description": "Each workload routes to the correct substrate based on capabilities",
             "test_cases": [
-                {"workload": "et0_batch", "expected_substrate": "GPU", "required_caps": ["F64", "ShaderDispatch"]},
-                {"workload": "water_balance_batch", "expected_substrate": "GPU", "required_caps": ["F64", "ShaderDispatch"]},
-                {"workload": "richards_pde", "expected_substrate": "GPU", "required_caps": ["F64", "ShaderDispatch"]},
-                {"workload": "crop_stress_classifier", "expected_substrate": "NPU", "required_caps": ["QuantizedInference"]},
-                {"workload": "irrigation_decision", "expected_substrate": "NPU", "required_caps": ["QuantizedInference"]},
-                {"workload": "validation_harness", "expected_substrate": "CPU", "required_caps": ["CpuCompute"]},
-                {"workload": "weather_ingest", "expected_substrate": "CPU", "required_caps": ["CpuCompute"]}
+                {
+                    "workload": "et0_batch",
+                    "expected_substrate": "GPU",
+                    "required_caps": [
+                        "F64",
+                        "ShaderDispatch"
+                    ]
+                },
+                {
+                    "workload": "water_balance_batch",
+                    "expected_substrate": "GPU",
+                    "required_caps": [
+                        "F64",
+                        "ShaderDispatch"
+                    ]
+                },
+                {
+                    "workload": "richards_pde",
+                    "expected_substrate": "GPU",
+                    "required_caps": [
+                        "F64",
+                        "ShaderDispatch"
+                    ]
+                },
+                {
+                    "workload": "crop_stress_classifier",
+                    "expected_substrate": "NPU",
+                    "required_caps": [
+                        "QuantizedInference"
+                    ]
+                },
+                {
+                    "workload": "irrigation_decision",
+                    "expected_substrate": "NPU",
+                    "required_caps": [
+                        "QuantizedInference"
+                    ]
+                },
+                {
+                    "workload": "validation_harness",
+                    "expected_substrate": "CPU",
+                    "required_caps": [
+                        "CpuCompute"
+                    ]
+                },
+                {
+                    "workload": "weather_ingest",
+                    "expected_substrate": "CPU",
+                    "required_caps": [
+                        "CpuCompute"
+                    ]
+                },
+                {
+                    "workload": "hargreaves_et0_batch",
+                    "expected_substrate": "GPU",
+                    "required_caps": [
+                        "F64",
+                        "ShaderDispatch"
+                    ]
+                },
+                {
+                    "workload": "kc_climate_batch",
+                    "expected_substrate": "GPU",
+                    "required_caps": [
+                        "F64",
+                        "ShaderDispatch"
+                    ]
+                },
+                {
+                    "workload": "sensor_calibration_batch",
+                    "expected_substrate": "GPU",
+                    "required_caps": [
+                        "F64",
+                        "ShaderDispatch"
+                    ]
+                },
+                {
+                    "workload": "seasonal_pipeline",
+                    "expected_substrate": "GPU",
+                    "required_caps": [
+                        "F64",
+                        "ShaderDispatch"
+                    ]
+                }
             ]
         },
         "priority_chain": {
             "description": "Dispatch priority: GPU > NPU > Neural > CPU",
             "test_cases": [
-                {"label": "F64+ShaderDispatch → GPU first", "caps": ["F64", "ShaderDispatch"], "expected": "GPU"},
-                {"label": "QuantizedInference → NPU first", "caps": ["QuantizedInference"], "expected": "NPU"},
-                {"label": "CpuCompute only → CPU", "caps": ["CpuCompute"], "expected": "CPU"}
+                {
+                    "label": "F64+ShaderDispatch \u2192 GPU first",
+                    "caps": [
+                        "F64",
+                        "ShaderDispatch"
+                    ],
+                    "expected": "GPU"
+                },
+                {
+                    "label": "QuantizedInference \u2192 NPU first",
+                    "caps": [
+                        "QuantizedInference"
+                    ],
+                    "expected": "NPU"
+                },
+                {
+                    "label": "CpuCompute only \u2192 CPU",
+                    "caps": [
+                        "CpuCompute"
+                    ],
+                    "expected": "CPU"
+                }
             ]
         },
         "fallback_behavior": {
             "description": "When preferred substrate is unavailable, falls back gracefully",
             "test_cases": [
-                {"label": "GPU workload on CPU-only system", "workload": "et0_batch", "available": ["CPU"], "should_route": true},
-                {"label": "NPU workload on GPU+CPU system", "workload": "crop_stress_classifier", "available": ["GPU", "CPU"], "should_route": false}
+                {
+                    "label": "GPU workload on CPU-only system",
+                    "workload": "et0_batch",
+                    "available": [
+                        "CPU"
+                    ],
+                    "should_route": true
+                },
+                {
+                    "label": "NPU workload on GPU+CPU system",
+                    "workload": "crop_stress_classifier",
+                    "available": [
+                        "GPU",
+                        "CPU"
+                    ],
+                    "should_route": false
+                }
             ]
         },
         "inventory_completeness": {
-            "description": "All 14 defined workloads have routing specs",
-            "expected_count": 14
+            "description": "All 18 defined workloads have routing specs",
+            "expected_count": 18
         }
     }
 }

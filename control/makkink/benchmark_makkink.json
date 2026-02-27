@@ -2,7 +2,7 @@
   "_provenance": {
     "method": "Makkink (1957) radiation-based ET₀, de Bruin (1987) coefficients",
     "baseline_script": "control/makkink/makkink_et0.py",
-    "baseline_commit": "pending",
+    "baseline_commit": "c080031",
     "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
     "baseline_command": "python3 control/makkink/makkink_et0.py",
     "python_version": "3.10",

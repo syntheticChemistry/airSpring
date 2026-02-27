@@ -16,7 +16,13 @@
 //! "Crop evapotranspiration — Guidelines for computing crop water requirements"
 //! FAO Irrigation and Drainage Paper 56, Rome.
 
-use std::f64::consts::PI;
+// Re-export solar geometry and radiation for backward compatibility.
+pub use super::et0_ensemble::{et0_ensemble, EnsembleInput, EnsembleResult};
+pub use super::solar::{
+    clear_sky_radiation, daylight_hours, extraterrestrial_radiation, inverse_rel_distance,
+    net_longwave_radiation, net_radiation, net_shortwave_radiation, solar_declination,
+    sunset_hour_angle,
+};
 
 // ── Atmospheric parameters ───────────────────────────────────────────
 
@@ -86,101 +92,6 @@ pub fn actual_vapour_pressure_rh(tmin: f64, tmax: f64, rh_min: f64, rh_max: f64)
     let e_tmin = saturation_vapour_pressure(tmin);
     let e_tmax = saturation_vapour_pressure(tmax);
     f64::midpoint(e_tmin * rh_max / 100.0, e_tmax * rh_min / 100.0)
-}
-
-// ── Solar geometry ───────────────────────────────────────────────────
-
-/// Inverse relative distance Earth–Sun (FAO-56 Eq. 23).
-///
-/// dr = 1 + 0.033 × cos(2π/365 × J)
-#[must_use]
-pub fn inverse_rel_distance(day_of_year: u32) -> f64 {
-    0.033f64.mul_add((2.0 * PI * f64::from(day_of_year) / 365.0).cos(), 1.0)
-}
-
-/// Solar declination δ (radians) (FAO-56 Eq. 24).
-///
-/// δ = 0.409 × sin(2π/365 × J − 1.39)
-#[must_use]
-pub fn solar_declination(day_of_year: u32) -> f64 {
-    0.409 * (2.0 * PI * f64::from(day_of_year) / 365.0 - 1.39).sin()
-}
-
-/// Sunset hour angle ωs (radians) (FAO-56 Eq. 25).
-///
-/// ωs = arccos(−tan(φ) × tan(δ))
-#[must_use]
-pub fn sunset_hour_angle(latitude_rad: f64, declination_rad: f64) -> f64 {
-    (-latitude_rad.tan() * declination_rad.tan())
-        .clamp(-1.0, 1.0)
-        .acos()
-}
-
-/// Extraterrestrial radiation Ra (MJ/m²/day) (FAO-56 Eq. 21).
-#[must_use]
-pub fn extraterrestrial_radiation(latitude_rad: f64, day_of_year: u32) -> f64 {
-    let gsc = 0.0820; // Solar constant (MJ/m²/min)
-    let dr = inverse_rel_distance(day_of_year);
-    let delta = solar_declination(day_of_year);
-    let ws = sunset_hour_angle(latitude_rad, delta);
-
-    (24.0 * 60.0 / PI)
-        * gsc
-        * dr
-        * (ws * latitude_rad.sin())
-            .mul_add(delta.sin(), latitude_rad.cos() * delta.cos() * ws.sin())
-}
-
-/// Daylight hours N (FAO-56 Eq. 34).
-///
-/// N = 24/π × ωs
-#[must_use]
-pub fn daylight_hours(latitude_rad: f64, day_of_year: u32) -> f64 {
-    let delta = solar_declination(day_of_year);
-    let ws = sunset_hour_angle(latitude_rad, delta);
-    24.0 / PI * ws
-}
-
-// ── Radiation ────────────────────────────────────────────────────────
-
-/// Clear-sky solar radiation Rso (MJ/m²/day) (FAO-56 Eq. 37).
-///
-/// Rso = (0.75 + 2 × 10⁻⁵ × z) × Ra
-#[must_use]
-pub fn clear_sky_radiation(elevation_m: f64, ra: f64) -> f64 {
-    2.0e-5f64.mul_add(elevation_m, 0.75) * ra
-}
-
-/// Net shortwave radiation Rns (MJ/m²/day) (FAO-56 Eq. 38).
-///
-/// Rns = (1 − α) × Rs, where α = 0.23 for hypothetical grass reference.
-#[must_use]
-pub fn net_shortwave_radiation(rs: f64, albedo: f64) -> f64 {
-    (1.0 - albedo) * rs
-}
-
-/// Net longwave radiation Rnl (MJ/m²/day) (FAO-56 Eq. 39).
-#[must_use]
-pub fn net_longwave_radiation(tmin: f64, tmax: f64, ea: f64, rs: f64, rso: f64) -> f64 {
-    let sigma = 4.903e-9; // Stefan-Boltzmann (MJ/m²/day/K⁴)
-    let tk_min = tmin + 273.16;
-    let tk_max = tmax + 273.16;
-    let avg_tk4 = f64::midpoint(tk_max.powi(4), tk_min.powi(4));
-    let humidity_factor = 0.14f64.mul_add(-ea.sqrt(), 0.34);
-    let cloudiness_factor = if rso > 0.0 {
-        1.35f64.mul_add((rs / rso).min(1.0), -0.35).max(0.05)
-    } else {
-        0.05
-    };
-    sigma * avg_tk4 * humidity_factor * cloudiness_factor
-}
-
-/// Net radiation Rn (MJ/m²/day) (FAO-56 Eq. 40).
-///
-/// Rn = Rns − Rnl
-#[must_use]
-pub fn net_radiation(rns: f64, rnl: f64) -> f64 {
-    rns - rnl
 }
 
 // ── Solar radiation estimation ────────────────────────────────────────
@@ -311,7 +222,8 @@ pub fn makkink_et0(tmean_c: f64, rs_mj: f64, elevation_m: f64) -> f64 {
     let pressure = atmospheric_pressure(elevation_m);
     let gamma = psychrometric_constant(pressure);
     let delta = vapour_pressure_slope(tmean_c);
-    C1.mul_add(delta / (delta + gamma) * (rs_mj / LAMBDA_MJ_KG), C2).max(0.0)
+    C1.mul_add(delta / (delta + gamma) * (rs_mj / LAMBDA_MJ_KG), C2)
+        .max(0.0)
 }
 
 /// Turc (1961) temperature-radiation ET₀ estimate (mm/day).
@@ -389,172 +301,6 @@ pub use super::thornthwaite::{
     annual_heat_index, mean_daylight_hours_for_month, monthly_heat_index_term,
     thornthwaite_exponent, thornthwaite_monthly_et0, thornthwaite_unadjusted_et0,
 };
-
-// ── Ensemble consensus ───────────────────────────────────────────────
-
-/// Input data for a multi-method ET₀ ensemble computation.
-///
-/// All fields are optional; the ensemble uses whichever methods
-/// the available data supports.
-pub struct EnsembleInput {
-    /// Minimum temperature (°C). Enables PM, PT, Hargreaves.
-    pub tmin: Option<f64>,
-    /// Maximum temperature (°C). Enables PM, PT, Hargreaves.
-    pub tmax: Option<f64>,
-    /// Mean temperature (°C). Enables Makkink, Turc, Hamon.
-    pub tmean: Option<f64>,
-    /// Solar radiation Rs (MJ/m²/day). Enables PM, PT, Makkink, Turc.
-    pub rs_mj: Option<f64>,
-    /// Wind speed at 2 m (m/s). Enables PM.
-    pub wind_speed_2m: Option<f64>,
-    /// Actual vapour pressure ea (kPa). Enables PM, PT.
-    pub actual_vapour_pressure: Option<f64>,
-    /// Relative humidity (%). Enables Turc humidity correction.
-    pub rh_pct: Option<f64>,
-    /// Elevation above sea level (m).
-    pub elevation_m: f64,
-    /// Latitude (decimal degrees, positive = North).
-    pub latitude_deg: f64,
-    /// Day of year (1–366).
-    pub day_of_year: u32,
-    /// Day length (hours). Enables Hamon. Computed from lat/doy if absent.
-    pub day_length_hours: Option<f64>,
-}
-
-/// Result of a multi-method ET₀ ensemble.
-pub struct EnsembleResult {
-    /// Equal-weight mean of available methods (mm/day).
-    pub consensus: f64,
-    /// Max − min of individual method estimates.
-    pub spread: f64,
-    /// Number of methods that contributed.
-    pub n_methods: u8,
-    /// Individual method results (NaN if method was not applicable).
-    pub pm: f64,
-    pub pt: f64,
-    pub hargreaves: f64,
-    pub makkink: f64,
-    pub turc: f64,
-    pub hamon: f64,
-}
-
-/// Compute a multi-method ET₀ ensemble from available data.
-///
-/// Uses 6 daily ET₀ methods (Thornthwaite excluded — it's monthly).
-/// Methods are gated by data availability: PM and PT need full weather,
-/// Makkink/Turc need radiation, Hargreaves/Hamon need only temperature.
-///
-/// Returns a consensus estimate (equal-weight mean) and method spread.
-#[must_use]
-pub fn et0_ensemble(input: &EnsembleInput) -> EnsembleResult {
-    let tmean = input
-        .tmean
-        .or_else(|| {
-            input
-                .tmin
-                .zip(input.tmax)
-                .map(|(lo, hi)| f64::midpoint(lo, hi))
-        })
-        .unwrap_or(f64::NAN);
-
-    let has_full = input.tmin.is_some()
-        && input.tmax.is_some()
-        && input.rs_mj.is_some()
-        && input.wind_speed_2m.is_some()
-        && input.actual_vapour_pressure.is_some()
-        && tmean.is_finite();
-    let has_rad = input.rs_mj.is_some() && tmean.is_finite();
-
-    let pm = if has_full {
-        let inp = DailyEt0Input {
-            tmin: input.tmin.unwrap_or(0.0),
-            tmax: input.tmax.unwrap_or(0.0),
-            tmean: Some(tmean),
-            solar_radiation: input.rs_mj.unwrap_or(0.0),
-            wind_speed_2m: input.wind_speed_2m.unwrap_or(0.0),
-            actual_vapour_pressure: input.actual_vapour_pressure.unwrap_or(0.0),
-            elevation_m: input.elevation_m,
-            latitude_deg: input.latitude_deg,
-            day_of_year: input.day_of_year,
-        };
-        daily_et0(&inp).et0
-    } else {
-        f64::NAN
-    };
-
-    let pt = if has_full {
-        let daily_input = DailyEt0Input {
-            tmin: input.tmin.unwrap_or(0.0),
-            tmax: input.tmax.unwrap_or(0.0),
-            tmean: Some(tmean),
-            solar_radiation: input.rs_mj.unwrap_or(0.0),
-            wind_speed_2m: input.wind_speed_2m.unwrap_or(0.0),
-            actual_vapour_pressure: input.actual_vapour_pressure.unwrap_or(0.0),
-            elevation_m: input.elevation_m,
-            latitude_deg: input.latitude_deg,
-            day_of_year: input.day_of_year,
-        };
-        let (pt_val, _pm) = daily_et0_pt_and_pm(&daily_input);
-        pt_val
-    } else {
-        f64::NAN
-    };
-
-    let mak = if has_rad {
-        makkink_et0(tmean, input.rs_mj.unwrap_or(0.0), input.elevation_m)
-    } else {
-        f64::NAN
-    };
-
-    let trc = if has_rad && input.rh_pct.is_some() {
-        turc_et0(tmean, input.rs_mj.unwrap_or(0.0), input.rh_pct.unwrap_or(60.0))
-    } else {
-        f64::NAN
-    };
-
-    let hg = if input.tmin.is_some() && input.tmax.is_some() {
-        let ra = extraterrestrial_radiation(
-            input.latitude_deg.to_radians(),
-            input.day_of_year,
-        );
-        hargreaves_et0(input.tmin.unwrap_or(0.0), input.tmax.unwrap_or(0.0), ra)
-    } else {
-        f64::NAN
-    };
-
-    let dl = input
-        .day_length_hours
-        .unwrap_or_else(|| daylight_hours(input.latitude_deg.to_radians(), input.day_of_year));
-    let ham = if tmean.is_finite() && tmean >= 0.0 && dl > 0.0 {
-        hamon_pet(tmean, dl)
-    } else {
-        f64::NAN
-    };
-
-    let methods = [pm, pt, hg, mak, trc, ham];
-    let valid: Vec<f64> = methods.iter().copied().filter(|v| v.is_finite() && *v >= 0.0).collect();
-
-    let n = valid.len();
-    if n == 0 {
-        return EnsembleResult {
-            consensus: 0.0,
-            spread: 0.0,
-            n_methods: 0,
-            pm, pt, hargreaves: hg, makkink: mak, turc: trc, hamon: ham,
-        };
-    }
-
-    let consensus = valid.iter().sum::<f64>() / n as f64;
-    let min_v = valid.iter().copied().fold(f64::INFINITY, f64::min);
-    let max_v = valid.iter().copied().fold(f64::NEG_INFINITY, f64::max);
-
-    EnsembleResult {
-        consensus,
-        spread: max_v - min_v,
-        n_methods: n as u8,
-        pm, pt, hargreaves: hg, makkink: mak, turc: trc, hamon: ham,
-    }
-}
 
 // ── Wind speed adjustment ─────────────────────────────────────────────
 
@@ -772,64 +518,6 @@ mod tests {
     fn test_psychrometric_constant() {
         let gamma = psychrometric_constant(101.3);
         assert!((gamma - 0.0674).abs() < 0.001, "γ: {gamma}");
-    }
-
-    #[test]
-    fn test_extraterrestrial_radiation() {
-        // FAO-56 Example 8: Sep 3 (DOY 246), lat −22.9°, Ra ≈ 32.2 MJ/m²/day
-        let lat_rad = (-22.9_f64).to_radians();
-        let ra = extraterrestrial_radiation(lat_rad, 246);
-        assert!((ra - 32.2).abs() < 1.5, "Ra: {ra}");
-    }
-
-    #[test]
-    fn test_daylight_hours() {
-        // FAO-56 Example 9: Sep 3 (DOY 246), lat −22.9°, N ≈ 11.7 h
-        let lat_rad = (-22.9_f64).to_radians();
-        let n = daylight_hours(lat_rad, 246);
-        assert!((n - 11.7).abs() < 0.2, "N: {n}");
-    }
-
-    #[test]
-    fn test_inverse_rel_distance() {
-        // DOY 1 (Jan 1): Earth closest to Sun, dr > 1
-        let dr_jan = inverse_rel_distance(1);
-        assert!(dr_jan > 1.0, "dr at DOY 1: {dr_jan}");
-        // DOY 182 (Jul 1): Earth farthest, dr < 1
-        let dr_jul = inverse_rel_distance(182);
-        assert!(dr_jul < 1.0, "dr at DOY 182: {dr_jul}");
-    }
-
-    #[test]
-    fn test_solar_declination() {
-        // Summer solstice (DOY ~172): δ ≈ +0.409 rad (max)
-        let delta_summer = solar_declination(172);
-        assert!(delta_summer > 0.3, "δ summer: {delta_summer}");
-        // Winter solstice (DOY ~355): δ ≈ −0.409 rad (min)
-        let delta_winter = solar_declination(355);
-        assert!(delta_winter < -0.3, "δ winter: {delta_winter}");
-    }
-
-    #[test]
-    fn test_net_shortwave_radiation() {
-        // Rs = 20 MJ/m²/day, albedo = 0.23 → Rns = 15.4
-        let rns = net_shortwave_radiation(20.0, 0.23);
-        assert!((rns - 15.4).abs() < 0.01);
-    }
-
-    #[test]
-    fn test_net_radiation_identity() {
-        // Rn = Rns − Rnl
-        let rns = 17.0;
-        let rnl = 3.5;
-        assert!((net_radiation(rns, rnl) - 13.5).abs() < f64::EPSILON);
-    }
-
-    #[test]
-    fn test_clear_sky_radiation() {
-        // Rso = (0.75 + 2e-5 × 100) × 40 = 0.752 × 40 = 30.08
-        let rso = clear_sky_radiation(100.0, 40.0);
-        assert!((rso - 30.08).abs() < 0.01, "Rso: {rso}");
     }
 
     #[test]
@@ -1100,12 +788,18 @@ mod tests {
         let et0 = makkink_et0(20.0, 15.0, 100.0);
         assert!((et0 - 2.438).abs() < 0.01, "Makkink(20,15,100) = {et0}");
         let et0_hot = makkink_et0(30.0, 25.0, 0.0);
-        assert!((et0_hot - 4.755).abs() < 0.01, "Makkink(30,25,0) = {et0_hot}");
+        assert!(
+            (et0_hot - 4.755).abs() < 0.01,
+            "Makkink(30,25,0) = {et0_hot}"
+        );
     }
 
     #[test]
     fn test_makkink_clamp_zero() {
-        assert!(makkink_et0(20.0, 0.0, 100.0) < f64::EPSILON, "Zero Rs → clamped to 0");
+        assert!(
+            makkink_et0(20.0, 0.0, 100.0) < f64::EPSILON,
+            "Zero Rs → clamped to 0"
+        );
     }
 
     #[test]
@@ -1137,7 +831,10 @@ mod tests {
     fn test_turc_humidity_boundary_continuity() {
         let at50 = turc_et0(20.0, 15.0, 50.0);
         let at49 = turc_et0(20.0, 15.0, 49.99);
-        assert!((at50 - at49).abs() < 0.01, "Continuity at RH=50%: {at50} vs {at49}");
+        assert!(
+            (at50 - at49).abs() < 0.01,
+            "Continuity at RH=50%: {at50} vs {at49}"
+        );
     }
 
     #[test]
@@ -1170,101 +867,5 @@ mod tests {
         let short = hamon_pet(20.0, 10.0);
         let long = hamon_pet(20.0, 16.0);
         assert!(long > short, "Longer day → more PET");
-    }
-
-    // ── Ensemble consensus tests ────────────────────────────────────
-
-    #[test]
-    fn test_ensemble_full_weather() {
-        let input = EnsembleInput {
-            tmin: Some(12.3),
-            tmax: Some(21.5),
-            tmean: Some(16.9),
-            rs_mj: Some(22.07),
-            wind_speed_2m: Some(2.078),
-            actual_vapour_pressure: Some(1.409),
-            rh_pct: Some(66.5),
-            elevation_m: 100.0,
-            latitude_deg: 50.8,
-            day_of_year: 187,
-            day_length_hours: Some(16.1),
-        };
-        let r = et0_ensemble(&input);
-        assert_eq!(r.n_methods, 6, "Full weather should use 6 methods");
-        assert!(r.consensus > 0.0, "Consensus should be positive");
-        assert!(r.spread > 0.0, "Spread should be positive");
-        assert!(r.pm.is_finite(), "PM should compute");
-        assert!(r.pt.is_finite(), "PT should compute");
-        assert!(r.hargreaves.is_finite(), "Hargreaves should compute");
-        assert!(r.makkink.is_finite(), "Makkink should compute");
-        assert!(r.turc.is_finite(), "Turc should compute");
-        assert!(r.hamon.is_finite(), "Hamon should compute");
-    }
-
-    #[test]
-    fn test_ensemble_temp_only() {
-        let input = EnsembleInput {
-            tmin: Some(20.0),
-            tmax: Some(30.0),
-            tmean: None,
-            rs_mj: None,
-            wind_speed_2m: None,
-            actual_vapour_pressure: None,
-            rh_pct: None,
-            elevation_m: 100.0,
-            latitude_deg: 42.0,
-            day_of_year: 180,
-            day_length_hours: Some(15.0),
-        };
-        let r = et0_ensemble(&input);
-        assert!(r.n_methods >= 2, "Should use at least Hargreaves + Hamon");
-        assert!(r.consensus > 0.0);
-        assert!(r.pm.is_nan(), "PM needs full weather");
-        assert!(r.pt.is_nan(), "PT needs full weather");
-        assert!(r.makkink.is_nan(), "Makkink needs radiation");
-    }
-
-    #[test]
-    fn test_ensemble_monotonicity() {
-        let cool = et0_ensemble(&EnsembleInput {
-            tmin: Some(5.0), tmax: Some(15.0), tmean: Some(10.0),
-            rs_mj: Some(15.0), wind_speed_2m: Some(2.0),
-            actual_vapour_pressure: Some(1.0), rh_pct: Some(60.0),
-            elevation_m: 100.0, latitude_deg: 45.0, day_of_year: 180,
-            day_length_hours: Some(15.0),
-        });
-        let warm = et0_ensemble(&EnsembleInput {
-            tmin: Some(15.0), tmax: Some(25.0), tmean: Some(20.0),
-            rs_mj: Some(15.0), wind_speed_2m: Some(2.0),
-            actual_vapour_pressure: Some(1.5), rh_pct: Some(60.0),
-            elevation_m: 100.0, latitude_deg: 45.0, day_of_year: 180,
-            day_length_hours: Some(15.0),
-        });
-        assert!(
-            warm.consensus > cool.consensus,
-            "Warmer → higher ET₀: {} > {}",
-            warm.consensus,
-            cool.consensus
-        );
-    }
-
-    #[test]
-    fn test_ensemble_consensus_within_range() {
-        let r = et0_ensemble(&EnsembleInput {
-            tmin: Some(15.0), tmax: Some(25.0), tmean: Some(20.0),
-            rs_mj: Some(15.0), wind_speed_2m: Some(2.0),
-            actual_vapour_pressure: Some(1.2), rh_pct: Some(60.0),
-            elevation_m: 100.0, latitude_deg: 45.0, day_of_year: 150,
-            day_length_hours: Some(15.0),
-        });
-        let methods = [r.pm, r.pt, r.hargreaves, r.makkink, r.turc, r.hamon];
-        let valid: Vec<f64> = methods.iter().copied().filter(|v| v.is_finite()).collect();
-        let min_v = valid.iter().copied().fold(f64::INFINITY, f64::min);
-        let max_v = valid.iter().copied().fold(f64::NEG_INFINITY, f64::max);
-        assert!(
-            r.consensus >= min_v && r.consensus <= max_v,
-            "Consensus {:.3} should be within [{:.3}, {:.3}]",
-            r.consensus, min_v, max_v
-        );
     }
 }

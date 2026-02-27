@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
 **Updated**: February 27, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.5.1)
-**Status**: 45 experiments, 1109/1109 Python + 651 Rust tests + 1393 atlas checks + 75/75 cross-validation + 11 Tier A modules + Titan V GPU live + AKD1000 NPU live + metalForge live hardware (5 substrates) + 25.9× CPU speedup (8/8 parity) + Anderson cross-spring coupling
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.5.2)
+**Status**: 45 experiments + Exp 042 pure GPU, 1109/1109 Python + 584 Rust lib tests + 1393 atlas checks + 75/75 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + atlas stream + MC GPU path + Titan V GPU live + AKD1000 NPU live + metalForge live (5 substrates, 18 workloads, cross-system routing) + 25.9× CPU speedup (8/8 parity) + Anderson cross-spring coupling
 
 ---
 
@@ -14,9 +14,12 @@ Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no instit
 Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (651 tests, 1393 atlas, 50+4 binaries)
 Phase 1.5 CPU benchmark         — 25.9× Rust-vs-Python geometric mean (8/8 parity)
 Phase 2   BarraCuda GPU bridge  — 11 Tier A modules wired (cross-spring S68 fully rewired)
+Phase 2.5 Tier B orchestrators — Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5)
+Phase 2.6 Seasonal pipeline    — ET₀→Kc→WB→Yield chained, atlas stream, MC ET₀ GPU path
 Phase 3   GPU live dispatch     — Titan V validated (24/24 PASS, 0.04% seasonal parity, 10K batch)
 Phase 3.5 NPU edge             — AKD1000 live: 3 experiments, ~48µs inference, LOCOMOS power budget
-Phase 3.7 metalForge live      — RTX 4070 + Titan V + AKD1000 + i9-12900K discovered, 14 workloads route
+Phase 3.7 metalForge live      — RTX 4070 + Titan V + AKD1000 + i9-12900K discovered, 18 workloads route
+Phase 3.8 Cross-system routing — GPU+NPU+CPU dispatch proven (29/29 PASS), NUCLEUS atomic ready
 Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($600 GPU + $99 NPU)
 ```
 
@@ -75,7 +78,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | 38 | Pedotransfer → Richards Coupling — Exp 038 | 0→CPU | 29+32 | Saxton-Rawls → VG → Richards |
 | 39 | Cross-Method ET₀ Bias Correction — Exp 039 | 0→CPU | 24+24 | Linear correction factors |
 | 40 | CPU vs GPU Parity — Exp 040 | 0→GPU | 22+26 | Bit-identical CPU fallback |
-| 41 | metalForge Mixed-Hardware Dispatch — Exp 041 | 0→GPU | 14+18 | 14 workloads, priority chain |
+| 41 | metalForge Mixed-Hardware Dispatch — Exp 041 | 0→GPU | 14+18 | 18 workloads, cross-system routing |
 | 42 | Seasonal Batch ET₀ at GPU Scale — Exp 042 | 0→GPU | 18+21 | 1,460 station-days batch |
 | 43 | Titan V GPU Live Dispatch — Exp 043 | GPU | 24 | WGSL shader on GV100, 0.04% parity |
 | 44 | metalForge Live Hardware Probe — Exp 044 | GPU+NPU | 17 | 5 substrates discovered live |
@@ -121,18 +124,24 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | `cross_validate` | 75 | Python↔Rust exact match (tol=1e-5) |
 | `validate_dispatch_routing` | 21 | metalForge CPU+GPU+NPU dispatch routing (forge) |
 
-### GPU Orchestrators (Phase 2) — 11 Tier A wired
+### GPU Orchestrators (Phase 2+2.5) — 11 Tier A + 4 Tier B + 3 pipeline
 
 | Orchestrator | BarraCuda Primitive | Cross-Spring Provenance | Status |
 |-------------|--------------------|----|---|
 | `BatchedEt0` | `batched_elementwise_f64` (op=0) | hotSpring `pow_f64` fix (TS-001) | **GPU-FIRST** |
 | `BatchedWaterBalance` | `batched_elementwise_f64` (op=1) | Multi-spring shared | **GPU-STEP** |
-| `BatchedDualKc` | CPU path (Tier B → GPU pending) | airSpring v0.3.10 | CPU ready |
+| `BatchedDualKc` | `batched_elementwise_f64` (op=8, pending) | airSpring v0.5.2 | **Wired** (Tier B) |
+| `BatchedHargreaves` | `batched_elementwise_f64` (op=6, pending) | FAO-56 Eq. 52 | **Wired** (Tier B) |
+| `BatchedKcClimate` | `batched_elementwise_f64` (op=7, pending) | FAO-56 Eq. 62 | **Wired** (Tier B) |
+| `BatchedSensorCal` | `batched_elementwise_f64` (op=5, pending) | Dong et al. 2024 | **Wired** (Tier B) |
 | `KrigingInterpolator` | `kriging_f64::KrigingF64` | wetSpring spatial interpolation | **Integrated** |
 | `SeasonalReducer` | `fused_map_reduce_f64` | wetSpring + airSpring TS-004 fix | **GPU N≥1024** |
 | `StreamSmoother` | `moving_window_stats` | wetSpring S28+ environmental | **Wired** |
 | `BatchedRichards` | `pde::richards::solve_richards` | airSpring→ToadStool S40 absorption | **Wired** |
 | `fit_*_nm/global` | `optimize::nelder_mead` + `multi_start` | neuralSpring optimizer | **Wired** |
+| `SeasonalPipeline` | Chains ops 0→7→1→yield | Zero round-trip architecture | **CPU chained** |
+| `AtlasStream` | `UnidirectionalPipeline` (pending) | Multi-year regional ET₀ | **CPU chained** |
+| `mc_et0_gpu` | `mc_et0_propagate_f64.wgsl` (pending) | groundSpring xoshiro + Box-Muller | **Wired** (Tier B) |
 
 ### CPU Benchmarks (v0.5.1) — Rust 25.9× Faster Than Python (8/8 Parity)
 
@@ -158,11 +167,15 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 
 ### Next Steps (Dong Lab)
 
-- **GPU at scale**: Profile `compute_gpu()` at N=100K+ (multi-year regional grids, crossover point)
+- **ToadStool absorption**: Ops 5-8 pending absorption; CPU fallback validated, GPU dispatch activates automatically
+- **GPU at scale**: Profile `compute_gpu()` at N=100K+ (multi-year regional grids, crossover point via `AtlasStream`)
+- **Pure GPU validation**: `validate_pure_gpu` exercises all orchestrators end-to-end (16/16 PASS)
 - **Richards + isotherm on GPU**: Move remaining Tier B modules to pure GPU via ToadStool shaders
 - **biomeOS integration**: Neural API `capability.call` for cross-primal compute orchestration
+- **NUCLEUS local deployment**: Tower + Node + Nest on Eastgate → LAN HPC across gates
+- **NestGate data providers**: Open-Meteo, NOAA CDO, USDA NASS for autonomous data acquisition
 - **Paper 12+**: Multi-sensor calibration network (awaiting field data from new lab)
-- **Coverage**: 97.06% → target 98%+ (remaining gaps: GPU-dependent code paths)
+- **Coverage**: 97.06% → target 98%+ (remaining gaps: GPU-dependent code paths now Tier B wired)
 
 ### What Good Science Looks Like
 
@@ -242,12 +255,19 @@ Tier 1-2 data fits on Eastgate (2TB NVMe). Tier 3 benefits from Westgate ZFS
 ### Primal Integration Path
 
 ```
-Step 1: NestGate data providers (Open-Meteo, NOAA, USDA)
+Step 0: ✓ DONE — metalForge cross-system routing (GPU+NPU+CPU, 18 workloads, 29/29)
+Step 1: NestGate data providers (Open-Meteo, NOAA CDO, USDA NASS)
         Model after ncbi_live_provider.rs — download once, store with provenance
+        NestGate already has: NCBI, Ensembl, HuggingFace, OpenMeteo, NOAA CDO, USDA NASS
 Step 2: Local NUCLEUS on Eastgate (Tower + Node + Nest)
-        airSpring as first workload consumer via capability.call
-Step 3: LAN HPC (Plasmodium across gates via 10G mesh)
-        Westgate=Nest (76TB), Southgate=Node (RTX 3090), Eastgate=Node+NPU
+        biomeOS graphs orchestrate: airSpring workloads via capability.call
+        Tower atomic: BearDog (crypto/TLS) + Songbird (mesh/discovery)
+        Node atomic: Tower + ToadStool (compute/GPU)
+        Nest atomic: Tower + NestGate (storage/provenance)
+Step 3: LAN HPC (Plasmodium across gates via 10G backbone)
+        Westgate=Heavy Nest (76TB ZFS), Southgate=Node (RTX 3090), Eastgate=Node+NPU
+        PCIe bypass: NPU→GPU direct (skip CPU roundtrip) via metalForge substrate routing
 Step 4: Full scale
-        Strandgate (dual EPYC), Northgate (RTX 5090), cross-spring pipelines
+        Strandgate (dual EPYC, 256GB ECC), Northgate (RTX 5090, 192GB DDR5)
+        Cross-spring pipelines: airSpring+wetSpring+groundSpring via biomeOS graphs
 ```

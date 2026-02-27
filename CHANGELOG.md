@@ -2,6 +2,63 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.5.2] - 2026-02-27
+
+### Tier B GPU Orchestrators + Seasonal Pipeline + Atlas Stream + Real Data Validation
+
+Four new Tier B GPU orchestrators (ops 5-8), seasonal agricultural pipeline chaining
+ET₀→Kc→WB→Yield, atlas streaming for 80-year station data, Monte Carlo ET₀ GPU path,
+metalForge cross-system routing (29/29), and real-data validation on 12 Open-Meteo
+ERA5 stations (73/73 PASS, 4800 crop-year results). Three inter-primal handoffs
+for ToadStool, NestGate, and biomeOS.
+
+#### Added
+- **4 Tier B GPU orchestrators** (ops 5-8, pending ToadStool absorption):
+  - `gpu::sensor_calibration` — SoilWatch 10 VWC (op=5, stride=5)
+  - `gpu::hargreaves` — Hargreaves-Samani ET₀ (op=6, stride=4)
+  - `gpu::kc_climate` — FAO-56 Eq. 62 Kc climate adjustment (op=7, stride=4)
+  - `gpu::dual_kc` — Dual Kc evaporation layer (op=8, stride=7)
+- **Seasonal pipeline** (`gpu::seasonal_pipeline`): Zero-round-trip chained
+  ET₀ → Kc adjust → water balance → Stewart yield response for multi-crop budgets
+- **Atlas stream** (`gpu::atlas_stream`): Station-batch streaming for 80-year
+  Open-Meteo ERA5 data with growing-season filtering and multi-crop dispatch
+- **MC ET₀ GPU path** (`gpu::mc_et0`): Monte Carlo uncertainty propagation
+  with parametric CI via `norm_ppf`
+- **`validate_atlas_stream` binary**: 73/73 PASS on real 80-year Open-Meteo data
+  (12 stations, 4800 crop-year results, mass balance ~2e-13 mm)
+- **`validate_pure_gpu` binary**: 16/16 PASS pure GPU validation
+- **metalForge cross-system routing**: 29/29 PASS, 18 eco workloads across
+  GPU+NPU+CPU substrates
+- **3 inter-primal handoff documents**:
+  - `AIRSPRING_TOADSTOOL_V052_OPS_5_8_HANDOFF`: WGSL specs for ops 5-8
+  - `AIRSPRING_NESTGATE_V052_DATA_PROVIDER_HANDOFF`: Open-Meteo/NOAA/NASS data providers
+  - `AIRSPRING_BIOMEOS_V052_WORKLOAD_GRAPH_HANDOFF`: biomeOS TOML graph + NUCLEUS mapping
+
+#### Changed
+- Barracuda lib tests: 527 → 584 (57 new GPU orchestrator + pipeline tests)
+- Barracuda binaries: 50 → 51 (validate_atlas_stream)
+- Forge tests: 26 → 31 (metalForge cross-system routing)
+- metalForge workloads: 14 → 18 (4 Tier B local workloads)
+- Evolution gaps: 23 → 26 entries (9 wired Tier B)
+- Version bumped to 0.5.2
+
+#### Documentation
+- `whitePaper/baseCamp/README.md`: Updated to v0.5.2 with GPU orchestrator table
+- `barracuda/src/gpu/evolution_gaps.rs`: v0.5.2 with wired Tier B entries
+- `specs/BARRACUDA_REQUIREMENTS.md`: Updated Phase 2 orchestrator table
+
+#### Quality Gates
+| Check | Status |
+|-------|--------|
+| Python baselines | **1109/1109 PASS** |
+| Rust lib tests | **584 passed** |
+| Rust integration | **20 passed** |
+| GPU live (Titan V) | **24/24 PASS** |
+| metalForge cross-system | **29/29 PASS** |
+| Atlas stream (real data) | **73/73 PASS** (12 stations, 4800 results) |
+| CPU vs Python | **25.9× (8/8 parity)** |
+| clippy pedantic | **0 warnings** |
+
 ## [0.5.1] - 2026-02-27
 
 ### Anderson Coupling + CPU vs Python Benchmark + Documentation Sweep

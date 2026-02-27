@@ -1,7 +1,7 @@
 # Validation Methodology
 
 **Purpose**: Document the multi-phase validation approach used in the airSpring study
-**Version**: v0.5.1
+**Version**: v0.5.2
 **See also**: [STUDY.md](STUDY.md) for complete results
 
 ---
@@ -40,7 +40,7 @@ Re-implement the same computations in pure Rust using BarraCuda. Compare:
 - **Reproducibility**: Deterministic results
 - **GPU readiness**: Architecture suitable for ToadStool GPU acceleration
 - **Code quality**: Zero clippy pedantic and nursery warnings, proper error types, idiomatic Rust
-- **Binaries**: 54 binaries (50 barracuda + 4 forge)
+- **Binaries**: 55 binaries (51 barracuda + 4 forge)
 
 ### Phase 2: Cross-Validation (Python↔Rust)
 
