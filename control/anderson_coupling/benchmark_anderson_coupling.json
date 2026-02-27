@@ -1,0 +1,696 @@
+{
+  "checks": [
+    {
+      "label": "point(sand, \u03b8=0.35) \u2192 extended",
+      "pass": true,
+      "soil": "sand",
+      "theta": 0.35,
+      "expected_regime": "extended",
+      "se": 0.7922077922077921,
+      "connectivity": 0.8900605553600227,
+      "coordination": 5.340363332160136,
+      "d_eff": 2.670181666080068,
+      "disorder": 2.4935064935064943,
+      "regime": "extended"
+    },
+    {
+      "label": "point(sand, \u03b8=0.10) \u2192 localized",
+      "pass": true,
+      "soil": "sand",
+      "theta": 0.1,
+      "expected_regime": "localized",
+      "se": 0.14285714285714288,
+      "connectivity": 0.37796447300922725,
+      "coordination": 2.2677868380553634,
+      "d_eff": 1.1338934190276817,
+      "disorder": 10.285714285714285,
+      "regime": "localized"
+    },
+    {
+      "label": "point(loam, \u03b8=0.30) \u2192 marginal",
+      "pass": true,
+      "soil": "loam",
+      "theta": 0.3,
+      "expected_regime": "marginal",
+      "se": 0.6306818181818181,
+      "connectivity": 0.7941547822570976,
+      "coordination": 4.764928693542585,
+      "d_eff": 2.3824643467712927,
+      "disorder": 4.4318181818181825,
+      "regime": "marginal"
+    },
+    {
+      "label": "point(loam, \u03b8=0.12) \u2192 localized",
+      "pass": true,
+      "soil": "loam",
+      "theta": 0.12,
+      "expected_regime": "localized",
+      "se": 0.11931818181818181,
+      "connectivity": 0.3454246398538787,
+      "coordination": 2.0725478391232723,
+      "d_eff": 1.0362739195616362,
+      "disorder": 10.568181818181818,
+      "regime": "localized"
+    },
+    {
+      "label": "point(silt_loam, \u03b8=0.35) \u2192 extended",
+      "pass": true,
+      "soil": "silt_loam",
+      "theta": 0.35,
+      "expected_regime": "extended",
+      "se": 0.7389033942558746,
+      "connectivity": 0.8595949012505103,
+      "coordination": 5.157569407503062,
+      "d_eff": 2.578784703751531,
+      "disorder": 3.133159268929505,
+      "regime": "extended"
+    },
+    {
+      "label": "point(silt_loam, \u03b8=0.10) \u2192 localized",
+      "pass": true,
+      "soil": "silt_loam",
+      "theta": 0.1,
+      "expected_regime": "localized",
+      "se": 0.08616187989556136,
+      "connectivity": 0.2935334391437564,
+      "coordination": 1.7612006348625384,
+      "d_eff": 0.8806003174312692,
+      "disorder": 10.966057441253264,
+      "regime": "localized"
+    },
+    {
+      "label": "point(clay, \u03b8=0.30) \u2192 extended",
+      "pass": true,
+      "soil": "clay",
+      "theta": 0.3,
+      "expected_regime": "extended",
+      "se": 0.7435897435897435,
+      "connectivity": 0.8623164985025762,
+      "coordination": 5.173898991015458,
+      "d_eff": 2.586949495507729,
+      "disorder": 3.076923076923078,
+      "regime": "extended"
+    },
+    {
+      "label": "point(clay, \u03b8=0.10) \u2192 localized",
+      "pass": true,
+      "soil": "clay",
+      "theta": 0.1,
+      "expected_regime": "localized",
+      "se": 0.10256410256410256,
+      "connectivity": 0.32025630761017426,
+      "coordination": 1.9215378456610455,
+      "d_eff": 0.9607689228305227,
+      "disorder": 10.76923076923077,
+      "regime": "localized"
+    },
+    {
+      "label": "point(loam, \u03b8=0.20) \u2192 localized",
+      "pass": true,
+      "soil": "loam",
+      "theta": 0.2,
+      "expected_regime": "localized",
+      "se": 0.3465909090909091,
+      "connectivity": 0.5887197203176645,
+      "coordination": 3.5323183219059873,
+      "d_eff": 1.7661591609529936,
+      "disorder": 7.84090909090909,
+      "regime": "localized"
+    },
+    {
+      "label": "monotonicity(sand): d_eff \u2191 with \u03b8",
+      "pass": true,
+      "soil": "sand"
+    },
+    {
+      "label": "monotonicity(loam): d_eff \u2191 with \u03b8",
+      "pass": true,
+      "soil": "loam"
+    },
+    {
+      "label": "monotonicity(silt_loam): d_eff \u2191 with \u03b8",
+      "pass": true,
+      "soil": "silt_loam"
+    },
+    {
+      "label": "monotonicity(clay): d_eff \u2191 with \u03b8",
+      "pass": true,
+      "soil": "clay"
+    },
+    {
+      "label": "boundary(sand, \u03b8=\u03b8_s) \u2192 d_eff=3.0",
+      "pass": true,
+      "d_eff": 3.0
+    },
+    {
+      "label": "boundary(sand, \u03b8=\u03b8_r) \u2192 d_eff=0.0",
+      "pass": true,
+      "d_eff": 0.0
+    },
+    {
+      "label": "boundary(loam, \u03b8=\u03b8_s) \u2192 d_eff=3.0",
+      "pass": true,
+      "d_eff": 3.0
+    },
+    {
+      "label": "boundary(loam, \u03b8=\u03b8_r) \u2192 d_eff=0.0",
+      "pass": true,
+      "d_eff": 0.0
+    },
+    {
+      "label": "boundary(silt_loam, \u03b8=\u03b8_s) \u2192 d_eff=3.0",
+      "pass": true,
+      "d_eff": 3.0
+    },
+    {
+      "label": "boundary(silt_loam, \u03b8=\u03b8_r) \u2192 d_eff=0.0",
+      "pass": true,
+      "d_eff": 0.0
+    },
+    {
+      "label": "boundary(clay, \u03b8=\u03b8_s) \u2192 d_eff=3.0",
+      "pass": true,
+      "d_eff": 3.0
+    },
+    {
+      "label": "boundary(clay, \u03b8=\u03b8_r) \u2192 d_eff=0.0",
+      "pass": true,
+      "d_eff": 0.0
+    },
+    {
+      "label": "disorder_monotonicity(sand): W \u2193 with \u03b8",
+      "pass": true,
+      "soil": "sand"
+    },
+    {
+      "label": "disorder_monotonicity(loam): W \u2193 with \u03b8",
+      "pass": true,
+      "soil": "loam"
+    },
+    {
+      "label": "disorder_monotonicity(silt_loam): W \u2193 with \u03b8",
+      "pass": true,
+      "soil": "silt_loam"
+    },
+    {
+      "label": "disorder_monotonicity(clay): W \u2193 with \u03b8",
+      "pass": true,
+      "soil": "clay"
+    },
+    {
+      "label": "seasonal(loam, notill): spring d_eff=2.42 > 2.0",
+      "pass": true
+    },
+    {
+      "label": "seasonal(loam, notill): spring > summer (2.42 > 1.16)",
+      "pass": true
+    },
+    {
+      "label": "seasonal(loam, conventional): spring d_eff=2.16 > 2.0",
+      "pass": true
+    },
+    {
+      "label": "seasonal(loam, conventional): spring > summer (2.16 > 1.01)",
+      "pass": true
+    },
+    {
+      "label": "tillage_effect(loam): notill d\u0304=1.782 > conv d\u0304=1.578",
+      "pass": true
+    },
+    {
+      "label": "seasonal(silt_loam, notill): spring d_eff=2.42 > 2.0",
+      "pass": true
+    },
+    {
+      "label": "seasonal(silt_loam, notill): spring > summer (2.42 > 1.16)",
+      "pass": true
+    },
+    {
+      "label": "seasonal(silt_loam, conventional): spring d_eff=2.18 > 2.0",
+      "pass": true
+    },
+    {
+      "label": "seasonal(silt_loam, conventional): spring > summer (2.18 > 1.03)",
+      "pass": true
+    },
+    {
+      "label": "tillage_effect(silt_loam): notill d\u0304=1.782 > conv d\u0304=1.595",
+      "pass": true
+    },
+    {
+      "label": "ref(sand, S_e=0.00): d_eff=0.000000, W=12.0000",
+      "pass": true,
+      "theta": 0.045,
+      "se": 0.0,
+      "connectivity": 0.0,
+      "coordination": 0.0,
+      "d_eff": 0.0,
+      "disorder": 12.0,
+      "regime": "localized"
+    },
+    {
+      "label": "ref(sand, S_e=0.25): d_eff=1.500000, W=9.0000",
+      "pass": true,
+      "theta": 0.14125,
+      "se": 0.24999999999999997,
+      "connectivity": 0.5,
+      "coordination": 3.0,
+      "d_eff": 1.5,
+      "disorder": 9.0,
+      "regime": "localized"
+    },
+    {
+      "label": "ref(sand, S_e=0.50): d_eff=2.121320, W=6.0000",
+      "pass": true,
+      "theta": 0.2375,
+      "se": 0.5,
+      "connectivity": 0.7071067811865476,
+      "coordination": 4.242640687119286,
+      "d_eff": 2.121320343559643,
+      "disorder": 6.0,
+      "regime": "marginal"
+    },
+    {
+      "label": "ref(sand, S_e=0.75): d_eff=2.598076, W=3.0000",
+      "pass": true,
+      "theta": 0.33375,
+      "se": 0.75,
+      "connectivity": 0.8660254037844386,
+      "coordination": 5.196152422706632,
+      "d_eff": 2.598076211353316,
+      "disorder": 3.0,
+      "regime": "extended"
+    },
+    {
+      "label": "ref(sand, S_e=1.00): d_eff=3.000000, W=0.0000",
+      "pass": true,
+      "theta": 0.43,
+      "se": 1.0,
+      "connectivity": 1.0,
+      "coordination": 6.0,
+      "d_eff": 3.0,
+      "disorder": 0.0,
+      "regime": "extended"
+    },
+    {
+      "label": "ref(loam, S_e=0.00): d_eff=0.000000, W=12.0000",
+      "pass": true,
+      "theta": 0.078,
+      "se": 0.0,
+      "connectivity": 0.0,
+      "coordination": 0.0,
+      "d_eff": 0.0,
+      "disorder": 12.0,
+      "regime": "localized"
+    },
+    {
+      "label": "ref(loam, S_e=0.25): d_eff=1.500000, W=9.0000",
+      "pass": true,
+      "theta": 0.16599999999999998,
+      "se": 0.24999999999999997,
+      "connectivity": 0.5,
+      "coordination": 3.0,
+      "d_eff": 1.5,
+      "disorder": 9.0,
+      "regime": "localized"
+    },
+    {
+      "label": "ref(loam, S_e=0.50): d_eff=2.121320, W=6.0000",
+      "pass": true,
+      "theta": 0.254,
+      "se": 0.5,
+      "connectivity": 0.7071067811865476,
+      "coordination": 4.242640687119286,
+      "d_eff": 2.121320343559643,
+      "disorder": 6.0,
+      "regime": "marginal"
+    },
+    {
+      "label": "ref(loam, S_e=0.75): d_eff=2.598076, W=3.0000",
+      "pass": true,
+      "theta": 0.342,
+      "se": 0.7500000000000001,
+      "connectivity": 0.8660254037844387,
+      "coordination": 5.196152422706632,
+      "d_eff": 2.598076211353316,
+      "disorder": 2.9999999999999987,
+      "regime": "extended"
+    },
+    {
+      "label": "ref(loam, S_e=1.00): d_eff=3.000000, W=0.0000",
+      "pass": true,
+      "theta": 0.43,
+      "se": 1.0,
+      "connectivity": 1.0,
+      "coordination": 6.0,
+      "d_eff": 3.0,
+      "disorder": 0.0,
+      "regime": "extended"
+    },
+    {
+      "label": "ref(silt_loam, S_e=0.00): d_eff=0.000000, W=12.0000",
+      "pass": true,
+      "theta": 0.067,
+      "se": 0.0,
+      "connectivity": 0.0,
+      "coordination": 0.0,
+      "d_eff": 0.0,
+      "disorder": 12.0,
+      "regime": "localized"
+    },
+    {
+      "label": "ref(silt_loam, S_e=0.25): d_eff=1.500000, W=9.0000",
+      "pass": true,
+      "theta": 0.16275,
+      "se": 0.25,
+      "connectivity": 0.5,
+      "coordination": 3.0,
+      "d_eff": 1.5,
+      "disorder": 9.0,
+      "regime": "localized"
+    },
+    {
+      "label": "ref(silt_loam, S_e=0.50): d_eff=2.121320, W=6.0000",
+      "pass": true,
+      "theta": 0.2585,
+      "se": 0.5,
+      "connectivity": 0.7071067811865476,
+      "coordination": 4.242640687119286,
+      "d_eff": 2.121320343559643,
+      "disorder": 6.0,
+      "regime": "marginal"
+    },
+    {
+      "label": "ref(silt_loam, S_e=0.75): d_eff=2.598076, W=3.0000",
+      "pass": true,
+      "theta": 0.35425,
+      "se": 0.75,
+      "connectivity": 0.8660254037844386,
+      "coordination": 5.196152422706632,
+      "d_eff": 2.598076211353316,
+      "disorder": 3.0,
+      "regime": "extended"
+    },
+    {
+      "label": "ref(silt_loam, S_e=1.00): d_eff=3.000000, W=0.0000",
+      "pass": true,
+      "theta": 0.45,
+      "se": 1.0,
+      "connectivity": 1.0,
+      "coordination": 6.0,
+      "d_eff": 3.0,
+      "disorder": 0.0,
+      "regime": "extended"
+    },
+    {
+      "label": "ref(clay, S_e=0.00): d_eff=0.000000, W=12.0000",
+      "pass": true,
+      "theta": 0.068,
+      "se": 0.0,
+      "connectivity": 0.0,
+      "coordination": 0.0,
+      "d_eff": 0.0,
+      "disorder": 12.0,
+      "regime": "localized"
+    },
+    {
+      "label": "ref(clay, S_e=0.25): d_eff=1.500000, W=9.0000",
+      "pass": true,
+      "theta": 0.14600000000000002,
+      "se": 0.25000000000000006,
+      "connectivity": 0.5000000000000001,
+      "coordination": 3.000000000000001,
+      "d_eff": 1.5000000000000004,
+      "disorder": 9.0,
+      "regime": "localized"
+    },
+    {
+      "label": "ref(clay, S_e=0.50): d_eff=2.121320, W=6.0000",
+      "pass": true,
+      "theta": 0.224,
+      "se": 0.5,
+      "connectivity": 0.7071067811865476,
+      "coordination": 4.242640687119286,
+      "d_eff": 2.121320343559643,
+      "disorder": 6.0,
+      "regime": "marginal"
+    },
+    {
+      "label": "ref(clay, S_e=0.75): d_eff=2.598076, W=3.0000",
+      "pass": true,
+      "theta": 0.302,
+      "se": 0.75,
+      "connectivity": 0.8660254037844386,
+      "coordination": 5.196152422706632,
+      "d_eff": 2.598076211353316,
+      "disorder": 3.0,
+      "regime": "extended"
+    },
+    {
+      "label": "ref(clay, S_e=1.00): d_eff=3.000000, W=0.0000",
+      "pass": true,
+      "theta": 0.38,
+      "se": 1.0,
+      "connectivity": 1.0,
+      "coordination": 6.0,
+      "d_eff": 3.0,
+      "disorder": 0.0,
+      "regime": "extended"
+    }
+  ],
+  "reference_values": [
+    {
+      "soil": "sand",
+      "theta": 0.045,
+      "se": 0.0,
+      "connectivity": 0.0,
+      "coordination": 0.0,
+      "d_eff": 0.0,
+      "disorder": 12.0,
+      "regime": "localized"
+    },
+    {
+      "soil": "sand",
+      "theta": 0.14125,
+      "se": 0.24999999999999997,
+      "connectivity": 0.5,
+      "coordination": 3.0,
+      "d_eff": 1.5,
+      "disorder": 9.0,
+      "regime": "localized"
+    },
+    {
+      "soil": "sand",
+      "theta": 0.2375,
+      "se": 0.5,
+      "connectivity": 0.7071067811865476,
+      "coordination": 4.242640687119286,
+      "d_eff": 2.121320343559643,
+      "disorder": 6.0,
+      "regime": "marginal"
+    },
+    {
+      "soil": "sand",
+      "theta": 0.33375,
+      "se": 0.75,
+      "connectivity": 0.8660254037844386,
+      "coordination": 5.196152422706632,
+      "d_eff": 2.598076211353316,
+      "disorder": 3.0,
+      "regime": "extended"
+    },
+    {
+      "soil": "sand",
+      "theta": 0.43,
+      "se": 1.0,
+      "connectivity": 1.0,
+      "coordination": 6.0,
+      "d_eff": 3.0,
+      "disorder": 0.0,
+      "regime": "extended"
+    },
+    {
+      "soil": "loam",
+      "theta": 0.078,
+      "se": 0.0,
+      "connectivity": 0.0,
+      "coordination": 0.0,
+      "d_eff": 0.0,
+      "disorder": 12.0,
+      "regime": "localized"
+    },
+    {
+      "soil": "loam",
+      "theta": 0.16599999999999998,
+      "se": 0.24999999999999997,
+      "connectivity": 0.5,
+      "coordination": 3.0,
+      "d_eff": 1.5,
+      "disorder": 9.0,
+      "regime": "localized"
+    },
+    {
+      "soil": "loam",
+      "theta": 0.254,
+      "se": 0.5,
+      "connectivity": 0.7071067811865476,
+      "coordination": 4.242640687119286,
+      "d_eff": 2.121320343559643,
+      "disorder": 6.0,
+      "regime": "marginal"
+    },
+    {
+      "soil": "loam",
+      "theta": 0.342,
+      "se": 0.7500000000000001,
+      "connectivity": 0.8660254037844387,
+      "coordination": 5.196152422706632,
+      "d_eff": 2.598076211353316,
+      "disorder": 2.9999999999999987,
+      "regime": "extended"
+    },
+    {
+      "soil": "loam",
+      "theta": 0.43,
+      "se": 1.0,
+      "connectivity": 1.0,
+      "coordination": 6.0,
+      "d_eff": 3.0,
+      "disorder": 0.0,
+      "regime": "extended"
+    },
+    {
+      "soil": "silt_loam",
+      "theta": 0.067,
+      "se": 0.0,
+      "connectivity": 0.0,
+      "coordination": 0.0,
+      "d_eff": 0.0,
+      "disorder": 12.0,
+      "regime": "localized"
+    },
+    {
+      "soil": "silt_loam",
+      "theta": 0.16275,
+      "se": 0.25,
+      "connectivity": 0.5,
+      "coordination": 3.0,
+      "d_eff": 1.5,
+      "disorder": 9.0,
+      "regime": "localized"
+    },
+    {
+      "soil": "silt_loam",
+      "theta": 0.2585,
+      "se": 0.5,
+      "connectivity": 0.7071067811865476,
+      "coordination": 4.242640687119286,
+      "d_eff": 2.121320343559643,
+      "disorder": 6.0,
+      "regime": "marginal"
+    },
+    {
+      "soil": "silt_loam",
+      "theta": 0.35425,
+      "se": 0.75,
+      "connectivity": 0.8660254037844386,
+      "coordination": 5.196152422706632,
+      "d_eff": 2.598076211353316,
+      "disorder": 3.0,
+      "regime": "extended"
+    },
+    {
+      "soil": "silt_loam",
+      "theta": 0.45,
+      "se": 1.0,
+      "connectivity": 1.0,
+      "coordination": 6.0,
+      "d_eff": 3.0,
+      "disorder": 0.0,
+      "regime": "extended"
+    },
+    {
+      "soil": "clay",
+      "theta": 0.068,
+      "se": 0.0,
+      "connectivity": 0.0,
+      "coordination": 0.0,
+      "d_eff": 0.0,
+      "disorder": 12.0,
+      "regime": "localized"
+    },
+    {
+      "soil": "clay",
+      "theta": 0.14600000000000002,
+      "se": 0.25000000000000006,
+      "connectivity": 0.5000000000000001,
+      "coordination": 3.000000000000001,
+      "d_eff": 1.5000000000000004,
+      "disorder": 9.0,
+      "regime": "localized"
+    },
+    {
+      "soil": "clay",
+      "theta": 0.224,
+      "se": 0.5,
+      "connectivity": 0.7071067811865476,
+      "coordination": 4.242640687119286,
+      "d_eff": 2.121320343559643,
+      "disorder": 6.0,
+      "regime": "marginal"
+    },
+    {
+      "soil": "clay",
+      "theta": 0.302,
+      "se": 0.75,
+      "connectivity": 0.8660254037844386,
+      "coordination": 5.196152422706632,
+      "d_eff": 2.598076211353316,
+      "disorder": 3.0,
+      "regime": "extended"
+    },
+    {
+      "soil": "clay",
+      "theta": 0.38,
+      "se": 1.0,
+      "connectivity": 1.0,
+      "coordination": 6.0,
+      "d_eff": 3.0,
+      "disorder": 0.0,
+      "regime": "extended"
+    }
+  ],
+  "soil_types": {
+    "sand": {
+      "theta_r": 0.045,
+      "theta_s": 0.43,
+      "alpha": 0.145,
+      "n": 2.68
+    },
+    "loam": {
+      "theta_r": 0.078,
+      "theta_s": 0.43,
+      "alpha": 0.036,
+      "n": 1.56
+    },
+    "silt_loam": {
+      "theta_r": 0.067,
+      "theta_s": 0.45,
+      "alpha": 0.02,
+      "n": 1.41
+    },
+    "clay": {
+      "theta_r": 0.068,
+      "theta_s": 0.38,
+      "alpha": 0.008,
+      "n": 1.09
+    }
+  },
+  "constants": {
+    "z_max": 6.0,
+    "l_mualem": 0.5,
+    "w_0": 12.0,
+    "d_eff_critical": 2.0,
+    "d_eff_extended": 2.5
+  }
+}

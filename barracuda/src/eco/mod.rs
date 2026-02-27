@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! Ecological and agricultural science algorithms.
 
+pub mod anderson;
 pub mod correction;
 pub mod crop;
 pub mod diversity;

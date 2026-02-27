@@ -138,7 +138,7 @@ dimension of the Anderson lattice, which determines whether QS signals propagate
 |---|-------------------|------|---------|:----------:|:--------------:|----------|
 | 12 | Islam et al. "No-till and conservation agriculture: David Brandt farm" | 2014 | — | **Yes** (ISWCR) | **In Exp 011** (data digitized) | N/A (data extraction) |
 | 13 | Allen et al. (1998) FAO-56 Ch 7 — Dual Kc for cover crops | 1998 | Standard | **Yes** (open literature) | **40/40 PASS** (Phase 0) | Batch Kc (op=7) |
-| 14 | Soil moisture → Anderson d_eff coupling model | — | Cross-spring | **Yes** (USDA + Open-Meteo) | Future | `BatchedWaterBalance` → Anderson |
+| 14 | Soil moisture → Anderson d_eff coupling model — Exp 045 | — | Cross-spring | **Yes** (USDA + Open-Meteo) | **55+95 PASS** | `eco::anderson` (θ→d_eff) |
 | 15 | OSU Triplett-Van Doren 60-year water balance reconstruction | — | Cross-spring | **Yes** (Open-Meteo 80-yr, USDA soils) | **10+11 PASS** (Exp 015) | `BatchedEt0` at scale |
 | 16 | Cover crop water use & seasonal diversity dynamics | — | Dong | Awaiting field data | Future | Batch ET₀ with Kc schedule |
 

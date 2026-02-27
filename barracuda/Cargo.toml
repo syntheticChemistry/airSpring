@@ -239,5 +239,9 @@ name = "validate_gpu_live"
 path = "src/bin/validate_gpu_live.rs"
 
 [[bin]]
+name = "validate_anderson"
+path = "src/bin/validate_anderson.rs"
+
+[[bin]]
 name = "bench_cross_spring"
 path = "src/bin/bench_cross_spring.rs"

@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-02-27 (v0.5.0 — 44 experiments, 1054 Python + 645 Rust tests + 1024 validation + 1393 atlas checks, 47 barracuda + 4 forge binaries, 69x CPU speedup, **Titan V GPU live dispatch** (24/24 PASS), AKD1000 NPU live, metalForge live hardware probe (5 substrates), CPU↔GPU 0.04% parity, clippy pedantic, 7 ET₀ methods)
+**Updated**: 2026-02-27 (v0.5.1 — 45 experiments, 1109 Python + 651 Rust tests + 1024 validation + 1393 atlas checks, 50 barracuda + 4 forge binaries, **25.9× Rust-vs-Python speedup** (8/8 parity), **Titan V GPU live dispatch** (24/24 PASS), AKD1000 NPU live, metalForge live hardware probe (5 substrates), CPU↔GPU 0.04% parity, clippy pedantic, 7 ET₀ methods, Anderson cross-spring coupling)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 

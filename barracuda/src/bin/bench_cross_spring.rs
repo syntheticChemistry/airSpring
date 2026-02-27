@@ -7,7 +7,7 @@
 //! Exercises all airSpring GPU paths, benchmarks them against CPU baselines,
 //! and reports the cross-spring shader lineage for each primitive.
 //!
-//! This binary validates that ToadStool's universal precision architecture
+//! This binary validates that `ToadStool`'s universal precision architecture
 //! (S68+) works correctly and documents where each shader came from.
 
 use std::sync::Arc;
@@ -192,8 +192,8 @@ fn main() {
 fn print_provenance_report() {
     println!("── Cross-Spring Shader Provenance ───────────────────────────\n");
     println!(
-        "  {:30} {:22} {:>5}  {}",
-        "Shader", "Origin", "Prims", "airSpring Use"
+        "  {:30} {:22} {:>5}  airSpring Use",
+        "Shader", "Origin", "Prims"
     );
     println!("  {}", "─".repeat(90));
     for p in PROVENANCE {
@@ -226,12 +226,12 @@ fn truncate(s: &str, max: usize) -> String {
 
 fn sample_station_day(doy: u32) -> StationDay {
     StationDay {
-        tmax: 21.5 + 0.01 * f64::from(doy),
-        tmin: 12.3 + 0.005 * f64::from(doy),
+        tmax: 0.01f64.mul_add(f64::from(doy), 21.5),
+        tmin: 0.005f64.mul_add(f64::from(doy), 12.3),
         rh_max: 84.0,
         rh_min: 63.0,
         wind_2m: 2.078,
-        rs: 22.07 + 0.02 * f64::from(doy),
+        rs: 0.02f64.mul_add(f64::from(doy), 22.07),
         elevation: 100.0,
         latitude: 50.80,
         doy,
@@ -240,10 +240,10 @@ fn sample_station_day(doy: u32) -> StationDay {
 
 fn sample_et0_input(doy: u32) -> DailyEt0Input {
     DailyEt0Input {
-        tmin: 12.3 + 0.005 * f64::from(doy),
-        tmax: 21.5 + 0.01 * f64::from(doy),
+        tmin: 0.005f64.mul_add(f64::from(doy), 12.3),
+        tmax: 0.01f64.mul_add(f64::from(doy), 21.5),
         tmean: None,
-        solar_radiation: 22.07 + 0.02 * f64::from(doy),
+        solar_radiation: 0.02f64.mul_add(f64::from(doy), 22.07),
         wind_speed_2m: 2.078,
         actual_vapour_pressure: 1.409,
         elevation_m: 100.0,
@@ -338,7 +338,7 @@ fn bench_wb_cpu_season(days: usize) -> bool {
         .map(|day| airspring_barracuda::eco::water_balance::DailyInput {
             precipitation: if day % 5 == 0 { 10.0 } else { 0.0 },
             irrigation: 0.0,
-            et0: 4.0 + 2.0 * (2.0 * std::f64::consts::PI * day as f64 / 365.0).sin(),
+            et0: 2.0f64.mul_add((2.0 * std::f64::consts::PI * day as f64 / 365.0).sin(), 4.0),
             kc: 1.0,
         })
         .collect();
@@ -385,7 +385,7 @@ fn bench_reduce_gpu(device: &Arc<WgpuDevice>, n: usize) -> bool {
         }
     };
     let data: Vec<f64> = (0..n)
-        .map(|i| 3.0 + 2.0 * (i as f64 * 0.01).sin())
+        .map(|i| 2.0f64.mul_add((i as f64 * 0.01).sin(), 3.0))
         .collect();
     match reducer.compute_stats(&data) {
         Ok(stats) => stats.total > 0.0 && stats.count == n,
@@ -398,7 +398,7 @@ fn bench_reduce_gpu(device: &Arc<WgpuDevice>, n: usize) -> bool {
 
 fn bench_stream_cpu(n: usize, window: usize) -> bool {
     let data: Vec<f64> = (0..n)
-        .map(|i| 25.0 + 3.0 * (i as f64 * 0.1).sin())
+        .map(|i| 3.0f64.mul_add((i as f64 * 0.1).sin(), 25.0))
         .collect();
     stream::smooth_cpu(&data, window).is_some()
 }
@@ -406,7 +406,7 @@ fn bench_stream_cpu(n: usize, window: usize) -> bool {
 fn bench_stream_gpu(device: &Arc<WgpuDevice>, n: usize, window: usize) -> bool {
     let smoother = StreamSmoother::new(Arc::clone(device));
     let data: Vec<f64> = (0..n)
-        .map(|i| 25.0 + 3.0 * (i as f64 * 0.1).sin())
+        .map(|i| 3.0f64.mul_add((i as f64 * 0.1).sin(), 25.0))
         .collect();
     match smoother.smooth(&data, window) {
         Ok(result) => !result.mean.is_empty(),
@@ -431,7 +431,7 @@ fn bench_richards_upstream() -> bool {
 fn bench_richards_cn_diffusion() -> bool {
     let req = sand_richards_request();
     match BatchedRichards::solve_cn_diffusion(&req) {
-        Ok(theta) => theta.len() == 20 && theta.iter().all(|&t| t >= 0.04 && t <= 0.44),
+        Ok(theta) => theta.len() == 20 && theta.iter().all(|&t| (0.04..=0.44).contains(&t)),
         Err(e) => {
             eprintln!("    CN diffusion failed: {e}");
             false
@@ -442,13 +442,13 @@ fn bench_richards_cn_diffusion() -> bool {
 fn bench_isotherm_nm() -> bool {
     let ce = [1.0, 2.5, 5.0, 10.0, 20.0, 40.0, 60.0, 80.0, 100.0];
     let qe = [0.85, 1.92, 3.45, 5.8, 8.9, 12.1, 13.8, 14.5, 14.9];
-    gpu_iso::fit_langmuir_nm(&ce, &qe).map_or(false, |f| f.r_squared > 0.95)
+    gpu_iso::fit_langmuir_nm(&ce, &qe).is_some_and(|f| f.r_squared > 0.95)
 }
 
 fn bench_isotherm_global() -> bool {
     let ce = [1.0, 2.5, 5.0, 10.0, 20.0, 40.0, 60.0, 80.0, 100.0];
     let qe = [0.85, 1.92, 3.45, 5.8, 8.9, 12.1, 13.8, 14.5, 14.9];
-    gpu_iso::fit_langmuir_global(&ce, &qe, 8).map_or(false, |f| f.r_squared > 0.95)
+    gpu_iso::fit_langmuir_global(&ce, &qe, 8).is_some_and(|f| f.r_squared > 0.95)
 }
 
 fn bench_mc_et0() -> bool {
@@ -458,7 +458,7 @@ fn bench_mc_et0() -> bool {
     result.n_samples > 4900 && lo < result.et0_mean && hi > result.et0_mean
 }
 
-fn sand_richards_request() -> RichardsRequest {
+const fn sand_richards_request() -> RichardsRequest {
     RichardsRequest {
         params: VanGenuchtenParams {
             theta_r: 0.045,

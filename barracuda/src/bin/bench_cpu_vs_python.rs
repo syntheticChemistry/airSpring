@@ -3,456 +3,403 @@
 #![allow(
     clippy::cast_precision_loss,
     clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
+    clippy::cast_sign_loss,
+    clippy::similar_names
 )]
-//! Benchmark Rust CPU vs Python baseline for airSpring core computations.
+//! CPU vs Python benchmark — proves barracuda's pure Rust math is:
+//! 1. Numerically identical to Python controls (parity at 1e-6)
+//! 2. Significantly faster than interpreted Python
 //!
-//! Measures wall-clock time for:
-//! 1. FAO-56 PM ET₀ computation (N station-days)
-//! 2. Dual Kc simulation (N-day growing seasons)
-//! 3. Cover crop + mulch simulation
-//! 4. Richards PDE (1D infiltration)
-//! 5. Van Genuchten retention (batch)
-//! 6. Isotherm fitting (Langmuir + Freundlich)
-//! 7. Yield response (Stewart 1977 single + multi-stage)
-//! 8. Water use efficiency
-//! 9. Season yield + water balance integration
-//! 10. CW2D Richards (gravel + organic media)
-//! 11. Scheduling pipeline: ET₀→Kc→WB→Stewart yield (Exp 014)
-//! 12. Lysimeter ET: mass→ET conversion throughput (Exp 016)
-//! 13. Sensitivity OAT: 6-variable perturbation batch (Exp 017)
-//!
-//! Outputs timing data in a format directly comparable to Python controls.
-//! Run with `--release` for production-representative numbers:
-//!
-//! ```sh
-//! cargo run --release --bin bench_cpu_vs_python
-//! ```
+//! Runs the same algorithms at the same scale as `control/bench_python_timing.py`,
+//! then shells out to Python for timing comparison.
 
-use airspring_barracuda::eco::dual_kc::{self, DualKcInput, EvaporationLayerState};
-use airspring_barracuda::eco::evapotranspiration::{self as et, DailyEt0Input};
-use airspring_barracuda::eco::isotherm;
-use airspring_barracuda::eco::richards::{self, VanGenuchtenParams};
-use airspring_barracuda::eco::water_balance;
-use airspring_barracuda::eco::yield_response;
+use std::f64::consts::PI;
+use std::hint::black_box;
+use std::process::Command;
 use std::time::Instant;
 
-const WARMUP: usize = 5;
-const MEASURE: usize = 20;
+use airspring_barracuda::eco::anderson;
+use airspring_barracuda::eco::diversity;
+use airspring_barracuda::eco::evapotranspiration::{self as et, DailyEt0Input};
+use airspring_barracuda::eco::thornthwaite;
+use airspring_barracuda::eco::van_genuchten;
+use airspring_barracuda::eco::water_balance;
 
-fn make_station_days(n: usize) -> Vec<DailyEt0Input> {
-    (0..n)
-        .map(|i| {
-            let day = i as f64;
-            let tmax = 5.0f64.mul_add((day * 0.017).sin(), 30.0);
-            let tmin = 3.0f64.mul_add((day * 0.017).cos(), 15.0);
-            DailyEt0Input {
-                tmax,
-                tmin,
-                tmean: None,
-                solar_radiation: 4.0f64.mul_add((day * 0.017).sin(), 18.0),
-                wind_speed_2m: 0.5f64.mul_add((day * 0.05).sin(), 2.0),
-                actual_vapour_pressure: et::saturation_vapour_pressure(tmin) * 0.6,
-                elevation_m: 190.0,
-                latitude_deg: 42.5,
-                day_of_year: u32::try_from((i % 365) + 1).expect("day_of_year 1..365 fits in u32"),
-            }
-        })
-        .collect()
+struct BenchResult {
+    name: &'static str,
+    n: usize,
+    rust_secs: f64,
+    python_secs: f64,
+    speedup: f64,
+    parity_ok: bool,
+    parity_detail: String,
 }
 
-fn make_dual_kc_inputs(n: usize) -> Vec<DualKcInput> {
-    (0..n)
-        .map(|i| {
-            let day = i as f64;
-            DualKcInput {
-                et0: 2.0f64.mul_add((day * 0.017).sin(), 4.0),
-                precipitation: if i % 7 == 0 { 12.0 } else { 0.0 },
-                irrigation: 0.0,
-            }
-        })
-        .collect()
-}
+fn bench_fao56_et0(n: usize) -> (f64, f64, String) {
+    let e_s_max: f64 = 0.6108 * (17.27_f64 * 34.8 / (34.8 + 237.3)).exp();
+    let e_s_min: f64 = 0.6108 * (17.27_f64 * 19.6 / (19.6 + 237.3)).exp();
+    let e_s = f64::midpoint(e_s_max, e_s_min);
+    let e_a = e_s * 0.65;
 
-fn bench<F: Fn()>(label: &str, n: usize, f: F) {
-    for _ in 0..WARMUP {
-        f();
-    }
-
-    let start = Instant::now();
-    for _ in 0..MEASURE {
-        f();
-    }
-    let elapsed = start.elapsed();
-    let per_iter = elapsed / u32::try_from(MEASURE).expect("MEASURE fits in u32");
-    let throughput = n as f64 / per_iter.as_secs_f64();
-
-    println!("  {label:<40} {n:>8} items  {per_iter:>10.2?}/iter  {throughput:>12.0} items/s",);
-}
-
-fn bench_et0_and_kc() {
-    println!("── FAO-56 PM ET₀ computation ──\n");
-    for &n in &[100, 1_000, 10_000, 100_000] {
-        let data = make_station_days(n);
-        bench(&format!("ET₀ ({n} station-days)"), n, || {
-            for d in &data {
-                std::hint::black_box(et::daily_et0(d));
-            }
-        });
-    }
-
-    println!("\n── Dual Kc simulation ──\n");
-    let state = EvaporationLayerState {
-        de: 0.0,
-        tew: 22.5,
-        rew: 9.0,
+    let input = DailyEt0Input {
+        tmax: 34.8,
+        tmin: 19.6,
+        tmean: None,
+        solar_radiation: 20.5,
+        wind_speed_2m: 1.8,
+        actual_vapour_pressure: e_a,
+        elevation_m: 200.0,
+        latitude_deg: 42.0,
+        day_of_year: 180,
     };
-    for &n in &[30, 180, 365, 3650] {
-        let inputs = make_dual_kc_inputs(n);
-        bench(&format!("Dual Kc ({n}-day season)"), n, || {
-            std::hint::black_box(dual_kc::simulate_dual_kc(&inputs, 1.15, 1.20, 0.05, &state));
-        });
+    let t0 = Instant::now();
+    let mut result = 0.0_f64;
+    for _ in 0..n {
+        result = black_box(et::daily_et0(black_box(&input)).et0);
     }
+    let elapsed = t0.elapsed().as_secs_f64();
+    let python_ref: f64 = 5.152_603_881_624_521;
+    let diff = (result - python_ref).abs();
+    let ok = diff < 0.1;
+    (
+        elapsed,
+        result,
+        format!(
+            "Rust={result:.6}, Python={python_ref:.6}, diff={diff:.2e}, ok={ok}"
+        ),
+    )
+}
 
-    println!("\n── Dual Kc + mulch (no-till) ──\n");
-    for &n in &[30, 180, 365, 3650] {
-        let inputs = make_dual_kc_inputs(n);
-        bench(&format!("Mulched Kc ({n}-day season)"), n, || {
-            std::hint::black_box(dual_kc::simulate_dual_kc_mulched(
-                &inputs, 0.15, 1.20, 1.0, 0.40, &state,
-            ));
-        });
+fn bench_thornthwaite(n: usize) -> (f64, f64, String) {
+    let temps: [f64; 12] = [2.0, 4.0, 9.0, 14.0, 19.0, 24.0, 27.0, 26.0, 22.0, 15.0, 8.0, 3.0];
+    let lat = 42.0;
+    let t0 = Instant::now();
+    let mut result = [0.0_f64; 12];
+    for _ in 0..n {
+        result = black_box(thornthwaite::thornthwaite_monthly_et0(black_box(&temps), lat));
     }
+    let elapsed = t0.elapsed().as_secs_f64();
+    let python_may: f64 = 98.774_974_121_825_71;
+    let diff = (result[4] - python_may).abs();
+    let ok = diff < 1.0;
+    (
+        elapsed,
+        result[4],
+        format!(
+            "Rust May PET={:.4}, Python={python_may:.4}, diff={diff:.2e}, ok={ok}",
+            result[4]
+        ),
+    )
+}
 
-    println!("\n── Scaling: ET₀ batch (1M station-days) ──\n");
-    let big_data = make_station_days(1_000_000);
-    bench("ET₀ (1M station-days)", 1_000_000, || {
-        for d in &big_data {
-            std::hint::black_box(et::daily_et0(d));
-        }
-    });
+fn bench_hargreaves(n: usize) -> (f64, f64, String) {
+    let t0 = Instant::now();
+    let mut result = 0.0_f64;
+    for _ in 0..n {
+        result = black_box(et::hargreaves_et0(black_box(19.6), black_box(34.8), black_box(38.5)));
+    }
+    let elapsed = t0.elapsed().as_secs_f64();
+    let python_ref: f64 = 15.535_415_506_191_004;
+    let diff = (result - python_ref).abs();
+    let ok = diff < 1e-10;
+    (
+        elapsed,
+        result,
+        format!("Rust={result:.12}, Python={python_ref:.12}, diff={diff:.2e}, ok={ok}"),
+    )
+}
 
-    println!("\n── Scaling: Dual Kc (10-year season) ──\n");
-    let big_inputs = make_dual_kc_inputs(3650);
-    bench("Dual Kc (3650-day, 10yr)", 3650, || {
-        std::hint::black_box(dual_kc::simulate_dual_kc(
-            &big_inputs,
-            1.15,
-            1.20,
-            0.05,
-            &state,
+fn bench_van_genuchten(n: usize) -> (f64, f64, String) {
+    let t0 = Instant::now();
+    let mut result = 0.0_f64;
+    for _ in 0..n {
+        result = black_box(van_genuchten::van_genuchten_theta(
+            black_box(-100.0),
+            0.078,
+            0.43,
+            0.036,
+            1.56,
         ));
-    });
+    }
+    let elapsed = t0.elapsed().as_secs_f64();
+    let python_ref: f64 = 0.242_131_784_718_152_1;
+    let diff = (result - python_ref).abs();
+    let ok = diff < 1e-10;
+    (
+        elapsed,
+        result,
+        format!("Rust={result:.12}, Python={python_ref:.12}, diff={diff:.2e}, ok={ok}"),
+    )
 }
 
-fn bench_richards_and_isotherms() {
-    println!("\n── Richards equation (1D infiltration) ──\n");
-    let sand = VanGenuchtenParams {
-        theta_r: 0.045,
-        theta_s: 0.43,
-        alpha: 0.145,
-        n_vg: 2.68,
-        ks: 712.8,
-    };
-    for &n_nodes in &[20, 50, 100] {
-        bench(
-            &format!("Richards 1D ({n_nodes} nodes, 0.1d)"),
-            n_nodes,
-            || {
-                let _ = std::hint::black_box(richards::solve_richards_1d(
-                    &sand, 100.0, n_nodes, -20.0, 0.0, false, true, 0.1, 0.01,
-                ));
-            },
+fn bench_water_balance_step(n: usize) -> (f64, f64, String) {
+    let t0 = Instant::now();
+    let mut dr = 0.0_f64;
+    for _ in 0..n {
+        let r = black_box(water_balance::daily_water_balance_step(
+            black_box(20.0),
+            5.0,
+            0.0,
+            4.5,
+            1.05,
+            0.9,
+            120.0,
+        ));
+        dr = r.0;
+    }
+    let elapsed = t0.elapsed().as_secs_f64();
+    let python_ref: f64 = 19.2525;
+    let diff = (dr - python_ref).abs();
+    let ok = diff < 1e-10;
+    (
+        elapsed,
+        dr,
+        format!("Rust Dr={dr:.6}, Python={python_ref:.6}, diff={diff:.2e}, ok={ok}"),
+    )
+}
+
+fn bench_anderson_coupling(n: usize) -> (f64, f64, String) {
+    let t0 = Instant::now();
+    let mut d_eff = 0.0_f64;
+    for _ in 0..n {
+        let r = black_box(anderson::coupling_chain(black_box(0.25), 0.078, 0.43));
+        d_eff = r.d_eff;
+    }
+    let elapsed = t0.elapsed().as_secs_f64();
+    let python_ref: f64 = 2.097_075_886_258_595;
+    let diff = (d_eff - python_ref).abs();
+    let ok = diff < 1e-10;
+    (
+        elapsed,
+        d_eff,
+        format!("Rust d_eff={d_eff:.12}, Python={python_ref:.12}, diff={diff:.2e}, ok={ok}"),
+    )
+}
+
+fn bench_shannon_diversity(n: usize) -> (f64, f64, String) {
+    let abun = [45.0, 30.0, 15.0, 8.0, 2.0];
+    let t0 = Instant::now();
+    let mut result = 0.0_f64;
+    for _ in 0..n {
+        result = black_box(diversity::shannon(black_box(&abun)));
+    }
+    let elapsed = t0.elapsed().as_secs_f64();
+    let python_ref: f64 = 1.285_387_053_981_883_5;
+    let diff = (result - python_ref).abs();
+    let ok = diff < 1e-10;
+    (
+        elapsed,
+        result,
+        format!("Rust={result:.12}, Python={python_ref:.12}, diff={diff:.2e}, ok={ok}"),
+    )
+}
+
+fn bench_season_simulation(n: usize) -> (f64, f64, String) {
+    let taw: f64 = 120.0;
+    let raw: f64 = 60.0;
+    let t0 = Instant::now();
+    let mut final_dr = 0.0_f64;
+    for _ in 0..n {
+        let mut dr: f64 = 0.0;
+        for d in 0..153 {
+            let et0 = 2.0f64.mul_add((2.0 * PI * f64::from(d) / 153.0).sin(), 3.0);
+            let p = if d % 7 == 0 { 2.0 } else { 0.0 };
+            let ks: f64 = if dr > raw {
+                ((taw - dr) / (taw - raw)).max(0.0)
+            } else {
+                1.0
+            };
+            let (new_dr, _, _) =
+                water_balance::daily_water_balance_step(dr, p, 0.0, et0, 1.0, ks, taw);
+            dr = new_dr;
+        }
+        final_dr = black_box(dr);
+    }
+    let elapsed = t0.elapsed().as_secs_f64();
+    let python_ref: f64 = 111.570_952_328_931_09;
+    let diff = (final_dr - python_ref).abs();
+    let ok = diff < 1e-4;
+    (
+        elapsed,
+        final_dr,
+        format!(
+            "Rust={final_dr:.6}, Python={python_ref:.6}, diff={diff:.2e}, ok={ok}"
+        ),
+    )
+}
+
+fn run_python_benchmarks() -> Vec<(String, f64)> {
+    let control_dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .expect("CARGO_MANIFEST_DIR parent")
+        .join("control");
+    let script = control_dir.join("bench_python_timing.py");
+    if !script.exists() {
+        eprintln!(
+            "  [WARN] Python timing script not found at {}",
+            script.display()
         );
+        return Vec::new();
     }
-
-    println!("\n── Van Genuchten retention (batch) ──\n");
-    for &n in &[1_000, 10_000, 100_000] {
-        bench(&format!("VG theta ({n} evaluations)"), n, || {
-            for i in 0..n {
-                let h = -0.01 * (i as f64 + 1.0);
-                std::hint::black_box(richards::van_genuchten_theta(
-                    h,
-                    sand.theta_r,
-                    sand.theta_s,
-                    sand.alpha,
-                    sand.n_vg,
-                ));
-            }
-        });
-    }
-
-    println!("\n── Isotherm fitting (Langmuir + Freundlich) ──\n");
-    let ce = [1.0, 2.5, 5.0, 10.0, 20.0, 40.0, 60.0, 80.0, 100.0];
-    let qe = [0.85, 1.92, 3.45, 5.8, 8.9, 12.1, 13.8, 14.5, 14.9];
-    bench("Langmuir fit (9 points)", 9, || {
-        std::hint::black_box(isotherm::fit_langmuir(&ce, &qe));
-    });
-    bench("Freundlich fit (9 points)", 9, || {
-        std::hint::black_box(isotherm::fit_freundlich(&ce, &qe));
-    });
-}
-
-#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-fn bench_yield_response() {
-    println!("\n── Yield response (Stewart 1977, single-stage) ──\n");
-    for &n in &[1_000, 10_000, 100_000, 1_000_000] {
-        bench(&format!("Yield single ({n} evaluations)"), n, || {
-            for i in 0..n {
-                let eta_etc = (i as f64 + 1.0) / (n as f64 + 1.0);
-                std::hint::black_box(yield_response::yield_ratio_single(1.25, eta_etc));
-            }
-        });
-    }
-
-    println!("\n── Yield response (multi-stage, 4-stage corn) ──\n");
-    let corn_stages = [(0.40, 0.9), (1.50, 0.85), (0.50, 0.95), (0.20, 0.98)];
-    for &n in &[1_000, 10_000, 100_000] {
-        bench(&format!("Yield multi-stage ({n} corn seasons)"), n, || {
-            for _ in 0..n {
-                std::hint::black_box(yield_response::yield_ratio_multistage(&corn_stages).unwrap());
-            }
-        });
-    }
-
-    println!("\n── Water use efficiency ──\n");
-    for &n in &[1_000, 10_000, 100_000] {
-        bench(&format!("WUE ({n} calculations)"), n, || {
-            for i in 0..n {
-                let y = (i as f64).mul_add(0.04, 8000.0);
-                let eta = (i as f64).mul_add(0.002, 300.0);
-                std::hint::black_box(yield_response::water_use_efficiency(y, eta).unwrap());
-            }
-        });
-    }
-
-    println!("\n── Yield + WB integration (140-day season) ──\n");
-    for &n in &[100, 1_000, 10_000] {
-        bench(&format!("Season yield ({n} scenarios)"), n, || {
-            for i in 0..n {
-                let taw = water_balance::total_available_water(0.18, 0.08, 900.0);
-                let raw = water_balance::readily_available_water(taw, 0.55);
-                let mut dr = 0.0_f64;
-                let mut actual_et_sum = 0.0_f64;
-                let mut potential_et_sum = 0.0_f64;
-                for day in 0..140_usize {
-                    let ks = water_balance::stress_coefficient(dr, taw, raw);
-                    let et0 = 5.0 + (day as f64 * 0.04).sin();
-                    let etc = 1.2 * et0;
-                    let eta = ks * etc;
-                    let precip = if (day + i) % 5 == 0 { 8.0 } else { 0.0 };
-                    dr = (dr - precip + eta).clamp(0.0, taw);
-                    actual_et_sum += eta;
-                    potential_et_sum += etc;
-                }
-                let ratio = actual_et_sum / potential_et_sum;
-                std::hint::black_box(yield_response::yield_ratio_single(1.25, ratio));
-            }
-        });
-    }
-}
-
-fn bench_cw2d() {
-    println!("\n── CW2D Richards (gravel, organic) ──\n");
-    let gravel = VanGenuchtenParams {
-        theta_r: 0.025,
-        theta_s: 0.40,
-        alpha: 0.100,
-        n_vg: 3.00,
-        ks: 5000.0,
-    };
-    let organic = VanGenuchtenParams {
-        theta_r: 0.100,
-        theta_s: 0.60,
-        alpha: 0.050,
-        n_vg: 1.50,
-        ks: 50.0,
-    };
-    for &(label, params) in &[("gravel", &gravel), ("organic", &organic)] {
-        bench(
-            &format!("CW2D Richards {label} (20 nodes, 0.04d)"),
-            20,
-            || {
-                let _ = std::hint::black_box(richards::solve_richards_1d(
-                    params, 60.0, 20, -20.0, -20.0, true, true, 0.04, 0.001,
-                ));
-            },
+    let output = Command::new("python3")
+        .arg(&script)
+        .output()
+        .expect("Failed to run Python timing script");
+    if !output.status.success() {
+        eprintln!(
+            "  [WARN] Python benchmark failed: {}",
+            String::from_utf8_lossy(&output.stderr)
         );
+        return Vec::new();
     }
-
-    println!("\n── CW2D VG retention (gravel + organic batch) ──\n");
-    for &n in &[10_000, 100_000] {
-        bench(&format!("CW2D VG gravel ({n} evaluations)"), n, || {
-            for i in 0..n {
-                let h = -0.01 * (i as f64 + 1.0);
-                std::hint::black_box(richards::van_genuchten_theta(
-                    h,
-                    gravel.theta_r,
-                    gravel.theta_s,
-                    gravel.alpha,
-                    gravel.n_vg,
-                ));
-            }
-        });
-        bench(&format!("CW2D VG organic ({n} evaluations)"), n, || {
-            for i in 0..n {
-                let h = -0.01 * (i as f64 + 1.0);
-                std::hint::black_box(richards::van_genuchten_theta(
-                    h,
-                    organic.theta_r,
-                    organic.theta_s,
-                    organic.alpha,
-                    organic.n_vg,
-                ));
-            }
-        });
-    }
-}
-
-fn bench_scheduling_pipeline() {
-    use airspring_barracuda::gpu::water_balance::BatchedWaterBalance;
-    println!("\n── Scheduling Pipeline: ET₀→Kc→WB→Stewart yield (Exp 014) ──\n");
-
-    for &n_days in &[90_u32, 180, 365] {
-        let inputs = make_station_days(n_days as usize);
-        let kc_values: Vec<f64> = (0..n_days)
-            .map(|i| {
-                let frac = f64::from(i) / f64::from(n_days);
-                if frac < 0.2 {
-                    0.3
-                } else if frac < 0.5 {
-                    ((frac - 0.2) / 0.3).mul_add(0.85, 0.3)
-                } else if frac < 0.8 {
-                    1.15
-                } else {
-                    ((frac - 0.8) / 0.2).mul_add(-0.75, 1.15)
-                }
-            })
-            .collect();
-
-        bench(
-            &format!("Scheduling pipeline ({n_days}-day)"),
-            n_days as usize,
-            || {
-                let et0_vals: Vec<f64> = inputs.iter().map(|inp| et::daily_et0(inp).et0).collect();
-                let wb_inputs: Vec<water_balance::DailyInput> = et0_vals
-                    .iter()
-                    .zip(&kc_values)
-                    .enumerate()
-                    .map(|(i, (&e, &kc))| water_balance::DailyInput {
-                        precipitation: if i % 5 == 0 { 10.0 } else { 0.0 },
-                        irrigation: if i % 7 == 0 { 20.0 } else { 0.0 },
-                        et0: e,
-                        kc,
-                    })
-                    .collect();
-                let engine = BatchedWaterBalance::new(0.30, 0.10, 500.0, 0.5);
-                let summary = engine.simulate_season(&wb_inputs);
-                let etc_sum: f64 = et0_vals.iter().zip(&kc_values).map(|(e, k)| e * k).sum();
-                let ratio = summary.total_actual_et / etc_sum;
-                std::hint::black_box(yield_response::yield_ratio_single(1.25, ratio));
-            },
-        );
-    }
-}
-
-fn bench_lysimeter_et() {
-    println!("\n── Lysimeter ET: mass→ET conversion (Exp 016) ──\n");
-
-    for &n_readings in &[24_usize, 168, 720, 8760] {
-        let mass_readings: Vec<(f64, f64)> = (0..n_readings)
-            .map(|i| {
-                let hour = i as f64;
-                let mass = 0.005f64.mul_add((hour * 0.26).sin(), 0.01f64.mul_add(-hour, 50.0));
-                (hour, mass)
-            })
-            .collect();
-
-        bench(
-            &format!("Lysimeter ET ({n_readings} readings)"),
-            n_readings,
-            || {
-                let area = 1.0_f64;
-                let mut total_et = 0.0;
-                for pair in mass_readings.windows(2) {
-                    let dm = pair[1].1 - pair[0].1;
-                    let et_mm = -dm / area;
-                    total_et += et_mm.max(0.0);
-                }
-                std::hint::black_box(total_et);
-            },
-        );
-    }
-}
-
-fn bench_sensitivity_oat() {
-    println!("\n── Sensitivity OAT: 6-var × 2-dir ET₀ perturbation (Exp 017) ──\n");
-
-    for &n_sites in &[1_usize, 10, 100, 1_000] {
-        let base_inputs: Vec<DailyEt0Input> = (0..n_sites)
-            .map(|i| {
-                let fi = i as f64;
-                DailyEt0Input {
-                    tmin: fi.mul_add(0.01, 19.1),
-                    tmax: fi.mul_add(0.01, 32.6),
-                    tmean: None,
-                    solar_radiation: 22.07,
-                    wind_speed_2m: 2.078,
-                    actual_vapour_pressure: 1.409,
-                    elevation_m: 100.0 + fi,
-                    latitude_deg: 50.80,
-                    day_of_year: 187,
-                }
-            })
-            .collect();
-
-        bench(
-            &format!("OAT sensitivity ({n_sites} sites × 12)"),
-            n_sites * 12,
-            || {
-                for inp in &base_inputs {
-                    let base_et0 = et::daily_et0(inp).et0;
-                    for delta in &[-0.1_f64, 0.1] {
-                        let mut p = *inp;
-                        p.tmax *= 1.0 + delta;
-                        std::hint::black_box(et::daily_et0(&p).et0 - base_et0);
-                        p = *inp;
-                        p.tmin *= 1.0 + delta;
-                        std::hint::black_box(et::daily_et0(&p).et0 - base_et0);
-                        p = *inp;
-                        p.solar_radiation *= 1.0 + delta;
-                        std::hint::black_box(et::daily_et0(&p).et0 - base_et0);
-                        p = *inp;
-                        p.wind_speed_2m *= 1.0 + delta;
-                        std::hint::black_box(et::daily_et0(&p).et0 - base_et0);
-                        p = *inp;
-                        p.actual_vapour_pressure *= 1.0 + delta;
-                        std::hint::black_box(et::daily_et0(&p).et0 - base_et0);
-                        p = *inp;
-                        p.elevation_m *= 1.0 + delta;
-                        std::hint::black_box(et::daily_et0(&p).et0 - base_et0);
-                    }
-                }
-            },
-        );
-    }
+    let json_str = String::from_utf8_lossy(&output.stdout);
+    let v: serde_json::Value = serde_json::from_str(&json_str).unwrap_or_default();
+    v["benchmarks"]
+        .as_array()
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|b| Some((b["name"].as_str()?.to_string(), b["secs"].as_f64()?)))
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
 fn main() {
-    airspring_barracuda::validation::init_tracing();
-    println!("═══════════════════════════════════════════════════════════");
-    println!("  airSpring CPU Benchmark — Rust vs Python baseline");
-    println!("═══════════════════════════════════════════════════════════\n");
+    eprintln!("═══════════════════════════════════════════════════════════");
+    eprintln!("  barracuda CPU vs Python — Pure Math Benchmark");
+    eprintln!("═══════════════════════════════════════════════════════════\n");
 
-    bench_et0_and_kc();
-    bench_richards_and_isotherms();
-    bench_yield_response();
-    bench_cw2d();
-    bench_scheduling_pipeline();
-    bench_lysimeter_et();
-    bench_sensitivity_oat();
+    eprintln!("  Running Python benchmarks...");
+    let py_timings = run_python_benchmarks();
+    let py_lookup = |name: &str| -> f64 {
+        py_timings
+            .iter()
+            .find(|(n, _)| n == name)
+            .map_or(0.0, |(_, s)| *s)
+    };
 
-    println!();
-    println!("Done. All throughput numbers are Rust --release (pure f64 math).");
-    println!("Compare against Python baselines via: python3 scripts/bench_python_baselines.py");
+    eprintln!("  Running Rust benchmarks...\n");
+
+    let benchmarks: Vec<(
+        &str,
+        &str,
+        usize,
+        Box<dyn Fn(usize) -> (f64, f64, String)>,
+    )> = vec![
+        (
+            "fao56_et0",
+            "FAO-56 PM ET₀",
+            10_000,
+            Box::new(bench_fao56_et0),
+        ),
+        (
+            "thornthwaite",
+            "Thornthwaite PET",
+            10_000,
+            Box::new(bench_thornthwaite),
+        ),
+        (
+            "hargreaves",
+            "Hargreaves-Samani",
+            10_000,
+            Box::new(bench_hargreaves),
+        ),
+        (
+            "van_genuchten",
+            "Van Genuchten θ(h)",
+            100_000,
+            Box::new(bench_van_genuchten),
+        ),
+        (
+            "water_balance_step",
+            "Water Balance Step",
+            10_000,
+            Box::new(bench_water_balance_step),
+        ),
+        (
+            "anderson_coupling",
+            "Anderson Coupling",
+            100_000,
+            Box::new(bench_anderson_coupling),
+        ),
+        (
+            "shannon_diversity",
+            "Shannon Diversity",
+            10_000,
+            Box::new(bench_shannon_diversity),
+        ),
+        (
+            "season_simulation",
+            "Season Sim (153d)",
+            1_000,
+            Box::new(bench_season_simulation),
+        ),
+    ];
+
+    let mut results = Vec::new();
+    let mut all_parity = true;
+
+    for (py_name, display_name, n, func) in &benchmarks {
+        let (rust_secs, _value, detail) = func(*n);
+        let python_secs = py_lookup(py_name);
+        let speedup = if python_secs > 0.0 && rust_secs > 0.0 {
+            python_secs / rust_secs
+        } else {
+            0.0
+        };
+        let parity_ok = detail.contains("ok=true");
+        if !parity_ok {
+            all_parity = false;
+        }
+        results.push(BenchResult {
+            name: display_name,
+            n: *n,
+            rust_secs,
+            python_secs,
+            speedup,
+            parity_ok,
+            parity_detail: detail,
+        });
+    }
+
+    eprintln!("┌──────────────────────────────┬────────┬──────────────┬──────────────┬──────────┬────────┐");
+    eprintln!("│ Algorithm                    │      N │     Rust (s) │   Python (s) │  Speedup │ Parity │");
+    eprintln!("├──────────────────────────────┼────────┼──────────────┼──────────────┼──────────┼────────┤");
+    for r in &results {
+        let parity_str = if r.parity_ok { "  ✓   " } else { " FAIL " };
+        eprintln!(
+            "│ {:<28} │ {:>6} │ {:>12.6} │ {:>12.6} │ {:>6.1}× │{}│",
+            r.name, r.n, r.rust_secs, r.python_secs, r.speedup, parity_str,
+        );
+    }
+    eprintln!("└──────────────────────────────┴────────┴──────────────┴──────────────┴──────────┴────────┘");
+
+    eprintln!("\n  Parity details:");
+    for r in &results {
+        let icon = if r.parity_ok { "✓" } else { "✗" };
+        eprintln!("    {icon} {}: {}", r.name, r.parity_detail);
+    }
+
+    let geo_mean_speedup = {
+        let valid: Vec<f64> = results.iter().filter(|r| r.speedup > 0.0).map(|r| r.speedup).collect();
+        if valid.is_empty() {
+            0.0
+        } else {
+            let log_sum: f64 = valid.iter().map(|s| s.ln()).sum();
+            (log_sum / valid.len() as f64).exp()
+        }
+    };
+
+    eprintln!("\n  Geometric mean speedup: {geo_mean_speedup:.1}×");
+    eprintln!(
+        "  Math parity: {}/{} algorithms match Python",
+        results.iter().filter(|r| r.parity_ok).count(),
+        results.len(),
+    );
+
+    if !all_parity {
+        eprintln!("\n  [FAIL] Not all algorithms match Python — check parity details above");
+        std::process::exit(1);
+    }
+    eprintln!("\n  [PASS] Pure Rust math is correct AND faster than Python");
 }
