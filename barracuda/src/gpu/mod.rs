@@ -9,6 +9,7 @@
 //!
 //! | Module | Purpose | Backend |
 //! |--------|---------|---------|
+//! | [`device_info`] | Precision probing, `Fp64Strategy`, provenance | Device + cross-spring |
 //! | [`et0`] | Batched FAO-56 ET₀ for `N` station-days | **GPU-first** (`BatchedElementwiseF64`) |
 //! | [`water_balance`] | Batched season simulation + GPU step | **GPU-step** + CPU season |
 //! | [`dual_kc`] | Batched dual Kc (`Ke` + `ETc`) for M fields | **CPU** (Tier B → GPU pending) |
@@ -64,6 +65,7 @@
 //! native pair  down   down
 //! ```
 
+pub mod device_info;
 pub mod dual_kc;
 pub mod et0;
 pub mod evolution_gaps;

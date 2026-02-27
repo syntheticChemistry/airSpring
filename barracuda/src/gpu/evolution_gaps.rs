@@ -186,7 +186,7 @@ pub enum Tier {
 
 /// All known evolution gaps (23 entries — 11 Tier A integrated, 11 Tier B (5 wired), 1 Tier C).
 ///
-/// v0.5.0: Synced to ToadStool S68+ (e96576ee). Universal precision architecture
+/// v0.5.0: Synced to `ToadStool` S68+ (e96576ee). Universal precision architecture
 /// means all GPU dispatch is precision-agnostic: f64 on Titan V, Df64 on consumer
 /// GPUs, f32 fallback. S60-S65 sovereign compiler regression **RESOLVED** (S66+).
 ///

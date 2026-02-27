@@ -25,6 +25,7 @@
 //!
 //! All GPU modules use `BarraCuda` f64-precision primitives with CPU fallback.
 //!
+//! - [`gpu::device_info`] — Precision-aware device probing, `Fp64Strategy`, cross-spring provenance
 //! - [`gpu::et0`] — Batched ET₀ via `BatchedElementwiseF64::fao56_et0_batch()`
 //! - [`gpu::water_balance`] — GPU-step + CPU season via `BatchedElementwiseF64::water_balance_batch()`
 //! - [`gpu::kriging`] — Soil moisture spatial interpolation (`KrigingInterpolator` ↔ `KrigingF64`)

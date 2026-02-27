@@ -2,7 +2,7 @@
 
 **Last Updated**: February 27, 2026 (v0.5.0 — 515 lib tests, 51 binaries)
 **ToadStool PIN**: S68+ HEAD (`e96576ee` — universal f64 canonical, dual-layer precision, device-lost resilience, 703 WGSL shaders)
-**Handoff**: V029 (ToadStool S68+ sync — universal precision architecture, `try_gpu` catch_unwind removed, evolution gaps updated)
+**Handoff**: V029 (ToadStool S68+ sync — universal precision, `device_info` wired, cross-spring provenance benchmark, 16/16 GPU paths validated)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -173,7 +173,7 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `cargo fmt --check` | **Clean** |
 | `cargo clippy --all-targets` | **0 warnings** (pedantic + nursery via `[lints.clippy]`, `--all-targets` clean) |
 | `cargo doc --no-deps` | **Builds**, 0 warnings |
-| `cargo test --lib` | **515 passed** (lib + doc + integration) |
+| `cargo test --lib` | **521 passed** (lib + doc + integration) |
 | `unsafe` code | **Zero** |
 | `unwrap()` in lib | **Zero** (all in `#[cfg(test)]` or validation-binary JSON helpers) |
 | Files > 1000 lines | **Zero** (max src: 834 `eco/evapotranspiration.rs` after Thornthwaite extraction) |
@@ -253,5 +253,10 @@ Synced from `89356efa` → `e96576ee` (2 commits):
 - Updated `gpu::mod.rs` architecture docs for universal precision
 - Updated `gpu::evolution_gaps.rs` inventory for S68+ capabilities
 - Updated `gpu::mc_et0` doc — sovereign compiler regression resolved (S66+)
+- Added `gpu::device_info` — `Fp64Strategy` probing, `F64BuiltinCapabilities`, `DevicePrecisionReport`,
+  10-entry cross-spring `PROVENANCE` table tracking shader lineage across all Springs
+- Added `bench_cross_spring` binary — 16 benchmarks exercising all GPU paths with provenance reporting
+- Fixed `try_f64_device()` to use `WgpuDevice::from_env()` (respects `BARRACUDA_GPU_ADAPTER`)
+- Fixed clippy `manual_midpoint` in `validate_seasonal_batch.rs`
 
-Revalidation: 515/515 tests, 0 clippy, all green
+Revalidation: 521/521 tests, 0 clippy, 16/16 bench_cross_spring (Titan V)

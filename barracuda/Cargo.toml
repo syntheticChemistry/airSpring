@@ -237,3 +237,7 @@ path = "src/bin/validate_seasonal_batch.rs"
 [[bin]]
 name = "validate_gpu_live"
 path = "src/bin/validate_gpu_live.rs"
+
+[[bin]]
+name = "bench_cross_spring"
+path = "src/bin/bench_cross_spring.rs"
