@@ -2,6 +2,53 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.5.1] - 2026-02-27
+
+### Anderson Coupling + CPU vs Python Benchmark + Documentation Sweep
+
+New experiment (Exp 045) coupling soil moisture to Anderson localization for
+quorum-sensing regime prediction. Formal CPU vs Python benchmark proving 25.9×
+geometric mean speedup with 8/8 numerical parity. Comprehensive documentation
+sweep fixing stale counts, paths, and handoff references across all docs.
+
+#### Added
+- **Exp 045: Anderson Soil-Moisture Coupling** (cross-spring)
+  - Full coupling chain: θ → S_e → pore_connectivity → z → d_eff → QS regime
+  - Van Genuchten effective saturation, Mualem pore connectivity, Bethe lattice d_eff
+  - Python: 55/55, Rust: 95/95 checks. Cross-validation at 1e-10 tolerance.
+- `eco::anderson` module: `coupling_chain`, `coupling_series`, `QsRegime` enum
+- `validate_anderson` binary: 95/95 checks
+- `bench_cpu_vs_python` binary: formal 8-algorithm benchmark with Python timing
+- `control/anderson_coupling/anderson_coupling.py`: Python control (55/55)
+- `control/bench_python_timing.py`: Python timing reference for benchmark
+
+#### Changed
+- Experiments: 44 → 45
+- Python checks: 1054 → 1109
+- Barracuda lib tests: 521 → 527 (6 Anderson unit tests)
+- Barracuda binaries: 47 → 50 (validate_anderson, bench_cpu_vs_python, validate_regional_et0 fix)
+- CPU benchmark: 69× (old, 8 algorithms, narrow scope) → 25.9× (8 algorithms, full parity, reproducible)
+- `validate_regional_et0`: per-pair hard fail → statistical gate (≥85% pass rate, r>0.40 floor)
+- Version bumped to 0.5.1
+
+#### Documentation
+- README, CHANGELOG, CONTROL_EXPERIMENT_STATUS updated to v0.5.1
+- Fixed `scripts/run_all_baselines.sh` path → `run_all_baselines.sh` across 4 docs
+- Updated handoff references: V027 → V030 across all root docs
+- Updated experiment counts (44→45), Python counts (1054→1109), binary counts (47→50)
+- Refreshed CPU benchmark table with reproducible 8-algorithm results
+
+#### Quality Gates
+| Check | Status |
+|-------|--------|
+| Python baselines | **1109/1109 PASS** |
+| Rust lib tests | **527 passed** |
+| Rust integration | **20 passed** |
+| GPU live (Titan V) | **24/24 PASS** |
+| metalForge live | **17/17 PASS** |
+| CPU vs Python | **25.9× (8/8 parity)** |
+| clippy pedantic | **0 warnings** |
+
 ## [0.5.0] - 2026-02-27
 
 ### Titan V GPU Live Dispatch + metalForge Live Hardware + 12 New Experiments

@@ -7,8 +7,7 @@
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V029** | [AIRSPRING_V029_TOADSTOOL_S68_UNIVERSAL_PRECISION_SYNC_HANDOFF_FEB27_2026.md](handoffs/AIRSPRING_V029_TOADSTOOL_S68_UNIVERSAL_PRECISION_SYNC_HANDOFF_FEB27_2026.md) | 2026-02-27 | **current** — ToadStool S68+ sync: universal precision architecture, try_gpu debt removed, evolution gaps updated, new capabilities documented |
-| **V028** | [AIRSPRING_V028_TOADSTOOL_ABSORPTION_TITAN_V_HANDOFF_FEB27_2026.md](handoffs/AIRSPRING_V028_TOADSTOOL_ABSORPTION_TITAN_V_HANDOFF_FEB27_2026.md) | 2026-02-27 | ToadStool absorption: Titan V live learnings, f64 trig precision, batch scaling, 7 ET₀ methods, Tier B candidates |
+| **V030** | [AIRSPRING_V030_EVOLUTION_ANDERSON_CPU_BENCHMARK_HANDOFF_FEB27_2026.md](handoffs/AIRSPRING_V030_EVOLUTION_ANDERSON_CPU_BENCHMARK_HANDOFF_FEB27_2026.md) | 2026-02-27 | **current** — v0.5.1: Exp 045 Anderson coupling (55+95 PASS), 25.9× CPU benchmark (8/8 parity), documentation sweep, ToadStool shader candidates |
 
 ## Cross-Spring Documents
 
@@ -27,6 +26,8 @@
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_V029_TOADSTOOL_S68_UNIVERSAL_PRECISION_SYNC_HANDOFF_FEB27_2026.md` | v0.5.0: ToadStool S68+ sync, universal precision architecture, evolution gaps |
+| `handoffs/archive/AIRSPRING_V028_TOADSTOOL_ABSORPTION_TITAN_V_HANDOFF_FEB27_2026.md` | v0.5.0: ToadStool absorption, Titan V live learnings, batch scaling |
 | `handoffs/archive/AIRSPRING_V027_GPU_PARITY_DISPATCH_HANDOFF_FEB27_2026.md` | v0.5.0: CPU↔GPU parity, metalForge dispatch, seasonal batch, Titan V + metalForge live hardware |
 | `handoffs/archive/AIRSPRING_V026_ENSEMBLE_COUPLING_HANDOFF_FEB27_2026.md` | v0.4.15: ET₀ ensemble, pedotransfer-Richards coupling, bias correction |
 | `handoffs/archive/AIRSPRING_V025_BIOMEOS_NEURAL_API_HANDOFF_FEB27_2026.md` | v0.4.13: biomeOS Neural API bridge, ecology capability domain |

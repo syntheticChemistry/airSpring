@@ -8,7 +8,7 @@
 
 ## Abstract
 
-We independently replicate 32 precision agriculture and environmental systems computational methods — FAO-56 Penman-Monteith evapotranspiration, soil moisture calibration, IoT irrigation, daily water balance, dual crop coefficient, cover crops, regional ET₀ intercomparison, Richards equation, biochar adsorption isotherms, yield response to water stress, CW2D constructed wetland media, 60-year water balance reconstruction, irrigation scheduling optimization, lysimeter ET measurement, ET₀ sensitivity analysis, Priestley-Taylor ET₀, ET₀ 3-method intercomparison, Thornthwaite monthly ET₀, growing degree days, and Saxton-Rawls pedotransfer — using only open-source tools and publicly available data. Python baselines (808/808 checks) validate against digitized paper benchmarks. A real data pipeline using Open-Meteo historical weather (918 station-days, 6 Michigan stations, 2023 growing season) produces ET₀ with R²=0.967 against independent computation. Water balance simulations show 53-72% water savings with smart scheduling. A Rust implementation via BarraCuda passes 499 tests + 853 validation checks + 1393 atlas checks across 38 binaries, with 75/75 Python-Rust cross-validation matches within 1e-5 tolerance. CPU benchmarks show Rust is 69x faster than Python (geometric mean, 20x–502x range) — establishing the foundation for GPU-accelerated precision irrigation on consumer hardware.
+We independently replicate 45 precision agriculture and environmental systems computational methods — FAO-56 Penman-Monteith ET₀, soil moisture calibration, IoT irrigation, daily water balance, dual crop coefficient, cover crops, regional ET₀, Richards equation, biochar isotherms, yield response, CW2D, 60-year WB, scheduling, lysimeter ET, sensitivity, Priestley-Taylor, 3-method intercomparison, Thornthwaite, GDD, pedotransfer, AmeriFlux eddy covariance, Hargreaves-Samani, ecological diversity, multi-crop budget, NPU edge inference, forecast scheduling, SCAN soil moisture, NASS yield, and Anderson soil-moisture coupling — using only open-source tools and publicly available data. Python baselines (1109/1109 checks) validate against digitized paper benchmarks. A real data pipeline using Open-Meteo historical weather (15,300 station-days, 100 Michigan stations, 2023 growing season) produces ET₀ with R²=0.967 against independent computation. Water balance simulations show 53-72% water savings with smart scheduling. A Rust implementation via BarraCuda passes 499 tests + 853 validation checks + 1393 atlas checks across 38 binaries, with 75/75 Python-Rust cross-validation matches within 1e-5 tolerance. CPU benchmarks show Rust is 69x faster than Python (geometric mean, 20x–502x range) — establishing the foundation for GPU-accelerated precision irrigation on consumer hardware.
 
 ---
 
@@ -34,7 +34,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda) 
 
 ---
 
-## 2. Phase 0: Python/R Control (808/808 PASS)
+## 2. Phase 0: Python/R Control (1109/1109 PASS)
 
 | Experiment | Paper | Checks | Key Validation |
 |------------|-------|:------:|----------------|
@@ -263,5 +263,5 @@ The same BarraCuda/ToadStool infrastructure supports both domains. The key share
 
 ---
 
-*February 2026 — 808 Python + 499 Rust tests + 853 validation + 1393 atlas checks, 38 binaries all pass,
-15,300 station-days (100 stations) real data, 75/75 cross-validation match, zero synthetic*
+*February 2026 — 1109 Python + 651 Rust tests + 1393 atlas checks, 54 binaries all pass,
+15,300 station-days (100 stations) real data, 75/75 cross-validation match, 25.9× Rust-vs-Python speedup (8/8 parity), zero synthetic*

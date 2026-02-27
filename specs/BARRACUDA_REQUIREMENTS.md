@@ -1,14 +1,14 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: February 27, 2026 (v0.5.0 — 499 lib tests, 37 barracuda + 1 forge binary, 11 Tier A modules, AKD1000 NPU live)
+**Last Updated**: February 27, 2026 (v0.5.1 — 527 lib tests, 50 barracuda + 4 forge binaries, 11 Tier A modules, AKD1000 NPU live, 25.9× CPU speedup)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
-**ToadStool HEAD**: `f0feb226` (S68 — universal f64, ValidationHarness tracing, LazyLock shader constants)
+**ToadStool HEAD**: `e96576ee` (S68 — universal f64, ValidationHarness tracing, LazyLock shader constants)
 
 ---
 
 ## Current Kernel Usage
 
-### Phase 1: Validated in Rust CPU + NPU (27 experiments)
+### Phase 1: Validated in Rust CPU + NPU (45 experiments)
 
 | Kernel / Module | Rust Crate | Checks | Validation |
 |----------------|------------|:------:|------------|
@@ -39,6 +39,7 @@
 | **Funky NPU IoT** | **`validate_npu_funky_eco`** | **32/32** | **Streaming, seasonal evolution, multi-crop crosstalk, LOCOMOS power, noise** |
 | **High-Cadence NPU** | **`validate_npu_high_cadence`** | **28/28** | **1-min cadence, burst mode, multi-sensor fusion, ensemble, weight hot-swap** |
 | **metalForge dispatch** | **`airspring-forge` crate** | **21/21** | **CPU/GPU/NPU routing, 14 eco workloads** |
+| **Anderson coupling** | **`eco::anderson`** | **55+95** | **θ→S_e→d_eff→QS regime (cross-spring)** |
 | Cross-validation harness | `validation` | 75/75 | Python↔Rust match (tol=1e-5) |
 
 ### Phase 2: GPU Orchestrators Wired (8 modules)
@@ -72,9 +73,9 @@ Note: `gpu::dual_kc::BatchedDualKc` has CPU orchestrator wired (Tier B → pendi
 
 ### Layer 1: BarraCuda CPU (validated, complete)
 
-All algorithms implemented in pure Rust. 493 lib tests, 29 binaries, 629 validation checks.
+All algorithms implemented in pure Rust. 527 lib tests, 50 binaries, 651 total checks.
 This is the baseline for correctness — GPU and metalForge results must match.
-CPU benchmarks: 12.7M ET₀/s, 36.5M VG θ/s, 59M dual Kc/s, 57M Langmuir fits/s.
+CPU benchmarks: 25.9× geometric mean speedup vs Python (8/8 parity).
 
 ```
 eco::evapotranspiration → validated daily_et0(), hargreaves_et0()

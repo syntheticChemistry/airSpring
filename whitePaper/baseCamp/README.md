@@ -1,17 +1,18 @@
 # baseCamp: Per-Faculty Research Briefings
 
 **Updated**: February 27, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.5.0)
-**Status**: 44 experiments, 1054/1054 Python + 645 Rust tests + 1393 atlas checks + 75/75 cross-validation + 11 Tier A modules + Titan V GPU live + AKD1000 NPU live + metalForge live hardware (5 substrates) + 69x CPU speedup
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.5.1)
+**Status**: 45 experiments, 1109/1109 Python + 651 Rust tests + 1393 atlas checks + 75/75 cross-validation + 11 Tier A modules + Titan V GPU live + AKD1000 NPU live + metalForge live hardware (5 substrates) + 25.9× CPU speedup (8/8 parity) + Anderson cross-spring coupling
 
 ---
 
 ## Evolution Path
 
 ```
-Phase 0   Python/R baselines    — reproduce paper results with original tools (1054/1054)
+Phase 0   Python/R baselines    — reproduce paper results with original tools (1109/1109)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (645 tests, 1393 atlas, 47+4 binaries, 97.06% coverage)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (651 tests, 1393 atlas, 50+4 binaries)
+Phase 1.5 CPU benchmark         — 25.9× Rust-vs-Python geometric mean (8/8 parity)
 Phase 2   BarraCuda GPU bridge  — 11 Tier A modules wired (cross-spring S68 fully rewired)
 Phase 3   GPU live dispatch     — Titan V validated (24/24 PASS, 0.04% seasonal parity, 10K batch)
 Phase 3.5 NPU edge             — AKD1000 live: 3 experiments, ~48µs inference, LOCOMOS power budget
@@ -23,7 +24,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 
 | Faculty | Institution | Track | Papers | Experiments | Checks | Domain |
 |---------|------------|-------|:------:|:-----------:|:------:|--------|
-| Dong | MSU BAE | Irrigation & Soil | 10+ | 44 | 1054+645 | ET₀ (7 methods), soil, IoT, WB, dual Kc, Richards, yield, ensemble, bias correction, GPU parity, metalForge dispatch |
+| Dong | MSU BAE | Irrigation & Soil | 10+ | 45 | 1109+651 | ET₀ (7 methods), soil, IoT, WB, dual Kc, Richards, yield, ensemble, bias correction, GPU parity, metalForge dispatch, Anderson coupling |
 
 ## Faculty: Younsuk Dong, PhD
 
@@ -78,8 +79,9 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | 42 | Seasonal Batch ET₀ at GPU Scale — Exp 042 | 0→GPU | 18+21 | 1,460 station-days batch |
 | 43 | Titan V GPU Live Dispatch — Exp 043 | GPU | 24 | WGSL shader on GV100, 0.04% parity |
 | 44 | metalForge Live Hardware Probe — Exp 044 | GPU+NPU | 17 | 5 substrates discovered live |
+| 45 | Anderson Soil-Moisture Coupling — Exp 045 | 0→CPU | 55+95 | θ→S_e→d_eff→QS regime, cross-spring |
 
-### Rust Validation (Phase 1+3) — 47 barracuda + 4 forge = 51 binaries
+### Rust Validation (Phase 1+3) — 50 barracuda + 4 forge = 54 binaries
 
 | Binary | Checks | Modules Exercised |
 |--------|:------:|-------------------|
@@ -132,17 +134,18 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | `BatchedRichards` | `pde::richards::solve_richards` | airSpring→ToadStool S40 absorption | **Wired** |
 | `fit_*_nm/global` | `optimize::nelder_mead` + `multi_start` | neuralSpring optimizer | **Wired** |
 
-### CPU Benchmarks (v0.5.0) — Rust 69x Faster Than Python
+### CPU Benchmarks (v0.5.1) — Rust 25.9× Faster Than Python (8/8 Parity)
 
-| Operation | Rust Throughput | Speedup vs Python | Cross-Spring Provenance |
-|-----------|----------------|:-----------------:|------------------------|
-| ET₀ (FAO-56) | 12.7M/s | **20x** | hotSpring df64, multi-spring elementwise |
-| VG θ(h) retention | 35.8M/s | **83x** | hotSpring df64 precision |
-| Yield single-stage | 1.08B/s | **81x** | airSpring `eco::yield_response` |
-| Dual Kc season | 59M/s | — | airSpring `eco::dual_kc` |
-| Richards PDE (50 nodes) | 3,620/s | **502x** | airSpring→ToadStool, hotSpring df64 |
-| Isotherm (NM 1-start) | 175K fits/s | neuralSpring `nelder_mead` |
-| Isotherm (NM 8×LHS) | 42.5K fits/s | neuralSpring `multi_start_nelder_mead` |
+| Algorithm | Speedup | Parity | Cross-Spring Provenance |
+|-----------|:-------:|:------:|------------------------|
+| FAO-56 PM ET₀ | **15×** | ✓ | hotSpring df64, multi-spring elementwise |
+| Hargreaves-Samani | **114×** | ✓ | FAO-56 Eq. 52, temperature-only |
+| Water Balance Step | **190×** | ✓ | FAO-56 Ch. 8, stress coefficient |
+| Anderson Coupling | **94×** | ✓ | Cross-spring: θ→S_e→d_eff→QS |
+| Season Sim (153d) | **44×** | ✓ | Full pipeline: ET₀→Kc→WB→yield |
+| Shannon Diversity | **26×** | ✓ | wetSpring diversity metrics |
+| Van Genuchten θ(h) | **6×** | ✓ | hotSpring df64 precision |
+| Thornthwaite PET | **1×** | ✓ | Higher-fidelity Rust (365 vs 12 trig) |
 
 ### Evolution Documents
 
@@ -150,7 +153,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 |----------|---------|
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C breakdown, absorbed vs stays-local, quality gates |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
-| `wateringHole/handoffs/` | V027 active — GPU parity + dispatch + Titan V live |
+| `wateringHole/handoffs/` | V030 active — evolution handoff + Anderson coupling |
 | `specs/CROSS_SPRING_EVOLUTION.md` | 774 WGSL shader provenance across all Springs |
 
 ### Next Steps (Dong Lab)
@@ -177,7 +180,7 @@ $200 sensor, Open-Meteo weather data, and a $600 GPU running BarraCuda.
 
 ## Extension Explorations
 
-With 44 experiments validated and the full Python → Rust CPU → Titan V GPU live →
+With 45 experiments validated and the full Python → Rust CPU → Titan V GPU live →
 metalForge mixed hardware pipeline proven, airSpring can now extend beyond
 reproduction into new science. These explorations use the validated stack to answer
 questions the original papers did not.

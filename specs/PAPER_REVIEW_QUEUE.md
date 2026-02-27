@@ -2,7 +2,7 @@
 
 **Last Updated**: February 27, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 44 completed (1054/1054 Python + 645 Rust tests + 1024 validation + 1393 atlas checks + 11 Tier A modules + 4 forge binaries). Titan V GPU live dispatch (24/24 PASS) + AKD1000 NPU live + metalForge live hardware probe (RTX 4070 + Titan V + AKD1000 + i9-12900K) + CPU↔GPU parity (0.04% seasonal). All completed papers use open data and systems.
+**Status**: 45 completed (1109/1109 Python + 651 Rust tests + 1393 atlas checks + 11 Tier A modules + 54 binaries). Titan V GPU live dispatch (24/24 PASS) + AKD1000 NPU live + metalForge live hardware probe (RTX 4070 + Titan V + AKD1000 + i9-12900K) + CPU↔GPU parity (0.04% seasonal) + 25.9× Rust-vs-Python speedup. All completed papers use open data and systems.
 
 ---
 
@@ -56,7 +56,7 @@
 
 ### Controls Audit
 
-All 44 completed papers have:
+All 45 completed papers have:
 - **Digitized benchmarks** in `control/*/benchmark_*.json`
 - **Python control scripts** that validate against benchmarks
 - **Rust validation binaries** (44 barracuda + 1 forge = 45 binaries) that load the same benchmarks
