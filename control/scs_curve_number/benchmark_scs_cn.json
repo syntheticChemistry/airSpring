@@ -1,0 +1,144 @@
+{
+  "provenance": {
+    "paper": "USDA Soil Conservation Service (1972) National Engineering Handbook, Section 4: Hydrology.",
+    "supplementary": [
+      "USDA-SCS (1986) TR-55: Urban Hydrology for Small Watersheds.",
+      "Mishra SK, Singh VP (2003) SCS-CN Method. Ch 9 in Soil Conservation Service Curve Number.",
+      "Ponce VM, Hawkins RH (1996) Runoff curve number: has it reached maturity? J Hydrol Eng 1(1):11-19."
+    ],
+    "data_source": "Published CN tables and equations (open literature, USDA public domain)",
+    "experiment": "050"
+  },
+  "equation": {
+    "scs_cn_runoff": "Q = (P - Ia)² / (P - Ia + S)  when P > Ia, else Q = 0",
+    "initial_abstraction": "Ia = 0.2 × S  (standard, or Ia = 0.05 × S for updated)",
+    "potential_retention": "S = (25400 / CN) - 254  [mm]  (or S = (1000/CN) - 10 [inches])",
+    "units": {"Q": "mm", "P": "mm", "S": "mm", "CN": "dimensionless (0-100)"}
+  },
+  "cn_table": {
+    "description": "Standard CN values for Hydrologic Soil Groups A-D, AMC II (average moisture)",
+    "land_use": {
+      "fallow_bare": {"A": 77, "B": 86, "C": 91, "D": 94},
+      "row_crops_straight": {"A": 72, "B": 81, "C": 88, "D": 91},
+      "row_crops_contoured": {"A": 67, "B": 78, "C": 85, "D": 89},
+      "small_grain_straight": {"A": 65, "B": 76, "C": 84, "D": 88},
+      "pasture_good": {"A": 39, "B": 61, "C": 74, "D": 80},
+      "meadow": {"A": 30, "B": 58, "C": 71, "D": 78},
+      "woods_good": {"A": 30, "B": 55, "C": 70, "D": 77},
+      "farmstead": {"A": 59, "B": 74, "C": 82, "D": 86},
+      "impervious": {"A": 98, "B": 98, "C": 98, "D": 98}
+    }
+  },
+  "amc_adjustment": {
+    "description": "Antecedent Moisture Condition adjustment (Chow 1964)",
+    "amc_i_dry": "CN_I = CN_II / (2.281 - 0.01281 × CN_II)  [Hawkins 1985]",
+    "amc_iii_wet": "CN_III = CN_II / (0.4036 + 0.0059 × CN_II)  [Hawkins 1985]",
+    "test_cases": [
+      {"cn_ii": 75, "expected_cn_i": 56.8, "expected_cn_iii": 88.6, "tolerance": 0.5},
+      {"cn_ii": 85, "expected_cn_i": 71.3, "expected_cn_iii": 93.9, "tolerance": 0.5},
+      {"cn_ii": 60, "expected_cn_i": 39.7, "expected_cn_iii": 79.2, "tolerance": 0.5}
+    ]
+  },
+  "analytical_benchmarks": [
+    {
+      "name": "cn75_25mm",
+      "description": "CN=75, P=25mm — light rain on average soil",
+      "inputs": {"cn": 75, "precip_mm": 25.0, "ia_ratio": 0.2},
+      "S_mm": 84.667,
+      "Ia_mm": 16.933,
+      "expected_Q_mm": 0.70,
+      "tolerance": 0.1,
+      "notes": "S = 25400/75 - 254 = 84.667; Ia = 16.933; Q = (25-16.933)²/(25-16.933+84.667) = 0.702"
+    },
+    {
+      "name": "cn75_50mm",
+      "description": "CN=75, P=50mm — moderate rain",
+      "inputs": {"cn": 75, "precip_mm": 50.0, "ia_ratio": 0.2},
+      "S_mm": 84.667,
+      "Ia_mm": 16.933,
+      "expected_Q_mm": 9.27,
+      "tolerance": 0.1,
+      "notes": "Q = (50-16.933)²/(50-16.933+84.667) = 9.272"
+    },
+    {
+      "name": "cn75_100mm",
+      "description": "CN=75, P=100mm — heavy rain",
+      "inputs": {"cn": 75, "precip_mm": 100.0, "ia_ratio": 0.2},
+      "S_mm": 84.667,
+      "Ia_mm": 16.933,
+      "expected_Q_mm": 41.20,
+      "tolerance": 0.1,
+      "notes": "Q = (100-16.933)²/(100-16.933+84.667) = 41.16"
+    },
+    {
+      "name": "cn90_50mm",
+      "description": "CN=90, P=50mm — poor soil, developed area",
+      "inputs": {"cn": 90, "precip_mm": 50.0, "ia_ratio": 0.2},
+      "S_mm": 28.222,
+      "Ia_mm": 5.644,
+      "expected_Q_mm": 27.14,
+      "tolerance": 0.1,
+      "notes": "S = 25400/90 - 254 = 28.222; Q = (50-5.644)²/(50-5.644+28.222) = 27.14"
+    },
+    {
+      "name": "cn50_50mm",
+      "description": "CN=50, P=50mm — well-drained forest",
+      "inputs": {"cn": 50, "precip_mm": 50.0, "ia_ratio": 0.2},
+      "S_mm": 254.0,
+      "Ia_mm": 50.8,
+      "expected_Q_mm": 0.0,
+      "tolerance": 0.01,
+      "notes": "P < Ia, so Q = 0"
+    },
+    {
+      "name": "cn85_10mm",
+      "description": "CN=85, P=10mm — light rain below Ia",
+      "inputs": {"cn": 85, "precip_mm": 10.0, "ia_ratio": 0.2},
+      "S_mm": 44.824,
+      "Ia_mm": 8.965,
+      "expected_Q_mm": 0.02,
+      "tolerance": 0.05,
+      "notes": "Q = (10-8.965)²/(10-8.965+44.824) = 0.024"
+    },
+    {
+      "name": "cn98_50mm",
+      "description": "CN=98, P=50mm — nearly impervious (parking lot)",
+      "inputs": {"cn": 98, "precip_mm": 50.0, "ia_ratio": 0.2},
+      "S_mm": 5.184,
+      "Ia_mm": 1.037,
+      "expected_Q_mm": 44.28,
+      "tolerance": 0.1,
+      "notes": "Almost all precipitation becomes runoff"
+    },
+    {
+      "name": "updated_ia_cn75_50mm",
+      "description": "CN=75, P=50mm with updated Ia=0.05S (Woodward 2003)",
+      "inputs": {"cn": 75, "precip_mm": 50.0, "ia_ratio": 0.05},
+      "S_mm": 84.667,
+      "Ia_mm": 4.233,
+      "expected_Q_mm": 16.08,
+      "tolerance": 0.1,
+      "notes": "Updated Ia ratio produces more runoff: Q = (50-4.233)²/(50-4.233+84.667) = 16.04"
+    },
+    {
+      "name": "zero_precip",
+      "description": "No precipitation — zero runoff",
+      "inputs": {"cn": 85, "precip_mm": 0.0, "ia_ratio": 0.2},
+      "expected_Q_mm": 0.0,
+      "tolerance": 0.001,
+      "notes": "Q = 0 when P = 0"
+    }
+  ],
+  "monotonicity_checks": [
+    {"name": "cn_monotonic", "description": "Higher CN → more runoff at constant P"},
+    {"name": "precip_monotonic", "description": "Higher P → more runoff at constant CN"},
+    {"name": "ia_ratio_monotonic", "description": "Higher Ia ratio → less runoff at constant P and CN"},
+    {"name": "Q_leq_P", "description": "Runoff never exceeds precipitation"}
+  ],
+  "soil_group_descriptions": {
+    "A": "Low runoff potential: sand, loamy sand, sandy loam (Ksat > 7.6 mm/hr)",
+    "B": "Moderate: silt loam, loam (3.8-7.6 mm/hr)",
+    "C": "High: sandy clay loam (1.3-3.8 mm/hr)",
+    "D": "Very high: clay loam, clay (< 1.3 mm/hr)"
+  }
+}

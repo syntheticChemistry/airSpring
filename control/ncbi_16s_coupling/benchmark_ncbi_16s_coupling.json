@@ -1,0 +1,69 @@
+{
+  "_provenance": {
+    "experiment": "Exp 048: NCBI 16S + Soil Moisture Anderson Coupling",
+    "description": "Couples real NCBI 16S metagenome study site to airSpring moisture-driven Anderson QS model",
+    "bioproject": "PRJNA481146",
+    "study": "16S amplicon sequences of soil microbiome after different tillage managements",
+    "site": "Ein Harod Meuhad, Israel (32.5978°N, 35.501°E)",
+    "date": "2026-02-28",
+    "cross_spring": "airSpring (θ, ET₀, Anderson) × wetSpring (16S) × NestGate (NCBI)",
+    "baseline_commit": "current",
+    "methodology": "Real Open-Meteo weather → FAO-56 ET₀ → water balance θ(t) → Anderson d_eff(t) → QS regime prediction"
+  },
+  "site": {
+    "lat": 32.5978,
+    "lon": 35.501,
+    "elevation_m": 80,
+    "climate": "Mediterranean (hot-summer, Csa)",
+    "soil_texture": "clay loam",
+    "collection_dates": ["2014-02-02", "2014-04-11"],
+    "sra_runs": 194,
+    "platform": "Illumina MiSeq",
+    "library_strategy": "AMPLICON"
+  },
+  "soil_parameters": {
+    "source": "Representative Mediterranean clay loam (Carsel & Parrish 1988 + Saxton-Rawls)",
+    "theta_r": 0.095,
+    "theta_s": 0.41,
+    "alpha_vg": 0.019,
+    "n_vg": 1.31,
+    "K_sat_mm_day": 62.0,
+    "FC_mm": 0.32,
+    "WP_mm": 0.15,
+    "rooting_depth_mm": 600
+  },
+  "anderson_coupling": {
+    "z_max": 6,
+    "mualem_L": 0.5,
+    "W_0": 20.0,
+    "W_c_3d": 16.5,
+    "regime_thresholds": {
+      "delocalized": "d_eff > 2.5",
+      "marginal": "2.0 <= d_eff <= 2.5",
+      "localized": "d_eff < 2.0"
+    }
+  },
+  "weather_period": {
+    "start": "2013-10-01",
+    "end": "2014-04-30",
+    "rationale": "Growing season containing both collection dates (Feb + Apr 2014)"
+  },
+  "validation_checks": [
+    {"name": "weather_fetch_ok", "type": "bool"},
+    {"name": "et0_positive_all_days", "type": "bool"},
+    {"name": "et0_mean_plausible_1_8mm", "type": "range", "min": 1.0, "max": 8.0},
+    {"name": "water_balance_mass_conserved", "type": "tolerance", "tol_mm": 0.1},
+    {"name": "theta_in_range", "type": "range", "min": 0.095, "max": 0.41},
+    {"name": "theta_feb_wetter_than_apr", "type": "bool", "rationale": "Mediterranean winter rain"},
+    {"name": "anderson_S_e_in_01", "type": "range", "min": 0.0, "max": 1.0},
+    {"name": "anderson_d_eff_positive", "type": "bool"},
+    {"name": "anderson_d_eff_feb_higher", "type": "bool", "rationale": "Wetter → higher connectivity → higher d_eff"},
+    {"name": "anderson_W_feb_lower", "type": "bool", "rationale": "Wetter → lower disorder"},
+    {"name": "anderson_regime_feb_classifiable", "type": "bool", "rationale": "Mediterranean semi-arid: low θ → localized is physically correct; regime must be classifiable"},
+    {"name": "anderson_regime_dry_more_localized", "type": "bool"},
+    {"name": "coupling_chain_monotonic", "type": "bool", "rationale": "Higher θ → higher d_eff → more delocalized"},
+    {"name": "diversity_prediction_consistent", "type": "bool", "rationale": "QS-active regime predicts higher diversity"}
+  ],
+  "total_checks": 14,
+  "pass_criteria": "14/14 PASS, exit code 0"
+}

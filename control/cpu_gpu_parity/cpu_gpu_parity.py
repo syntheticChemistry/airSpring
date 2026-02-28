@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """Exp 040 — CPU vs GPU Parity Validation (Python control).
 
 Validates that the GPU dispatch path (via BatchedElementwiseF64) produces

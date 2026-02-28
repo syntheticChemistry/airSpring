@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """Exp 042 — Seasonal Batch ET₀ at GPU Scale (Python control).
 
 Generates synthetic 365-day weather for 4 US climate stations, computes

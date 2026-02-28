@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """Exp 036 — biomeOS Neural API Round-Trip Parity Control.
 
 Validates that the concept of orchestrated compute via JSON-RPC produces

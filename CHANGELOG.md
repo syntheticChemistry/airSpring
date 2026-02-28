@@ -2,6 +2,67 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.5.3] - 2026-02-28
+
+### Experiment Buildout (049-051) + Deep Technical Debt Resolution
+
+Three new experiments completing the temperature-based ET₀ portfolio, hydrology
+runoff, and infiltration physics. Comprehensive technical debt resolution:
+named constants extraction, dead code removal, cast hygiene, capability-based
+GPU discovery.
+
+#### Added
+- **Exp 049: Blaney-Criddle (1950) Temperature PET** — 8th ET₀ method
+  - Python: 18/18, Rust: 5 unit tests + validation binary PASS.
+  - `eco::evapotranspiration::blaney_criddle_et0()`, `blaney_criddle_p()`,
+    `blaney_criddle_from_location()`
+- **Exp 050: SCS Curve Number Runoff (USDA 1972)**
+  - Python: 38/38, Rust: 12 unit tests + validation binary PASS.
+  - New `eco::runoff` module: `scs_cn_runoff()`, `potential_retention()`,
+    `amc_cn_dry/wet()`, `LandUse`/`SoilGroup` enums with CN table
+- **Exp 051: Green-Ampt (1911) Infiltration**
+  - Python: 37/37, Rust: 12 unit tests + validation binary PASS.
+  - New `eco::infiltration` module: `cumulative_infiltration()` (Newton-Raphson),
+    `infiltration_rate()`, `ponding_time()`, `GreenAmptParams` (7 Rawls soils)
+- 5 new cross-spring benchmarks in `bench_cross_spring` (25→30)
+- 3 new `ShaderProvenance` entries in `gpu::device_info` (13→16)
+- V034 handoff for ToadStool/BarraCuda team
+
+#### Changed — Technical Debt Resolution
+- **Named constants (42+)**: Extracted 21 in `evapotranspiration` (`MAGNUS_A/B/C`,
+  `HARGREAVES_COEFF`, `MJ_TO_MM`, `BC_TEMP_COEFF`), 9 in `solar` (`SOLAR_CONSTANT_MJ`,
+  `STEFAN_BOLTZMANN`), 12 in `thornthwaite` (`EXPONENT_C0-C3`, `WILLMOTT_A/B/C`)
+- **Dead code eliminated**: `#[allow(dead_code)]` removed from 4 GPU modules by
+  adding `pub const fn gpu_engine()` accessors; `SeasonResult` fields prefixed `_`
+- **Cast hygiene**: `as usize` → `usize::try_from()` in `richards`, `as u64` →
+  `u64::try_from().unwrap_or()` in `npu`, `as i8` → `i8::from_ne_bytes()` in `npu`
+- **Capability-based GPU**: `validate_gpu_live` now reads `BARRACUDA_GPU_ADAPTER`
+  from env with fallback to runtime device discovery (no more `set_var` hardcoding)
+- **Unreachable code**: Removed `#[allow(unreachable_code)]` in `validate_atlas_stream`
+- Experiments: 48 → 51
+- Python checks: 1144 → 1237 (+93)
+- Rust lib tests: 589 → 618 (+29)
+- Validation binaries: 53 → 56 (+3)
+- Cross-spring benchmarks: 25/25 → 30/30 (+5)
+- Provenance entries: 13 → 16 (+3)
+- ET₀ methods: 7 → 8 (Blaney-Criddle)
+- `#[allow(dead_code)]` directives: 5 → 0
+
+#### Quality Gates
+| Check | Status |
+|-------|--------|
+| Python baselines | **1237/1237 PASS** |
+| Rust lib tests | **618 passed** |
+| Rust integration | **20 passed** |
+| GPU live (Titan V) | **24/24 PASS** |
+| metalForge cross-system | **29/29 PASS** |
+| Atlas stream (real data) | **73/73 PASS** |
+| CPU vs Python | **25.9× (8/8 parity)** |
+| Cross-spring benchmarks | **30/30 PASS** |
+| clippy pedantic+nursery | **0 warnings** |
+| unsafe blocks | **0** |
+| production unwrap() | **0** |
+
 ## [0.5.2] - 2026-02-27
 
 ### Tier B GPU Orchestrators + Seasonal Pipeline + Atlas Stream + Real Data Validation

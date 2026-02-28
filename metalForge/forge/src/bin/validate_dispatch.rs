@@ -11,6 +11,7 @@
 use airspring_forge::dispatch::{self, Reason};
 use airspring_forge::substrate::{Capability, Identity, Properties, Substrate, SubstrateKind};
 use airspring_forge::workloads;
+use barracuda::validation::ValidationHarness;
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../../control/metalforge_dispatch/benchmark_metalforge_dispatch.json");
@@ -68,17 +69,7 @@ fn full_inventory() -> Vec<Substrate> {
     ]
 }
 
-fn check(name: &str, ok: bool, pass: &mut u32, fail: &mut u32) {
-    if ok {
-        *pass += 1;
-        println!("  [PASS] {name}");
-    } else {
-        *fail += 1;
-        println!("  [FAIL] {name}");
-    }
-}
-
-fn check_workload_routing(inv: &[Substrate], pass: &mut u32, fail: &mut u32) {
+fn check_workload_routing(inv: &[Substrate], v: &mut ValidationHarness) {
     println!("── GPU Workload Routing ──");
     let gpu_wls = [
         workloads::et0_batch(),
@@ -94,12 +85,10 @@ fn check_workload_routing(inv: &[Substrate], pass: &mut u32, fail: &mut u32) {
     ];
     for ew in &gpu_wls {
         let r = dispatch::route(&ew.workload, inv);
-        check(
+        v.check_bool(
             &format!("{} → GPU", ew.workload.name),
             r.as_ref()
                 .is_some_and(|d| d.substrate.kind == SubstrateKind::Gpu),
-            pass,
-            fail,
         );
     }
 
@@ -111,36 +100,30 @@ fn check_workload_routing(inv: &[Substrate], pass: &mut u32, fail: &mut u32) {
     ];
     for ew in &npu_wls {
         let r = dispatch::route(&ew.workload, inv);
-        check(
+        v.check_bool(
             &format!("{} → NPU", ew.workload.name),
             r.as_ref()
                 .is_some_and(|d| d.substrate.kind == SubstrateKind::Npu),
-            pass,
-            fail,
         );
     }
 
     println!("\n── CPU Workload Routing ──");
     let ew = workloads::weather_ingest();
     let r = dispatch::route(&ew.workload, inv);
-    check(
+    v.check_bool(
         &format!("{} → CPU", ew.workload.name),
         r.as_ref()
             .is_some_and(|d| d.substrate.kind == SubstrateKind::Cpu),
-        pass,
-        fail,
     );
 }
 
-fn check_priority_and_fallback(inv: &[Substrate], pass: &mut u32, fail: &mut u32) {
+fn check_priority_and_fallback(inv: &[Substrate], v: &mut ValidationHarness) {
     println!("\n── Priority Chain ──");
     let r = dispatch::route(&workloads::et0_batch().workload, inv);
-    check(
+    v.check_bool(
         "GPU preferred over Neural for F64 workloads",
         r.as_ref()
             .is_some_and(|d| d.substrate.kind == SubstrateKind::Gpu),
-        pass,
-        fail,
     );
 
     println!("\n── Fallback Behavior ──");
@@ -154,12 +137,10 @@ fn check_priority_and_fallback(inv: &[Substrate], pass: &mut u32, fail: &mut u32
         ],
     )];
     let r = dispatch::route(&workloads::et0_batch().workload, &cpu_only_inv);
-    check(
+    v.check_bool(
         "ET₀ batch falls back to CPU when no GPU",
         r.as_ref()
             .is_some_and(|d| d.substrate.kind == SubstrateKind::Cpu),
-        pass,
-        fail,
     );
 
     let gpu_cpu_only = vec![
@@ -175,65 +156,47 @@ fn check_priority_and_fallback(inv: &[Substrate], pass: &mut u32, fail: &mut u32
         ),
     ];
     let r = dispatch::route(&workloads::crop_stress_classifier().workload, &gpu_cpu_only);
-    check(
-        "NPU workload fails when no NPU available",
-        r.is_none(),
-        pass,
-        fail,
-    );
+    v.check_bool("NPU workload fails when no NPU available", r.is_none());
 }
 
-fn check_reasons_and_inventory(inv: &[Substrate], pass: &mut u32, fail: &mut u32) {
+fn check_reasons_and_inventory(inv: &[Substrate], v: &mut ValidationHarness) {
     println!("\n── Dispatch Reason ──");
     let r =
         dispatch::route(&workloads::crop_stress_classifier().workload, inv).expect("should route");
-    check(
+    v.check_bool(
         "NPU workload reports Preferred reason",
         r.reason == Reason::Preferred,
-        pass,
-        fail,
     );
 
     let r = dispatch::route(&workloads::et0_batch().workload, inv).expect("should route");
-    check(
+    v.check_bool(
         "GPU workload reports BestAvailable reason",
         r.reason == Reason::BestAvailable,
-        pass,
-        fail,
     );
 
     println!("\n── Inventory Completeness ──");
     let all = workloads::all_workloads();
-    check(
+    v.check_bool(
         &format!("{} workloads in catalog", all.len()),
         all.len() == 18,
-        pass,
-        fail,
     );
 
     let all_route = all
         .iter()
         .all(|ew| dispatch::route(&ew.workload, inv).is_some());
-    check(
-        "All 18 workloads route in full inventory",
-        all_route,
-        pass,
-        fail,
-    );
+    v.check_bool("All 18 workloads route in full inventory", all_route);
 
     let (absorbed, local, npu_native, cpu_only) = workloads::origin_summary();
-    check(
+    v.check_bool(
         &format!(
             "9 absorbed + 4 local + 3 NPU + 2 CPU = {}",
             absorbed + local + npu_native + cpu_only
         ),
         absorbed == 9 && local == 4 && npu_native == 3 && cpu_only == 2,
-        pass,
-        fail,
     );
 }
 
-fn check_cross_system_routing(inv: &[Substrate], pass: &mut u32, fail: &mut u32) {
+fn check_cross_system_routing(inv: &[Substrate], v: &mut ValidationHarness) {
     println!("\n── Cross-System Pipeline ──");
     let seasonal = dispatch::route(&workloads::seasonal_pipeline().workload, inv)
         .expect("seasonal_pipeline should route");
@@ -246,47 +209,28 @@ fn check_cross_system_routing(inv: &[Substrate], pass: &mut u32, fail: &mut u32)
     let sub_stress = stress.substrate.kind;
     let sub_ingest = ingest.substrate.kind;
 
-    check(
+    v.check_bool(
         "seasonal_pipeline → GPU",
         sub_seasonal == SubstrateKind::Gpu,
-        pass,
-        fail,
     );
-    check(
+    v.check_bool(
         "crop_stress_classifier → NPU",
         sub_stress == SubstrateKind::Npu,
-        pass,
-        fail,
     );
-    check(
-        "weather_ingest → CPU",
-        sub_ingest == SubstrateKind::Cpu,
-        pass,
-        fail,
-    );
+    v.check_bool("weather_ingest → CPU", sub_ingest == SubstrateKind::Cpu);
 
     let all_different =
         sub_seasonal != sub_stress && sub_stress != sub_ingest && sub_seasonal != sub_ingest;
-    check(
-        "pipeline routes to 3 different substrates",
-        all_different,
-        pass,
-        fail,
-    );
+    v.check_bool("pipeline routes to 3 different substrates", all_different);
 
     let kinds: [SubstrateKind; 3] = [sub_seasonal, sub_stress, sub_ingest];
     let covers_all = kinds.contains(&SubstrateKind::Gpu)
         && kinds.contains(&SubstrateKind::Npu)
         && kinds.contains(&SubstrateKind::Cpu);
-    check(
-        "pipeline covers GPU + NPU + CPU",
-        covers_all,
-        pass,
-        fail,
-    );
+    v.check_bool("pipeline covers GPU + NPU + CPU", covers_all);
 }
 
-fn check_benchmark_expectations(pass: &mut u32, fail: &mut u32) {
+fn check_benchmark_expectations(v: &mut ValidationHarness) {
     let json: serde_json::Value =
         serde_json::from_str(BENCHMARK_JSON).expect("benchmark JSON must parse");
 
@@ -299,11 +243,9 @@ fn check_benchmark_expectations(pass: &mut u32, fail: &mut u32) {
         .and_then(|tc| tc.as_array());
     let test_cases_len = test_cases.map_or(0, Vec::len);
 
-    check(
+    v.check_bool(
         &format!("workload_routing test cases >= 7 ({test_cases_len})"),
         test_cases_len >= 7,
-        pass,
-        fail,
     );
 
     let expected_count = json
@@ -313,32 +255,31 @@ fn check_benchmark_expectations(pass: &mut u32, fail: &mut u32) {
         .and_then(serde_json::Value::as_u64)
         .unwrap_or(0);
 
-    check(
+    v.check_bool(
         &format!("inventory_completeness expected_count == 18 ({expected_count})"),
         expected_count == 18,
-        pass,
-        fail,
     );
 }
 
 fn main() {
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO)
+        .with_target(false)
+        .without_time()
+        .init();
+
     println!("═══════════════════════════════════════════════════════════");
     println!("  airSpring Exp 041: metalForge Mixed-Hardware Dispatch");
     println!("═══════════════════════════════════════════════════════════\n");
 
     let inv = full_inventory();
-    let mut pass = 0_u32;
-    let mut fail = 0_u32;
+    let mut v = ValidationHarness::new("metalForge Dispatch");
 
-    check_workload_routing(&inv, &mut pass, &mut fail);
-    check_priority_and_fallback(&inv, &mut pass, &mut fail);
-    check_reasons_and_inventory(&inv, &mut pass, &mut fail);
-    check_cross_system_routing(&inv, &mut pass, &mut fail);
-    check_benchmark_expectations(&mut pass, &mut fail);
+    check_workload_routing(&inv, &mut v);
+    check_priority_and_fallback(&inv, &mut v);
+    check_reasons_and_inventory(&inv, &mut v);
+    check_cross_system_routing(&inv, &mut v);
+    check_benchmark_expectations(&mut v);
 
-    let total = pass + fail;
-    println!("\n=== metalForge Dispatch: {pass}/{total} PASS, {fail} FAIL ===");
-    if fail > 0 {
-        std::process::exit(1);
-    }
+    v.finish();
 }

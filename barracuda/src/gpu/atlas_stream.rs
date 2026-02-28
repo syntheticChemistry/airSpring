@@ -12,9 +12,7 @@
 //! Current: CPU sequential, same API shape
 //! ```
 
-use crate::gpu::seasonal_pipeline::{
-    CropConfig, SeasonalPipeline, SeasonResult, WeatherDay,
-};
+use crate::gpu::seasonal_pipeline::{CropConfig, SeasonResult, SeasonalPipeline, WeatherDay};
 use std::ops::Range;
 
 /// Station batch: station identifier and weather data for one season.
@@ -78,14 +76,10 @@ impl AtlasStream {
         batches: &[StationBatch],
         config: &AtlasStreamConfig,
     ) -> Vec<StationSeasonResult> {
-        let mut results = Vec::with_capacity(
-            batches.len() * config.crop_configs.len(),
-        );
+        let mut results = Vec::with_capacity(batches.len() * config.crop_configs.len());
         for batch in batches {
             for crop_config in &config.crop_configs {
-                let result = self
-                    .pipeline
-                    .run_season(&batch.weather, crop_config);
+                let result = self.pipeline.run_season(&batch.weather, crop_config);
                 let crop_name = crop_config.crop_type.coefficients().name.to_string();
                 results.push(StationSeasonResult {
                     station_id: batch.station_id.clone(),
@@ -179,7 +173,10 @@ mod tests {
         let results = stream.process_batch(&batches, &config);
 
         assert_eq!(results.len(), 2);
-        let corn = results.iter().find(|r| r.crop_name == "Corn (grain)").unwrap();
+        let corn = results
+            .iter()
+            .find(|r| r.crop_name == "Corn (grain)")
+            .unwrap();
         let soy = results.iter().find(|r| r.crop_name == "Soybean").unwrap();
         assert!(corn.result.total_actual_et > soy.result.total_actual_et);
     }

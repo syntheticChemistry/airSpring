@@ -165,6 +165,35 @@ pub fn adjust_kc_for_climate(kc_table: f64, u2: f64, rh_min: f64, crop_height_m:
     (kc_table + adjustment).max(0.0)
 }
 
+/// Linear Kc interpolation within a growth stage (calendar-day based).
+///
+/// Wraps [`barracuda::stats::crop_coefficient`] (absorbed from airSpring
+/// metalForge, S66 R-S66-002). Use for day-in-stage interpolation when
+/// stage boundaries are defined by calendar days rather than GDD.
+///
+/// For GDD-based interpolation, use [`kc_from_gdd`] instead.
+///
+/// # Arguments
+///
+/// * `kc_prev` — Kc at the start of the stage
+/// * `kc_next` — Kc at the end of the stage
+/// * `day_in_stage` — Current day within the stage (0-indexed)
+/// * `stage_length` — Total days in the stage
+///
+/// # Cross-Spring Provenance
+///
+/// Originally written in airSpring `metalForge`, absorbed into
+/// `barracuda::stats::hydrology` (`ToadStool` S66).
+#[must_use]
+pub fn crop_coefficient_stage(
+    kc_prev: f64,
+    kc_next: f64,
+    day_in_stage: u32,
+    stage_length: u32,
+) -> f64 {
+    barracuda::stats::crop_coefficient(kc_prev, kc_next, day_in_stage, stage_length)
+}
+
 // ── Growing Degree Days (GDD) ────────────────────────────────────────
 
 /// Growing degree-day parameters for a crop.
@@ -405,6 +434,26 @@ mod tests {
         // Lower wind and higher humidity → lower Kc
         let kc = adjust_kc_for_climate(1.20, 1.0, 70.0, 2.0);
         assert!(kc < 1.20, "Calm+humid should decrease Kc: {kc}");
+    }
+
+    #[test]
+    fn test_crop_coefficient_stage_midpoint() {
+        let kc = crop_coefficient_stage(0.30, 1.20, 50, 100);
+        assert!((kc - 0.75).abs() < 1e-10, "Midpoint should be 0.75: {kc}");
+    }
+
+    #[test]
+    fn test_crop_coefficient_stage_boundaries() {
+        let start = crop_coefficient_stage(0.30, 1.20, 0, 100);
+        assert!((start - 0.30).abs() < 1e-10, "Start: {start}");
+        let end = crop_coefficient_stage(0.30, 1.20, 100, 100);
+        assert!((end - 1.20).abs() < 1e-10, "End: {end}");
+    }
+
+    #[test]
+    fn test_crop_coefficient_stage_zero_length() {
+        let kc = crop_coefficient_stage(0.30, 1.20, 5, 0);
+        assert!((kc - 0.30).abs() < 1e-10, "Zero-length returns kc_prev: {kc}");
     }
 
     #[test]

@@ -63,7 +63,6 @@ pub struct BatchedDualKcResult {
 /// absorbs op=8, all dispatch falls back to the validated CPU path.
 pub struct BatchedDualKc {
     configs: Vec<FieldDualKcConfig>,
-    #[allow(dead_code)]
     gpu_engine: Option<BatchedElementwiseF64>,
 }
 
@@ -77,6 +76,13 @@ impl std::fmt::Debug for BatchedDualKc {
 }
 
 impl BatchedDualKc {
+    /// Returns a reference to the GPU engine, if available.
+    /// Used for `ToadStool` GPU dispatch when the shader is wired.
+    #[must_use]
+    pub const fn gpu_engine(&self) -> Option<&BatchedElementwiseF64> {
+        self.gpu_engine.as_ref()
+    }
+
     /// Create a new batched dual Kc orchestrator for M fields (CPU only).
     #[allow(clippy::missing_const_for_fn)]
     #[must_use]

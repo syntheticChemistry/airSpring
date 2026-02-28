@@ -131,6 +131,21 @@ def load_atlas_stations() -> dict:
     return data["stations"]
 
 
+def _fetch_with_retry(params):
+    """GET with retry on 429 rate-limit."""
+    for attempt in range(8):
+        resp = requests.get(OPEN_METEO_BASE, params=params, timeout=120)
+        if resp.status_code == 429:
+            wait = 15 * (attempt + 1)
+            print(f"    Rate limited (429), waiting {wait}s (attempt {attempt+1}/8)...")
+            time.sleep(wait)
+            continue
+        resp.raise_for_status()
+        return resp.json()
+    resp.raise_for_status()
+    return resp.json()
+
+
 def fetch_daily(lat: float, lon: float, start: str, end: str) -> pd.DataFrame:
     """
     Fetch daily weather data from Open-Meteo Archive API.
@@ -148,9 +163,7 @@ def fetch_daily(lat: float, lon: float, start: str, end: str) -> pd.DataFrame:
         "precipitation_unit": "mm",
     }
 
-    resp = requests.get(OPEN_METEO_BASE, params=params, timeout=30)
-    resp.raise_for_status()
-    data = resp.json()
+    data = _fetch_with_retry(params)
 
     if "daily" not in data:
         raise ValueError(f"No daily data returned: {data.get('reason', 'unknown')}")
@@ -289,12 +302,26 @@ def main():
 
     all_daily = []
 
-    for station_id in stations_to_fetch:
+    for idx, station_id in enumerate(stations_to_fetch):
         info = active_stations[station_id]
         name = info.get("name", station_id)
-        print(f"\n--- {name} ({station_id}) ---")
+        print(f"\n--- [{idx+1}/{len(stations_to_fetch)}] {name} ({station_id}) ---")
         print(f"  Lat: {info['lat']}, Lon: {info['lon']}, "
               f"Elev: {info['elevation_m']}m")
+
+        daily_path = out_dir / f"{station_id}_{start}_{end}_daily.csv"
+        if daily_path.exists():
+            print(f"  SKIP: {daily_path.name} already exists")
+            try:
+                all_daily.append(pd.read_csv(daily_path))
+            except Exception:
+                pass
+            continue
+
+        if idx > 0:
+            delay = 10.0  # Rate limit: Open-Meteo free tier (80yr requests are heavy)
+            print(f"  (waiting {delay}s for rate limit...)")
+            time.sleep(delay)
 
         try:
             # Daily data

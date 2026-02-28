@@ -1,8 +1,9 @@
 # airSpring NUCLEUS Integration
 
-**Date:** February 27, 2026
+**Date:** February 28, 2026
 **Status:** Experimental — deployment graph + capability spec + Neural API bridge operational
 **Gate:** Eastgate (i9-12900K, RTX 4070, 32GB DDR5, 2TB NVMe, BrainChip Akida NPU)
+**Invariant:** 584 Rust lib tests + 46/46 GPU math + 75/75 cross-validation + 1393 atlas must pass regardless of deployment mode
 
 ---
 
@@ -182,8 +183,67 @@ Open-Meteo requires no API key. USDA NASS registration is instant and free.
 2. **With local NUCLEUS**: Same tests, but data flows through NestGate
 3. **With Neural API**: `validate_neural_api` confirms JSON round-trip parity (29/29 PASS)
 4. **With Plasmodium**: Same tests, but GPU workloads route to best available gate
-5. **Validation invariant**: All 511 Rust lib tests + 934 validation checks + 1393 atlas checks must pass regardless of deployment mode
+5. **Validation invariant**: All 584 Rust lib tests + 46/46 GPU math portability + 1393 atlas checks must pass regardless of deployment mode
 
 The compute results are deterministic. NUCLEUS changes *where* the compute runs,
 not *what* it computes. The 75/75 cross-validation match (tol=1e-5) is the
 invariant across all deployment modes.
+
+---
+
+## Quick Start: Eastgate Tower Deployment
+
+### Phase A — Atomic Tower (BearDog + Songbird)
+
+```bash
+# 1. Build biomeOS
+cd /home/eastgate/Development/ecoPrimals/phase2/biomeOS
+cargo build --workspace --release
+
+# 2. Create family seed (one-time)
+head -c 32 /dev/urandom > .family.seed
+chmod 600 .family.seed
+
+# 3. Start tower
+export NODE_ID=eastgate
+export XDG_RUNTIME_DIR=/run/user/$(id -u)
+biomeos nucleus --mode tower --node-id eastgate
+
+# 4. Verify: airSpring tests still pass (math is deployment-invariant)
+cd /home/eastgate/Development/ecoPrimals/airSpring/barracuda
+cargo test --release
+cargo run --release --bin validate_gpu_math
+```
+
+### Phase B — Node (add ToadStool compute)
+
+```bash
+biomeos nucleus --mode node --node-id eastgate
+```
+
+airSpring GPU workloads (18 eco-domain) route through ToadStool instead of direct
+`wgpu`. The `metalForge::neural::NeuralBridge` discovers the socket automatically:
+
+```
+$XDG_RUNTIME_DIR/biomeos/neural-api-<family_id>.sock
+```
+
+### Phase C — Nest (add NestGate storage)
+
+```bash
+# Eastgate (local compute + storage)
+biomeos nucleus --mode nest --node-id eastgate
+
+# Later: Westgate (76TB ZFS data gravity)
+biomeos nucleus --mode nest --node-id westgate
+```
+
+NestGate providers download and store with content-addressed provenance (BLAKE3):
+- Open-Meteo: 80yr ERA5, no API key
+- NOAA CDO: GHCND observations, `NOAA_CDO_TOKEN`
+- USDA NASS: County crop yields, `USDA_NASS_API_KEY`
+- NCBI: 16S + metagenomes, no key for E-utilities
+
+### Phase D — Plasmodium (LAN HPC, after 10G cabling)
+
+See "LAN HPC (Plasmodium) — Step 5" above.

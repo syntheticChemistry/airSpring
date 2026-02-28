@@ -73,7 +73,6 @@ pub struct BatchedKcClimateResult {
 /// the GPU engine activates automatically.
 pub struct BatchedKcClimate {
     backend: Backend,
-    #[allow(dead_code)]
     gpu_engine: Option<BatchedElementwiseF64>,
 }
 
@@ -102,6 +101,13 @@ impl BatchedKcClimate {
             backend: Backend::Gpu,
             gpu_engine: Some(engine),
         })
+    }
+
+    /// Returns a reference to the GPU engine, if available.
+    /// Used for `ToadStool` GPU dispatch when the shader is wired.
+    #[must_use]
+    pub const fn gpu_engine(&self) -> Option<&BatchedElementwiseF64> {
+        self.gpu_engine.as_ref()
     }
 
     /// Create with CPU fallback (always safe, no device needed).
@@ -145,12 +151,7 @@ impl BatchedKcClimate {
         inputs
             .iter()
             .map(|day| {
-                crop::adjust_kc_for_climate(
-                    day.kc_table,
-                    day.u2,
-                    day.rh_min,
-                    day.crop_height_m,
-                )
+                crop::adjust_kc_for_climate(day.kc_table, day.u2, day.rh_min, day.crop_height_m)
             })
             .collect()
     }

@@ -1,0 +1,145 @@
+{
+  "provenance": {
+    "paper": "Blaney HF, Criddle WD (1950) Determining water requirements in irrigated areas from climatological and irrigation data. USDA-SCS Tech Paper 96.",
+    "supplementary": [
+      "Doorenbos J, Pruitt WO (1977) FAO-24 Crop water requirements. Table 18.",
+      "Allen RG, Pereira LS (1998) FAO-56, Annex to Ch 2 (Blaney-Criddle as reference).",
+      "Xu CY, Singh VP (2001) Evaluation of three complementary models. J Hydrol 242:95-107."
+    ],
+    "data_source": "Published equations and FAO-24 Table 18 (open literature)",
+    "experiment": "049"
+  },
+  "equation": {
+    "description": "ET₀_BC = p × (0.46 × Tmean + 8.13)  [mm/day, original Blaney-Criddle]",
+    "fao24_form": "ET₀ = a + b × [p × (0.46 × T + 8.13)]  [FAO-24 corrected]",
+    "units": {
+      "ET0": "mm/day",
+      "T": "°C",
+      "p": "fraction of annual daylight hours (0-1)"
+    },
+    "notes": [
+      "p = mean daily percentage of annual daytime hours, depends on latitude and month",
+      "FAO-24 adds a + b correction for humidity, wind, and sunshine ratio",
+      "Original (1950) is uncorrected; widely used in western US irrigation districts"
+    ]
+  },
+  "monthly_daylight_pct": {
+    "description": "Mean daily percentage of annual daytime hours (p) by latitude and month, from FAO-24 Table 18",
+    "note": "p values sum to ~100% over 12 months for each latitude. Each value is percent per DAY for that month.",
+    "latitude_0N": {
+      "jan": 0.274, "feb": 0.274, "mar": 0.274, "apr": 0.274, "may": 0.274,
+      "jun": 0.274, "jul": 0.274, "aug": 0.274, "sep": 0.274, "oct": 0.274,
+      "nov": 0.274, "dec": 0.274
+    },
+    "latitude_20N": {
+      "jan": 0.254, "feb": 0.254, "mar": 0.274, "apr": 0.280, "may": 0.293,
+      "jun": 0.299, "jul": 0.297, "aug": 0.286, "sep": 0.276, "oct": 0.265,
+      "nov": 0.254, "dec": 0.247
+    },
+    "latitude_30N": {
+      "jan": 0.240, "feb": 0.247, "mar": 0.274, "apr": 0.286, "may": 0.307,
+      "jun": 0.316, "jul": 0.313, "aug": 0.296, "sep": 0.278, "oct": 0.258,
+      "nov": 0.242, "dec": 0.234
+    },
+    "latitude_40N": {
+      "jan": 0.222, "feb": 0.237, "mar": 0.274, "apr": 0.293, "may": 0.323,
+      "jun": 0.338, "jul": 0.333, "aug": 0.307, "sep": 0.279, "oct": 0.250,
+      "nov": 0.226, "dec": 0.215
+    },
+    "latitude_50N": {
+      "jan": 0.199, "feb": 0.224, "mar": 0.274, "apr": 0.302, "may": 0.345,
+      "jun": 0.366, "jul": 0.359, "aug": 0.321, "sep": 0.281, "oct": 0.240,
+      "nov": 0.207, "dec": 0.190
+    }
+  },
+  "analytical_benchmarks": [
+    {
+      "name": "equator_25C",
+      "description": "Equator, Tmean=25°C, July (p=0.274)",
+      "inputs": {"tmean_c": 25.0, "p": 0.274},
+      "expected_et0_mm_day": 5.38,
+      "tolerance": 0.02,
+      "notes": "ET₀ = 0.274 × (0.46 × 25 + 8.13) = 0.274 × 19.63 = 5.379"
+    },
+    {
+      "name": "equator_15C",
+      "description": "Equator, Tmean=15°C, any month (p=0.274)",
+      "inputs": {"tmean_c": 15.0, "p": 0.274},
+      "expected_et0_mm_day": 4.12,
+      "tolerance": 0.02,
+      "notes": "ET₀ = 0.274 × (0.46 × 15 + 8.13) = 0.274 × 15.03 = 4.118"
+    },
+    {
+      "name": "lat40_summer_30C",
+      "description": "40°N, July (p=0.333), Tmean=30°C",
+      "inputs": {"tmean_c": 30.0, "p": 0.333},
+      "expected_et0_mm_day": 7.30,
+      "tolerance": 0.02,
+      "notes": "ET₀ = 0.333 × (0.46 × 30 + 8.13) = 0.333 × 21.93 = 7.303"
+    },
+    {
+      "name": "lat40_winter_5C",
+      "description": "40°N, January (p=0.222), Tmean=5°C",
+      "inputs": {"tmean_c": 5.0, "p": 0.222},
+      "expected_et0_mm_day": 2.32,
+      "tolerance": 0.02,
+      "notes": "ET₀ = 0.222 × (0.46 × 5 + 8.13) = 0.222 × 10.43 = 2.315"
+    },
+    {
+      "name": "lat50_summer_20C",
+      "description": "50°N, June (p=0.366), Tmean=20°C",
+      "inputs": {"tmean_c": 20.0, "p": 0.366},
+      "expected_et0_mm_day": 6.35,
+      "tolerance": 0.02,
+      "notes": "ET₀ = 0.366 × (0.46 × 20 + 8.13) = 0.366 × 17.33 = 6.343"
+    },
+    {
+      "name": "zero_temperature",
+      "description": "Edge case: Tmean=0°C, p=0.274",
+      "inputs": {"tmean_c": 0.0, "p": 0.274},
+      "expected_et0_mm_day": 2.23,
+      "tolerance": 0.02,
+      "notes": "ET₀ = 0.274 × (0.46 × 0 + 8.13) = 0.274 × 8.13 = 2.228"
+    },
+    {
+      "name": "negative_temperature",
+      "description": "Edge case: Tmean=-10°C, p=0.222 — formula goes negative, clamped to 0",
+      "inputs": {"tmean_c": -10.0, "p": 0.222},
+      "expected_et0_mm_day": 0.78,
+      "tolerance": 0.02,
+      "notes": "ET₀ = 0.222 × (0.46 × (-10) + 8.13) = 0.222 × 3.53 = 0.784; still positive"
+    },
+    {
+      "name": "very_cold",
+      "description": "Edge case: Tmean=-20°C, p=0.199 — inner term near zero",
+      "inputs": {"tmean_c": -20.0, "p": 0.199},
+      "expected_et0_mm_day": 0.0,
+      "tolerance": 0.02,
+      "notes": "ET₀ = 0.199 × (0.46 × (-20) + 8.13) = 0.199 × (-1.07) = -0.213 → clamped to 0"
+    }
+  ],
+  "daylight_computation": {
+    "description": "p can be computed from latitude and day-of-year using FAO-56 solar equations",
+    "formula": "p = N / (365 × 12) where N = (24/π) × ωs, ωs = arccos(-tan(φ) × tan(δ))",
+    "notes": "For monthly averages, use mid-month DOY"
+  },
+  "cross_method_comparison": {
+    "description": "Compare BC with PM, PT, HG at lat=42.7°N (Michigan), summer",
+    "inputs": {
+      "tmean_c": 22.0,
+      "latitude_deg": 42.7,
+      "month": "july",
+      "p_july_lat40": 0.333,
+      "p_july_lat50": 0.359
+    },
+    "expected_bc_et0_range_mm_day": [5.5, 6.5],
+    "expected_pm_et0_range_mm_day": [4.0, 6.0],
+    "expected_ratio_bc_pm": [0.9, 1.3],
+    "notes": "BC tends to overestimate in humid climates (no humidity correction in original)"
+  },
+  "monotonicity_checks": [
+    {"name": "temperature_monotonic", "description": "Higher T → higher ET₀ at constant p"},
+    {"name": "daylight_monotonic", "description": "Higher p → higher ET₀ at constant T"},
+    {"name": "latitude_seasonal", "description": "Summer p > winter p for northern latitudes"}
+  ]
+}

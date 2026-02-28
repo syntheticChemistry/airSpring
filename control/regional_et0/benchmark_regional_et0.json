@@ -1,0 +1,42 @@
+{
+  "_provenance": {
+    "experiment": "Exp 010 — Regional ET₀ Intercomparison",
+    "baseline_script": "control/regional_et0/regional_et0_intercomparison.py",
+    "baseline_commit": "af1eb97",
+    "baseline_date": "2026-02-26",
+    "reproduce": "python control/regional_et0/regional_et0_intercomparison.py",
+    "data_source": "Open-Meteo ERA5 daily, 2023 growing season (May-Sep)",
+    "stations": "6+ Michigan stations discovered from data/open_meteo/"
+  },
+  "validation_thresholds": {
+    "et0_daily_mean_mm": {
+      "min": 2.0,
+      "max": 6.0,
+      "justification": "FAO-56 Table 4: humid region 2-5 mm/day, Michigan temperate humid to warm continental"
+    },
+    "r2_vs_openmeteo": {
+      "min": 0.85,
+      "justification": "Allen et al. (1998) Annex 4: PM R² > 0.90 vs stations; 0.85 allows ERA5 noise"
+    },
+    "rmse_mm_per_day": {
+      "max": 2.0,
+      "justification": "Doorenbos & Pruitt (1977): ±1.5 mm/day acceptable; 2.0 allows ERA5 uncertainty"
+    },
+    "cv_pct": {
+      "min": 1.0,
+      "max": 30.0,
+      "justification": "Allen et al. (1998): 5-15% across 50 km; Michigan network ~350 km, up to 30% plausible"
+    },
+    "cross_station_r": {
+      "min": 0.70,
+      "pass_fraction": 0.85,
+      "floor": 0.40,
+      "justification": "ASCE Standardization (2005): r > 0.70 for same-region pairs; 85% pass rate accounts for distant UP pairs"
+    },
+    "seasonal_spread_mm": {
+      "min": 20.0,
+      "max": 250.0,
+      "justification": "MSU Enviro-weather: Michigan LP ET₀ 550-750 mm/season, max spread 250 mm"
+    }
+  }
+}

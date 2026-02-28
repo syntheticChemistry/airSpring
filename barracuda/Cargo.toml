@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.5.2"
+version = "0.5.3"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
@@ -249,6 +249,26 @@ path = "src/bin/validate_anderson.rs"
 [[bin]]
 name = "validate_atlas_stream"
 path = "src/bin/validate_atlas_stream.rs"
+
+[[bin]]
+name = "validate_gpu_math"
+path = "src/bin/validate_gpu_math.rs"
+
+[[bin]]
+name = "validate_ncbi_16s_coupling"
+path = "src/bin/validate_ncbi_16s_coupling.rs"
+
+[[bin]]
+name = "validate_blaney_criddle"
+path = "src/bin/validate_blaney_criddle.rs"
+
+[[bin]]
+name = "validate_scs_cn"
+path = "src/bin/validate_scs_cn.rs"
+
+[[bin]]
+name = "validate_green_ampt"
+path = "src/bin/validate_green_ampt.rs"
 
 [[bin]]
 name = "bench_cross_spring"

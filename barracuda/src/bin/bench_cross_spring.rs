@@ -15,10 +15,17 @@ use std::time::Instant;
 
 use barracuda::device::WgpuDevice;
 
+use airspring_barracuda::eco::anderson;
+use airspring_barracuda::eco::crop;
+use airspring_barracuda::eco::diversity;
+use airspring_barracuda::eco::evapotranspiration as et;
+use airspring_barracuda::eco::infiltration;
+use airspring_barracuda::eco::runoff;
 use airspring_barracuda::eco::evapotranspiration::DailyEt0Input;
 use airspring_barracuda::eco::richards::VanGenuchtenParams;
 use airspring_barracuda::gpu::device_info::{self, PROVENANCE};
 use airspring_barracuda::gpu::et0::{BatchedEt0, StationDay};
+use airspring_barracuda::gpu::hargreaves::{BatchedHargreaves, HargreavesDay};
 use airspring_barracuda::gpu::isotherm as gpu_iso;
 use airspring_barracuda::gpu::mc_et0::{mc_et0_cpu, Et0Uncertainties};
 use airspring_barracuda::gpu::reduce::SeasonalReducer;
@@ -33,8 +40,8 @@ fn main() {
         .init();
 
     println!("═══════════════════════════════════════════════════════════════");
-    println!("  airSpring Cross-Spring Provenance Benchmark (v0.5.0)");
-    println!("  ToadStool S68+ — Universal Precision Architecture");
+    println!("  airSpring Cross-Spring Provenance Benchmark (v0.5.2)");
+    println!("  ToadStool S68+ — Universal Precision, Pure Math Shaders");
     println!("═══════════════════════════════════════════════════════════════\n");
 
     print_provenance_report();
@@ -90,12 +97,19 @@ fn run_all_benchmarks(device: Option<&Arc<WgpuDevice>>) -> (u32, u32) {
     println!("── Benchmark Results ────────────────────────────────────────\n");
 
     run_et0_benchmarks(device, &mut pass, &mut fail);
+    run_hargreaves_benchmarks(&mut pass, &mut fail);
     run_water_balance_benchmarks(device, &mut pass, &mut fail);
     run_reduce_benchmarks(device, &mut pass, &mut fail);
     run_stream_benchmarks(device, &mut pass, &mut fail);
     run_richards_benchmarks(&mut pass, &mut fail);
     run_isotherm_benchmarks(&mut pass, &mut fail);
     run_mc_et0_benchmarks(&mut pass, &mut fail);
+    run_diversity_benchmarks(&mut pass, &mut fail);
+    run_crop_kc_benchmarks(&mut pass, &mut fail);
+    run_anderson_benchmarks(&mut pass, &mut fail);
+    run_blaney_criddle_benchmarks(&mut pass, &mut fail);
+    run_scs_cn_benchmarks(&mut pass, &mut fail);
+    run_green_ampt_benchmarks(&mut pass, &mut fail);
 
     (pass, fail)
 }
@@ -231,6 +245,23 @@ fn run_isotherm_benchmarks(pass: &mut u32, fail: &mut u32) {
     );
 }
 
+fn run_hargreaves_benchmarks(pass: &mut u32, fail: &mut u32) {
+    run_bench(
+        pass,
+        fail,
+        "Hargreaves batch CPU (N=365)",
+        "airSpring→ToadStool S66 hydrology",
+        || bench_hargreaves_batch(365),
+    );
+    run_bench(
+        pass,
+        fail,
+        "Hargreaves batch CPU (N=10000)",
+        "airSpring→ToadStool S66 hydrology",
+        || bench_hargreaves_batch(10_000),
+    );
+}
+
 fn run_mc_et0_benchmarks(pass: &mut u32, fail: &mut u32) {
     run_bench(
         pass,
@@ -239,6 +270,182 @@ fn run_mc_et0_benchmarks(pass: &mut u32, fail: &mut u32) {
         "groundSpring MC + hotSpring norm_ppf",
         bench_mc_et0,
     );
+}
+
+fn run_diversity_benchmarks(pass: &mut u32, fail: &mut u32) {
+    run_bench(
+        pass,
+        fail,
+        "Diversity alpha (5-species mix)",
+        "wetSpring→ToadStool S64 bio",
+        bench_diversity_alpha,
+    );
+    run_bench(
+        pass,
+        fail,
+        "Bray-Curtis matrix (20 samples)",
+        "wetSpring→ToadStool S64 bio",
+        bench_bray_curtis_matrix,
+    );
+    run_bench(
+        pass,
+        fail,
+        "Shannon from frequencies (pre-norm)",
+        "wetSpring→ToadStool S66",
+        bench_shannon_frequencies,
+    );
+}
+
+fn run_crop_kc_benchmarks(pass: &mut u32, fail: &mut u32) {
+    run_bench(
+        pass,
+        fail,
+        "Crop Kc stage interpolation (180d)",
+        "airSpring→ToadStool S66 hydrology",
+        bench_crop_kc_stage,
+    );
+    run_bench(
+        pass,
+        fail,
+        "Kc from GDD (corn season)",
+        "airSpring domain (FAO-56 Table 12)",
+        bench_kc_from_gdd,
+    );
+}
+
+fn run_anderson_benchmarks(pass: &mut u32, fail: &mut u32) {
+    run_bench(
+        pass,
+        fail,
+        "Anderson coupling chain (10K θ)",
+        "groundSpring→airSpring cross-spring",
+        bench_anderson_chain,
+    );
+    run_bench(
+        pass,
+        fail,
+        "Anderson regime classification",
+        "groundSpring spectral→airSpring eco",
+        bench_anderson_regimes,
+    );
+}
+
+fn run_blaney_criddle_benchmarks(pass: &mut u32, fail: &mut u32) {
+    run_bench(
+        pass,
+        fail,
+        "Blaney-Criddle ET₀ (10K days)",
+        "airSpring ET₀ (8th method)",
+        bench_blaney_criddle,
+    );
+}
+
+fn run_scs_cn_benchmarks(pass: &mut u32, fail: &mut u32) {
+    run_bench(
+        pass,
+        fail,
+        "SCS-CN runoff (10K events)",
+        "airSpring hydrology",
+        bench_scs_cn,
+    );
+    run_bench(
+        pass,
+        fail,
+        "SCS-CN AMC adjustment",
+        "airSpring hydrology",
+        bench_scs_cn_amc,
+    );
+}
+
+fn run_green_ampt_benchmarks(pass: &mut u32, fail: &mut u32) {
+    run_bench(
+        pass,
+        fail,
+        "Green-Ampt infiltration (7 soils)",
+        "airSpring soil physics",
+        bench_green_ampt_soils,
+    );
+    run_bench(
+        pass,
+        fail,
+        "Green-Ampt ponding time",
+        "airSpring soil physics",
+        bench_green_ampt_ponding,
+    );
+}
+
+fn bench_blaney_criddle() -> bool {
+    let mut sum = 0.0;
+    for i in 0..10_000_i32 {
+        let tmean = 5.0 + f64::from(i % 30);
+        let lat_rad = (40.0 + f64::from(i % 20) * 0.1).to_radians();
+        #[allow(clippy::cast_sign_loss)]
+        let doy = (i % 365) as u32 + 1;
+        sum += et::blaney_criddle_from_location(tmean, lat_rad, doy);
+    }
+    let mean_et0 = sum / 10_000.0;
+    println!("    mean_ET₀={mean_et0:.3} mm/day");
+    mean_et0 > 0.0 && mean_et0 < 15.0
+}
+
+fn bench_scs_cn() -> bool {
+    let mut sum = 0.0;
+    for i in 0..10_000 {
+        let cn = 30.0 + f64::from(i % 70);
+        let precip = f64::from(i % 200);
+        sum += runoff::scs_cn_runoff_standard(precip, cn);
+    }
+    let mean_q = sum / 10_000.0;
+    println!("    mean_Q={mean_q:.3} mm");
+    mean_q >= 0.0
+}
+
+fn bench_scs_cn_amc() -> bool {
+    let mut all_ordered = true;
+    for cn_ii in (30..=95).map(f64::from) {
+        let cn_i = runoff::amc_cn_dry(cn_ii);
+        let cn_iii = runoff::amc_cn_wet(cn_ii);
+        if cn_i >= cn_ii || cn_iii <= cn_ii {
+            all_ordered = false;
+        }
+    }
+    println!("    AMC-I < AMC-II < AMC-III: {all_ordered}");
+    all_ordered
+}
+
+fn bench_green_ampt_soils() -> bool {
+    let soils = [
+        infiltration::GreenAmptParams::SAND,
+        infiltration::GreenAmptParams::LOAMY_SAND,
+        infiltration::GreenAmptParams::SANDY_LOAM,
+        infiltration::GreenAmptParams::LOAM,
+        infiltration::GreenAmptParams::SILT_LOAM,
+        infiltration::GreenAmptParams::CLAY_LOAM,
+        infiltration::GreenAmptParams::CLAY,
+    ];
+    let mut all_ok = true;
+    for p in &soils {
+        let f1 = infiltration::cumulative_infiltration(p, 1.0);
+        let f10 = infiltration::cumulative_infiltration(p, 10.0);
+        let rate = infiltration::infiltration_rate(p, f1);
+        if f10 <= f1 || rate < p.ks_cm_hr {
+            all_ok = false;
+        }
+    }
+    println!("    7 soils: monotonic + rate≥Ks: {all_ok}");
+    all_ok
+}
+
+fn bench_green_ampt_ponding() -> bool {
+    let loam = infiltration::GreenAmptParams {
+        delta_theta: 0.405,
+        ..infiltration::GreenAmptParams::LOAM
+    };
+    let tp = infiltration::ponding_time(&loam, 2.0);
+    let sand = infiltration::GreenAmptParams::SAND;
+    let tp_sand = infiltration::ponding_time(&sand, 5.0);
+    println!("    loam tp={tp:.3} hr, sand no-pond={}", tp_sand.is_infinite());
+    (tp - 0.37).abs() < 0.1 && tp_sand.is_infinite()
 }
 
 fn print_summary(pass: u32, fail: u32) {
@@ -517,6 +724,101 @@ fn bench_mc_et0() -> bool {
     let result = mc_et0_cpu(&input, &Et0Uncertainties::default(), 5000, 42);
     let (lo, hi) = result.parametric_ci(0.90);
     result.n_samples > 4900 && lo < result.et0_mean && hi > result.et0_mean
+}
+
+fn bench_hargreaves_batch(n: usize) -> bool {
+    let engine = BatchedHargreaves::cpu();
+    let inputs: Vec<HargreavesDay> = (0..n)
+        .map(|i| HargreavesDay {
+            tmax: 0.01f64.mul_add(i as f64, 21.5),
+            tmin: 0.005f64.mul_add(i as f64, 12.3),
+            latitude_deg: 42.7,
+            day_of_year: 1 + (u32::try_from(i).unwrap_or(0) % 365),
+        })
+        .collect();
+    let result = engine.compute(&inputs);
+    result.et0_values.len() == n && result.et0_values.iter().all(|v| v.is_finite() && *v > 0.0)
+}
+
+fn bench_diversity_alpha() -> bool {
+    let counts = vec![120.0, 85.0, 45.0, 30.0, 20.0];
+    let ad = diversity::alpha_diversity(&counts);
+    ad.shannon > 1.0 && ad.simpson > 0.5 && (ad.observed - 5.0).abs() < 1e-10
+}
+
+fn bench_bray_curtis_matrix() -> bool {
+    let samples: Vec<Vec<f64>> = (0..20)
+        .map(|i| {
+            (0..50)
+                .map(|j| (f64::from(i * 50 + j) * 0.1).sin().abs() * 100.0)
+                .collect()
+        })
+        .collect();
+    let mat = diversity::bray_curtis_matrix(&samples);
+    mat.len() == 400
+        && (0..20).all(|i| mat[i * 20 + i].abs() < 1e-12)
+        && mat.iter().all(|v| *v >= 0.0 && *v <= 1.0)
+}
+
+fn bench_shannon_frequencies() -> bool {
+    let counts = vec![120.0, 85.0, 45.0, 30.0, 20.0];
+    let total: f64 = counts.iter().sum();
+    let freqs: Vec<f64> = counts.iter().map(|&c| c / total).collect();
+    let h1 = diversity::shannon(&counts);
+    let h2 = diversity::shannon_from_frequencies(&freqs);
+    (h1 - h2).abs() < 1e-10
+}
+
+fn bench_crop_kc_stage() -> bool {
+    let kc_ini = 0.30;
+    let kc_mid = 1.20;
+    let all_reasonable = (0..180u32).all(|d| {
+        let kc = crop::crop_coefficient_stage(kc_ini, kc_mid, d, 180);
+        kc >= kc_ini - 1e-10 && kc <= kc_mid + 1e-10
+    });
+    let mid = crop::crop_coefficient_stage(kc_ini, kc_mid, 90, 180);
+    all_reasonable && (mid - 0.75).abs() < 1e-10
+}
+
+fn bench_kc_from_gdd() -> bool {
+    let params = crop::CropType::Corn.gdd_params();
+    let cum_gdd: Vec<f64> = (0..=2700).step_by(100).map(f64::from).collect();
+    let kc_vals: Vec<f64> = cum_gdd
+        .iter()
+        .map(|&g| crop::kc_from_gdd(g, &params.kc_stages_gdd, &params.kc_values).unwrap_or(0.0))
+        .collect();
+    kc_vals.iter().all(|k| (0.0..=1.5).contains(k))
+        && kc_vals.first().is_some_and(|&k| (k - 0.30).abs() < 0.01)
+}
+
+fn bench_anderson_chain() -> bool {
+    let theta_r = 0.045;
+    let theta_s = 0.43;
+    let theta_series: Vec<f64> = (0..10_000)
+        .map(|i| 0.15_f64.mul_add((f64::from(i) * 0.01).sin(), 0.25))
+        .collect();
+    let results = anderson::coupling_series(&theta_series, theta_r, theta_s);
+    let n_extended = results
+        .iter()
+        .filter(|r| r.regime == anderson::QsRegime::Extended)
+        .count();
+    let n_localized = results
+        .iter()
+        .filter(|r| r.regime == anderson::QsRegime::Localized)
+        .count();
+    n_extended > 0 && n_localized > 0 && results.len() == 10_000
+}
+
+fn bench_anderson_regimes() -> bool {
+    let theta_r = 0.045;
+    let theta_s = 0.43;
+    let saturated = anderson::coupling_chain(theta_s, theta_r, theta_s);
+    let residual = anderson::coupling_chain(theta_r, theta_r, theta_s);
+    let mid_theta = 0.5_f64.mul_add(theta_s - theta_r, theta_r);
+    let mid = anderson::coupling_chain(mid_theta, theta_r, theta_s);
+    saturated.regime == anderson::QsRegime::Extended
+        && residual.regime == anderson::QsRegime::Localized
+        && mid.d_eff > anderson::D_EFF_CRITICAL
 }
 
 const fn sand_richards_request() -> RichardsRequest {

@@ -1,6 +1,6 @@
 # Absorption Manifest — airSpring → barracuda
 
-**Date**: February 27, 2026 (updated v0.5.2 — V052 active handoff, forge evolved to mixed hardware dispatch, 18 workloads, 29/29 cross-system)
+**Date**: February 28, 2026 (updated v0.5.3 — V034 active handoff, forge evolved to mixed hardware dispatch, 18 workloads, 29/29 cross-system)
 **Source**: `metalForge/forge/` (airspring-forge v0.2.0)
 **Target**: `barracuda` (ToadStool crate)
 **Absorption Status**: 6/6 absorbed upstream — ALL modules absorbed as of S66
@@ -139,5 +139,7 @@ These workloads auto-activate GPU dispatch upon ToadStool absorption of ops 5-8.
 cargo fmt   — clean
 cargo clippy --all-targets — zero warnings (pedantic)
 cargo test  — 31/31 pass (forge), 584/584 pass (barracuda lib)
+validate_*  — 48/48 PASS (barracuda) + 3 bench binaries (30/30 cross-spring benchmarks)
 metalForge cross-system routing — 29/29 PASS (18 workloads × dispatch checks)
+ToadStool sync: S68+ (e96576ee) — universal precision, 700 WGSL, 6-Spring provenance
 ```

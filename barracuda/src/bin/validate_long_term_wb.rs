@@ -142,18 +142,20 @@ struct SiteParams {
 }
 
 /// Result for one growing season.
-#[allow(dead_code)]
 struct SeasonResult {
     year: u32,
     total_et0_rust: f64,
     total_et0_om: f64,
     total_precip: f64,
     total_et: f64,
-    total_dp: f64,
-    total_irrig: f64,
+    /// Total deep percolation (mm); used to derive has_dp.
+    _total_dp: f64,
+    /// Total irrigation applied (mm); used for mass balance / audit.
+    _total_irrig: f64,
     irrig_events: usize,
     mb_error: f64,
-    stress_days: usize,
+    /// Days with water stress; used to derive has_stress.
+    _stress_days: usize,
     has_stress: bool,
     has_dp: bool,
 }
@@ -225,11 +227,11 @@ fn run_season(days: &[WeatherDay], params: &SiteParams) -> SeasonResult {
         total_et0_om,
         total_precip,
         total_et,
-        total_dp,
-        total_irrig,
+        _total_dp: total_dp,
+        _total_irrig: total_irrig,
         irrig_events,
         mb_error,
-        stress_days,
+        _stress_days: stress_days,
         has_stress,
         has_dp,
     }

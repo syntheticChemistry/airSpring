@@ -71,6 +71,11 @@ run_python control/ameriflux_et/ameriflux_et_validation.py
 run_python control/hargreaves/hargreaves_samani.py
 run_python control/diversity/diversity_indices.py
 run_python control/anderson_coupling/anderson_coupling.py
+run_python control/gpu_math_portability/gpu_math_portability.py
+run_python control/ncbi_16s_coupling/ncbi_16s_coupling.py
+run_python control/blaney_criddle/blaney_criddle_et0.py
+run_python control/scs_curve_number/scs_curve_number.py
+run_python control/green_ampt/green_ampt_infiltration.py
 
 echo ""
 echo "━━━ Phase 1: Rust Validation Binaries ━━━"
@@ -111,6 +116,9 @@ run_rust validate_iot
 run_rust validate_ameriflux
 run_rust validate_hargreaves
 run_rust validate_diversity
+run_rust validate_blaney_criddle
+run_rust validate_scs_cn
+run_rust validate_green_ampt
 
 echo ""
 echo "━━━ Phase 1+: Data-Dependent Validations ━━━"
@@ -141,6 +149,8 @@ else
 fi
 
 run_rust validate_pure_gpu
+run_rust validate_gpu_math
+run_rust validate_ncbi_16s_coupling
 
 echo ""
 echo "━━━ Phase 3: GPU Live Dispatch (Titan V) ━━━"

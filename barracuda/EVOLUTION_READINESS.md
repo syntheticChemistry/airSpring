@@ -1,8 +1,8 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: February 27, 2026 (v0.5.2 — 584 lib tests, 55 binaries)
-**ToadStool PIN**: S68+ HEAD (`e96576ee` — universal f64 canonical, dual-layer precision, device-lost resilience, 703 WGSL shaders)
-**Handoff**: V052 (Tier B ops 5-8, seasonal pipeline, atlas stream, NestGate data, biomeOS graphs)
+**Last Updated**: February 28, 2026 (v0.5.3 — 618 lib tests, 56 binaries, 51 experiments, 1237 Python)
+**ToadStool PIN**: S68+ HEAD (`e96576ee` — universal f64 canonical, dual-layer precision, device-lost resilience, 700 WGSL shaders, 2546+ barracuda tests, 21599+ workspace tests)
+**Handoff**: V034 (Experiment buildout 049-051 + deep technical debt resolution: 42+ named constants, zero dead code, cast hygiene, capability-based GPU, 8 ET₀ methods, SCS-CN runoff, Green-Ampt infiltration)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -40,7 +40,9 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 | `eco::dual_kc` | FAO-56 Ch 7/11 domain logic — too specialized for barracuda |
 | `eco::sensor_calibration` | SoilWatch 10 specific — domain consumer |
 | `eco::crop` | FAO-56 Table 12 crop database, GDD, kc_from_gdd — domain data |
-| `eco::evapotranspiration` | Thornthwaite monthly ET₀ — domain consumer |
+| `eco::evapotranspiration` | Thornthwaite monthly ET₀, Blaney-Criddle ET₀ — domain consumer |
+| `eco::runoff` | SCS-CN curve number — domain consumer |
+| `eco::infiltration` | Green-Ampt infiltration — domain consumer |
 | `eco::soil_moisture` | Saxton-Rawls pedotransfer (θs/θr/Ks from texture) — domain consumer |
 | `io::csv_ts` | airSpring-specific IoT CSV parser |
 | `testutil::generators` | Synthetic IoT data for airSpring tests |
@@ -61,7 +63,7 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 | `eco::correction::fit_ridge` | `linalg::ridge::ridge_regression` | **WIRED** |
 | `gpu::richards::BatchedRichards` | `pde::richards::solve_richards` | **WIRED** (+ CN f64 cross-val) |
 | `gpu::isotherm::fit_*_nm/global` | `optimize::nelder_mead` + `multi_start` | **WIRED** |
-| `eco::diversity` | `stats::diversity` (Shannon, Simpson, Bray-Curtis) | **LEANING** (S64) |
+| `eco::diversity` | `stats::diversity` (Shannon, Simpson, Bray-Curtis, matrix, frequencies) | **LEANING** (S64+S66) |
 | `gpu::mc_et0::parametric_ci` | `stats::normal::norm_ppf` | **WIRED** — hotSpring precision lineage |
 | `eco::richards::inverse_van_genuchten_h` | `optimize::brent` | **WIRED** — neuralSpring optimizer lineage |
 
@@ -123,13 +125,15 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | Capability | Module | Wired In | Status |
 |-----------|--------|----------|--------|
 | `barracuda::tolerances` | `tolerances` | v0.3.6 | **LEANING** — re-exported |
-| `barracuda::validation::ValidationHarness` | `validation` | v0.3.6 | **LEANING** — all 37 binaries (incl. validate_atlas, 1393 checks) |
+| `barracuda::validation::ValidationHarness` | `validation` | v0.3.6 | **LEANING** — all 51 validation binaries (incl. validate_atlas, 1393 checks) |
 | `pde::richards::solve_richards` | `pde` | v0.4.0 | **WIRED** — `gpu::richards` |
 | `pde::crank_nicolson::CrankNicolson1D` | `pde` | v0.4.4 | **WIRED** — CN f64 diffusion cross-val |
 | `optimize::nelder_mead` | `optimize` | v0.4.1 | **WIRED** — isotherm fitting |
 | `optimize::multi_start_nelder_mead` | `optimize` | v0.4.1 | **WIRED** — global isotherm search |
-| `stats::diversity::*` | `stats` | v0.4.3 | **LEANING** — `eco::diversity` delegates |
+| `stats::diversity::*` | `stats` | v0.4.3 | **LEANING** — `eco::diversity` delegates (+ `bray_curtis_matrix`, `shannon_from_frequencies` v0.5.2) |
 | `stats::metrics::*` | `stats` | v0.4.3 | **LEANING** — `testutil::stats` delegates |
+| `stats::hydrology::hargreaves_et0_batch` | `stats` | v0.5.2 | **WIRED** — `gpu::hargreaves` delegates CPU batch to upstream |
+| `stats::hydrology::crop_coefficient` | `stats` | v0.5.2 | **WIRED** — `eco::crop::crop_coefficient_stage` delegates to upstream |
 | `stats::normal::norm_ppf` | `stats` | v0.4.4 | **WIRED** — `McEt0Result::parametric_ci()` |
 | `optimize::brent` | `optimize` | v0.4.4 | **WIRED** — `inverse_van_genuchten_h()` θ→h inversion |
 
@@ -173,11 +177,11 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `cargo fmt --check` | **Clean** |
 | `cargo clippy --all-targets` | **0 warnings** (pedantic + nursery via `[lints.clippy]`, `--all-targets` clean) |
 | `cargo doc --no-deps` | **Builds**, 0 warnings |
-| `cargo test --lib` | **584 passed** (lib + doc + integration) |
+| `cargo test --lib` | **618 passed** (lib + doc + integration) |
 | `unsafe` code | **Zero** |
 | `unwrap()` in lib | **Zero** (all in `#[cfg(test)]` or validation-binary JSON helpers) |
-| Files > 1000 lines | **Zero** (max src: 834 `eco/evapotranspiration.rs` after Thornthwaite extraction) |
-| Validation binaries | **51/51 PASS** (barracuda) + 4/4 PASS (forge) |
+| Files > 1000 lines | **Zero** (max src: 872 `eco/evapotranspiration.rs` after Thornthwaite extraction) |
+| Validation binaries | **51/51 PASS** (barracuda validate_*) + 3 bench (30/30 benchmarks) + 4/4 PASS (forge) |
 | GPU live (Titan V) | **24/24 PASS** (0.04% seasonal parity, `BARRACUDA_GPU_ADAPTER=titan`) |
 | metalForge live | **29/29 PASS** (5 substrates, 18 workloads route) |
 | Atlas stream (real data) | **73/73 PASS** (12 stations, 4800 crop-year results) |
@@ -201,8 +205,10 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `brent` (Brent 1973) | neuralSpring | VG pressure head inversion (θ→h) |
 | `pde::richards` | airSpring → upstream | 1D Richards equation (absorbed S40) |
 | `stats::regression` | airSpring metalForge → upstream | Sensor correction fitting (absorbed S66) |
-| `stats::hydrology` | airSpring metalForge → upstream | Hargreaves ET₀, batch (absorbed S66) |
+| `stats::hydrology` | airSpring metalForge → upstream | Hargreaves ET₀, batch, crop_coefficient (absorbed S66) |
 | `stats::moving_window_f64` | airSpring metalForge → upstream | f64 stream statistics (absorbed S66) |
+| `stats::diversity::bray_curtis_matrix` | wetSpring → upstream | Full M×M distance matrix for ordination (wired v0.5.2) |
+| `stats::diversity::shannon_from_frequencies` | wetSpring → upstream | Pre-normalised Shannon for streaming pipelines (wired v0.5.2) |
 
 ### airSpring Contributions Back
 
@@ -236,28 +242,54 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `barracuda::ml::esn` | wetSpring V61 | ESN reservoir for time-series IoT | Proposed |
 | `batched_multinomial.wgsl` | groundSpring V10 | Rarefaction for diversity GPU | Proposed |
 
-### S68+ HEAD Sync (e96576ee)
+### S68+ HEAD Sync (e96576ee) — Full Review Feb 28, 2026
 
-Synced from `89356efa` → `e96576ee` (2 commits):
-- `92679172`: Root docs cleaned, stale scripts/docs archived to fossil
-- `e96576ee`: GPU device-lost resilience for standalone testing
+ToadStool S50–S68+ represents 29 commits since Feb 25, touching 779 files (+21,891/−13,831 lines).
+Reviewed at `e96576ee`. All airSpring imports verified — **zero breaking changes**.
+
+**Major evolution absorbed** (S50–S68):
+- S50-S56: Deep audit, cross-spring absorption, idiomatic Rust, coverage push (+193 tests)
+- S57: +47 tests, println→tracing migration, coverage to 4,224+ core tests
+- S58-S59: DF64, Fp64Strategy, ridge, ValidationHarness absorption (anderson correlated)
+- S60-S63: DF64 FMA, sovereign compiler, SPIR-V passthrough, CN f64 GPU shader
+- S64-S65: Stats absorption from all Springs, smart refactoring, doc cleanup
+- S66: **Cross-spring absorption** — regression, hydrology, 8 SoilParams, P0 BGL fix
+- S67: Universal precision doctrine — "math is universal, precision is silicon"
+- S68: **296 f32-only shaders removed** — ZERO f32-only, all f64 canonical
+  - `op_preamble()` → abstract math ops for precision-parametric shaders
+  - `df64_rewrite.rs` → naga IR rewrite: f64 infix → DF64 bridge calls
+  - `compile_op_shader(source, precision, label)` → one source, any precision
+  - 122 dedicated shader tests (unit + e2e + chaos + fault)
+- S68+: GPU device-lost resilience, root doc cleanup, archive stale scripts
 
 **Universal precision architecture** now fully available:
 - `compile_shader_universal(source, precision, label)` → one f64 source compiles to F16/F32/F64/Df64
+- `compile_op_shader(source, precision, label)` → preamble injection for abstract ops
 - `Fp64Strategy::Native` (Titan V, A100) vs `Fp64Strategy::Hybrid` (RTX 4070, consumer GPUs)
-- `op_preamble()` → abstract math ops (`op_add`, `op_mul`, etc.) resolve per precision
+- `op_preamble()` → abstract math ops (`op_add`, `op_mul`, `Scalar` type alias) resolve per precision
 - `df64_rewrite.rs` → naga IR rewrite transforms f64 infix → DF64 bridge calls
-- 703 WGSL shaders total (497 f32 downcast, 182 native f64, 21 df64, 2 df64 infra)
+- `downcast_f64_to_df64()` → text-based fallback when naga rewrite unavailable
+- 700 WGSL shaders total (497 f32 via downcast, 182 native f64, 21 df64)
+- 2,546+ barracuda unit tests, 21,599+ workspace tests
 
-**airSpring cleanup**:
-- Removed `try_gpu` catch_unwind from `gpu::et0` and `gpu::water_balance` tests (S60-S65 regression resolved)
-- Updated `gpu::mod.rs` architecture docs for universal precision
-- Updated `gpu::evolution_gaps.rs` inventory for S68+ capabilities
-- Updated `gpu::mc_et0` doc — sovereign compiler regression resolved (S66+)
-- Added `gpu::device_info` — `Fp64Strategy` probing, `F64BuiltinCapabilities`, `DevicePrecisionReport`,
-  10-entry cross-spring `PROVENANCE` table tracking shader lineage across all Springs
-- Added `bench_cross_spring` binary — 16 benchmarks exercising all GPU paths with provenance reporting
-- Fixed `try_f64_device()` to use `WgpuDevice::from_env()` (respects `BARRACUDA_GPU_ADAPTER`)
-- Fixed clippy `manual_midpoint` in `validate_seasonal_batch.rs`
+**ToadStool handoff sync gap**: ToadStool has processed airSpring through **V009** (S66 absorption).
+airSpring handoffs V010–V031 are pending upstream absorption. V032 created to acknowledge S68 sync.
 
-Revalidation: 584/584 tests, 0 clippy, 73/73 atlas stream (real data), 29/29 metalForge cross-system
+**airSpring V033 cross-spring rewiring**:
+- **Rewired `gpu::hargreaves`** — CPU batch now delegates to `barracuda::stats::hargreaves_et0_batch` (ToadStool S66)
+- **Wired `eco::diversity::bray_curtis_matrix`** — full M×M distance matrix for ordination (wetSpring S64)
+- **Wired `eco::diversity::shannon_from_frequencies`** — pre-normalised Shannon for streaming 16S (wetSpring S66)
+- **Wired `eco::crop::crop_coefficient_stage`** — delegates to `barracuda::stats::crop_coefficient` (airSpring metalForge → S66)
+- **Cleaned `gpu::richards::solve_cn_diffusion`** — consolidated SoilParams via `to_barracuda_params()`
+- **Expanded `bench_cross_spring` v0.5.2** — 30 benchmarks (was 16), 16 shader provenance entries (was 10), 45 primitives, 6 origin Springs
+- **New benchmarks**: Hargreaves batch (365/10K), diversity alpha, Bray-Curtis matrix (20 samples), Shannon frequencies, crop Kc stage (180d), Kc from GDD (corn), Anderson coupling chain (10K θ), Anderson regimes
+- **Expanded PROVENANCE** table: added hydrology batch kernel (airSpring), diversity bio kernel (wetSpring), anderson coupling kernel (groundSpring)
+- 618 lib tests (+5 from new rewiring), 0 clippy warnings, 0 errors
+
+Prior V032 cleanup:
+- Registered `validate_gpu_math` and `validate_ncbi_16s_coupling` in Cargo.toml (were unregistered)
+- Fixed 2 clippy `manual_clamp` warnings in `validate_ncbi_16s_coupling.rs`
+- Prior V030-V031: removed `try_gpu` catch_unwind, updated docs for universal precision,
+  added `gpu::device_info` (Fp64Strategy probing), added `bench_cross_spring` (16→30 benchmarks)
+
+Revalidation: 618/618 tests, 0 clippy, 33/33 cross-validation, 1498/1498 atlas, 46/46 GPU math, 29/29 NCBI 16S, 30/30 benchmarks

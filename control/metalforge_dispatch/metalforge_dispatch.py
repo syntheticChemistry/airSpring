@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """Exp 041 — metalForge Mixed-Hardware Dispatch Validation (Python control).
 
 Simulates metalForge's capability-based workload routing. Validates that:
@@ -23,6 +24,7 @@ BENCHMARK = os.path.join(SCRIPT_DIR, "benchmark_metalforge_dispatch.json")
 # ── Simulated metalForge substrate model ─────────────────────────────────────
 
 WORKLOAD_CAPS = {
+    # GPU batch compute (absorbed by ToadStool)
     "et0_batch": {"F64", "ShaderDispatch"},
     "water_balance_batch": {"F64", "ShaderDispatch"},
     "richards_pde": {"F64", "ShaderDispatch"},
@@ -32,9 +34,16 @@ WORKLOAD_CAPS = {
     "gdd_accumulate": {"F64", "ShaderDispatch"},
     "dual_kc_batch": {"F64", "ShaderDispatch"},
     "forecast_scheduling": {"F64", "ShaderDispatch"},
+    # Tier B GPU orchestrators (pending absorption)
+    "hargreaves_et0_batch": {"F64", "ShaderDispatch"},
+    "kc_climate_batch": {"F64", "ShaderDispatch"},
+    "sensor_calibration_batch": {"F64", "ShaderDispatch"},
+    "seasonal_pipeline": {"F64", "ShaderDispatch"},
+    # NPU-native classifiers (AKD1000 int8)
     "crop_stress_classifier": {"QuantizedInference"},
     "irrigation_decision": {"QuantizedInference"},
     "sensor_anomaly": {"QuantizedInference"},
+    # CPU-only domains
     "validation_harness": {"CpuCompute"},
     "weather_ingest": {"CpuCompute"},
 }

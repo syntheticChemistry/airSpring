@@ -45,11 +45,15 @@ fn seasonal_value(doy: u32, vmin: f64, vmax: f64) -> f64 {
 }
 
 fn create_device() -> Option<Arc<WgpuDevice>> {
-    std::env::set_var("BARRACUDA_GPU_ADAPTER", "titan");
+    // Use adapter from env or discover at runtime (capability-based).
+    let adapter_hint = std::env::var("BARRACUDA_GPU_ADAPTER").unwrap_or_default();
+    if adapter_hint.is_empty() {
+        println!("  No GPU adapter hint — using runtime discovery");
+    }
 
     match pollster::block_on(WgpuDevice::from_env()) {
         Ok(dev) => {
-            println!("  GPU device created: TITAN V selected via BARRACUDA_GPU_ADAPTER");
+            println!("  GPU device created");
             Some(Arc::new(dev))
         }
         Err(e) => {

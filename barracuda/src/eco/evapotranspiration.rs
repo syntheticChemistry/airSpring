@@ -24,6 +24,60 @@ pub use super::solar::{
     sunset_hour_angle,
 };
 
+// ── FAO-56 physical constants ────────────────────────────────────────
+
+/// Psychrometric coefficient (kPa/°C per kPa pressure). FAO-56 Eq. 8.
+const PSYCHROMETRIC_COEFF: f64 = 0.665e-3;
+
+/// Sea-level atmospheric pressure (kPa). FAO-56 Eq. 7.
+const SEA_LEVEL_PRESSURE_KPA: f64 = 101.3;
+/// Standard temperature lapse rate (°C/m). FAO-56 Eq. 7.
+const LAPSE_RATE: f64 = 0.0065;
+/// Standard base temperature (K). FAO-56 Eq. 7.
+const BASE_TEMP_K: f64 = 293.0;
+/// Pressure exponent. FAO-56 Eq. 7.
+const PRESSURE_EXPONENT: f64 = 5.26;
+
+/// Magnus formula coefficient a. FAO-56 Eq. 11.
+const MAGNUS_A: f64 = 0.6108;
+/// Magnus formula coefficient b. FAO-56 Eq. 11.
+const MAGNUS_B: f64 = 17.27;
+/// Magnus formula coefficient c (°C). FAO-56 Eq. 11.
+const MAGNUS_C: f64 = 237.3;
+
+/// Vapour pressure slope numerator. FAO-56 Eq. 13.
+const VP_SLOPE_NUMERATOR: f64 = 4098.0;
+
+/// Default Ångström coefficient as. FAO-56 Eq. 35.
+const ANGSTROM_AS: f64 = 0.25;
+/// Default Ångström coefficient bs. FAO-56 Eq. 35.
+const ANGSTROM_BS: f64 = 0.50;
+
+/// Monthly soil heat flux coefficient (MJ/m²/month per °C). FAO-56 Eq. 43.
+const SOIL_HEAT_FLUX_COEFF: f64 = 0.14;
+
+/// Hargreaves empirical coefficient. FAO-56 Eq. 52.
+const HARGREAVES_COEFF: f64 = 0.0023;
+/// Hargreaves temperature offset (°C). FAO-56 Eq. 52.
+const HARGREAVES_TEMP_OFFSET: f64 = 17.8;
+
+/// Latent heat conversion: MJ/m²/day → mm/day. FAO-56 (1/λ at 20°C).
+const MJ_TO_MM: f64 = 0.408;
+
+/// Hamon saturation density coefficient (g/m³ per kPa/K). Lu et al. (2005).
+const HAMON_RHO_COEFF: f64 = 216.7;
+/// Hamon absolute temperature offset (K). Lu et al. (2005).
+const HAMON_TEMP_OFFSET_K: f64 = 273.3;
+/// Hamon PET coefficient. Lu et al. (2005).
+const HAMON_PET_COEFF: f64 = 0.1651;
+
+/// Blaney-Criddle annual daylight hours (approx 4380 hrs / 100). FAO-24.
+const BC_ANNUAL_DAYLIGHT: f64 = 43.80;
+/// Blaney-Criddle temperature coefficient. USDA-SCS (1950).
+const BC_TEMP_COEFF: f64 = 0.46;
+/// Blaney-Criddle offset constant. USDA-SCS (1950).
+const BC_OFFSET: f64 = 8.13;
+
 // ── Atmospheric parameters ───────────────────────────────────────────
 
 /// Psychrometric constant γ (kPa/°C).
@@ -33,7 +87,7 @@ pub use super::solar::{
 /// FAO-56 Eq. 8.
 #[must_use]
 pub fn psychrometric_constant(pressure_kpa: f64) -> f64 {
-    0.665e-3 * pressure_kpa
+    PSYCHROMETRIC_COEFF * pressure_kpa
 }
 
 /// Atmospheric pressure from elevation (kPa).
@@ -43,7 +97,7 @@ pub fn psychrometric_constant(pressure_kpa: f64) -> f64 {
 /// FAO-56 Eq. 7.
 #[must_use]
 pub fn atmospheric_pressure(elevation_m: f64) -> f64 {
-    101.3 * (0.0065f64.mul_add(-elevation_m, 293.0) / 293.0).powf(5.26)
+    SEA_LEVEL_PRESSURE_KPA * (LAPSE_RATE.mul_add(-elevation_m, BASE_TEMP_K) / BASE_TEMP_K).powf(PRESSURE_EXPONENT)
 }
 
 // ── Vapour pressure functions ────────────────────────────────────────
@@ -53,7 +107,7 @@ pub fn atmospheric_pressure(elevation_m: f64) -> f64 {
 /// FAO-56 Eq. 11: e°(T) = 0.6108 × exp(17.27T / (T + 237.3))
 #[must_use]
 pub fn saturation_vapour_pressure(temp_c: f64) -> f64 {
-    0.6108 * ((17.27 * temp_c) / (temp_c + 237.3)).exp()
+    MAGNUS_A * ((MAGNUS_B * temp_c) / (temp_c + MAGNUS_C)).exp()
 }
 
 /// Slope of saturation vapour pressure curve Δ (kPa/°C).
@@ -62,7 +116,7 @@ pub fn saturation_vapour_pressure(temp_c: f64) -> f64 {
 #[must_use]
 pub fn vapour_pressure_slope(temp_c: f64) -> f64 {
     let es = saturation_vapour_pressure(temp_c);
-    4098.0 * es / (temp_c + 237.3).powi(2)
+    VP_SLOPE_NUMERATOR * es / (temp_c + MAGNUS_C).powi(2)
 }
 
 /// Mean saturation vapour pressure from `Tmin` and `Tmax`.
@@ -112,7 +166,7 @@ pub fn solar_radiation_from_sunshine(sunshine_hours: f64, max_daylight_hours: f6
         max_daylight_hours > 0.0,
         "Max daylight hours must be positive"
     );
-    0.50f64.mul_add(sunshine_hours / max_daylight_hours, 0.25) * ra
+    ANGSTROM_BS.mul_add(sunshine_hours / max_daylight_hours, ANGSTROM_AS) * ra
 }
 
 /// Solar radiation from temperature range — Hargreaves method (FAO-56 Eq. 50).
@@ -133,7 +187,7 @@ pub fn solar_radiation_from_temperature(tmax: f64, tmin: f64, ra: f64, krs: f64)
 /// For daily time steps, G ≈ 0 (handled in [`daily_et0`]).
 #[must_use]
 pub fn soil_heat_flux_monthly(t_month: f64, t_month_prev: f64) -> f64 {
-    0.14 * (t_month - t_month_prev)
+    SOIL_HEAT_FLUX_COEFF * (t_month - t_month_prev)
 }
 
 /// Hargreaves–Samani ET₀ estimate (FAO-56 Eq. 52).
@@ -158,7 +212,7 @@ pub fn soil_heat_flux_monthly(t_month: f64, t_month_prev: f64) -> f64 {
 #[must_use]
 pub fn hargreaves_et0(tmin: f64, tmax: f64, ra_mm_day: f64) -> f64 {
     let tmean = f64::midpoint(tmin, tmax);
-    (0.0023 * (tmean + 17.8) * (tmax - tmin).max(0.0).sqrt() * ra_mm_day).max(0.0)
+    (HARGREAVES_COEFF * (tmean + HARGREAVES_TEMP_OFFSET) * (tmax - tmin).max(0.0).sqrt() * ra_mm_day).max(0.0)
 }
 
 /// Priestley-Taylor ET₀ estimate (mm/day).
@@ -184,7 +238,7 @@ pub fn priestley_taylor_et0(rn: f64, g: f64, tmean_c: f64, elevation_m: f64) -> 
     let pressure = atmospheric_pressure(elevation_m);
     let gamma = psychrometric_constant(pressure);
     let delta = vapour_pressure_slope(tmean_c);
-    (ALPHA_PT * 0.408 * (delta / (delta + gamma)) * (rn - g)).max(0.0)
+    (ALPHA_PT * MJ_TO_MM * (delta / (delta + gamma)) * (rn - g)).max(0.0)
 }
 
 /// Compute both Priestley-Taylor and Penman-Monteith ET₀ from the same inputs.
@@ -281,8 +335,8 @@ pub fn hamon_pet(tmean_c: f64, day_length_hours: f64) -> f64 {
         return 0.0;
     }
     let es = saturation_vapour_pressure(tmean_c);
-    let rhosat = 216.7 * es / (tmean_c + 273.3);
-    0.1651 * day_length_hours * rhosat
+    let rhosat = HAMON_RHO_COEFF * es / (tmean_c + HAMON_TEMP_OFFSET_K);
+    HAMON_PET_COEFF * day_length_hours * rhosat
 }
 
 /// Hamon PET from geographic location (computes day length internally).
@@ -301,6 +355,59 @@ pub use super::thornthwaite::{
     annual_heat_index, mean_daylight_hours_for_month, monthly_heat_index_term,
     thornthwaite_exponent, thornthwaite_monthly_et0, thornthwaite_unadjusted_et0,
 };
+
+// ── Blaney-Criddle (1950) PET ─────────────────────────────────────────
+
+/// Blaney-Criddle daylight fraction `p` from latitude and day-of-year.
+///
+/// p = N / 43.80, where N is daylight hours. Total annual daylight ≈ 4380 hrs
+/// at any latitude (summer/winter balance). p ≈ 0.274 at equator.
+///
+/// # Reference
+///
+/// Doorenbos J, Pruitt WO (1977) FAO Irrigation and Drainage Paper 24, Table 18.
+#[must_use]
+pub fn blaney_criddle_p(latitude_rad: f64, day_of_year: u32) -> f64 {
+    let n = super::solar::daylight_hours(latitude_rad, day_of_year);
+    n / BC_ANNUAL_DAYLIGHT
+}
+
+/// Blaney-Criddle (1950) PET estimate (mm/day).
+///
+/// ET₀ = p × (0.46 × T + 8.13)
+///
+/// The simplest widely-used PET method — requires only temperature and daylight
+/// fraction. Widely used in western US irrigation districts.
+///
+/// # Arguments
+///
+/// * `tmean_c` — Mean temperature (°C).
+/// * `p` — Blaney-Criddle daylight fraction (use [`blaney_criddle_p`]).
+///
+/// # Reference
+///
+/// Blaney HF, Criddle WD (1950) *Determining water requirements in irrigated
+/// areas from climatological and irrigation data.* USDA-SCS Tech Paper 96.
+#[must_use]
+pub fn blaney_criddle_et0(tmean_c: f64, p: f64) -> f64 {
+    (p * BC_TEMP_COEFF.mul_add(tmean_c, BC_OFFSET)).max(0.0)
+}
+
+/// Blaney-Criddle PET from location (latitude + DOY).
+///
+/// Convenience wrapper: computes daylight fraction `p` from latitude and DOY,
+/// then applies the Blaney-Criddle equation.
+///
+/// # Arguments
+///
+/// * `tmean_c` — Mean temperature (°C).
+/// * `latitude_rad` — Latitude in radians.
+/// * `day_of_year` — Day of year (1–366).
+#[must_use]
+pub fn blaney_criddle_from_location(tmean_c: f64, latitude_rad: f64, day_of_year: u32) -> f64 {
+    let p = blaney_criddle_p(latitude_rad, day_of_year);
+    blaney_criddle_et0(tmean_c, p)
+}
 
 // ── Wind speed adjustment ─────────────────────────────────────────────
 
@@ -867,5 +974,39 @@ mod tests {
         let short = hamon_pet(20.0, 10.0);
         let long = hamon_pet(20.0, 16.0);
         assert!(long > short, "Longer day → more PET");
+    }
+
+    #[test]
+    fn test_blaney_criddle_equator_25c() {
+        let et0 = blaney_criddle_et0(25.0, 0.274);
+        assert!((et0 - 5.38).abs() < 0.02, "BC equator 25°C: {et0}");
+    }
+
+    #[test]
+    fn test_blaney_criddle_negative_clamp() {
+        let et0 = blaney_criddle_et0(-20.0, 0.199);
+        assert!(et0.abs() < 1e-10, "BC -20°C should be 0: {et0}");
+    }
+
+    #[test]
+    fn test_blaney_criddle_from_location_summer() {
+        let lat = 40.0_f64.to_radians();
+        let et0 = blaney_criddle_from_location(25.0, lat, 172); // June 21
+        assert!(et0 > 4.0 && et0 < 8.0, "BC 40°N summer: {et0}");
+    }
+
+    #[test]
+    fn test_blaney_criddle_p_equator() {
+        let p = blaney_criddle_p(0.0, 172);
+        assert!((p - 0.274).abs() < 0.005, "p equator: {p}");
+    }
+
+    #[test]
+    fn test_blaney_criddle_temperature_monotonic() {
+        let p = 0.274;
+        let et0_10 = blaney_criddle_et0(10.0, p);
+        let et0_20 = blaney_criddle_et0(20.0, p);
+        let et0_30 = blaney_criddle_et0(30.0, p);
+        assert!(et0_10 < et0_20 && et0_20 < et0_30);
     }
 }

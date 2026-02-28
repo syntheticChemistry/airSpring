@@ -61,7 +61,6 @@ pub struct BatchedSensorCalResult {
 /// the GPU engine activates automatically.
 pub struct BatchedSensorCal {
     backend: Backend,
-    #[allow(dead_code)]
     gpu_engine: Option<BatchedElementwiseF64>,
 }
 
@@ -87,6 +86,13 @@ impl BatchedSensorCal {
             backend: Backend::Gpu,
             gpu_engine: Some(engine),
         })
+    }
+
+    /// Returns a reference to the GPU engine, if available.
+    /// Used for `ToadStool` GPU dispatch when the shader is wired.
+    #[must_use]
+    pub const fn gpu_engine(&self) -> Option<&BatchedElementwiseF64> {
+        self.gpu_engine.as_ref()
     }
 
     /// Create with CPU fallback (always safe, no device needed).
@@ -186,8 +192,12 @@ mod tests {
     fn deterministic() {
         let engine = BatchedSensorCal::cpu();
         let inputs = vec![
-            SensorReading { raw_count: 10_000.0 },
-            SensorReading { raw_count: 20_000.0 },
+            SensorReading {
+                raw_count: 10_000.0,
+            },
+            SensorReading {
+                raw_count: 20_000.0,
+            },
         ];
         let r1 = engine.compute(&inputs);
         let r2 = engine.compute(&inputs);
@@ -200,7 +210,9 @@ mod tests {
     fn monotonic_in_valid_range() {
         let engine = BatchedSensorCal::cpu();
         let low = engine.compute(&[SensorReading { raw_count: 5_000.0 }]);
-        let high = engine.compute(&[SensorReading { raw_count: 20_000.0 }]);
+        let high = engine.compute(&[SensorReading {
+            raw_count: 20_000.0,
+        }]);
         assert!(
             low.vwc_values[0] < high.vwc_values[0],
             "VWC(5000)={} should be < VWC(20000)={}",
@@ -213,7 +225,9 @@ mod tests {
     fn compute_gpu_fallback() {
         let engine = BatchedSensorCal::cpu();
         let result = engine
-            .compute_gpu(&[SensorReading { raw_count: 10_000.0 }])
+            .compute_gpu(&[SensorReading {
+                raw_count: 10_000.0,
+            }])
             .unwrap();
         assert_eq!(result.vwc_values.len(), 1);
         assert!((result.vwc_values[0] - 0.1323).abs() < 1e-4);

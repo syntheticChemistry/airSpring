@@ -16,6 +16,11 @@ Where:
     d_eff = z / 2                              [effective dimension, Bethe lattice]
     W   = W_0 × (1 - S_e)                     [Anderson disorder parameter]
 
+Provenance:
+    Baseline commit: af1eb97 (2026-02-26)
+    Benchmark: control/anderson_coupling/benchmark_anderson_coupling.json
+    Reproduce: python control/anderson_coupling/anderson_coupling.py
+
 References:
     - van Genuchten (1980) SSSA J 44:892-898
     - Mualem (1976) WRR 12:513-522

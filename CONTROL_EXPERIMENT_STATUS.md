@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-02-27 (v0.5.2 — 45 experiments, 1109 Python + 584 lib + 31 forge tests, 51 barracuda + 4 forge = 55 binaries, **25.9× Rust-vs-Python speedup** (8/8 parity), **Titan V GPU live dispatch** (24/24 PASS), AKD1000 NPU live, metalForge live (5 substrates, 18 workloads, 29/29 cross-system), 4 Tier B GPU orchestrators, seasonal pipeline (73/73, 12 stations, 4800 results), CPU↔GPU 0.04% parity, clippy pedantic, 7 ET₀ methods, Anderson cross-spring coupling)
+**Updated**: 2026-02-28 (v0.5.3 — 51 experiments, 1237 Python + 618 lib + 31 forge tests, 53 barracuda + 4 forge = 56 binaries, **25.9× Rust-vs-Python speedup** (8/8 parity), **Titan V GPU live dispatch** (24/24 PASS), AKD1000 NPU live, metalForge live (5 substrates, 18 workloads, 29/29 cross-system), 4 Tier B GPU orchestrators, seasonal pipeline (73/73, 12 stations, 4800 results), CPU↔GPU 0.04% parity, clippy pedantic, 8 ET₀ methods, SCS-CN runoff, Green-Ampt infiltration, Anderson coupling, 42+ named constants, zero dead code)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -235,7 +235,7 @@ BEFORE evolving to Rust/BarraCuda.
 | `control/water_balance/fao56_water_balance.py` | FAO-56 Chapter 8 | 18/18 | TAW/RAW (3), Ks bounds (5), dry-down mass balance (2), irrigated mass balance (3), MI summer 535mm ET (3), heavy rain DP (2) |
 | `control/iot_irrigation/anova_irrigation.R` | Dong et al. 2024 (R v4.3.1) | — | Written, awaiting R install; one-way ANOVA on blueberry/tomato yield |
 
-**Total Python: 1109/1109 checks PASS, 45/45 baseline experiments PASS**
+**Total Python: 1237/1237 checks PASS, 51/51 baseline experiments PASS**
 **Exp 018 Atlas: 1393/1393 Rust checks PASS (100-station full Michigan, 10 crops, cross-validated vs Python)**
 **R ANOVA: script written, 1 skip (R not installed)**
 
@@ -260,7 +260,7 @@ Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2, Stewart 1977, CW2D media params)
 |--------|-------|--------|----------------|
 | validate_et0 | T1 | 31/31 | FAO-56 Tables 2.3/2.4, Example 18 Uccle within 0.0005 mm/day |
 | validate_soil | T1 | 26/26 | Topp equation (7 points), inverse round-trip, 5 USDA textures, PAW |
-| validate_iot | T1 | 11/11 | 168 records, 5 columns, CSV round-trip, diurnal statistics |
+| validate_iot | T1 | 11/11 | 168 records, 5 columns, CSV round-trip, diurnal statistics (synthetic data via `testutil::generate_synthetic_iot_data`) |
 | validate_water_balance | T1 | 13/13 | Mass balance 0.0000 (3 scenarios), Ks bounds, MI summer |
 | validate_sensor_calibration | T1 | 21/21 | SoilWatch 10 VWC, irrigation model, Dong 2024 field results |
 | validate_real_data | T1 | 23/23 | Open-Meteo ERA5, 6+ MI stations, R²>0.85, capability-based discovery |
@@ -937,9 +937,9 @@ Chapter 7, separating transpiration from soil evaporation for precision scheduli
 
 ```
 Track 1 (Precision Agriculture):
-  Phase 0  [COMPLETE]: Python baselines — 1109/1109 PASS (45 experiments)
+  Phase 0  [COMPLETE]: Python baselines — 1237/1237 PASS (51 experiments)
   Phase 0+ [COMPLETE]: Real data pipeline — 15,300 station-days, ET₀ R²=0.97
-  Phase 1  [COMPLETE]: Rust validation — 584 lib + 31 forge tests, 55 binaries
+  Phase 1  [COMPLETE]: Rust validation — 618 lib + 31 forge tests, 56 binaries
   Phase 1.5[COMPLETE]: CPU benchmark — Rust 25.9× faster than Python (8/8 parity)
   Phase 2  [COMPLETE]: Cross-validation — 75/75 MATCH (Python↔Rust, tol=1e-5)
   Phase 2.5[COMPLETE]: Tier B GPU — 4 orchestrators wired (ops 5-8, pending ToadStool absorption)
@@ -1010,8 +1010,9 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026 — Updated: February 27, 2026 (v0.5.2)*
-*45 experiments, 1109/1109 Python, 584 lib + 31 forge tests, 55 binaries, 75/75 cross-validation, 100 Michigan stations.*
+*Initialized: February 16, 2026 — Updated: February 28, 2026 (v0.5.3)*
+*51 experiments, 1237/1237 Python, 618 lib + 31 forge tests, 56 binaries, 75/75 cross-validation, 100 Michigan stations.*
+*8 ET₀ methods + SCS-CN runoff + Green-Ampt infiltration. 42+ named constants, zero dead code.*
 *Rust 25.9× faster than Python (8/8 parity). 11 Tier A + 4 Tier B GPU orchestrators. AKD1000 NPU live (3 experiments).*
 *Seasonal pipeline 73/73 PASS (12 stations, 4800 results). metalForge 18 workloads, 29/29 cross-system.*
 *Quality: zero .unwrap(), zero unsafe, zero clippy pedantic + nursery warnings. AGPL-3.0-or-later.*

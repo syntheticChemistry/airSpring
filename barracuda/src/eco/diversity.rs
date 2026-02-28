@@ -82,12 +82,42 @@ pub fn bray_curtis(a: &[f64], b: &[f64]) -> f64 {
     barracuda::stats::bray_curtis(a, b)
 }
 
+/// Shannon entropy from pre-computed relative frequencies.
+///
+/// Use when abundances are already normalised to proportions (sum to 1.0).
+/// Avoids re-normalisation overhead in pipelines where relative frequencies
+/// are maintained (e.g., streaming 16S amplicon processing).
+///
+/// # Cross-Spring Provenance
+///
+/// Absorbed from wetSpring biodiversity pipeline (S66 R-S66-037).
+#[must_use]
+pub fn shannon_from_frequencies(freqs: &[f64]) -> f64 {
+    barracuda::stats::shannon_from_frequencies(freqs)
+}
+
 /// Bray-Curtis pairwise distance matrix (condensed upper triangle).
 ///
 /// For M samples, returns M*(M-1)/2 pairwise dissimilarities.
 #[must_use]
 pub fn bray_curtis_condensed(samples: &[Vec<f64>]) -> Vec<f64> {
     barracuda::stats::bray_curtis_condensed(samples)
+}
+
+/// Bray-Curtis full distance matrix (M×M).
+///
+/// Returns a flat M×M matrix where `matrix[i*m + j]` is the Bray-Curtis
+/// dissimilarity between samples `i` and `j`. Diagonal entries are 0.0.
+/// Useful for ordination (`PCoA`, `NMDS`) and cluster analysis in soil
+/// microbiome community comparisons.
+///
+/// # Cross-Spring Provenance
+///
+/// Absorbed from wetSpring biodiversity pipeline (S64). Uses the same
+/// kernel as `bray_curtis_condensed` but returns the full symmetric matrix.
+#[must_use]
+pub fn bray_curtis_matrix(samples: &[Vec<f64>]) -> Vec<f64> {
+    barracuda::stats::bray_curtis_matrix(samples)
 }
 
 /// Rarefaction curve: expected species count at each subsampling depth.
@@ -180,6 +210,35 @@ mod tests {
         ];
         let dists = bray_curtis_condensed(&samples);
         assert_eq!(dists.len(), 3, "3 samples → 3 pairwise distances");
+    }
+
+    #[test]
+    fn shannon_from_frequencies_matches_counts() {
+        let counts = cover_crop_mix();
+        let total: f64 = counts.iter().sum();
+        let freqs: Vec<f64> = counts.iter().map(|&c| c / total).collect();
+        let h_counts = shannon(&counts);
+        let h_freqs = shannon_from_frequencies(&freqs);
+        assert!(
+            (h_counts - h_freqs).abs() < 1e-10,
+            "H' from counts ({h_counts}) should match H' from frequencies ({h_freqs})"
+        );
+    }
+
+    #[test]
+    fn bray_curtis_matrix_correct_size() {
+        let samples = vec![
+            cover_crop_mix(),
+            monoculture(),
+            vec![50.0, 50.0, 50.0, 50.0, 50.0],
+        ];
+        let m = 3;
+        let mat = bray_curtis_matrix(&samples);
+        assert_eq!(mat.len(), m * m, "3×3 matrix");
+        for i in 0..m {
+            assert!(mat[i * m + i].abs() < 1e-12, "Diagonal should be 0");
+        }
+        assert!((mat[1] - mat[m]).abs() < 1e-12, "Symmetric: mat[0,1] == mat[1,0]");
     }
 
     #[test]

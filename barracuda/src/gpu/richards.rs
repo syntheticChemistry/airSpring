@@ -207,19 +207,8 @@ impl BatchedRichards {
             .advance(n_steps)
             .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
 
-        let theta: Vec<f64> = h_final
-            .iter()
-            .map(|&h| {
-                pde_richards::SoilParams {
-                    theta_s: req.params.theta_s,
-                    theta_r: req.params.theta_r,
-                    alpha: req.params.alpha,
-                    n: req.params.n_vg,
-                    k_sat: req.params.ks / 86_400.0,
-                }
-                .theta(h)
-            })
-            .collect();
+        let soil = to_barracuda_params(&req.params);
+        let theta: Vec<f64> = h_final.iter().map(|&h| soil.theta(h)).collect();
 
         Ok(theta)
     }

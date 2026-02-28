@@ -14,6 +14,18 @@
 //! all ops (0, 1, 5-8), this binary demonstrates end-to-end GPU execution
 //! without CPU round-trips.
 //!
+//! # Provenance
+//!
+//! Expected values are derived from the deterministic synthetic weather
+//! generator `growing_season_weather()` (DOY 121–273, sinusoidal patterns)
+//! processed through the CPU-validated eco modules. Thresholds are physical
+//! plausibility bounds, not Python baseline matches:
+//!
+//! - `VWC(10000) ≈ 0.1323` — Topp equation at `raw_count=10000` (Exp 005)
+//! - `KcClimate ≈ 1.20` — FAO-56 Table 12 standard conditions
+//! - `total_et0 > 400 mm` — 153-day Michigan growing season physical minimum
+//! - `yield_ratio ∈ [0.5, 1.0]` — Stewart equation physical range
+//!
 //! # Validated Stages
 //!
 //! | Stage | Op | Module | Status |
@@ -30,7 +42,7 @@ use airspring_barracuda::gpu::et0::{BatchedEt0, StationDay};
 use airspring_barracuda::gpu::hargreaves::{BatchedHargreaves, HargreavesDay};
 use airspring_barracuda::gpu::kc_climate::{BatchedKcClimate, KcClimateDay};
 use airspring_barracuda::gpu::seasonal_pipeline::{
-    CropConfig, SeasonalPipeline, SeasonResult, WeatherDay,
+    CropConfig, SeasonResult, SeasonalPipeline, WeatherDay,
 };
 use airspring_barracuda::gpu::sensor_calibration::{BatchedSensorCal, SensorReading};
 use airspring_barracuda::validation::{self, ValidationHarness};
@@ -82,7 +94,10 @@ fn validate_batched_et0(v: &mut ValidationHarness) {
         .collect();
     let engine = BatchedEt0::cpu();
     let result = engine.compute_gpu(&station_days).expect("compute_gpu");
-    v.check_bool("BatchedEt0 batch length", result.et0_values.len() == station_days.len());
+    v.check_bool(
+        "BatchedEt0 batch length",
+        result.et0_values.len() == station_days.len(),
+    );
     let all_positive = result.et0_values.iter().all(|&e| e > 0.0);
     v.check_bool("all ET₀ > 0", all_positive);
     let summer_et0: f64 = result.et0_values[31..92].iter().sum();
@@ -104,7 +119,10 @@ fn validate_hargreaves(v: &mut ValidationHarness) {
         .collect();
     let engine = BatchedHargreaves::cpu();
     let result = engine.compute(&days);
-    v.check_bool("BatchedHargreaves batch length", result.et0_values.len() == days.len());
+    v.check_bool(
+        "BatchedHargreaves batch length",
+        result.et0_values.len() == days.len(),
+    );
     let all_positive = result.et0_values.iter().all(|&e| e > 0.0);
     v.check_bool("all HG ET₀ > 0", all_positive);
     let summer: f64 = result.et0_values[31..92].iter().sum();
@@ -132,7 +150,11 @@ fn validate_kc_climate(v: &mut ValidationHarness) {
     let result = engine.compute(&inputs);
     v.check_bool("KcClimate batch length", result.kc_values.len() == 2);
     v.check_abs("KcClimate standard", result.kc_values[0], 1.20, 0.01);
-    v.check_lower("KcClimate windy > standard", result.kc_values[1], result.kc_values[0]);
+    v.check_lower(
+        "KcClimate windy > standard",
+        result.kc_values[1],
+        result.kc_values[0],
+    );
 }
 
 fn validate_sensor_cal(v: &mut ValidationHarness) {

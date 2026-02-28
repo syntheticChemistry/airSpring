@@ -1,7 +1,7 @@
 # airSpring Experiments
 
-**Updated**: February 27, 2026
-**Status**: 45 experiments, 1109/1109 Python + 584 lib + 31 forge tests + 73/73 atlas stream + 75/75 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + AKD1000 NPU live + Titan V GPU live dispatch + metalForge 18 workloads 29/29 cross-system + CPU↔GPU parity (bit-exact CPU, 0.04% GPU shader) + **Rust 25.9× faster than Python** (8/8 parity)
+**Updated**: February 28, 2026
+**Status**: 51 experiments, 1237/1237 Python + 618 lib + 31 forge tests + 73/73 atlas stream + 75/75 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + AKD1000 NPU live + Titan V GPU live dispatch + metalForge 18 workloads 29/29 cross-system + GPU math portability 46/46 (13 modules) + NCBI 16S coupling (14+29) + CPU↔GPU parity + **Rust 26.3× faster than Python** (8/8 parity)
 
 ---
 
@@ -55,8 +55,13 @@
 | 044 | metalForge Live Hardware Probe | Mixed HW | **Complete** | Rust (probe + dispatch) | RTX 4070 + Titan V + AKD1000 + i9-12900K | 17 |
 | 045 | Anderson Soil-Moisture Coupling | Cross-Spring | **Complete** | Python + Rust CPU | `eco::anderson` (θ→S_e→d_eff→QS regime) | 55+95 |
 | 046 | Atlas Stream Real Data Validation | Integration | **Complete** | Rust (80yr Open-Meteo) | `gpu::atlas_stream` + `gpu::seasonal_pipeline` | 73/73 |
+| 047 | GPU Math Portability Validation | GPU Portability | **Complete** | Python + Rust (all 13 GPU modules) | All `gpu::*` orchestrators (13 modules, 46 checks) | 21+46 |
+| 048 | NCBI 16S + Soil Moisture Anderson Coupling | Cross-Spring | **Complete** | Python + Rust CPU | `eco::anderson` + `eco::et` + `eco::water_balance` + NCBI | 14+29 |
+| 049 | Blaney-Criddle (1950) Temperature PET | Precision Ag | **Complete** | Python + Rust CPU | `eco::evapotranspiration` (Blaney-Criddle) | 18+18 |
+| 050 | SCS Curve Number Runoff (USDA 1972) | Hydrology | **Complete** | Python + Rust CPU | `eco::runoff` (SCS-CN, AMC) | 38+38 |
+| 051 | Green-Ampt (1911) Infiltration | Soil Physics | **Complete** | Python + Rust CPU | `eco::infiltration` (Newton-Raphson) | 37+37 |
 
-**Grand Total**: 1109 Python + **584 lib + 31 forge tests** + 73/73 atlas stream + 75 cross-validation values + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge (5 substrates, 18 workloads, 29/29 cross-system)
+**Grand Total**: 1237 Python + **618 lib + 31 forge tests** + 1498/1498 atlas + 33/33 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge (5 substrates, 18 workloads, 29/29 cross-system) + GPU math portability (46/46) + NCBI 16S coupling (14+29) + 56 binaries + 30/30 cross-spring benchmarks (6 Springs) + ToadStool S68 synced
 
 ---
 
@@ -64,11 +69,11 @@
 
 | Category | Tests | Source |
 |----------|:-----:|--------|
-| Barracuda lib (unit + doc) | 584 | `cargo test --lib` (incl. Tier B orchestrators, seasonal pipeline, atlas stream, anderson, diversity, mc\_et0, NPU, Makkink/Turc/Hamon) |
-| Barracuda validation binaries | 51 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
+| Barracuda lib (unit + doc) | 618 | `cargo test --lib` (incl. Tier B orchestrators, seasonal pipeline, atlas stream, anderson, diversity, mc\_et0, NPU, Makkink/Turc/Hamon) |
+| Barracuda validation binaries | 54 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
 | Forge | 31 | `metalForge/forge/` (substrate, dispatch, probe, workloads, cross-system routing) |
 | Forge binaries | 4 | `validate_dispatch`, `validate_live_hardware`, `validate_dispatch_routing` |
-| **Total project tests** | **584 lib + 31 forge** | |
+| **Total project tests** | **618 lib + 31 forge** | |
 | Atlas stream (real data) | 73 | `validate_atlas_stream` (12 stations, 4800 crop-year results) |
 | Atlas checks | 1393 | `validate_atlas` (100 stations × 13 checks each) |
 | GPU live checks | 24 | `validate_gpu_live` (Titan V WGSL dispatch) |
@@ -344,6 +349,10 @@ Experiments follow `NNN_name` format:
 - `036`–`044`: biomeOS Neural API, ensemble, pedotransfer-Richards coupling, CPU-GPU parity, metalForge dispatch, seasonal batch, Titan V live, live hardware
 - `045`: Anderson soil-moisture coupling (cross-spring)
 - `046`: Atlas stream real data validation (80yr Open-Meteo, seasonal pipeline + atlas stream)
+- `047`: GPU math portability validation (all 13 GPU modules, CPU vs GPU parity)
+- `049`: Blaney-Criddle ET₀
+- `050`: SCS Curve Number runoff
+- `051`: Green-Ampt infiltration
 
 Gap (013) reserved. See `specs/PAPER_REVIEW_QUEUE.md`.
 
@@ -384,6 +393,36 @@ Gap (013) reserved. See `specs/PAPER_REVIEW_QUEUE.md`.
 **Equation**: PET = 0.1651 × N × RHOSAT (Lu et al. 2005). Minimum data: temperature + latitude.
 
 **Key Result**: Simplest method in portfolio (T + day length only). Rank-correlated with pyet despite coefficient variant difference (~3x). Suitable for data-sparse historical reconstruction.
+
+### Exp 049: Blaney-Criddle (1950) Temperature PET
+
+**Paper**: Blaney & Criddle (1950) *Determining water requirements in irrigated areas from climatological and irrigation data.* USDA SCS-TP 96.
+
+**Control**: `control/blaney_criddle/blaney_criddle.py` — 18/18 checks. Temperature-based PET, monthly k factor, pyet cross-validation.
+
+**Rust**: `barracuda/src/eco/evapotranspiration.rs` — `blaney_criddle_pet()`. `validate_blaney_criddle` binary: 18/18 checks.
+
+**Key Result**: Minimal-input PET method (T + latitude only). Completes temperature-based ET₀ portfolio with Thornthwaite, Hamon, Hargreaves.
+
+### Exp 050: SCS Curve Number Runoff (USDA 1972)
+
+**Paper**: USDA (1972) *National Engineering Handbook Section 4: Hydrology.* SCS Curve Number method for rainfall-runoff.
+
+**Control**: `control/scs_curve_number/scs_curve_number.py` — 38/38 checks. CN lookup (hydrologic soil group × land use), AMC I/II/III, retention S, runoff Q.
+
+**Rust**: `barracuda/src/eco/runoff.rs` — `scs_curve_number()`, `scs_runoff()`, AMC adjustment. `validate_scs_cn` binary: 38/38 checks.
+
+**Key Result**: Industry-standard event-based runoff. Integrates with water balance for irrigation scheduling and flood design.
+
+### Exp 051: Green-Ampt (1911) Infiltration
+
+**Paper**: Green & Ampt (1911) *Studies on soil physics.* J Agric Sci 4(1):1-24. Mein & Larson (1973) *Application of Green-Ampt.* Water Resour Res 9(2):384-394.
+
+**Control**: `control/green_ampt/green_ampt.py` — 37/37 checks. Cumulative infiltration, wetting front suction, Newton-Raphson iteration, ponding time.
+
+**Rust**: `barracuda/src/eco/infiltration.rs` — `green_ampt_infiltration()`, Newton-Raphson solver. `validate_green_ampt` binary: 37/37 checks.
+
+**Key Result**: Physics-based infiltration for event-scale modeling. Complements Richards for rapid storm events.
 
 ## Adding a New Experiment
 

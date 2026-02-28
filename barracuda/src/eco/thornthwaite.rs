@@ -13,6 +13,28 @@
 
 use super::solar::daylight_hours;
 
+/// Heat index temperature divisor. Thornthwaite (1948).
+const HEAT_INDEX_DIVISOR: f64 = 5.0;
+/// Heat index exponent. Thornthwaite (1948).
+const HEAT_INDEX_EXPONENT: f64 = 1.514;
+
+/// Exponent polynomial coefficients: a = c3·I³ + c2·I² + c1·I + c0.
+const EXPONENT_C3: f64 = 6.75e-7;
+const EXPONENT_C2: f64 = -7.71e-5;
+const EXPONENT_C1: f64 = 1.792e-2;
+const EXPONENT_C0: f64 = 0.49239;
+
+/// High-temperature correction threshold (°C). Willmott et al. (1985).
+const HIGH_TEMP_THRESHOLD: f64 = 26.5;
+/// Willmott correction coefficients.
+const WILLMOTT_A: f64 = -415.85;
+const WILLMOTT_B: f64 = 32.24;
+const WILLMOTT_C: f64 = -0.43;
+
+/// Standard base temperature (°C) for unadjusted PET. Thornthwaite (1948).
+const PET_BASE_COEFF: f64 = 16.0;
+const PET_TEMP_FACTOR: f64 = 10.0;
+
 /// Single-month contribution to the annual Thornthwaite heat index.
 ///
 /// `i = (T/5)^1.514` for T > 0, else 0.
@@ -24,7 +46,7 @@ pub fn monthly_heat_index_term(tmean_c: f64) -> f64 {
     if tmean_c <= 0.0 {
         return 0.0;
     }
-    (tmean_c / 5.0).powf(1.514)
+    (tmean_c / HEAT_INDEX_DIVISOR).powf(HEAT_INDEX_EXPONENT)
 }
 
 /// Annual Thornthwaite heat index: I = Σ (Tᵢ/5)^1.514 for 12 months.
@@ -42,10 +64,10 @@ pub fn annual_heat_index(monthly_temps: &[f64; 12]) -> f64 {
 #[must_use]
 pub fn thornthwaite_exponent(heat_index: f64) -> f64 {
     let i = heat_index;
-    6.75e-7f64
-        .mul_add(i, -7.71e-5)
-        .mul_add(i, 1.792e-2)
-        .mul_add(i, 0.49239)
+    EXPONENT_C3
+        .mul_add(i, EXPONENT_C2)
+        .mul_add(i, EXPONENT_C1)
+        .mul_add(i, EXPONENT_C0)
 }
 
 /// Unadjusted monthly Thornthwaite ET₀ (mm/month for a 30-day month with 12-hr daylight).
@@ -56,11 +78,11 @@ pub fn thornthwaite_unadjusted_et0(tmean_c: f64, heat_index: f64, exponent_a: f6
     if tmean_c <= 0.0 || heat_index <= 0.0 {
         return 0.0;
     }
-    if tmean_c >= 26.5 {
+    if tmean_c >= HIGH_TEMP_THRESHOLD {
         #[allow(clippy::suboptimal_flops)]
-        return (-415.85 + 32.24 * tmean_c - 0.43 * tmean_c * tmean_c).max(0.0);
+        return (WILLMOTT_A + WILLMOTT_B * tmean_c + WILLMOTT_C * tmean_c * tmean_c).max(0.0);
     }
-    16.0 * (10.0 * tmean_c / heat_index).powf(exponent_a)
+    PET_BASE_COEFF * (PET_TEMP_FACTOR * tmean_c / heat_index).powf(exponent_a)
 }
 
 /// Mean daylight hours for a month at a given latitude.

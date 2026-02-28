@@ -13,24 +13,20 @@ use airspring_forge::dispatch::{self, Reason};
 use airspring_forge::probe;
 use airspring_forge::substrate::{Capability, SubstrateKind};
 use airspring_forge::workloads;
+use barracuda::validation::ValidationHarness;
 
 fn main() {
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO)
+        .with_target(false)
+        .without_time()
+        .init();
+
     println!("═══════════════════════════════════════════════════════════");
     println!("  airSpring Exp 044: metalForge Live Hardware Probe");
     println!("═══════════════════════════════════════════════════════════\n");
 
-    let mut pass = 0_u32;
-    let mut fail = 0_u32;
-
-    let check = |name: &str, ok: bool, pass: &mut u32, fail: &mut u32| {
-        if ok {
-            *pass += 1;
-            println!("  [PASS] {name}");
-        } else {
-            *fail += 1;
-            println!("  [FAIL] {name}");
-        }
-    };
+    let mut v = ValidationHarness::new("Live Hardware");
 
     // ── GPU Probe ───────────────────────────────────────────────────────
 
@@ -50,35 +46,18 @@ fn main() {
         }
     }
 
-    check(
-        "At least 1 GPU discovered",
-        !gpus.is_empty(),
-        &mut pass,
-        &mut fail,
-    );
+    v.check_bool("At least 1 GPU discovered", !gpus.is_empty());
 
     let titan_v = gpus
         .iter()
         .find(|g| g.identity.name.to_lowercase().contains("titan"));
-    check(
-        "TITAN V found in GPU inventory",
-        titan_v.is_some(),
-        &mut pass,
-        &mut fail,
-    );
+    v.check_bool("TITAN V found in GPU inventory", titan_v.is_some());
 
     if let Some(tv) = titan_v {
-        check(
-            "TITAN V has F64Compute",
-            tv.has(&Capability::F64Compute),
-            &mut pass,
-            &mut fail,
-        );
-        check(
+        v.check_bool("TITAN V has F64Compute", tv.has(&Capability::F64Compute));
+        v.check_bool(
             "TITAN V has ShaderDispatch",
             tv.has(&Capability::ShaderDispatch),
-            &mut pass,
-            &mut fail,
         );
     } else {
         println!("  WARN: TITAN V not found — skipping TITAN V-specific checks");
@@ -88,20 +67,10 @@ fn main() {
         g.identity.name.to_lowercase().contains("4070")
             || g.identity.name.to_lowercase().contains("rtx")
     });
-    check(
-        "RTX 4070 found in GPU inventory",
-        rtx_4070.is_some(),
-        &mut pass,
-        &mut fail,
-    );
+    v.check_bool("RTX 4070 found in GPU inventory", rtx_4070.is_some());
 
     if let Some(rtx) = rtx_4070 {
-        check(
-            "RTX 4070 has F64Compute",
-            rtx.has(&Capability::F64Compute),
-            &mut pass,
-            &mut fail,
-        );
+        v.check_bool("RTX 4070 has F64Compute", rtx.has(&Capability::F64Compute));
     }
 
     // ── NPU Probe ───────────────────────────────────────────────────────
@@ -117,31 +86,20 @@ fn main() {
         );
     }
 
-    check(
-        "At least 1 NPU discovered (/dev/akida0)",
-        !npus.is_empty(),
-        &mut pass,
-        &mut fail,
-    );
+    v.check_bool("At least 1 NPU discovered (/dev/akida0)", !npus.is_empty());
 
     if let Some(npu) = npus.first() {
-        check(
+        v.check_bool(
             "AKD1000 has QuantizedInference(8)",
             npu.has(&Capability::QuantizedInference { bits: 8 }),
-            &mut pass,
-            &mut fail,
         );
-        check(
+        v.check_bool(
             "AKD1000 has BatchInference",
             npu.has(&Capability::BatchInference { max_batch: 8 }),
-            &mut pass,
-            &mut fail,
         );
-        check(
+        v.check_bool(
             "AKD1000 has WeightMutation",
             npu.has(&Capability::WeightMutation),
-            &mut pass,
-            &mut fail,
         );
     }
 
@@ -160,23 +118,11 @@ fn main() {
         println!("  Memory: {} GB", mem / (1024 * 1024 * 1024));
     }
 
-    check(
-        "CPU has F64Compute",
-        cpu.has(&Capability::F64Compute),
-        &mut pass,
-        &mut fail,
-    );
-    check(
-        "CPU has CpuCompute",
-        cpu.has(&Capability::CpuCompute),
-        &mut pass,
-        &mut fail,
-    );
-    check(
+    v.check_bool("CPU has F64Compute", cpu.has(&Capability::F64Compute));
+    v.check_bool("CPU has CpuCompute", cpu.has(&Capability::CpuCompute));
+    v.check_bool(
         "CPU has SimdVector (AVX2)",
         cpu.has(&Capability::SimdVector),
-        &mut pass,
-        &mut fail,
     );
 
     // ── Full Inventory Dispatch ─────────────────────────────────────────
@@ -205,48 +151,29 @@ fn main() {
         }
     }
 
-    check(
-        "All 14 workloads route with live hardware",
-        all_route,
-        &mut pass,
-        &mut fail,
-    );
+    v.check_bool("All 14 workloads route with live hardware", all_route);
 
-    // Verify ET₀ routes to a real GPU (not CPU)
     let et0_route = dispatch::route(&workloads::et0_batch().workload, &inventory);
-    check(
+    v.check_bool(
         "ET₀ batch routes to GPU (not CPU fallback)",
         et0_route
             .as_ref()
             .is_some_and(|d| d.substrate.kind == SubstrateKind::Gpu),
-        &mut pass,
-        &mut fail,
     );
 
-    // Verify NPU workloads route to live AKD1000
     let stress_route = dispatch::route(&workloads::crop_stress_classifier().workload, &inventory);
-    check(
+    v.check_bool(
         "Crop stress routes to live AKD1000 NPU",
         stress_route
             .as_ref()
             .is_some_and(|d| d.substrate.kind == SubstrateKind::Npu),
-        &mut pass,
-        &mut fail,
     );
-    check(
+    v.check_bool(
         "NPU route uses Preferred reason",
         stress_route
             .as_ref()
             .is_some_and(|d| d.reason == Reason::Preferred),
-        &mut pass,
-        &mut fail,
     );
 
-    // ── Summary ─────────────────────────────────────────────────────────
-
-    let total = pass + fail;
-    println!("\n=== metalForge Live Hardware: {pass}/{total} PASS, {fail} FAIL ===");
-    if fail > 0 {
-        std::process::exit(1);
-    }
+    v.finish();
 }

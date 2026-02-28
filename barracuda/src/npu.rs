@@ -242,14 +242,14 @@ pub fn npu_infer_i8(
 
     let t = std::time::Instant::now();
     handle.write_raw(&input_bytes)?;
-    let write_ns = t.elapsed().as_nanos() as u64;
+    let write_ns = u64::try_from(t.elapsed().as_nanos()).unwrap_or(u64::MAX);
 
     let mut out_buf = vec![0u8; n_outputs];
     let t = std::time::Instant::now();
     handle.read_raw(&mut out_buf)?;
-    let read_ns = t.elapsed().as_nanos() as u64;
+    let read_ns = u64::try_from(t.elapsed().as_nanos()).unwrap_or(u64::MAX);
 
-    let raw_i8: Vec<i8> = out_buf.iter().map(|&b| b as i8).collect();
+    let raw_i8: Vec<i8> = out_buf.iter().map(|&b| i8::from_ne_bytes([b])).collect();
     let class = raw_i8
         .iter()
         .enumerate()
@@ -566,7 +566,7 @@ pub fn load_readout_weights(handle: &mut NpuHandle, weights_i8: &[i8]) -> Result
     let bytes: Vec<u8> = weights_i8.iter().map(|&x| x.cast_unsigned()).collect();
     let t = std::time::Instant::now();
     handle.write_raw(&bytes)?;
-    Ok(t.elapsed().as_nanos() as u64)
+    Ok(u64::try_from(t.elapsed().as_nanos()).unwrap_or(u64::MAX))
 }
 
 /// Result of a high-cadence streaming session.
@@ -727,5 +727,222 @@ mod tests {
                 println!("No NPU: {e} (expected on CI)");
             }
         }
+    }
+
+    // ── Quantization boundary and precision tests ──────────────────────
+
+    #[test]
+    fn quantize_boundary_lo_equals_hi() {
+        // (val - lo) / (hi - lo) = 0/0 = NaN → clamp(0,1) = 0.0 → 0
+        assert_eq!(quantize_i8(5.0, 5.0, 5.0), 0);
+    }
+
+    #[test]
+    fn quantize_exact_midpoint() {
+        let q = quantize_i8(5.0, 0.0, 10.0);
+        assert_eq!(q, 63, "midpoint of [0,10] should map to 127/2 = 63");
+    }
+
+    #[test]
+    fn quantize_exact_endpoints() {
+        assert_eq!(quantize_i8(0.0, 0.0, 10.0), 0);
+        assert_eq!(quantize_i8(10.0, 0.0, 10.0), 127);
+    }
+
+    #[test]
+    fn dequantize_exact_endpoints() {
+        let lo = dequantize_i8(0, 0.0, 10.0);
+        let hi = dequantize_i8(127, 0.0, 10.0);
+        assert!((lo - 0.0).abs() < f64::EPSILON, "deq(0) = {lo}");
+        assert!((hi - 10.0).abs() < f64::EPSILON, "deq(127) = {hi}");
+    }
+
+    #[test]
+    fn quantize_roundtrip_precision() {
+        for domain in &[(0.0, 1.0), (0.0, 0.6), (-10.0, 50.0), (0.0, 300.0)] {
+            let (lo, hi) = *domain;
+            let step = (hi - lo) / 127.0;
+            for i in 0..=127 {
+                let original = lo + step * f64::from(i);
+                let q = quantize_i8(original, lo, hi);
+                let deq = dequantize_i8(q, lo, hi);
+                assert!(
+                    (original - deq).abs() <= step + 1e-10,
+                    "roundtrip error at {original}: deq={deq}, step={step}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn quantize_negative_range() {
+        let q = quantize_i8(-5.0, -10.0, 50.0);
+        let deq = dequantize_i8(q, -10.0, 50.0);
+        assert!((-5.0 - deq).abs() < 1.0, "negative range: deq={deq}");
+    }
+
+    // ── RollingStats convergence tests ─────────────────────────────────
+
+    #[test]
+    fn rolling_stats_constant_signal() {
+        let mut stats = RollingStats::new(0.1);
+        for _ in 0..200 {
+            stats.update(42.0);
+        }
+        assert!((stats.mean() - 42.0).abs() < 0.01);
+        assert!(
+            stats.sigma() < 0.01,
+            "σ should be ~0 for constant: {}",
+            stats.sigma()
+        );
+    }
+
+    #[test]
+    fn rolling_stats_step_change_adapts() {
+        let mut stats = RollingStats::new(0.3);
+        for _ in 0..100 {
+            stats.update(10.0);
+        }
+        for _ in 0..100 {
+            stats.update(20.0);
+        }
+        assert!(
+            stats.mean() > 17.0,
+            "mean should adapt to 20 after step change: {}",
+            stats.mean()
+        );
+    }
+
+    #[test]
+    fn rolling_stats_first_reading_sets_mean() {
+        let mut stats = RollingStats::new(0.1);
+        stats.update(99.0);
+        assert!((stats.mean() - 99.0).abs() < f64::EPSILON);
+        assert!(stats.sigma().abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn rolling_stats_range_tracks_extremes() {
+        let mut stats = RollingStats::new(0.1);
+        stats.update(5.0);
+        stats.update(100.0);
+        stats.update(-3.0);
+        stats.update(50.0);
+        assert_eq!(stats.range(), (-3.0, 100.0));
+    }
+
+    // ── classify_reading edge cases ────────────────────────────────────
+
+    #[test]
+    fn classify_insufficient_data_never_anomaly() {
+        let mut stats = RollingStats::new(0.1);
+        for _ in 0..5 {
+            stats.update(0.30);
+        }
+        let result = classify_reading(99.0, &stats, 0.38, 0.15, 3.0);
+        assert!(
+            !result.is_anomaly,
+            "count < 10 should suppress anomaly detection"
+        );
+    }
+
+    #[test]
+    fn classify_zero_sigma_never_anomaly() {
+        let mut stats = RollingStats::new(0.1);
+        for _ in 0..50 {
+            stats.update(0.30);
+        }
+        let result = classify_reading(0.31, &stats, 0.38, 0.15, 3.0);
+        assert!(
+            !result.is_anomaly,
+            "σ ≈ 0 should suppress anomaly detection"
+        );
+    }
+
+    #[test]
+    fn classify_depletion_boundary() {
+        let mut stats = RollingStats::new(0.1);
+        for _ in 0..50 {
+            stats.update(0.25);
+        }
+        let fc = 0.38;
+        let wp = 0.15;
+        let theta_at_boundary = fc - 0.55 * (fc - wp);
+        let below = classify_reading(theta_at_boundary - 0.01, &stats, fc, wp, 3.0);
+        let above = classify_reading(theta_at_boundary + 0.01, &stats, fc, wp, 3.0);
+        assert_eq!(below.class, 1, "below boundary should be stressed");
+        assert_eq!(above.class, 0, "above boundary should be normal");
+    }
+
+    // ── Input struct quantization symmetry ─────────────────────────────
+
+    #[test]
+    fn crop_stress_boundary_values() {
+        let low = CropStressInput {
+            depletion: 0.0,
+            et_ratio: 0.0,
+            theta: 0.0,
+            ks: 0.0,
+        };
+        let high = CropStressInput {
+            depletion: 1.0,
+            et_ratio: 1.5,
+            theta: 0.6,
+            ks: 1.0,
+        };
+        let q_low = low.to_i8();
+        let q_high = high.to_i8();
+        assert!(
+            q_low.iter().all(|&v| v == 0),
+            "all-zero input → all-zero quant"
+        );
+        assert!(
+            q_high.iter().all(|&v| v == 127),
+            "all-max input → all-127 quant"
+        );
+    }
+
+    #[test]
+    fn irrigation_boundary_values() {
+        let low = IrrigationInput {
+            forecast_et0: 0.0,
+            theta: 0.0,
+            taw: 0.0,
+            stage: 0.0,
+            ks: 0.0,
+            rain_prob: 0.0,
+        };
+        let high = IrrigationInput {
+            forecast_et0: 15.0,
+            theta: 0.6,
+            taw: 300.0,
+            stage: 1.0,
+            ks: 1.0,
+            rain_prob: 1.0,
+        };
+        assert!(low.to_i8().iter().all(|&v| v == 0));
+        assert!(high.to_i8().iter().all(|&v| v == 127));
+    }
+
+    #[test]
+    fn multi_sensor_boundary_values() {
+        let low = MultiSensorInput {
+            theta: 0.0,
+            temperature: -10.0,
+            ec: 0.0,
+            depletion: 0.0,
+            hour_norm: 0.0,
+            days_since_irr: 0.0,
+        };
+        let high = MultiSensorInput {
+            theta: 0.6,
+            temperature: 50.0,
+            ec: 5.0,
+            depletion: 1.0,
+            hour_norm: 1.0,
+            days_since_irr: 1.0,
+        };
+        assert!(low.to_i8().iter().all(|&v| v == 0));
+        assert!(high.to_i8().iter().all(|&v| v == 127));
     }
 }

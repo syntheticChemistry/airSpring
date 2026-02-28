@@ -37,8 +37,7 @@ use airspring_barracuda::validation::{self, ValidationHarness};
 use std::io::BufRead;
 use std::path::Path;
 
-const BENCHMARK_JSON: &str =
-    include_str!("../../../control/atlas/benchmark_atlas.json");
+const BENCHMARK_JSON: &str = include_str!("../../../control/atlas/benchmark_atlas.json");
 
 const ALL_CROPS: &[(CropType, &str, f64)] = &[
     (CropType::Corn, "corn", 1.25),
@@ -599,11 +598,15 @@ fn validate_against_benchmark(results: &[StationResult], v: &mut ValidationHarne
         }
 
         for crop in &result.crop_results {
-            if let Some(benchmark_yield) =
-                validation::json_f64(station_json, &["crops", crop.crop_name.as_str(), "mean_yield_ratio"])
-            {
+            if let Some(benchmark_yield) = validation::json_f64(
+                station_json,
+                &["crops", crop.crop_name.as_str(), "mean_yield_ratio"],
+            ) {
                 v.check_abs(
-                    &format!("{}/{} yield ratio vs benchmark", result.station, crop.crop_name),
+                    &format!(
+                        "{}/{} yield ratio vs benchmark",
+                        result.station, crop.crop_name
+                    ),
                     crop.mean_yield_ratio,
                     benchmark_yield,
                     0.001,
@@ -612,7 +615,10 @@ fn validate_against_benchmark(results: &[StationResult], v: &mut ValidationHarne
         }
     }
 
-    println!("  Matched {matched}/{} stations against benchmark", results.len());
+    println!(
+        "  Matched {matched}/{} stations against benchmark",
+        results.len()
+    );
 }
 
 fn main() {

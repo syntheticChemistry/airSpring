@@ -193,6 +193,70 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         evolved_by: &["hotSpring special-function library → barracuda S52+"],
         airspring_use: "MC ET₀ parametric confidence intervals",
     },
+    ShaderProvenance {
+        shader: "hydrology (CPU batch kernel)",
+        primitives: &["hargreaves_et0_batch", "crop_coefficient", "soil_water_balance"],
+        origin: "airSpring",
+        domain: "FAO-56 hydrology batch primitives",
+        evolved_by: &["airSpring metalForge → ToadStool S66 (absorption)"],
+        airspring_use: "Hargreaves batch ET₀, Kc stage interpolation",
+    },
+    ShaderProvenance {
+        shader: "diversity (CPU bio kernel)",
+        primitives: &[
+            "shannon", "simpson", "chao1", "bray_curtis",
+            "bray_curtis_matrix", "shannon_from_frequencies",
+        ],
+        origin: "wetSpring",
+        domain: "Microbiome alpha/beta diversity",
+        evolved_by: &[
+            "wetSpring S28 (bio/diversity)",
+            "ToadStool S64 (absorption)",
+            "airSpring (agroecology wrappers)",
+        ],
+        airspring_use: "Cover crop biodiversity, soil 16S microbiome, pollinator habitat",
+    },
+    ShaderProvenance {
+        shader: "anderson (CPU coupling kernel)",
+        primitives: &["coupling_chain", "coupling_series", "classify_regime"],
+        origin: "groundSpring",
+        domain: "Anderson localisation → soil moisture coupling",
+        evolved_by: &[
+            "groundSpring (physics model)",
+            "airSpring Exp-048 (θ→QS regime for 16S)",
+        ],
+        airspring_use: "Soil moisture regime classification, NCBI 16S coupling",
+    },
+    ShaderProvenance {
+        shader: "blaney_criddle (CPU ET₀ kernel)",
+        primitives: &["blaney_criddle_et0", "blaney_criddle_p", "blaney_criddle_from_location"],
+        origin: "airSpring",
+        domain: "Temperature-daylight PET (8th ET₀ method)",
+        evolved_by: &[
+            "airSpring Exp-049 (USDA-SCS 1950)",
+        ],
+        airspring_use: "Blaney-Criddle PET for data-sparse regions",
+    },
+    ShaderProvenance {
+        shader: "scs_cn (CPU runoff kernel)",
+        primitives: &["scs_cn_runoff", "potential_retention", "amc_cn_dry", "amc_cn_wet"],
+        origin: "airSpring",
+        domain: "SCS Curve Number rainfall-runoff",
+        evolved_by: &[
+            "airSpring Exp-050 (USDA-SCS TR-55)",
+        ],
+        airspring_use: "Runoff estimation for water balance, CN tables, AMC adjustment",
+    },
+    ShaderProvenance {
+        shader: "green_ampt (CPU infiltration kernel)",
+        primitives: &["cumulative_infiltration", "infiltration_rate", "ponding_time"],
+        origin: "airSpring",
+        domain: "Green-Ampt (1911) soil infiltration physics",
+        evolved_by: &[
+            "airSpring Exp-051 (Rawls 1983 parameters)",
+        ],
+        airspring_use: "Infiltration modeling, ponding prediction, 7-soil parameter table",
+    },
 ];
 
 /// Cross-spring shader provenance record.
@@ -240,6 +304,12 @@ mod tests {
         assert!(shaders.contains(&"math_f64.wgsl"));
         assert!(shaders.contains(&"df64_core.wgsl"));
         assert!(shaders.contains(&"crank_nicolson_f64.wgsl"));
+        assert!(shaders.contains(&"hydrology (CPU batch kernel)"));
+        assert!(shaders.contains(&"diversity (CPU bio kernel)"));
+        assert!(shaders.contains(&"anderson (CPU coupling kernel)"));
+        assert!(shaders.contains(&"blaney_criddle (CPU ET₀ kernel)"));
+        assert!(shaders.contains(&"scs_cn (CPU runoff kernel)"));
+        assert!(shaders.contains(&"green_ampt (CPU infiltration kernel)"));
     }
 
     #[test]
@@ -249,6 +319,8 @@ mod tests {
         assert!(origins.contains(&"wetSpring"));
         assert!(origins.contains(&"neuralSpring"));
         assert!(origins.contains(&"airSpring + ToadStool"));
+        assert!(origins.contains(&"airSpring"));
+        assert!(origins.contains(&"groundSpring"));
     }
 
     #[test]

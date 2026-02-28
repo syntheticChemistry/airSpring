@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """Exp 037 — ET₀ Ensemble Consensus (7-Method Weighted).
 
 Combines all 7 validated ET₀ methods into a data-adaptive weighted
@@ -12,6 +13,11 @@ Thornthwaite is excluded — it computes monthly PET (mm/month) using an
 annual heat index and is not directly comparable to daily ET₀ methods.
 
 Weighting: equal-weight mean of available methods (robust baseline).
+
+Provenance:
+  Baseline commit: af1eb97 (2026-02-26)
+  Benchmark: control/et0_ensemble/benchmark_et0_ensemble.json
+  Reproduce: python control/et0_ensemble/et0_ensemble.py
 
 References:
   Oudin et al. (2005) J Hydrol 303:290-306

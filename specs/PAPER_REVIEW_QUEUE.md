@@ -1,8 +1,8 @@
 # airSpring — Paper Review Queue
 
-**Last Updated**: February 27, 2026
+**Last Updated**: February 28, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 45 completed (1109/1109 Python + 651 Rust tests + 1393 atlas checks + 11 Tier A modules + 54 binaries). Titan V GPU live dispatch (24/24 PASS) + AKD1000 NPU live + metalForge live hardware probe (RTX 4070 + Titan V + AKD1000 + i9-12900K) + CPU↔GPU parity (0.04% seasonal) + 25.9× Rust-vs-Python speedup. All completed papers use open data and systems.
+**Status**: 51 completed (1237/1237 Python + 618 Rust lib tests + 1498 atlas checks + 11 Tier A modules + 56 binaries + 30/30 cross-spring benchmarks). GPU math portability 46/46. NCBI 16S coupling 14+29. ToadStool S68 sync (universal precision, 700 WGSL, zero f32-only, 6-Spring provenance). Titan V GPU live dispatch (24/24 PASS) + AKD1000 NPU live + metalForge live + CPU↔GPU parity + 26.3× Rust-vs-Python speedup. All completed papers use open data and systems.
 
 ---
 
@@ -53,10 +53,14 @@
 | 41 | Seasonal Batch ET₀ at GPU Scale — Exp 042 | 1+2 | 18+21 | Standard | `benchmark_seasonal_batch.json` | 365×4 station-days batch via BatchedEt0 |
 | 42 | Titan V GPU Live Dispatch — Exp 043 | 3 | 24 | — | `validate_gpu_live` | Live WGSL shader on Titan V GV100, 10K batch scaling |
 | 43 | metalForge Live Hardware Probe — Exp 044 | 3 | 17 | — | `validate_live_hardware` | RTX 4070 + Titan V + AKD1000 + i9-12900K discovery + dispatch |
+| 44 | GPU Math Portability (all 13 modules) — Exp 047 | 1+2 | 21+46 | — | `benchmark_gpu_math.json` | All GPU orchestrators CPU↔GPU identical |
+| 45 | Blaney-Criddle (1950) Temperature PET — Exp 049 | 0+1 | 18+18 | Standard | `benchmark_blaney_criddle.json` | USDA-SCS Tech Paper 96 (open literature) |
+| 46 | SCS Curve Number Runoff (USDA 1972) — Exp 050 | 0+1 | 38+38 | Standard | `benchmark_scs_cn.json` | USDA NEH-4 / TR-55 (public domain) |
+| 47 | Green-Ampt (1911) Infiltration — Exp 051 | 0+1 | 37+37 | Standard | `benchmark_green_ampt.json` | Rawls et al. (1983) Table 1 (open literature) |
 
 ### Controls Audit
 
-All 45 completed papers have:
+All 51 completed papers have:
 - **Digitized benchmarks** in `control/*/benchmark_*.json`
 - **Python control scripts** that validate against benchmarks
 - **Rust validation binaries** (44 barracuda + 1 forge = 45 binaries) that load the same benchmarks
@@ -107,6 +111,9 @@ All 45 completed papers have:
 | 36 | 9/9 | 17/17 (`validate_et0_ensemble`) | Multi-method consensus | `evapotranspiration` (ensemble) |
 | 37 | 29/29 | 32/32 (`validate_pedotransfer_richards`) | SR→VG→Richards coupling | `soil_moisture` + `richards` + `van_genuchten` |
 | 38 | 24/24 | 24/24 (`validate_et0_bias`) | Bias correction factors | `evapotranspiration` (ensemble) |
+| 45 | 18/18 | 18/18 (`validate_blaney_criddle`) | `BatchedElementwise` (Tier B, op=BC) | `evapotranspiration` (BC) |
+| 46 | 38/38 | 38/38 (`validate_scs_cn`) | `BatchedElementwise` (Tier B, op=CN) | `runoff` (SCS-CN) |
+| 47 | 37/37 | 37/37 (`validate_green_ampt`) | `BatchedElementwise` (Tier B, op=GA) | `infiltration` (Green-Ampt) |
 
 ---
 
@@ -150,12 +157,34 @@ Anderson r(t) from θ(t)-derived geometry. The cross-spring pipeline is:
 dominates ET₀ uncertainty at 66%. This propagates into the Anderson coupling:
 moisture uncertainty → geometry uncertainty → QS prediction uncertainty.
 
+### Tier 3.5 — NCBI 16S + Soil Moisture Coupling (baseCamp 06 extension)
+
+Cross-spring experiment coupling NCBI soil metagenome data to airSpring's
+moisture-driven Anderson QS model. Uses NestGate NCBI provider for 16S data
+and Open-Meteo for weather. Goal: predict microbial community state from
+soil moisture dynamics using the Anderson localization framework.
+
+| # | Component | Data Source | Compute | Status |
+|---|-----------|-------------|---------|--------|
+| 19 | NCBI 16S agricultural soil metagenomes (ESearch + EFetch) | NCBI SRA (~105K entries for soil 16S) | I/O bound, NestGate pipeline | **Provider validated** — 23/23 checks |
+| 20 | Open-Meteo ERA5 for study site weather reconstruction | Open-Meteo archive (free, no key) | CPU: `compute_et0_batch` | **Provider validated** — 115 CSVs, 80yr |
+| 21 | θ(t) → Anderson d_eff coupling with 16S diversity overlay | airSpring `eco::anderson` + wetSpring 16S pipeline | GPU: Richards PDE + Anderson | **Exp 045 validated** — 55+95 checks |
+| 22 | Shannon H′ from 16S → W(disorder) calibration | NCBI 16S + groundSpring Exp023 diversity loss | CPU: diversity indices | **Framework ready** — groundSpring Exp023 |
+
+**Pipeline**: NCBI ESearch (soil 16S studies) → EFetch (FASTQ/metadata) →
+wetSpring 16S pipeline (OTU table, Shannon H′) → airSpring Anderson coupling
+(H′ → W, θ(t) → d_eff(t)) → QS regime prediction → compare tilled vs no-till.
+
+**Data budget**: ~50 GB (16S amplicon data for 10-20 studies, ~2-5 GB each).
+**Compute budget**: GPU Richards PDE + CPU 16S pipeline, ~2 hrs on Eastgate.
+**Storage**: NestGate with BLAKE3 provenance on Eastgate (2TB NVMe sufficient).
+
 ### Tier 4 — Longer horizon
 
 | # | Paper / Direction | Year | Faculty | Open Data? | Control Status | GPU Path |
 |---|-------------------|------|---------|:----------:|:--------------:|----------|
-| 17 | Dolson — Evolutionary optimization of sensor placement | — | Dolson | N/A | Future | `NelderMeadGpu` |
-| 18 | Waters — Soil microbiome ↔ plant water dynamics | — | Waters | N/A | Future | N/A |
+| 23 | Dolson — Evolutionary optimization of sensor placement | — | Dolson | N/A | Future | `NelderMeadGpu` |
+| 24 | Waters — Soil microbiome ↔ plant water dynamics | — | Waters | N/A | Future | N/A |
 
 ---
 
@@ -189,8 +218,10 @@ moisture uncertainty → geometry uncertainty → QS prediction uncertainty.
 - Queue items 6-7 (Tier 1) depend on access to Dong lab's real field data (new lab 2026)
 - Queue items 10-11 (Tier 2) are cross-spring references — already validated in their respective Springs
 - Queue items 12-16 (Tier 3) support baseCamp Sub-thesis 06 (no-till Anderson QS)
-- Queue items 17-18 (Tier 4) are longer-horizon explorations (evolutionary optimization, microbiome)
-- All 35 completed reproductions use **open data** — zero institutional access, zero proprietary sensors
+- Queue items 19-22 (Tier 3.5) extend baseCamp 06 with NCBI 16S data — NestGate providers validated
+- Queue items 23-24 (Tier 4) are longer-horizon explorations (evolutionary optimization, microbiome)
+- All 41 paper reproductions use **open data** — zero institutional access, zero proprietary sensors
 - Every completed paper has been validated through the full pipeline: Python → Rust CPU → GPU/NPU
-- Three compute tiers verified: 30 control dirs, 41 Rust binaries, 11 Tier A GPU modules, 3 NPU experiments
-- ET₀ method coverage: PM (FAO-56), Priestley-Taylor, Hargreaves, Thornthwaite, Makkink, Turc, Hamon — 7 independent methods
+- Three compute tiers verified: 40 control dirs, 56 Rust binaries, 11 Tier A + 4 Tier B GPU modules, 3 NPU experiments
+- ET₀ method coverage: PM (FAO-56), Priestley-Taylor, Hargreaves, Thornthwaite, Makkink, Turc, Hamon, Blaney-Criddle — 8 independent methods
+- GPU math portability: all 13 GPU orchestrator modules validated (Exp 047, 46/46 checks)

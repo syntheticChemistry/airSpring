@@ -80,8 +80,7 @@ impl CropConfig {
     #[must_use]
     pub fn standard(crop_type: CropType) -> Self {
         let kc = crop_type.coefficients();
-        let ky = yield_response::ky_table(kc.name)
-            .map_or(1.25, |yrf| yrf.ky_total);
+        let ky = yield_response::ky_table(kc.name).map_or(1.25, |yrf| yrf.ky_total);
         Self {
             crop_type,
             field_capacity: 0.30,
@@ -174,10 +173,7 @@ impl SeasonalPipeline {
         let n = weather.len();
 
         // Stage 1: ET₀ computation (op=0)
-        let et0_daily: Vec<f64> = weather
-            .iter()
-            .map(compute_et0)
-            .collect();
+        let et0_daily: Vec<f64> = weather.iter().map(compute_et0).collect();
 
         // Stage 2: Kc schedule with climate adjustment (op=7)
         let kc_daily: Vec<f64> = weather
@@ -229,16 +225,12 @@ impl SeasonalPipeline {
         } else {
             1.0
         };
-        let yield_ratio = yield_response::clamp_yield_ratio(
-            yield_response::yield_ratio_single(config.ky, eta_etc),
-        );
+        let yield_ratio = yield_response::clamp_yield_ratio(yield_response::yield_ratio_single(
+            config.ky, eta_etc,
+        ));
 
-        let mass_balance_error = wb::mass_balance_check(
-            &wb_inputs,
-            &wb_outputs,
-            0.0,
-            state.depletion,
-        );
+        let mass_balance_error =
+            wb::mass_balance_check(&wb_inputs, &wb_outputs, 0.0, state.depletion);
 
         let actual_et_daily: Vec<f64> = wb_outputs.iter().map(|o| o.actual_et).collect();
         let stress_days = wb_outputs.iter().filter(|o| o.ks < 1.0).count();
@@ -327,10 +319,16 @@ mod tests {
 
         assert_eq!(result.n_days, 153);
         assert!(result.total_et0 > 400.0, "ET₀ = {:.0}", result.total_et0);
-        assert!(result.yield_ratio > 0.5 && result.yield_ratio <= 1.0,
-            "YR = {:.3}", result.yield_ratio);
-        assert!(result.mass_balance_error < 0.1,
-            "MB = {:.6}", result.mass_balance_error);
+        assert!(
+            result.yield_ratio > 0.5 && result.yield_ratio <= 1.0,
+            "YR = {:.3}",
+            result.yield_ratio
+        );
+        assert!(
+            result.mass_balance_error < 0.1,
+            "MB = {:.6}",
+            result.mass_balance_error
+        );
     }
 
     #[test]
@@ -350,9 +348,12 @@ mod tests {
         let corn = pipeline.run_season(&weather, &CropConfig::standard(CropType::Corn));
         let soy = pipeline.run_season(&weather, &CropConfig::standard(CropType::Soybean));
 
-        assert!(corn.total_actual_et > soy.total_actual_et,
+        assert!(
+            corn.total_actual_et > soy.total_actual_et,
             "Corn ET ({:.0}) > Soy ET ({:.0})",
-            corn.total_actual_et, soy.total_actual_et);
+            corn.total_actual_et,
+            soy.total_actual_et
+        );
     }
 
     #[test]
@@ -366,9 +367,12 @@ mod tests {
         rainfed_config.irrigation_depth_mm = 0.0;
         let rainfed = pipeline.run_season(&weather, &rainfed_config);
 
-        assert!(irrigated.yield_ratio >= rainfed.yield_ratio,
+        assert!(
+            irrigated.yield_ratio >= rainfed.yield_ratio,
             "Irrigated YR ({:.3}) >= rainfed ({:.3})",
-            irrigated.yield_ratio, rainfed.yield_ratio);
+            irrigated.yield_ratio,
+            rainfed.yield_ratio
+        );
     }
 
     #[test]
@@ -396,9 +400,13 @@ mod tests {
     fn drought_lowers_yield() {
         let pipeline = SeasonalPipeline::cpu();
         let normal = growing_season();
-        let drought: Vec<WeatherDay> = normal.iter().map(|w| {
-            WeatherDay { precipitation: 0.0, ..*w }
-        }).collect();
+        let drought: Vec<WeatherDay> = normal
+            .iter()
+            .map(|w| WeatherDay {
+                precipitation: 0.0,
+                ..*w
+            })
+            .collect();
 
         let mut config = CropConfig::standard(CropType::Corn);
         config.irrigation_depth_mm = 0.0;
@@ -406,9 +414,12 @@ mod tests {
         let normal_result = pipeline.run_season(&normal, &config);
         let drought_result = pipeline.run_season(&drought, &config);
 
-        assert!(normal_result.yield_ratio > drought_result.yield_ratio,
+        assert!(
+            normal_result.yield_ratio > drought_result.yield_ratio,
             "Normal YR ({:.3}) > drought ({:.3})",
-            normal_result.yield_ratio, drought_result.yield_ratio);
+            normal_result.yield_ratio,
+            drought_result.yield_ratio
+        );
     }
 
     #[test]
@@ -417,13 +428,20 @@ mod tests {
         let weather = growing_season();
 
         for crop_type in &[
-            CropType::Corn, CropType::Soybean, CropType::WinterWheat,
-            CropType::Alfalfa, CropType::Potato,
+            CropType::Corn,
+            CropType::Soybean,
+            CropType::WinterWheat,
+            CropType::Alfalfa,
+            CropType::Potato,
         ] {
             let config = CropConfig::standard(*crop_type);
             let result = pipeline.run_season(&weather, &config);
-            assert!(result.mass_balance_error < 0.1,
-                "{:?} MB = {:.6}", crop_type, result.mass_balance_error);
+            assert!(
+                result.mass_balance_error < 0.1,
+                "{:?} MB = {:.6}",
+                crop_type,
+                result.mass_balance_error
+            );
         }
     }
 }

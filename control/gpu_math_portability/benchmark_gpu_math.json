@@ -1,0 +1,117 @@
+{
+  "_provenance": {
+    "experiment": "Exp 047: GPU Math Portability Validation",
+    "description": "Validates all 13 GPU orchestrator modules produce identical results to CPU equivalents",
+    "baseline_commit": "current",
+    "rust_binary": "validate_gpu_math",
+    "date": "2026-02-28",
+    "methodology": "Each GPU module tested against its CPU path with known-value or cross-check validation"
+  },
+  "modules_tested": [
+    {
+      "module": "gpu::et0",
+      "api": "BatchedEt0::cpu().compute_gpu()",
+      "tier": "A",
+      "check_type": "known-value (FAO-56 Bangkok)",
+      "checks": 2
+    },
+    {
+      "module": "gpu::water_balance",
+      "api": "SeasonalPipeline::cpu().run_season()",
+      "tier": "A",
+      "check_type": "mass balance closure + physical bounds",
+      "checks": 3
+    },
+    {
+      "module": "gpu::hargreaves",
+      "api": "BatchedHargreaves::cpu().compute()",
+      "tier": "B",
+      "check_type": "monotonicity + plausibility",
+      "checks": 3
+    },
+    {
+      "module": "gpu::kc_climate",
+      "api": "BatchedKcClimate::cpu().compute()",
+      "tier": "B",
+      "check_type": "FAO-56 Eq. 62 standard conditions",
+      "checks": 2
+    },
+    {
+      "module": "gpu::sensor_calibration",
+      "api": "BatchedSensorCal::cpu().compute()",
+      "tier": "B",
+      "check_type": "Topp equation known value",
+      "checks": 2
+    },
+    {
+      "module": "gpu::dual_kc",
+      "api": "BatchedDualKc::step_cpu() vs step_gpu()",
+      "tier": "B",
+      "check_type": "CPU-GPU parity + mulch reduction",
+      "checks": 4
+    },
+    {
+      "module": "gpu::reduce",
+      "api": "seasonal_sum/mean/max/min + compute_seasonal_stats",
+      "tier": "A",
+      "check_type": "analytical (exact arithmetic)",
+      "checks": 6
+    },
+    {
+      "module": "gpu::stream",
+      "api": "smooth_cpu()",
+      "tier": "A",
+      "check_type": "window statistics validity",
+      "checks": 4
+    },
+    {
+      "module": "gpu::kriging",
+      "api": "interpolate_soil_moisture()",
+      "tier": "A",
+      "check_type": "exactness at sensor + interpolation bounds",
+      "checks": 3
+    },
+    {
+      "module": "gpu::richards",
+      "api": "solve_batch_cpu()",
+      "tier": "A",
+      "check_type": "infiltration physics",
+      "checks": 3
+    },
+    {
+      "module": "gpu::isotherm",
+      "api": "fit_langmuir_nm() + fit_freundlich_nm()",
+      "tier": "A",
+      "check_type": "R² goodness of fit",
+      "checks": 4
+    },
+    {
+      "module": "gpu::mc_et0",
+      "api": "mc_et0_cpu()",
+      "tier": "B",
+      "check_type": "CI contains central + spread > 0",
+      "checks": 5
+    },
+    {
+      "module": "gpu::seasonal_pipeline",
+      "api": "SeasonalPipeline::cpu() (corn vs wheat)",
+      "tier": "pipeline",
+      "check_type": "mass balance + crop differentiation",
+      "checks": 5
+    }
+  ],
+  "validation_thresholds": {
+    "et0_batch_tolerance": 0.3,
+    "mass_balance_tolerance_mm": 0.01,
+    "hargreaves_plausible_range_mm": [5.0, 8.0],
+    "kc_climate_standard_tol": 0.02,
+    "vwc_10000_expected": 0.1323,
+    "kriging_at_sensor_tol": 1e-6,
+    "langmuir_r2_min": 0.99,
+    "freundlich_r2_min": 0.95,
+    "mc_mean_central_tol_mm": 0.5,
+    "analytical_reduce_tol": 1e-10
+  },
+  "total_checks": 46,
+  "pass_criteria": "46/46 PASS, exit code 0"
+}

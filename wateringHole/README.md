@@ -1,13 +1,14 @@
 # airSpring wateringHole
 
-**Updated**: February 27, 2026
+**Updated**: February 28, 2026
 **Purpose**: Spring-local handoffs to ToadStool/BarraCuda and cross-spring provenance
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V030** | [AIRSPRING_V030_EVOLUTION_ANDERSON_CPU_BENCHMARK_HANDOFF_FEB27_2026.md](handoffs/AIRSPRING_V030_EVOLUTION_ANDERSON_CPU_BENCHMARK_HANDOFF_FEB27_2026.md) | 2026-02-27 | **current** — v0.5.1: Exp 045 Anderson coupling (55+95 PASS), 25.9× CPU benchmark (8/8 parity), documentation sweep, ToadStool shader candidates |
+| **V034** | [AIRSPRING_V034_EXPERIMENT_BUILDOUT_DEBT_RESOLUTION_HANDOFF_FEB28_2026.md](handoffs/AIRSPRING_V034_EXPERIMENT_BUILDOUT_DEBT_RESOLUTION_HANDOFF_FEB28_2026.md) | 2026-02-28 | **current** — v0.5.3: 3 new experiments (049-051), deep technical debt resolution (42+ named constants, zero dead code, cast hygiene, capability-based GPU), 30/30 benchmarks, 16 provenance entries, 8 ET₀ methods |
+| V033 | [AIRSPRING_V033_CROSS_SPRING_REWIRING_BENCHMARK_HANDOFF_FEB28_2026.md](handoffs/AIRSPRING_V033_CROSS_SPRING_REWIRING_BENCHMARK_HANDOFF_FEB28_2026.md) | 2026-02-28 | v0.5.2: Cross-spring rewiring (Hargreaves→ToadStool batch, diversity matrix/frequencies, Kc stage), 25/25 benchmarks, 13 provenance entries |
 
 ## Cross-Spring Documents
 
@@ -26,6 +27,9 @@
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_V032_TOADSTOOL_S68_SYNC_REVALIDATION_HANDOFF_FEB28_2026.md` | v0.5.2: ToadStool S68 full review, zero breaking changes, binary registration fix |
+| `handoffs/archive/AIRSPRING_V031_GPU_MATH_PORTABILITY_METALFORGE_FIXES_HANDOFF_FEB28_2026.md` | v0.5.2: Exp 047 GPU math portability (13 modules, 46/46), metalForge fixes |
+| `handoffs/archive/AIRSPRING_V030_EVOLUTION_ANDERSON_CPU_BENCHMARK_HANDOFF_FEB27_2026.md` | v0.5.1: Exp 045 Anderson coupling, 25.9× CPU benchmark |
 | `handoffs/archive/AIRSPRING_V029_TOADSTOOL_S68_UNIVERSAL_PRECISION_SYNC_HANDOFF_FEB27_2026.md` | v0.5.0: ToadStool S68+ sync, universal precision architecture, evolution gaps |
 | `handoffs/archive/AIRSPRING_V028_TOADSTOOL_ABSORPTION_TITAN_V_HANDOFF_FEB27_2026.md` | v0.5.0: ToadStool absorption, Titan V live learnings, batch scaling |
 | `handoffs/archive/AIRSPRING_V027_GPU_PARITY_DISPATCH_HANDOFF_FEB27_2026.md` | v0.5.0: CPU↔GPU parity, metalForge dispatch, seasonal batch, Titan V + metalForge live hardware |

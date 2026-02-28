@@ -63,8 +63,7 @@ fn date_to_doy(date_str: &str) -> (u32, u32) {
     let month: u32 = parts[1].parse().unwrap_or(1);
     let day: u32 = parts[2].parse().unwrap_or(1);
 
-    let is_leap =
-        year.is_multiple_of(4) && (!year.is_multiple_of(100) || year.is_multiple_of(400));
+    let is_leap = year.is_multiple_of(4) && (!year.is_multiple_of(100) || year.is_multiple_of(400));
     let days_before: [u32; 12] = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
     let mut doy = days_before[(month - 1).min(11) as usize] + day;
     if is_leap && month > 2 {
@@ -282,13 +281,13 @@ fn main() {
     if stations.is_empty() {
         println!("No 80yr station files found — download in progress.");
         h.finish();
-        #[allow(unreachable_code)]
-        return;
     }
 
     let stream = AtlasStream::new();
-    let crop_configs: Vec<CropConfig> =
-        TEST_CROPS.iter().map(|ct| CropConfig::standard(*ct)).collect();
+    let crop_configs: Vec<CropConfig> = TEST_CROPS
+        .iter()
+        .map(|ct| CropConfig::standard(*ct))
+        .collect();
 
     let config = AtlasStreamConfig {
         crop_configs: crop_configs.clone(),

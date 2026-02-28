@@ -32,7 +32,6 @@ use std::sync::Arc;
 use barracuda::device::WgpuDevice;
 use barracuda::ops::batched_elementwise_f64::BatchedElementwiseF64;
 
-use crate::eco::evapotranspiration as et;
 use crate::eco::solar;
 
 /// Per-day input for batched Hargreaves ET₀.
@@ -76,7 +75,6 @@ pub struct BatchedHargreavesResult {
 /// the GPU engine activates automatically.
 pub struct BatchedHargreaves {
     backend: Backend,
-    #[allow(dead_code)]
     gpu_engine: Option<BatchedElementwiseF64>,
 }
 
@@ -105,6 +103,13 @@ impl BatchedHargreaves {
             backend: Backend::Gpu,
             gpu_engine: Some(engine),
         })
+    }
+
+    /// Returns a reference to the GPU engine, if available.
+    /// Used for `ToadStool` GPU dispatch when the shader is wired.
+    #[must_use]
+    pub const fn gpu_engine(&self) -> Option<&BatchedElementwiseF64> {
+        self.gpu_engine.as_ref()
     }
 
     /// Create with CPU fallback (always safe, no device needed).
@@ -146,22 +151,26 @@ impl BatchedHargreaves {
     }
 
     fn compute_cpu_batch(inputs: &[HargreavesDay]) -> Vec<f64> {
-        inputs
+        // Pre-compute Ra (mm/day) for each day from latitude and DOY.
+        let lambda = 2.45_f64;
+        let ra: Vec<f64> = inputs
             .iter()
-            .map(|day| {
-                let lat_rad = day.latitude_deg.to_radians();
-                let extra_rad = solar::extraterrestrial_radiation(lat_rad, day.day_of_year);
-                let lambda = 2.45_f64;
-                let ra_mm_day = extra_rad / lambda;
-                et::hargreaves_et0(day.tmin, day.tmax, ra_mm_day)
-            })
-            .collect()
+            .map(|d| solar::extraterrestrial_radiation(d.latitude_deg.to_radians(), d.day_of_year) / lambda)
+            .collect();
+        let tmax: Vec<f64> = inputs.iter().map(|d| d.tmax).collect();
+        let tmin: Vec<f64> = inputs.iter().map(|d| d.tmin).collect();
+
+        // Delegate to ToadStool batch (absorbed from airSpring metalForge, S66 R-S66-002).
+        // Upstream uses (ra, tmax, tmin) parameter order; returns None only on length mismatch.
+        barracuda::stats::hargreaves_et0_batch(&ra, &tmax, &tmin)
+            .unwrap_or_default()
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::eco::evapotranspiration as et;
 
     fn sample_day() -> HargreavesDay {
         HargreavesDay {

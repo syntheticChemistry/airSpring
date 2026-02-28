@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """Exp 039 — Cross-Method ET₀ Bias Correction.
 
 Quantifies the systematic bias of simplified ET₀ methods relative to

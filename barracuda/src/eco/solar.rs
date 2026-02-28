@@ -7,12 +7,31 @@
 
 use std::f64::consts::PI;
 
+/// Earth orbit eccentricity coefficient. FAO-56 Eq. 23.
+const ECCENTRICITY_COEFF: f64 = 0.033;
+/// Days in standard year.
+const DAYS_PER_YEAR: f64 = 365.0;
+/// Maximum solar declination (radians). FAO-56 Eq. 24.
+const MAX_DECLINATION: f64 = 0.409;
+/// Solar declination phase offset (radians). FAO-56 Eq. 24.
+const DECLINATION_PHASE: f64 = 1.39;
+/// Solar constant Gsc (MJ/m²/min). FAO-56 Table 2.7.
+const SOLAR_CONSTANT_MJ: f64 = 0.0820;
+/// Stefan-Boltzmann constant (MJ/m²/day/K⁴).
+const STEFAN_BOLTZMANN: f64 = 4.903e-9;
+/// Clear-sky elevation coefficient (per metre). FAO-56 Eq. 37.
+const CLEAR_SKY_ELEV_COEFF: f64 = 2.0e-5;
+/// Clear-sky base transmissivity. FAO-56 Eq. 37.
+const CLEAR_SKY_BASE: f64 = 0.75;
+/// Net longwave humidity factor coefficient. FAO-56 Eq. 39.
+const LW_HUMIDITY_COEFF: f64 = 0.14;
+
 /// Inverse relative distance Earth–Sun (FAO-56 Eq. 23).
 ///
 /// dr = 1 + 0.033 × cos(2π/365 × J)
 #[must_use]
 pub fn inverse_rel_distance(day_of_year: u32) -> f64 {
-    0.033f64.mul_add((2.0 * PI * f64::from(day_of_year) / 365.0).cos(), 1.0)
+    ECCENTRICITY_COEFF.mul_add((2.0 * PI * f64::from(day_of_year) / DAYS_PER_YEAR).cos(), 1.0)
 }
 
 /// Solar declination δ (radians) (FAO-56 Eq. 24).
@@ -20,7 +39,7 @@ pub fn inverse_rel_distance(day_of_year: u32) -> f64 {
 /// δ = 0.409 × sin(2π/365 × J − 1.39)
 #[must_use]
 pub fn solar_declination(day_of_year: u32) -> f64 {
-    0.409 * (2.0 * PI * f64::from(day_of_year) / 365.0 - 1.39).sin()
+    MAX_DECLINATION * (2.0 * PI * f64::from(day_of_year) / DAYS_PER_YEAR - DECLINATION_PHASE).sin()
 }
 
 /// Sunset hour angle ωs (radians) (FAO-56 Eq. 25).
@@ -36,13 +55,12 @@ pub fn sunset_hour_angle(latitude_rad: f64, declination_rad: f64) -> f64 {
 /// Extraterrestrial radiation Ra (MJ/m²/day) (FAO-56 Eq. 21).
 #[must_use]
 pub fn extraterrestrial_radiation(latitude_rad: f64, day_of_year: u32) -> f64 {
-    let gsc = 0.0820; // Solar constant (MJ/m²/min)
     let dr = inverse_rel_distance(day_of_year);
     let delta = solar_declination(day_of_year);
     let ws = sunset_hour_angle(latitude_rad, delta);
 
     (24.0 * 60.0 / PI)
-        * gsc
+        * SOLAR_CONSTANT_MJ
         * dr
         * (ws * latitude_rad.sin())
             .mul_add(delta.sin(), latitude_rad.cos() * delta.cos() * ws.sin())
@@ -63,7 +81,7 @@ pub fn daylight_hours(latitude_rad: f64, day_of_year: u32) -> f64 {
 /// Rso = (0.75 + 2 × 10⁻⁵ × z) × Ra
 #[must_use]
 pub fn clear_sky_radiation(elevation_m: f64, ra: f64) -> f64 {
-    2.0e-5f64.mul_add(elevation_m, 0.75) * ra
+    CLEAR_SKY_ELEV_COEFF.mul_add(elevation_m, CLEAR_SKY_BASE) * ra
 }
 
 /// Net shortwave radiation Rns (MJ/m²/day) (FAO-56 Eq. 38).
@@ -77,17 +95,16 @@ pub fn net_shortwave_radiation(rs: f64, albedo: f64) -> f64 {
 /// Net longwave radiation Rnl (MJ/m²/day) (FAO-56 Eq. 39).
 #[must_use]
 pub fn net_longwave_radiation(tmin: f64, tmax: f64, ea: f64, rs: f64, rso: f64) -> f64 {
-    let sigma = 4.903e-9; // Stefan-Boltzmann (MJ/m²/day/K⁴)
     let tk_min = tmin + 273.16;
     let tk_max = tmax + 273.16;
     let avg_tk4 = f64::midpoint(tk_max.powi(4), tk_min.powi(4));
-    let humidity_factor = 0.14f64.mul_add(-ea.sqrt(), 0.34);
+    let humidity_factor = LW_HUMIDITY_COEFF.mul_add(-ea.sqrt(), 0.34);
     let cloudiness_factor = if rso > 0.0 {
         1.35f64.mul_add((rs / rso).min(1.0), -0.35).max(0.05)
     } else {
         0.05
     };
-    sigma * avg_tk4 * humidity_factor * cloudiness_factor
+    STEFAN_BOLTZMANN * avg_tk4 * humidity_factor * cloudiness_factor
 }
 
 /// Net radiation Rn (MJ/m²/day) (FAO-56 Eq. 40).

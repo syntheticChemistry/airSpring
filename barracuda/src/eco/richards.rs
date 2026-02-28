@@ -165,7 +165,7 @@ pub fn solve_richards_1d(
     let mut h: Vec<f64> = vec![h_initial.clamp(H_CLIP_MIN, H_CLIP_MAX); n_nodes];
     let mut profiles = Vec::new();
 
-    let n_steps = (duration_days / dt_days).ceil() as usize;
+    let n_steps = usize::try_from((duration_days / dt_days).ceil() as u64).unwrap_or(1);
     let mut t = 0.0_f64;
 
     let mut a = vec![0.0_f64; n_nodes];
