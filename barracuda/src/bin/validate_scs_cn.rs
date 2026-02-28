@@ -19,6 +19,7 @@ use airspring_barracuda::eco::runoff::{
     amc_cn_dry, amc_cn_wet, potential_retention, scs_cn_runoff, scs_cn_runoff_standard, LandUse,
     SoilGroup,
 };
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
 
 const BENCHMARK_JSON: &str =
@@ -43,7 +44,12 @@ fn validate_analytical(v: &mut ValidationHarness, benchmark: &serde_json::Value)
 
         if let Some(s_expected) = tc.get("S_mm").and_then(serde_json::Value::as_f64) {
             let s = potential_retention(cn);
-            v.check_abs(&format!("S({name})"), s, s_expected, 0.01);
+            v.check_abs(
+                &format!("S({name})"),
+                s,
+                s_expected,
+                tolerances::SCS_CN_ANALYTICAL.abs_tol,
+            );
         }
     }
 }
@@ -69,12 +75,18 @@ fn validate_monotonicity(v: &mut ValidationHarness) {
 
     // CN monotonic
     let cns = [30, 50, 65, 75, 85, 90, 95, 98];
-    let qs: Vec<f64> = cns.iter().map(|&cn| scs_cn_runoff_standard(50.0, f64::from(cn))).collect();
+    let qs: Vec<f64> = cns
+        .iter()
+        .map(|&cn| scs_cn_runoff_standard(50.0, f64::from(cn)))
+        .collect();
     v.check_bool("cn_monotonic", qs.windows(2).all(|w| w[0] <= w[1]));
 
     // Precip monotonic
     let ps = [0.0, 10.0, 20.0, 30.0, 50.0, 75.0, 100.0, 150.0];
-    let qs: Vec<f64> = ps.iter().map(|&p| scs_cn_runoff_standard(p, 75.0)).collect();
+    let qs: Vec<f64> = ps
+        .iter()
+        .map(|&p| scs_cn_runoff_standard(p, 75.0))
+        .collect();
     v.check_bool("precip_monotonic", qs.windows(2).all(|w| w[0] <= w[1]));
 
     // Q ≤ P always
@@ -113,8 +125,9 @@ fn validate_cn_table(v: &mut ValidationHarness) {
 
 fn validate_edge_cases(v: &mut ValidationHarness) {
     validation::section("Edge Cases");
-    v.check_abs("CN100", scs_cn_runoff_standard(50.0, 100.0), 50.0, 0.01);
-    v.check_abs("CN1", scs_cn_runoff_standard(50.0, 1.0), 0.0, 0.01);
+    let tol = tolerances::SCS_CN_ANALYTICAL.abs_tol;
+    v.check_abs("CN100", scs_cn_runoff_standard(50.0, 100.0), 50.0, tol);
+    v.check_abs("CN1", scs_cn_runoff_standard(50.0, 1.0), 0.0, tol);
 }
 
 fn main() {
@@ -122,7 +135,7 @@ fn main() {
     let mut v = ValidationHarness::new("Exp 050: SCS Curve Number Runoff");
     validate_analytical(&mut v, &benchmark);
     validate_amc(&mut v, &benchmark);
-    validate_monotonicity(&mut v, );
+    validate_monotonicity(&mut v);
     validate_cn_table(&mut v);
     validate_edge_cases(&mut v);
     v.finish();

@@ -335,14 +335,22 @@ fn validate_physical_checks(
     }
 }
 
+fn cv_percent(data: &[f64]) -> f64 {
+    let m = barracuda::stats::mean(data);
+    if m <= 0.0 || data.len() < 2 {
+        return 0.0;
+    }
+    let sd = barracuda::stats::correlation::std_dev(data).unwrap_or(0.0);
+    100.0 * sd / m
+}
+
 fn compute_trend_stats(results: &[SeasonResult]) -> (f64, f64, f64) {
-    let n = results.len();
     let et0_arr: Vec<f64> = results.iter().map(|r| r.total_et0_rust).collect();
     let precip_arr: Vec<f64> = results.iter().map(|r| r.total_precip).collect();
     let years: Vec<f64> = results.iter().map(|r| f64::from(r.year)).collect();
 
-    let mean_y = et0_arr.iter().sum::<f64>() / n as f64;
-    let mean_x = years.iter().sum::<f64>() / n as f64;
+    let mean_y = barracuda::stats::mean(&et0_arr);
+    let mean_x = barracuda::stats::mean(&years);
     let mut num = 0.0_f64;
     let mut den = 0.0_f64;
     for (i, &y) in years.iter().enumerate() {
@@ -352,51 +360,25 @@ fn compute_trend_stats(results: &[SeasonResult]) -> (f64, f64, f64) {
     }
     let slope = if den.abs() > 1e-10 { num / den } else { 0.0 };
 
-    let mean_precip = precip_arr.iter().sum::<f64>() / n as f64;
-    let var_precip = precip_arr
-        .iter()
-        .map(|p| (p - mean_precip).powi(2))
-        .sum::<f64>()
-        / (n - 1) as f64;
-    let cv_precip = if mean_precip > 0.0 {
-        100.0 * var_precip.sqrt() / mean_precip
-    } else {
-        0.0
-    };
-
-    (slope, cv_precip, compute_decade_cv(results))
+    (slope, cv_percent(&precip_arr), compute_decade_cv(results))
 }
 
 fn compute_decade_cv(results: &[SeasonResult]) -> f64 {
     let mut decade_means: Vec<f64> = Vec::new();
     for d in (1960..2024).step_by(10) {
-        let mut sum = 0.0_f64;
-        let mut count = 0_usize;
-        for r in results {
-            if r.year >= d && r.year < d + 10 {
-                sum += r.total_et0_rust;
-                count += 1;
-            }
-        }
-        if count > 0 {
-            decade_means.push(sum / count as f64);
+        let vals: Vec<f64> = results
+            .iter()
+            .filter(|r| r.year >= d && r.year < d + 10)
+            .map(|r| r.total_et0_rust)
+            .collect();
+        if !vals.is_empty() {
+            decade_means.push(barracuda::stats::mean(&vals));
         }
     }
-    let mean_decade = if decade_means.is_empty() {
+    if decade_means.is_empty() {
         return 0.0;
-    } else {
-        decade_means.iter().sum::<f64>() / decade_means.len() as f64
-    };
-    let var_decade = decade_means
-        .iter()
-        .map(|m| (m - mean_decade).powi(2))
-        .sum::<f64>()
-        / (decade_means.len().max(1) - 1).max(1) as f64;
-    if mean_decade > 0.0 {
-        100.0 * var_decade.sqrt() / mean_decade
-    } else {
-        0.0
     }
+    cv_percent(&decade_means)
 }
 
 fn validate_climate_trends(

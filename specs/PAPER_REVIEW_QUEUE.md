@@ -2,7 +2,7 @@
 
 **Last Updated**: February 28, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 51 completed (1237/1237 Python + 618 Rust lib tests + 1498 atlas checks + 11 Tier A modules + 56 binaries + 30/30 cross-spring benchmarks). GPU math portability 46/46. NCBI 16S coupling 14+29. ToadStool S68 sync (universal precision, 700 WGSL, zero f32-only, 6-Spring provenance). Titan V GPU live dispatch (24/24 PASS) + AKD1000 NPU live + metalForge live + CPU↔GPU parity + 26.3× Rust-vs-Python speedup. All completed papers use open data and systems.
+**Status**: 54 completed (1237/1237 Python + 618 Rust lib tests + 1498 atlas checks + 11 Tier A modules + 59 binaries + 30/30 cross-spring benchmarks). GPU math portability 46/46. NCBI 16S coupling 14+29. ToadStool S68 sync (universal precision, 700 WGSL, zero f32-only, 6-Spring provenance). Titan V GPU live dispatch (24/24 PASS) + AKD1000 NPU live + metalForge live + CPU↔GPU parity + 26.3× Rust-vs-Python speedup. Coupled runoff-infiltration (292/292), VG inverse (84/84), full-season WB audit (34/34). All completed papers use open data and systems.
 
 ---
 
@@ -57,10 +57,13 @@
 | 45 | Blaney-Criddle (1950) Temperature PET — Exp 049 | 0+1 | 18+18 | Standard | `benchmark_blaney_criddle.json` | USDA-SCS Tech Paper 96 (open literature) |
 | 46 | SCS Curve Number Runoff (USDA 1972) — Exp 050 | 0+1 | 38+38 | Standard | `benchmark_scs_cn.json` | USDA NEH-4 / TR-55 (public domain) |
 | 47 | Green-Ampt (1911) Infiltration — Exp 051 | 0+1 | 37+37 | Standard | `benchmark_green_ampt.json` | Rawls et al. (1983) Table 1 (open literature) |
+| 48 | SCS-CN + Green-Ampt Coupled Runoff-Infiltration — Exp 052 | 0+1 | 292+292 | Standard | `benchmark_coupled_runoff.json` | NEH-4 + Rawls (1983) (open literature) |
+| 49 | Van Genuchten Inverse Parameter Estimation — Exp 053 | 0+1 | 84+84 | Standard | `benchmark_vg_inverse.json` | Carsel & Parrish (1988) Table 1 (open literature) |
+| 50 | Full-Season Irrigation Water Budget — Exp 054 | 0+1 | 34+34 | Standard | `benchmark_season_wb.json` | FAO-56 Ch 2-8 + Stewart (1977) (open literature) |
 
 ### Controls Audit
 
-All 51 completed papers have:
+All 54 completed papers have:
 - **Digitized benchmarks** in `control/*/benchmark_*.json`
 - **Python control scripts** that validate against benchmarks
 - **Rust validation binaries** (44 barracuda + 1 forge = 45 binaries) that load the same benchmarks
@@ -114,6 +117,9 @@ All 51 completed papers have:
 | 45 | 18/18 | 18/18 (`validate_blaney_criddle`) | `BatchedElementwise` (Tier B, op=BC) | `evapotranspiration` (BC) |
 | 46 | 38/38 | 38/38 (`validate_scs_cn`) | `BatchedElementwise` (Tier B, op=CN) | `runoff` (SCS-CN) |
 | 47 | 37/37 | 37/37 (`validate_green_ampt`) | `BatchedElementwise` (Tier B, op=GA) | `infiltration` (Green-Ampt) |
+| 48 | 292/292 | 292/292 (`validate_coupled_runoff`) | `BatchedElementwise` (CN+GA) | `runoff` + `infiltration` |
+| 49 | 84/84 | 84/84 (`validate_vg_inverse`) | `BatchedOptimize` (Tier B, Brent) | `van_genuchten` (inverse) |
+| 50 | 34/34 | 34/34 (`validate_season_wb`) | `SeasonalPipeline` (ET₀→Kc→WB→Yield) | All hydrology modules |
 
 ---
 

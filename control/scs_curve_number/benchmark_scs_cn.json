@@ -7,7 +7,12 @@
       "Ponce VM, Hawkins RH (1996) Runoff curve number: has it reached maturity? J Hydrol Eng 1(1):11-19."
     ],
     "data_source": "Published CN tables and equations (open literature, USDA public domain)",
-    "experiment": "050"
+    "experiment": "050",
+    "baseline_script": "control/scs_curve_number/scs_curve_number.py",
+    "baseline_commit": "97e7533213e92a248db04a47cab2a00fde87c4cc",
+    "baseline_command": "python control/scs_curve_number/scs_curve_number.py",
+    "baseline_date": "2026-02-28",
+    "baseline_result": "38/38 PASS"
   },
   "equation": {
     "scs_cn_runoff": "Q = (P - Ia)² / (P - Ia + S)  when P > Ia, else Q = 0",

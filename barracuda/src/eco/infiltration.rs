@@ -32,19 +32,47 @@ pub struct GreenAmptParams {
 
 impl GreenAmptParams {
     /// Sand: Ks=11.78 cm/hr, ψ=4.95 cm.
-    pub const SAND: Self = Self { ks_cm_hr: 11.78, psi_cm: 4.95, delta_theta: 0.417 };
+    pub const SAND: Self = Self {
+        ks_cm_hr: 11.78,
+        psi_cm: 4.95,
+        delta_theta: 0.417,
+    };
     /// Loamy sand.
-    pub const LOAMY_SAND: Self = Self { ks_cm_hr: 2.99, psi_cm: 6.13, delta_theta: 0.401 };
+    pub const LOAMY_SAND: Self = Self {
+        ks_cm_hr: 2.99,
+        psi_cm: 6.13,
+        delta_theta: 0.401,
+    };
     /// Sandy loam.
-    pub const SANDY_LOAM: Self = Self { ks_cm_hr: 1.09, psi_cm: 11.01, delta_theta: 0.412 };
+    pub const SANDY_LOAM: Self = Self {
+        ks_cm_hr: 1.09,
+        psi_cm: 11.01,
+        delta_theta: 0.412,
+    };
     /// Loam.
-    pub const LOAM: Self = Self { ks_cm_hr: 0.34, psi_cm: 8.89, delta_theta: 0.434 };
+    pub const LOAM: Self = Self {
+        ks_cm_hr: 0.34,
+        psi_cm: 8.89,
+        delta_theta: 0.434,
+    };
     /// Silt loam.
-    pub const SILT_LOAM: Self = Self { ks_cm_hr: 0.65, psi_cm: 16.68, delta_theta: 0.486 };
+    pub const SILT_LOAM: Self = Self {
+        ks_cm_hr: 0.65,
+        psi_cm: 16.68,
+        delta_theta: 0.486,
+    };
     /// Clay loam.
-    pub const CLAY_LOAM: Self = Self { ks_cm_hr: 0.10, psi_cm: 20.88, delta_theta: 0.309 };
+    pub const CLAY_LOAM: Self = Self {
+        ks_cm_hr: 0.10,
+        psi_cm: 20.88,
+        delta_theta: 0.309,
+    };
     /// Clay.
-    pub const CLAY: Self = Self { ks_cm_hr: 0.03, psi_cm: 31.63, delta_theta: 0.385 };
+    pub const CLAY: Self = Self {
+        ks_cm_hr: 0.03,
+        psi_cm: 31.63,
+        delta_theta: 0.385,
+    };
 }
 
 /// Cumulative infiltration F(t) via Newton-Raphson on the implicit GA equation.
@@ -121,10 +149,7 @@ pub fn ponding_time(params: &GreenAmptParams, rain_intensity_cm_hr: f64) -> f64 
 ///
 /// Returns (`cumulative_cm`, `rate_cm_hr`) pairs.
 #[must_use]
-pub fn infiltration_series(
-    params: &GreenAmptParams,
-    times_hr: &[f64],
-) -> Vec<(f64, f64)> {
+pub fn infiltration_series(params: &GreenAmptParams, times_hr: &[f64]) -> Vec<(f64, f64)> {
     times_hr
         .iter()
         .map(|&t| {
@@ -141,7 +166,10 @@ mod tests {
 
     #[test]
     fn sandy_loam_1hr() {
-        let p = GreenAmptParams { delta_theta: 0.312, ..GreenAmptParams::SANDY_LOAM };
+        let p = GreenAmptParams {
+            delta_theta: 0.312,
+            ..GreenAmptParams::SANDY_LOAM
+        };
         let f = cumulative_infiltration(&p, 1.0);
         assert!((f - 3.51).abs() < 0.2, "F={f}");
         let rate = infiltration_rate(&p, f);
@@ -150,14 +178,20 @@ mod tests {
 
     #[test]
     fn sand_fast_infiltration() {
-        let p = GreenAmptParams { delta_theta: 0.367, ..GreenAmptParams::SAND };
+        let p = GreenAmptParams {
+            delta_theta: 0.367,
+            ..GreenAmptParams::SAND
+        };
         let f = cumulative_infiltration(&p, 1.0);
         assert!(f > 10.0, "Sand should infiltrate fast: F={f}");
     }
 
     #[test]
     fn clay_slow_infiltration() {
-        let p = GreenAmptParams { delta_theta: 0.285, ..GreenAmptParams::CLAY };
+        let p = GreenAmptParams {
+            delta_theta: 0.285,
+            ..GreenAmptParams::CLAY
+        };
         let f = cumulative_infiltration(&p, 1.0);
         assert!(f < 2.0, "Clay should infiltrate slowly: F={f}");
     }
@@ -170,7 +204,10 @@ mod tests {
 
     #[test]
     fn cumulative_monotonic() {
-        let p = GreenAmptParams { delta_theta: 0.312, ..GreenAmptParams::SANDY_LOAM };
+        let p = GreenAmptParams {
+            delta_theta: 0.312,
+            ..GreenAmptParams::SANDY_LOAM
+        };
         let mut prev = 0.0;
         for t in [0.1, 0.5, 1.0, 2.0, 4.0, 8.0, 24.0] {
             let f = cumulative_infiltration(&p, t);
@@ -181,7 +218,10 @@ mod tests {
 
     #[test]
     fn rate_decreasing() {
-        let p = GreenAmptParams { delta_theta: 0.312, ..GreenAmptParams::SANDY_LOAM };
+        let p = GreenAmptParams {
+            delta_theta: 0.312,
+            ..GreenAmptParams::SANDY_LOAM
+        };
         let mut prev_rate = f64::MAX;
         for t in [0.1, 0.5, 1.0, 2.0, 4.0, 8.0, 24.0] {
             let rate = infiltration_rate_at(&p, t);
@@ -192,7 +232,10 @@ mod tests {
 
     #[test]
     fn rate_bounded_below_by_ks() {
-        let p = GreenAmptParams { delta_theta: 0.312, ..GreenAmptParams::SANDY_LOAM };
+        let p = GreenAmptParams {
+            delta_theta: 0.312,
+            ..GreenAmptParams::SANDY_LOAM
+        };
         for t in [0.1, 1.0, 10.0, 100.0] {
             let rate = infiltration_rate_at(&p, t);
             assert!(rate >= p.ks_cm_hr - 1e-10, "rate {rate} < Ks at t={t}");
@@ -201,14 +244,24 @@ mod tests {
 
     #[test]
     fn asymptotic_to_ks() {
-        let p = GreenAmptParams { delta_theta: 0.312, ..GreenAmptParams::SANDY_LOAM };
+        let p = GreenAmptParams {
+            delta_theta: 0.312,
+            ..GreenAmptParams::SANDY_LOAM
+        };
         let rate = infiltration_rate_at(&p, 100.0);
-        assert!((rate / p.ks_cm_hr - 1.0).abs() < 0.05, "ratio={}", rate / p.ks_cm_hr);
+        assert!(
+            (rate / p.ks_cm_hr - 1.0).abs() < 0.05,
+            "ratio={}",
+            rate / p.ks_cm_hr
+        );
     }
 
     #[test]
     fn ponding_time_loam() {
-        let p = GreenAmptParams { delta_theta: 0.405, ..GreenAmptParams::LOAM };
+        let p = GreenAmptParams {
+            delta_theta: 0.405,
+            ..GreenAmptParams::LOAM
+        };
         let tp = ponding_time(&p, 2.0);
         assert!((tp - 0.37).abs() < 0.1, "tp={tp}");
     }
@@ -235,9 +288,12 @@ mod tests {
     #[test]
     fn named_constants_physical() {
         let soils = [
-            GreenAmptParams::SAND, GreenAmptParams::LOAMY_SAND,
-            GreenAmptParams::SANDY_LOAM, GreenAmptParams::LOAM,
-            GreenAmptParams::SILT_LOAM, GreenAmptParams::CLAY_LOAM,
+            GreenAmptParams::SAND,
+            GreenAmptParams::LOAMY_SAND,
+            GreenAmptParams::SANDY_LOAM,
+            GreenAmptParams::LOAM,
+            GreenAmptParams::SILT_LOAM,
+            GreenAmptParams::CLAY_LOAM,
             GreenAmptParams::CLAY,
         ];
         for s in soils {

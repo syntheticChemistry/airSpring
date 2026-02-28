@@ -238,7 +238,10 @@ mod tests {
         for i in 0..m {
             assert!(mat[i * m + i].abs() < 1e-12, "Diagonal should be 0");
         }
-        assert!((mat[1] - mat[m]).abs() < 1e-12, "Symmetric: mat[0,1] == mat[1,0]");
+        assert!(
+            (mat[1] - mat[m]).abs() < 1e-12,
+            "Symmetric: mat[0,1] == mat[1,0]"
+        );
     }
 
     #[test]

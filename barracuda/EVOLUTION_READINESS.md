@@ -1,6 +1,6 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: February 28, 2026 (v0.5.3 — 618 lib tests, 56 binaries, 51 experiments, 1237 Python)
+**Last Updated**: February 28, 2026 (v0.5.4 — 618 lib tests, 59 binaries, 54 experiments, 1237 Python)
 **ToadStool PIN**: S68+ HEAD (`e96576ee` — universal f64 canonical, dual-layer precision, device-lost resilience, 700 WGSL shaders, 2546+ barracuda tests, 21599+ workspace tests)
 **Handoff**: V034 (Experiment buildout 049-051 + deep technical debt resolution: 42+ named constants, zero dead code, cast hygiene, capability-based GPU, 8 ET₀ methods, SCS-CN runoff, Green-Ampt infiltration)
 **License**: AGPL-3.0-or-later

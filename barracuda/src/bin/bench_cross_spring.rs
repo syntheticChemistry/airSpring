@@ -19,10 +19,10 @@ use airspring_barracuda::eco::anderson;
 use airspring_barracuda::eco::crop;
 use airspring_barracuda::eco::diversity;
 use airspring_barracuda::eco::evapotranspiration as et;
-use airspring_barracuda::eco::infiltration;
-use airspring_barracuda::eco::runoff;
 use airspring_barracuda::eco::evapotranspiration::DailyEt0Input;
+use airspring_barracuda::eco::infiltration;
 use airspring_barracuda::eco::richards::VanGenuchtenParams;
+use airspring_barracuda::eco::runoff;
 use airspring_barracuda::gpu::device_info::{self, PROVENANCE};
 use airspring_barracuda::gpu::et0::{BatchedEt0, StationDay};
 use airspring_barracuda::gpu::hargreaves::{BatchedHargreaves, HargreavesDay};
@@ -444,7 +444,10 @@ fn bench_green_ampt_ponding() -> bool {
     let tp = infiltration::ponding_time(&loam, 2.0);
     let sand = infiltration::GreenAmptParams::SAND;
     let tp_sand = infiltration::ponding_time(&sand, 5.0);
-    println!("    loam tp={tp:.3} hr, sand no-pond={}", tp_sand.is_infinite());
+    println!(
+        "    loam tp={tp:.3} hr, sand no-pond={}",
+        tp_sand.is_infinite()
+    );
     (tp - 0.37).abs() < 0.1 && tp_sand.is_infinite()
 }
 

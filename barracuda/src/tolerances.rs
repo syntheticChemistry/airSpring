@@ -385,6 +385,43 @@ pub const ET0_CROSS_METHOD_PCT: Tolerance = Tolerance {
 };
 
 // ═══════════════════════════════════════════════════════════════════
+// Simplified ET₀ methods (Blaney-Criddle, SCS-CN, Green-Ampt)
+// ═══════════════════════════════════════════════════════════════════
+
+/// Blaney-Criddle daylight fraction `p`: FAO-24 Table 18 interpolation precision.
+pub const BLANEY_CRIDDLE_DAYLIGHT: Tolerance = Tolerance {
+    name: "blaney_criddle_daylight",
+    abs_tol: 0.015,
+    rel_tol: 0.05,
+    justification: "FAO-24 Table 18 p values: ±0.015 covers latitude interpolation and solar model",
+};
+
+/// SCS Curve Number analytical precision: USDA-SCS equation arithmetic.
+pub const SCS_CN_ANALYTICAL: Tolerance = Tolerance {
+    name: "scs_cn_analytical",
+    abs_tol: 0.01,
+    rel_tol: 1e-4,
+    justification: "SCS-CN Q and S: integer CN → f64 arithmetic yields ±0.01 mm precision",
+};
+
+/// Green-Ampt infiltration: Newton iteration convergence for implicit F(t).
+pub const GREEN_AMPT_ANALYTICAL: Tolerance = Tolerance {
+    name: "green_ampt_analytical",
+    abs_tol: 0.001,
+    rel_tol: 1e-4,
+    justification:
+        "Green-Ampt Newton iteration converges to 1e-12; 0.001 cm covers soil param uncertainty",
+};
+
+/// FAO-56 Kc precision: Eq. 72 `Kc_max` and dual Kc component precision.
+pub const DUAL_KC_PRECISION: Tolerance = Tolerance {
+    name: "dual_kc_precision",
+    abs_tol: 0.01,
+    rel_tol: 0.01,
+    justification: "FAO-56 Eq 72 Kc_max: 2-decimal tabulated values; wind/RH adjustment precision",
+};
+
+// ═══════════════════════════════════════════════════════════════════
 // IoT sensor data validation
 // ═══════════════════════════════════════════════════════════════════
 
@@ -530,6 +567,11 @@ mod tests {
             &R2_MINIMUM,
             &RMSE_MAXIMUM,
             &ET0_CROSS_METHOD_PCT,
+            // Simplified ET₀ methods
+            &BLANEY_CRIDDLE_DAYLIGHT,
+            &SCS_CN_ANALYTICAL,
+            &GREEN_AMPT_ANALYTICAL,
+            &DUAL_KC_PRECISION,
             // IoT sensor data validation
             &IOT_TEMPERATURE_MEAN,
             &IOT_TEMPERATURE_EXTREMES,
@@ -549,10 +591,10 @@ mod tests {
             );
             assert!(tol.abs_tol > 0.0, "{}: abs_tol must be positive", tol.name);
         }
-        // Ensure we cover every defined tolerance (41 total)
+        // Ensure we cover every defined tolerance (45 total)
         assert_eq!(
             all_tolerances.len(),
-            41,
+            45,
             "test must include every tolerance constant defined in this file"
         );
     }

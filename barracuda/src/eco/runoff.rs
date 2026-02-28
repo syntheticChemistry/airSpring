@@ -128,7 +128,9 @@ pub fn scs_cn_runoff(precip_mm: f64, cn: f64, ia_ratio: f64) -> f64 {
     }
     let pe = precip_mm - ia;
     #[allow(clippy::suspicious_operation_groupings)]
-    { pe * pe / (pe + s) }
+    {
+        pe * pe / (pe + s)
+    }
 }
 
 /// SCS-CN runoff with standard Ia = 0.2S.

@@ -76,6 +76,9 @@ run_python control/ncbi_16s_coupling/ncbi_16s_coupling.py
 run_python control/blaney_criddle/blaney_criddle_et0.py
 run_python control/scs_curve_number/scs_curve_number.py
 run_python control/green_ampt/green_ampt_infiltration.py
+run_python control/coupled_runoff_infiltration/coupled_runoff_infiltration.py
+run_python control/vg_inverse/vg_inverse_fitting.py
+run_python control/season_water_budget/season_water_budget.py
 
 echo ""
 echo "━━━ Phase 1: Rust Validation Binaries ━━━"
@@ -119,6 +122,9 @@ run_rust validate_diversity
 run_rust validate_blaney_criddle
 run_rust validate_scs_cn
 run_rust validate_green_ampt
+run_rust validate_coupled_runoff
+run_rust validate_vg_inverse
+run_rust validate_season_wb
 
 echo ""
 echo "━━━ Phase 1+: Data-Dependent Validations ━━━"

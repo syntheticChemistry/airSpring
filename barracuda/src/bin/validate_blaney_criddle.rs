@@ -18,6 +18,7 @@
 use airspring_barracuda::eco::evapotranspiration::{
     blaney_criddle_et0, blaney_criddle_from_location, blaney_criddle_p,
 };
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
 
 const BENCHMARK_JSON: &str =
@@ -40,17 +41,19 @@ fn validate_analytical(v: &mut ValidationHarness, benchmark: &serde_json::Value)
 fn validate_daylight(v: &mut ValidationHarness) {
     validation::section("Daylight Fraction");
 
+    let p_tol = tolerances::BLANEY_CRIDDLE_DAYLIGHT.abs_tol;
+
     // Summer solstice at 40°N
     let p = blaney_criddle_p(40.0_f64.to_radians(), 172);
-    v.check_abs("p_summer_40N", p, 0.333, 0.015);
+    v.check_abs("p_summer_40N", p, 0.333, p_tol);
 
     // Winter solstice at 40°N
     let p = blaney_criddle_p(40.0_f64.to_radians(), 356);
-    v.check_abs("p_winter_40N", p, 0.222, 0.015);
+    v.check_abs("p_winter_40N", p, 0.222, p_tol);
 
-    // Equator year-round
+    // Equator year-round (tighter: equator p is well-constrained)
     let p = blaney_criddle_p(0.0, 172);
-    v.check_abs("p_equator", p, 0.274, 0.005);
+    v.check_abs("p_equator", p, 0.274, p_tol / 3.0);
 }
 
 fn validate_monotonicity(v: &mut ValidationHarness) {
@@ -83,8 +86,19 @@ fn validate_cross_method(v: &mut ValidationHarness) {
 
 fn validate_non_negative(v: &mut ValidationHarness) {
     validation::section("Non-Negative Constraint");
-    v.check_abs("clamp_minus20", blaney_criddle_et0(-20.0, 0.199), 0.0, 0.01);
-    v.check_abs("clamp_minus30", blaney_criddle_et0(-30.0, 0.199), 0.0, 0.01);
+    let et0_tol = tolerances::ET0_REFERENCE.abs_tol;
+    v.check_abs(
+        "clamp_minus20",
+        blaney_criddle_et0(-20.0, 0.199),
+        0.0,
+        et0_tol,
+    );
+    v.check_abs(
+        "clamp_minus30",
+        blaney_criddle_et0(-30.0, 0.199),
+        0.0,
+        et0_tol,
+    );
 }
 
 fn main() {

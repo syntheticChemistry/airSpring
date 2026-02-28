@@ -7,7 +7,9 @@
     "site": "Ein Harod Meuhad, Israel (32.5978°N, 35.501°E)",
     "date": "2026-02-28",
     "cross_spring": "airSpring (θ, ET₀, Anderson) × wetSpring (16S) × NestGate (NCBI)",
-    "baseline_commit": "current",
+    "baseline_commit": "97e7533213e92a248db04a47cab2a00fde87c4cc",
+    "baseline_script": "control/ncbi_16s_coupling/ncbi_16s_coupling.py",
+    "baseline_command": "python control/ncbi_16s_coupling/ncbi_16s_coupling.py",
     "methodology": "Real Open-Meteo weather → FAO-56 ET₀ → water balance θ(t) → Anderson d_eff(t) → QS regime prediction"
   },
   "site": {

@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-02-28 (v0.5.3 — 51 experiments, 1237 Python + 618 lib + 31 forge tests, 53 barracuda + 4 forge = 56 binaries, **25.9× Rust-vs-Python speedup** (8/8 parity), **Titan V GPU live dispatch** (24/24 PASS), AKD1000 NPU live, metalForge live (5 substrates, 18 workloads, 29/29 cross-system), 4 Tier B GPU orchestrators, seasonal pipeline (73/73, 12 stations, 4800 results), CPU↔GPU 0.04% parity, clippy pedantic, 8 ET₀ methods, SCS-CN runoff, Green-Ampt infiltration, Anderson coupling, 42+ named constants, zero dead code)
+**Updated**: 2026-02-28 (v0.5.4 — 54 experiments, 1237 Python + 618 lib + 31 forge tests, 56 barracuda + 4 forge = 59 binaries, **25.9× Rust-vs-Python speedup** (8/8 parity), **Titan V GPU live dispatch** (24/24 PASS), AKD1000 NPU live, metalForge live (5 substrates, 18 workloads, 29/29 cross-system), 4 Tier B GPU orchestrators, seasonal pipeline (73/73, 12 stations, 4800 results), CPU↔GPU 0.04% parity, clippy pedantic, 8 ET₀ methods, SCS-CN runoff, Green-Ampt infiltration, coupled runoff-infiltration (292/292), VG inverse (84/84), full-season WB audit (34/34), Anderson coupling, 42+ named constants, zero dead code)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -71,7 +71,8 @@ for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   validate_thornthwaite validate_gdd validate_pedotransfer \
   validate_nass_yield validate_forecast validate_scan_moisture \
   validate_multicrop validate_ameriflux validate_hargreaves \
-  validate_diversity; do
+  validate_diversity \
+  validate_coupled_runoff validate_vg_inverse validate_season_wb; do
   cargo run --release --bin $bin
 done
 
@@ -159,16 +160,16 @@ soil moisture sensing, evapotranspiration modeling, agrivoltaics.
 | D3 | Historical daily (GHCND) | NOAA CDO | `testing-secrets/` | **153 days Lansing downloaded** |
 | D4 | Soil properties by county | USDA Web Soil Survey | None | Public |
 | D5 | MSU Enviro-weather stations | MSU AgWeather | JavaScript site | Needs scraper |
-| D6 | Lysimeter ET data | Dong & Hansen 2023 | Paper suppl. | To locate |
+| D6 | Lysimeter ET data | Dong & Hansen 2023 | DOI: [10.1016/j.atech.2023.100147](https://doi.org/10.1016/j.atech.2023.100147) | Supplementary — contact author |
 
 ### Track 2: Environmental Systems
 
 | ID | Dataset | Source | Size | Status |
 |----|---------|--------|------|--------|
-| D7 | HYDRUS CW2D examples | PC-Progress | ~5 MB | Available |
+| D7 | HYDRUS CW2D examples | PC-Progress | [hydrus.pc-progress.com](https://www.pc-progress.com/en/Default.aspx?hydrus-3d) | Public download |
 | D8 | Biochar adsorption data | Kumari et al. 2025 | ~1 MB | Paper suppl. |
-| D9 | EPA PFAS soil data | EPA ORD | ~2 MB | Public |
-| D10 | Agrivoltaic PAR data | MSU Solar Farm | ~5 MB | To identify |
+| D9 | EPA PFAS soil data | EPA ORD | [epa.gov/pfas](https://www.epa.gov/pfas/pfas-analytical-methods) | Public — EPA CompTox Dashboard |
+| D10 | Agrivoltaic PAR data | MSU Solar Farm | Contact: MSU BAE Dept | To identify — IEEE Access DOI: [10.1109/ACCESS.2024.3350866](https://doi.org/10.1109/ACCESS.2024.3350866) |
 
 ---
 
@@ -937,9 +938,9 @@ Chapter 7, separating transpiration from soil evaporation for precision scheduli
 
 ```
 Track 1 (Precision Agriculture):
-  Phase 0  [COMPLETE]: Python baselines — 1237/1237 PASS (51 experiments)
+  Phase 0  [COMPLETE]: Python baselines — 1237/1237 PASS (54 experiments)
   Phase 0+ [COMPLETE]: Real data pipeline — 15,300 station-days, ET₀ R²=0.97
-  Phase 1  [COMPLETE]: Rust validation — 618 lib + 31 forge tests, 56 binaries
+  Phase 1  [COMPLETE]: Rust validation — 618 lib + 31 forge tests, 59 binaries
   Phase 1.5[COMPLETE]: CPU benchmark — Rust 25.9× faster than Python (8/8 parity)
   Phase 2  [COMPLETE]: Cross-validation — 75/75 MATCH (Python↔Rust, tol=1e-5)
   Phase 2.5[COMPLETE]: Tier B GPU — 4 orchestrators wired (ops 5-8, pending ToadStool absorption)
@@ -1010,9 +1011,10 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026 — Updated: February 28, 2026 (v0.5.3)*
-*51 experiments, 1237/1237 Python, 618 lib + 31 forge tests, 56 binaries, 75/75 cross-validation, 100 Michigan stations.*
-*8 ET₀ methods + SCS-CN runoff + Green-Ampt infiltration. 42+ named constants, zero dead code.*
-*Rust 25.9× faster than Python (8/8 parity). 11 Tier A + 4 Tier B GPU orchestrators. AKD1000 NPU live (3 experiments).*
+*Initialized: February 16, 2026 — Updated: February 28, 2026 (v0.5.4)*
+*54 experiments, 1237/1237 Python, 618 lib + 31 forge tests, 59 binaries, 75/75 cross-validation, 100 Michigan stations.*
+*8 ET₀ methods + SCS-CN runoff + Green-Ampt infiltration + coupled runoff-infiltration + VG inverse + full-season WB.*
+*42+ named constants, zero dead code. Rust 25.9× faster than Python (8/8 parity).*
+*11 Tier A + 4 Tier B GPU orchestrators. AKD1000 NPU live (3 experiments).*
 *Seasonal pipeline 73/73 PASS (12 stations, 4800 results). metalForge 18 workloads, 29/29 cross-system.*
 *Quality: zero .unwrap(), zero unsafe, zero clippy pedantic + nursery warnings. AGPL-3.0-or-later.*

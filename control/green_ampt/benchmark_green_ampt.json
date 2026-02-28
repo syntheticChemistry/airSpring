@@ -7,7 +7,12 @@
       "Mein RG, Larson CL (1973) Modeling infiltration during a steady rain. Water Resources Research 9(2):384-394."
     ],
     "data_source": "Published soil hydraulic parameters and equations (open literature)",
-    "experiment": "051"
+    "experiment": "051",
+    "baseline_script": "control/green_ampt/green_ampt_infiltration.py",
+    "baseline_commit": "97e7533213e92a248db04a47cab2a00fde87c4cc",
+    "baseline_command": "python control/green_ampt/green_ampt_infiltration.py",
+    "baseline_date": "2026-02-28",
+    "baseline_result": "37/37 PASS"
   },
   "equation": {
     "cumulative": "F(t) = Ks × t + ψ × Δθ × ln(1 + F(t)/(ψ × Δθ))  [implicit]",

@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: February 28, 2026
-**Status**: 51 experiments, 1237/1237 Python + 618 lib + 31 forge tests + 73/73 atlas stream + 75/75 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + AKD1000 NPU live + Titan V GPU live dispatch + metalForge 18 workloads 29/29 cross-system + GPU math portability 46/46 (13 modules) + NCBI 16S coupling (14+29) + CPU↔GPU parity + **Rust 26.3× faster than Python** (8/8 parity)
+**Status**: 54 experiments, 1237/1237 Python + 618 lib + 31 forge tests + 73/73 atlas stream + 75/75 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + AKD1000 NPU live + Titan V GPU live dispatch + metalForge 18 workloads 29/29 cross-system + GPU math portability 46/46 (13 modules) + NCBI 16S coupling (14+29) + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34) + CPU↔GPU parity + **Rust 25.9× faster than Python** (8/8 parity)
 
 ---
 
@@ -60,17 +60,20 @@
 | 049 | Blaney-Criddle (1950) Temperature PET | Precision Ag | **Complete** | Python + Rust CPU | `eco::evapotranspiration` (Blaney-Criddle) | 18+18 |
 | 050 | SCS Curve Number Runoff (USDA 1972) | Hydrology | **Complete** | Python + Rust CPU | `eco::runoff` (SCS-CN, AMC) | 38+38 |
 | 051 | Green-Ampt (1911) Infiltration | Soil Physics | **Complete** | Python + Rust CPU | `eco::infiltration` (Newton-Raphson) | 37+37 |
+| 052 | SCS-CN + Green-Ampt Coupled Runoff-Infiltration | Hydrology | **Complete** | Python + Rust CPU | `eco::runoff` + `eco::infiltration` | 292+292 |
+| 053 | Van Genuchten Inverse Parameter Estimation | Soil Physics | **Complete** | Python + Rust CPU | `eco::van_genuchten` + `barracuda::optimize::brent` | 84+84 |
+| 054 | Full-Season Irrigation Water Budget Audit | Integration | **Complete** | Python + Rust CPU | `eco::evapotranspiration` + `eco::water_balance` + `eco::yield_response` | 34+34 |
 
-**Grand Total**: 1237 Python + **618 lib + 31 forge tests** + 1498/1498 atlas + 33/33 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge (5 substrates, 18 workloads, 29/29 cross-system) + GPU math portability (46/46) + NCBI 16S coupling (14+29) + 56 binaries + 30/30 cross-spring benchmarks (6 Springs) + ToadStool S68 synced
+**Grand Total**: 1237 Python + **618 lib + 31 forge tests** + 1498/1498 atlas + 33/33 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge (5 substrates, 18 workloads, 29/29 cross-system) + GPU math portability (46/46) + NCBI 16S coupling (14+29) + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34) + 59 binaries + 30/30 cross-spring benchmarks (6 Springs) + ToadStool S68 synced
 
 ---
 
-## Test Breakdown (v0.5.2)
+## Test Breakdown (v0.5.4)
 
 | Category | Tests | Source |
 |----------|:-----:|--------|
 | Barracuda lib (unit + doc) | 618 | `cargo test --lib` (incl. Tier B orchestrators, seasonal pipeline, atlas stream, anderson, diversity, mc\_et0, NPU, Makkink/Turc/Hamon) |
-| Barracuda validation binaries | 54 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
+| Barracuda validation binaries | 59 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
 | Forge | 31 | `metalForge/forge/` (substrate, dispatch, probe, workloads, cross-system routing) |
 | Forge binaries | 4 | `validate_dispatch`, `validate_live_hardware`, `validate_dispatch_routing` |
 | **Total project tests** | **618 lib + 31 forge** | |
@@ -353,6 +356,9 @@ Experiments follow `NNN_name` format:
 - `049`: Blaney-Criddle ET₀
 - `050`: SCS Curve Number runoff
 - `051`: Green-Ampt infiltration
+- `052`: Coupled runoff-infiltration (SCS-CN + Green-Ampt)
+- `053`: Van Genuchten inverse parameter estimation
+- `054`: Full-season irrigation water budget audit
 
 Gap (013) reserved. See `specs/PAPER_REVIEW_QUEUE.md`.
 
@@ -423,6 +429,36 @@ Gap (013) reserved. See `specs/PAPER_REVIEW_QUEUE.md`.
 **Rust**: `barracuda/src/eco/infiltration.rs` — `green_ampt_infiltration()`, Newton-Raphson solver. `validate_green_ampt` binary: 37/37 checks.
 
 **Key Result**: Physics-based infiltration for event-scale modeling. Complements Richards for rapid storm events.
+
+### Exp 052: SCS-CN + Green-Ampt Coupled Runoff-Infiltration
+
+**Papers**: USDA-SCS (1972) NEH-4; Green & Ampt (1911); Rawls et al. (1983).
+
+**Control**: `control/coupled_runoff_infiltration/coupled_runoff_infiltration.py` — 292/292 checks. Couples SCS Curve Number runoff with Green-Ampt cumulative infiltration across 48 storm × soil × land-use combinations, 80-point conservation sweep, 4 monotonicity checks, and 160 sensitivity perturbations.
+
+**Rust**: `barracuda/src/bin/validate_coupled_runoff.rs` — 292/292 checks. Validates coupled partitioning: rainfall → runoff (SCS-CN) → net rain → infiltration (Green-Ampt) → surface storage, with mass balance ≤ 1e-8 mm.
+
+**Key Result**: Module coupling preserves mass conservation across all 292 scenarios. Demonstrates that `eco::runoff` + `eco::infiltration` compose cleanly for event-scale hydrology.
+
+### Exp 053: Van Genuchten Inverse Parameter Estimation
+
+**Paper**: van Genuchten (1980), Carsel & Parrish (1988) Table 1.
+
+**Control**: `control/vg_inverse/vg_inverse_fitting.py` — 84/84 checks. Forward VG retention θ(h), Mualem hydraulic conductivity K(h), θ→h→θ round-trip via bisection, monotonicity for 7 USDA textures at 5 Se fractions.
+
+**Rust**: `barracuda/src/bin/validate_vg_inverse.rs` — 84/84 checks. Uses `barracuda::optimize::brent` for inverse θ→h root-finding, validates K(h) monotonicity and round-trip accuracy.
+
+**Key Result**: Brent inversion converges for all practical Se fractions. Demonstrates that `barracuda::optimize::brent` serves inverse problems in soil physics.
+
+### Exp 054: Full-Season Irrigation Water Budget Audit
+
+**Papers**: Allen et al. (1998) FAO-56 Ch 2-8; Stewart (1977) yield response.
+
+**Control**: `control/season_water_budget/season_water_budget.py` — 34/34 checks. Synthetic deterministic weather → FAO-56 PM ET₀ → trapezoidal Kc schedule → daily water balance → Stewart yield for 4 crops (corn, soybean, winter wheat, alfalfa). Mass conservation, ETa ≤ ETc, yield 0–1, cross-crop comparison.
+
+**Rust**: `barracuda/src/bin/validate_season_wb.rs` — 34/34 checks. Replicates the complete chain end-to-end. Validates mass balance to 0.1 mm, physical bounds, and crop ordering.
+
+**Key Result**: End-to-end pipeline audit confirms all `eco` modules compose correctly for a full growing season simulation.
 
 ## Adding a New Experiment
 

@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.5.3"
+version = "0.5.4"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
@@ -269,6 +269,18 @@ path = "src/bin/validate_scs_cn.rs"
 [[bin]]
 name = "validate_green_ampt"
 path = "src/bin/validate_green_ampt.rs"
+
+[[bin]]
+name = "validate_coupled_runoff"
+path = "src/bin/validate_coupled_runoff.rs"
+
+[[bin]]
+name = "validate_vg_inverse"
+path = "src/bin/validate_vg_inverse.rs"
+
+[[bin]]
+name = "validate_season_wb"
+path = "src/bin/validate_season_wb.rs"
 
 [[bin]]
 name = "bench_cross_spring"

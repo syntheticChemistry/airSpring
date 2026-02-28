@@ -13,6 +13,7 @@ pub mod isotherm;
 pub mod richards;
 pub mod runoff;
 pub mod sensor_calibration;
+pub mod simple_et0;
 pub mod soil_moisture;
 pub mod solar;
 pub mod thornthwaite;

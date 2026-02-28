@@ -195,7 +195,11 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
     },
     ShaderProvenance {
         shader: "hydrology (CPU batch kernel)",
-        primitives: &["hargreaves_et0_batch", "crop_coefficient", "soil_water_balance"],
+        primitives: &[
+            "hargreaves_et0_batch",
+            "crop_coefficient",
+            "soil_water_balance",
+        ],
         origin: "airSpring",
         domain: "FAO-56 hydrology batch primitives",
         evolved_by: &["airSpring metalForge → ToadStool S66 (absorption)"],
@@ -204,8 +208,12 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
     ShaderProvenance {
         shader: "diversity (CPU bio kernel)",
         primitives: &[
-            "shannon", "simpson", "chao1", "bray_curtis",
-            "bray_curtis_matrix", "shannon_from_frequencies",
+            "shannon",
+            "simpson",
+            "chao1",
+            "bray_curtis",
+            "bray_curtis_matrix",
+            "shannon_from_frequencies",
         ],
         origin: "wetSpring",
         domain: "Microbiome alpha/beta diversity",
@@ -229,32 +237,39 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
     },
     ShaderProvenance {
         shader: "blaney_criddle (CPU ET₀ kernel)",
-        primitives: &["blaney_criddle_et0", "blaney_criddle_p", "blaney_criddle_from_location"],
+        primitives: &[
+            "blaney_criddle_et0",
+            "blaney_criddle_p",
+            "blaney_criddle_from_location",
+        ],
         origin: "airSpring",
         domain: "Temperature-daylight PET (8th ET₀ method)",
-        evolved_by: &[
-            "airSpring Exp-049 (USDA-SCS 1950)",
-        ],
+        evolved_by: &["airSpring Exp-049 (USDA-SCS 1950)"],
         airspring_use: "Blaney-Criddle PET for data-sparse regions",
     },
     ShaderProvenance {
         shader: "scs_cn (CPU runoff kernel)",
-        primitives: &["scs_cn_runoff", "potential_retention", "amc_cn_dry", "amc_cn_wet"],
+        primitives: &[
+            "scs_cn_runoff",
+            "potential_retention",
+            "amc_cn_dry",
+            "amc_cn_wet",
+        ],
         origin: "airSpring",
         domain: "SCS Curve Number rainfall-runoff",
-        evolved_by: &[
-            "airSpring Exp-050 (USDA-SCS TR-55)",
-        ],
+        evolved_by: &["airSpring Exp-050 (USDA-SCS TR-55)"],
         airspring_use: "Runoff estimation for water balance, CN tables, AMC adjustment",
     },
     ShaderProvenance {
         shader: "green_ampt (CPU infiltration kernel)",
-        primitives: &["cumulative_infiltration", "infiltration_rate", "ponding_time"],
+        primitives: &[
+            "cumulative_infiltration",
+            "infiltration_rate",
+            "ponding_time",
+        ],
         origin: "airSpring",
         domain: "Green-Ampt (1911) soil infiltration physics",
-        evolved_by: &[
-            "airSpring Exp-051 (Rawls 1983 parameters)",
-        ],
+        evolved_by: &["airSpring Exp-051 (Rawls 1983 parameters)"],
         airspring_use: "Infiltration modeling, ponding prediction, 7-soil parameter table",
     },
 ];

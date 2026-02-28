@@ -2,7 +2,7 @@
 
 **Status**: Working draft — reviewed for PII, suitable for public repository
 **Purpose**: Document the replication of precision agriculture computational methods on consumer hardware using BarraCuda
-**Date**: February 2026 (v0.5.2)
+**Date**: February 2026 (v0.5.4)
 
 ---
 
@@ -23,13 +23,13 @@ airSpring replicates published precision irrigation, soil science, and environme
 The study answers four questions:
 
 1. **Can published agricultural science be independently reproduced using open tools?**
-   Answer: yes — 1109/1109 Python checks pass against digitized paper benchmarks (FAO-56, soil sensors, IoT irrigation, Richards equation, biochar, yield, CW2D, 60-year WB, Priestley-Taylor, 3-method intercomparison, Thornthwaite, GDD, pedotransfer, AmeriFlux, Hargreaves, diversity, Anderson coupling).
+   Answer: yes — 1237/1237 Python checks pass against digitized paper benchmarks (FAO-56, soil sensors, IoT irrigation, Richards equation, biochar, yield, CW2D, 60-year WB, Priestley-Taylor, 3-method intercomparison, Thornthwaite, GDD, pedotransfer, AmeriFlux, Hargreaves, diversity, Anderson coupling, Blaney-Criddle, SCS-CN runoff, Green-Ampt infiltration, coupled runoff-infiltration, VG inverse fitting, full-season water budget).
 
 2. **Can open data replace institutional weather station access?**
    Answer: yes — Open-Meteo (free, no key, 80+ years) provides real historical Michigan weather at 10km resolution. Our FAO-56 ET₀ matches Open-Meteo's independent computation with R²=0.967 across 15,300 station-days. NOAA CDO and OpenWeatherMap supplement with GHCND daily records and real-time forecasts.
 
 3. **Can Rust + WebGPU replace Python/Excel for precision agriculture?**
-   Answer: yes (validation complete) — Rust BarraCuda passes 584 lib + 31 forge tests across 55 binaries (pedantic + nursery 0 warnings). A cross-validation harness confirms 75/75 Python-Rust value matches within 1e-5 tolerance; 690 crop-station yield pairs within 0.01. 11 Tier A + 4 Tier B GPU orchestrators wired to ToadStool/BarraCuda primitives including Richards PDE, isotherm fitting, MC ET₀ uncertainty, seasonal pipeline (ET₀→Kc→WB→Yield, 73/73 real data), atlas streaming (12 stations, 4800 crop-year results), and Anderson soil-moisture coupling. S68 synced with universal f64 precision. CPU benchmarks: 25.9× geometric mean speedup vs Python (8/8 parity).
+   Answer: yes (validation complete) — Rust BarraCuda passes 618 lib + 31 forge tests across 59 binaries (pedantic + nursery 0 warnings). A cross-validation harness confirms 75/75 Python-Rust value matches within 1e-5 tolerance; 690 crop-station yield pairs within 0.01. 11 Tier A + 4 Tier B GPU orchestrators wired to ToadStool/BarraCuda primitives including Richards PDE, isotherm fitting, MC ET₀ uncertainty, seasonal pipeline (ET₀→Kc→WB→Yield, 73/73 real data), atlas streaming (12 stations, 4800 crop-year results), Anderson soil-moisture coupling, coupled runoff-infiltration (292/292), VG inverse (84/84), and full-season water budget audit (34/34). S68 synced with universal f64 precision. CPU benchmarks: 25.9× geometric mean speedup vs Python (8/8 parity).
 
 4. **Can the math be truly portable across hardware?**
    Complete — all 6 metalForge modules absorbed upstream into barracuda (S64: metrics; S66: regression, hydrology, moving_window_f64; S40: van_genuchten; S64: isotherm). airSpring now leans on upstream primitives following the Write → Absorb → Lean cycle. GPU wiring proves the compute is hardware-portable; metalForge demonstrates the cross-system absorption pattern.
@@ -38,7 +38,7 @@ The study answers four questions:
 
 ## Key Results
 
-### Phase 0 (Python Control): 1109/1109 checks pass (45 experiments)
+### Phase 0 (Python Control): 1237/1237 checks pass (54 experiments)
 
 | Experiment | Paper | Checks | Key Validation |
 |------------|-------|:------:|----------------|
@@ -80,7 +80,7 @@ The study answers four questions:
 | West Olive (blueberry) | 0.257 | 0.963 | 639.1 mm | 635.2 mm |
 | **Overall** | **0.267** | **0.967** | — | — |
 
-### Phase 1 (Rust BarraCuda): 584 lib + 31 forge tests, 55 binaries
+### Phase 1 (Rust BarraCuda): 618 lib + 31 forge tests, 59 binaries
 
 | Binary | Checks | Key Validation |
 |--------|:------:|----------------|
@@ -147,5 +147,5 @@ No institutional access required. No proprietary software. AGPL-3.0 licensed.
 ## Next Phase: GPU Validation & metalForge
 
 See `specs/PAPER_REVIEW_QUEUE.md` for the full paper queue and compute pipeline.
-See `wateringHole/handoffs/` for the latest handoffs (V052 ToadStool ops 5-8 + NestGate data + biomeOS graphs).
+See `wateringHole/handoffs/` for the latest handoffs (V035 pipeline coupling + inverse + handoff).
 See `CHANGELOG.md` for the full evolution history.

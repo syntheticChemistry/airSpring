@@ -7,7 +7,12 @@
       "Xu CY, Singh VP (2001) Evaluation of three complementary models. J Hydrol 242:95-107."
     ],
     "data_source": "Published equations and FAO-24 Table 18 (open literature)",
-    "experiment": "049"
+    "experiment": "049",
+    "baseline_script": "control/blaney_criddle/blaney_criddle_et0.py",
+    "baseline_commit": "97e7533213e92a248db04a47cab2a00fde87c4cc",
+    "baseline_command": "python control/blaney_criddle/blaney_criddle_et0.py",
+    "baseline_date": "2026-02-28",
+    "baseline_result": "18/18 PASS"
   },
   "equation": {
     "description": "ET₀_BC = p × (0.46 × Tmean + 8.13)  [mm/day, original Blaney-Criddle]",

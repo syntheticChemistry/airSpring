@@ -155,15 +155,17 @@ impl BatchedHargreaves {
         let lambda = 2.45_f64;
         let ra: Vec<f64> = inputs
             .iter()
-            .map(|d| solar::extraterrestrial_radiation(d.latitude_deg.to_radians(), d.day_of_year) / lambda)
+            .map(|d| {
+                solar::extraterrestrial_radiation(d.latitude_deg.to_radians(), d.day_of_year)
+                    / lambda
+            })
             .collect();
         let tmax: Vec<f64> = inputs.iter().map(|d| d.tmax).collect();
         let tmin: Vec<f64> = inputs.iter().map(|d| d.tmin).collect();
 
         // Delegate to ToadStool batch (absorbed from airSpring metalForge, S66 R-S66-002).
         // Upstream uses (ra, tmax, tmin) parameter order; returns None only on length mismatch.
-        barracuda::stats::hargreaves_et0_batch(&ra, &tmax, &tmin)
-            .unwrap_or_default()
+        barracuda::stats::hargreaves_et0_batch(&ra, &tmax, &tmin).unwrap_or_default()
     }
 }
 

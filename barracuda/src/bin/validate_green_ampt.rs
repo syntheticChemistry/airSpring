@@ -16,13 +16,12 @@
 //! Reference: Green WH, Ampt GA (1911) J Agr Sci 4(1):1-24.
 
 use airspring_barracuda::eco::infiltration::{
-    cumulative_infiltration, infiltration_rate, ponding_time,
-    GreenAmptParams,
+    cumulative_infiltration, infiltration_rate, ponding_time, GreenAmptParams,
 };
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
 
-const BENCHMARK_JSON: &str =
-    include_str!("../../../control/green_ampt/benchmark_green_ampt.json");
+const BENCHMARK_JSON: &str = include_str!("../../../control/green_ampt/benchmark_green_ampt.json");
 
 fn validate_analytical(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Analytical Benchmarks");
@@ -54,8 +53,9 @@ fn validate_analytical(v: &mut ValidationHarness, benchmark: &serde_json::Value)
             }
 
             // Rate check
-            if let Some(expected_rate) =
-                tc.get("expected_f_cm_hr").and_then(serde_json::Value::as_f64)
+            if let Some(expected_rate) = tc
+                .get("expected_f_cm_hr")
+                .and_then(serde_json::Value::as_f64)
             {
                 let tol = json_field(tc, "tolerance");
                 let f_cum = cumulative_infiltration(&params, t);
@@ -93,7 +93,7 @@ fn validate_analytical(v: &mut ValidationHarness, benchmark: &serde_json::Value)
                     &format!("F_zero({name})"),
                     cumulative_infiltration(&params, 0.0),
                     0.0,
-                    0.001,
+                    tolerances::GREEN_AMPT_ANALYTICAL.abs_tol,
                 );
             }
         }
@@ -141,7 +141,10 @@ fn validate_monotonicity(v: &mut ValidationHarness) {
 
     // F monotonically increasing
     let times = [0.1, 0.5, 1.0, 2.0, 4.0, 8.0, 24.0];
-    let f_vals: Vec<f64> = times.iter().map(|&t| cumulative_infiltration(&p, t)).collect();
+    let f_vals: Vec<f64> = times
+        .iter()
+        .map(|&t| cumulative_infiltration(&p, t))
+        .collect();
     v.check_bool(
         "cumulative_monotonic",
         f_vals.windows(2).all(|w| w[0] <= w[1]),
@@ -153,10 +156,7 @@ fn validate_monotonicity(v: &mut ValidationHarness) {
         .filter(|&&f| f > 0.0)
         .map(|&f| infiltration_rate(&p, f))
         .collect();
-    v.check_bool(
-        "rate_decreasing",
-        rates.windows(2).all(|w| w[0] >= w[1]),
-    );
+    v.check_bool("rate_decreasing", rates.windows(2).all(|w| w[0] >= w[1]));
 
     // Rate bounded below by Ks
     v.check_bool(

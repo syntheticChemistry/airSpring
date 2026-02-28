@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
 **Updated**: February 28, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.5.2)
-**Status**: 51 experiments, 1237/1237 Python + 618 Rust lib tests + 1498 atlas checks + 33/33 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + atlas stream + MC GPU path + GPU math portability 46/46 + Titan V GPU live + AKD1000 NPU live + metalForge live (5 substrates, 18 workloads, 29/29 dispatch) + 25.9× CPU speedup + 8 ET₀ methods + SCS-CN runoff + Green-Ampt infiltration + 42+ named constants + zero dead code + capability-based GPU + ToadStool S68 sync (universal precision, 700 WGSL, 6-Spring provenance, 30/30 benchmarks)
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.5.4)
+**Status**: 54 experiments, 1237/1237 Python + 618 Rust lib tests + 1498 atlas checks + 33/33 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + atlas stream + MC GPU path + GPU math portability 46/46 + Titan V GPU live + AKD1000 NPU live + metalForge live (5 substrates, 18 workloads, 29/29 dispatch) + 25.9× CPU speedup + 8 ET₀ methods + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34) + 42+ named constants + zero dead code + capability-based GPU + ToadStool S68 sync (universal precision, 700 WGSL, 6-Spring provenance, 30/30 benchmarks)
 
 ---
 
@@ -11,7 +11,7 @@
 ```
 Phase 0   Python/R baselines    — reproduce paper results with original tools (1237/1237)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (618 lib + 1498 atlas, 56 binaries + 30 benchmarks)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (618 lib + 1498 atlas, 59 binaries + 30 benchmarks)
 Phase 1.5 CPU benchmark         — 25.9× Rust-vs-Python geometric mean (8/8 parity)
 Phase 2   BarraCuda GPU bridge  — 11 Tier A modules wired (cross-spring S68 fully rewired)
 Phase 2.5 Tier B orchestrators — Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5)
@@ -27,7 +27,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 
 | Faculty | Institution | Track | Papers | Experiments | Checks | Domain |
 |---------|------------|-------|:------:|:-----------:|:------:|--------|
-| Dong | MSU BAE | Irrigation & Soil | 10+ | 51 | 1237+618 | ET₀ (8 methods), soil, IoT, WB, dual Kc, Richards, yield, ensemble, bias correction, GPU parity, GPU math portability, metalForge dispatch, Anderson coupling, SCS-CN runoff, Green-Ampt infiltration |
+| Dong | MSU BAE | Irrigation & Soil | 10+ | 54 | 1237+618 | ET₀ (8 methods), soil, IoT, WB, dual Kc, Richards, yield, ensemble, bias correction, GPU parity, GPU math portability, metalForge dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB audit |
 
 ## Faculty: Younsuk Dong, PhD
 
@@ -89,8 +89,11 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | 49 | Blaney-Criddle (1950) Temperature PET — Exp 049 | 0→CPU | 18+18 | 8th ET₀ method, USDA-SCS TP-96 |
 | 50 | SCS Curve Number Runoff (USDA 1972) — Exp 050 | 0→CPU | 38+38 | Industry-standard rainfall-runoff Q = (P-Ia)²/(P-Ia+S) |
 | 51 | Green-Ampt (1911) Infiltration — Exp 051 | 0→CPU | 37+37 | Newton-Raphson implicit, 7 Rawls soils, ponding time |
+| 52 | SCS-CN + Green-Ampt Coupled Runoff-Infiltration — Exp 052 | 0→CPU | 292+292 | Rainfall → runoff → infiltration → surface storage partitioning |
+| 53 | Van Genuchten Inverse Parameter Estimation — Exp 053 | 0→CPU | 84+84 | Forward VG, Mualem K(h), θ→h→θ round-trip via Brent inversion |
+| 54 | Full-Season Irrigation Water Budget — Exp 054 | 0→CPU | 34+34 | Synthetic weather → PM ET₀ → Kc → WB → Stewart yield, 4 crops |
 
-### Rust Validation (Phase 1+3) — 56 binaries + 30 cross-spring benchmarks
+### Rust Validation (Phase 1+3) — 59 binaries + 30 cross-spring benchmarks
 
 | Binary | Checks | Modules Exercised |
 |--------|:------:|-------------------|
@@ -129,6 +132,9 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | `validate_diversity` | 22 | Shannon, Simpson, richness diversity indices |
 | `validate_gpu_math` | 46 | All 13 GPU orchestrators CPU↔GPU parity |
 | `cross_validate` | 75 | Python↔Rust exact match (tol=1e-5) |
+| `validate_coupled_runoff` | 292 | SCS-CN + Green-Ampt coupled rainfall partitioning |
+| `validate_vg_inverse` | 84 | VG forward, Mualem K(h), θ→h→θ Brent round-trip |
+| `validate_season_wb` | 34 | Full-season: weather → ET₀ → Kc → WB → yield (4 crops) |
 | `validate_dispatch_routing` | 21 | metalForge CPU+GPU+NPU dispatch routing (forge) |
 
 ### GPU Orchestrators (Phase 2+2.5) — 11 Tier A + 4 Tier B + 3 pipeline
@@ -200,7 +206,7 @@ $200 sensor, Open-Meteo weather data, and a $600 GPU running BarraCuda.
 
 ## Extension Explorations
 
-With 51 experiments validated and the full Python → Rust CPU → Titan V GPU live →
+With 54 experiments validated and the full Python → Rust CPU → Titan V GPU live →
 GPU math portability (13 modules, 46/46) → metalForge mixed hardware pipeline proven,
 airSpring can now extend beyond reproduction into new science. These explorations use the validated stack to answer
 questions the original papers did not.

@@ -14,7 +14,8 @@
 //! - [`eco::correction`] — Sensor correction curve fitting (linear, quadratic, exponential, logarithmic)
 //! - [`eco::crop`] — FAO-56 Table 12 crop coefficient (`Kc`) database (10 crops) + climate adjustment
 //! - [`eco::dual_kc`] — FAO-56 Ch 7+11 dual Kc (Kcb + Ke), cover crops, no-till mulch
-//! - [`eco::evapotranspiration`] — FAO-56 Penman-Monteith (low-level + high-level) + Hargreaves ET₀
+//! - [`eco::evapotranspiration`] — FAO-56 Penman-Monteith (low-level + high-level) + Hargreaves + Priestley-Taylor
+//! - [`eco::simple_et0`] — Simplified ET₀ methods: Makkink, Turc, Hamon, Blaney-Criddle
 //! - [`eco::isotherm`] — Langmuir and Freundlich isotherm fitting for biochar adsorption
 //! - [`eco::sensor_calibration`] — `SoilWatch` 10 VWC calibration + irrigation recommendation
 //! - [`eco::soil_moisture`] — Dielectric sensor calibration (Topp equation)

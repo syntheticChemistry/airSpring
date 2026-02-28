@@ -15,9 +15,8 @@ use airspring_barracuda::eco::solar;
 use airspring_barracuda::eco::water_balance;
 use airspring_barracuda::validation::{self, ValidationHarness};
 
-const BENCHMARK: &str = include_str!(
-    "../../../control/ncbi_16s_coupling/benchmark_ncbi_16s_coupling.json"
-);
+const BENCHMARK: &str =
+    include_str!("../../../control/ncbi_16s_coupling/benchmark_ncbi_16s_coupling.json");
 
 const THETA_R: f64 = 0.095;
 const THETA_S: f64 = 0.41;
@@ -50,8 +49,14 @@ fn validate_anderson_coupling(v: &mut ValidationHarness) {
     v.check_bool("d_eff residual = 0.0", r_res.d_eff.abs() < 1e-10);
 
     v.check_bool("W wet < W dry", r_wet.disorder < r_dry.disorder);
-    v.check_bool("regime saturated = Extended", r_sat.regime == QsRegime::Extended);
-    v.check_bool("regime residual = Localized", r_res.regime == QsRegime::Localized);
+    v.check_bool(
+        "regime saturated = Extended",
+        r_sat.regime == QsRegime::Extended,
+    );
+    v.check_bool(
+        "regime residual = Localized",
+        r_res.regime == QsRegime::Localized,
+    );
 
     let thetas: Vec<f64> = (0..=20)
         .map(|i| THETA_R + (THETA_S - THETA_R) * f64::from(i) / 20.0)
@@ -92,7 +97,11 @@ fn validate_mediterranean_site(v: &mut ValidationHarness) {
     let mut dr = TAW * 0.3;
     let mut theta_feb_avg = 0.0;
     for &precip in &precip_feb {
-        let ks = if dr < raw { 1.0 } else { ((TAW - dr) / (TAW - raw)).clamp(0.0, 1.0) };
+        let ks = if dr < raw {
+            1.0
+        } else {
+            ((TAW - dr) / (TAW - raw)).clamp(0.0, 1.0)
+        };
         let (new_dr, _eta, _dp) =
             water_balance::daily_water_balance_step(dr, precip, 0.0, et0_feb, kc, ks, TAW);
         dr = new_dr;
@@ -103,7 +112,11 @@ fn validate_mediterranean_site(v: &mut ValidationHarness) {
 
     let mut theta_apr_avg = 0.0;
     for &precip in &precip_apr {
-        let ks = if dr < raw { 1.0 } else { ((TAW - dr) / (TAW - raw)).clamp(0.0, 1.0) };
+        let ks = if dr < raw {
+            1.0
+        } else {
+            ((TAW - dr) / (TAW - raw)).clamp(0.0, 1.0)
+        };
         let (new_dr, _eta, _dp) =
             water_balance::daily_water_balance_step(dr, precip, 0.0, et0_apr, kc, ks, TAW);
         dr = new_dr;
@@ -112,8 +125,14 @@ fn validate_mediterranean_site(v: &mut ValidationHarness) {
     }
     theta_apr_avg /= precip_apr.len() as f64;
 
-    v.check_bool("θ Feb in valid range", (THETA_R..=THETA_S).contains(&theta_feb_avg));
-    v.check_bool("θ Apr in valid range", (THETA_R..=THETA_S).contains(&theta_apr_avg));
+    v.check_bool(
+        "θ Feb in valid range",
+        (THETA_R..=THETA_S).contains(&theta_feb_avg),
+    );
+    v.check_bool(
+        "θ Apr in valid range",
+        (THETA_R..=THETA_S).contains(&theta_apr_avg),
+    );
 
     let chain_feb = anderson::coupling_chain(theta_feb_avg, THETA_R, THETA_S);
     let chain_apr = anderson::coupling_chain(theta_apr_avg, THETA_R, THETA_S);
@@ -137,13 +156,19 @@ fn validate_mediterranean_site(v: &mut ValidationHarness) {
 
     println!(
         "  Feb: θ={:.3} → S_e={:.3} → d_eff={:.3} → {} (W={:.2})",
-        theta_feb_avg, chain_feb.se, chain_feb.d_eff,
-        chain_feb.regime.as_str(), chain_feb.disorder
+        theta_feb_avg,
+        chain_feb.se,
+        chain_feb.d_eff,
+        chain_feb.regime.as_str(),
+        chain_feb.disorder
     );
     println!(
         "  Apr: θ={:.3} → S_e={:.3} → d_eff={:.3} → {} (W={:.2})",
-        theta_apr_avg, chain_apr.se, chain_apr.d_eff,
-        chain_apr.regime.as_str(), chain_apr.disorder
+        theta_apr_avg,
+        chain_apr.se,
+        chain_apr.d_eff,
+        chain_apr.regime.as_str(),
+        chain_apr.disorder
     );
 }
 
@@ -156,18 +181,9 @@ fn validate_irrigation_transition(v: &mut ValidationHarness) {
     let r_dry = anderson::coupling_chain(theta_dryland, THETA_R, THETA_S);
     let r_irr = anderson::coupling_chain(theta_irrigated, THETA_R, THETA_S);
 
-    v.check_bool(
-        "dryland localized",
-        r_dry.regime == QsRegime::Localized,
-    );
-    v.check_bool(
-        "irrigated has higher d_eff",
-        r_irr.d_eff > r_dry.d_eff,
-    );
-    v.check_bool(
-        "irrigated d_eff > 2.0 (marginal+)",
-        r_irr.d_eff > 2.0,
-    );
+    v.check_bool("dryland localized", r_dry.regime == QsRegime::Localized);
+    v.check_bool("irrigated has higher d_eff", r_irr.d_eff > r_dry.d_eff);
+    v.check_bool("irrigated d_eff > 2.0 (marginal+)", r_irr.d_eff > 2.0);
     v.check_bool(
         "irrigation crosses QS threshold",
         r_irr.regime != QsRegime::Localized,
@@ -175,15 +191,17 @@ fn validate_irrigation_transition(v: &mut ValidationHarness) {
 
     println!(
         "  Dryland:   θ={:.3} → d_eff={:.3} → {}",
-        theta_dryland, r_dry.d_eff, r_dry.regime.as_str()
+        theta_dryland,
+        r_dry.d_eff,
+        r_dry.regime.as_str()
     );
     println!(
         "  Irrigated: θ={:.3} → d_eff={:.3} → {}",
-        theta_irrigated, r_irr.d_eff, r_irr.regime.as_str()
+        theta_irrigated,
+        r_irr.d_eff,
+        r_irr.regime.as_str()
     );
-    println!(
-        "  Anderson prediction: irrigation restores 3D pore connectivity → QS active"
-    );
+    println!("  Anderson prediction: irrigation restores 3D pore connectivity → QS active");
 }
 
 fn validate_benchmark_provenance(v: &mut ValidationHarness) {

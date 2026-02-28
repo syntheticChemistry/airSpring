@@ -1,0 +1,370 @@
+{
+  "provenance": {
+    "paper": "van Genuchten MTh (1980) SSSA J 44:892-898; Carsel RF, Parrish RS (1988) WRR 24:755-769",
+    "data_source": "Carsel & Parrish (1988) Table 1 \u2014 12 USDA soil texture classes (open literature)",
+    "experiment": "053",
+    "baseline_script": "control/vg_inverse/vg_inverse_fitting.py",
+    "baseline_commit": "pending",
+    "baseline_command": "python control/vg_inverse/vg_inverse_fitting.py",
+    "baseline_date": "2026-02-28",
+    "baseline_result": "84/84 PASS"
+  },
+  "forward_checks": [
+    {
+      "name": "sand_theta_sat",
+      "computed": 0.43,
+      "expected": 0.43,
+      "pass": true
+    },
+    {
+      "name": "sand_theta_fc",
+      "computed": 0.04558,
+      "in_range": true,
+      "pass": true
+    },
+    {
+      "name": "sand_k_sat",
+      "computed": 712.8,
+      "expected": 712.8,
+      "pass": true
+    },
+    {
+      "name": "loamy_sand_theta_sat",
+      "computed": 0.41,
+      "expected": 0.41,
+      "pass": true
+    },
+    {
+      "name": "loamy_sand_theta_fc",
+      "computed": 0.060051,
+      "in_range": true,
+      "pass": true
+    },
+    {
+      "name": "loamy_sand_k_sat",
+      "computed": 350.2,
+      "expected": 350.2,
+      "pass": true
+    },
+    {
+      "name": "sandy_loam_theta_sat",
+      "computed": 0.41,
+      "expected": 0.41,
+      "pass": true
+    },
+    {
+      "name": "sandy_loam_theta_fc",
+      "computed": 0.084818,
+      "in_range": true,
+      "pass": true
+    },
+    {
+      "name": "sandy_loam_k_sat",
+      "computed": 106.1,
+      "expected": 106.1,
+      "pass": true
+    },
+    {
+      "name": "loam_theta_sat",
+      "computed": 0.43,
+      "expected": 0.43,
+      "pass": true
+    },
+    {
+      "name": "loam_theta_fc",
+      "computed": 0.165377,
+      "in_range": true,
+      "pass": true
+    },
+    {
+      "name": "loam_k_sat",
+      "computed": 24.96,
+      "expected": 24.96,
+      "pass": true
+    },
+    {
+      "name": "silt_loam_theta_sat",
+      "computed": 0.45,
+      "expected": 0.45,
+      "pass": true
+    },
+    {
+      "name": "silt_loam_theta_fc",
+      "computed": 0.240242,
+      "in_range": true,
+      "pass": true
+    },
+    {
+      "name": "silt_loam_k_sat",
+      "computed": 10.8,
+      "expected": 10.8,
+      "pass": true
+    },
+    {
+      "name": "clay_loam_theta_sat",
+      "computed": 0.41,
+      "expected": 0.41,
+      "pass": true
+    },
+    {
+      "name": "clay_loam_theta_fc",
+      "computed": 0.269693,
+      "in_range": true,
+      "pass": true
+    },
+    {
+      "name": "clay_loam_k_sat",
+      "computed": 6.24,
+      "expected": 6.24,
+      "pass": true
+    },
+    {
+      "name": "clay_theta_sat",
+      "computed": 0.38,
+      "expected": 0.38,
+      "pass": true
+    },
+    {
+      "name": "clay_theta_fc",
+      "computed": 0.34695,
+      "in_range": true,
+      "pass": true
+    },
+    {
+      "name": "clay_k_sat",
+      "computed": 4.8,
+      "expected": 4.8,
+      "pass": true
+    }
+  ],
+  "inverse_fits": [
+    {
+      "soil": "sand",
+      "alpha_true": 0.145,
+      "alpha_fit": 0.145,
+      "alpha_rel_error": 0.0,
+      "n_true": 2.68,
+      "n_fit": 2.68,
+      "n_rel_error": 0.0,
+      "rmse": 0.0,
+      "alpha_pass": true,
+      "n_pass": true,
+      "rmse_pass": true
+    },
+    {
+      "soil": "loamy_sand",
+      "alpha_true": 0.124,
+      "alpha_fit": 0.124,
+      "alpha_rel_error": 0.0,
+      "n_true": 2.28,
+      "n_fit": 2.28,
+      "n_rel_error": 0.0,
+      "rmse": 0.0,
+      "alpha_pass": true,
+      "n_pass": true,
+      "rmse_pass": true
+    },
+    {
+      "soil": "sandy_loam",
+      "alpha_true": 0.075,
+      "alpha_fit": 0.075,
+      "alpha_rel_error": 0.0,
+      "n_true": 1.89,
+      "n_fit": 1.89,
+      "n_rel_error": 0.0,
+      "rmse": 0.0,
+      "alpha_pass": true,
+      "n_pass": true,
+      "rmse_pass": true
+    },
+    {
+      "soil": "loam",
+      "alpha_true": 0.036,
+      "alpha_fit": 0.036,
+      "alpha_rel_error": 0.0,
+      "n_true": 1.56,
+      "n_fit": 1.56,
+      "n_rel_error": 0.0,
+      "rmse": 0.0,
+      "alpha_pass": true,
+      "n_pass": true,
+      "rmse_pass": true
+    },
+    {
+      "soil": "silt_loam",
+      "alpha_true": 0.02,
+      "alpha_fit": 0.02,
+      "alpha_rel_error": 0.0,
+      "n_true": 1.41,
+      "n_fit": 1.41,
+      "n_rel_error": 0.0,
+      "rmse": 0.0,
+      "alpha_pass": true,
+      "n_pass": true,
+      "rmse_pass": true
+    },
+    {
+      "soil": "clay_loam",
+      "alpha_true": 0.019,
+      "alpha_fit": 0.019,
+      "alpha_rel_error": 0.0,
+      "n_true": 1.31,
+      "n_fit": 1.31,
+      "n_rel_error": 0.0,
+      "rmse": 0.0,
+      "alpha_pass": true,
+      "n_pass": true,
+      "rmse_pass": true
+    },
+    {
+      "soil": "clay",
+      "alpha_true": 0.008,
+      "alpha_fit": 0.008,
+      "alpha_rel_error": 0.0,
+      "n_true": 1.09,
+      "n_fit": 1.09,
+      "n_rel_error": 0.0,
+      "rmse": 0.0,
+      "alpha_pass": true,
+      "n_pass": true,
+      "rmse_pass": true
+    }
+  ],
+  "round_trip": [
+    {
+      "soil": "sand",
+      "se_frac": 0.1,
+      "theta_target": 0.0835,
+      "h_inverted": -26.8969,
+      "theta_recovered": 0.0835,
+      "error": 0.0,
+      "pass": true
+    },
+    {
+      "soil": "sand",
+      "se_frac": 0.25,
+      "theta_target": 0.14125,
+      "h_inverted": -15.073,
+      "theta_recovered": 0.14125,
+      "error": 0.0,
+      "pass": true
+    },
+    {
+      "soil": "sand",
+      "se_frac": 0.5,
+      "theta_target": 0.2375,
+      "h_inverted": -8.9678,
+      "theta_recovered": 0.2375,
+      "error": 1e-10,
+      "pass": true
+    },
+    {
+      "soil": "sand",
+      "se_frac": 0.75,
+      "theta_target": 0.33375,
+      "h_inverted": -5.6366,
+      "theta_recovered": 0.33375,
+      "error": 0.0,
+      "pass": true
+    },
+    {
+      "soil": "sand",
+      "se_frac": 0.9,
+      "theta_target": 0.3915,
+      "h_inverted": -3.6597,
+      "theta_recovered": 0.3915,
+      "error": 0.0,
+      "pass": true
+    },
+    {
+      "soil": "loamy_sand",
+      "se_frac": 0.1,
+      "theta_target": 0.0923,
+      "h_inverted": -48.3782,
+      "theta_recovered": 0.0923,
+      "error": 0.0,
+      "pass": true
+    },
+    {
+      "soil": "loamy_sand",
+      "se_frac": 0.25,
+      "theta_target": 0.14525,
+      "h_inverted": -22.9135,
+      "theta_recovered": 0.14525,
+      "error": 0.0,
+      "pass": true
+    },
+    {
+      "soil": "loamy_sand",
+      "se_frac": 0.5,
+      "theta_target": 0.2335,
+      "h_inverted": -11.9198,
+      "theta_recovered": 0.2335,
+      "error": 0.0,
+      "pass": true
+    },
+    {
+      "soil": "loamy_sand",
+      "se_frac": 0.75,
+      "theta_target": 0.32175,
+      "h_inverted": -6.7625,
+      "theta_recovered": 0.32175,
+      "error": 1e-10,
+      "pass": true
+    },
+    {
+      "soil": "loamy_sand",
+      "se_frac": 0.9,
+      "theta_target": 0.3747,
+      "h_inverted": -4.0369,
+      "theta_recovered": 0.3747,
+      "error": 0.0,
+      "pass": true
+    }
+  ],
+  "monotonicity": [
+    {
+      "soil": "sand",
+      "theta_monotonic": true,
+      "k_monotonic": true,
+      "pass": true
+    },
+    {
+      "soil": "loamy_sand",
+      "theta_monotonic": true,
+      "k_monotonic": true,
+      "pass": true
+    },
+    {
+      "soil": "sandy_loam",
+      "theta_monotonic": true,
+      "k_monotonic": true,
+      "pass": true
+    },
+    {
+      "soil": "loam",
+      "theta_monotonic": true,
+      "k_monotonic": true,
+      "pass": true
+    },
+    {
+      "soil": "silt_loam",
+      "theta_monotonic": true,
+      "k_monotonic": true,
+      "pass": true
+    },
+    {
+      "soil": "clay_loam",
+      "theta_monotonic": true,
+      "k_monotonic": true,
+      "pass": true
+    },
+    {
+      "soil": "clay",
+      "theta_monotonic": true,
+      "k_monotonic": true,
+      "pass": true
+    }
+  ],
+  "_tolerance_justification": "Forward VG and round-trip are analytical (< 1e-6). Inverse fitting from noiseless synthetic data recovers \u03b1, n within 5% relative."
+}

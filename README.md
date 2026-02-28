@@ -2,7 +2,7 @@
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
 **Date**: February 28, 2026
-**Version**: 0.5.3
+**Version**: 0.5.4
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -13,13 +13,13 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → biomeOS (NUCLEUS atomics, deployment graphs) → Penny Irrigation
 ```
 
-## Current Status (v0.5.2)
+## Current Status (v0.5.4)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
-| Phase 0: Paper baselines (Python) | **1,237/1,237 PASS** | 51 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN runoff, Green-Ampt infiltration |
+| Phase 0: Paper baselines (Python) | **1,237/1,237 PASS** | 54 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **618 lib + 1498 atlas** | 56 binaries + 30/30 cross-spring benchmarks |
+| Phase 1: Rust validation | **618 lib + 1498 atlas** | 59 binaries + 30/30 cross-spring benchmarks |
 | Phase 1.5: CPU Benchmark | **25.9× faster** | Rust vs Python geometric mean (6×–190× range, 8/8 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B GPU | **4 orchestrators wired** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) |
@@ -188,31 +188,31 @@ Richards equation (unsaturated flow — open-source alternative to HYDRUS), bioc
 
 ```
 airSpring/
-├── control/                     # Phase 0: Python baselines (1237/1237, 41 scripts)
-│   ├── fao56/ ... anderson_coupling/  # 41 paper controls
-│   ├── blaney_criddle/          # Blaney-Criddle (1950) temperature PET (18/18)
-│   ├── scs_curve_number/        # SCS Curve Number runoff (38/38)
-│   ├── green_ampt/              # Green-Ampt (1911) infiltration (37/37)
+├── control/                     # Phase 0: Python baselines (1237/1237, 44 scripts)
+│   ├── fao56/ ... anderson_coupling/  # 44 paper controls
+│   ├── coupled_runoff_infiltration/   # Coupled SCS-CN + Green-Ampt (292/292)
+│   ├── vg_inverse/              # Van Genuchten inverse fitting (84/84)
+│   ├── season_water_budget/     # Full-season irrigation WB (34/34)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (618 lib + 20 integration, 56 binaries)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (618 lib + 20 integration, 59 binaries)
 │   ├── src/
-│   │   ├── eco/                 # Domain modules (17 validated, 8 ET₀ methods + runoff + infiltration + Anderson)
-│   │   ├── gpu/                 # ToadStool/BarraCuda GPU bridge (11 Tier A modules + device_info)
+│   │   ├── eco/                 # Domain modules (19 validated, 8 ET₀ + runoff + infiltration + VG + Anderson)
+│   │   ├── gpu/                 # ToadStool/BarraCuda GPU bridge (11 Tier A + 4 Tier B)
 │   │   ├── npu.rs               # BrainChip AKD1000 NPU (feature-gated)
-│   │   └── bin/                 # validate_*, bench_*, cross_validate (56 total)
+│   │   └── bin/                 # validate_*, bench_*, cross_validate (59 total)
 │   ├── tests/                   # Integration tests (7+ files + common/)
-│   └── Cargo.toml               # v0.5.2
+│   └── Cargo.toml               # v0.5.4
 ├── metalForge/                  # Mixed hardware dispatch (CPU+GPU+NPU)
 │   └── forge/                   # airspring-forge (31 tests, 4 binaries, live hardware probe)
 ├── specs/                       # Specifications and requirements
-│   ├── PAPER_REVIEW_QUEUE.md    # Paper reproduction queue (51 complete)
+│   ├── PAPER_REVIEW_QUEUE.md    # Paper reproduction queue (54 complete)
 │   ├── BARRACUDA_REQUIREMENTS.md# GPU + NPU kernel requirements
 │   └── CROSS_SPRING_EVOLUTION.md# Cross-spring shader provenance
 ├── whitePaper/                  # Methodology and study documentation
 │   └── baseCamp/                # Per-faculty research briefings + baseCamp extensions
-├── experiments/                 # Experiment protocols and results (51 experiments)
+├── experiments/                 # Experiment protocols and results (54 experiments)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
-│   └── handoffs/                # Versioned (V034 evolution handoff active)
+│   └── handoffs/                # Versioned (V035 evolution handoff active)
 ├── graphs/                      # biomeOS deployment graphs (TOML)
 ├── CHANGELOG.md                 # Keep-a-Changelog versioned history
 ├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
@@ -237,14 +237,14 @@ airSpring/
 | Document | Purpose |
 |----------|---------|
 | `CHANGELOG.md` | Versioned change history |
-| `CONTROL_EXPERIMENT_STATUS.md` | Detailed experiment results (51 experiments) |
+| `CONTROL_EXPERIMENT_STATUS.md` | Detailed experiment results (54 experiments) |
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C GPU evolution, absorbed/stays-local |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66), 18 workloads |
 | `metalForge/forge/` | Mixed hardware dispatch: live probe + capability routing |
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance |
-| `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (51 complete) |
+| `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (54 complete) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V034 active) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V035 active) |
 
 ## License
 
@@ -252,9 +252,9 @@ AGPL-3.0-or-later
 
 ---
 
-*February 28, 2026 — v0.5.3. 51 experiments, 1237/1237 Python, 618 lib + 31 forge tests,
-56 binaries + 30/30 cross-spring benchmarks, 33/33 cross-validation, 15,300 station-days, 1498/1498 atlas checks, 6-Spring provenance.
-Rust 25.9× faster than Python (8/8 parity, geometric mean). 8 ET₀ methods (Blaney-Criddle added).
-SCS Curve Number runoff + Green-Ampt infiltration. 42+ named constants (zero magic numbers in core modules).
+*February 28, 2026 — v0.5.4. 54 experiments, 1237/1237 Python, 618 lib + 31 forge tests,
+59 binaries + 30/30 cross-spring benchmarks, 33/33 cross-validation, 15,300 station-days, 1498/1498 atlas checks, 6-Spring provenance.
+Rust 25.9× faster than Python (8/8 parity, geometric mean). 8 ET₀ methods + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34).
+42+ named constants (zero magic numbers in core modules).
 Zero #[allow(dead_code)], zero unsafe, zero clippy warnings. Capability-based GPU discovery.
 ToadStool S68 synced (774 WGSL). Pure Rust + BarraCuda. AGPL-3.0-or-later.*

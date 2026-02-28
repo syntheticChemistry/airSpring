@@ -453,7 +453,10 @@ mod tests {
     #[test]
     fn test_crop_coefficient_stage_zero_length() {
         let kc = crop_coefficient_stage(0.30, 1.20, 5, 0);
-        assert!((kc - 0.30).abs() < 1e-10, "Zero-length returns kc_prev: {kc}");
+        assert!(
+            (kc - 0.30).abs() < 1e-10,
+            "Zero-length returns kc_prev: {kc}"
+        );
     }
 
     #[test]

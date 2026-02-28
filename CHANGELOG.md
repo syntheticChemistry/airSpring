@@ -2,6 +2,37 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.5.4] - 2026-02-28
+
+### Experiment Buildout (052-054) — Pipeline Coupling + Inverse Problems
+
+Three new experiments coupling existing validated modules into integrated
+pipelines: rainfall partitioning, soil parameter estimation, and full-season
+water budget audit. Exercises the complete FAO-56 chain end-to-end.
+
+#### Added
+- **Exp 052: SCS-CN + Green-Ampt Coupled Rainfall Partitioning**
+  - Python: 292/292, Rust: validation binary PASS.
+  - Couples `eco::runoff` (SCS-CN) + `eco::infiltration` (Green-Ampt) for
+    rainfall → runoff → infiltration → surface storage partitioning.
+  - 48 storm × soil × land-use matrix + 80 conservation sweep + 4 monotonicity.
+- **Exp 053: Van Genuchten Inverse Parameter Estimation**
+  - Python: 84/84, Rust: validation binary PASS.
+  - Forward VG retention, Mualem K(h), θ→h→θ round-trip via `barracuda::optimize::brent`,
+    monotonicity for all 7 Carsel & Parrish (1988) USDA textures.
+- **Exp 054: Full-Season Irrigation Water Budget Audit**
+  - Python: 34/34, Rust: validation binary PASS.
+  - Complete FAO-56 pipeline: synthetic weather → PM ET₀ → trapezoidal Kc →
+    daily water balance → Stewart yield for 4 crops (corn, soybean, winter wheat, alfalfa).
+  - Mass conservation, ETa ≤ ETc, yield bounds, cross-crop comparisons.
+
+#### Changed
+- Binary count: 56 → 59 (3 new validation binaries)
+- Experiment count: 51 → 54
+- PAPER_REVIEW_QUEUE.md and CONTROL_EXPERIMENT_STATUS.md updated
+
+---
+
 ## [0.5.3] - 2026-02-28
 
 ### Experiment Buildout (049-051) + Deep Technical Debt Resolution

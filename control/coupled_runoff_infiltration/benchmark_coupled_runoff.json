@@ -1,0 +1,279 @@
+{
+  "provenance": {
+    "paper": "USDA-SCS (1972) NEH-4; Green WH, Ampt GA (1911) J Agr Sci 4(1):1-24.",
+    "supplementary": [
+      "Rawls WJ et al. (1983) J Hydraul Eng 109(1):62-70.",
+      "Chow VT et al. (1988) Applied Hydrology, McGraw-Hill."
+    ],
+    "data_source": "Published equations and soil parameters (open literature)",
+    "experiment": "052",
+    "baseline_script": "control/coupled_runoff_infiltration/coupled_runoff_infiltration.py",
+    "baseline_commit": "pending",
+    "baseline_command": "python control/coupled_runoff_infiltration/coupled_runoff_infiltration.py",
+    "baseline_date": "2026-02-28",
+    "baseline_result": "292/292 PASS"
+  },
+  "storm_matrix": [
+    {
+      "storm": "light",
+      "soil": "sandy_loam",
+      "land_use": "row_crops_B",
+      "cn": 81,
+      "storm_duration_hr": 6.0,
+      "precip_mm": 15.0,
+      "runoff_mm": 0.151773,
+      "infiltration_mm": 14.848227,
+      "surface_storage_mm": 0.0,
+      "mass_balance_error": 0.0,
+      "runoff_fraction": 0.010118,
+      "infiltration_fraction": 0.989882
+    },
+    {
+      "storm": "light",
+      "soil": "sandy_loam",
+      "land_use": "pasture_B",
+      "cn": 61,
+      "storm_duration_hr": 6.0,
+      "precip_mm": 15.0,
+      "runoff_mm": 0.0,
+      "infiltration_mm": 15.0,
+      "surface_storage_mm": 0.0,
+      "mass_balance_error": 0.0,
+      "runoff_fraction": 0.0,
+      "infiltration_fraction": 1.0
+    },
+    {
+      "storm": "light",
+      "soil": "sandy_loam",
+      "land_use": "woods_B",
+      "cn": 55,
+      "storm_duration_hr": 6.0,
+      "precip_mm": 15.0,
+      "runoff_mm": 0.0,
+      "infiltration_mm": 15.0,
+      "surface_storage_mm": 0.0,
+      "mass_balance_error": 0.0,
+      "runoff_fraction": 0.0,
+      "infiltration_fraction": 1.0
+    },
+    {
+      "storm": "light",
+      "soil": "loam",
+      "land_use": "row_crops_B",
+      "cn": 81,
+      "storm_duration_hr": 6.0,
+      "precip_mm": 15.0,
+      "runoff_mm": 0.151773,
+      "infiltration_mm": 14.848227,
+      "surface_storage_mm": 0.0,
+      "mass_balance_error": 0.0,
+      "runoff_fraction": 0.010118,
+      "infiltration_fraction": 0.989882
+    },
+    {
+      "storm": "light",
+      "soil": "loam",
+      "land_use": "pasture_B",
+      "cn": 61,
+      "storm_duration_hr": 6.0,
+      "precip_mm": 15.0,
+      "runoff_mm": 0.0,
+      "infiltration_mm": 15.0,
+      "surface_storage_mm": 0.0,
+      "mass_balance_error": 0.0,
+      "runoff_fraction": 0.0,
+      "infiltration_fraction": 1.0
+    },
+    {
+      "storm": "light",
+      "soil": "loam",
+      "land_use": "woods_B",
+      "cn": 55,
+      "storm_duration_hr": 6.0,
+      "precip_mm": 15.0,
+      "runoff_mm": 0.0,
+      "infiltration_mm": 15.0,
+      "surface_storage_mm": 0.0,
+      "mass_balance_error": 0.0,
+      "runoff_fraction": 0.0,
+      "infiltration_fraction": 1.0
+    },
+    {
+      "storm": "light",
+      "soil": "silt_loam",
+      "land_use": "row_crops_B",
+      "cn": 81,
+      "storm_duration_hr": 6.0,
+      "precip_mm": 15.0,
+      "runoff_mm": 0.151773,
+      "infiltration_mm": 14.848227,
+      "surface_storage_mm": 0.0,
+      "mass_balance_error": 0.0,
+      "runoff_fraction": 0.010118,
+      "infiltration_fraction": 0.989882
+    },
+    {
+      "storm": "light",
+      "soil": "silt_loam",
+      "land_use": "pasture_B",
+      "cn": 61,
+      "storm_duration_hr": 6.0,
+      "precip_mm": 15.0,
+      "runoff_mm": 0.0,
+      "infiltration_mm": 15.0,
+      "surface_storage_mm": 0.0,
+      "mass_balance_error": 0.0,
+      "runoff_fraction": 0.0,
+      "infiltration_fraction": 1.0
+    },
+    {
+      "storm": "light",
+      "soil": "silt_loam",
+      "land_use": "woods_B",
+      "cn": 55,
+      "storm_duration_hr": 6.0,
+      "precip_mm": 15.0,
+      "runoff_mm": 0.0,
+      "infiltration_mm": 15.0,
+      "surface_storage_mm": 0.0,
+      "mass_balance_error": 0.0,
+      "runoff_fraction": 0.0,
+      "infiltration_fraction": 1.0
+    },
+    {
+      "storm": "light",
+      "soil": "clay_loam",
+      "land_use": "row_crops_B",
+      "cn": 81,
+      "storm_duration_hr": 6.0,
+      "precip_mm": 15.0,
+      "runoff_mm": 0.151773,
+      "infiltration_mm": 14.848227,
+      "surface_storage_mm": 0.0,
+      "mass_balance_error": 0.0,
+      "runoff_fraction": 0.010118,
+      "infiltration_fraction": 0.989882
+    },
+    {
+      "storm": "light",
+      "soil": "clay_loam",
+      "land_use": "pasture_B",
+      "cn": 61,
+      "storm_duration_hr": 6.0,
+      "precip_mm": 15.0,
+      "runoff_mm": 0.0,
+      "infiltration_mm": 15.0,
+      "surface_storage_mm": 0.0,
+      "mass_balance_error": 0.0,
+      "runoff_fraction": 0.0,
+      "infiltration_fraction": 1.0
+    },
+    {
+      "storm": "light",
+      "soil": "clay_loam",
+      "land_use": "woods_B",
+      "cn": 55,
+      "storm_duration_hr": 6.0,
+      "precip_mm": 15.0,
+      "runoff_mm": 0.0,
+      "infiltration_mm": 15.0,
+      "surface_storage_mm": 0.0,
+      "mass_balance_error": 0.0,
+      "runoff_fraction": 0.0,
+      "infiltration_fraction": 1.0
+    }
+  ],
+  "conservation_checks": [
+    {
+      "precip_mm": 5.0,
+      "cn": 55,
+      "soil": "sandy_loam",
+      "mass_balance_error": 0.0,
+      "q_leq_p": true,
+      "f_leq_pnet": true,
+      "all_non_negative": true
+    },
+    {
+      "precip_mm": 5.0,
+      "cn": 55,
+      "soil": "clay_loam",
+      "mass_balance_error": 0.0,
+      "q_leq_p": true,
+      "f_leq_pnet": true,
+      "all_non_negative": true
+    },
+    {
+      "precip_mm": 5.0,
+      "cn": 65,
+      "soil": "sandy_loam",
+      "mass_balance_error": 0.0,
+      "q_leq_p": true,
+      "f_leq_pnet": true,
+      "all_non_negative": true
+    },
+    {
+      "precip_mm": 5.0,
+      "cn": 65,
+      "soil": "clay_loam",
+      "mass_balance_error": 0.0,
+      "q_leq_p": true,
+      "f_leq_pnet": true,
+      "all_non_negative": true
+    },
+    {
+      "precip_mm": 5.0,
+      "cn": 75,
+      "soil": "sandy_loam",
+      "mass_balance_error": 0.0,
+      "q_leq_p": true,
+      "f_leq_pnet": true,
+      "all_non_negative": true
+    },
+    {
+      "precip_mm": 5.0,
+      "cn": 75,
+      "soil": "clay_loam",
+      "mass_balance_error": 0.0,
+      "q_leq_p": true,
+      "f_leq_pnet": true,
+      "all_non_negative": true
+    },
+    {
+      "precip_mm": 5.0,
+      "cn": 85,
+      "soil": "sandy_loam",
+      "mass_balance_error": 0.0,
+      "q_leq_p": true,
+      "f_leq_pnet": true,
+      "all_non_negative": true
+    },
+    {
+      "precip_mm": 5.0,
+      "cn": 85,
+      "soil": "clay_loam",
+      "mass_balance_error": 0.0,
+      "q_leq_p": true,
+      "f_leq_pnet": true,
+      "all_non_negative": true
+    },
+    {
+      "precip_mm": 5.0,
+      "cn": 95,
+      "soil": "sandy_loam",
+      "mass_balance_error": 0.0,
+      "q_leq_p": true,
+      "f_leq_pnet": true,
+      "all_non_negative": true
+    },
+    {
+      "precip_mm": 5.0,
+      "cn": 95,
+      "soil": "clay_loam",
+      "mass_balance_error": 0.0,
+      "q_leq_p": true,
+      "f_leq_pnet": true,
+      "all_non_negative": true
+    }
+  ],
+  "_tolerance_justification": "SCS-CN and Green-Ampt are analytical: f64 arithmetic yields < 0.01 mm mass balance error"
+}

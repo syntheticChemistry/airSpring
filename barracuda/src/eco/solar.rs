@@ -31,7 +31,10 @@ const LW_HUMIDITY_COEFF: f64 = 0.14;
 /// dr = 1 + 0.033 × cos(2π/365 × J)
 #[must_use]
 pub fn inverse_rel_distance(day_of_year: u32) -> f64 {
-    ECCENTRICITY_COEFF.mul_add((2.0 * PI * f64::from(day_of_year) / DAYS_PER_YEAR).cos(), 1.0)
+    ECCENTRICITY_COEFF.mul_add(
+        (2.0 * PI * f64::from(day_of_year) / DAYS_PER_YEAR).cos(),
+        1.0,
+    )
 }
 
 /// Solar declination δ (radians) (FAO-56 Eq. 24).
