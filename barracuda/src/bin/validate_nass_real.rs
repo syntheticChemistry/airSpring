@@ -24,9 +24,7 @@ use airspring_barracuda::validation::ValidationHarness;
 const BENCHMARK_JSON: &str = include_str!("../../../control/nass_real/benchmark_nass_real.json");
 
 fn main() {
-    tracing_subscriber::fmt()
-        .with_env_filter("info")
-        .init();
+    tracing_subscriber::fmt().with_env_filter("info").init();
 
     let benchmark: serde_json::Value =
         serde_json::from_str(BENCHMARK_JSON).expect("benchmark JSON");
@@ -40,7 +38,9 @@ fn main() {
         let ky = crop["ky_mid"].as_f64().unwrap_or(1.0);
         let years = crop["synthetic_years"].as_array().expect("years");
         let drought_year = crop["expected_drought_year"].as_u64().unwrap_or(0);
-        let drought_drop = crop["expected_drought_yield_drop_pct"].as_f64().unwrap_or(0.0);
+        let drought_drop = crop["expected_drought_yield_drop_pct"]
+            .as_f64()
+            .unwrap_or(0.0);
 
         let mut yields: Vec<(u32, f64)> = Vec::new();
         let mut drought_yield = 0.0;
@@ -112,12 +112,16 @@ fn main() {
 
         // Yield trend: recent years should be higher (technology + management)
         if yields.len() >= 4 {
-            let first_half: f64 =
-                yields[..yields.len() / 2].iter().map(|(_, y)| y).sum::<f64>()
-                    / (yields.len() / 2) as f64;
-            let second_half: f64 =
-                yields[yields.len() / 2..].iter().map(|(_, y)| y).sum::<f64>()
-                    / (yields.len() - yields.len() / 2) as f64;
+            let first_half: f64 = yields[..yields.len() / 2]
+                .iter()
+                .map(|(_, y)| y)
+                .sum::<f64>()
+                / (yields.len() / 2) as f64;
+            let second_half: f64 = yields[yields.len() / 2..]
+                .iter()
+                .map(|(_, y)| y)
+                .sum::<f64>()
+                / (yields.len() - yields.len() / 2) as f64;
             v.check_lower(
                 &format!("{commodity}_yield_trend_positive"),
                 second_half - first_half,

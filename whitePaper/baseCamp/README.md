@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
 **Updated**: March 1, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.5.8)
-**Status**: 63 experiments, 1237/1237 Python + 641 Rust lib tests + 57 forge tests + 72 binaries + 78/78 pure GPU + 26/26 GPU rewire + 104/104 mixed-hardware + 35/35 cross-spring benchmarks + ops 5-8 GPU-first (ToadStool S70+) + GPU stats (neuralSpring S69) + seasonal pipeline GPU Stages 1-2 + streaming pipeline (GpuPipelined, GpuFused) + NPU→GPU PCIe bypass + NUCLEUS primal (16 capabilities, 28/28 cross-primal pipeline) + biomeOS graph execution (capability_call wired) + 21/21 CPU parity (14.5× speedup) + atlas stream unified batch + capability-based hardware discovery + data provider trait (OpenMeteo + NASS) + decade analysis (102/102) + NASS yield (99/99) + Shannon H' diversity (63/63) + cross-primal forwarding (ToadStool, BearDog) + ecology domain in biomeOS registry
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.5.9)
+**Status**: 63 experiments, 1237/1237 Python + 817 Rust lib tests + 57 forge tests + 73 binaries + 44/44 cross-spring evolution benchmark + Richards PDE rewired to `barracuda::linalg::tridiagonal_solve` + configurable `RichardsConfig` + shared `biomeos` module + `lifecycle.health` (wateringHole-compliant) + zero mocks in production + capability-based discovery everywhere + 78/78 pure GPU + 26/26 GPU rewire + 104/104 mixed-hardware + ops 5-8 GPU-first (ToadStool S70+) + seasonal pipeline GPU Stages 1-2 + streaming pipeline (GpuPipelined, GpuFused) + NPU→GPU PCIe bypass + NUCLEUS primal (17 capabilities, 28/28 cross-primal pipeline) + biomeOS graph execution + 21/21 CPU parity (14.5× speedup) + atlas stream unified batch + data provider trait (OpenMeteo + NASS) + decade analysis (102/102) + NASS yield (99/99) + Shannon H' diversity (63/63) + cross-primal forwarding + ecology domain in biomeOS registry
 
 ---
 

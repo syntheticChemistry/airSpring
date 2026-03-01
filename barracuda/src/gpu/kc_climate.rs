@@ -303,10 +303,7 @@ mod tests {
         let gpu_result = gpu_engine.compute_gpu(&inputs).unwrap();
         let cpu_result = cpu_engine.compute(&inputs);
         for (g, c) in gpu_result.kc_values.iter().zip(&cpu_result.kc_values) {
-            assert!(
-                (g - c).abs() < 0.01,
-                "GPU {g:.6} vs CPU {c:.6}"
-            );
+            assert!((g - c).abs() < 0.01, "GPU {g:.6} vs CPU {c:.6}");
         }
     }
 

@@ -33,44 +33,18 @@ use std::os::unix::net::UnixStream;
 use std::path::PathBuf;
 use std::time::Duration;
 
+use airspring_barracuda::biomeos;
 use airspring_barracuda::eco::evapotranspiration as et;
 use airspring_barracuda::eco::simple_et0;
 
 use barracuda::validation::ValidationHarness;
 
 fn resolve_socket_dir() -> PathBuf {
-    if let Ok(dir) = std::env::var("BIOMEOS_SOCKET_DIR") {
-        return PathBuf::from(dir);
-    }
-    if let Ok(xdg) = std::env::var("XDG_RUNTIME_DIR") {
-        return PathBuf::from(xdg).join("biomeos");
-    }
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::MetadataExt;
-        if let Ok(meta) = std::fs::metadata("/proc/self") {
-            let uid = meta.uid();
-            let dir = PathBuf::from(format!("/run/user/{uid}/biomeos"));
-            if dir.parent().is_some_and(std::path::Path::exists) {
-                return dir;
-            }
-        }
-    }
-    std::env::temp_dir().join("biomeos")
+    biomeos::resolve_socket_dir()
 }
 
 fn find_airspring_socket() -> Option<PathBuf> {
-    let socket_dir = resolve_socket_dir();
-    if let Ok(entries) = std::fs::read_dir(&socket_dir) {
-        for entry in entries.flatten() {
-            let name = entry.file_name();
-            let name_str = name.to_string_lossy();
-            if name_str.starts_with("airspring") && name_str.ends_with(".sock") {
-                return Some(entry.path());
-            }
-        }
-    }
-    None
+    biomeos::find_socket("airspring")
 }
 
 fn send_jsonrpc(
@@ -287,7 +261,10 @@ fn main() {
         let expected_etc: f64 = 6.0 * 1.15;
         v.check_abs("wb_etc_parity", etc, expected_etc, 1e-10);
 
-        let sw = r.get("soil_water_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
+        let sw = r
+            .get("soil_water_mm")
+            .and_then(|v| v.as_f64())
+            .unwrap_or(0.0);
         let expected_sw: f64 = (150.0_f64 + 2.5 - expected_etc).clamp(50.0, 200.0);
         v.check_abs("wb_soil_water_parity", sw, expected_sw, 1e-10);
     }
@@ -308,21 +285,12 @@ fn main() {
     }
 
     // ── Phase 8: Cross-Primal Discovery ────────────────────────────
-    let primals = ["beardog", "songbird", "squirrel", "toadstool"];
+    let primal_names_env = std::env::var("BIOMEOS_EXPECTED_PRIMALS")
+        .unwrap_or_else(|_| "beardog,songbird,squirrel,toadstool".to_string());
+    let primals: Vec<&str> = primal_names_env.split(',').map(str::trim).collect();
+    let discovered = biomeos::discover_all_primals();
     for name in &primals {
-        let discoverable = {
-            let socket_dir = resolve_socket_dir();
-            let entries = std::fs::read_dir(&socket_dir).ok();
-            entries
-                .map(|e| {
-                    e.flatten().any(|entry| {
-                        let n = entry.file_name();
-                        let s = n.to_string_lossy();
-                        s.starts_with(name) && s.ends_with(".sock")
-                    })
-                })
-                .unwrap_or(false)
-        };
+        let discoverable = discovered.iter().any(|d| d == name);
         v.check_bool(&format!("primal_{name}_discoverable"), discoverable);
     }
 

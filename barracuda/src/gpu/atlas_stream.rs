@@ -59,7 +59,7 @@ pub struct StationSeasonResult {
 ///
 /// # Streaming Pattern
 ///
-/// [`process_streaming`] emits results via callback as they are produced,
+/// [`AtlasStream::process_streaming`] emits results via callback as they are produced,
 /// preparing for `ToadStool`'s `UnidirectionalPipeline` (fire-and-forget
 /// GPU streaming) without buffering the full result set.
 #[derive(Debug)]
@@ -106,7 +106,7 @@ impl AtlasStream {
 
     /// Process stations in a streaming pattern, emitting each result via callback.
     ///
-    /// Unlike [`process_batch`], this avoids buffering the full result set.
+    /// Unlike [`Self::process_batch`], this avoids buffering the full result set.
     /// When `ToadStool`'s `UnidirectionalPipeline` is available, this method
     /// becomes fire-and-forget GPU streaming.
     pub fn process_streaming<F>(

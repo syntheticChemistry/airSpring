@@ -24,9 +24,7 @@
 use std::f64::consts::PI;
 
 use airspring_barracuda::eco::crop::CropType;
-use airspring_barracuda::gpu::seasonal_pipeline::{
-    CropConfig, SeasonalPipeline, WeatherDay,
-};
+use airspring_barracuda::gpu::seasonal_pipeline::{CropConfig, SeasonalPipeline, WeatherDay};
 use airspring_barracuda::validation::{self, parse_benchmark_json, ValidationHarness};
 
 const BENCHMARK_JSON: &str =
@@ -38,7 +36,7 @@ const SEASON_DAYS: usize = 153;
 const LATITUDE_DEG: f64 = 42.5;
 const ELEVATION_M: f64 = 250.0;
 
-/// Precip pattern from Python: np.random.default_rng(42); (rng.random(153) < 0.4) * 3.0
+/// Precip pattern from Python: `np.random.default_rng(42)`; (rng.random(153) < 0.4) * 3.0
 const PRECIP_MM: &[f64; 153] = &[
     0., 0., 0., 0., 3., 0., 0., 0., 3., 0., 3., 0., 0., 0., 0., 3., 0., 3., 0., 0., 0., 3., 0., 0.,
     0., 3., 0., 3., 3., 0., 0., 0., 3., 3., 0., 3., 3., 0., 3., 0., 0., 0., 0., 3., 0., 0., 3., 3.,
@@ -49,6 +47,7 @@ const PRECIP_MM: &[f64; 153] = &[
     0., 3., 3., 0., 0., 3., 0., 0., 3.,
 ];
 
+#[allow(clippy::too_many_lines)]
 fn main() {
     validation::init_tracing();
     validation::banner("Exp 058: Climate Scenario Water Demand Analysis");
@@ -112,12 +111,13 @@ fn main() {
     for &crop_name in &crop_names {
         let et0_vals: Vec<f64> = scenarios
             .iter()
-            .map(|s| {
-                results[s["name"].as_str().unwrap()][crop_name].0
-            })
+            .map(|s| results[s["name"].as_str().unwrap()][crop_name].0)
             .collect();
         let monotonic = et0_vals.windows(2).all(|w| w[0] <= w[1]);
-        v.check_bool(&format!("{crop_name}: ET₀ increases with delta_T"), monotonic);
+        v.check_bool(
+            &format!("{crop_name}: ET₀ increases with delta_T"),
+            monotonic,
+        );
     }
 
     // 2. Water demand (ETc) increases with warming — ET0 increases → ETc increases
@@ -182,7 +182,7 @@ fn main() {
         for &crop_name in &crop_names {
             let yr = results[name][crop_name].3;
             v.check_bool(
-                &format!("{} {} yield_ratio in [0,1]", name, crop_name),
+                &format!("{name} {crop_name} yield_ratio in [0,1]"),
                 (0.0..=1.0).contains(&yr),
             );
         }
@@ -194,12 +194,7 @@ fn main() {
         let name = scen["name"].as_str().unwrap();
         for &crop_name in &crop_names {
             let mb = results[name][crop_name].4;
-            v.check_abs(
-                &format!("{} {} mass balance", name, crop_name),
-                mb,
-                0.0,
-                mb_tol,
-            );
+            v.check_abs(&format!("{name} {crop_name} mass balance"), mb, 0.0, mb_tol);
         }
     }
 
@@ -243,17 +238,17 @@ fn main() {
 
 fn generate_michigan_weather(delta_t: f64) -> Vec<WeatherDay> {
     let mut weather = Vec::with_capacity(SEASON_DAYS);
-    for i in 0..SEASON_DAYS {
+    for (i, &precip) in PRECIP_MM.iter().enumerate() {
         let doy = SEASON_START_DOY + i as u32;
         let doy_frac = i as f64 / (SEASON_DAYS - 1) as f64;
 
-        let tmax_base = 25.0 + 7.0 * (PI * doy_frac).sin();
+        let tmax_base = 7.0f64.mul_add((PI * doy_frac).sin(), 25.0);
         let tmin_base = tmax_base - 10.0;
         let tmax = tmax_base + delta_t;
         let tmin = tmin_base + delta_t;
 
         let solar_base = 18.0;
-        let solar = solar_base * (0.85 + 0.15 * (PI * doy_frac).sin());
+        let solar = solar_base * 0.15f64.mul_add((PI * doy_frac).sin(), 0.85);
 
         weather.push(WeatherDay {
             tmax,
@@ -262,7 +257,7 @@ fn generate_michigan_weather(delta_t: f64) -> Vec<WeatherDay> {
             rh_min: 65.0,
             wind_2m: 2.0,
             solar_rad: solar,
-            precipitation: PRECIP_MM[i],
+            precipitation: precip,
             elevation: ELEVATION_M,
             latitude_deg: LATITUDE_DEG,
             day_of_year: doy,

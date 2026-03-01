@@ -11,6 +11,7 @@
 //! - Z-score anomaly detection with minimum sample guard
 
 use super::quantize_i8;
+use crate::tolerances;
 
 /// Multi-sensor fusion input (θ + T + EC) for single-inference field state.
 pub struct MultiSensorInput {
@@ -54,10 +55,6 @@ pub struct RollingStats {
     count: u64,
     alpha: f64,
 }
-
-const MIN_ANOMALY_SAMPLES: u64 = 10;
-const SIGMA_FLOOR: f64 = 1e-10;
-const STRESS_DEPLETION_THRESHOLD: f64 = 0.55;
 
 impl RollingStats {
     /// Create a new tracker with the given smoothing factor.
@@ -146,7 +143,9 @@ pub fn classify_reading(
     let sigma = stats.sigma();
     let mean = stats.mean();
 
-    let is_anomaly = if sigma > SIGMA_FLOOR && stats.count() > MIN_ANOMALY_SAMPLES {
+    let is_anomaly = if sigma > tolerances::NPU_SIGMA_FLOOR.abs_tol
+        && stats.count() > tolerances::NPU_MIN_ANOMALY_SAMPLES
+    {
         ((reading - mean) / sigma).abs() > anomaly_z
     } else {
         false
@@ -155,7 +154,7 @@ pub fn classify_reading(
     let depletion = (fc - reading) / (fc - wp);
     let class = if is_anomaly {
         2
-    } else if depletion > STRESS_DEPLETION_THRESHOLD {
+    } else if depletion > tolerances::NPU_STRESS_DEPLETION.abs_tol {
         1
     } else {
         0

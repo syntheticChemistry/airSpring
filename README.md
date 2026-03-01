@@ -2,7 +2,7 @@
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
 **Date**: March 1, 2026
-**Version**: 0.5.8
+**Version**: 0.5.9
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -13,13 +13,13 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → biomeOS (NUCLEUS atomics, deployment graphs) → Penny Irrigation
 ```
 
-## Current Status (v0.5.8)
+## Current Status (v0.5.9)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,237/1,237 PASS** | 54 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **641 lib + 1498 atlas** | 72 binaries + 35/35 cross-spring benchmarks |
+| Phase 1: Rust validation | **817 lib + 1498 atlas** | 73 binaries + 44/44 cross-spring benchmarks |
 | Phase 1.5: CPU Benchmark | **14.5× faster** | Rust vs Python geometric mean (21/21 parity, incl. seasonal_pipeline) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -36,12 +36,12 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` (barracuda) | **641 passed**, 0 failures |
+| `cargo test` (barracuda, all) | **817 passed**, 0 failures |
 | `cargo test --lib` (metalForge) | **57 passed**, 0 failures |
-| `cargo test --tests` | **20 passed** (integration) |
 | `cargo clippy (pedantic)` | **0 warnings** (pedantic + nursery, both crates) |
 | `cargo fmt --check` | **Clean** |
-| `cargo doc` | **Builds** |
+| `cargo doc` | **70 pages generated** |
+| `bench_cross_spring_evolution` | **44/44 PASS** (release) |
 
 ### Hardware Validated
 
@@ -198,12 +198,13 @@ airSpring/
 │   └── requirements.txt
 ├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (641 lib + 20 integration, 68 binaries)
 │   ├── src/
-│   │   ├── eco/                 # Domain modules (19 validated, 8 ET₀ + runoff + infiltration + VG + Anderson)
-│   │   ├── gpu/                 # ToadStool/BarraCuda GPU bridge (11 Tier A + 4 Tier B)
-│   │   ├── npu.rs               # BrainChip AKD1000 NPU (feature-gated)
-│   │   └── bin/                 # validate_*, bench_*, airspring_primal (68 src, 72 declared)
-│   ├── tests/                   # Integration tests (7+ files + common/)
-│   └── Cargo.toml               # v0.5.8
+    │   │   ├── biomeos.rs           # biomeOS socket resolution + primal discovery (shared)
+    │   │   ├── eco/                 # Domain modules (19 validated, 8 ET₀ + runoff + infiltration + VG + Anderson)
+    │   │   ├── gpu/                 # ToadStool/BarraCuda GPU bridge (11 Tier A + 4 Tier B)
+    │   │   ├── npu.rs               # BrainChip AKD1000 NPU (feature-gated)
+    │   │   └── bin/                 # validate_*, bench_*, airspring_primal (69 src, 73 declared)
+    │   ├── tests/                   # Integration tests (7+ files + common/)
+    │   └── Cargo.toml               # v0.5.9
 ├── metalForge/                  # Mixed hardware dispatch (CPU+GPU+NPU)
 │   └── forge/                   # airspring-forge (31 tests, 4 binaries, live hardware probe)
 ├── specs/                       # Specifications and requirements
@@ -246,7 +247,7 @@ airSpring/
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance |
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (63 complete) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda/NUCLEUS handoffs (V041 active) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda/NUCLEUS handoffs (V042 active) |
 
 ## License
 
@@ -254,9 +255,10 @@ AGPL-3.0-or-later
 
 ---
 
-*March 1, 2026 — v0.5.8. 63 experiments, 1237/1237 Python, 641 lib + 57 forge tests,
-72 binaries + 35/35 cross-spring benchmarks, 21/21 CPU parity (14.5× speedup), 15,300 station-days, 1498/1498 atlas checks, 6-Spring provenance.
-NUCLEUS primal (16 capabilities, 28/28 cross-primal pipeline), ecology domain in biomeOS capability registry,
-cross-primal forwarding (ToadStool, BearDog), capability.call routing via neural-api.
-Zero unsafe, zero clippy warnings, zero TODOs. Capability-based GPU + primal discovery.
-ToadStool S68 synced (774 WGSL). Pure Rust + BarraCuda. AGPL-3.0-or-later.*
+*March 1, 2026 — v0.5.9. 63 experiments, 1237/1237 Python, 817 lib + 57 forge tests,
+73 binaries + 44/44 cross-spring evolution benchmarks, 21/21 CPU parity (14.5× speedup), 15,300 station-days, 1498/1498 atlas checks, 6-Spring provenance.
+NUCLEUS primal (17 capabilities, `lifecycle.health` wateringHole-compliant), ecology domain in biomeOS registry.
+Cross-spring evolution benchmark: hotSpring precision (9.6µs), wetSpring bio (8.8µs), neuralSpring optimizers (13.8µs), airSpring rewired (4.5µs), groundSpring uncertainty (2.5ms).
+Richards PDE rewired to `barracuda::linalg::tridiagonal_solve`. Configurable `RichardsConfig`. Shared `biomeos` module.
+Zero unsafe, zero clippy warnings, zero TODOs, zero mocks in production. Capability-based discovery everywhere.
+ToadStool S70+ synced (774 WGSL). Pure Rust + BarraCuda. AGPL-3.0-or-later.*

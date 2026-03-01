@@ -9,7 +9,8 @@
 //!
 //! Benchmark source: `control/fao56/benchmark_fao56.json`
 //! Provenance: Allen et al. (1998) FAO Paper 56, Tables 2.3–2.4, Examples 17–20.
-//! Digitized: 2026-02-16, commit: initial airSpring.
+//! script=`control/fao56/penman_monteith.py`, commit=502f2ada, date=2026-02-16
+//! Run: `python3 control/fao56/penman_monteith.py`
 
 use airspring_barracuda::eco::evapotranspiration::{self as et, DailyEt0Input};
 use airspring_barracuda::tolerances;

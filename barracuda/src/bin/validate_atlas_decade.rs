@@ -34,12 +34,36 @@ struct StationMeta {
 }
 
 const STATIONS: &[StationMeta] = &[
-    StationMeta { id: "east_lansing", lat: 42.727, elevation_m: 256.0 },
-    StationMeta { id: "grand_junction", lat: 42.375, elevation_m: 197.0 },
-    StationMeta { id: "sparta", lat: 43.160, elevation_m: 262.0 },
-    StationMeta { id: "hart", lat: 43.698, elevation_m: 244.0 },
-    StationMeta { id: "west_olive", lat: 42.917, elevation_m: 192.0 },
-    StationMeta { id: "manchester", lat: 42.153, elevation_m: 290.0 },
+    StationMeta {
+        id: "east_lansing",
+        lat: 42.727,
+        elevation_m: 256.0,
+    },
+    StationMeta {
+        id: "grand_junction",
+        lat: 42.375,
+        elevation_m: 197.0,
+    },
+    StationMeta {
+        id: "sparta",
+        lat: 43.160,
+        elevation_m: 262.0,
+    },
+    StationMeta {
+        id: "hart",
+        lat: 43.698,
+        elevation_m: 244.0,
+    },
+    StationMeta {
+        id: "west_olive",
+        lat: 42.917,
+        elevation_m: 192.0,
+    },
+    StationMeta {
+        id: "manchester",
+        lat: 42.153,
+        elevation_m: 290.0,
+    },
 ];
 
 const DECADES: &[(u32, u32)] = &[
@@ -66,8 +90,8 @@ struct DayRow {
 }
 
 fn load_station_csv(station_id: &str) -> Option<Vec<DayRow>> {
-    let data_dir = std::env::var("ATLAS_DATA_DIR")
-        .unwrap_or_else(|_| "data/open_meteo".to_string());
+    let data_dir =
+        std::env::var("ATLAS_DATA_DIR").unwrap_or_else(|_| "data/open_meteo".to_string());
     let path = format!("{data_dir}/{station_id}_1945-01-01_2024-12-31_daily.csv");
     let p = Path::new(&path);
     if !p.exists() {
@@ -124,19 +148,39 @@ fn load_station_csv(station_id: &str) -> Option<Vec<DayRow>> {
             doy,
             tmax_c: get_f64("tmax_c"),
             tmin_c: get_f64("tmin_c"),
-            rh_max_pct: if rh_max.is_nan() { 70.0 } else { rh_max.clamp(20.0, 100.0) },
-            rh_min_pct: if rh_min.is_nan() { 40.0 } else { rh_min.clamp(10.0, 100.0) },
+            rh_max_pct: if rh_max.is_nan() {
+                70.0
+            } else {
+                rh_max.clamp(20.0, 100.0)
+            },
+            rh_min_pct: if rh_min.is_nan() {
+                40.0
+            } else {
+                rh_min.clamp(10.0, 100.0)
+            },
             wind_2m_m_s: {
                 let w = get_f64("wind_2m_m_s");
-                if w.is_nan() { 2.0 } else { w.max(0.5) }
+                if w.is_nan() {
+                    2.0
+                } else {
+                    w.max(0.5)
+                }
             },
             solar_rad_mj_m2: {
                 let s = get_f64("solar_rad_mj_m2");
-                if s.is_nan() { 15.0 } else { s.max(0.1) }
+                if s.is_nan() {
+                    15.0
+                } else {
+                    s.max(0.1)
+                }
             },
             precip_mm: {
                 let p = get_f64("precip_mm");
-                if p.is_nan() { 0.0 } else { p }
+                if p.is_nan() {
+                    0.0
+                } else {
+                    p
+                }
             },
         });
     }
@@ -145,17 +189,16 @@ fn load_station_csv(station_id: &str) -> Option<Vec<DayRow>> {
 }
 
 fn day_of_year(year: u32, month: u32, day: u32) -> u32 {
-    let is_leap = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+    let is_leap = (year.is_multiple_of(4) && !year.is_multiple_of(100)) || year.is_multiple_of(400);
     let month_days: [u32; 12] = if is_leap {
         [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
     } else {
         [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
     };
-    let mut doy = day;
-    for m in 0..(month as usize - 1).min(11) {
-        doy += month_days[m];
-    }
-    doy
+    day + month_days
+        .iter()
+        .take((month as usize - 1).min(11))
+        .sum::<u32>()
 }
 
 fn compute_et0(row: &DayRow, lat_deg: f64, elevation_m: f64) -> f64 {
@@ -163,12 +206,7 @@ fn compute_et0(row: &DayRow, lat_deg: f64, elevation_m: f64) -> f64 {
         return f64::NAN;
     }
 
-    let ea = et::actual_vapour_pressure_rh(
-        row.tmin_c,
-        row.tmax_c,
-        row.rh_min_pct,
-        row.rh_max_pct,
-    );
+    let ea = et::actual_vapour_pressure_rh(row.tmin_c, row.tmax_c, row.rh_min_pct, row.rh_max_pct);
 
     let input = DailyEt0Input {
         tmax: row.tmax_c,
@@ -186,12 +224,10 @@ fn compute_et0(row: &DayRow, lat_deg: f64, elevation_m: f64) -> f64 {
 }
 
 fn main() {
-    tracing_subscriber::fmt()
-        .with_env_filter("info")
-        .init();
+    tracing_subscriber::fmt().with_env_filter("info").init();
 
-    let benchmark: serde_json::Value = serde_json::from_str(BENCHMARK_JSON)
-        .expect("benchmark JSON");
+    let benchmark: serde_json::Value =
+        serde_json::from_str(BENCHMARK_JSON).expect("benchmark JSON");
 
     let mut v = ValidationHarness::new("Exp 059: Atlas 80yr Decade Analysis");
 
@@ -199,24 +235,18 @@ fn main() {
     let mut total_checks = 0;
 
     for station_meta in STATIONS {
-        let rows = match load_station_csv(station_meta.id) {
-            Some(r) => r,
-            None => {
-                println!("  SKIP {}: no CSV", station_meta.id);
-                continue;
-            }
+        let Some(rows) = load_station_csv(station_meta.id) else {
+            println!("  SKIP {}: no CSV", station_meta.id);
+            continue;
         };
 
         let bench_station = bench_stations
             .iter()
             .find(|s| s["station_id"].as_str() == Some(station_meta.id));
 
-        let bench_station = match bench_station {
-            Some(s) => s,
-            None => {
-                println!("  SKIP {}: no benchmark", station_meta.id);
-                continue;
-            }
+        let Some(bench_station) = bench_station else {
+            println!("  SKIP {}: no benchmark", station_meta.id);
+            continue;
         };
 
         let bench_decades = bench_station["decades"].as_array().expect("decades");
@@ -262,25 +292,17 @@ fn main() {
                 let expected_et0 = bd["mean_seasonal_et0_mm"].as_f64().unwrap_or(0.0);
                 let expected_precip = bd["mean_seasonal_precip_mm"].as_f64().unwrap_or(0.0);
 
-                let label_et0 = format!(
-                    "{}_{dec_start}s_mean_et0",
-                    station_meta.id
-                );
+                let label_et0 = format!("{}_{dec_start}s_mean_et0", station_meta.id);
                 v.check_abs(&label_et0, mean_et0, expected_et0, 2.0);
                 total_checks += 1;
 
-                let label_precip = format!(
-                    "{}_{dec_start}s_mean_precip",
-                    station_meta.id
-                );
+                let label_precip = format!("{}_{dec_start}s_mean_precip", station_meta.id);
                 v.check_abs(&label_precip, mean_precip, expected_precip, 0.01);
                 total_checks += 1;
             }
         }
 
-        let bench_trend = bench_station["trend_mm_per_decade"]
-            .as_f64()
-            .unwrap_or(0.0);
+        let bench_trend = bench_station["trend_mm_per_decade"].as_f64().unwrap_or(0.0);
 
         let mut decade_means: Vec<(f64, f64)> = Vec::new();
         for &(dec_start, dec_end) in DECADES {
@@ -313,12 +335,16 @@ fn main() {
         }
 
         if decade_means.len() >= 3 {
-            let n = decade_means.len() as f64;
-            let sum_x: f64 = decade_means.iter().map(|(x, _)| x).sum();
-            let sum_y: f64 = decade_means.iter().map(|(_, y)| y).sum();
-            let sum_xy: f64 = decade_means.iter().map(|(x, y)| x * y).sum();
-            let sum_xx: f64 = decade_means.iter().map(|(x, _)| x * x).sum();
-            let slope = (n * sum_xy - sum_x * sum_y) / (n * sum_xx - sum_x * sum_x);
+            #[allow(clippy::suspicious_operation_groupings)]
+            let slope = {
+                let n = decade_means.len() as f64;
+                let sum_x: f64 = decade_means.iter().map(|(x, _)| x).sum();
+                let sum_y: f64 = decade_means.iter().map(|(_, y)| y).sum();
+                let sum_x_times_y: f64 = decade_means.iter().map(|(x, y)| x * y).sum();
+                let sum_xx: f64 = decade_means.iter().map(|(x, _)| x * x).sum();
+                // OLS slope: (n·Σxy - Σx·Σy) / (n·Σx² - (Σx)²)
+                n.mul_add(sum_x_times_y, -(sum_x * sum_y)) / n.mul_add(sum_xx, -(sum_x * sum_x))
+            };
             let trend_mm_per_decade = slope * 10.0;
 
             let label = format!("{}_trend_mm_decade", station_meta.id);

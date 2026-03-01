@@ -7,8 +7,8 @@
 //! (`control/anderson_coupling/anderson_coupling.py`).
 //!
 //! Benchmark: `control/anderson_coupling/benchmark_anderson_coupling.json`
-//! Provenance: Python baseline commit af1eb97 (2026-02-26)
-//! Reproduction: `cd control/anderson_coupling && python anderson_coupling.py`
+//! script=`control/anderson_coupling/anderson_coupling.py`, commit=0500398, date=2026-02-27
+//! Run: `python3 control/anderson_coupling/anderson_coupling.py`
 //!
 //! Tests: point coupling, monotonicity, boundaries, disorder, seasonal regime,
 //! tillage effects, and numeric reference parity at 1e-10.

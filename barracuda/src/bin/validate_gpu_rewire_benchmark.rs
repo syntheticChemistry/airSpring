@@ -40,9 +40,7 @@ use airspring_barracuda::validation::{self, ValidationHarness};
 
 fn main() {
     validation::init_tracing();
-    validation::banner(
-        "Exp 057: GPU Ops 5-8 Rewire Validation + Cross-Spring Benchmark",
-    );
+    validation::banner("Exp 057: GPU Ops 5-8 Rewire Validation + Cross-Spring Benchmark");
     println!(
         "Validates ToadStool S70+ absorption: all 6 batched ops GPU vs CPU,\n\
          timing benchmarks, and cross-spring evolution provenance.\n"
@@ -64,10 +62,10 @@ fn main() {
     let mut benchmarks: Vec<BenchRow> = Vec::new();
 
     // ═══ Section 1: Op 0 — FAO-56 Penman-Monteith ET₀ ═════════════════════
-    validation::section(
-        "Op 0: FAO-56 PM ET₀ (hotSpring precision + neuralSpring orchestrator)",
+    validation::section("Op 0: FAO-56 PM ET₀ (hotSpring precision + neuralSpring orchestrator)");
+    println!(
+        "  Provenance: hotSpring pow_f64/sin_f64/cos_f64 → neuralSpring batch → airSpring domain"
     );
-    println!("  Provenance: hotSpring pow_f64/sin_f64/cos_f64 → neuralSpring batch → airSpring domain");
 
     let n_et0 = 1000;
     let station_days = generate_station_days(n_et0);
@@ -81,13 +79,21 @@ fn main() {
     );
 
     let t_gpu_et0 = bench_fao56(&engine, &station_days, 20);
-    let t_cpu_et0 = bench_cpu_fn(|| {
-        station_days
-            .iter()
-            .map(compute_et0_cpu)
-            .collect::<Vec<f64>>()
-    }, 20);
-    benchmarks.push(BenchRow::new("FAO-56 ET₀ (op=0)", n_et0, t_gpu_et0, t_cpu_et0));
+    let t_cpu_et0 = bench_cpu_fn(
+        || {
+            station_days
+                .iter()
+                .map(compute_et0_cpu)
+                .collect::<Vec<f64>>()
+        },
+        20,
+    );
+    benchmarks.push(BenchRow::new(
+        "FAO-56 ET₀ (op=0)",
+        n_et0,
+        t_gpu_et0,
+        t_cpu_et0,
+    ));
 
     // ═══ Section 2: Op 1 — Water Balance ═══════════════════════════════════
     validation::section("Op 1: Water Balance (multi-spring state patterns)");
@@ -125,10 +131,20 @@ fn main() {
 
     let t_gpu_sc = bench_execute(&engine, &sensor_data, n_sensor, Op::SensorCalibration, 20);
     let t_cpu_sc = bench_cpu_fn(
-        || sensor_data.iter().map(|&r| sensor_cal_cpu(r)).collect::<Vec<f64>>(),
+        || {
+            sensor_data
+                .iter()
+                .map(|&r| sensor_cal_cpu(r))
+                .collect::<Vec<f64>>()
+        },
         20,
     );
-    benchmarks.push(BenchRow::new("SensorCal (op=5)", n_sensor, t_gpu_sc, t_cpu_sc));
+    benchmarks.push(BenchRow::new(
+        "SensorCal (op=5)",
+        n_sensor,
+        t_gpu_sc,
+        t_cpu_sc,
+    ));
 
     // ═══ Section 4: Op 6 — Hargreaves-Samani ET₀ ══════════════════════════
     validation::section("Op 6: Hargreaves ET₀ (airSpring + hotSpring acos_f64/sin_f64)");
@@ -170,9 +186,7 @@ fn main() {
 
     let n_kc = 2000;
     let kc_data = generate_kc_data(n_kc);
-    let kc_gpu = engine
-        .execute(&kc_data, n_kc, Op::KcClimateAdjust)
-        .unwrap();
+    let kc_gpu = engine.execute(&kc_data, n_kc, Op::KcClimateAdjust).unwrap();
 
     let kc_cpu: Vec<f64> = kc_data
         .chunks(4)
@@ -235,7 +249,9 @@ fn main() {
 
     // ═══ Section 8: Seasonal Pipeline GPU Stages 1-2 ══════════════════════
     validation::section("Seasonal Pipeline GPU Stages 1-2 (all Springs converge)");
-    println!("  Provenance: hotSpring(precision) + wetSpring(patterns) + neuralSpring(orchestration)");
+    println!(
+        "  Provenance: hotSpring(precision) + wetSpring(patterns) + neuralSpring(orchestration)"
+    );
     println!("            + airSpring(domain) + groundSpring(uncertainty) → unified GPU pipeline");
 
     let weather = generate_growing_season();
@@ -313,21 +329,13 @@ fn main() {
     // ═══ Benchmark Summary ════════════════════════════════════════════════
     println!();
     validation::section("Benchmark Summary");
-    println!(
-        "  ┌──────────────────────┬───────┬──────────────┬──────────────┬──────────┐"
-    );
-    println!(
-        "  │ Operation            │     N │     GPU (ms) │     CPU (ms) │  Speedup │"
-    );
-    println!(
-        "  ├──────────────────────┼───────┼──────────────┼──────────────┼──────────┤"
-    );
+    println!("  ┌──────────────────────┬───────┬──────────────┬──────────────┬──────────┐");
+    println!("  │ Operation            │     N │     GPU (ms) │     CPU (ms) │  Speedup │");
+    println!("  ├──────────────────────┼───────┼──────────────┼──────────────┼──────────┤");
     for row in &benchmarks {
         row.print();
     }
-    println!(
-        "  └──────────────────────┴───────┴──────────────┴──────────────┴──────────┘"
-    );
+    println!("  └──────────────────────┴───────┴──────────────┴──────────────┴──────────┘");
 
     let valid_speedups: Vec<f64> = benchmarks
         .iter()
@@ -335,8 +343,10 @@ fn main() {
         .map(|r| r.t_cpu / r.t_gpu)
         .collect();
     if !valid_speedups.is_empty() {
-        let geo_mean =
-            valid_speedups.iter().product::<f64>().powf(1.0 / valid_speedups.len() as f64);
+        let geo_mean = valid_speedups
+            .iter()
+            .product::<f64>()
+            .powf(1.0 / valid_speedups.len() as f64);
         println!("\n  Geometric mean GPU speedup: {geo_mean:.1}×");
     }
 
@@ -354,7 +364,12 @@ struct BenchRow {
 
 impl BenchRow {
     const fn new(name: &'static str, n: usize, t_gpu: f64, t_cpu: f64) -> Self {
-        Self { name, n, t_gpu, t_cpu }
+        Self {
+            name,
+            n,
+            t_gpu,
+            t_cpu,
+        }
     }
 
     fn print(&self) {
@@ -464,7 +479,10 @@ fn generate_sensor_data(n: usize) -> Vec<f64> {
 }
 
 fn sensor_cal_cpu(raw: f64) -> f64 {
-    2e-13f64.mul_add(raw, -4e-9).mul_add(raw, 4e-5).mul_add(raw, -0.0677)
+    2e-13f64
+        .mul_add(raw, -4e-9)
+        .mul_add(raw, 4e-5)
+        .mul_add(raw, -0.0677)
 }
 
 fn generate_hargreaves_data(n: usize) -> Vec<f64> {
@@ -528,7 +546,11 @@ fn generate_growing_season() -> Vec<WeatherDay> {
         .collect()
 }
 
-fn bench_fao56(engine: &BatchedElementwiseF64, data: &[bef64::StationDayInput], iters: usize) -> f64 {
+fn bench_fao56(
+    engine: &BatchedElementwiseF64,
+    data: &[bef64::StationDayInput],
+    iters: usize,
+) -> f64 {
     let _ = engine.fao56_et0_batch(data);
     let start = Instant::now();
     for _ in 0..iters {
@@ -537,7 +559,13 @@ fn bench_fao56(engine: &BatchedElementwiseF64, data: &[bef64::StationDayInput], 
     start.elapsed().as_secs_f64() / iters as f64
 }
 
-fn bench_execute(engine: &BatchedElementwiseF64, data: &[f64], n: usize, op: Op, iters: usize) -> f64 {
+fn bench_execute(
+    engine: &BatchedElementwiseF64,
+    data: &[f64],
+    n: usize,
+    op: Op,
+    iters: usize,
+) -> f64 {
     let _ = engine.execute(data, n, op);
     let start = Instant::now();
     for _ in 0..iters {
@@ -555,7 +583,12 @@ fn bench_cpu_fn<F: Fn() -> Vec<f64>>(f: F, iters: usize) -> f64 {
     start.elapsed().as_secs_f64() / iters as f64
 }
 
-fn bench_season(pipeline: &SeasonalPipeline, weather: &[WeatherDay], config: &CropConfig, iters: usize) -> f64 {
+fn bench_season(
+    pipeline: &SeasonalPipeline,
+    weather: &[WeatherDay],
+    config: &CropConfig,
+    iters: usize,
+) -> f64 {
     let start = Instant::now();
     for _ in 0..iters {
         let _ = pipeline.run_season(weather, config);

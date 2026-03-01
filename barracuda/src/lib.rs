@@ -58,6 +58,7 @@
 //! - **Optimizers**: `nelder_mead` (isotherm fitting), `brent` (VG pressure head inversion)
 //! - **Validation**: `ValidationHarness`, `tolerances::Tolerance`
 
+pub mod biomeos;
 pub mod data;
 pub mod eco;
 pub mod error;

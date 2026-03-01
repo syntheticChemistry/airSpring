@@ -19,6 +19,10 @@
 //! Crops: 10 Michigan crops (from `eco::crop::CropType`)
 //! Output: Per-station, per-crop seasonal water budgets
 //!
+//! Benchmark: `control/atlas/benchmark_atlas.json`
+//! script=`control/atlas/atlas_water_budget.py`, commit=e651409, date=2026-02-26
+//! Run: `python3 control/atlas/atlas_water_budget.py`
+//!
 //! Runtime config via env vars (all optional):
 //!   ATLAS_DATA_DIR   — path to Open-Meteo CSVs (default: data/open_meteo)
 //!   ATLAS_YEAR_START — first year to process (default: 1945)

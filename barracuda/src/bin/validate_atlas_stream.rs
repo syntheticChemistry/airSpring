@@ -19,6 +19,10 @@
 //! Data: 80yr Open-Meteo ERA5 daily CSVs (11+ stations, ~29,220 days each)
 //! Crops: 5 Michigan crops (corn, soybean, wheat, potato, alfalfa)
 //!
+//! Data download: `scripts/download_atlas_80yr.py`
+//! commit=d3ecdc8, date=2026-02-27
+//! Run: `python scripts/download_atlas_80yr.py`
+//!
 //! Runtime config via env vars (all optional):
 //!   `ATLAS_STREAM_DIR` — path to 80yr CSVs (default: `data/open_meteo`)
 

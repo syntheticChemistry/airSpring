@@ -13,7 +13,21 @@
 //! synthetic moisture gradient modeled after PRJNA481146 (Ein Harod).
 //!
 //! Cross-Spring: airSpring (θ, Anderson) × wetSpring (diversity metrics)
-//! Data: Synthetic OTU tables (pending NestGate NCBI provider for real SRA data)
+//!
+//! # Data Provenance
+//!
+//! - **Reference study**: Levi et al. (2017) "Soil tillage effect on 16S rRNA",
+//!   NCBI `BioProject` PRJNA481146, Ein Harod, Israel.
+//! - **Current data**: Synthetic OTU tables with abundance distributions
+//!   modeled on PRJNA481146 community structure. Uses realistic Shannon H'
+//!   ranges (1.5–3.5) and evenness ranges (0.4–0.85) from published values.
+//! - **Evolution path**: When `NestGate` NCBI provider is operational, replace
+//!   synthetic tables with real SRA amplicon data (PRJNA481146, PRJNA520952).
+//!   Accession PRJNA520952 (Hartman et al. 2018) adds a temperate climate
+//!   gradient for cross-validation.
+//! - Provenance: script=`control/ncbi_diversity/ncbi_diversity_analysis.py`,
+//!   commit=88d07c0, date=2026-02-28.
+//! - Run: `python3 control/ncbi_diversity/ncbi_diversity_analysis.py`
 
 use airspring_barracuda::eco::anderson;
 use airspring_barracuda::eco::diversity;
@@ -23,9 +37,7 @@ const BENCHMARK: &str =
     include_str!("../../../control/ncbi_diversity/benchmark_ncbi_diversity.json");
 
 fn main() {
-    tracing_subscriber::fmt()
-        .with_env_filter("info")
-        .init();
+    tracing_subscriber::fmt().with_env_filter("info").init();
 
     let bench: serde_json::Value = serde_json::from_str(BENCHMARK).expect("benchmark JSON");
     let mut v = ValidationHarness::new("Exp 061: Cross-Spring Shannon H' Diversity Gradient");
@@ -72,40 +84,16 @@ fn main() {
         all_abundances.push(abundances);
 
         // Shannon in expected range
-        v.check_lower(
-            &format!("{label}_shannon_min"),
-            h,
-            sh_min,
-        );
-        v.check_upper(
-            &format!("{label}_shannon_max"),
-            h,
-            sh_max,
-        );
+        v.check_lower(&format!("{label}_shannon_min"), h, sh_min);
+        v.check_upper(&format!("{label}_shannon_max"), h, sh_max);
 
         // Evenness in expected range
-        v.check_lower(
-            &format!("{label}_evenness_min"),
-            evenness,
-            ev_min,
-        );
-        v.check_upper(
-            &format!("{label}_evenness_max"),
-            evenness,
-            ev_max,
-        );
+        v.check_lower(&format!("{label}_evenness_min"), evenness, ev_min);
+        v.check_upper(&format!("{label}_evenness_max"), evenness, ev_max);
 
         // Simpson should always be in [0, 1]
-        v.check_lower(
-            &format!("{label}_simpson_positive"),
-            simpson,
-            0.0,
-        );
-        v.check_upper(
-            &format!("{label}_simpson_max"),
-            simpson,
-            1.0,
-        );
+        v.check_lower(&format!("{label}_simpson_positive"), simpson, 0.0);
+        v.check_upper(&format!("{label}_simpson_max"), simpson, 1.0);
 
         // Anderson coupling
         let chain = anderson::coupling_chain(theta, theta_r, theta_s);
@@ -114,10 +102,7 @@ fn main() {
             (0.0..=1.0).contains(&chain.se),
         );
 
-        v.check_bool(
-            &format!("{label}_d_eff_non_negative"),
-            chain.d_eff >= 0.0,
-        );
+        v.check_bool(&format!("{label}_d_eff_non_negative"), chain.d_eff >= 0.0);
     }
 
     validation::section("Moisture-Diversity Coupling");
@@ -129,16 +114,8 @@ fn main() {
         let first_h = shannon_values[0].1;
         let last_h = shannon_values[shannon_values.len() - 1].1;
 
-        v.check_lower(
-            "shannon_mid_gt_dry",
-            mid_h - first_h,
-            0.0,
-        );
-        v.check_lower(
-            "shannon_mid_gt_saturated",
-            mid_h - last_h,
-            0.0,
-        );
+        v.check_lower("shannon_mid_gt_dry", mid_h - first_h, 0.0);
+        v.check_lower("shannon_mid_gt_saturated", mid_h - last_h, 0.0);
     }
 
     // Bray-Curtis: dry vs wet should show meaningful dissimilarity
@@ -169,10 +146,7 @@ fn main() {
     let n = all_abundances.len();
     if n >= 3 {
         let bc_matrix = diversity::bray_curtis_matrix(&all_abundances);
-        v.check_bool(
-            "bray_curtis_matrix_size",
-            bc_matrix.len() == n * n,
-        );
+        v.check_bool("bray_curtis_matrix_size", bc_matrix.len() == n * n);
 
         let all_valid = bc_matrix.iter().all(|&bc| (0.0..=1.0).contains(&bc));
         v.check_bool("bray_curtis_all_valid", all_valid);

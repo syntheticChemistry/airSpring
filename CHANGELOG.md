@@ -2,6 +2,57 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.5.9] - 2026-03-01
+
+### Cross-Spring Evolution Rewire + Deep Debt Resolution + wateringHole Compliance
+
+Complete modern ToadStool/BarraCUDA rewiring with validated cross-spring evolution
+benchmark (44/44 PASS). Richards PDE solver rewired to upstream tridiagonal solve.
+Deep technical debt resolution: shared biomeos module, configurable solver, hardened
+startup, capability-based discovery everywhere. 817 tests, zero mocks in production.
+
+#### Added
+- **`biomeos` module** (`src/biomeos.rs`) — Shared socket resolution, family ID,
+  primal discovery, and fallback registration. Replaces triplicated code across
+  `airspring_primal`, `validate_nucleus`, and `validate_nucleus_pipeline`.
+- **`RichardsConfig` struct** — Configurable Picard iteration parameters (tolerance,
+  max iterations, relaxation, clipping range). `solve_richards_1d_with_config()` for
+  custom tuning; `solve_richards_1d()` unchanged for existing callers.
+- **`bench_cross_spring_evolution` binary** — Validates cross-spring shader evolution
+  across all 5 contributing Springs with provenance documentation and timing:
+  hotSpring precision (9.6µs), wetSpring bio (8.8µs), neuralSpring optimizers (13.8µs),
+  airSpring rewired (4.5µs), groundSpring uncertainty (2.5ms), tridiagonal rewire (11ms).
+- **§14 cross-spring absorption tests** — 16 new tests in `cross_spring_absorption.rs`
+  covering S70+ primitives: Nelder-Mead, BFGS, Newton/Secant, Bisection, Brent,
+  erf/gamma/norm_cdf, Crank-Nicolson PDE, Jackknife, Chi-squared, spectral density,
+  Hill/Monod, convergence diagnostics, Richards tridiag rewire, correction regression.
+
+#### Changed
+- **Richards PDE**: Local `thomas_solve` replaced by `barracuda::linalg::tridiagonal_solve`
+  with singularity detection via `Result`. Zero numerical difference; eliminates duplicate code.
+- **JSON-RPC `health`**: Evolved to `lifecycle.health` (wateringHole `domain.operation` compliance).
+  Backward-compatible: both `"lifecycle.health"` and `"health"` dispatch to same handler.
+- **Primal startup**: All `expect()`/`panic!()` in `airspring_primal` startup replaced with
+  `eprintln!` + `std::process::exit(1)` for clean error reporting.
+- **Fallback registration**: Hardcoded `"neural-api"` replaced with `BIOMEOS_FALLBACK_PRIMAL`
+  env var. Primal code only has self-knowledge; discovers other primals at runtime.
+- **Primal discovery**: `validate_nucleus.rs` reads `BIOMEOS_EXPECTED_PRIMALS` env var
+  (comma-separated) instead of hardcoding primal names.
+- **Test path**: `/tmp/nonexistent_csv_ts_test.csv` → `std::env::temp_dir()` for cross-platform.
+- **Kriging IDW**: Documentation clarified as intentional lightweight device-free alternative.
+- Lib tests: 641 → 817 (including 5 new biomeos module tests, 16 cross-spring evolution tests).
+- Binaries: 72 → 73 (bench_cross_spring_evolution).
+- Cross-spring benchmarks: 35 → 44 (full evolution benchmark).
+
+#### Compliance
+- Zero unsafe code, zero clippy warnings, zero TODOs, zero mocks in production.
+- All .rs files under 1000 lines (wateringHole maximum).
+- All .rs files have AGPL-3.0-or-later SPDX headers.
+- All JSON-RPC methods follow `domain.operation` naming.
+- All external dependencies are pure Rust (no C/FFI).
+
+---
+
 ## [0.5.8] - 2026-03-01
 
 ### NUCLEUS Cross-Primal Pipeline + Ecology Domain + Science Extensions

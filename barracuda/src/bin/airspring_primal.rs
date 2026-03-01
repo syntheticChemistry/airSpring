@@ -43,6 +43,7 @@ use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
+use airspring_barracuda::biomeos;
 use airspring_barracuda::eco::evapotranspiration as et;
 use airspring_barracuda::eco::simple_et0;
 
@@ -78,69 +79,23 @@ struct PrimalState {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Socket resolution (capability-based, no hardcoded paths)
+// Socket resolution — delegates to `biomeos` module
 // ═══════════════════════════════════════════════════════════════════
 
 fn resolve_socket_dir() -> PathBuf {
-    if let Ok(dir) = std::env::var("BIOMEOS_SOCKET_DIR") {
-        return PathBuf::from(dir);
-    }
-    if let Ok(xdg) = std::env::var("XDG_RUNTIME_DIR") {
-        return PathBuf::from(xdg).join("biomeos");
-    }
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::MetadataExt;
-        if let Ok(meta) = std::fs::metadata("/proc/self") {
-            let uid = meta.uid();
-            let dir = PathBuf::from(format!("/run/user/{uid}/biomeos"));
-            if dir.parent().is_some_and(Path::exists) {
-                return dir;
-            }
-        }
-    }
-    std::env::temp_dir().join("biomeos")
+    biomeos::resolve_socket_dir()
 }
 
 fn get_family_id() -> String {
-    if let Ok(id) = std::env::var("FAMILY_ID") {
-        return id;
-    }
-    if let Ok(id) = std::env::var("BIOMEOS_FAMILY_ID") {
-        return id;
-    }
-    "default".to_string()
+    biomeos::get_family_id()
 }
 
 fn resolve_socket_path(family_id: &str) -> PathBuf {
-    resolve_socket_dir().join(format!("{PRIMAL_NAME}-{family_id}.sock"))
+    biomeos::resolve_socket_path(PRIMAL_NAME, family_id)
 }
 
 fn discover_primal_socket(primal_name: &str) -> Option<PathBuf> {
-    let socket_dir = resolve_socket_dir();
-    let family_id = get_family_id();
-
-    let with_family = socket_dir.join(format!("{primal_name}-{family_id}.sock"));
-    if with_family.exists() {
-        return Some(with_family);
-    }
-
-    let without_family = socket_dir.join(format!("{primal_name}.sock"));
-    if without_family.exists() {
-        return Some(without_family);
-    }
-
-    if let Ok(entries) = std::fs::read_dir(&socket_dir) {
-        for entry in entries.flatten() {
-            let name = entry.file_name();
-            let name_str = name.to_string_lossy();
-            if name_str.starts_with(primal_name) && name_str.ends_with(".sock") {
-                return Some(entry.path());
-            }
-        }
-    }
-
-    None
+    biomeos::discover_primal_socket(primal_name)
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -169,15 +124,19 @@ fn json_rpc_error(id: &serde_json::Value, code: i32, message: &str) -> serde_jso
 
 fn dispatch(method: &str, params: &serde_json::Value, state: &PrimalState) -> serde_json::Value {
     match method {
-        "health" => handle_health(state),
+        "lifecycle.health" | "health" => handle_health(state),
 
         "science.et0_fao56" | "ecology.et0_fao56" => handle_et0_fao56(params),
         "science.et0_hargreaves" | "ecology.et0_hargreaves" => handle_et0_hargreaves(params),
-        "science.et0_priestley_taylor" | "ecology.et0_priestley_taylor" => handle_et0_priestley_taylor(params),
+        "science.et0_priestley_taylor" | "ecology.et0_priestley_taylor" => {
+            handle_et0_priestley_taylor(params)
+        }
         "science.et0_makkink" | "ecology.et0_makkink" => handle_et0_makkink(params),
         "science.et0_turc" | "ecology.et0_turc" => handle_et0_turc(params),
         "science.et0_hamon" | "ecology.et0_hamon" => handle_et0_hamon(params),
-        "science.et0_blaney_criddle" | "ecology.et0_blaney_criddle" => handle_et0_blaney_criddle(params),
+        "science.et0_blaney_criddle" | "ecology.et0_blaney_criddle" => {
+            handle_et0_blaney_criddle(params)
+        }
         "science.water_balance" | "ecology.water_balance" => handle_water_balance(params),
         "science.yield_response" | "ecology.yield_response" => handle_yield_response(params),
 
@@ -466,28 +425,7 @@ fn handle_primal_forward(params: &serde_json::Value) -> serde_json::Value {
 
 fn handle_primal_discover() -> serde_json::Value {
     let socket_dir = resolve_socket_dir();
-    let mut primals = Vec::new();
-
-    if let Ok(entries) = std::fs::read_dir(&socket_dir) {
-        for entry in entries.flatten() {
-            let name = entry.file_name();
-            let name_str = name.to_string_lossy().to_string();
-            if name_str.ends_with(".sock") {
-                let primal_name = name_str
-                    .split('-')
-                    .next()
-                    .unwrap_or(&name_str)
-                    .trim_end_matches(".sock")
-                    .to_string();
-
-                if !primals.contains(&primal_name) {
-                    primals.push(primal_name);
-                }
-            }
-        }
-    }
-
-    primals.sort();
+    let primals = biomeos::discover_all_primals();
 
     serde_json::json!({
         "socket_dir": socket_dir.to_string_lossy(),
@@ -500,7 +438,11 @@ fn handle_primal_discover() -> serde_json::Value {
 // biomeOS registration (synchronous)
 // ═══════════════════════════════════════════════════════════════════
 
-fn send_jsonrpc(socket_path: &Path, method: &str, params: serde_json::Value) -> Option<serde_json::Value> {
+fn send_jsonrpc(
+    socket_path: &Path,
+    method: &str,
+    params: serde_json::Value,
+) -> Option<serde_json::Value> {
     let mut stream = match UnixStream::connect(socket_path) {
         Ok(s) => s,
         Err(e) => {
@@ -534,16 +476,24 @@ fn send_jsonrpc(socket_path: &Path, method: &str, params: serde_json::Value) -> 
 fn register_with_biomeos(our_socket: &Path) {
     let biomeos_socket = resolve_socket_dir().join(ORCHESTRATOR_SOCKET);
     if !biomeos_socket.exists() {
-        eprintln!("[biomeos] No orchestrator at {}, running standalone", biomeos_socket.display());
+        eprintln!(
+            "[biomeos] No orchestrator at {}, running standalone",
+            biomeos_socket.display()
+        );
 
-        let neural_api = discover_primal_socket("neural-api");
-        if let Some(ref api_sock) = neural_api {
-            eprintln!("[biomeos] Found neural-api at {}, registering via neural-api", api_sock.display());
-            register_via_socket(api_sock, our_socket);
-            return;
+        if let Some(fallback_name) = biomeos::fallback_registration_primal() {
+            if let Some(ref fallback_sock) = discover_primal_socket(&fallback_name) {
+                eprintln!(
+                    "[biomeos] Found {fallback_name} at {}, registering via fallback",
+                    fallback_sock.display()
+                );
+                register_via_socket(fallback_sock, our_socket);
+                return;
+            }
+            eprintln!("[biomeos] Fallback primal '{fallback_name}' not found — fully standalone");
+        } else {
+            eprintln!("[biomeos] No BIOMEOS_FALLBACK_PRIMAL set — fully standalone");
         }
-
-        eprintln!("[biomeos] No neural-api found either — fully standalone");
         return;
     }
 
@@ -612,7 +562,10 @@ fn register_via_socket(target: &Path, our_socket: &Path) {
         }
     }
 
-    eprintln!("[biomeos] {registered}/{} capabilities + ecology domain registered", ALL_CAPABILITIES.len());
+    eprintln!(
+        "[biomeos] {registered}/{} capabilities + ecology domain registered",
+        ALL_CAPABILITIES.len()
+    );
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -640,7 +593,11 @@ fn handle_connection(stream: UnixStream, state: &PrimalState) {
         let parsed: serde_json::Value = match serde_json::from_str(trimmed) {
             Ok(v) => v,
             Err(e) => {
-                let resp = json_rpc_error(&serde_json::Value::Null, -32700, &format!("Parse error: {e}"));
+                let resp = json_rpc_error(
+                    &serde_json::Value::Null,
+                    -32700,
+                    &format!("Parse error: {e}"),
+                );
                 let _ = writeln!(writer, "{resp}");
                 let _ = writer.flush();
                 continue;
@@ -648,10 +605,7 @@ fn handle_connection(stream: UnixStream, state: &PrimalState) {
         };
 
         let id = parsed.get("id").cloned().unwrap_or(serde_json::Value::Null);
-        let method = parsed
-            .get("method")
-            .and_then(|v| v.as_str())
-            .unwrap_or("");
+        let method = parsed.get("method").and_then(|v| v.as_str()).unwrap_or("");
         let params = parsed
             .get("params")
             .cloned()
@@ -675,11 +629,23 @@ fn main() {
     let socket_path = resolve_socket_path(&family_id);
 
     if let Some(parent) = socket_path.parent() {
-        std::fs::create_dir_all(parent).expect("creating socket directory");
+        if let Err(e) = std::fs::create_dir_all(parent) {
+            eprintln!(
+                "[fatal] Cannot create socket directory {}: {e}",
+                parent.display()
+            );
+            std::process::exit(1);
+        }
     }
 
     if socket_path.exists() {
-        std::fs::remove_file(&socket_path).expect("removing stale socket");
+        if let Err(e) = std::fs::remove_file(&socket_path) {
+            eprintln!(
+                "[fatal] Cannot remove stale socket {}: {e}",
+                socket_path.display()
+            );
+            std::process::exit(1);
+        }
     }
 
     let state = Arc::new(PrimalState {
@@ -687,9 +653,13 @@ fn main() {
         requests_served: AtomicU64::new(0),
     });
 
-    let listener =
-        UnixListener::bind(&socket_path)
-            .unwrap_or_else(|e| panic!("binding to {}: {e}", socket_path.display()));
+    let listener = match UnixListener::bind(&socket_path) {
+        Ok(l) => l,
+        Err(e) => {
+            eprintln!("[fatal] Cannot bind to {}: {e}", socket_path.display());
+            std::process::exit(1);
+        }
+    };
 
     eprintln!("airSpring primal listening on {}", socket_path.display());
     eprintln!("  Family ID: {family_id}");
@@ -709,11 +679,12 @@ fn main() {
     let heartbeat_path = socket_path.clone();
     std::thread::spawn(move || {
         let biomeos_socket = resolve_socket_dir().join(ORCHESTRATOR_SOCKET);
-        let neural_api = discover_primal_socket("neural-api");
+        let fallback =
+            biomeos::fallback_registration_primal().and_then(|name| discover_primal_socket(&name));
         let target = if biomeos_socket.exists() {
             Some(biomeos_socket)
         } else {
-            neural_api
+            fallback
         };
 
         while heartbeat_running.load(Ordering::Relaxed) {

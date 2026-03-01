@@ -442,7 +442,8 @@ mod tests {
 
     #[test]
     fn test_parse_csv_file_not_found() {
-        let result = parse_csv(Path::new("/tmp/nonexistent_csv_ts_test.csv"), None);
+        let path = std::env::temp_dir().join("nonexistent_csv_ts_test_airspring.csv");
+        let result = parse_csv(&path, None);
         assert!(result.is_err());
     }
 

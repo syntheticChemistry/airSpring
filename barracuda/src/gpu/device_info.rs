@@ -230,7 +230,10 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         primitives: &["fused_et0_kc_wb_stress"],
         origin: "airSpring concept → ToadStool S70+",
         domain: "Single-dispatch seasonal pipeline: ET₀ → Kc → WB → Stress",
-        evolved_by: &["airSpring (domain spec)", "ToadStool S70+ (WGSL implementation)"],
+        evolved_by: &[
+            "airSpring (domain spec)",
+            "ToadStool S70+ (WGSL implementation)",
+        ],
         airspring_use: "Future: fused seasonal pipeline (pending Rust executor)",
     },
     ShaderProvenance {
@@ -238,7 +241,10 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         primitives: &["brent_vg_inverse", "brent_green_ampt"],
         origin: "airSpring concept → ToadStool S70+",
         domain: "Brent method root-finding for VG inverse and Green-Ampt",
-        evolved_by: &["airSpring (VG inverse need)", "ToadStool S70+ (WGSL, bug on L49)"],
+        evolved_by: &[
+            "airSpring (VG inverse need)",
+            "ToadStool S70+ (WGSL, bug on L49)",
+        ],
         airspring_use: "Future: GPU VG inverse (pending ToadStool bug fix)",
     },
     ShaderProvenance {

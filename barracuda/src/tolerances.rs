@@ -457,6 +457,31 @@ pub const IOT_CSV_ROUNDTRIP: Tolerance = Tolerance {
     justification: "CSV {:.2} format truncation: round-trip within 0.1 of mean",
 };
 
+// ═══════════════════════════════════════════════════════════════════
+// NPU streaming classification
+// ═══════════════════════════════════════════════════════════════════
+
+/// Minimum EMA samples before anomaly detection activates — guards against
+/// false positives during warmup.
+pub const NPU_MIN_ANOMALY_SAMPLES: u64 = 10;
+
+/// EMA variance floor — prevents division by zero in z-score anomaly detection.
+pub const NPU_SIGMA_FLOOR: Tolerance = Tolerance {
+    name: "npu_sigma_floor",
+    abs_tol: 1e-10,
+    rel_tol: 1e-10,
+    justification: "EMA variance floor — prevents division by zero in z-score anomaly detection",
+};
+
+/// FAO-56 p-factor: stress onset when Dr > 0.55 × TAW (Allen et al. 1998 Eq 84,
+/// midpoint for field crops).
+pub const NPU_STRESS_DEPLETION: Tolerance = Tolerance {
+    name: "npu_stress_depletion",
+    abs_tol: 0.55,
+    rel_tol: 0.0,
+    justification: "FAO-56 p-factor: stress onset when Dr > 0.55 × TAW (Allen et al. 1998 Eq 84, midpoint for field crops)",
+};
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -577,6 +602,9 @@ mod tests {
             &IOT_TEMPERATURE_EXTREMES,
             &IOT_PAR_MAX,
             &IOT_CSV_ROUNDTRIP,
+            // NPU streaming classification
+            &NPU_SIGMA_FLOOR,
+            &NPU_STRESS_DEPLETION,
         ];
         for tol in all_tolerances {
             assert!(
@@ -591,10 +619,10 @@ mod tests {
             );
             assert!(tol.abs_tol > 0.0, "{}: abs_tol must be positive", tol.name);
         }
-        // Ensure we cover every defined tolerance (45 total)
+        // Ensure we cover every defined tolerance (47 total)
         assert_eq!(
             all_tolerances.len(),
-            45,
+            47,
             "test must include every tolerance constant defined in this file"
         );
     }

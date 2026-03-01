@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.5.8"
+version = "0.5.9"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
@@ -325,4 +325,8 @@ path = "src/bin/validate_nucleus.rs"
 [[bin]]
 name = "validate_nucleus_pipeline"
 path = "src/bin/validate_nucleus_pipeline.rs"
+
+[[bin]]
+name = "bench_cross_spring_evolution"
+path = "src/bin/bench_cross_spring_evolution.rs"
 

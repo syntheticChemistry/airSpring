@@ -334,10 +334,7 @@ mod tests {
         let gpu_result = gpu_engine.compute_gpu(&inputs).unwrap();
         let cpu_result = cpu_engine.compute(&inputs);
         for (g, c) in gpu_result.et0_values.iter().zip(&cpu_result.et0_values) {
-            assert!(
-                (g - c).abs() < 0.05,
-                "GPU {g:.4} vs CPU {c:.4}"
-            );
+            assert!((g - c).abs() < 0.05, "GPU {g:.4} vs CPU {c:.4}");
         }
     }
 

@@ -315,7 +315,8 @@ pub const GAPS: &[EvolutionGap] = &[
         description: "Batch sensor calibration (SoilWatch 10) via custom op",
         tier: Tier::A,
         toadstool_primitive: Some("batched_elementwise_f64.wgsl (op=5, stride=1)"),
-        action: "GPU-FIRST (v0.5.6): gpu::sensor_calibration → Op::SensorCalibration (S70+ absorbed)",
+        action:
+            "GPU-FIRST (v0.5.6): gpu::sensor_calibration → Op::SensorCalibration (S70+ absorbed)",
     },
     EvolutionGap {
         id: "hargreaves_batch",

@@ -8,7 +8,8 @@
 //! Validate FAO-56 Chapter 7 dual crop coefficient against Python control.
 //!
 //! Benchmark source: `control/dual_kc/benchmark_dual_kc.json`
-//! Python baseline: `control/dual_kc/dual_crop_coefficient.py` (63/63 PASS)
+//! script=`control/dual_kc/dual_crop_coefficient.py`, commit=374ff74f, date=2026-02-25
+//! Run: `python3 control/dual_kc/dual_crop_coefficient.py`
 //!
 //! Validates:
 //! 1. Eq. 69 — `ETc` = (`Kcb` × `Ks` + `Ke`) × ET₀

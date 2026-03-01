@@ -35,43 +35,13 @@ use std::os::unix::net::UnixStream;
 use std::path::PathBuf;
 use std::time::Duration;
 
+use airspring_barracuda::biomeos;
 use airspring_barracuda::eco::evapotranspiration as et;
 
 use barracuda::validation::ValidationHarness;
 
-fn resolve_socket_dir() -> PathBuf {
-    if let Ok(dir) = std::env::var("BIOMEOS_SOCKET_DIR") {
-        return PathBuf::from(dir);
-    }
-    if let Ok(xdg) = std::env::var("XDG_RUNTIME_DIR") {
-        return PathBuf::from(xdg).join("biomeos");
-    }
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::MetadataExt;
-        if let Ok(meta) = std::fs::metadata("/proc/self") {
-            let uid = meta.uid();
-            let dir = PathBuf::from(format!("/run/user/{uid}/biomeos"));
-            if dir.parent().is_some_and(std::path::Path::exists) {
-                return dir;
-            }
-        }
-    }
-    std::env::temp_dir().join("biomeos")
-}
-
 fn find_socket(prefix: &str) -> Option<PathBuf> {
-    let socket_dir = resolve_socket_dir();
-    if let Ok(entries) = std::fs::read_dir(&socket_dir) {
-        for entry in entries.flatten() {
-            let name = entry.file_name();
-            let s = name.to_string_lossy();
-            if s.starts_with(prefix) && s.ends_with(".sock") {
-                return Some(entry.path());
-            }
-        }
-    }
-    None
+    biomeos::find_socket(prefix)
 }
 
 fn send_jsonrpc(
@@ -120,8 +90,14 @@ fn main() {
     let health = send_jsonrpc(&sock, "health", serde_json::json!({}));
     v.check_bool("health_response", health.is_some());
     if let Some(ref h) = health {
-        v.check_bool("health_healthy", h.get("status").and_then(|v| v.as_str()) == Some("healthy"));
-        let cap_count = h.get("capabilities").and_then(|v| v.as_array()).map_or(0, |a| a.len());
+        v.check_bool(
+            "health_healthy",
+            h.get("status").and_then(|v| v.as_str()) == Some("healthy"),
+        );
+        let cap_count = h
+            .get("capabilities")
+            .and_then(|v| v.as_array())
+            .map_or(0, |a| a.len());
         v.check_abs("capability_count", cap_count as f64, 16.0, 0.5);
     }
 
@@ -147,9 +123,15 @@ fn main() {
 
     // Also verify direct Rust call parity
     let direct = et::daily_et0(&et::DailyEt0Input {
-        tmax: 32.0, tmin: 18.0, tmean: None,
-        solar_radiation: 22.5, wind_speed_2m: 1.8, actual_vapour_pressure: 1.2,
-        day_of_year: 200, latitude_deg: 42.727, elevation_m: 256.0,
+        tmax: 32.0,
+        tmin: 18.0,
+        tmean: None,
+        solar_radiation: 22.5,
+        wind_speed_2m: 1.8,
+        actual_vapour_pressure: 1.2,
+        day_of_year: 200,
+        latitude_deg: 42.727,
+        elevation_m: 256.0,
     });
     if let Some(ref e) = ecology_et0 {
         let rpc_val = e.get("et0_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
@@ -176,18 +158,30 @@ fn main() {
         v.check_bool("pipeline_has_stages", stages.is_some());
 
         if let Some(stages) = stages {
-            let et0_mm = stages.pointer("/et0/et0_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
+            let et0_mm = stages
+                .pointer("/et0/et0_mm")
+                .and_then(|v| v.as_f64())
+                .unwrap_or(0.0);
             v.check_lower("pipeline_et0_positive", et0_mm, 0.0);
             v.check_abs("pipeline_et0_value", et0_mm, direct.et0, 1e-10);
 
-            let etc = stages.pointer("/water_balance/etc_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
+            let etc = stages
+                .pointer("/water_balance/etc_mm")
+                .and_then(|v| v.as_f64())
+                .unwrap_or(0.0);
             v.check_abs("pipeline_etc_computed", etc, et0_mm * 1.15, 1e-10);
 
-            let sw = stages.pointer("/water_balance/soil_water_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
+            let sw = stages
+                .pointer("/water_balance/soil_water_mm")
+                .and_then(|v| v.as_f64())
+                .unwrap_or(0.0);
             v.check_lower("pipeline_sw_above_wilt", sw, 49.9);
             v.check_upper("pipeline_sw_below_fc", sw, 200.1);
 
-            let yield_ratio = stages.pointer("/yield/yield_ratio").and_then(|v| v.as_f64()).unwrap_or(-1.0);
+            let yield_ratio = stages
+                .pointer("/yield/yield_ratio")
+                .and_then(|v| v.as_f64())
+                .unwrap_or(-1.0);
             v.check_lower("pipeline_yield_ratio_non_negative", yield_ratio, -0.01);
         }
     }
@@ -201,7 +195,10 @@ fn main() {
     v.check_bool("forward_toadstool_response", toadstool_fwd.is_some());
     if let Some(ref t) = toadstool_fwd {
         let inner = t.pointer("/response/result/healthy");
-        v.check_bool("toadstool_healthy", inner.and_then(|v| v.as_bool()).unwrap_or(false));
+        v.check_bool(
+            "toadstool_healthy",
+            inner.and_then(|v| v.as_bool()).unwrap_or(false),
+        );
     }
 
     let beardog_fwd = send_jsonrpc(
@@ -212,7 +209,10 @@ fn main() {
     v.check_bool("forward_beardog_response", beardog_fwd.is_some());
     if let Some(ref b) = beardog_fwd {
         let inner = b.pointer("/response/result/status");
-        v.check_bool("beardog_healthy", inner.and_then(|v| v.as_str()) == Some("healthy"));
+        v.check_bool(
+            "beardog_healthy",
+            inner.and_then(|v| v.as_str()) == Some("healthy"),
+        );
     }
 
     // ── Phase 5: Primal Discovery ──────────────────────────────────
@@ -227,7 +227,10 @@ fn main() {
             let names: Vec<&str> = primals.iter().filter_map(|v| v.as_str()).collect();
             v.check_bool("discover_airspring", names.contains(&"airspring"));
             v.check_bool("discover_beardog", names.contains(&"beardog"));
-            v.check_bool("discover_toadstool", names.iter().any(|n| n.starts_with("toadstool")));
+            v.check_bool(
+                "discover_toadstool",
+                names.iter().any(|n| n.starts_with("toadstool")),
+            );
         }
     }
 

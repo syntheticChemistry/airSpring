@@ -92,12 +92,7 @@ pub fn soil_correlation_gpu(
     n_variables: usize,
 ) -> Result<Vec<f64>, barracuda::error::BarracudaError> {
     assert_eq!(data.len(), n_observations * n_variables);
-    stats_f64::matrix_correlation(
-        device,
-        data,
-        n_observations as u32,
-        n_variables as u32,
-    )
+    stats_f64::matrix_correlation(device, data, n_observations as u32, n_variables as u32)
 }
 
 /// Apply polynomial coefficients from [`sensor_regression_gpu`] to predict VWC.
@@ -117,7 +112,9 @@ mod tests {
     use super::*;
 
     fn try_device() -> Option<Arc<WgpuDevice>> {
-        pollster::block_on(WgpuDevice::new_f64_capable()).ok().map(Arc::new)
+        pollster::block_on(WgpuDevice::new_f64_capable())
+            .ok()
+            .map(Arc::new)
     }
 
     #[test]
@@ -130,7 +127,9 @@ mod tests {
     fn predict_vwc_cubic() {
         let coeffs = [-0.0677, 4e-5, -4e-9, 2e-13];
         let vwc = predict_vwc(&coeffs, 10_000.0);
-        let expected = ((2e-13 * 10_000.0 - 4e-9) * 10_000.0 + 4e-5) * 10_000.0 - 0.0677;
+        let expected = (2e-13f64.mul_add(10_000.0, -4e-9))
+            .mul_add(10_000.0, 4e-5)
+            .mul_add(10_000.0, -0.0677);
         assert!(
             (vwc - expected).abs() < 1e-6,
             "cubic predict: got {vwc}, expected {expected}"
@@ -143,8 +142,10 @@ mod tests {
             eprintln!("SKIP: No f64-capable GPU");
             return;
         };
-        let raw: Vec<f64> = (0..50).map(|i| 1000.0 + i as f64 * 200.0).collect();
-        let vwc: Vec<f64> = raw.iter().map(|&r| 0.05 + r * 0.00002).collect();
+        let raw: Vec<f64> = (0..50)
+            .map(|i| f64::from(i).mul_add(200.0, 1000.0))
+            .collect();
+        let vwc: Vec<f64> = raw.iter().map(|&r| r.mul_add(0.00002, 0.05)).collect();
         let dev = Arc::clone(&device);
         let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
             sensor_regression_gpu(&dev, &raw, &vwc, 50, 1, 1)
@@ -163,10 +164,7 @@ mod tests {
         assert_eq!(result.len(), 1);
         let coeffs = &result[0];
         assert!((coeffs[0] - 0.05).abs() < 0.01, "intercept ≈ 0.05");
-        assert!(
-            (coeffs[1] - 0.00002).abs() < 1e-5,
-            "slope ≈ 0.00002"
-        );
+        assert!((coeffs[1] - 0.00002).abs() < 1e-5, "slope ≈ 0.00002");
     }
 
     #[test]
@@ -179,9 +177,10 @@ mod tests {
         let p = 3;
         let mut data = Vec::with_capacity(n * p);
         for i in 0..n {
-            data.push(i as f64);
-            data.push(2.0 * i as f64 + 1.0);
-            data.push(-(i as f64) + 50.0);
+            let fi = f64::from(i as u16);
+            data.push(fi);
+            data.push(fi.mul_add(2.0, 1.0));
+            data.push((-fi) + 50.0);
         }
         let dev = Arc::clone(&device);
         let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
@@ -206,11 +205,11 @@ mod tests {
             );
         }
         assert!(
-            corr[0 * p + 1] > 0.99,
+            corr[1] > 0.99,
             "x1 and x2=2*x1+1 should be highly correlated"
         );
         assert!(
-            corr[0 * p + 2] < -0.99,
+            corr[2] < -0.99,
             "x1 and x3=-x1+50 should be highly anti-correlated"
         );
     }

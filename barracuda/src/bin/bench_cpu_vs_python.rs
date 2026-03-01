@@ -498,7 +498,9 @@ fn bench_sensor_cal(n: usize) -> (f64, f64, String) {
         result = black_box(sensor_calibration::soilwatch10_vwc(black_box(10_000.0)));
     }
     let elapsed = t0.elapsed().as_secs_f64();
-    let expected = ((2e-13 * 10_000.0 - 4e-9) * 10_000.0 + 4e-5) * 10_000.0 - 0.0677;
+    let expected = (2e-13f64.mul_add(10_000.0, -4e-9))
+        .mul_add(10_000.0, 4e-5)
+        .mul_add(10_000.0, -0.0677);
     let diff = (result - expected).abs();
     let ok = diff < 1e-10;
     (
@@ -543,11 +545,11 @@ fn bench_seasonal_pipeline(n: usize) -> (f64, f64, String) {
 
     let weather: Vec<WeatherDay> = (0u32..153)
         .map(|d| {
-            let df = d as f64;
+            let df = f64::from(d);
             let frac = df / 153.0;
-            let tmax = 25.0 + 7.0 * (std::f64::consts::PI * frac).sin() + 1.5;
+            let tmax = 7.0f64.mul_add((std::f64::consts::PI * frac).sin(), 25.0) + 1.5;
             let tmin = tmax - 10.0;
-            let solar = 18.0 + 5.0 * (std::f64::consts::PI * frac).sin();
+            let solar = 5.0f64.mul_add((std::f64::consts::PI * frac).sin(), 18.0);
             let precip = if (d * 7 + 13) % 17 < 7 { 3.0 } else { 0.0 };
             WeatherDay {
                 tmax,
@@ -572,11 +574,7 @@ fn bench_seasonal_pipeline(n: usize) -> (f64, f64, String) {
     }
     let elapsed = t0.elapsed().as_secs_f64();
     let ok = yr > 0.0 && yr <= 1.0;
-    (
-        elapsed,
-        yr,
-        format!("Rust yield_ratio={yr:.6}, ok={ok}"),
-    )
+    (elapsed, yr, format!("Rust yield_ratio={yr:.6}, ok={ok}"))
 }
 
 fn build_benchmarks() -> Vec<BenchEntry> {
