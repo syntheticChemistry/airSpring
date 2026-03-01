@@ -29,6 +29,18 @@ const HAMON_TEMP_OFFSET_K: f64 = 273.3;
 /// Hamon PET coefficient. Lu et al. (2005).
 const HAMON_PET_COEFF: f64 = 0.1651;
 
+// ── Turc humidity correction constants ─────────────────────────────
+
+/// Turc (1961) RH threshold for humidity correction (%). Below this,
+/// ET₀ is increased by a dryness factor. Turc (1961) Eq. 2.
+const TURC_RH_THRESHOLD_PCT: f64 = 50.0;
+/// Turc (1961) humidity correction denominator (%). Turc (1961) Eq. 2.
+const TURC_RH_CORRECTION_RANGE: f64 = 70.0;
+/// Turc (1961) temperature factor denominator offset (°C).
+const TURC_TEMP_DENOM_OFFSET: f64 = 15.0;
+/// Turc (1961) empirical coefficient. Turc (1961) Eq. 1.
+const TURC_COEFF: f64 = 0.013;
+
 // ── Blaney-Criddle constants ────────────────────────────────────────
 
 /// Blaney-Criddle annual daylight hours (approx 4380 hrs / 100). FAO-24.
@@ -84,7 +96,8 @@ pub fn makkink_et0(tmean_c: f64, rs_mj: f64, elevation_m: f64) -> f64 {
 #[must_use]
 pub fn turc_et0(tmean_c: f64, rs_mj: f64, rh_pct: f64) -> f64 {
     const MJ_TO_CAL_CM2: f64 = 23.8846;
-    let denom = tmean_c + 15.0;
+    const RADIATION_OFFSET_CAL: f64 = 50.0;
+    let denom = tmean_c + TURC_TEMP_DENOM_OFFSET;
     if denom == 0.0 {
         return 0.0;
     }
@@ -92,10 +105,10 @@ pub fn turc_et0(tmean_c: f64, rs_mj: f64, rh_pct: f64) -> f64 {
     if t_factor < 0.0 {
         return 0.0;
     }
-    let rs_cal = MJ_TO_CAL_CM2.mul_add(rs_mj, 50.0);
-    let mut et0 = 0.013 * t_factor * rs_cal;
-    if rh_pct < 50.0 {
-        et0 *= 1.0 + (50.0 - rh_pct) / 70.0;
+    let rs_cal = MJ_TO_CAL_CM2.mul_add(rs_mj, RADIATION_OFFSET_CAL);
+    let mut et0 = TURC_COEFF * t_factor * rs_cal;
+    if rh_pct < TURC_RH_THRESHOLD_PCT {
+        et0 *= 1.0 + (TURC_RH_THRESHOLD_PCT - rh_pct) / TURC_RH_CORRECTION_RANGE;
     }
     et0.max(0.0)
 }

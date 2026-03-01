@@ -531,6 +531,54 @@ fn bench_kc_climate_adjust(n: usize) -> (f64, f64, String) {
     )
 }
 
+fn bench_seasonal_pipeline(n: usize) -> (f64, f64, String) {
+    use airspring_barracuda::eco::crop::CropType;
+    use airspring_barracuda::gpu::seasonal_pipeline::{CropConfig, SeasonalPipeline, WeatherDay};
+
+    let pipeline = SeasonalPipeline::cpu();
+    let mut config = CropConfig::standard(CropType::Corn);
+    config.field_capacity = 0.28;
+    config.wilting_point = 0.14;
+    config.irrigation_depth_mm = 0.0;
+
+    let weather: Vec<WeatherDay> = (0u32..153)
+        .map(|d| {
+            let df = d as f64;
+            let frac = df / 153.0;
+            let tmax = 25.0 + 7.0 * (std::f64::consts::PI * frac).sin() + 1.5;
+            let tmin = tmax - 10.0;
+            let solar = 18.0 + 5.0 * (std::f64::consts::PI * frac).sin();
+            let precip = if (d * 7 + 13) % 17 < 7 { 3.0 } else { 0.0 };
+            WeatherDay {
+                tmax,
+                tmin,
+                rh_max: 75.0,
+                rh_min: 55.0,
+                wind_2m: 2.0,
+                solar_rad: solar,
+                precipitation: precip,
+                elevation: 256.0,
+                latitude_deg: 42.7,
+                day_of_year: 121 + d,
+            }
+        })
+        .collect();
+
+    let t0 = Instant::now();
+    let mut yr = 0.0_f64;
+    for _ in 0..n {
+        let result = pipeline.run_season(black_box(&weather), black_box(&config));
+        yr = black_box(result.yield_ratio);
+    }
+    let elapsed = t0.elapsed().as_secs_f64();
+    let ok = yr > 0.0 && yr <= 1.0;
+    (
+        elapsed,
+        yr,
+        format!("Rust yield_ratio={yr:.6}, ok={ok}"),
+    )
+}
+
 fn build_benchmarks() -> Vec<BenchEntry> {
     vec![
         (
@@ -652,6 +700,12 @@ fn build_benchmarks() -> Vec<BenchEntry> {
             "Kc Climate Adj (op=7)",
             100_000,
             Box::new(bench_kc_climate_adjust),
+        ),
+        (
+            "seasonal_pipeline",
+            "Seasonal Pipeline (153d)",
+            1_000,
+            Box::new(bench_seasonal_pipeline),
         ),
     ]
 }

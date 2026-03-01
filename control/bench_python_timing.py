@@ -315,6 +315,41 @@ def main():
     results.append(bench("kc_climate_adjust", kc_climate_adjust, N * 10,
                          1.20, 2.0, 45.0, 2.0))
 
+    # Seasonal pipeline (ET₀→Kc→WB→Yield, 153 days) — 1K seasons
+    def seasonal_pipeline():
+        taw = 1000 * (0.28 - 0.14) * 1.0
+        raw = 0.55 * taw
+        dr = 0.0
+        total_eta = 0.0
+        total_etc = 0.0
+        for d in range(153):
+            doy_frac = d / 153
+            tmax = 25.0 + 7.0 * math.sin(math.pi * doy_frac) + 1.5
+            tmin = tmax - 10.0
+            tmean = (tmax + tmin) / 2.0
+            doy = 121 + d
+            dr_ = 1.0 + 0.033 * math.cos(2 * math.pi * doy / 365)
+            decl = 0.409 * math.sin(2 * math.pi * doy / 365 - 1.39)
+            lat_r = math.radians(42.7)
+            ws = math.acos(max(-1, min(1, -math.tan(lat_r) * math.tan(decl))))
+            ra = (24 * 60 / math.pi) * 0.082 * dr_ * (
+                ws * math.sin(lat_r) * math.sin(decl)
+                + math.cos(lat_r) * math.cos(decl) * math.sin(ws))
+            ra_mm = ra * 0.408
+            td = max(tmax - tmin, 0.1)
+            et0 = max(0, 0.0023 * (tmean + 17.8) * math.sqrt(td) * ra_mm)
+            kc = 1.20
+            etc = et0 * kc
+            ks = 1.0 if dr <= raw else max(0.0, (taw - dr) / (taw - raw))
+            eta = ks * etc
+            precip = 3.0 if (d * 7 + 13) % 17 < 7 else 0.0
+            dr = max(0.0, min(dr - precip + eta, taw))
+            total_eta += eta
+            total_etc += etc
+        ratio = total_eta / total_etc if total_etc > 0 else 1.0
+        return max(0, 1.0 - 1.25 * (1 - ratio))
+    results.append(bench("seasonal_pipeline", seasonal_pipeline, N // 10))
+
     out = {"benchmarks": results}
     json.dump(out, sys.stdout)
 

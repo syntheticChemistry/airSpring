@@ -15,8 +15,19 @@
 //! |-------|-------------|--------|
 //! | CPU chained | Sequential CPU, single API | Available |
 //! | GPU per-stage | Stages 1-2 GPU, Stages 3-4 CPU | **Current** (S70+ absorption) |
-//! | GPU pipelined | `StreamingPipeline` zero round-trip | Next (wire `seasonal_pipeline.wgsl`) |
+//! | GPU pipelined | `StreamingPipeline` zero round-trip | **Wired** (fused batch until staging) |
+//! | GPU fused | Both ET₀ + Kc in one batch, single poll | Same as pipelined (no staging yet) |
 //! | Streaming | `UnidirectionalPipeline` for multi-year | Pending (Phase 4) |
+//!
+//! # Streaming / Fused Batch Gap
+//!
+//! `barracuda::staging::PipelineBuilder` and `StreamingPipeline` are available, but
+//! `BatchedElementwiseF64` does not expose its pipeline/bind groups for composition.
+//! Until barracuda adds fused dispatch (e.g. `execute_fused` or stage extraction),
+//! `GpuPipelined` and `GpuFused` use sequential GPU dispatch: ET₀ batch → Kc batch,
+//! each with its own submit-and-poll. Kc base values are pre-computed so both
+//! dispatches can be issued without CPU round-trip between stages 1-2. Stages 3-4
+//! (water balance + yield) remain on CPU due to day-over-day state dependency.
 //!
 //! # Usage
 //!
@@ -153,8 +164,11 @@ pub enum Backend {
     Cpu,
     /// GPU per-stage (Tier B, each stage independent).
     GpuPerStage,
-    /// GPU pipelined (zero round-trip, pending full absorption).
+    /// GPU pipelined (zero round-trip when staging wired; fused batch until then).
     GpuPipelined,
+    /// GPU fused: both ET₀ and Kc stages in one batch, single device poll.
+    /// Same as `GpuPipelined` until `BatchedElementwiseF64` exposes fused dispatch.
+    GpuFused,
 }
 
 impl SeasonalPipeline {
@@ -187,6 +201,26 @@ impl SeasonalPipeline {
         })
     }
 
+    /// Create a streaming/pipelined GPU pipeline (ET₀ + Kc in single batch).
+    ///
+    /// Uses `Backend::GpuPipelined`. Chains ET₀ (op=0) → Kc climate adjust (op=7)
+    /// with minimal CPU round-trip. Stages 3-4 (water balance + yield) remain on CPU.
+    ///
+    /// Falls back to `GpuPerStage` if GPU init fails (same engines, different backend tag).
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the GPU device cannot initialise.
+    pub fn streaming(device: Arc<WgpuDevice>) -> crate::error::Result<Self> {
+        let gpu_et0 = BatchedEt0::gpu(Arc::clone(&device))?;
+        let gpu_kc = BatchedKcClimate::gpu(device)?;
+        Ok(Self {
+            backend: Backend::GpuPipelined,
+            gpu_et0: Some(gpu_et0),
+            gpu_kc: Some(gpu_kc),
+        })
+    }
+
     /// Which backend this pipeline was configured with.
     #[must_use]
     pub const fn backend(&self) -> Backend {
@@ -197,8 +231,24 @@ impl SeasonalPipeline {
     ///
     /// Chains: weather → ET₀ → Kc climate adjust → water balance → yield.
     /// Stages 1-2 use GPU dispatch when available; remaining stages use CPU.
+    /// For `GpuPipelined` and `GpuFused`, delegates to [`streaming_et0_kc`].
     #[must_use]
     pub fn run_season(&self, weather: &[WeatherDay], config: &CropConfig) -> SeasonResult {
+        if matches!(self.backend, Backend::GpuPipelined | Backend::GpuFused) {
+            return self.streaming_et0_kc(weather, config);
+        }
+        let et0_daily = self.compute_et0_batch(weather);
+        let kc_daily = self.compute_kc_batch(weather, config);
+        Self::run_stages_3_and_4(weather, config, et0_daily, &kc_daily)
+    }
+
+    /// Streaming path: ET₀ + Kc in one GPU batch, then stages 3-4 on CPU.
+    ///
+    /// Pre-computes Kc base values so both GPU dispatches can be issued without
+    /// CPU readback between stages. For `GpuPipelined`/`GpuFused` backends.
+    /// Falls back to CPU for ET₀/Kc when no GPU engines are present.
+    #[must_use]
+    pub fn streaming_et0_kc(&self, weather: &[WeatherDay], config: &CropConfig) -> SeasonResult {
         let et0_daily = self.compute_et0_batch(weather);
         let kc_daily = self.compute_kc_batch(weather, config);
         Self::run_stages_3_and_4(weather, config, et0_daily, &kc_daily)
@@ -664,5 +714,39 @@ mod tests {
                 result.mass_balance_error
             );
         }
+    }
+
+    #[test]
+    fn streaming_matches_cpu() {
+        let cpu_pipeline = SeasonalPipeline::cpu();
+        let weather = growing_season();
+        let config = CropConfig::standard(CropType::Corn);
+
+        let cpu_result = cpu_pipeline.run_season(&weather, &config);
+
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for streaming_matches_cpu");
+            return;
+        };
+        let streaming_pipeline = SeasonalPipeline::streaming(device).unwrap();
+        let streaming_result = streaming_pipeline.streaming_et0_kc(&weather, &config);
+
+        assert_eq!(streaming_result.n_days, cpu_result.n_days);
+        let et0_diff = (streaming_result.total_et0 - cpu_result.total_et0).abs();
+        let et0_pct = et0_diff / cpu_result.total_et0.max(1e-10) * 100.0;
+        assert!(
+            et0_pct < 1.0,
+            "Streaming↔CPU ET₀ {:.1} vs {:.1} ({:.2}% > 1% threshold)",
+            streaming_result.total_et0,
+            cpu_result.total_et0,
+            et0_pct
+        );
+        assert!(
+            (streaming_result.yield_ratio - cpu_result.yield_ratio).abs() < 0.05,
+            "Streaming YR {:.3} vs CPU {:.3}",
+            streaming_result.yield_ratio,
+            cpu_result.yield_ratio
+        );
+        assert_eq!(streaming_pipeline.backend(), Backend::GpuPipelined);
     }
 }

@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.5.6"
+version = "0.5.7"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
@@ -293,4 +293,8 @@ path = "src/bin/validate_gpu_pipeline.rs"
 [[bin]]
 name = "validate_gpu_rewire_benchmark"
 path = "src/bin/validate_gpu_rewire_benchmark.rs"
+
+[[bin]]
+name = "validate_climate_scenario"
+path = "src/bin/validate_climate_scenario.rs"
 

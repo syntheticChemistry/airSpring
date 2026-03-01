@@ -2,6 +2,29 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.5.7] - 2026-03-01
+
+### Climate Scenario Analysis + Streaming Pipeline + Turc Constants
+
+Exp 058 Climate Scenario Analysis (46/46 PASS), streaming pipeline backends
+(GpuPipelined, GpuFused), seasonal pipeline benchmark in CPU vs Python suite,
+Turc magic numbers promoted to named constants.
+
+#### Added
+- **Exp 058: Climate Scenario Analysis** (46/46 PASS)
+  - `validate_climate_scenario` binary — climate scenario pipeline validation
+- **Streaming pipeline backend**: `Backend::GpuPipelined`, `backend::GpuFused`
+- **Seasonal pipeline benchmark** in `bench_cpu_vs_python` — 21/21 parity at 14.5× speedup
+
+#### Changed
+- Lib tests: 640 → 641 (`streaming_matches_cpu` test)
+- Binaries: 67 → 68 (`validate_climate_scenario`)
+- CPU vs Python parity: 20/20 (17.9×) → 21/21 (14.5×) — added seasonal_pipeline benchmark
+- Turc magic numbers → named constants: `TURC_RH_THRESHOLD_PCT`, `TURC_RH_CORRECTION_RANGE`,
+  `TURC_TEMP_DENOM_OFFSET`, `TURC_COEFF`
+
+---
+
 ## [0.5.6] - 2026-03-01
 
 ### ToadStool S70+ Complete Rewire + Cross-Spring Benchmark

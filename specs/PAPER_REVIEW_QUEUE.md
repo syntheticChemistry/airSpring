@@ -2,7 +2,7 @@
 
 **Last Updated**: March 1, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 57 experiments (1237/1237 Python + 640 Rust lib tests + 1498 atlas checks + 17 Tier A modules + 67 binaries + 35/35 cross-spring benchmarks). GPU math portability 46/46. Ops 5-8 GPU-first (ToadStool S70+ absorbed). GPU stats (neuralSpring S69). NCBI 16S coupling 14+29. ToadStool S70+ sync (universal precision, 703 WGSL, 6-Spring provenance). Titan V GPU live dispatch (24/24 PASS) + AKD1000 NPU live + metalForge live + CPU↔GPU parity (26/26) + 17.9× Rust-vs-Python speedup (20/20 parity). Coupled runoff-infiltration (292/292), VG inverse (84/84), full-season WB audit (34/34). All completed papers use open data and systems.
+**Status**: 58 experiments (1237/1237 Python + 641 Rust lib tests + 1498 atlas checks + 17 Tier A modules + 68 binaries + 35/35 cross-spring benchmarks). GPU math portability 46/46. Ops 5-8 GPU-first (ToadStool S70+ absorbed). GPU stats (neuralSpring S69). NCBI 16S coupling 14+29. ToadStool S70+ sync (universal precision, 703 WGSL, 6-Spring provenance). Titan V GPU live dispatch (24/24 PASS) + AKD1000 NPU live + metalForge live + CPU↔GPU parity (26/26) + 14.5× Rust-vs-Python speedup (21/21 parity). Exp 058 Climate Scenario (46/46). Coupled runoff-infiltration (292/292), VG inverse (84/84), full-season WB audit (34/34). All completed papers use open data and systems.
 
 ---
 

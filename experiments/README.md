@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: March 1, 2026
-**Status**: 57 experiments, 1237/1237 Python + 640 lib + 57 forge tests + 62 barracuda + 5 forge binaries + 78/78 pure GPU pipeline + 26/26 GPU rewire benchmark + 104/104 metalForge mixed-hardware + 75/75 cross-validation + 17 Tier A GPU orchestrators (ops 5-8 GPU-first via ToadStool S70+) + GPU stats (neuralSpring S69) + seasonal pipeline (GPU Stages 1-2) + NPU→GPU PCIe bypass + NUCLEUS atomics + biomeOS graph execution + **Rust 17.9× faster than Python** (20/20 parity, incl. SensorCal + Kc adj)
+**Status**: 58 experiments, 1237/1237 Python + 641 lib + 57 forge tests + 63 barracuda + 5 forge binaries + 78/78 pure GPU pipeline + 26/26 GPU rewire benchmark + 104/104 metalForge mixed-hardware + 75/75 cross-validation + 17 Tier A GPU orchestrators (ops 5-8 GPU-first via ToadStool S70+) + GPU stats (neuralSpring S69) + seasonal pipeline (GPU Stages 1-2) + Exp 058 Climate Scenario (46/46) + streaming pipeline (GpuPipelined, GpuFused) + NPU→GPU PCIe bypass + NUCLEUS atomics + biomeOS graph execution + **Rust 14.5× faster than Python** (21/21 parity, incl. seasonal_pipeline)
 
 ---
 
@@ -66,26 +66,27 @@
 | 055 | Barracuda Pure GPU Workload Validation | GPU | **Complete** | Rust GPU (Titan V) | `gpu::et0` + `gpu::seasonal_pipeline` + `gpu::hargreaves` + `gpu::kc_climate` | 78 |
 | 056 | Mixed-Hardware Pipeline + NUCLEUS Atomics | metalForge | **Complete** | Rust (synthetic) | `metalForge::pipeline` + `metalForge::nucleus` + `metalForge::graph` | 43 |
 | 057 | GPU Ops 5-8 Rewire Validation + Benchmark | GPU | **Complete** | Rust GPU (Titan V) | `BatchedElementwiseF64` ops 0-8 + `gpu::seasonal_pipeline` | 26 |
+| 058 | Climate Scenario Analysis | Integration | **Complete** | Rust CPU | `eco::evapotranspiration` + `eco::water_balance` + `eco::yield_response` | 46 |
 
-**Grand Total**: 1237 Python + **640 lib + 57 forge tests** + 1498/1498 atlas + 33/33 cross-validation + 17 Tier A + 7 Tier B GPU orchestrators + seasonal pipeline GPU Stages 1-2 + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge (5 substrates, 18 workloads, 29/29 cross-system) + GPU math portability (46/46) + NCBI 16S coupling (14+29) + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34) + 67 binaries + 35/35 cross-spring benchmarks (6 Springs) + ToadStool S70+ synced + 20/20 CPU parity
+**Grand Total**: 1237 Python + **641 lib + 57 forge tests** + 1498/1498 atlas + 33/33 cross-validation + 17 Tier A + 7 Tier B GPU orchestrators + seasonal pipeline GPU Stages 1-2 + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge (5 substrates, 18 workloads, 29/29 cross-system) + GPU math portability (46/46) + NCBI 16S coupling (14+29) + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34) + Exp 058 Climate Scenario (46/46) + 68 binaries + 35/35 cross-spring benchmarks (6 Springs) + ToadStool S70+ synced + 21/21 CPU parity
 
 ---
 
-## Test Breakdown (v0.5.6)
+## Test Breakdown (v0.5.7)
 
 | Category | Tests | Source |
 |----------|:-----:|--------|
-| Barracuda lib (unit + doc) | 640 | `cargo test --lib` (incl. Tier B orchestrators, seasonal pipeline, atlas stream, anderson, diversity, mc\_et0, NPU, Makkink/Turc/Hamon) |
-| Barracuda validation binaries | 61 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
+| Barracuda lib (unit + doc) | 641 | `cargo test --lib` (incl. Tier B orchestrators, seasonal pipeline, atlas stream, anderson, diversity, mc\_et0, NPU, Makkink/Turc/Hamon, streaming_matches_cpu) |
+| Barracuda validation binaries | 68 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
 | Forge | 31 | `metalForge/forge/` (substrate, dispatch, probe, workloads, cross-system routing) |
 | Forge binaries | 4 | `validate_dispatch`, `validate_live_hardware`, `validate_dispatch_routing` |
-| **Total project tests** | **640 lib + 31 forge** | |
+| **Total project tests** | **641 lib + 31 forge** | |
 | Atlas stream (real data) | 73 | `validate_atlas_stream` (12 stations, 4800 crop-year results) |
 | Atlas checks | 1393 | `validate_atlas` (100 stations × 13 checks each) |
 | GPU live checks | 24 | `validate_gpu_live` (Titan V WGSL dispatch) |
 | Cross-system routing | 29 | `validate_dispatch` (18 workloads × dispatch checks) |
 | Hardware probe checks | 17 | `validate_live_hardware` (5 substrates) |
-| CPU vs Python parity | 8/8 | `bench_cpu_vs_python` (25.9× geometric mean speedup) |
+| CPU vs Python parity | 21/21 | `bench_cpu_vs_python` (14.5× geometric mean speedup, incl. seasonal_pipeline) |
 
 ---
 

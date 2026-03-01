@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
 **Updated**: March 1, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.5.6)
-**Status**: 57 experiments, 1237/1237 Python + 640 Rust lib tests + 57 forge tests + 67 binaries + 78/78 pure GPU + 26/26 GPU rewire + 104/104 mixed-hardware + 35/35 cross-spring benchmarks + ops 5-8 GPU-first (ToadStool S70+) + GPU stats (neuralSpring S69) + seasonal pipeline GPU Stages 1-2 + NPU→GPU PCIe bypass + NUCLEUS atomics + biomeOS graph execution + 20/20 CPU parity (17.9× speedup) + atlas stream unified batch + capability-based hardware discovery
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.5.7)
+**Status**: 58 experiments, 1237/1237 Python + 641 Rust lib tests + 57 forge tests + 68 binaries + 78/78 pure GPU + 26/26 GPU rewire + 104/104 mixed-hardware + 35/35 cross-spring benchmarks + ops 5-8 GPU-first (ToadStool S70+) + GPU stats (neuralSpring S69) + seasonal pipeline GPU Stages 1-2 + Exp 058 Climate Scenario (46/46) + streaming pipeline (GpuPipelined, GpuFused) + NPU→GPU PCIe bypass + NUCLEUS atomics + biomeOS graph execution + 21/21 CPU parity (14.5× speedup) + atlas stream unified batch + capability-based hardware discovery
 
 ---
 
@@ -11,8 +11,8 @@
 ```
 Phase 0   Python/R baselines    — reproduce paper results with original tools (1237/1237)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (640 lib + 1498 atlas, 61 binaries + 35/35 cross-spring benchmarks)
-Phase 1.5 CPU benchmark         — 17.9× Rust-vs-Python geometric mean (20/20 parity)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (641 lib + 1498 atlas, 68 binaries + 35/35 cross-spring benchmarks)
+Phase 1.5 CPU benchmark         — 14.5× Rust-vs-Python geometric mean (21/21 parity)
 Phase 2   BarraCuda GPU bridge  — 17 Tier A modules wired (cross-spring S70+ fully rewired)
 Phase 2.5 Ops 5-8 GPU-first   — Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed
 Phase 2.6 Seasonal pipeline    — GPU Stages 1-2 (ET₀ + Kc), atlas stream, MC ET₀ GPU path
@@ -93,7 +93,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | 53 | Van Genuchten Inverse Parameter Estimation — Exp 053 | 0→CPU | 84+84 | Forward VG, Mualem K(h), θ→h→θ round-trip via Brent inversion |
 | 54 | Full-Season Irrigation Water Budget — Exp 054 | 0→CPU | 34+34 | Synthetic weather → PM ET₀ → Kc → WB → Stewart yield, 4 crops |
 
-### Rust Validation (Phase 1+3) — 61 binaries + 35/35 cross-spring benchmarks
+### Rust Validation (Phase 1+3) — 68 binaries + 35/35 cross-spring benchmarks
 
 | Binary | Checks | Modules Exercised |
 |--------|:------:|-------------------|
@@ -206,7 +206,7 @@ $200 sensor, Open-Meteo weather data, and a $600 GPU running BarraCuda.
 
 ## Extension Explorations
 
-With 54 experiments validated and the full Python → Rust CPU → Titan V GPU live →
+With 58 experiments validated and the full Python → Rust CPU → Titan V GPU live →
 GPU math portability (13 modules, 46/46) → metalForge mixed hardware pipeline proven,
 airSpring can now extend beyond reproduction into new science. These explorations use the validated stack to answer
 questions the original papers did not.

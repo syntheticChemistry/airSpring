@@ -27,12 +27,13 @@
 //! | `eco::crop` (Kc adj) | `gpu::kc_climate` | `batched_elementwise_f64.wgsl` (op=7) | Kc climate adjust | A (GPU-first, S70+ absorbed) |
 //! | `eco::*` (pipeline) | `gpu::seasonal_pipeline` | Chained ops 0→7→1→yield | Seasonal pipeline | **GPU Stages 1-2** (v0.5.6) |
 //! | `eco::*` (stream) | `gpu::atlas_stream` | Unified batch + streaming callback | Regional atlas | **GPU-capable** (v0.5.6) |
+//! | `eco::*` (stream) | `gpu::seasonal_pipeline` | `Backend::GpuPipelined`, `Backend::GpuFused` | Streaming pipeline | **v0.5.7** |
 //! | `eco::*` (MC) | `gpu::mc_et0` | `mc_et0_propagate_f64.wgsl` (pending) | MC uncertainty | B (wired, pending shader) |
 //! | `io::csv_ts` | `gpu::stream` | `moving_window.wgsl` | Stream smoothing | A (ready) |
 //! | `eco::sensor_calibration` (OLS) | `gpu::stats` | `linear_regression_f64.wgsl` | Sensor regression | A (GPU, neuralSpring S69) |
 //! | `eco::*` (multi-var) | `gpu::stats` | `matrix_correlation_f64.wgsl` | Soil correlation | A (GPU, neuralSpring S69) |
 //!
-//! # Current Inventory (March 1, 2026 — v0.5.6, synced to `ToadStool` HEAD `1dd7e338`)
+//! # Current Inventory (March 1, 2026 — v0.5.7, synced to `ToadStool` HEAD `1dd7e338`)
 //!
 //! `ToadStool` S42–S70+++: 183+ commits, 50+ cross-spring absorptions, 2,546+ tests, 703 WGSL shaders.
 //! All four airSpring issues (TS-001 through TS-004) resolved in **S54**.

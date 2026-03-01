@@ -1,0 +1,18 @@
+{
+  "_provenance": {
+    "experiment": "Exp 058",
+    "created": "2026-03-01",
+    "reference": "CMIP6 AR6 WG1 Ch4"
+  },
+  "scenarios": [
+    {"name": "baseline", "delta_t": 0.0},
+    {"name": "ssp245_2050", "delta_t": 1.5},
+    {"name": "ssp370_2050", "delta_t": 2.5},
+    {"name": "ssp585_2050", "delta_t": 4.0}
+  ],
+  "crops": ["corn", "soybean", "winter_wheat"],
+  "soil": {"field_capacity": 0.28, "wilting_point": 0.14},
+  "season_days": 153,
+  "et0_pct_increase_per_degC": {"lo": 2.0, "hi": 8.0},
+  "tolerance_mass_balance_mm": 1.0
+}

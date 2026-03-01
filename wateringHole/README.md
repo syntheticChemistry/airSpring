@@ -7,7 +7,8 @@
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V039** | [AIRSPRING_V039_TOADSTOOL_BARRACUDA_EVOLUTION_HANDOFF_MAR01_2026.md](handoffs/AIRSPRING_V039_TOADSTOOL_BARRACUDA_EVOLUTION_HANDOFF_MAR01_2026.md) | 2026-03-01 | **current** — v0.5.6: ToadStool/BarraCuda evolution handoff, full cross-spring provenance, 20/20 CPU parity, 26/26 GPU rewire |
+| **V040** | [AIRSPRING_V040_SCIENCE_EXTENSIONS_STREAMING_HANDOFF_MAR01_2026.md](handoffs/AIRSPRING_V040_SCIENCE_EXTENSIONS_STREAMING_HANDOFF_MAR01_2026.md) | 2026-03-01 | **current** — v0.5.7: science extensions (Exp 058), streaming pipeline, 21/21 CPU parity, technical debt |
+| V039 | [archive](handoffs/archive/AIRSPRING_V039_TOADSTOOL_BARRACUDA_EVOLUTION_HANDOFF_MAR01_2026.md) | 2026-03-01 | v0.5.6: ToadStool/BarraCuda evolution handoff, cross-spring provenance |
 | V038 | [archive](handoffs/archive/AIRSPRING_V038_COMPLETE_REWIRE_BENCHMARK_HANDOFF_MAR01_2026.md) | 2026-03-01 | v0.5.6: complete rewire benchmark handoff |
 | V033 | [AIRSPRING_V033_CROSS_SPRING_REWIRING_BENCHMARK_HANDOFF_FEB28_2026.md](handoffs/AIRSPRING_V033_CROSS_SPRING_REWIRING_BENCHMARK_HANDOFF_FEB28_2026.md) | 2026-02-28 | v0.5.2: Cross-spring rewiring (Hargreaves→ToadStool batch, diversity matrix/frequencies, Kc stage), 25/25 benchmarks, 13 provenance entries |
 

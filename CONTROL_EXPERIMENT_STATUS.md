@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-03-01 (v0.5.6+ — 57 experiments, 1237 Python + 640 lib + 57 forge tests, 62 barracuda + 5 forge = 67 binaries, **22.7× Rust-vs-Python speedup** (18/18 parity), **pure GPU pipeline** (78/78 PASS), **GPU rewire benchmark** (26/26 PASS), **mixed-hardware pipeline** (104/104 PASS), **ops 5-8 GPU-first** (ToadStool S70+ absorbed), **GPU stats** (neuralSpring S69), seasonal pipeline GPU Stages 1-2, 35/35 cross-spring benchmarks, NPU→GPU PCIe bypass, NUCLEUS atomics (tower/node/nest), biomeOS graph execution, capability-based hardware discovery, AKD1000 NPU live, metalForge live (5 substrates, 18 workloads), atlas stream unified batch, clippy pedantic, zero dead code)
+**Updated**: 2026-03-01 (v0.5.7 — 58 experiments, 1237 Python + 641 lib + 57 forge tests, 63 barracuda + 5 forge = 68 binaries, **14.5× Rust-vs-Python speedup** (21/21 parity), **pure GPU pipeline** (78/78 PASS), **GPU rewire benchmark** (26/26 PASS), **mixed-hardware pipeline** (104/104 PASS), **ops 5-8 GPU-first** (ToadStool S70+ absorbed), **GPU stats** (neuralSpring S69), seasonal pipeline GPU Stages 1-2, **Exp 058 Climate Scenario** (46/46 PASS), streaming pipeline (Backend::GpuPipelined, GpuFused), 35/35 cross-spring benchmarks, NPU→GPU PCIe bypass, NUCLEUS atomics (tower/node/nest), biomeOS graph execution, capability-based hardware discovery, AKD1000 NPU live, metalForge live (5 substrates, 18 workloads), atlas stream unified batch, clippy pedantic, zero dead code)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -72,7 +72,7 @@ for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   validate_nass_yield validate_forecast validate_scan_moisture \
   validate_multicrop validate_ameriflux validate_hargreaves \
   validate_diversity \
-  validate_coupled_runoff validate_vg_inverse validate_season_wb; do
+  validate_coupled_runoff validate_vg_inverse validate_season_wb validate_climate_scenario; do
   cargo run --release --bin $bin
 done
 
@@ -955,14 +955,28 @@ with timing benchmarks and cross-spring evolution provenance tracking.
 
 ---
 
+### Experiment 058: Climate Scenario Analysis — PHASE 1 COMPLETE
+
+**Goal**: Validate climate scenario pipeline — synthetic climate perturbations
+across ET₀, water balance, and yield response for scenario-based planning.
+
+**Phase 1 (Rust — 46/46 PASS):**
+- [x] Climate scenario generation and perturbation
+- [x] ET₀ → water balance → yield pipeline under scenarios
+- [x] Mass balance, physical bounds, cross-scenario consistency
+
+**Binary**: `validate_climate_scenario`
+
+---
+
 ## Evolution Roadmap
 
 ```
 Track 1 (Precision Agriculture):
   Phase 0  [COMPLETE]: Python baselines — 1237/1237 PASS (54 experiments)
   Phase 0+ [COMPLETE]: Real data pipeline — 15,300 station-days, ET₀ R²=0.97
-  Phase 1  [COMPLETE]: Rust validation — 640 lib + 57 forge tests, 66 binaries
-  Phase 1.5[COMPLETE]: CPU benchmark — Rust 22.7× faster than Python (18/18 parity)
+  Phase 1  [COMPLETE]: Rust validation — 641 lib + 57 forge tests, 68 binaries
+  Phase 1.5[COMPLETE]: CPU benchmark — Rust 14.5× faster than Python (21/21 parity)
   Phase 2  [COMPLETE]: Cross-validation — 75/75 MATCH (Python↔Rust, tol=1e-5)
   Phase 2.5[COMPLETE]: Ops 5-8 GPU-first — 4 orchestrators rewired (ToadStool S70+ absorbed)
   Phase 2.6[COMPLETE]: Seasonal pipeline — GPU Stages 1-2 (ET₀ + Kc), 73/73 real data (12 stations)
@@ -1033,10 +1047,10 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026 — Updated: March 1, 2026 (v0.5.6+)*
-*57 experiments, 1237/1237 Python, 640 lib + 57 forge tests, 67 binaries, 75/75 cross-validation, 100 Michigan stations, 18/18 CPU parity, 78/78 GPU pipeline, 26/26 GPU rewire, 104/104 mixed-hardware pipeline.*
-*8 ET₀ methods + SCS-CN runoff + Green-Ampt infiltration + coupled runoff-infiltration + VG inverse + full-season WB.*
-*42+ named constants, zero dead code. Rust 22.7× faster than Python (18/18 parity).*
+*Initialized: February 16, 2026 — Updated: March 1, 2026 (v0.5.7)*
+*58 experiments, 1237/1237 Python, 641 lib + 57 forge tests, 68 binaries, 75/75 cross-validation, 100 Michigan stations, 21/21 CPU parity, 78/78 GPU pipeline, 26/26 GPU rewire, 104/104 mixed-hardware pipeline.*
+*8 ET₀ methods + SCS-CN runoff + Green-Ampt infiltration + coupled runoff-infiltration + VG inverse + full-season WB + Exp 058 Climate Scenario (46/46).*
+*42+ named constants (incl. Turc TURC_*), zero dead code. Rust 14.5× faster than Python (21/21 parity).*
 *17 Tier A + 7 Tier B GPU orchestrators. Ops 5-8 GPU-first (ToadStool S70+). GPU stats (neuralSpring S69).*
 *Seasonal pipeline GPU Stages 1-2. 73/73 atlas PASS (12 stations, 4800 results). 35/35 cross-spring benchmarks.*
 *metalForge 18 workloads, 29/29 cross-system. AKD1000 NPU live (3 experiments).*
