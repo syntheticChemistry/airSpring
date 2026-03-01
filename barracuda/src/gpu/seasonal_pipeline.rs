@@ -13,9 +13,9 @@
 //!
 //! | Phase | Architecture | Status |
 //! |-------|-------------|--------|
-//! | CPU chained | Sequential CPU, single API | **Current** |
-//! | GPU per-stage | Each stage dispatches independently | Ready (Tier B ops pending) |
-//! | GPU pipelined | `PipelineBuilder` zero round-trip | Pending full `ToadStool` absorption |
+//! | CPU chained | Sequential CPU, single API | Available |
+//! | GPU per-stage | Stages 1-2 GPU, Stages 3-4 CPU | **Current** (S70+ absorption) |
+//! | GPU pipelined | `StreamingPipeline` zero round-trip | Next (wire `seasonal_pipeline.wgsl`) |
 //! | Streaming | `UnidirectionalPipeline` for multi-year | Pending (Phase 4) |
 //!
 //! # Usage
@@ -35,6 +35,7 @@ use crate::eco::evapotranspiration::{self as et, DailyEt0Input};
 use crate::eco::water_balance::{self as wb, DailyInput, WaterBalanceState};
 use crate::eco::yield_response;
 use crate::gpu::et0::{BatchedEt0, StationDay};
+use crate::gpu::kc_climate::{BatchedKcClimate, KcClimateDay};
 
 /// Daily weather observation for the seasonal pipeline.
 #[derive(Debug, Clone, Copy)]
@@ -126,12 +127,12 @@ pub struct SeasonResult {
 /// Seasonal agricultural pipeline orchestrator.
 ///
 /// Chains ET₀ → Kc adjustment → water balance → yield response in a
-/// single `run_season()` call. Stage 1 (ET₀) dispatches to GPU when a
-/// device is available; remaining stages upgrade independently as
-/// `ToadStool` absorbs their corresponding ops.
+/// single `run_season()` call. Stages 1-2 (ET₀ + Kc) dispatch to GPU
+/// when a device is available; remaining stages use CPU.
 pub struct SeasonalPipeline {
     backend: Backend,
     gpu_et0: Option<BatchedEt0>,
+    gpu_kc: Option<BatchedKcClimate>,
 }
 
 impl std::fmt::Debug for SeasonalPipeline {
@@ -139,6 +140,7 @@ impl std::fmt::Debug for SeasonalPipeline {
         f.debug_struct("SeasonalPipeline")
             .field("backend", &self.backend)
             .field("gpu_et0", &self.gpu_et0.is_some())
+            .field("gpu_kc", &self.gpu_kc.is_some())
             .finish()
     }
 }
@@ -162,22 +164,26 @@ impl SeasonalPipeline {
         Self {
             backend: Backend::Cpu,
             gpu_et0: None,
+            gpu_kc: None,
         }
     }
 
-    /// Create a GPU per-stage pipeline with GPU ET₀ dispatch (Stage 1).
+    /// Create a GPU per-stage pipeline with GPU dispatch for Stages 1-2.
     ///
-    /// Stage 1 (ET₀) dispatches to the GPU via `BatchedEt0`; remaining
-    /// stages fall back to CPU until `ToadStool` absorbs their ops.
+    /// Stage 1 (ET₀) dispatches via `BatchedEt0` (op=0);
+    /// Stage 2 (Kc climate adjustment) dispatches via `BatchedKcClimate` (op=7).
+    /// Remaining stages use CPU.
     ///
     /// # Errors
     ///
-    /// Returns an error if the GPU device cannot initialise `BatchedEt0`.
+    /// Returns an error if the GPU device cannot initialise.
     pub fn gpu(device: Arc<WgpuDevice>) -> crate::error::Result<Self> {
-        let gpu_et0 = BatchedEt0::gpu(device)?;
+        let gpu_et0 = BatchedEt0::gpu(Arc::clone(&device))?;
+        let gpu_kc = BatchedKcClimate::gpu(device)?;
         Ok(Self {
             backend: Backend::GpuPerStage,
             gpu_et0: Some(gpu_et0),
+            gpu_kc: Some(gpu_kc),
         })
     }
 
@@ -190,14 +196,15 @@ impl SeasonalPipeline {
     /// Run a complete seasonal simulation.
     ///
     /// Chains: weather → ET₀ → Kc climate adjust → water balance → yield.
-    /// Stage 1 uses GPU dispatch when available; remaining stages use CPU.
+    /// Stages 1-2 use GPU dispatch when available; remaining stages use CPU.
     #[must_use]
     pub fn run_season(&self, weather: &[WeatherDay], config: &CropConfig) -> SeasonResult {
         let et0_daily = self.compute_et0_batch(weather);
-        Self::run_stages_2_through_4(weather, config, et0_daily)
+        let kc_daily = self.compute_kc_batch(weather, config);
+        Self::run_stages_3_and_4(weather, config, et0_daily, &kc_daily)
     }
 
-    /// Run Stages 2–4 with pre-computed ET₀ (enables unified GPU dispatch).
+    /// Run Stages 3–4 with pre-computed ET₀ and Kc (enables unified GPU dispatch).
     ///
     /// When [`AtlasStream`] computes ET₀ for all stations in a single GPU
     /// batch (eliminating per-station round-trips), it passes the pre-sliced
@@ -208,13 +215,24 @@ impl SeasonalPipeline {
         config: &CropConfig,
         et0_daily: &[f64],
     ) -> SeasonResult {
-        Self::run_stages_2_through_4(weather, config, et0_daily.to_vec())
+        let kc = config.crop_type.coefficients();
+        let n = weather.len();
+        let kc_daily: Vec<f64> = weather
+            .iter()
+            .enumerate()
+            .map(|(i, w)| {
+                let kc_base = stage_kc(&kc, i, n);
+                adjust_kc_for_climate(kc_base, w.wind_2m, w.rh_min, config.crop_height_m)
+            })
+            .collect();
+        Self::run_stages_3_and_4(weather, config, et0_daily.to_vec(), &kc_daily)
     }
 
-    fn run_stages_2_through_4(
+    fn run_stages_3_and_4(
         weather: &[WeatherDay],
         config: &CropConfig,
         et0_daily: Vec<f64>,
+        kc_daily: &[f64],
     ) -> SeasonResult {
         if weather.is_empty() {
             return SeasonResult {
@@ -233,16 +251,6 @@ impl SeasonalPipeline {
 
         let kc = config.crop_type.coefficients();
         let n = weather.len();
-
-        // Stage 2: Kc schedule with climate adjustment (op=7)
-        let kc_daily: Vec<f64> = weather
-            .iter()
-            .enumerate()
-            .map(|(i, w)| {
-                let kc_base = stage_kc(&kc, i, n);
-                adjust_kc_for_climate(kc_base, w.wind_2m, w.rh_min, config.crop_height_m)
-            })
-            .collect();
 
         // Stage 3: Water balance (op=1) with irrigation scheduling
         let root_mm = kc.root_depth_m * 1000.0;
@@ -307,6 +315,56 @@ impl SeasonalPipeline {
             et0_daily,
             actual_et_daily,
         }
+    }
+
+    /// Batch-compute Kc climate adjustment, using GPU (op=7) when available.
+    #[must_use]
+    fn compute_kc_batch(&self, weather: &[WeatherDay], config: &CropConfig) -> Vec<f64> {
+        let kc_coeff = config.crop_type.coefficients();
+        let n = weather.len();
+
+        self.gpu_kc.as_ref().map_or_else(
+            || {
+                weather
+                    .iter()
+                    .enumerate()
+                    .map(|(i, w)| {
+                        let kc_base = stage_kc(&kc_coeff, i, n);
+                        adjust_kc_for_climate(kc_base, w.wind_2m, w.rh_min, config.crop_height_m)
+                    })
+                    .collect()
+            },
+            |kc_engine| {
+                let days: Vec<KcClimateDay> = weather
+                    .iter()
+                    .enumerate()
+                    .map(|(i, w)| KcClimateDay {
+                        kc_table: stage_kc(&kc_coeff, i, n),
+                        u2: w.wind_2m,
+                        rh_min: w.rh_min,
+                        crop_height_m: config.crop_height_m,
+                    })
+                    .collect();
+                kc_engine.compute_gpu(&days).map_or_else(
+                    |_| {
+                        weather
+                            .iter()
+                            .enumerate()
+                            .map(|(i, w)| {
+                                let kc_base = stage_kc(&kc_coeff, i, n);
+                                adjust_kc_for_climate(
+                                    kc_base,
+                                    w.wind_2m,
+                                    w.rh_min,
+                                    config.crop_height_m,
+                                )
+                            })
+                            .collect()
+                    },
+                    |r| r.kc_values,
+                )
+            },
+        )
     }
 
     /// Batch-compute ET₀ for all weather days, using GPU when available.

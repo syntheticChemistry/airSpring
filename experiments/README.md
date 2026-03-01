@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: March 1, 2026
-**Status**: 56 experiments, 1237/1237 Python + 630 lib + 57 forge tests + 60 barracuda + 5 forge binaries + 78/78 pure GPU pipeline + 104/104 metalForge mixed-hardware + 75/75 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline (GPU Stage 1) + NPU→GPU PCIe bypass + NUCLEUS atomics + biomeOS graph execution + **Rust 20.1× faster than Python** (18/18 parity)
+**Status**: 56 experiments, 1237/1237 Python + 636 lib + 57 forge tests + 60 barracuda + 5 forge binaries + 78/78 pure GPU pipeline + 104/104 metalForge mixed-hardware + 75/75 cross-validation + 15 Tier A GPU orchestrators (ops 5-8 GPU-first via ToadStool S70+) + seasonal pipeline (GPU Stages 1-2) + NPU→GPU PCIe bypass + NUCLEUS atomics + biomeOS graph execution + **Rust 21.0× faster than Python** (18/18 parity)
 
 ---
 

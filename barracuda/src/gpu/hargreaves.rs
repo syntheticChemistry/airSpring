@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! Batched Hargreaves-Samani ET₀ GPU orchestrator (Tier B — pending op=6 absorption).
+//! Batched Hargreaves-Samani ET₀ GPU orchestrator (Tier A — op=6 absorbed).
 //!
 //! The Hargreaves-Samani (1985) equation estimates ET₀ from temperature range and
 //! extraterrestrial radiation alone — no humidity or wind data required:
@@ -13,14 +13,13 @@
 //! | API | Device? | Backend |
 //! |-----|:-------:|---------|
 //! | [`BatchedHargreaves::compute`] | No | CPU via `eco::evapotranspiration::hargreaves_et0` |
-//! | [`BatchedHargreaves::compute_gpu`] | Yes | GPU via `BatchedElementwiseF64` (op=6, pending) |
+//! | [`BatchedHargreaves::compute_gpu`] | Yes | **GPU** via `BatchedElementwiseF64` op=6 (`ToadStool` S70+) |
 //!
-//! # GPU Readiness
+//! # GPU Dispatch
 //!
-//! The CPU path is fully validated against FAO-56 Eq. 52. The GPU interface
-//! is wired and ready for `ToadStool` absorption. Once `ToadStool` adds
-//! `hargreaves_batch` (op=6, stride=4: `[tmax, tmin, lat_rad, doy]`),
-//! the GPU path activates automatically.
+//! The CPU path is fully validated against FAO-56 Eq. 52. The GPU path
+//! dispatches to `ToadStool` `BatchedElementwiseF64` op=6 (stride=4:
+//! `[tmax, tmin, lat_rad, doy]`), absorbed in S70+.
 //!
 //! # Reference
 //!
@@ -30,7 +29,7 @@
 use std::sync::Arc;
 
 use barracuda::device::WgpuDevice;
-use barracuda::ops::batched_elementwise_f64::BatchedElementwiseF64;
+use barracuda::ops::batched_elementwise_f64::{BatchedElementwiseF64, Op};
 
 use crate::eco::solar;
 
@@ -55,7 +54,7 @@ pub enum Backend {
     /// Validated CPU path (always available).
     #[default]
     Cpu,
-    /// GPU path via `BatchedElementwiseF64` op=6 (pending `ToadStool` absorption).
+    /// GPU path via `BatchedElementwiseF64` op=6 (`ToadStool` S70+ absorbed).
     Gpu,
 }
 
@@ -71,8 +70,8 @@ pub struct BatchedHargreavesResult {
 /// Batched Hargreaves-Samani ET₀ orchestrator.
 ///
 /// Computes Hargreaves ET₀ for N station-days in a single call.
-/// Currently CPU-only (Tier B). When `ToadStool` absorbs op=6,
-/// the GPU engine activates automatically.
+/// GPU dispatch via `BatchedElementwiseF64` op=6 (absorbed in `ToadStool` S70+).
+/// Falls back to CPU when no GPU device is configured.
 pub struct BatchedHargreaves {
     backend: Backend,
     gpu_engine: Option<BatchedElementwiseF64>,
@@ -88,10 +87,7 @@ impl std::fmt::Debug for BatchedHargreaves {
 }
 
 impl BatchedHargreaves {
-    /// Create with GPU engine (Tier B — currently falls back to CPU).
-    ///
-    /// Once `ToadStool` absorbs `hargreaves_batch` (op=6), this path
-    /// will dispatch to the GPU shader automatically.
+    /// Create with GPU engine (Tier A — dispatches to op=6 shader).
     ///
     /// # Errors
     ///
@@ -122,9 +118,8 @@ impl BatchedHargreaves {
 
     /// Compute Hargreaves ET₀ for a batch of station-days.
     ///
-    /// When `ToadStool` absorbs op=6 (stride=4: `[tmax, tmin, lat_rad, doy]`),
-    /// this method dispatches to the GPU engine automatically. Until then,
-    /// the validated CPU path is authoritative.
+    /// Dispatches to GPU via `BatchedElementwiseF64` op=6 when a GPU engine
+    /// is configured; falls back to CPU otherwise.
     ///
     /// # Errors
     ///
@@ -133,14 +128,20 @@ impl BatchedHargreaves {
         &self,
         inputs: &[HargreavesDay],
     ) -> crate::error::Result<BatchedHargreavesResult> {
-        // TODO(toadstool): When op=6 is absorbed, replace with:
-        //   let packed = Self::pack_gpu_input(inputs);
-        //   engine.execute(&packed, inputs.len(), Op::Hargreaves)?
-        let et0_values = Self::compute_cpu_batch(inputs);
-        Ok(BatchedHargreavesResult {
-            et0_values,
-            backend_used: Backend::Cpu,
-        })
+        if let Some(engine) = &self.gpu_engine {
+            let packed = Self::pack_gpu_input(inputs);
+            let et0_values = engine.execute(&packed, inputs.len(), Op::HargreavesEt0)?;
+            Ok(BatchedHargreavesResult {
+                et0_values,
+                backend_used: Backend::Gpu,
+            })
+        } else {
+            let et0_values = Self::compute_cpu_batch(inputs);
+            Ok(BatchedHargreavesResult {
+                et0_values,
+                backend_used: Backend::Cpu,
+            })
+        }
     }
 
     /// Pack inputs into stride-4 GPU layout: `[tmax, tmin, lat_rad, doy]`.
@@ -285,12 +286,59 @@ mod tests {
     }
 
     #[test]
-    fn compute_gpu_fallback() {
+    fn compute_gpu_cpu_fallback() {
         let engine = BatchedHargreaves::cpu();
         let result = engine.compute_gpu(&[sample_day()]).unwrap();
         assert_eq!(result.et0_values.len(), 1);
         assert!(result.et0_values[0] > 0.5 && result.et0_values[0] < 10.0);
         assert_eq!(result.backend_used, Backend::Cpu);
+    }
+
+    fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
+        pollster::block_on(barracuda::device::WgpuDevice::new_f64_capable())
+            .ok()
+            .map(std::sync::Arc::new)
+    }
+
+    #[test]
+    fn compute_gpu_device_dispatch() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for BatchedHargreaves");
+            return;
+        };
+        let engine = BatchedHargreaves::gpu(device).unwrap();
+        let result = engine.compute_gpu(&[sample_day()]).unwrap();
+        assert_eq!(result.et0_values.len(), 1);
+        assert!(
+            result.et0_values[0] > 0.5 && result.et0_values[0] < 10.0,
+            "GPU ET₀ = {:.3}",
+            result.et0_values[0]
+        );
+        assert_eq!(result.backend_used, Backend::Gpu);
+    }
+
+    #[test]
+    fn compute_gpu_matches_cpu() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for BatchedHargreaves");
+            return;
+        };
+        let gpu_engine = BatchedHargreaves::gpu(device).unwrap();
+        let cpu_engine = BatchedHargreaves::cpu();
+        let inputs: Vec<HargreavesDay> = (0..50)
+            .map(|i| HargreavesDay {
+                day_of_year: 100 + i,
+                ..sample_day()
+            })
+            .collect();
+        let gpu_result = gpu_engine.compute_gpu(&inputs).unwrap();
+        let cpu_result = cpu_engine.compute(&inputs);
+        for (g, c) in gpu_result.et0_values.iter().zip(&cpu_result.et0_values) {
+            assert!(
+                (g - c).abs() < 0.05,
+                "GPU {g:.4} vs CPU {c:.4}"
+            );
+        }
     }
 
     #[test]

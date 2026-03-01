@@ -11,13 +11,13 @@
 //! |--------|---------|---------|
 //! | [`device_info`] | Precision probing, `Fp64Strategy`, provenance | Device + cross-spring |
 //! | [`et0`] | Batched FAO-56 ET₀ for `N` station-days | **GPU-first** (`BatchedElementwiseF64`) |
-//! | [`hargreaves`] | Batched Hargreaves-Samani ET₀ (temp-only) | **CPU** (Tier B → op=6 pending) |
+//! | [`hargreaves`] | Batched Hargreaves-Samani ET₀ (temp-only) | **GPU-first** (`BatchedElementwiseF64` op=6, S70+) |
 //! | [`water_balance`] | Batched season simulation + GPU step | **GPU-step** + CPU season |
-//! | [`dual_kc`] | Batched dual Kc (`Ke` + `ETc`) for M fields | **CPU** (Tier B → GPU pending) |
+//! | [`dual_kc`] | Batched dual Kc (`Ke` + `ETc`) for M fields | **GPU-first** (`BatchedElementwiseF64` op=8, S70+) |
 //! | [`kriging`] | Soil moisture spatial interpolation | **Integrated** (`KrigingF64`) |
 //! | [`reduce`] | Seasonal aggregation statistics | **GPU** for N≥1024 (`FusedMapReduceF64`) |
-//! | [`sensor_calibration`] | Batched `SoilWatch` 10 VWC calibration | **CPU** (Tier B → op=5 pending) |
-//! | [`seasonal_pipeline`] | Full-season ET₀→Kc→WB→Yield pipeline | **GPU Stage 1** (ET₀) + CPU stages 2-4 |
+//! | [`sensor_calibration`] | Batched `SoilWatch` 10 VWC calibration | **GPU-first** (`BatchedElementwiseF64` op=5, S70+) |
+//! | [`seasonal_pipeline`] | Full-season ET₀→Kc→WB→Yield pipeline | **GPU Stages 1-2** (ET₀ + Kc) + CPU stages 3-4 |
 //! | [`atlas_stream`] | Multi-station multi-crop regional pipeline | **GPU-capable** + streaming callback |
 //! | [`stream`] | `IoT` stream smoothing (sliding window) | **GPU** (`MovingWindowStats`, wetSpring) |
 //! | [`richards`] | 1D Richards equation (vadose zone) | **Wired** (`pde::richards`) |

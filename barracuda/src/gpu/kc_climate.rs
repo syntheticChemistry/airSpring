@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! Batched Kc climate adjustment GPU orchestrator (Tier B — pending op absorption).
+//! Batched Kc climate adjustment GPU orchestrator (Tier A — op=7 absorbed).
 //!
 //! FAO-56 Eq. 62 adjusts tabulated crop coefficients for local wind and humidity:
 //!
@@ -12,14 +12,13 @@
 //! | API | Device? | Backend |
 //! |-----|:-------:|---------|
 //! | [`BatchedKcClimate::compute`] | No | CPU via `eco::crop::adjust_kc_for_climate` |
-//! | [`BatchedKcClimate::compute_gpu`] | Yes | GPU via `BatchedElementwiseF64` (pending) |
+//! | [`BatchedKcClimate::compute_gpu`] | Yes | **GPU** via `BatchedElementwiseF64` op=7 (`ToadStool` S70+) |
 //!
-//! # GPU Readiness
+//! # GPU Dispatch
 //!
-//! The CPU path is fully validated against FAO-56 Eq. 62. The GPU interface
-//! is wired and ready for `ToadStool` absorption. Once `ToadStool` adds
-//! `kc_climate_batch` (stride=4: `[kc_table, u2, rh_min, crop_height_m]`),
-//! the GPU path activates automatically.
+//! The CPU path is fully validated against FAO-56 Eq. 62. The GPU path
+//! dispatches to `ToadStool` `BatchedElementwiseF64` op=7 (stride=4:
+//! `[kc_table, u2, rh_min, crop_height_m]`), absorbed in S70+.
 //!
 //! # Reference
 //!
@@ -28,7 +27,7 @@
 use std::sync::Arc;
 
 use barracuda::device::WgpuDevice;
-use barracuda::ops::batched_elementwise_f64::BatchedElementwiseF64;
+use barracuda::ops::batched_elementwise_f64::{BatchedElementwiseF64, Op};
 
 use crate::eco::crop;
 
@@ -53,7 +52,7 @@ pub enum Backend {
     /// Validated CPU path (always available).
     #[default]
     Cpu,
-    /// GPU path via `BatchedElementwiseF64` (pending `ToadStool` absorption).
+    /// GPU path via `BatchedElementwiseF64` op=7 (`ToadStool` S70+ absorbed).
     Gpu,
 }
 
@@ -69,8 +68,8 @@ pub struct BatchedKcClimateResult {
 /// Batched Kc climate adjustment orchestrator.
 ///
 /// Computes FAO-56 Eq. 62 for N station-days in a single call.
-/// Currently CPU-only (Tier B). When `ToadStool` absorbs the Kc climate op,
-/// the GPU engine activates automatically.
+/// GPU dispatch via `BatchedElementwiseF64` op=7 (absorbed in `ToadStool` S70+).
+/// Falls back to CPU when no GPU device is configured.
 pub struct BatchedKcClimate {
     backend: Backend,
     gpu_engine: Option<BatchedElementwiseF64>,
@@ -86,10 +85,7 @@ impl std::fmt::Debug for BatchedKcClimate {
 }
 
 impl BatchedKcClimate {
-    /// Create with GPU engine (Tier B — currently falls back to CPU).
-    ///
-    /// Once `ToadStool` absorbs `kc_climate_batch` (stride=4), this path
-    /// will dispatch to the GPU shader automatically.
+    /// Create with GPU engine (Tier A — dispatches to op=7 shader).
     ///
     /// # Errors
     ///
@@ -120,10 +116,8 @@ impl BatchedKcClimate {
 
     /// Compute Kc climate adjustment for a batch of station-days.
     ///
-    /// When `ToadStool` absorbs op=7 (stride=4:
-    /// `[kc_table, u2, rh_min, crop_height_m]`), this method dispatches to
-    /// the GPU engine automatically. Until then, the validated CPU path is
-    /// authoritative.
+    /// Dispatches to GPU via `BatchedElementwiseF64` op=7 when a GPU engine
+    /// is configured; falls back to CPU otherwise.
     ///
     /// # Errors
     ///
@@ -132,14 +126,20 @@ impl BatchedKcClimate {
         &self,
         inputs: &[KcClimateDay],
     ) -> crate::error::Result<BatchedKcClimateResult> {
-        // TODO(toadstool): When op=7 is absorbed, replace with:
-        //   let packed = Self::pack_gpu_input(inputs);
-        //   engine.execute(&packed, inputs.len(), Op::KcClimate)?
-        let kc_values = Self::compute_cpu_batch(inputs);
-        Ok(BatchedKcClimateResult {
-            kc_values,
-            backend_used: Backend::Cpu,
-        })
+        if let Some(engine) = &self.gpu_engine {
+            let packed = Self::pack_gpu_input(inputs);
+            let kc_values = engine.execute(&packed, inputs.len(), Op::KcClimateAdjust)?;
+            Ok(BatchedKcClimateResult {
+                kc_values,
+                backend_used: Backend::Gpu,
+            })
+        } else {
+            let kc_values = Self::compute_cpu_batch(inputs);
+            Ok(BatchedKcClimateResult {
+                kc_values,
+                backend_used: Backend::Cpu,
+            })
+        }
     }
 
     /// Pack inputs into stride-4 GPU layout: `[kc_table, u2, rh_min, crop_height_m]`.
@@ -255,12 +255,59 @@ mod tests {
     }
 
     #[test]
-    fn compute_gpu_fallback() {
+    fn compute_gpu_cpu_fallback() {
         let engine = BatchedKcClimate::cpu();
         let result = engine.compute_gpu(&[sample_day()]).unwrap();
         assert_eq!(result.kc_values.len(), 1);
         assert!((result.kc_values[0] - 1.20).abs() < 0.001);
         assert_eq!(result.backend_used, Backend::Cpu);
+    }
+
+    fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
+        pollster::block_on(barracuda::device::WgpuDevice::new_f64_capable())
+            .ok()
+            .map(std::sync::Arc::new)
+    }
+
+    #[test]
+    fn compute_gpu_device_dispatch() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for BatchedKcClimate");
+            return;
+        };
+        let engine = BatchedKcClimate::gpu(device).unwrap();
+        let result = engine.compute_gpu(&[sample_day()]).unwrap();
+        assert_eq!(result.kc_values.len(), 1);
+        assert!(
+            (result.kc_values[0] - 1.20).abs() < 0.01,
+            "GPU Kc = {:.4}",
+            result.kc_values[0]
+        );
+        assert_eq!(result.backend_used, Backend::Gpu);
+    }
+
+    #[test]
+    fn compute_gpu_matches_cpu() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for BatchedKcClimate");
+            return;
+        };
+        let gpu_engine = BatchedKcClimate::gpu(device).unwrap();
+        let cpu_engine = BatchedKcClimate::cpu();
+        let inputs: Vec<KcClimateDay> = (0..50)
+            .map(|i| KcClimateDay {
+                rh_min: f64::from(i as u32).mul_add(0.5, 30.0),
+                ..sample_day()
+            })
+            .collect();
+        let gpu_result = gpu_engine.compute_gpu(&inputs).unwrap();
+        let cpu_result = cpu_engine.compute(&inputs);
+        for (g, c) in gpu_result.kc_values.iter().zip(&cpu_result.kc_values) {
+            assert!(
+                (g - c).abs() < 0.01,
+                "GPU {g:.6} vs CPU {c:.6}"
+            );
+        }
     }
 
     #[test]

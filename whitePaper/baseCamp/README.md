@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
 **Updated**: March 1, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.5.5)
-**Status**: 56 experiments, 1237/1237 Python + 630 Rust lib tests + 57 forge tests + 65 binaries + 78/78 pure GPU pipeline + 104/104 mixed-hardware pipeline + NPU→GPU PCIe bypass + NUCLEUS atomics + biomeOS graph execution + 18/18 CPU parity (20.1× speedup) + seasonal pipeline GPU Stage 1 + atlas stream unified batch + capability-based hardware discovery
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.5.6)
+**Status**: 56 experiments, 1237/1237 Python + 636 Rust lib tests + 57 forge tests + 65 binaries + 78/78 pure GPU pipeline + 104/104 mixed-hardware pipeline + ops 5-8 GPU-first (ToadStool S70+ absorbed) + seasonal pipeline GPU Stages 1-2 + NPU→GPU PCIe bypass + NUCLEUS atomics + biomeOS graph execution + 18/18 CPU parity (21.0× speedup) + atlas stream unified batch + capability-based hardware discovery
 
 ---
 
@@ -13,9 +13,9 @@ Phase 0   Python/R baselines    — reproduce paper results with original tools 
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
 Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (618 lib + 1498 atlas, 59 binaries + 30 benchmarks)
 Phase 1.5 CPU benchmark         — 25.9× Rust-vs-Python geometric mean (8/8 parity)
-Phase 2   BarraCuda GPU bridge  — 11 Tier A modules wired (cross-spring S68 fully rewired)
-Phase 2.5 Tier B orchestrators — Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5)
-Phase 2.6 Seasonal pipeline    — ET₀→Kc→WB→Yield chained, atlas stream, MC ET₀ GPU path
+Phase 2   BarraCuda GPU bridge  — 15 Tier A modules wired (cross-spring S70+ fully rewired)
+Phase 2.5 Ops 5-8 GPU-first   — Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed
+Phase 2.6 Seasonal pipeline    — GPU Stages 1-2 (ET₀ + Kc), atlas stream, MC ET₀ GPU path
 Phase 3   GPU live dispatch     — Titan V validated (24/24 PASS, 0.04% seasonal parity, 10K batch)
 Phase 3.5 NPU edge             — AKD1000 live: 3 experiments, ~48µs inference, LOCOMOS power budget
 Phase 3.7 metalForge live      — RTX 4070 + Titan V + AKD1000 + i9-12900K discovered, 18 workloads route

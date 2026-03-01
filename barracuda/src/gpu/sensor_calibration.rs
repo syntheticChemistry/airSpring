@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! Batched `SoilWatch` 10 sensor calibration GPU orchestrator (Tier B — pending op=5).
+//! Batched `SoilWatch` 10 sensor calibration GPU orchestrator (Tier A — op=5 absorbed).
 //!
 //! Converts raw analog counts to volumetric water content (cm³/cm³) via Dong et al. 2024 Eq. 5:
 //!
@@ -12,7 +12,7 @@
 //! | API | Device? | Backend |
 //! |-----|:-------:|---------|
 //! | [`BatchedSensorCal::compute`] | No | CPU via `eco::sensor_calibration::soilwatch10_vwc` |
-//! | [`BatchedSensorCal::compute_gpu`] | Yes | GPU via `BatchedElementwiseF64` (op=5, pending) |
+//! | [`BatchedSensorCal::compute_gpu`] | Yes | **GPU** via `BatchedElementwiseF64` op=5 (`ToadStool` S70+) |
 //!
 //! # Reference
 //!
@@ -22,7 +22,7 @@
 use std::sync::Arc;
 
 use barracuda::device::WgpuDevice;
-use barracuda::ops::batched_elementwise_f64::BatchedElementwiseF64;
+use barracuda::ops::batched_elementwise_f64::{BatchedElementwiseF64, Op};
 
 use crate::eco::sensor_calibration;
 
@@ -41,7 +41,7 @@ pub enum Backend {
     /// Validated CPU path (always available).
     #[default]
     Cpu,
-    /// GPU path via `BatchedElementwiseF64` op=5 (pending `ToadStool` absorption).
+    /// GPU path via `BatchedElementwiseF64` op=5 (`ToadStool` S70+ absorbed).
     Gpu,
 }
 
@@ -57,8 +57,8 @@ pub struct BatchedSensorCalResult {
 /// Batched `SoilWatch` 10 sensor calibration orchestrator.
 ///
 /// Computes VWC for N sensor readings in a single call.
-/// Currently CPU-only (Tier B). When `ToadStool` absorbs op=5,
-/// the GPU engine activates automatically.
+/// GPU dispatch via `BatchedElementwiseF64` op=5 (absorbed in `ToadStool` S70+).
+/// Falls back to CPU when no GPU device is configured.
 pub struct BatchedSensorCal {
     backend: Backend,
     gpu_engine: Option<BatchedElementwiseF64>,
@@ -74,7 +74,7 @@ impl std::fmt::Debug for BatchedSensorCal {
 }
 
 impl BatchedSensorCal {
-    /// Create with GPU engine (Tier B — currently falls back to CPU).
+    /// Create with GPU engine (Tier A — dispatches to op=5 shader).
     ///
     /// # Errors
     ///
@@ -105,9 +105,8 @@ impl BatchedSensorCal {
 
     /// Compute VWC for a batch of sensor readings.
     ///
-    /// When `ToadStool` absorbs op=5 (stride=1: `[raw_count]`), this method
-    /// dispatches to the GPU engine automatically. Until then, the validated
-    /// CPU path is authoritative.
+    /// Dispatches to GPU via `BatchedElementwiseF64` op=5 when a GPU engine
+    /// is configured; falls back to CPU otherwise.
     ///
     /// # Errors
     ///
@@ -116,14 +115,20 @@ impl BatchedSensorCal {
         &self,
         inputs: &[SensorReading],
     ) -> crate::error::Result<BatchedSensorCalResult> {
-        // TODO(toadstool): When op=5 is absorbed, replace with:
-        //   let packed = Self::pack_gpu_input(inputs);
-        //   engine.execute(&packed, inputs.len(), Op::SensorCal)?
-        let vwc_values = compute_cpu_batch(inputs);
-        Ok(BatchedSensorCalResult {
-            vwc_values,
-            backend_used: Backend::Cpu,
-        })
+        if let Some(engine) = &self.gpu_engine {
+            let packed = Self::pack_gpu_input(inputs);
+            let vwc_values = engine.execute(&packed, inputs.len(), Op::SensorCalibration)?;
+            Ok(BatchedSensorCalResult {
+                vwc_values,
+                backend_used: Backend::Gpu,
+            })
+        } else {
+            let vwc_values = compute_cpu_batch(inputs);
+            Ok(BatchedSensorCalResult {
+                vwc_values,
+                backend_used: Backend::Cpu,
+            })
+        }
     }
 
     /// Pack inputs into stride-1 GPU layout: `[raw_count]`.
@@ -235,7 +240,7 @@ mod tests {
     }
 
     #[test]
-    fn compute_gpu_fallback() {
+    fn compute_gpu_cpu_fallback() {
         let engine = BatchedSensorCal::cpu();
         let result = engine
             .compute_gpu(&[SensorReading {
@@ -245,6 +250,56 @@ mod tests {
         assert_eq!(result.vwc_values.len(), 1);
         assert!((result.vwc_values[0] - 0.1323).abs() < 1e-4);
         assert_eq!(result.backend_used, Backend::Cpu);
+    }
+
+    fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
+        pollster::block_on(barracuda::device::WgpuDevice::new_f64_capable())
+            .ok()
+            .map(std::sync::Arc::new)
+    }
+
+    #[test]
+    fn compute_gpu_device_dispatch() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for BatchedSensorCal");
+            return;
+        };
+        let engine = BatchedSensorCal::gpu(device).unwrap();
+        let result = engine
+            .compute_gpu(&[SensorReading {
+                raw_count: 10_000.0,
+            }])
+            .unwrap();
+        assert_eq!(result.vwc_values.len(), 1);
+        assert!(
+            (result.vwc_values[0] - 0.1323).abs() < 0.01,
+            "GPU VWC(10000) = {}, expected ~0.1323",
+            result.vwc_values[0]
+        );
+        assert_eq!(result.backend_used, Backend::Gpu);
+    }
+
+    #[test]
+    fn compute_gpu_matches_cpu() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for BatchedSensorCal");
+            return;
+        };
+        let gpu_engine = BatchedSensorCal::gpu(device).unwrap();
+        let cpu_engine = BatchedSensorCal::cpu();
+        let inputs: Vec<SensorReading> = (0..50)
+            .map(|i| SensorReading {
+                raw_count: f64::from(i).mul_add(500.0, 5_000.0),
+            })
+            .collect();
+        let gpu_result = gpu_engine.compute_gpu(&inputs).unwrap();
+        let cpu_result = cpu_engine.compute(&inputs);
+        for (g, c) in gpu_result.vwc_values.iter().zip(&cpu_result.vwc_values) {
+            assert!(
+                (g - c).abs() < 0.01,
+                "GPU {g:.6} vs CPU {c:.6}"
+            );
+        }
     }
 
     #[test]

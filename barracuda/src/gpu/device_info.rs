@@ -362,6 +362,7 @@ mod tests {
             fp64_strategy: Fp64Strategy::Native,
             fp64_rate: Fp64Rate::Full,
             builtins: F64BuiltinCapabilities {
+                basic_f64: true,
                 exp: true,
                 log: true,
                 exp2: true,

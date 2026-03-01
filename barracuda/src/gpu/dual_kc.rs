@@ -4,14 +4,14 @@
 //! Dispatches M fields' dual Kc computations (`Ke` + `ETc`) in parallel.
 //!
 //! - **GPU**: Per-timestep `Ke` batch across M independent fields via
-//!   `BatchedElementwiseF64` (Tier B — pending `ToadStool` primitive absorption).
+//!   `BatchedElementwiseF64` op=8 (`ToadStool` S70+ absorbed).
 //! - **CPU**: Sequential multi-day simulation using validated `eco::dual_kc`.
 //!
-//! # GPU readiness
+//! # GPU dispatch
 //!
-//! The CPU path is fully validated against FAO-56 Ch 7+11. The GPU interface
-//! is wired and ready for `ToadStool` absorption. Once `ToadStool` adds a
-//! `dual_kc_ke_batch` shader operation, the GPU path activates automatically.
+//! The CPU path is fully validated against FAO-56 Ch 7+11. The GPU path
+//! dispatches `Ke` computation to `ToadStool` `BatchedElementwiseF64` op=8
+//! (stride=9, absorbed in S70+). State updates remain on CPU.
 //!
 //! # Mulch support
 //!
@@ -21,7 +21,7 @@
 use std::sync::Arc;
 
 use barracuda::device::WgpuDevice;
-use barracuda::ops::batched_elementwise_f64::BatchedElementwiseF64;
+use barracuda::ops::batched_elementwise_f64::{BatchedElementwiseF64, Op};
 
 use crate::eco::dual_kc::{self, DualKcInput, DualKcOutput, EvaporationLayerState};
 
@@ -55,12 +55,12 @@ pub struct BatchedDualKcResult {
 /// daily weather (ET₀, precipitation, irrigation). Each field has
 /// its own crop parameters and evaporation layer state.
 ///
-/// # GPU Readiness (Tier B — op=8 pending)
+/// # GPU Dispatch (Tier A — op=8 absorbed in `ToadStool` S70+)
 ///
 /// The GPU path packs per-field state into stride-9 vectors:
 /// `[kcb, kc_max, few, mulch_factor, de_prev, rew, tew, p_eff, et0]`
-/// and dispatches to `BatchedElementwiseF64` (op=8). Until `ToadStool`
-/// absorbs op=8, all dispatch falls back to the validated CPU path.
+/// and dispatches to `BatchedElementwiseF64` op=8 for `Ke` computation.
+/// Falls back to CPU when no GPU device is configured.
 pub struct BatchedDualKc {
     configs: Vec<FieldDualKcConfig>,
     gpu_engine: Option<BatchedElementwiseF64>,
@@ -146,21 +146,51 @@ impl BatchedDualKc {
         BatchedDualKcResult { outputs, states }
     }
 
-    /// Compute one timestep across all fields (GPU path, Tier B fallback to CPU).
+    /// Compute one timestep across all fields (GPU path).
     ///
-    /// When `ToadStool` absorbs op=8 (stride=9:
-    /// `[kcb, kc_max, few, mulch_factor, de_prev, rew, tew, p_eff, et0]`),
-    /// this dispatches M-field Ke computations to the GPU.
-    /// Until then, falls back to [`Self::step_cpu`].
+    /// Dispatches M-field `Ke` computations to GPU via `BatchedElementwiseF64`
+    /// op=8. The GPU returns raw `Ke` values; state update remains on CPU to
+    /// maintain the sequential dependency chain of `de_prev`.
     ///
     /// # Errors
     ///
     /// Returns an error if the GPU dispatch fails irrecoverably.
     pub fn step_gpu(&mut self, input: &DualKcInput) -> crate::error::Result<BatchedDualKcResult> {
-        // TODO(toadstool): When op=8 is absorbed, replace with:
-        //   let packed = self.pack_gpu_timestep(input);
-        //   engine.execute(&packed, self.configs.len(), Op::DualKc)?
-        Ok(self.step_cpu(input))
+        if let Some(engine) = &self.gpu_engine {
+            let packed = self.pack_gpu_timestep(input);
+            let ke_values = engine.execute(&packed, self.configs.len(), Op::DualKcKe)?;
+
+            let mut outputs = Vec::with_capacity(self.configs.len());
+            let mut states = Vec::with_capacity(self.configs.len());
+
+            for (i, config) in self.configs.iter_mut().enumerate() {
+                let ke = ke_values[i];
+                let kc_act = config.kcb + ke;
+                let etc = kc_act * input.et0;
+                let p_eff = (input.precipitation + input.irrigation).max(0.0);
+                let de_new = (config.state.de - p_eff + etc).clamp(0.0, config.state.tew);
+
+                let out = DualKcOutput {
+                    ke,
+                    etc,
+                    kr: if config.state.de <= config.state.rew {
+                        1.0
+                    } else {
+                        ((config.state.tew - config.state.de)
+                            / (config.state.tew - config.state.rew))
+                            .clamp(0.0, 1.0)
+                    },
+                    de: de_new,
+                };
+                config.state.de = de_new;
+                outputs.push(out);
+                states.push(config.state);
+            }
+
+            Ok(BatchedDualKcResult { outputs, states })
+        } else {
+            Ok(self.step_cpu(input))
+        }
     }
 
     /// Pack per-field state for one timestep into stride-9 GPU layout.

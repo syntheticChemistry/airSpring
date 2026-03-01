@@ -1,8 +1,8 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: March 1, 2026 (v0.5.5 — 630 lib tests, 60 barracuda + 5 forge binaries, 11 Tier A + 4 Tier B GPU orchestrators + GPU seasonal pipeline (Stage 1) + GPU atlas stream (unified batch) + pure GPU pipeline (78/78) + mixed-hardware pipeline (104/104 metalForge) + NUCLEUS atomics + biomeOS graph execution, 20.1× CPU speedup across 18 algorithms)
+**Last Updated**: March 1, 2026 (v0.5.6 — 636 lib tests, 60 barracuda + 5 forge binaries, 15 Tier A + 3 pipeline GPU orchestrators + pure GPU pipeline (78/78) + mixed-hardware pipeline (104/104 metalForge) + NUCLEUS atomics + biomeOS graph execution, 21.0× CPU speedup across 18 algorithms)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
-**ToadStool HEAD**: `e96576ee` (S68 — universal f64, ValidationHarness tracing, LazyLock shader constants)
+**ToadStool HEAD**: `1dd7e338` (S70+++ — ops 5-8 absorbed, seasonal pipeline WGSL, brent GPU shader, cross-spring absorption)
 
 ---
 
@@ -42,7 +42,7 @@
 | **Anderson coupling** | **`eco::anderson`** | **55+95** | **θ→S_e→d_eff→QS regime (cross-spring)** |
 | Cross-validation harness | `validation` | 75/75 | Python↔Rust match (tol=1e-5) |
 
-### Phase 2: GPU Orchestrators Wired (8 Tier A + 4 Tier B + 3 pipeline)
+### Phase 2: GPU Orchestrators Wired (15 Tier A + 3 pipeline)
 
 | Orchestrator | BarraCuda Primitive | Status | Provenance |
 |-------------|--------------------|----|---|
@@ -54,11 +54,11 @@
 | `eco::correction::fit_ridge` | `linalg::ridge::ridge_regression` | **Wired** | wetSpring ESN |
 | `gpu::richards::BatchedRichards` | `pde::richards::solve_richards` | **Wired** (v0.4.0) | airSpring → upstream |
 | `gpu::isotherm::fit_*_nm` | `optimize::nelder_mead` | **Wired** (v0.4.0) | airSpring → upstream |
-| `gpu::hargreaves::BatchedHargreaves` | `batched_elementwise_f64` (op=6, pending) | **Wired** (v0.5.2, Tier B) | FAO-56 Eq. 52 |
-| `gpu::kc_climate::BatchedKcClimate` | `batched_elementwise_f64` (op=7, pending) | **Wired** (v0.5.2, Tier B) | FAO-56 Eq. 62 |
-| `gpu::dual_kc::BatchedDualKc` | `batched_elementwise_f64` (op=8, pending) | **Wired** (v0.5.2, Tier B) | airSpring v0.5.2 |
-| `gpu::sensor_calibration::BatchedSensorCal` | `batched_elementwise_f64` (op=5, pending) | **Wired** (v0.5.2, Tier B) | Dong et al. 2024 |
-| `gpu::seasonal_pipeline::SeasonalPipeline` | Chains ops 0→7→1→yield | **GPU Stage 1** (v0.5.4) | ET₀ GPU dispatch + CPU stages 2-4 |
+| `gpu::hargreaves::BatchedHargreaves` | `batched_elementwise_f64` (op=6) | **GPU-FIRST** (v0.5.6) | FAO-56 Eq. 52, S70+ absorbed |
+| `gpu::kc_climate::BatchedKcClimate` | `batched_elementwise_f64` (op=7) | **GPU-FIRST** (v0.5.6) | FAO-56 Eq. 62, S70+ absorbed |
+| `gpu::dual_kc::BatchedDualKc` | `batched_elementwise_f64` (op=8) | **GPU-FIRST** (v0.5.6) | airSpring v0.5.2, S70+ absorbed |
+| `gpu::sensor_calibration::BatchedSensorCal` | `batched_elementwise_f64` (op=5) | **GPU-FIRST** (v0.5.6) | Dong et al. 2024, S70+ absorbed |
+| `gpu::seasonal_pipeline::SeasonalPipeline` | Chains ops 0→7→1→yield | **GPU Stages 1-2** (v0.5.6) | ET₀ + Kc GPU dispatch, CPU stages 3-4 |
 | `gpu::atlas_stream::AtlasStream` | `UnidirectionalPipeline` (pending) | **GPU+streaming** (v0.5.4) | GPU-capable + callback pattern |
 | `gpu::mc_et0::mc_et0_gpu` | `mc_et0_propagate_f64.wgsl` (pending) | **Wired** (v0.5.2, Tier B) | groundSpring xoshiro |
 

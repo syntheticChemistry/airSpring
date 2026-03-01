@@ -13,7 +13,7 @@ dependencies = [
 
 [[package]]
 name = "airspring-barracuda"
-version = "0.5.4"
+version = "0.5.6"
 dependencies = [
  "akida-driver",
  "barracuda",
@@ -26,7 +26,6 @@ dependencies = [
 name = "akida-driver"
 version = "0.1.0"
 dependencies = [
- "anyhow",
  "bytemuck",
  "bytes",
  "libc",
@@ -43,12 +42,6 @@ checksum = "819e7219dbd41043ac279b19830f2efc897156490d7fd6ea916720117ee66311"
 dependencies = [
  "libc",
 ]
-
-[[package]]
-name = "anyhow"
-version = "1.0.101"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5f0e0fee31ef5ed1ba1316088939cea399010ed7731dba877ed44aeb407a75ea"
 
 [[package]]
 name = "arrayvec"
@@ -1129,7 +1122,6 @@ name = "toadstool-core"
 version = "0.1.0"
 dependencies = [
  "akida-driver",
- "anyhow",
  "thiserror 2.0.18",
  "tracing",
 ]

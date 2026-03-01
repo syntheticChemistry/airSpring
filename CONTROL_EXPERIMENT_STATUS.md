@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-03-01 (v0.5.5 — 56 experiments, 1237 Python + 630 lib + 57 forge tests, 60 barracuda + 5 forge = 65 binaries, **20.1× Rust-vs-Python speedup** (18/18 parity), **pure GPU pipeline** (78/78 PASS), **mixed-hardware pipeline** (104/104 PASS), NPU→GPU PCIe bypass, NUCLEUS atomics (tower/node/nest), biomeOS graph execution, capability-based hardware discovery, AKD1000 NPU live, metalForge live (5 substrates, 18 workloads), seasonal pipeline GPU Stage 1, atlas stream unified batch, clippy pedantic, zero dead code)
+**Updated**: 2026-03-01 (v0.5.6 — 56 experiments, 1237 Python + 636 lib + 57 forge tests, 60 barracuda + 5 forge = 65 binaries, **21.0× Rust-vs-Python speedup** (18/18 parity), **pure GPU pipeline** (78/78 PASS), **mixed-hardware pipeline** (104/104 PASS), **ops 5-8 GPU-first** (ToadStool S70+ absorbed), seasonal pipeline GPU Stages 1-2, NPU→GPU PCIe bypass, NUCLEUS atomics (tower/node/nest), biomeOS graph execution, capability-based hardware discovery, AKD1000 NPU live, metalForge live (5 substrates, 18 workloads), atlas stream unified batch, clippy pedantic, zero dead code)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -940,12 +940,12 @@ Chapter 7, separating transpiration from soil evaporation for precision scheduli
 Track 1 (Precision Agriculture):
   Phase 0  [COMPLETE]: Python baselines — 1237/1237 PASS (54 experiments)
   Phase 0+ [COMPLETE]: Real data pipeline — 15,300 station-days, ET₀ R²=0.97
-  Phase 1  [COMPLETE]: Rust validation — 630 lib + 57 forge tests, 65 binaries
-  Phase 1.5[COMPLETE]: CPU benchmark — Rust 20.1× faster than Python (18/18 parity)
+  Phase 1  [COMPLETE]: Rust validation — 636 lib + 57 forge tests, 65 binaries
+  Phase 1.5[COMPLETE]: CPU benchmark — Rust 21.0× faster than Python (18/18 parity)
   Phase 2  [COMPLETE]: Cross-validation — 75/75 MATCH (Python↔Rust, tol=1e-5)
-  Phase 2.5[COMPLETE]: Tier B GPU — 4 orchestrators wired (ops 5-8, pending ToadStool absorption)
-  Phase 2.6[COMPLETE]: Seasonal pipeline — ET₀→Kc→WB→Yield chained, 73/73 real data (12 stations)
-  Phase 3  [COMPLETE]: GPU bridge — 11 Tier A modules wired to ToadStool primitives
+  Phase 2.5[COMPLETE]: Ops 5-8 GPU-first — 4 orchestrators rewired (ToadStool S70+ absorbed)
+  Phase 2.6[COMPLETE]: Seasonal pipeline — GPU Stages 1-2 (ET₀ + Kc), 73/73 real data (12 stations)
+  Phase 3  [COMPLETE]: GPU bridge — 15 Tier A modules wired to ToadStool primitives
   Phase 3.5[COMPLETE]: NPU edge — AKD1000 live, 3 experiments, ~48µs inference
   Phase 3.7[COMPLETE]: metalForge mixed — CPU+GPU+NPU substrate routing, 18 eco workloads
   Phase 3.8[COMPLETE]: Cross-system routing — 29/29 PASS, NUCLEUS atomic ready
