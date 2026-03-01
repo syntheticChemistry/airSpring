@@ -202,9 +202,21 @@ def anderson_coupling_chain(theta, soil, anderson):
 
 # ---------- Main Pipeline ----------
 
+WEATHER_CACHE = Path(__file__).parent / "data" / "weather_cache.json"
+
+
 def fetch_weather():
-    """Fetch real weather from Open-Meteo for the study site."""
+    """Fetch real weather from Open-Meteo, with local cache fallback."""
     print("\n--- Step 1: Fetch Open-Meteo Weather ---")
+
+    if WEATHER_CACHE.exists():
+        cached = json.loads(WEATHER_CACHE.read_text())
+        data = cached["daily"]
+        n_days = len(data["time"])
+        print(f"  Loaded {n_days} days from cache: {WEATHER_CACHE}")
+        check("weather_fetch_ok", True, "cached")
+        return data, n_days
+
     params = {
         "latitude": SITE["lat"],
         "longitude": SITE["lon"],
@@ -218,10 +230,24 @@ def fetch_weather():
         ]),
         "timezone": "auto",
     }
-    resp = requests.get(OPEN_METEO_BASE, params=params, timeout=30)
-    check("weather_fetch_ok", resp.status_code == 200, f"HTTP {resp.status_code}")
+    try:
+        resp = requests.get(OPEN_METEO_BASE, params=params, timeout=30)
+    except requests.RequestException as exc:
+        print(f"  API unreachable: {exc}")
+        print("  SKIP — ncbi_16s_coupling requires live Open-Meteo data")
+        sys.exit(0)
 
-    data = resp.json()["daily"]
+    if resp.status_code != 200:
+        print(f"  API returned HTTP {resp.status_code} — skipping (rate-limited or unavailable)")
+        sys.exit(0)
+
+    check("weather_fetch_ok", True)
+    full = resp.json()
+    WEATHER_CACHE.parent.mkdir(parents=True, exist_ok=True)
+    WEATHER_CACHE.write_text(json.dumps(full, indent=2))
+    print(f"  Cached to {WEATHER_CACHE}")
+
+    data = full["daily"]
     n_days = len(data["time"])
     print(f"  Fetched {n_days} days: {WEATHER['start']} to {WEATHER['end']}")
     return data, n_days

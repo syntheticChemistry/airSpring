@@ -178,6 +178,131 @@ def main():
         return dr
     results.append(bench("season_simulation", run_season, N // 10))
 
+    # SCS-CN Runoff — 100K
+    def scs_cn_runoff(P, CN):
+        if CN <= 0 or CN >= 100:
+            return 0.0
+        S = 25400.0 / CN - 254.0
+        Ia = 0.2 * S
+        return ((P - Ia) ** 2 / (P - Ia + S)) if P > Ia else 0.0
+    results.append(bench("scs_cn_runoff", scs_cn_runoff, N * 10, 50.0, 75.0))
+
+    # Green-Ampt infiltration — 100K (Newton-Raphson)
+    def green_ampt_F(ks, psi_dt, t):
+        if t <= 0:
+            return 0.0
+        F = ks * t
+        for _ in range(50):
+            F_new = ks * t + psi_dt * math.log(1 + F / psi_dt)
+            if abs(F_new - F) < 1e-10:
+                break
+            F = F_new
+        return F
+    results.append(bench("green_ampt", green_ampt_F, N * 10,
+                         1.09, 11.01 * 0.34, 1.0))
+
+    # Saxton-Rawls pedotransfer — 100K
+    def saxton_rawls_fc(sand, clay, om):
+        S, C, OM = sand * 100, clay * 100, om
+        fc_33t = (-0.251 * S + 0.195 * C + 0.011 * OM +
+                  0.006 * S * OM - 0.027 * C * OM +
+                  0.452 * S * C / 100 + 0.299)
+        fc_33 = fc_33t + (1.283 * fc_33t**2 - 0.374 * fc_33t - 0.015)
+        return fc_33
+    results.append(bench("saxton_rawls", saxton_rawls_fc, N * 10,
+                         0.40, 0.20, 2.5))
+
+    # Langmuir isotherm fit — 10K
+    def fit_langmuir(Ce, qe):
+        Ce_qe = [c / q for c, q in zip(Ce, qe) if q > 0]
+        Ce_f = [c for c, q in zip(Ce, qe) if q > 0]
+        n = len(Ce_f)
+        sx = sum(Ce_f)
+        sy = sum(Ce_qe)
+        sxy = sum(x * y for x, y in zip(Ce_f, Ce_qe))
+        sxx = sum(x * x for x in Ce_f)
+        slope = (n * sxy - sx * sy) / (n * sxx - sx ** 2)
+        intercept = (sy - slope * sx) / n
+        qmax = 1.0 / slope
+        KL = slope / intercept
+        y_mean = sy / n
+        ss_tot = sum((y - y_mean) ** 2 for y in Ce_qe)
+        ss_res = sum((y - (slope * x + intercept)) ** 2 for x, y in zip(Ce_f, Ce_qe))
+        r2 = 1 - ss_res / ss_tot if ss_tot > 0 else 0
+        return r2
+    Ce = [1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0, 200.0, 300.0]
+    qe = [2.8, 4.9, 8.5, 11.2, 14.0, 16.1, 17.0, 17.6, 17.8]
+    results.append(bench("langmuir_fit", fit_langmuir, N, Ce, qe))
+
+    # Priestley-Taylor ET₀ — 10K
+    def priestley_taylor(Rn, G, T, alt):
+        P = 101.3 * ((293 - 0.0065 * alt) / 293) ** 5.26
+        gamma = 0.000665 * P
+        delta = 4098 * 0.6108 * math.exp(17.27 * T / (T + 237.3)) / (T + 237.3) ** 2
+        return max(0, 1.26 * 0.408 * delta / (delta + gamma) * (Rn - G))
+    results.append(bench("priestley_taylor", priestley_taylor, N,
+                         15.0, 0.5, 25.0, 200.0))
+
+    # Richards 1D — 1K (simple implicit Euler)
+    def richards_1d(n_nodes, dt, n_steps):
+        h = [-100.0] * n_nodes
+        dz = 30.0 / (n_nodes - 1)
+        alpha, n_vg, theta_r, theta_s = 0.145, 2.68, 0.045, 0.43
+        ks = 712.8
+        m = 1 - 1 / n_vg
+        h[0] = 0.0
+        for _ in range(n_steps):
+            for node in range(1, n_nodes - 1):
+                Se = (1 + (alpha * abs(h[node])) ** n_vg) ** (-m) if h[node] < 0 else 1.0
+                K = ks * Se ** 0.5 * (1 - (1 - Se ** (1/m)) ** m) ** 2
+                C = alpha * m * (theta_s - theta_r) * n_vg * (alpha * abs(h[node])) ** (n_vg - 1) / (1 + (alpha * abs(h[node])) ** n_vg) ** (m + 1) if h[node] < 0 else 0.0
+                flux = K * ((h[node-1] - 2*h[node] + h[node+1]) / dz**2 + 1.0)
+                h[node] += dt * flux / max(C, 1e-10) if C > 0 else 0
+        Se_top = (1 + (alpha * abs(h[0])) ** n_vg) ** (-m) if h[0] < 0 else 1.0
+        return theta_r + (theta_s - theta_r) * Se_top
+    results.append(bench("richards_1d", richards_1d, N // 10, 20, 0.001, 10))
+
+    # Yield response — 100K
+    def stewart_yield(ky, eta_etc):
+        return 1 - ky * (1 - eta_etc)
+    results.append(bench("yield_response", stewart_yield, N * 10, 1.25, 0.75))
+
+    # Dual Kc 7-day — 10K
+    def dual_kc_7day():
+        de = 0.0
+        tew, rew = 22.0, 9.0
+        kcb, kc_max, few = 1.0, 1.2, 0.5
+        for d in range(7):
+            et0 = 4.5
+            P = 15.0 if d == 0 else 0.0
+            de = max(0, de - P)
+            kr = max(0, (tew - de) / (tew - rew)) if de > rew else 1.0
+            ke = min(few * (kc_max - kcb), kr * (kc_max - kcb))
+            etc = (kcb + ke) * et0
+            de = min(tew, de + etc * few - P * max(0, 1 - de/tew))
+        return de
+    results.append(bench("dual_kc_step", dual_kc_7day, N))
+
+    # Makkink ET₀ — 100K
+    def makkink_et0(T, Rs, alt):
+        P = 101.3 * ((293 - 0.0065 * alt) / 293) ** 5.26
+        gamma = 0.000665 * P
+        delta = 4098 * 0.6108 * math.exp(17.27 * T / (T + 237.3)) / (T + 237.3) ** 2
+        return max(0, 0.61 * delta / (delta + gamma) * Rs / 2.45 - 0.12)
+    results.append(bench("makkink_et0", makkink_et0, N * 10, 25.0, 20.0, 200.0))
+
+    # Blaney-Criddle ET₀ — 100K
+    def blaney_criddle(T, lat_rad, doy):
+        decl = 0.409 * math.sin(2 * math.pi * doy / 365.0 - 1.39)
+        cos_ws = -math.tan(lat_rad) * math.tan(decl)
+        cos_ws = max(-1, min(1, cos_ws))
+        ws = math.acos(cos_ws)
+        n = 24 * ws / math.pi
+        p = n / (365 * 12)
+        return max(0, p * (0.46 * T + 8.13))
+    results.append(bench("blaney_criddle", blaney_criddle, N * 10,
+                         25.0, math.radians(42.0), 180))
+
     out = {"benchmarks": results}
     json.dump(out, sys.stdout)
 

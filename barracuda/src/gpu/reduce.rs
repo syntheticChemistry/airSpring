@@ -60,8 +60,7 @@ impl SeasonalReducer {
     ///
     /// Returns an error if the `FusedMapReduceF64` engine cannot be initialised.
     pub fn new(device: Arc<WgpuDevice>) -> crate::error::Result<Self> {
-        let engine = FusedMapReduceF64::new(device)
-            .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
+        let engine = FusedMapReduceF64::new(device)?;
         Ok(Self { engine })
     }
 
@@ -73,7 +72,7 @@ impl SeasonalReducer {
     pub fn sum(&self, values: &[f64]) -> crate::error::Result<f64> {
         self.engine
             .sum(values)
-            .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))
+            .map_err(crate::error::AirSpringError::from)
     }
 
     /// GPU-accelerated seasonal maximum.
@@ -84,7 +83,7 @@ impl SeasonalReducer {
     pub fn max(&self, values: &[f64]) -> crate::error::Result<f64> {
         self.engine
             .max(values)
-            .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))
+            .map_err(crate::error::AirSpringError::from)
     }
 
     /// GPU-accelerated seasonal minimum.
@@ -95,7 +94,7 @@ impl SeasonalReducer {
     pub fn min(&self, values: &[f64]) -> crate::error::Result<f64> {
         self.engine
             .min(values)
-            .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))
+            .map_err(crate::error::AirSpringError::from)
     }
 
     /// GPU-accelerated sum of squares (for variance computation).
@@ -106,7 +105,7 @@ impl SeasonalReducer {
     pub fn sum_of_squares(&self, values: &[f64]) -> crate::error::Result<f64> {
         self.engine
             .sum_of_squares(values)
-            .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))
+            .map_err(crate::error::AirSpringError::from)
     }
 
     /// Compute all seasonal statistics via GPU-accelerated reductions.

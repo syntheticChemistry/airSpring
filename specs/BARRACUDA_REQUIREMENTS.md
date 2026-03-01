@@ -1,6 +1,6 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: February 27, 2026 (v0.5.2 — 584 lib tests, 50 barracuda + 4 forge binaries, 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + atlas stream + MC GPU, AKD1000 NPU live, 25.9× CPU speedup)
+**Last Updated**: March 1, 2026 (v0.5.5 — 630 lib tests, 60 barracuda + 5 forge binaries, 11 Tier A + 4 Tier B GPU orchestrators + GPU seasonal pipeline (Stage 1) + GPU atlas stream (unified batch) + pure GPU pipeline (78/78) + mixed-hardware pipeline (104/104 metalForge) + NUCLEUS atomics + biomeOS graph execution, 20.1× CPU speedup across 18 algorithms)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
 **ToadStool HEAD**: `e96576ee` (S68 — universal f64, ValidationHarness tracing, LazyLock shader constants)
 
@@ -58,8 +58,8 @@
 | `gpu::kc_climate::BatchedKcClimate` | `batched_elementwise_f64` (op=7, pending) | **Wired** (v0.5.2, Tier B) | FAO-56 Eq. 62 |
 | `gpu::dual_kc::BatchedDualKc` | `batched_elementwise_f64` (op=8, pending) | **Wired** (v0.5.2, Tier B) | airSpring v0.5.2 |
 | `gpu::sensor_calibration::BatchedSensorCal` | `batched_elementwise_f64` (op=5, pending) | **Wired** (v0.5.2, Tier B) | Dong et al. 2024 |
-| `gpu::seasonal_pipeline::SeasonalPipeline` | Chains ops 0→7→1→yield | **CPU chained** (v0.5.2) | Zero round-trip target |
-| `gpu::atlas_stream::AtlasStream` | `UnidirectionalPipeline` (pending) | **CPU chained** (v0.5.2) | Multi-year regional |
+| `gpu::seasonal_pipeline::SeasonalPipeline` | Chains ops 0→7→1→yield | **GPU Stage 1** (v0.5.4) | ET₀ GPU dispatch + CPU stages 2-4 |
+| `gpu::atlas_stream::AtlasStream` | `UnidirectionalPipeline` (pending) | **GPU+streaming** (v0.5.4) | GPU-capable + callback pattern |
 | `gpu::mc_et0::mc_et0_gpu` | `mc_et0_propagate_f64.wgsl` (pending) | **Wired** (v0.5.2, Tier B) | groundSpring xoshiro |
 
 ### Phase 2: Stats & Validation
@@ -78,9 +78,12 @@
 
 ### Layer 1: BarraCuda CPU (validated, complete)
 
-All algorithms implemented in pure Rust. 584 lib tests, 50 binaries, 651 total checks.
+All algorithms implemented in pure Rust. 628 lib tests, 50+ binaries, 651+ total checks.
 This is the baseline for correctness — GPU and metalForge results must match.
-CPU benchmarks: 25.9× geometric mean speedup vs Python (8/8 parity).
+CPU benchmarks: 21.0× geometric mean speedup vs Python (18/18 parity across
+ET₀, dual Kc, mulched Kc, VG θ, Richards 1D, Langmuir, Freundlich, GDD,
+SCS-CN runoff, Green-Ampt, Saxton-Rawls, Priestley-Taylor, yield response,
+dual Kc step, Makkink, Blaney-Criddle, Hargreaves, sensor calibration).
 
 ```
 eco::evapotranspiration → validated daily_et0(), hargreaves_et0()
@@ -112,8 +115,8 @@ gpu::sensor_calibration → BatchedSensorCal::compute_gpu() → batched_elementw
 gpu::hargreaves         → BatchedHargreaves::compute_gpu()→ batched_elementwise (op=6) [Tier B]
 gpu::kc_climate         → BatchedKcClimate::compute_gpu() → batched_elementwise (op=7) [Tier B]
 gpu::dual_kc            → BatchedDualKc::step_gpu()       → batched_elementwise (op=8) [Tier B]
-gpu::seasonal_pipeline  → SeasonalPipeline::run_season()  → chained ops 0→7→1→yield   [CPU chained]
-gpu::atlas_stream       → AtlasStream::process_batch()    → UnidirectionalPipeline     [CPU chained]
+gpu::seasonal_pipeline  → SeasonalPipeline::gpu()/cpu()   → GPU ET₀ + chained 7→1→yield [GPU Stage 1]
+gpu::atlas_stream       → AtlasStream::with_gpu()/new()  → GPU pipeline + streaming    [GPU+streaming]
 gpu::mc_et0             → mc_et0_gpu()                    → mc_et0_propagate_f64.wgsl  [Tier B]
 ```
 

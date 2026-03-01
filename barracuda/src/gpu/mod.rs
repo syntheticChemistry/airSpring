@@ -17,6 +17,8 @@
 //! | [`kriging`] | Soil moisture spatial interpolation | **Integrated** (`KrigingF64`) |
 //! | [`reduce`] | Seasonal aggregation statistics | **GPU** for N≥1024 (`FusedMapReduceF64`) |
 //! | [`sensor_calibration`] | Batched `SoilWatch` 10 VWC calibration | **CPU** (Tier B → op=5 pending) |
+//! | [`seasonal_pipeline`] | Full-season ET₀→Kc→WB→Yield pipeline | **GPU Stage 1** (ET₀) + CPU stages 2-4 |
+//! | [`atlas_stream`] | Multi-station multi-crop regional pipeline | **GPU-capable** + streaming callback |
 //! | [`stream`] | `IoT` stream smoothing (sliding window) | **GPU** (`MovingWindowStats`, wetSpring) |
 //! | [`richards`] | 1D Richards equation (vadose zone) | **Wired** (`pde::richards`) |
 //! | [`isotherm`] | Batch isotherm fitting (biochar) | **Wired** (`nelder_mead` + `multi_start`) |

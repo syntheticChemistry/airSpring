@@ -46,6 +46,13 @@ use barracuda::optimize;
 
 use crate::eco::isotherm::{self, IsothermFit};
 
+const LANGMUIR_QMAX_BOUNDS: (f64, f64) = (0.1, 1000.0);
+const LANGMUIR_KL_BOUNDS: (f64, f64) = (1e-6, 100.0);
+const FREUNDLICH_KF_BOUNDS: (f64, f64) = (1e-4, 1000.0);
+const FREUNDLICH_N_BOUNDS: (f64, f64) = (0.2, 15.0);
+const NM_MAX_ITER: usize = 2000;
+const NM_TOLERANCE: f64 = 1e-10;
+
 /// Fit Langmuir model using `barracuda::optimize::nelder_mead`.
 ///
 /// Minimizes sum of squared residuals: `Σ(qe_i - qmax·KL·Ce_i/(1+KL·Ce_i))²`
@@ -81,10 +88,10 @@ pub fn fit_langmuir_nm(ce: &[f64], qe: &[f64]) -> Option<IsothermFit> {
     };
 
     let x0 = vec![qmax_init, kl_init];
-    let bounds = vec![(0.1, 1000.0), (1e-6, 100.0)];
+    let bounds = vec![LANGMUIR_QMAX_BOUNDS, LANGMUIR_KL_BOUNDS];
 
     let (x_best, _f_best, _n_evals) =
-        optimize::nelder_mead(objective, &x0, &bounds, 2000, 1e-10).ok()?;
+        optimize::nelder_mead(objective, &x0, &bounds, NM_MAX_ITER, NM_TOLERANCE).ok()?;
 
     let qmax = x_best[0];
     let kl = x_best[1];
@@ -133,10 +140,10 @@ pub fn fit_freundlich_nm(ce: &[f64], qe: &[f64]) -> Option<IsothermFit> {
     };
 
     let x0 = vec![kf_init, n_init];
-    let bounds = vec![(1e-4, 1000.0), (0.2, 15.0)];
+    let bounds = vec![FREUNDLICH_KF_BOUNDS, FREUNDLICH_N_BOUNDS];
 
     let (x_best, _f_best, _n_evals) =
-        optimize::nelder_mead(objective, &x0, &bounds, 2000, 1e-10).ok()?;
+        optimize::nelder_mead(objective, &x0, &bounds, NM_MAX_ITER, NM_TOLERANCE).ok()?;
 
     let kf = x_best[0];
     let n = x_best[1];
@@ -182,10 +189,17 @@ pub fn fit_langmuir_global(ce: &[f64], qe: &[f64], n_starts: usize) -> Option<Is
             .sum()
     };
 
-    let bounds = vec![(0.1, 1000.0), (1e-6, 100.0)];
+    let bounds = vec![LANGMUIR_QMAX_BOUNDS, LANGMUIR_KL_BOUNDS];
 
-    let (best, _cache, _results) =
-        optimize::multi_start_nelder_mead(objective, &bounds, n_starts, 2000, 1e-10, 42).ok()?;
+    let (best, _cache, _results) = optimize::multi_start_nelder_mead(
+        objective,
+        &bounds,
+        n_starts,
+        NM_MAX_ITER,
+        NM_TOLERANCE,
+        42,
+    )
+    .ok()?;
 
     let qmax = best.x_best[0];
     let kl = best.x_best[1];
@@ -230,10 +244,17 @@ pub fn fit_freundlich_global(ce: &[f64], qe: &[f64], n_starts: usize) -> Option<
             .sum()
     };
 
-    let bounds = vec![(1e-4, 1000.0), (0.2, 15.0)];
+    let bounds = vec![FREUNDLICH_KF_BOUNDS, FREUNDLICH_N_BOUNDS];
 
-    let (best, _cache, _results) =
-        optimize::multi_start_nelder_mead(objective, &bounds, n_starts, 2000, 1e-10, 42).ok()?;
+    let (best, _cache, _results) = optimize::multi_start_nelder_mead(
+        objective,
+        &bounds,
+        n_starts,
+        NM_MAX_ITER,
+        NM_TOLERANCE,
+        42,
+    )
+    .ok()?;
 
     let kf = best.x_best[0];
     let n = best.x_best[1];

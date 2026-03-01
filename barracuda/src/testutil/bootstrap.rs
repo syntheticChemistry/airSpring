@@ -51,8 +51,7 @@ pub fn bootstrap_rmse(
         n_bootstrap,
         confidence,
         BOOTSTRAP_SEED,
-    )
-    .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
+    )?;
 
     Ok((ci.lower, ci.upper))
 }

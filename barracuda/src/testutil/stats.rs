@@ -37,8 +37,7 @@ pub fn pearson_r(x: &[f64], y: &[f64]) -> f64 {
 /// primitive fails (e.g. length mismatch, degenerate data).
 #[must_use = "R² value should be checked"]
 pub fn r_squared(observed: &[f64], simulated: &[f64]) -> crate::error::Result<f64> {
-    let r = barracuda::stats::pearson_correlation(observed, simulated)
-        .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
+    let r = barracuda::stats::pearson_correlation(observed, simulated)?;
     Ok(r * r)
 }
 
@@ -184,7 +183,7 @@ pub fn coefficient_of_determination(
 #[must_use = "Spearman ρ value should be checked"]
 pub fn spearman_r(observed: &[f64], simulated: &[f64]) -> crate::error::Result<f64> {
     barracuda::stats::correlation::spearman_correlation(observed, simulated)
-        .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))
+        .map_err(crate::error::AirSpringError::from)
 }
 
 /// Compute sample variance using barracuda's implementation.
@@ -197,8 +196,7 @@ pub fn spearman_r(observed: &[f64], simulated: &[f64]) -> crate::error::Result<f
 /// Returns [`crate::error::AirSpringError::Barracuda`] on failure.
 #[must_use = "variance value should be checked"]
 pub fn variance(data: &[f64]) -> crate::error::Result<f64> {
-    barracuda::stats::correlation::variance(data)
-        .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))
+    barracuda::stats::correlation::variance(data).map_err(crate::error::AirSpringError::from)
 }
 
 /// Compute sample standard deviation using barracuda's implementation.
@@ -210,8 +208,7 @@ pub fn variance(data: &[f64]) -> crate::error::Result<f64> {
 /// Returns [`crate::error::AirSpringError::Barracuda`] on failure.
 #[must_use = "standard deviation value should be checked"]
 pub fn std_deviation(data: &[f64]) -> crate::error::Result<f64> {
-    barracuda::stats::correlation::std_dev(data)
-        .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))
+    barracuda::stats::correlation::std_dev(data).map_err(crate::error::AirSpringError::from)
 }
 
 // ── Upstream re-exports (`ToadStool` S64) ────────────────────────────

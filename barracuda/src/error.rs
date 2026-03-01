@@ -19,10 +19,18 @@ pub enum AirSpringError {
     BenchmarkParse(String),
     /// Invalid input (out of range, wrong dimensions).
     InvalidInput(String),
-    /// Errors propagated from barracuda primitives.
-    Barracuda(String),
+    /// Errors propagated from barracuda primitives (preserves source chain).
+    Barracuda(barracuda::error::BarracudaError),
     /// NPU errors (discovery, DMA, inference).
     Npu(String),
+}
+
+impl AirSpringError {
+    /// Wrap a string as a barracuda error (for cases where the original
+    /// error type is not available, e.g. formatted NPU driver messages).
+    pub fn barracuda_msg(msg: impl Into<String>) -> Self {
+        Self::Barracuda(barracuda::error::BarracudaError::Internal(msg.into()))
+    }
 }
 
 impl fmt::Display for AirSpringError {
@@ -33,7 +41,7 @@ impl fmt::Display for AirSpringError {
             Self::JsonParse(e) => write!(f, "JSON parse error: {e}"),
             Self::BenchmarkParse(msg) => write!(f, "Benchmark parse error: {msg}"),
             Self::InvalidInput(msg) => write!(f, "Invalid input: {msg}"),
-            Self::Barracuda(msg) => write!(f, "barracuda error: {msg}"),
+            Self::Barracuda(e) => write!(f, "barracuda error: {e}"),
             Self::Npu(msg) => write!(f, "NPU error: {msg}"),
         }
     }
@@ -44,11 +52,10 @@ impl std::error::Error for AirSpringError {
         match self {
             Self::Io(e) => Some(e),
             Self::JsonParse(e) => Some(e),
-            Self::CsvParse(_)
-            | Self::BenchmarkParse(_)
-            | Self::InvalidInput(_)
-            | Self::Barracuda(_)
-            | Self::Npu(_) => None,
+            Self::Barracuda(e) => Some(e),
+            Self::CsvParse(_) | Self::BenchmarkParse(_) | Self::InvalidInput(_) | Self::Npu(_) => {
+                None
+            }
         }
     }
 }
@@ -62,6 +69,12 @@ impl From<std::io::Error> for AirSpringError {
 impl From<serde_json::Error> for AirSpringError {
     fn from(e: serde_json::Error) -> Self {
         Self::JsonParse(e)
+    }
+}
+
+impl From<barracuda::error::BarracudaError> for AirSpringError {
+    fn from(e: barracuda::error::BarracudaError) -> Self {
+        Self::Barracuda(e)
     }
 }
 
@@ -100,7 +113,7 @@ mod tests {
 
     #[test]
     fn test_barracuda_display() {
-        let err = AirSpringError::Barracuda("GPU fail".into());
+        let err = AirSpringError::from(barracuda::error::BarracudaError::Gpu("GPU fail".into()));
         assert!(format!("{err}").contains("barracuda error"));
     }
 
@@ -152,9 +165,28 @@ mod tests {
     }
 
     #[test]
+    fn test_barracuda_source() {
+        let err = AirSpringError::from(barracuda::error::BarracudaError::Gpu("x".into()));
+        assert!(std::error::Error::source(&err).is_some());
+    }
+
+    #[test]
+    fn test_barracuda_msg_helper() {
+        let err = AirSpringError::barracuda_msg("custom context");
+        assert!(format!("{err}").contains("custom context"));
+    }
+
+    #[test]
     fn test_debug_format() {
-        let err = AirSpringError::Barracuda("test".into());
+        let err = AirSpringError::from(barracuda::error::BarracudaError::Internal("test".into()));
         let debug = format!("{err:?}");
         assert!(debug.contains("Barracuda"));
+    }
+
+    #[test]
+    fn test_from_barracuda_error() {
+        let barr_err = barracuda::error::BarracudaError::Device("gone".into());
+        let err: AirSpringError = barr_err.into();
+        assert!(matches!(err, AirSpringError::Barracuda(_)));
     }
 }

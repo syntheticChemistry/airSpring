@@ -102,8 +102,7 @@ impl BatchedDualKc {
         configs: Vec<FieldDualKcConfig>,
         device: Arc<WgpuDevice>,
     ) -> crate::error::Result<Self> {
-        let engine = BatchedElementwiseF64::new(device)
-            .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
+        let engine = BatchedElementwiseF64::new(device)?;
         Ok(Self {
             configs,
             gpu_engine: Some(engine),
@@ -149,15 +148,41 @@ impl BatchedDualKc {
 
     /// Compute one timestep across all fields (GPU path, Tier B fallback to CPU).
     ///
-    /// When `ToadStool` absorbs op=8, this dispatches M-field Ke computations
-    /// to the GPU. Currently falls back to [`Self::step_cpu`].
+    /// When `ToadStool` absorbs op=8 (stride=9:
+    /// `[kcb, kc_max, few, mulch_factor, de_prev, rew, tew, p_eff, et0]`),
+    /// this dispatches M-field Ke computations to the GPU.
+    /// Until then, falls back to [`Self::step_cpu`].
     ///
     /// # Errors
     ///
-    /// Returns an error if the GPU dispatch fails (future).
+    /// Returns an error if the GPU dispatch fails irrecoverably.
     pub fn step_gpu(&mut self, input: &DualKcInput) -> crate::error::Result<BatchedDualKcResult> {
-        // Tier B: CPU fallback until ToadStool absorbs op=8
+        // TODO(toadstool): When op=8 is absorbed, replace with:
+        //   let packed = self.pack_gpu_timestep(input);
+        //   engine.execute(&packed, self.configs.len(), Op::DualKc)?
         Ok(self.step_cpu(input))
+    }
+
+    /// Pack per-field state for one timestep into stride-9 GPU layout.
+    ///
+    /// `[kcb, kc_max, few, mulch_factor, de_prev, rew, tew, p_eff, et0]` per field.
+    /// Ready for `ToadStool` op=8 absorption.
+    #[must_use]
+    pub fn pack_gpu_timestep(&self, input: &DualKcInput) -> Vec<f64> {
+        let mut data = Vec::with_capacity(self.configs.len() * 9);
+        let p_eff = (input.precipitation + input.irrigation).max(0.0);
+        for cfg in &self.configs {
+            data.push(cfg.kcb);
+            data.push(cfg.kc_max);
+            data.push(cfg.few);
+            data.push(cfg.mulch_factor);
+            data.push(cfg.state.de);
+            data.push(cfg.state.rew);
+            data.push(cfg.state.tew);
+            data.push(p_eff);
+            data.push(input.et0);
+        }
+        data
     }
 
     /// Run a multi-day season simulation across all fields.

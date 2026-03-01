@@ -120,8 +120,7 @@ impl BatchedWaterBalance {
         p: f64,
         device: Arc<WgpuDevice>,
     ) -> crate::error::Result<Self> {
-        let engine = BatchedElementwiseF64::new(device)
-            .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
+        let engine = BatchedElementwiseF64::new(device)?;
         Ok(Self {
             state: WaterBalanceState::new(fc, wp, root_depth_mm, p),
             gpu_engine: Some(engine),
@@ -171,7 +170,7 @@ impl BatchedWaterBalance {
                     fields.iter().map(|f| f.to_toadstool()).collect();
                 engine
                     .water_balance_batch(&inputs)
-                    .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))
+                    .map_err(crate::error::AirSpringError::from)
             },
         )
     }

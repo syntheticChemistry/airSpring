@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
-**Updated**: February 28, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.5.4)
-**Status**: 54 experiments, 1237/1237 Python + 618 Rust lib tests + 1498 atlas checks + 33/33 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + atlas stream + MC GPU path + GPU math portability 46/46 + Titan V GPU live + AKD1000 NPU live + metalForge live (5 substrates, 18 workloads, 29/29 dispatch) + 25.9× CPU speedup + 8 ET₀ methods + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34) + 42+ named constants + zero dead code + capability-based GPU + ToadStool S68 sync (universal precision, 700 WGSL, 6-Spring provenance, 30/30 benchmarks)
+**Updated**: March 1, 2026
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.5.5)
+**Status**: 56 experiments, 1237/1237 Python + 630 Rust lib tests + 57 forge tests + 65 binaries + 78/78 pure GPU pipeline + 104/104 mixed-hardware pipeline + NPU→GPU PCIe bypass + NUCLEUS atomics + biomeOS graph execution + 18/18 CPU parity (20.1× speedup) + seasonal pipeline GPU Stage 1 + atlas stream unified batch + capability-based hardware discovery
 
 ---
 

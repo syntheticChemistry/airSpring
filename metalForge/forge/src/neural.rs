@@ -265,22 +265,21 @@ fn resolve_socket() -> Option<PathBuf> {
     None
 }
 
+const FALLBACK_UID: u32 = 1000;
+const PROC_STATUS_PATH: &str = "/proc/self/status";
+
 /// Extract UID from `/proc/self/status` (safe, no libc).
 fn uid_from_runtime_dir() -> u32 {
-    // Try /proc/self/status Uid line
-    if let Ok(status) = std::fs::read_to_string("/proc/self/status") {
-        for line in status.lines() {
-            if let Some(rest) = line.strip_prefix("Uid:") {
-                if let Some(uid_str) = rest.split_whitespace().next() {
-                    if let Ok(uid) = uid_str.parse::<u32>() {
-                        return uid;
-                    }
-                }
-            }
-        }
-    }
-    // Fallback: 1000 (common non-root uid)
-    1000
+    std::fs::read_to_string(PROC_STATUS_PATH)
+        .ok()
+        .and_then(|status| {
+            status.lines().find_map(|line| {
+                line.strip_prefix("Uid:")
+                    .and_then(|rest| rest.split_whitespace().next())
+                    .and_then(|s| s.parse::<u32>().ok())
+            })
+        })
+        .unwrap_or(FALLBACK_UID)
 }
 
 fn parse_response(response: &serde_json::Value) -> Result<CallResult, NeuralError> {

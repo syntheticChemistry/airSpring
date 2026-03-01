@@ -144,7 +144,7 @@ impl BatchedRichards {
         };
 
         pde_richards::solve_richards(&config, &h0, n_steps, top_bc, bottom_bc)
-            .map_err(|e| crate::error::AirSpringError::Barracuda(e.to_string()))
+            .map_err(crate::error::AirSpringError::from)
     }
 
     /// Compare CPU (`eco::richards`) and upstream (`barracuda::pde`) for validation.
@@ -201,11 +201,8 @@ impl BatchedRichards {
             .with_boundary_conditions(req.h_initial, req.h_initial);
 
         let initial = vec![req.h_initial; req.n_nodes];
-        let mut solver = HeatEquation1D::new(cn_config, &initial)
-            .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
-        let h_final = solver
-            .advance(n_steps)
-            .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
+        let mut solver = HeatEquation1D::new(cn_config, &initial)?;
+        let h_final = solver.advance(n_steps)?;
 
         let soil = to_barracuda_params(&req.params);
         let theta: Vec<f64> = h_final.iter().map(|&h| soil.theta(h)).collect();

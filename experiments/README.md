@@ -1,7 +1,7 @@
 # airSpring Experiments
 
-**Updated**: February 28, 2026
-**Status**: 54 experiments, 1237/1237 Python + 618 lib + 31 forge tests + 73/73 atlas stream + 75/75 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + AKD1000 NPU live + Titan V GPU live dispatch + metalForge 18 workloads 29/29 cross-system + GPU math portability 46/46 (13 modules) + NCBI 16S coupling (14+29) + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34) + CPU↔GPU parity + **Rust 25.9× faster than Python** (8/8 parity)
+**Updated**: March 1, 2026
+**Status**: 56 experiments, 1237/1237 Python + 630 lib + 57 forge tests + 60 barracuda + 5 forge binaries + 78/78 pure GPU pipeline + 104/104 metalForge mixed-hardware + 75/75 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline (GPU Stage 1) + NPU→GPU PCIe bypass + NUCLEUS atomics + biomeOS graph execution + **Rust 20.1× faster than Python** (18/18 parity)
 
 ---
 
@@ -63,6 +63,8 @@
 | 052 | SCS-CN + Green-Ampt Coupled Runoff-Infiltration | Hydrology | **Complete** | Python + Rust CPU | `eco::runoff` + `eco::infiltration` | 292+292 |
 | 053 | Van Genuchten Inverse Parameter Estimation | Soil Physics | **Complete** | Python + Rust CPU | `eco::van_genuchten` + `barracuda::optimize::brent` | 84+84 |
 | 054 | Full-Season Irrigation Water Budget Audit | Integration | **Complete** | Python + Rust CPU | `eco::evapotranspiration` + `eco::water_balance` + `eco::yield_response` | 34+34 |
+| 055 | Barracuda Pure GPU Workload Validation | GPU | **Complete** | Rust GPU (Titan V) | `gpu::et0` + `gpu::seasonal_pipeline` + `gpu::hargreaves` + `gpu::kc_climate` | 78 |
+| 056 | Mixed-Hardware Pipeline + NUCLEUS Atomics | metalForge | **Complete** | Rust (synthetic) | `metalForge::pipeline` + `metalForge::nucleus` + `metalForge::graph` | 43 |
 
 **Grand Total**: 1237 Python + **618 lib + 31 forge tests** + 1498/1498 atlas + 33/33 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge (5 substrates, 18 workloads, 29/29 cross-system) + GPU math portability (46/46) + NCBI 16S coupling (14+29) + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34) + 59 binaries + 30/30 cross-spring benchmarks (6 Springs) + ToadStool S68 synced
 

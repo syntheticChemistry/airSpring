@@ -10,7 +10,9 @@ description = "Cross-system compute dispatch for airSpring ecological pipelines 
 
 [dependencies]
 wgpu = { version = "24", features = ["vulkan-portability"] }
+serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+toml = "0.8"
 barracuda = { path = "../../../phase1/toadstool/crates/barracuda" }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
@@ -33,3 +35,7 @@ path = "src/bin/validate_dispatch.rs"
 [[bin]]
 name = "validate_live_hardware"
 path = "src/bin/validate_live_hardware.rs"
+
+[[bin]]
+name = "validate_mixed_pipeline"
+path = "src/bin/validate_mixed_pipeline.rs"

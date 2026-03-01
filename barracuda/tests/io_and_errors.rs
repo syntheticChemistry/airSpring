@@ -151,10 +151,10 @@ fn test_error_type_display_and_source() {
     assert!(msg.contains("Invalid input"), "InvalidInput display: {msg}");
     assert!(input_err.source().is_none(), "InvalidInput has no source");
 
-    let bc_err = AirSpringError::Barracuda("primitive failed".to_string());
+    let bc_err = AirSpringError::barracuda_msg("primitive failed");
     let msg = format!("{bc_err}");
     assert!(msg.contains("barracuda error"), "Barracuda display: {msg}");
-    assert!(bc_err.source().is_none(), "Barracuda has no source");
+    assert!(bc_err.source().is_some(), "Barracuda should have source");
 
     let io_err = std::io::Error::new(std::io::ErrorKind::NotFound, "gone");
     let converted: AirSpringError = io_err.into();

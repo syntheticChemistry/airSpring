@@ -1,8 +1,8 @@
 # airSpring — Ecological & Agricultural Sciences
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
-**Date**: February 28, 2026
-**Version**: 0.5.4
+**Date**: March 1, 2026
+**Version**: 0.5.5
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -13,33 +13,33 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → biomeOS (NUCLEUS atomics, deployment graphs) → Penny Irrigation
 ```
 
-## Current Status (v0.5.4)
+## Current Status (v0.5.5)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,237/1,237 PASS** | 54 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **618 lib + 1498 atlas** | 59 binaries + 30/30 cross-spring benchmarks |
-| Phase 1.5: CPU Benchmark | **25.9× faster** | Rust vs Python geometric mean (6×–190× range, 8/8 parity) |
+| Phase 1: Rust validation | **630 lib + 1498 atlas** | 60 binaries + 30/30 cross-spring benchmarks |
+| Phase 1.5: CPU Benchmark | **20.1× faster** | Rust vs Python geometric mean (18/18 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B GPU | **4 orchestrators wired** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) |
-| Phase 2.6: Seasonal pipeline | **73/73 PASS** | ET₀→Kc→WB→Yield chained, 12 stations, 4800 crop-year results |
-| Phase 3: GPU live dispatch | **Titan V validated** | 24/24 PASS, 0.04% seasonal parity, 10K batch scaling |
+| Phase 2.6: Seasonal pipeline | **GPU Stage 1** | ET₀ GPU dispatch + CPU stages 2-4, unified batch, streaming callback |
+| Phase 3: GPU live dispatch | **78/78 PASS** | Pure GPU workload validation (Exp 055), 0.04% seasonal parity |
 | Phase 3.5: NPU edge | **AKD1000 live** | 3 experiments, 95/95 NPU checks, ~48µs inference |
 | Phase 3.7: metalForge live | **5 substrates discovered** | RTX 4070 + Titan V + AKD1000 + i9-12900K, 18 workloads route |
-| Phase 3.8: Cross-system routing | **29/29 PASS** | GPU+NPU+CPU dispatch proven, NUCLEUS atomic ready |
+| Phase 3.8: Mixed-hardware pipeline | **104/104 PASS** | NPU→GPU PCIe bypass, NUCLEUS atomics, biomeOS graphs |
 | Phase 4: Penny Irrigation | Vision | Sovereign, consumer hardware |
 
 ### Code Quality
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` | **618 passed**, 0 failures |
+| `cargo test --lib` (barracuda) | **630 passed**, 0 failures |
+| `cargo test --lib` (metalForge) | **57 passed**, 0 failures |
 | `cargo test --tests` | **20 passed** (integration) |
-| `cargo clippy (pedantic)` | **0 warnings** (pedantic + nursery) |
+| `cargo clippy (pedantic)` | **0 warnings** (pedantic + nursery, both crates) |
 | `cargo fmt --check` | **Clean** |
 | `cargo doc` | **Builds** |
-| Forge tests | 31 (metalForge/forge — absorption staging + NPU dispatch) |
 
 ### Hardware Validated
 

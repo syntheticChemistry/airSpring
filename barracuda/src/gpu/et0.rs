@@ -121,8 +121,7 @@ impl BatchedEt0 {
     ///
     /// Returns an error if `BatchedElementwiseF64` cannot be initialised.
     pub fn gpu(device: Arc<WgpuDevice>) -> crate::error::Result<Self> {
-        let engine = BatchedElementwiseF64::new(device)
-            .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
+        let engine = BatchedElementwiseF64::new(device)?;
         Ok(Self {
             backend: Backend::Gpu,
             gpu_engine: Some(engine),
@@ -152,9 +151,7 @@ impl BatchedEt0 {
         if let Some(engine) = &self.gpu_engine {
             let station_days: Vec<bef64::StationDayInput> =
                 inputs.iter().map(|s| s.to_toadstool()).collect();
-            let et0_values = engine
-                .fao56_et0_batch(&station_days)
-                .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
+            let et0_values = engine.fao56_et0_batch(&station_days)?;
             Ok(BatchedEt0Result {
                 et0_values,
                 backend_used: Backend::Gpu,

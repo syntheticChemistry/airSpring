@@ -26,10 +26,15 @@
 //! println!("Yield ratio: {:.3}", result.yield_ratio);
 //! ```
 
+use std::sync::Arc;
+
+use barracuda::device::WgpuDevice;
+
 use crate::eco::crop::{adjust_kc_for_climate, CropCoefficients, CropType};
 use crate::eco::evapotranspiration::{self as et, DailyEt0Input};
 use crate::eco::water_balance::{self as wb, DailyInput, WaterBalanceState};
 use crate::eco::yield_response;
+use crate::gpu::et0::{BatchedEt0, StationDay};
 
 /// Daily weather observation for the seasonal pipeline.
 #[derive(Debug, Clone, Copy)]
@@ -121,11 +126,21 @@ pub struct SeasonResult {
 /// Seasonal agricultural pipeline orchestrator.
 ///
 /// Chains ET₀ → Kc adjustment → water balance → yield response in a
-/// single `run_season()` call. Currently CPU-only; each stage upgrades
-/// to GPU independently as `ToadStool` absorbs the corresponding ops.
-#[derive(Debug)]
+/// single `run_season()` call. Stage 1 (ET₀) dispatches to GPU when a
+/// device is available; remaining stages upgrade independently as
+/// `ToadStool` absorbs their corresponding ops.
 pub struct SeasonalPipeline {
-    _backend: Backend,
+    backend: Backend,
+    gpu_et0: Option<BatchedEt0>,
+}
+
+impl std::fmt::Debug for SeasonalPipeline {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("SeasonalPipeline")
+            .field("backend", &self.backend)
+            .field("gpu_et0", &self.gpu_et0.is_some())
+            .finish()
+    }
 }
 
 /// Backend selection.
@@ -145,15 +160,62 @@ impl SeasonalPipeline {
     #[must_use]
     pub const fn cpu() -> Self {
         Self {
-            _backend: Backend::Cpu,
+            backend: Backend::Cpu,
+            gpu_et0: None,
         }
+    }
+
+    /// Create a GPU per-stage pipeline with GPU ET₀ dispatch (Stage 1).
+    ///
+    /// Stage 1 (ET₀) dispatches to the GPU via `BatchedEt0`; remaining
+    /// stages fall back to CPU until `ToadStool` absorbs their ops.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the GPU device cannot initialise `BatchedEt0`.
+    pub fn gpu(device: Arc<WgpuDevice>) -> crate::error::Result<Self> {
+        let gpu_et0 = BatchedEt0::gpu(device)?;
+        Ok(Self {
+            backend: Backend::GpuPerStage,
+            gpu_et0: Some(gpu_et0),
+        })
+    }
+
+    /// Which backend this pipeline was configured with.
+    #[must_use]
+    pub const fn backend(&self) -> Backend {
+        self.backend
     }
 
     /// Run a complete seasonal simulation.
     ///
     /// Chains: weather → ET₀ → Kc climate adjust → water balance → yield.
+    /// Stage 1 uses GPU dispatch when available; remaining stages use CPU.
     #[must_use]
     pub fn run_season(&self, weather: &[WeatherDay], config: &CropConfig) -> SeasonResult {
+        let et0_daily = self.compute_et0_batch(weather);
+        Self::run_stages_2_through_4(weather, config, et0_daily)
+    }
+
+    /// Run Stages 2–4 with pre-computed ET₀ (enables unified GPU dispatch).
+    ///
+    /// When [`AtlasStream`] computes ET₀ for all stations in a single GPU
+    /// batch (eliminating per-station round-trips), it passes the pre-sliced
+    /// ET₀ array here for the remaining CPU-bound stages.
+    #[must_use]
+    pub fn run_season_with_et0(
+        weather: &[WeatherDay],
+        config: &CropConfig,
+        et0_daily: &[f64],
+    ) -> SeasonResult {
+        Self::run_stages_2_through_4(weather, config, et0_daily.to_vec())
+    }
+
+    fn run_stages_2_through_4(
+        weather: &[WeatherDay],
+        config: &CropConfig,
+        et0_daily: Vec<f64>,
+    ) -> SeasonResult {
         if weather.is_empty() {
             return SeasonResult {
                 n_days: 0,
@@ -171,9 +233,6 @@ impl SeasonalPipeline {
 
         let kc = config.crop_type.coefficients();
         let n = weather.len();
-
-        // Stage 1: ET₀ computation (op=0)
-        let et0_daily: Vec<f64> = weather.iter().map(compute_et0).collect();
 
         // Stage 2: Kc schedule with climate adjustment (op=7)
         let kc_daily: Vec<f64> = weather
@@ -248,6 +307,36 @@ impl SeasonalPipeline {
             et0_daily,
             actual_et_daily,
         }
+    }
+
+    /// Batch-compute ET₀ for all weather days, using GPU when available.
+    ///
+    /// Public for unified dispatch from [`super::atlas_stream::AtlasStream`].
+    #[must_use]
+    pub fn compute_et0_batch(&self, weather: &[WeatherDay]) -> Vec<f64> {
+        self.gpu_et0.as_ref().map_or_else(
+            || weather.iter().map(compute_et0).collect(),
+            |et0_engine| {
+                let station_days: Vec<StationDay> = weather
+                    .iter()
+                    .map(|w| StationDay {
+                        tmax: w.tmax,
+                        tmin: w.tmin,
+                        rh_max: w.rh_max,
+                        rh_min: w.rh_min,
+                        wind_2m: w.wind_2m,
+                        rs: w.solar_rad,
+                        elevation: w.elevation,
+                        latitude: w.latitude_deg,
+                        doy: w.day_of_year,
+                    })
+                    .collect();
+                et0_engine.compute_gpu(&station_days).map_or_else(
+                    |_| weather.iter().map(compute_et0).collect(),
+                    |r| r.et0_values,
+                )
+            },
+        )
     }
 }
 
@@ -439,6 +528,80 @@ mod tests {
             assert!(
                 result.mass_balance_error < 0.1,
                 "{:?} MB = {:.6}",
+                crop_type,
+                result.mass_balance_error
+            );
+        }
+    }
+
+    #[test]
+    fn backend_accessor() {
+        let cpu = SeasonalPipeline::cpu();
+        assert_eq!(cpu.backend(), Backend::Cpu);
+    }
+
+    #[test]
+    fn debug_format_cpu() {
+        let pipeline = SeasonalPipeline::cpu();
+        let dbg = format!("{pipeline:?}");
+        assert!(dbg.contains("Cpu"));
+        assert!(dbg.contains("false"));
+    }
+
+    fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
+        pollster::block_on(barracuda::device::WgpuDevice::new_f64_capable())
+            .ok()
+            .map(std::sync::Arc::new)
+    }
+
+    #[test]
+    fn gpu_pipeline_matches_cpu() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for SeasonalPipeline");
+            return;
+        };
+        let gpu_pipeline = SeasonalPipeline::gpu(device).unwrap();
+        let cpu_pipeline = SeasonalPipeline::cpu();
+        let weather = growing_season();
+        let config = CropConfig::standard(CropType::Corn);
+
+        let gpu_result = gpu_pipeline.run_season(&weather, &config);
+        let cpu_result = cpu_pipeline.run_season(&weather, &config);
+
+        assert_eq!(gpu_result.n_days, cpu_result.n_days);
+        let et0_diff = (gpu_result.total_et0 - cpu_result.total_et0).abs();
+        let et0_pct = et0_diff / cpu_result.total_et0 * 100.0;
+        assert!(
+            et0_pct < 1.0,
+            "GPU↔CPU ET₀ {:.1} vs {:.1} ({:.2}% > 1% threshold)",
+            gpu_result.total_et0,
+            cpu_result.total_et0,
+            et0_pct
+        );
+        assert!(
+            (gpu_result.yield_ratio - cpu_result.yield_ratio).abs() < 0.05,
+            "GPU YR {:.3} vs CPU {:.3}",
+            gpu_result.yield_ratio,
+            cpu_result.yield_ratio
+        );
+        assert_eq!(gpu_pipeline.backend(), Backend::GpuPerStage);
+    }
+
+    #[test]
+    fn gpu_pipeline_mass_balance() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for SeasonalPipeline");
+            return;
+        };
+        let pipeline = SeasonalPipeline::gpu(device).unwrap();
+        let weather = growing_season();
+
+        for crop_type in &[CropType::Corn, CropType::Soybean, CropType::WinterWheat] {
+            let config = CropConfig::standard(*crop_type);
+            let result = pipeline.run_season(&weather, &config);
+            assert!(
+                result.mass_balance_error < 0.5,
+                "{:?} GPU MB = {:.6}",
                 crop_type,
                 result.mass_balance_error
             );

@@ -80,8 +80,7 @@ impl BatchedSensorCal {
     ///
     /// Returns an error if `BatchedElementwiseF64` cannot be initialised.
     pub fn gpu(device: Arc<WgpuDevice>) -> crate::error::Result<Self> {
-        let engine = BatchedElementwiseF64::new(device)
-            .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
+        let engine = BatchedElementwiseF64::new(device)?;
         Ok(Self {
             backend: Backend::Gpu,
             gpu_engine: Some(engine),
@@ -106,20 +105,34 @@ impl BatchedSensorCal {
 
     /// Compute VWC for a batch of sensor readings.
     ///
-    /// Currently always uses CPU (Tier B — GPU pending).
+    /// When `ToadStool` absorbs op=5 (stride=1: `[raw_count]`), this method
+    /// dispatches to the GPU engine automatically. Until then, the validated
+    /// CPU path is authoritative.
     ///
     /// # Errors
     ///
-    /// Returns an error if the GPU dispatch fails (future).
+    /// Returns an error if the GPU dispatch fails irrecoverably.
     pub fn compute_gpu(
         &self,
         inputs: &[SensorReading],
     ) -> crate::error::Result<BatchedSensorCalResult> {
+        // TODO(toadstool): When op=5 is absorbed, replace with:
+        //   let packed = Self::pack_gpu_input(inputs);
+        //   engine.execute(&packed, inputs.len(), Op::SensorCal)?
         let vwc_values = compute_cpu_batch(inputs);
         Ok(BatchedSensorCalResult {
             vwc_values,
             backend_used: Backend::Cpu,
         })
+    }
+
+    /// Pack inputs into stride-1 GPU layout: `[raw_count]`.
+    ///
+    /// Ready for `ToadStool` op=5 absorption — produces the flat `f64` array
+    /// that `BatchedElementwiseF64::execute` expects.
+    #[must_use]
+    pub fn pack_gpu_input(inputs: &[SensorReading]) -> Vec<f64> {
+        inputs.iter().map(|r| r.raw_count).collect()
     }
 
     /// Compute VWC using the validated CPU path.

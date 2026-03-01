@@ -25,12 +25,12 @@
 //! | `eco::sensor_calibration` | `gpu::sensor_calibration` | `batched_elementwise_f64.wgsl` (op=5) | Sensor VWC | B→A (wired, pending absorption) |
 //! | `eco::evapotranspiration` (HG) | `gpu::hargreaves` | `batched_elementwise_f64.wgsl` (op=6) | Hargreaves ET₀ | B→A (wired, pending absorption) |
 //! | `eco::crop` (Kc adj) | `gpu::kc_climate` | `batched_elementwise_f64.wgsl` (op=7) | Kc climate adjust | B→A (wired, pending absorption) |
-//! | `eco::*` (pipeline) | `gpu::seasonal_pipeline` | Chained ops 0→7→1→yield | Seasonal pipeline | B (CPU chained) |
-//! | `eco::*` (stream) | `gpu::atlas_stream` | `UnidirectionalPipeline` (pending) | Regional atlas | B (CPU chained) |
+//! | `eco::*` (pipeline) | `gpu::seasonal_pipeline` | Chained ops 0→7→1→yield | Seasonal pipeline | **GPU Stage 1** (v0.5.5) |
+//! | `eco::*` (stream) | `gpu::atlas_stream` | Unified batch + streaming callback | Regional atlas | **GPU-capable** (v0.5.5) |
 //! | `eco::*` (MC) | `gpu::mc_et0` | `mc_et0_propagate_f64.wgsl` (pending) | MC uncertainty | B (wired, pending shader) |
 //! | `io::csv_ts` | `gpu::stream` | `moving_window.wgsl` | Stream smoothing | A (ready) |
 //!
-//! # Current Inventory (February 27, 2026 — v0.5.2, synced to `ToadStool` HEAD `e96576ee`)
+//! # Current Inventory (March 1, 2026 — v0.5.5, synced to `ToadStool` HEAD `e96576ee`)
 //!
 //! `ToadStool` S42–S68+: 170+ commits, 46+ cross-spring absorptions, 2,546+ tests, 703 WGSL shaders.
 //! All four airSpring issues (TS-001 through TS-004) resolved in **S54**.
@@ -192,7 +192,9 @@ pub enum Tier {
 
 /// All known evolution gaps (23+6 entries — 11 Tier A integrated, 11 Tier B (9 wired) + 6 new orchestrators, 1 Tier C).
 ///
-/// v0.5.2: 4 Tier B GPU orchestrators wired (ops 5-8), seasonal pipeline, atlas stream, MC GPU.
+/// v0.5.4: `SeasonalPipeline::gpu()` dispatches Stage 1 (ET₀) to GPU;
+/// `AtlasStream::with_gpu()` + `process_streaming()` callback pattern;
+/// Tier B orchestrators have `pack_gpu_input()` ready for `ToadStool` absorption.
 /// Synced to `ToadStool` S68+ (e96576ee). Universal precision architecture
 /// means all GPU dispatch is precision-agnostic: f64 on Titan V, Df64 on consumer
 /// GPUs, f32 fallback. S60-S65 sovereign compiler regression **RESOLVED** (S66+).
@@ -368,16 +370,16 @@ pub const GAPS: &[EvolutionGap] = &[
         description: "Chained ET₀→Kc→WB→Yield pipeline (zero CPU round-trips target)",
         tier: Tier::B,
         toadstool_primitive: Some("PipelineBuilder (chains ops 0→7→1→yield)"),
-        action: "WIRED (v0.5.2): gpu::seasonal_pipeline::SeasonalPipeline — CPU chained, \
-                 GPU per-stage or fully pipelined when ToadStool absorbs all ops",
+        action: "GPU per-stage (v0.5.4): SeasonalPipeline::gpu() dispatches Stage 1 (ET₀) \
+                 via BatchedEt0::gpu(), remaining stages CPU until ToadStool absorption",
     },
     EvolutionGap {
         id: "atlas_stream",
         description: "Streaming multi-year regional ET₀ for 100+ stations",
         tier: Tier::B,
         toadstool_primitive: Some("UnidirectionalPipeline (fire-and-forget GPU streaming)"),
-        action: "WIRED (v0.5.2): gpu::atlas_stream::AtlasStream — CPU batch, \
-                 true GPU streaming when UnidirectionalPipeline available",
+        action: "GPU+streaming (v0.5.4): AtlasStream::with_gpu() + process_streaming() \
+                 callback pattern, true GPU streaming when UnidirectionalPipeline available",
     },
     EvolutionGap {
         id: "mc_et0_gpu",

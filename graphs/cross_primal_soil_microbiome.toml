@@ -135,7 +135,7 @@ timeout_ms = 900000
 
 [[nodes]]
 id = "store_results"
-depends_on = ["spectral_results"]
+depends_on = ["spectral_analysis"]
 output = "results_stored"
 
 [nodes.operation]

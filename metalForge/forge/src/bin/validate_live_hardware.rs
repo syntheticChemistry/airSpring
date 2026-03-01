@@ -4,10 +4,9 @@
 //! Exp 044: metalForge Live Hardware Probe + Dispatch.
 //!
 //! Probes actual hardware on this machine and validates dispatch routing
-//! against the live inventory. Expects:
-//! - 2 GPUs (RTX 4070 + TITAN V)
-//! - 1 NPU (`BrainChip` AKD1000 at `/dev/akida0`)
-//! - 1 CPU (i9-12900K)
+//! against the live inventory. Capability-based: only asserts on hardware
+//! that is actually discovered at runtime. Primal code has self-knowledge
+//! and discovers other substrates dynamically.
 
 use airspring_forge::dispatch::{self, Reason};
 use airspring_forge::probe;
@@ -86,21 +85,25 @@ fn main() {
         );
     }
 
-    v.check_bool("At least 1 NPU discovered (/dev/akida0)", !npus.is_empty());
-
-    if let Some(npu) = npus.first() {
-        v.check_bool(
-            "AKD1000 has QuantizedInference(8)",
-            npu.has(&Capability::QuantizedInference { bits: 8 }),
-        );
-        v.check_bool(
-            "AKD1000 has BatchInference",
-            npu.has(&Capability::BatchInference { max_batch: 8 }),
-        );
-        v.check_bool(
-            "AKD1000 has WeightMutation",
-            npu.has(&Capability::WeightMutation),
-        );
+    let has_npu = !npus.is_empty();
+    if has_npu {
+        v.check_bool("NPU discovered", true);
+        if let Some(npu) = npus.first() {
+            v.check_bool(
+                "AKD1000 has QuantizedInference(8)",
+                npu.has(&Capability::QuantizedInference { bits: 8 }),
+            );
+            v.check_bool(
+                "AKD1000 has BatchInference",
+                npu.has(&Capability::BatchInference { max_batch: 8 }),
+            );
+            v.check_bool(
+                "AKD1000 has WeightMutation",
+                npu.has(&Capability::WeightMutation),
+            );
+        }
+    } else {
+        println!("  INFO: No NPU hardware detected — NPU checks skipped (capability-based)");
     }
 
     // ── CPU Probe ───────────────────────────────────────────────────────
@@ -134,24 +137,39 @@ fn main() {
     println!("  Total substrates: {}", inventory.len());
 
     let all_wl = workloads::all_workloads();
-    let mut all_route = true;
+    let mut routed_count = 0_usize;
+    let mut npu_required_count = 0_usize;
     for ew in &all_wl {
         let r = dispatch::route(&ew.workload, &inventory);
-        let routed = r.is_some();
-        if !routed {
-            all_route = false;
-        }
         if let Some(decision) = r {
+            routed_count += 1;
             println!(
                 "    {} → {} ({:?})",
                 ew.workload.name, decision.substrate.identity.name, decision.reason
             );
         } else {
-            println!("    {} → NO ROUTE", ew.workload.name);
+            let is_npu_only = ew
+                .workload
+                .preferred_substrate
+                .as_ref()
+                .is_some_and(|k| *k == SubstrateKind::Npu);
+            if is_npu_only && !has_npu {
+                npu_required_count += 1;
+                println!(
+                    "    {} → SKIP (NPU-preferred, no NPU hardware)",
+                    ew.workload.name
+                );
+            } else {
+                println!("    {} → NO ROUTE", ew.workload.name);
+            }
         }
     }
 
-    v.check_bool("All 14 workloads route with live hardware", all_route);
+    let expected_routable = all_wl.len() - npu_required_count;
+    v.check_bool(
+        "All routable workloads dispatched",
+        routed_count >= expected_routable,
+    );
 
     let et0_route = dispatch::route(&workloads::et0_batch().workload, &inventory);
     v.check_bool(
@@ -162,18 +180,28 @@ fn main() {
     );
 
     let stress_route = dispatch::route(&workloads::crop_stress_classifier().workload, &inventory);
-    v.check_bool(
-        "Crop stress routes to live AKD1000 NPU",
-        stress_route
-            .as_ref()
-            .is_some_and(|d| d.substrate.kind == SubstrateKind::Npu),
-    );
-    v.check_bool(
-        "NPU route uses Preferred reason",
-        stress_route
-            .as_ref()
-            .is_some_and(|d| d.reason == Reason::Preferred),
-    );
+    if has_npu {
+        v.check_bool(
+            "Crop stress routes to live AKD1000 NPU",
+            stress_route
+                .as_ref()
+                .is_some_and(|d| d.substrate.kind == SubstrateKind::Npu),
+        );
+        v.check_bool(
+            "NPU route uses Preferred reason",
+            stress_route
+                .as_ref()
+                .is_some_and(|d| d.reason == Reason::Preferred),
+        );
+    } else {
+        println!("  INFO: NPU dispatch checks skipped (no NPU hardware)");
+        if let Some(ref decision) = stress_route {
+            println!(
+                "    Crop stress fallback → {} ({:?})",
+                decision.substrate.identity.name, decision.reason
+            );
+        }
+    }
 
     v.finish();
 }

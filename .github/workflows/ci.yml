@@ -67,21 +67,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          path: airSpring
+
+      - uses: actions/checkout@v4
+        with:
+          repository: syntheticChemistry/ecoPrimals
+          path: phase1
+          sparse-checkout: toadstool/crates/barracuda
 
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
 
       - name: cargo fmt
-        working-directory: metalForge/forge
+        working-directory: airSpring/metalForge/forge
         run: cargo fmt --check
 
       - name: cargo clippy (pedantic)
-        working-directory: metalForge/forge
+        working-directory: airSpring/metalForge/forge
         run: cargo clippy --all-targets -- -D warnings -W clippy::pedantic
 
       - name: cargo test
-        working-directory: metalForge/forge
+        working-directory: airSpring/metalForge/forge
         run: cargo test
 
   python-baselines:
@@ -124,6 +132,24 @@ jobs:
           python3 control/ameriflux_et/ameriflux_et_validation.py
           python3 control/hargreaves/hargreaves_samani.py
           python3 control/diversity/diversity_indices.py
+          python3 control/makkink/makkink_et0.py
+          python3 control/turc/turc_et0.py
+          python3 control/hamon/hamon_pet.py
+          python3 control/blaney_criddle/blaney_criddle_et0.py
+          python3 control/scs_curve_number/scs_curve_number.py
+          python3 control/green_ampt/green_ampt_infiltration.py
+          python3 control/coupled_runoff_infiltration/coupled_runoff_infiltration.py
+          python3 control/vg_inverse/vg_inverse_fitting.py
+          python3 control/season_water_budget/season_water_budget.py
+          python3 control/anderson_coupling/anderson_coupling.py
+          python3 control/pedotransfer_richards/pedotransfer_richards.py
+          python3 control/et0_ensemble/et0_ensemble.py
+          python3 control/et0_bias_correction/et0_bias_correction.py
+          python3 control/gpu_math_portability/gpu_math_portability.py
+          python3 control/cpu_gpu_parity/cpu_gpu_parity.py
+          python3 control/neural_api/neural_api_parity.py
+          python3 control/seasonal_batch_et0/seasonal_batch_et0.py
+          python3 control/metalforge_dispatch/metalforge_dispatch.py
 
   coverage:
     name: Code Coverage (llvm-cov)
@@ -148,7 +174,7 @@ jobs:
 
       - name: Generate coverage report
         working-directory: airSpring/barracuda
-        run: cargo llvm-cov --lib --summary-only --fail-under-lines 80
+        run: cargo llvm-cov --lib --summary-only --fail-under-lines 90
 
   file-size:
     name: File Size Gate

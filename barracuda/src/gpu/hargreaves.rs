@@ -97,8 +97,7 @@ impl BatchedHargreaves {
     ///
     /// Returns an error if `BatchedElementwiseF64` cannot be initialised.
     pub fn gpu(device: Arc<WgpuDevice>) -> crate::error::Result<Self> {
-        let engine = BatchedElementwiseF64::new(device)
-            .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
+        let engine = BatchedElementwiseF64::new(device)?;
         Ok(Self {
             backend: Backend::Gpu,
             gpu_engine: Some(engine),
@@ -123,22 +122,41 @@ impl BatchedHargreaves {
 
     /// Compute Hargreaves ET₀ for a batch of station-days.
     ///
-    /// Currently always uses CPU (Tier B — GPU pending). When `ToadStool`
-    /// absorbs op=6, this method will dispatch to GPU automatically.
+    /// When `ToadStool` absorbs op=6 (stride=4: `[tmax, tmin, lat_rad, doy]`),
+    /// this method dispatches to the GPU engine automatically. Until then,
+    /// the validated CPU path is authoritative.
     ///
     /// # Errors
     ///
-    /// Returns an error if the GPU dispatch fails (future).
+    /// Returns an error if the GPU dispatch fails irrecoverably.
     pub fn compute_gpu(
         &self,
         inputs: &[HargreavesDay],
     ) -> crate::error::Result<BatchedHargreavesResult> {
-        // Tier B: CPU fallback until ToadStool absorbs op=6
+        // TODO(toadstool): When op=6 is absorbed, replace with:
+        //   let packed = Self::pack_gpu_input(inputs);
+        //   engine.execute(&packed, inputs.len(), Op::Hargreaves)?
         let et0_values = Self::compute_cpu_batch(inputs);
         Ok(BatchedHargreavesResult {
             et0_values,
             backend_used: Backend::Cpu,
         })
+    }
+
+    /// Pack inputs into stride-4 GPU layout: `[tmax, tmin, lat_rad, doy]`.
+    ///
+    /// Ready for `ToadStool` op=6 absorption — produces the flat `f64` array
+    /// that `BatchedElementwiseF64::execute` expects.
+    #[must_use]
+    pub fn pack_gpu_input(inputs: &[HargreavesDay]) -> Vec<f64> {
+        let mut data = Vec::with_capacity(inputs.len() * 4);
+        for d in inputs {
+            data.push(d.tmax);
+            data.push(d.tmin);
+            data.push(d.latitude_deg.to_radians());
+            data.push(f64::from(d.day_of_year));
+        }
+        data
     }
 
     /// Compute Hargreaves ET₀ using the validated CPU path.

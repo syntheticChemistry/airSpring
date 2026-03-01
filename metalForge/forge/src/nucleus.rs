@@ -1,0 +1,369 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+//! NUCLEUS atomics — tower, node, and nest deployment patterns.
+//!
+//! A NUCLEUS atomic is a minimal, composable deployment unit:
+//!
+//! | Atomic | Components | Role |
+//! |--------|-----------|------|
+//! | **Tower** | `BearDog` (crypto/TLS) + `Songbird` (mesh/discovery) | Base security and primal discovery |
+//! | **Node** | Tower + `ToadStool` (compute/GPU) | Compute dispatch |
+//! | **Nest** | Tower + `NestGate` (storage/provenance) | Data storage and provenance |
+//!
+//! # Coordination via biomeOS Graphs
+//!
+//! NUCLEUS atomics are coordinated by biomeOS directed graphs:
+//!
+//! ```text
+//! ┌──────────┐    ┌──────────┐    ┌──────────┐
+//! │  Tower   │    │   Node   │    │   Nest   │
+//! │ (crypto  │───►│ (compute │───►│ (storage │
+//! │  + mesh) │    │  + GPU)  │    │  + prov) │
+//! └──────────┘    └──────────┘    └──────────┘
+//!       │               │               │
+//!       └───────────────┴───────────────┘
+//!                       │
+//!              biomeOS graph engine
+//! ```
+//!
+//! # Mixed-Hardware Dispatch
+//!
+//! A Node atomic discovers its local substrates (GPU, NPU, CPU) and
+//! advertises capabilities to the biomeOS mesh. Pipelines are routed
+//! across the mesh using capability-based dispatch:
+//!
+//! ```text
+//! Node A (GPU: TITAN V)  ──┐
+//! Node B (NPU: AKD1000)  ──┼── biomeOS mesh ── Pipeline Router
+//! Node C (CPU: i9-12900K) ─┘
+//! ```
+
+use crate::substrate::Substrate;
+
+/// NUCLEUS atomic deployment mode.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum AtomicKind {
+    /// Base layer: crypto (`BearDog`) + mesh discovery (`Songbird`).
+    Tower,
+    /// Compute layer: Tower + `ToadStool` GPU/CPU dispatch.
+    Node,
+    /// Storage layer: Tower + `NestGate` provenance tracking.
+    Nest,
+}
+
+impl AtomicKind {
+    /// Components included in this atomic.
+    #[must_use]
+    pub const fn components(&self) -> &[&str] {
+        match self {
+            Self::Tower => &["BearDog (crypto/TLS)", "Songbird (mesh/discovery)"],
+            Self::Node => &[
+                "BearDog (crypto/TLS)",
+                "Songbird (mesh/discovery)",
+                "ToadStool (compute/GPU)",
+            ],
+            Self::Nest => &[
+                "BearDog (crypto/TLS)",
+                "Songbird (mesh/discovery)",
+                "NestGate (storage/provenance)",
+            ],
+        }
+    }
+
+    /// Whether this atomic includes compute dispatch capability.
+    #[must_use]
+    pub const fn has_compute(&self) -> bool {
+        matches!(self, Self::Node)
+    }
+
+    /// Whether this atomic includes storage/provenance capability.
+    #[must_use]
+    pub const fn has_storage(&self) -> bool {
+        matches!(self, Self::Nest)
+    }
+
+    /// Whether this atomic includes mesh discovery.
+    #[must_use]
+    pub const fn has_mesh(&self) -> bool {
+        true
+    }
+}
+
+/// A NUCLEUS atomic instance on a specific machine.
+#[derive(Debug, Clone)]
+pub struct NucleusAtomic {
+    /// What kind of atomic this is.
+    pub kind: AtomicKind,
+    /// Unique node identifier in the biomeOS mesh.
+    pub node_id: String,
+    /// Locally discovered substrates (GPU, NPU, CPU).
+    pub substrates: Vec<Substrate>,
+    /// Whether this atomic is currently reachable on the mesh.
+    pub reachable: bool,
+}
+
+impl NucleusAtomic {
+    /// Create a new atomic with discovered local substrates.
+    #[must_use]
+    pub fn new(kind: AtomicKind, node_id: impl Into<String>, substrates: Vec<Substrate>) -> Self {
+        Self {
+            kind,
+            node_id: node_id.into(),
+            substrates,
+            reachable: true,
+        }
+    }
+
+    /// Total number of substrates this atomic can dispatch to.
+    #[must_use]
+    pub const fn substrate_count(&self) -> usize {
+        self.substrates.len()
+    }
+
+    /// Whether this atomic can handle a given workload.
+    #[must_use]
+    pub fn can_route(&self, workload: &crate::dispatch::Workload) -> bool {
+        self.kind.has_compute() && crate::dispatch::route(workload, &self.substrates).is_some()
+    }
+}
+
+/// A mesh of NUCLEUS atomics coordinated via biomeOS.
+#[derive(Debug, Default)]
+pub struct NucleusMesh {
+    /// All discovered atomics on the mesh.
+    pub atomics: Vec<NucleusAtomic>,
+}
+
+impl NucleusMesh {
+    /// Create a new empty mesh.
+    #[must_use]
+    pub const fn new() -> Self {
+        Self {
+            atomics: Vec::new(),
+        }
+    }
+
+    /// Register an atomic on the mesh.
+    pub fn register(&mut self, atomic: NucleusAtomic) {
+        self.atomics.push(atomic);
+    }
+
+    /// Find all Node atomics that can handle a workload.
+    #[must_use]
+    pub fn find_capable_nodes(&self, workload: &crate::dispatch::Workload) -> Vec<&NucleusAtomic> {
+        self.atomics
+            .iter()
+            .filter(|a| a.reachable && a.can_route(workload))
+            .collect()
+    }
+
+    /// Count atomics by kind.
+    #[must_use]
+    pub fn count_by_kind(&self, kind: AtomicKind) -> usize {
+        self.atomics.iter().filter(|a| a.kind == kind).count()
+    }
+
+    /// All substrates across all reachable compute nodes.
+    #[must_use]
+    pub fn all_substrates(&self) -> Vec<&Substrate> {
+        self.atomics
+            .iter()
+            .filter(|a| a.reachable && a.kind.has_compute())
+            .flat_map(|a| a.substrates.iter())
+            .collect()
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::expect_used, clippy::unwrap_used)]
+mod tests {
+    use super::*;
+    use crate::substrate::{Capability, Identity, Properties, SubstrateKind};
+
+    fn gpu(name: &str) -> Substrate {
+        Substrate {
+            kind: SubstrateKind::Gpu,
+            identity: Identity::named(name),
+            properties: Properties {
+                has_f64: true,
+                ..Properties::default()
+            },
+            capabilities: vec![
+                Capability::F64Compute,
+                Capability::ShaderDispatch,
+                Capability::ScalarReduce,
+            ],
+        }
+    }
+
+    fn cpu() -> Substrate {
+        Substrate {
+            kind: SubstrateKind::Cpu,
+            identity: Identity::named("i9-12900K"),
+            properties: Properties::default(),
+            capabilities: vec![
+                Capability::F64Compute,
+                Capability::CpuCompute,
+                Capability::SimdVector,
+            ],
+        }
+    }
+
+    fn npu() -> Substrate {
+        Substrate {
+            kind: SubstrateKind::Npu,
+            identity: Identity::named("AKD1000"),
+            properties: Properties::default(),
+            capabilities: vec![
+                Capability::QuantizedInference { bits: 8 },
+                Capability::BatchInference { max_batch: 8 },
+            ],
+        }
+    }
+
+    #[test]
+    fn tower_components() {
+        assert_eq!(AtomicKind::Tower.components().len(), 2);
+        assert!(!AtomicKind::Tower.has_compute());
+        assert!(!AtomicKind::Tower.has_storage());
+        assert!(AtomicKind::Tower.has_mesh());
+    }
+
+    #[test]
+    fn node_has_compute() {
+        assert!(AtomicKind::Node.has_compute());
+        assert_eq!(AtomicKind::Node.components().len(), 3);
+    }
+
+    #[test]
+    fn nest_has_storage() {
+        assert!(AtomicKind::Nest.has_storage());
+        assert_eq!(AtomicKind::Nest.components().len(), 3);
+    }
+
+    #[test]
+    fn mesh_register_and_count() {
+        let mut mesh = NucleusMesh::new();
+        mesh.register(NucleusAtomic::new(AtomicKind::Tower, "tower-01", vec![]));
+        mesh.register(NucleusAtomic::new(
+            AtomicKind::Node,
+            "node-01",
+            vec![gpu("TITAN V"), cpu()],
+        ));
+        mesh.register(NucleusAtomic::new(AtomicKind::Nest, "nest-01", vec![]));
+
+        assert_eq!(mesh.count_by_kind(AtomicKind::Tower), 1);
+        assert_eq!(mesh.count_by_kind(AtomicKind::Node), 1);
+        assert_eq!(mesh.count_by_kind(AtomicKind::Nest), 1);
+    }
+
+    #[test]
+    fn node_can_route_f64_workload() {
+        let node = NucleusAtomic::new(AtomicKind::Node, "node-01", vec![gpu("TITAN V"), cpu()]);
+        let wl = crate::dispatch::Workload::new(
+            "et0_batch",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        );
+        assert!(node.can_route(&wl));
+    }
+
+    #[test]
+    fn tower_cannot_route() {
+        let tower = NucleusAtomic::new(AtomicKind::Tower, "tower-01", vec![cpu()]);
+        let wl = crate::dispatch::Workload::new("anything", vec![Capability::F64Compute]);
+        assert!(!tower.can_route(&wl));
+    }
+
+    #[test]
+    fn mesh_finds_capable_nodes() {
+        let mut mesh = NucleusMesh::new();
+        mesh.register(NucleusAtomic::new(
+            AtomicKind::Node,
+            "gpu-node",
+            vec![gpu("TITAN V"), cpu()],
+        ));
+        mesh.register(NucleusAtomic::new(
+            AtomicKind::Node,
+            "npu-node",
+            vec![npu(), cpu()],
+        ));
+        mesh.register(NucleusAtomic::new(AtomicKind::Tower, "tower", vec![]));
+
+        let gpu_wl = crate::dispatch::Workload::new(
+            "et0_batch",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        );
+        let capable = mesh.find_capable_nodes(&gpu_wl);
+        assert_eq!(capable.len(), 1);
+        assert_eq!(capable[0].node_id, "gpu-node");
+
+        let npu_wl = crate::dispatch::Workload::new(
+            "crop_stress",
+            vec![Capability::QuantizedInference { bits: 8 }],
+        );
+        let capable = mesh.find_capable_nodes(&npu_wl);
+        assert_eq!(capable.len(), 1);
+        assert_eq!(capable[0].node_id, "npu-node");
+    }
+
+    #[test]
+    fn all_substrates_from_nodes_only() {
+        let mut mesh = NucleusMesh::new();
+        mesh.register(NucleusAtomic::new(
+            AtomicKind::Node,
+            "node-a",
+            vec![gpu("TITAN V")],
+        ));
+        mesh.register(NucleusAtomic::new(AtomicKind::Nest, "nest-a", vec![cpu()]));
+
+        let subs = mesh.all_substrates();
+        assert_eq!(subs.len(), 1);
+        assert_eq!(subs[0].kind, SubstrateKind::Gpu);
+    }
+
+    #[test]
+    fn unreachable_node_excluded() {
+        let mut mesh = NucleusMesh::new();
+        let mut node = NucleusAtomic::new(AtomicKind::Node, "offline", vec![gpu("TITAN V"), cpu()]);
+        node.reachable = false;
+        mesh.register(node);
+
+        let wl = crate::dispatch::Workload::new(
+            "et0_batch",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        );
+        assert!(mesh.find_capable_nodes(&wl).is_empty());
+        assert!(mesh.all_substrates().is_empty());
+    }
+
+    #[test]
+    fn mixed_pipeline_across_mesh() {
+        let mut mesh = NucleusMesh::new();
+        mesh.register(NucleusAtomic::new(
+            AtomicKind::Node,
+            "eastgate",
+            vec![gpu("TITAN V"), npu(), cpu()],
+        ));
+
+        let all_subs = mesh.all_substrates();
+        let all_subs_owned: Vec<Substrate> = all_subs.into_iter().cloned().collect();
+
+        let workloads = [
+            crate::dispatch::Workload::new(
+                "crop_stress",
+                vec![Capability::QuantizedInference { bits: 8 }],
+            )
+            .prefer(SubstrateKind::Npu),
+            crate::dispatch::Workload::new(
+                "et0_batch",
+                vec![Capability::F64Compute, Capability::ShaderDispatch],
+            ),
+        ];
+
+        let pipeline =
+            crate::pipeline::route_pipeline(&workloads, &all_subs_owned).expect("should route");
+        assert_eq!(pipeline.stages.len(), 2);
+        assert_eq!(pipeline.stages[0].substrate.kind, SubstrateKind::Npu);
+        assert_eq!(pipeline.stages[1].substrate.kind, SubstrateKind::Gpu);
+    }
+}

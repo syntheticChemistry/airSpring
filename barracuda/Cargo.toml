@@ -285,3 +285,8 @@ path = "src/bin/validate_season_wb.rs"
 [[bin]]
 name = "bench_cross_spring"
 path = "src/bin/bench_cross_spring.rs"
+
+[[bin]]
+name = "validate_gpu_pipeline"
+path = "src/bin/validate_gpu_pipeline.rs"
+

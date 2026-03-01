@@ -120,8 +120,7 @@ impl KrigingInterpolator {
     ///
     /// Returns an error if the `KrigingF64` engine cannot be initialised.
     pub fn new(device: Arc<WgpuDevice>) -> crate::error::Result<Self> {
-        let engine = kriging_f64::KrigingF64::new(device)
-            .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
+        let engine = kriging_f64::KrigingF64::new(device)?;
         Ok(Self { engine })
     }
 
@@ -152,10 +151,7 @@ impl KrigingInterpolator {
         let target_pts: Vec<(f64, f64)> = targets.iter().map(|t| (t.x, t.y)).collect();
         let bv = to_barracuda_variogram(variogram);
 
-        let result = self
-            .engine
-            .interpolate(&known, &target_pts, bv)
-            .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
+        let result = self.engine.interpolate(&known, &target_pts, bv)?;
 
         Ok(InterpolationResult {
             vwc_values: result.values,
@@ -177,7 +173,7 @@ impl KrigingInterpolator {
     ) -> crate::error::Result<(Vec<f64>, Vec<f64>)> {
         let known: Vec<(f64, f64, f64)> = sensors.iter().map(|s| (s.x, s.y, s.vwc)).collect();
         kriging_f64::KrigingF64::fit_variogram(&known, n_lags, max_distance)
-            .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))
+            .map_err(crate::error::AirSpringError::from)
     }
 }
 

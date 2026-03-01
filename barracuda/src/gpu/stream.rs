@@ -81,10 +81,7 @@ impl StreamSmoother {
         #[allow(clippy::cast_possible_truncation)]
         let f32_data: Vec<f32> = data.iter().map(|&x| x as f32).collect();
 
-        let result = self
-            .inner
-            .compute(&f32_data, window_size)
-            .map_err(|e| crate::error::AirSpringError::Barracuda(format!("{e}")))?;
+        let result = self.inner.compute(&f32_data, window_size)?;
 
         let out_len = result.mean.len();
         Ok(SmoothedSeries {
