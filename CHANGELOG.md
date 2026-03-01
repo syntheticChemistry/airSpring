@@ -2,6 +2,48 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.5.8] - 2026-03-01
+
+### NUCLEUS Cross-Primal Pipeline + Ecology Domain + Science Extensions
+
+airSpring registered as a biomeOS ecology primal (16 capabilities) with full
+cross-primal pipeline validation (28/28 PASS). Ecology domain added to biomeOS
+capability registry. capability_call node type wired in biomeOS graph executor.
+5 new experiments (059-063), 4 new binaries.
+
+#### Added
+- **Exp 059: Atlas 80yr Decade Analysis** (102/102 PASS)
+  - `validate_atlas_decade` binary — Open-Meteo 1944-2024 decadal ET₀ + precipitation trends
+- **Exp 060: NASS Real Yield Comparison** (99/99 PASS)
+  - `validate_nass_real` binary — Stewart (1977) vs synthetic NASS corn/soy/wheat
+- **Exp 061: Cross-Spring Shannon H' Diversity** (63/63 PASS)
+  - `validate_ncbi_diversity` binary — synthetic OTU, Shannon H', Pielou, Bray-Curtis, Anderson
+- **Exp 062: NUCLEUS Integration Validation** (29/29 PASS)
+  - `validate_nucleus` binary — JSON-RPC science parity via biomeOS Unix socket
+  - `airspring_primal` binary — biomeOS NUCLEUS primal (16 capabilities, Unix socket)
+- **Exp 063: NUCLEUS Cross-Primal Pipeline** (28/28 PASS)
+  - `validate_nucleus_pipeline` binary — ecology domain routing, cross-primal forwarding,
+    neural-api capability.call, primal discovery (7 primals), full pipeline (ET₀→WB→yield)
+- **Ecology domain**: `ecology.et0_fao56`, `ecology.water_balance`, `ecology.yield_response`,
+  `ecology.full_pipeline` (single-call ET₀→WB→yield chain)
+- **Cross-primal forwarding**: `primal.forward` (call ToadStool/BearDog/Songbird through airSpring)
+- **Primal discovery**: `primal.discover` (list all NUCLEUS primals at runtime)
+- **biomeOS graph**: `airspring_ecology_pipeline.toml` (weather → ET₀ → WB → yield)
+- **Data providers**: `data::open_meteo`, `data::usda_nass` (pure Rust via ureq)
+
+#### Changed
+- Binaries: 68 → 72 (airspring_primal + validate_nucleus + validate_nucleus_pipeline + validate_atlas_decade + validate_nass_real + validate_ncbi_diversity)
+- Experiments: 58 → 63
+- airspring_primal capabilities: 9 → 16 (ecology.* aliases, full_pipeline, primal.forward, primal.discover)
+- capability.register: fixed field name (`socket` not `socket_path`) + semantic mappings
+
+#### biomeOS Changes (upstream)
+- Added `ecology` domain to `config/capability_registry.toml` (9 translations)
+- Added `airspring` to `capability_domains.rs` fallback (10/10 tests pass)
+- Wired `capability_call` node type in `neural_executor.rs` (fixes all science pipeline graphs)
+
+---
+
 ## [0.5.7] - 2026-03-01
 
 ### Climate Scenario Analysis + Streaming Pipeline + Turc Constants

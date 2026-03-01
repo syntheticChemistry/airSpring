@@ -58,6 +58,7 @@
 //! - **Optimizers**: `nelder_mead` (isotherm fitting), `brent` (VG pressure head inversion)
 //! - **Validation**: `ValidationHarness`, `tolerances::Tolerance`
 
+pub mod data;
 pub mod eco;
 pub mod error;
 pub mod gpu;

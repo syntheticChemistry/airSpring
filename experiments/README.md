@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: March 1, 2026
-**Status**: 58 experiments, 1237/1237 Python + 641 lib + 57 forge tests + 63 barracuda + 5 forge binaries + 78/78 pure GPU pipeline + 26/26 GPU rewire benchmark + 104/104 metalForge mixed-hardware + 75/75 cross-validation + 17 Tier A GPU orchestrators (ops 5-8 GPU-first via ToadStool S70+) + GPU stats (neuralSpring S69) + seasonal pipeline (GPU Stages 1-2) + Exp 058 Climate Scenario (46/46) + streaming pipeline (GpuPipelined, GpuFused) + NPU→GPU PCIe bypass + NUCLEUS atomics + biomeOS graph execution + **Rust 14.5× faster than Python** (21/21 parity, incl. seasonal_pipeline)
+**Status**: 63 experiments, 1237/1237 Python + 641 lib + 57 forge tests + 67 barracuda + 5 forge binaries + 78/78 pure GPU pipeline + 26/26 GPU rewire benchmark + 104/104 metalForge mixed-hardware + 75/75 cross-validation + 17 Tier A GPU orchestrators (ops 5-8 GPU-first via ToadStool S70+) + GPU stats (neuralSpring S69) + seasonal pipeline (GPU Stages 1-2) + Exp 058 Climate Scenario (46/46) + streaming pipeline (GpuPipelined, GpuFused) + NPU→GPU PCIe bypass + NUCLEUS primal (16 capabilities, 28/28 cross-primal pipeline) + biomeOS graph execution (capability_call wired) + ecology domain + cross-primal forwarding + **Rust 14.5× faster than Python** (21/21 parity, incl. seasonal_pipeline)
 
 ---
 
@@ -67,8 +67,13 @@
 | 056 | Mixed-Hardware Pipeline + NUCLEUS Atomics | metalForge | **Complete** | Rust (synthetic) | `metalForge::pipeline` + `metalForge::nucleus` + `metalForge::graph` | 43 |
 | 057 | GPU Ops 5-8 Rewire Validation + Benchmark | GPU | **Complete** | Rust GPU (Titan V) | `BatchedElementwiseF64` ops 0-8 + `gpu::seasonal_pipeline` | 26 |
 | 058 | Climate Scenario Analysis | Integration | **Complete** | Rust CPU | `eco::evapotranspiration` + `eco::water_balance` + `eco::yield_response` | 46 |
+| 059 | Atlas 80yr Decade Analysis | Integration | **Complete** | Rust CPU + Open-Meteo | `data::open_meteo` + `eco::evapotranspiration` | 102 |
+| 060 | NASS Real Yield Comparison | Irrigation | **Complete** | Rust CPU + USDA NASS | `data::usda_nass` + `eco::yield_response` | 99 |
+| 061 | Cross-Spring Diversity (NCBI 16S) | Biodiversity | **Complete** | Rust CPU | `eco::diversity` + wetSpring Shannon H' | 63 |
+| 062 | NUCLEUS Integration Validation | NUCLEUS | **Complete** | Rust + biomeOS | `airspring_primal` — JSON-RPC parity (9 science methods) | 29 |
+| 063 | NUCLEUS Cross-Primal Pipeline | NUCLEUS | **Complete** | Rust + biomeOS + neural-api | ecology domain, cross-primal forwarding, capability.call routing | 28 |
 
-**Grand Total**: 1237 Python + **641 lib + 57 forge tests** + 1498/1498 atlas + 33/33 cross-validation + 17 Tier A + 7 Tier B GPU orchestrators + seasonal pipeline GPU Stages 1-2 + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge (5 substrates, 18 workloads, 29/29 cross-system) + GPU math portability (46/46) + NCBI 16S coupling (14+29) + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34) + Exp 058 Climate Scenario (46/46) + 68 binaries + 35/35 cross-spring benchmarks (6 Springs) + ToadStool S70+ synced + 21/21 CPU parity
+**Grand Total**: 1237 Python + **641 lib + 57 forge tests** + 1498/1498 atlas + 33/33 cross-validation + 17 Tier A + 7 Tier B GPU orchestrators + seasonal pipeline GPU Stages 1-2 + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge (5 substrates, 18 workloads, 29/29 cross-system) + GPU math portability (46/46) + NCBI 16S coupling (14+29) + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34) + Exp 058 Climate Scenario (46/46) + NUCLEUS primal (29/29 + 28/28) + atlas decade (102/102) + NASS real (99/99) + NCBI diversity (63/63) + 72 binaries + 35/35 cross-spring benchmarks (6 Springs) + ToadStool S70+ synced + 21/21 CPU parity
 
 ---
 

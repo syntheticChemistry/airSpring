@@ -1,8 +1,8 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: February 28, 2026 (v0.5.6 — 618 lib tests, 59 binaries, 54 experiments, 1237 Python)
-**ToadStool PIN**: S68+ HEAD (`e96576ee` — universal f64 canonical, dual-layer precision, device-lost resilience, 700 WGSL shaders, 2546+ barracuda tests, 21599+ workspace tests)
-**Handoff**: V034 (Experiment buildout 049-051 + deep technical debt resolution: 42+ named constants, zero dead code, cast hygiene, capability-based GPU, 8 ET₀ methods, SCS-CN runoff, Green-Ampt infiltration)
+**Last Updated**: March 1, 2026 (v0.5.8 — 641 lib tests, 72 binaries, 63 experiments, 1237 Python, 16 NUCLEUS capabilities, 28/28 cross-primal pipeline)
+**ToadStool PIN**: S70+++ HEAD (`1dd7e338` — universal f64 canonical, dual-layer precision, device-lost resilience, 774 WGSL shaders, cross-spring ops 5-8 absorbed)
+**Handoff**: V041 (NUCLEUS cross-primal evolution — ecology domain, capability.call, cross-primal forwarding, 5 new experiments)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -16,7 +16,7 @@ validate against papers, hand off to ToadStool/BarraCuda, lean on upstream.
 
 | Module | Absorbed Into | When | Status |
 |--------|--------------|------|--------|
-| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all 55 binaries use upstream |
+| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all 72 binaries use upstream |
 | `van_genuchten` | `barracuda::pde::richards::SoilParams` | S40 | **Leaning** — `gpu::richards` bridges to upstream |
 | `isotherm NM` | `barracuda::optimize::nelder_mead` | S62 | **Leaning** — `gpu::isotherm` bridges to upstream |
 
@@ -125,7 +125,7 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | Capability | Module | Wired In | Status |
 |-----------|--------|----------|--------|
 | `barracuda::tolerances` | `tolerances` | v0.3.6 | **LEANING** — re-exported |
-| `barracuda::validation::ValidationHarness` | `validation` | v0.3.6 | **LEANING** — all 51 validation binaries (incl. validate_atlas, 1393 checks) |
+| `barracuda::validation::ValidationHarness` | `validation` | v0.3.6 | **LEANING** — all 63 validation binaries (incl. validate_atlas, 1393 checks) |
 | `pde::richards::solve_richards` | `pde` | v0.4.0 | **WIRED** — `gpu::richards` |
 | `pde::crank_nicolson::CrankNicolson1D` | `pde` | v0.4.4 | **WIRED** — CN f64 diffusion cross-val |
 | `optimize::nelder_mead` | `optimize` | v0.4.1 | **WIRED** — isotherm fitting |
@@ -177,11 +177,12 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `cargo fmt --check` | **Clean** |
 | `cargo clippy --all-targets` | **0 warnings** (pedantic + nursery via `[lints.clippy]`, `--all-targets` clean) |
 | `cargo doc --no-deps` | **Builds**, 0 warnings |
-| `cargo test --lib` | **618 passed** (lib + doc + integration) |
+| `cargo test --lib` | **641 passed** (lib + doc + integration) |
 | `unsafe` code | **Zero** |
 | `unwrap()` in lib | **Zero** (all in `#[cfg(test)]` or validation-binary JSON helpers) |
 | Files > 1000 lines | **Zero** (max src: 872 `eco/evapotranspiration.rs` after Thornthwaite extraction) |
-| Validation binaries | **51/51 PASS** (barracuda validate_*) + 3 bench (30/30 benchmarks) + 4/4 PASS (forge) |
+| Validation binaries | **63 PASS** (barracuda validate_*) + 3 bench (35/35 benchmarks) + 5/5 PASS (forge) |
+| NUCLEUS pipeline | **28/28 PASS** (ecology domain, capability.call, cross-primal forwarding) |
 | GPU live (Titan V) | **24/24 PASS** (0.04% seasonal parity, `BARRACUDA_GPU_ADAPTER=titan`) |
 | metalForge live | **29/29 PASS** (5 substrates, 18 workloads route) |
 | Atlas stream (real data) | **73/73 PASS** (12 stations, 4800 crop-year results) |
@@ -200,7 +201,7 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `moving_window_stats` | wetSpring | IoT stream smoothing |
 | `ridge_regression` | wetSpring | Sensor correction pipeline |
 | `nelder_mead`, `multi_start` | neuralSpring | Isotherm fitting |
-| `ValidationHarness` | neuralSpring | All 27 validation binaries |
+| `ValidationHarness` | neuralSpring | All 63 validation binaries |
 | `norm_ppf` (Moro 1995) | hotSpring | MC ET₀ parametric confidence intervals |
 | `brent` (Brent 1973) | neuralSpring | VG pressure head inversion (θ→h) |
 | `pde::richards` | airSpring → upstream | 1D Richards equation (absorbed S40) |

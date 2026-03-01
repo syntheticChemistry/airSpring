@@ -1,0 +1,60 @@
+{
+  "experiment": "Exp 060: NASS Real Yield Comparison",
+  "provenance": "Synthetic Michigan yields from validated Stewart pipeline + Open-Meteo weather",
+  "note": "When USDA NASS API key is available, replace with download_usda_nass.py output",
+  "state": "MI",
+  "year_range": "2000-2023",
+  "crops": [
+    {
+      "commodity": "CORN",
+      "ky_mid": 1.25,
+      "synthetic_years": [
+        {"year": 2000, "yield_bu_acre": 132.5, "season_precip_mm": 420.0, "season_et0_mm": 615.0},
+        {"year": 2005, "yield_bu_acre": 141.0, "season_precip_mm": 450.0, "season_et0_mm": 598.0},
+        {"year": 2010, "yield_bu_acre": 145.2, "season_precip_mm": 438.0, "season_et0_mm": 625.0},
+        {"year": 2012, "yield_bu_acre": 108.3, "season_precip_mm": 310.0, "season_et0_mm": 680.0},
+        {"year": 2015, "yield_bu_acre": 155.0, "season_precip_mm": 470.0, "season_et0_mm": 605.0},
+        {"year": 2020, "yield_bu_acre": 162.0, "season_precip_mm": 480.0, "season_et0_mm": 610.0}
+      ],
+      "expected_yield_trend": "increasing",
+      "expected_drought_year": 2012,
+      "expected_drought_yield_drop_pct": 20.0
+    },
+    {
+      "commodity": "SOYBEANS",
+      "ky_mid": 0.85,
+      "synthetic_years": [
+        {"year": 2000, "yield_bu_acre": 38.5, "season_precip_mm": 420.0, "season_et0_mm": 615.0},
+        {"year": 2005, "yield_bu_acre": 41.0, "season_precip_mm": 450.0, "season_et0_mm": 598.0},
+        {"year": 2010, "yield_bu_acre": 42.8, "season_precip_mm": 438.0, "season_et0_mm": 625.0},
+        {"year": 2012, "yield_bu_acre": 35.2, "season_precip_mm": 310.0, "season_et0_mm": 680.0},
+        {"year": 2015, "yield_bu_acre": 45.0, "season_precip_mm": 470.0, "season_et0_mm": 605.0},
+        {"year": 2020, "yield_bu_acre": 48.5, "season_precip_mm": 480.0, "season_et0_mm": 610.0}
+      ],
+      "expected_yield_trend": "increasing",
+      "expected_drought_year": 2012,
+      "expected_drought_yield_drop_pct": 12.0
+    },
+    {
+      "commodity": "WHEAT",
+      "ky_mid": 1.00,
+      "synthetic_years": [
+        {"year": 2000, "yield_bu_acre": 60.0, "season_precip_mm": 420.0, "season_et0_mm": 615.0},
+        {"year": 2005, "yield_bu_acre": 63.5, "season_precip_mm": 450.0, "season_et0_mm": 598.0},
+        {"year": 2010, "yield_bu_acre": 66.0, "season_precip_mm": 438.0, "season_et0_mm": 625.0},
+        {"year": 2012, "yield_bu_acre": 52.0, "season_precip_mm": 310.0, "season_et0_mm": 680.0},
+        {"year": 2015, "yield_bu_acre": 68.0, "season_precip_mm": 470.0, "season_et0_mm": 605.0},
+        {"year": 2020, "yield_bu_acre": 72.0, "season_precip_mm": 480.0, "season_et0_mm": 610.0}
+      ],
+      "expected_yield_trend": "increasing",
+      "expected_drought_year": 2012,
+      "expected_drought_yield_drop_pct": 15.0
+    }
+  ],
+  "validation_rules": {
+    "drought_sensitivity_ordering": "corn > wheat > soybean",
+    "yield_ratio_range": [0.3, 1.0],
+    "water_deficit_correlation_r2_min": 0.5,
+    "precip_et0_ratio_realistic_range": [0.4, 1.2]
+  }
+}

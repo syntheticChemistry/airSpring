@@ -1,16 +1,16 @@
 # airSpring wateringHole
 
-**Updated**: February 28, 2026
-**Purpose**: Spring-local handoffs to ToadStool/BarraCuda and cross-spring provenance
+**Updated**: March 1, 2026
+**Purpose**: Spring-local handoffs to ToadStool/BarraCuda, biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V040** | [AIRSPRING_V040_SCIENCE_EXTENSIONS_STREAMING_HANDOFF_MAR01_2026.md](handoffs/AIRSPRING_V040_SCIENCE_EXTENSIONS_STREAMING_HANDOFF_MAR01_2026.md) | 2026-03-01 | **current** — v0.5.7: science extensions (Exp 058), streaming pipeline, 21/21 CPU parity, technical debt |
+| **V041** | [AIRSPRING_V041_NUCLEUS_CROSS_PRIMAL_EVOLUTION_HANDOFF_MAR01_2026.md](handoffs/AIRSPRING_V041_NUCLEUS_CROSS_PRIMAL_EVOLUTION_HANDOFF_MAR01_2026.md) | 2026-03-01 | **current** — v0.5.8: NUCLEUS primal (16 caps), cross-primal pipeline (28/28), ecology domain, 5 new experiments (059-063), 72 binaries |
+| V040 | [archive](handoffs/archive/AIRSPRING_V040_SCIENCE_EXTENSIONS_STREAMING_HANDOFF_MAR01_2026.md) | 2026-03-01 | v0.5.7: science extensions (Exp 058), streaming pipeline, 21/21 CPU parity |
 | V039 | [archive](handoffs/archive/AIRSPRING_V039_TOADSTOOL_BARRACUDA_EVOLUTION_HANDOFF_MAR01_2026.md) | 2026-03-01 | v0.5.6: ToadStool/BarraCuda evolution handoff, cross-spring provenance |
 | V038 | [archive](handoffs/archive/AIRSPRING_V038_COMPLETE_REWIRE_BENCHMARK_HANDOFF_MAR01_2026.md) | 2026-03-01 | v0.5.6: complete rewire benchmark handoff |
-| V033 | [AIRSPRING_V033_CROSS_SPRING_REWIRING_BENCHMARK_HANDOFF_FEB28_2026.md](handoffs/AIRSPRING_V033_CROSS_SPRING_REWIRING_BENCHMARK_HANDOFF_FEB28_2026.md) | 2026-02-28 | v0.5.2: Cross-spring rewiring (Hargreaves→ToadStool batch, diversity matrix/frequencies, Kc stage), 25/25 benchmarks, 13 provenance entries |
 
 ## Cross-Spring Documents
 
@@ -29,6 +29,7 @@
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_V040_SCIENCE_EXTENSIONS_STREAMING_HANDOFF_MAR01_2026.md` | v0.5.7: science extensions (Exp 058), streaming pipeline, 21/21 CPU parity, technical debt |
 | `handoffs/archive/AIRSPRING_V034_EXPERIMENT_BUILDOUT_DEBT_RESOLUTION_HANDOFF_FEB28_2026.md` | v0.5.3: 3 new experiments (049-051), deep technical debt resolution, 42+ named constants |
 | `handoffs/archive/AIRSPRING_V032_TOADSTOOL_S68_SYNC_REVALIDATION_HANDOFF_FEB28_2026.md` | v0.5.2: ToadStool S68 full review, zero breaking changes, binary registration fix |
 | `handoffs/archive/AIRSPRING_V031_GPU_MATH_PORTABILITY_METALFORGE_FIXES_HANDOFF_FEB28_2026.md` | v0.5.2: Exp 047 GPU math portability (13 modules, 46/46), metalForge fixes |
@@ -68,9 +69,10 @@
 
 Handoff files follow: `AIRSPRING_V{NNN}_{TOPIC}_HANDOFF_{DATE}.md`
 
-Direction: airSpring → ToadStool, biomeOS (unidirectional). airSpring is a consumer
-of BarraCuda primitives and a provider of ecology capabilities; handoffs
-communicate what we learned, what we need, and what we can contribute back.
+Direction: airSpring → ToadStool, biomeOS, NestGate, BearDog, Songbird (unidirectional).
+airSpring is a consumer of BarraCuda primitives and NUCLEUS services, and a provider
+of ecology science capabilities; handoffs communicate what we learned, what we need,
+and what we can contribute back.
 
 Cross-primal issues go to `../../wateringHole/SPRING_EVOLUTION_ISSUES.md`
 (the shared ecosystem issues tracker).

@@ -198,6 +198,7 @@ module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 | Feb 28 | airSpring v0.5.4: Pipeline coupling + inverse problems + season-scale audit | 618 lib tests, 59 binaries, 54 experiments. Coupled runoff-infiltration (292/292), VG inverse via Brent (84/84), full-season WB audit (34/34). V035 handoff: batched Brent GPU candidate |
 | Mar 01 | airSpring v0.5.6: ToadStool S70+ complete rewire + GPU benchmark | 640 lib tests, 67 binaries, 57 experiments. Ops 5-8 GPU-first, GPU stats (neuralSpring S69), Exp 057 (26/26), 20/20 CPU parity (17.9×), 35/35 cross-spring benchmarks. V039 handoff: full cross-spring provenance |
 | Mar 01 | airSpring v0.5.7: Science extensions + streaming + debt resolution | 641 lib tests, 68 binaries, 58 experiments. Exp 058 climate scenario (46/46), streaming pipeline (GpuPipelined/GpuFused), 21/21 CPU parity (14.5×), Turc named constants, zero magic numbers. V040 handoff |
+| Mar 01 | airSpring v0.5.8: NUCLEUS cross-primal pipeline + ecology domain | 641 lib tests, 72 binaries, 63 experiments. NUCLEUS primal (16 caps), ecology domain in biomeOS, capability.call routing, cross-primal forwarding, 28/28 pipeline (Exp 063). Atlas decade 80yr (102/102), NASS real (99/99), NCBI diversity (63/63). V041 handoff |
 
 ---
 

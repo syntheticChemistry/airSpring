@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.5.7"
+version = "0.5.8"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
@@ -29,6 +29,10 @@ tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
 
 # Async runtime for WgpuDevice initialization in validation binaries.
 pollster = "0.3"
+
+# Pure Rust synchronous HTTP client for data providers.
+# Replaces Python download scripts with sovereign Rust — no tokio, no C deps.
+ureq = "3"
 
 # BrainChip AKD1000 NPU driver — pure Rust, optional.
 akida-driver = { path = "../../phase1/toadstool/crates/neuromorphic/akida-driver", optional = true }
@@ -297,4 +301,28 @@ path = "src/bin/validate_gpu_rewire_benchmark.rs"
 [[bin]]
 name = "validate_climate_scenario"
 path = "src/bin/validate_climate_scenario.rs"
+
+[[bin]]
+name = "validate_atlas_decade"
+path = "src/bin/validate_atlas_decade.rs"
+
+[[bin]]
+name = "validate_nass_real"
+path = "src/bin/validate_nass_real.rs"
+
+[[bin]]
+name = "validate_ncbi_diversity"
+path = "src/bin/validate_ncbi_diversity.rs"
+
+[[bin]]
+name = "airspring_primal"
+path = "src/bin/airspring_primal.rs"
+
+[[bin]]
+name = "validate_nucleus"
+path = "src/bin/validate_nucleus.rs"
+
+[[bin]]
+name = "validate_nucleus_pipeline"
+path = "src/bin/validate_nucleus_pipeline.rs"
 

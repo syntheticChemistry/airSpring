@@ -1,7 +1,7 @@
 # airSpring Specifications
 
-**Last Updated**: February 28, 2026
-**Status**: Phase 0-3 complete — 1237/1237 Python + 618 lib + 31 forge tests + 73/73 atlas stream + 75/75 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + AKD1000 NPU live + 25.9× CPU speedup + metalForge 18 workloads 29/29 + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB (34/34) (v0.5.6)
+**Last Updated**: March 1, 2026
+**Status**: Phase 0-4 complete — 1237/1237 Python + 641 lib + 57 forge tests + 73/73 atlas stream + 75/75 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + AKD1000 NPU live + 14.5× CPU speedup (21/21 parity) + metalForge 18 workloads 29/29 + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB (34/34) + NUCLEUS primal (16 capabilities, 28/28 cross-primal) + ecology domain + 63 experiments + 72 binaries (v0.5.8)
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling, Anderson coupling
 
 ---
@@ -12,14 +12,16 @@
 |--------|-------|
 | Phase 0 (Python) | 1237/1237 PASS — 54 experiments (FAO-56, soil, IoT, WB, dual Kc, cover crops, regional ET₀, Richards, biochar, 60yr WB, yield, CW2D, scheduling, lysimeter, sensitivity, Priestley-Taylor, 3-method intercomparison, Thornthwaite, GDD, pedotransfer, AmeriFlux, Hargreaves, diversity, multi-crop, NPU eco, forecast, SCAN moisture, NASS yield, Anderson coupling, Blaney-Criddle, SCS-CN, Green-Ampt, coupled runoff-infiltration, VG inverse, full-season WB) |
 | Phase 0+ (Real data) | 15,300 station-days, R²=0.967 across 100 Michigan stations |
-| Phase 1 (Rust) | 618 lib + 31 forge tests — 63 binaries (59 barracuda + 4 forge) |
-| Phase 1.5 (CPU benchmark) | Rust 25.9× faster than Python (geometric mean, 8/8 parity) |
+| Phase 1 (Rust) | 641 lib + 57 forge tests — 72 binaries (67 barracuda + 5 forge) |
+| Phase 1.5 (CPU benchmark) | Rust 14.5× faster than Python (geometric mean, 21/21 parity) |
 | Phase 2 (Cross-validation) | 75/75 Python↔Rust match within 1e-5; 690 crop-station yield pairs within 0.01 |
 | Phase 2.5 (Tier B GPU) | 4 Tier B orchestrators wired (ops 5-8), seasonal pipeline, atlas stream |
 | Phase 3 (GPU) | 11 Tier A + 4 Tier B modules wired, cross-spring S68 fully rewired |
 | Phase 3.8 (Cross-system) | metalForge 18 workloads, 29/29 cross-system routing (GPU+NPU+CPU) |
 | Faculty | Dong (BAE, MSU — new lab 2026) |
-| Handoff | V038 (complete rewire benchmark) in `wateringHole/handoffs/` |
+| Phase 3.9 (NUCLEUS primal) | 29/29 biomeOS primal parity, 9 science capabilities |
+| Phase 4.0 (Cross-primal) | 28/28 PASS — ecology domain, capability.call, cross-primal forwarding |
+| Handoff | V041 (NUCLEUS cross-primal evolution) in `wateringHole/handoffs/` |
 
 ---
 
@@ -33,7 +35,7 @@
 | [BARRACUDA_REQUIREMENTS.md](BARRACUDA_REQUIREMENTS.md) | Active | GPU kernel requirements + compute pipeline |
 | [CROSS_SPRING_EVOLUTION.md](CROSS_SPRING_EVOLUTION.md) | Active | Cross-spring shader provenance and evolution story |
 | [ATLAS_STATION_LIST.md](ATLAS_STATION_LIST.md) | Planning | Michigan 100-station expansion for crop water atlas |
-| [NUCLEUS_INTEGRATION.md](NUCLEUS_INTEGRATION.md) | Planning | NUCLEUS deployment for sovereign data + compute pipeline |
+| [NUCLEUS_INTEGRATION.md](NUCLEUS_INTEGRATION.md) | **Complete** | NUCLEUS deployment — primal registered, ecology domain, 28/28 pipeline |
 
 ### Existing Documentation (in parent directories)
 
