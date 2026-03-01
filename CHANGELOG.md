@@ -4,12 +4,16 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [0.5.9] - 2026-03-01
 
-### Cross-Spring Evolution Rewire + Deep Debt Resolution + wateringHole Compliance
+### ToadStool S71 Sync + Cross-Spring Evolution Rewire + Deep Debt Resolution
 
-Complete modern ToadStool/BarraCUDA rewiring with validated cross-spring evolution
-benchmark (44/44 PASS). Richards PDE solver rewired to upstream tridiagonal solve.
-Deep technical debt resolution: shared biomeos module, configurable solver, hardened
-startup, capability-based discovery everywhere. 817 tests, zero mocks in production.
+ToadStool S71 synced (HEAD `8dc01a37`): 671 WGSL shaders, 2,773+ barracuda tests,
+DF64 transcendentals complete (15 functions), 66 ComputeDispatch migrations,
+`HargreavesBatchGpu`, `JackknifeMeanGpu`, `BootstrapMeanGpu`, `HistogramGpu`,
+`KimuraGpu`, `fao56_et0` scalar PM. Evolution benchmark expanded to 53/53 PASS with
+9 S71-specific checks (upstream fao56_et0 cross-validation, kimura fixation,
+jackknife, bootstrap CI, percentile). Richards PDE rewired to upstream tridiagonal
+solve. Deep debt resolution: shared biomeos module, configurable solver, hardened
+startup, capability-based discovery. 817 tests, zero mocks in production.
 
 #### Added
 - **`biomeos` module** (`src/biomeos.rs`) — Shared socket resolution, family ID,
@@ -27,6 +31,17 @@ startup, capability-based discovery everywhere. 817 tests, zero mocks in product
   erf/gamma/norm_cdf, Crank-Nicolson PDE, Jackknife, Chi-squared, spectral density,
   Hill/Monod, convergence diagnostics, Richards tridiag rewire, correction regression.
 
+- **ToadStool S71 sync**: Pulled and validated ToadStool HEAD `8dc01a37`. New upstream
+  capabilities available: `HargreavesBatchGpu` (science shader), `JackknifeMeanGpu`,
+  `BootstrapMeanGpu`, `HistogramGpu`, `KimuraGpu` (bio/evolution), `fao56_et0`
+  scalar Penman-Monteith, HMM log-domain dispatch, `df64_transcendentals.wgsl`
+  (15 DF64 functions: asin/acos/atan/atan2/sinh/cosh/gamma/erf + existing 7).
+  66 ComputeDispatch migrations (reduction, FFT, index ops). 671 WGSL shaders
+  (down from 774 — f32-only shaders replaced by universal precision architecture).
+- **S71 evolution benchmark checks** (9 new): upstream `fao56_et0` vs local PM
+  cross-validation (bit-identical!), kimura fixation probability, jackknife mean/variance,
+  bootstrap CI, percentile. Total: 53/53 PASS.
+
 #### Changed
 - **Richards PDE**: Local `thomas_solve` replaced by `barracuda::linalg::tridiagonal_solve`
   with singularity detection via `Result`. Zero numerical difference; eliminates duplicate code.
@@ -42,7 +57,7 @@ startup, capability-based discovery everywhere. 817 tests, zero mocks in product
 - **Kriging IDW**: Documentation clarified as intentional lightweight device-free alternative.
 - Lib tests: 641 → 817 (including 5 new biomeos module tests, 16 cross-spring evolution tests).
 - Binaries: 72 → 73 (bench_cross_spring_evolution).
-- Cross-spring benchmarks: 35 → 44 (full evolution benchmark).
+- Cross-spring benchmarks: 35 → 53 (full evolution benchmark + S71 upstream checks).
 
 #### Compliance
 - Zero unsafe code, zero clippy warnings, zero TODOs, zero mocks in production.

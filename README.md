@@ -19,7 +19,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,237/1,237 PASS** | 54 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **817 lib + 1498 atlas** | 73 binaries + 44/44 cross-spring benchmarks |
+| Phase 1: Rust validation | **817 lib + 1498 atlas** | 73 binaries + 53/53 cross-spring benchmarks |
 | Phase 1.5: CPU Benchmark | **14.5× faster** | Rust vs Python geometric mean (21/21 parity, incl. seasonal_pipeline) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -41,7 +41,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | `cargo clippy (pedantic)` | **0 warnings** (pedantic + nursery, both crates) |
 | `cargo fmt --check` | **Clean** |
 | `cargo doc` | **70 pages generated** |
-| `bench_cross_spring_evolution` | **44/44 PASS** (release) |
+| `bench_cross_spring_evolution` | **53/53 PASS** (release, S71 sync) |
 
 ### Hardware Validated
 
@@ -76,7 +76,7 @@ airSpring domain code (`eco::`) is validated against papers, then wrapped by GPU
 
 ### Cross-Spring Shader Evolution
 
-ToadStool contains **774 WGSL shaders** across 41+ categories (S68: 2,541+ barracuda tests). airSpring uses 6 shared shader families, contributed **3 upstream fixes**, and had **all metalForge modules absorbed upstream** (S64 + S66):
+ToadStool contains **671 WGSL shaders** (S71: 2,773+ barracuda tests, pure math + precision per silicon). airSpring uses 6 shared shader families, contributed **3 upstream fixes**, and had **all metalForge modules absorbed upstream** (S64 + S66):
 
 | Spring | Shaders | What airSpring Gets | What airSpring Gave Back |
 |--------|---------|--------------------|-----------------------|
@@ -86,7 +86,9 @@ ToadStool contains **774 WGSL shaders** across 41+ categories (S68: 2,541+ barra
 | **groundSpring** | — | **MC ET₀ uncertainty propagation shader** | — |
 | **airSpring** | — | Domain consumer + stats absorbed upstream | Richards PDE (S40), stats metrics (S64) |
 
-46+ cross-spring absorptions (S51-S66). All metalForge absorbed. See `specs/CROSS_SPRING_EVOLUTION.md`.
+50+ cross-spring absorptions (S42-S71). All metalForge absorbed. DF64 transcendentals complete (15 functions).
+S71: `HargreavesBatchGpu`, `JackknifeMeanGpu`, `BootstrapMeanGpu`, `HistogramGpu`, `KimuraGpu`, `fao56_et0`.
+See `specs/CROSS_SPRING_EVOLUTION.md`.
 
 ### BarraCuda Integration (11 Tier A + 4 Tier B + 3 pipeline)
 
@@ -247,7 +249,7 @@ airSpring/
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance |
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (63 complete) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda/NUCLEUS handoffs (V042 active) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda/NUCLEUS handoffs (V043 active) |
 
 ## License
 
@@ -256,9 +258,11 @@ AGPL-3.0-or-later
 ---
 
 *March 1, 2026 — v0.5.9. 63 experiments, 1237/1237 Python, 817 lib + 57 forge tests,
-73 binaries + 44/44 cross-spring evolution benchmarks, 21/21 CPU parity (14.5× speedup), 15,300 station-days, 1498/1498 atlas checks, 6-Spring provenance.
+73 binaries + 53/53 cross-spring evolution benchmarks (S71 sync), 21/21 CPU parity (14.5× speedup), 15,300 station-days, 1498/1498 atlas checks, 6-Spring provenance.
 NUCLEUS primal (17 capabilities, `lifecycle.health` wateringHole-compliant), ecology domain in biomeOS registry.
-Cross-spring evolution benchmark: hotSpring precision (9.6µs), wetSpring bio (8.8µs), neuralSpring optimizers (13.8µs), airSpring rewired (4.5µs), groundSpring uncertainty (2.5ms).
+ToadStool S71 synced: 671 WGSL shaders, 2,773+ barracuda tests, DF64 transcendentals complete (15 functions),
+`HargreavesBatchGpu`, `JackknifeMeanGpu`, `BootstrapMeanGpu`, `HistogramGpu`, `KimuraGpu`, `fao56_et0`,
+66 `ComputeDispatch` migrations, pure math + precision per silicon. Upstream `fao56_et0` cross-validated ≡ local PM.
 Richards PDE rewired to `barracuda::linalg::tridiagonal_solve`. Configurable `RichardsConfig`. Shared `biomeos` module.
 Zero unsafe, zero clippy warnings, zero TODOs, zero mocks in production. Capability-based discovery everywhere.
-ToadStool S70+ synced (774 WGSL). Pure Rust + BarraCuda. AGPL-3.0-or-later.*
+Pure Rust + BarraCuda. AGPL-3.0-or-later.*

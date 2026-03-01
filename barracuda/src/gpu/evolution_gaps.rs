@@ -33,11 +33,14 @@
 //! | `eco::sensor_calibration` (OLS) | `gpu::stats` | `linear_regression_f64.wgsl` | Sensor regression | A (GPU, neuralSpring S69) |
 //! | `eco::*` (multi-var) | `gpu::stats` | `matrix_correlation_f64.wgsl` | Soil correlation | A (GPU, neuralSpring S69) |
 //!
-//! # Current Inventory (March 1, 2026 — v0.5.7, synced to `ToadStool` HEAD `1dd7e338`)
+//! # Current Inventory (March 1, 2026 — v0.5.9, synced to `ToadStool` HEAD `8dc01a37`)
 //!
-//! `ToadStool` S42–S70+++: 183+ commits, 50+ cross-spring absorptions, 2,546+ tests, 703 WGSL shaders.
+//! `ToadStool` S42–S71: 200+ commits, 50+ cross-spring absorptions, 2,773+ barracuda tests, 671 WGSL shaders.
 //! All four airSpring issues (TS-001 through TS-004) resolved in **S54**.
 //! P0 GPU dispatch blocker resolved in **S66** (explicit `BindGroupLayout`).
+//! S71 synced: DF64 transcendentals complete (15 functions), 66 `ComputeDispatch` ops,
+//! `HargreavesBatchGpu`, `JackknifeMeanGpu`, `BootstrapMeanGpu`, `HistogramGpu`, `KimuraGpu`,
+//! `fao56_et0` scalar, HMM log-domain dispatch, pure math precision-per-silicon doctrine.
 //!
 //! ## Universal Precision Architecture (S67–S68)
 //!
@@ -79,6 +82,15 @@
 //!   `linear_regression_f64`, `matrix_correlation_f64`
 //! - S70++: Sovereignty, architecture, monitoring split, stub evolution
 //! - S70+++: Builder refactor, dead code removal, monitoring evolution
+//! - S71: **GPU dispatch wiring + sovereignty** — `HargreavesBatchGpu` (science shader),
+//!   `JackknifeMeanGpu`, `BootstrapMeanGpu`, `HistogramGpu`, `KimuraGpu` (bio),
+//!   `HmmForwardLogF32`/`F64`, `fao56_et0` scalar PM, `df64_transcendentals.wgsl`
+//!   (asin, acos, atan, atan2, sinh, cosh, gamma, erf → 15 DF64 functions complete),
+//!   `hargreaves_batch_f64.wgsl`, `jackknife_mean_f64.wgsl`, `kimura_fixation_f64.wgsl`,
+//!   66 `ComputeDispatch` migrations, 14 reduction+FFT+index `ComputeDispatch` migrations,
+//!   all files < 1000 lines, hardcoded primal names → `primals::*` constants,
+//!   `jsonrpc_server.rs` 904→628, `network_config/types.rs` split 7 modules,
+//!   5 stale examples deleted, 2 stub test files deleted. Pure math + precision per silicon.
 //!
 //! ## Cross-Spring Shader Provenance (validated in `cross_spring_absorption.rs` §13)
 //!

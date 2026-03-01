@@ -29,6 +29,9 @@
 //! - S66: airSpring regression, hydrology, `moving_window` → `barracuda::stats`
 //! - S68: Universal precision (334+ shaders → f64 canonical) → ALL Springs
 //! - S70+: airSpring ops 5-8, `seasonal_pipeline` → `barracuda::ops`
+//! - S71: DF64 transcendentals complete, `HargreavesBatchGpu`, `JackknifeMeanGpu`,
+//!   `BootstrapMeanGpu`, `HistogramGpu`, `KimuraGpu`, `fao56_et0` scalar PM,
+//!   66 `ComputeDispatch` migrations, pure math + precision per silicon doctrine
 
 use std::time::Instant;
 
@@ -45,8 +48,8 @@ fn main() {
         .init();
 
     println!("═══════════════════════════════════════════════════════════════");
-    println!("  Cross-Spring Evolution Benchmark (v0.5.8)");
-    println!("  ToadStool S70+++ — Modern Rewiring Validation");
+    println!("  Cross-Spring Evolution Benchmark (v0.5.9)");
+    println!("  ToadStool S71 — Pure Math + Precision per Silicon");
     println!("═══════════════════════════════════════════════════════════════\n");
 
     let mut v = ValidationHarness::new("Cross-Spring Evolution");
@@ -57,6 +60,7 @@ fn main() {
     bench_airspring_rewired(&mut v);
     bench_groundspring_uncertainty(&mut v);
     bench_tridiagonal_rewire(&mut v);
+    bench_s71_upstream_evolution(&mut v);
 
     println!();
     v.finish();
@@ -357,4 +361,73 @@ fn bench_tridiagonal_rewire(v: &mut ValidationHarness) {
     );
 
     println!("  Tridiagonal rewire: {:.1?}", t0.elapsed());
+}
+
+fn bench_s71_upstream_evolution(v: &mut ValidationHarness) {
+    println!("\n── ToadStool S71 Upstream Evolution ─────────────────────────");
+
+    let t0 = Instant::now();
+
+    let et0 = barracuda::stats::fao56_et0(21.5, 12.3, 84.0, 63.0, 2.78, 22.07, 100.0, 50.8, 187)
+        .expect("fao56_et0 valid inputs");
+    v.check_abs(
+        "upstream fao56_et0 FAO-56 Example 18 [groundSpring → S70]",
+        et0,
+        3.88,
+        0.15,
+    );
+
+    let ea = et::actual_vapour_pressure_rh(12.3, 21.5, 63.0, 84.0);
+    let local_result = et::daily_et0(&DailyEt0Input {
+        tmin: 12.3,
+        tmax: 21.5,
+        tmean: None,
+        solar_radiation: 22.07,
+        wind_speed_2m: 2.78,
+        actual_vapour_pressure: ea,
+        elevation_m: 100.0,
+        latitude_deg: 50.8,
+        day_of_year: 187,
+    });
+    v.check_abs(
+        "upstream fao56_et0 ≈ local PM [cross-validation]",
+        et0,
+        local_result.et0,
+        0.15,
+    );
+
+    let fix = barracuda::stats::kimura_fixation_prob(1000, 0.01, 0.5);
+    v.check_lower(
+        "kimura fixation p > 0.5 (s>0) [wetSpring bio → S71]",
+        fix,
+        0.5,
+    );
+    v.check_upper("kimura fixation p < 1.0", fix, 1.0);
+
+    let jk = barracuda::stats::jackknife_mean_variance(&[1.0, 2.0, 3.0, 4.0, 5.0])
+        .expect("jackknife");
+    v.check_abs(
+        "jackknife mean of 1..5 = 3.0 [neuralSpring → S70+]",
+        jk.estimate,
+        3.0,
+        1e-12,
+    );
+    v.check_lower("jackknife variance > 0", jk.variance, 0.0);
+
+    let ci = barracuda::stats::bootstrap_ci(
+        &[2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0],
+        barracuda::stats::mean,
+        1000,
+        0.95,
+        42,
+    )
+    .expect("bootstrap_ci");
+    v.check_lower("bootstrap CI lower < upper [S64]", ci.upper - ci.lower, 0.0);
+    v.check_abs("bootstrap mean ≈ 6.5", ci.estimate, 6.5, 0.5);
+
+    let hist_data: Vec<f64> = (0..100).map(|i| f64::from(i) * 0.01).collect();
+    let p50 = barracuda::stats::percentile(&hist_data, 50.0);
+    v.check_abs("percentile(50) of uniform [0,1) [S64]", p50, 0.5, 0.05);
+
+    println!("  S71 upstream evolution: {:.1?}", t0.elapsed());
 }
