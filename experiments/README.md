@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: March 1, 2026
-**Status**: 63 experiments, 1237/1237 Python + 817 lib + 57 forge tests + 68 barracuda + 5 forge binaries + 44/44 cross-spring evolution benchmark + Richards PDE rewired to upstream tridiagonal solve + configurable `RichardsConfig` + shared `biomeos` module + 78/78 pure GPU pipeline + 26/26 GPU rewire benchmark + 104/104 metalForge mixed-hardware + 75/75 cross-validation + 17 Tier A GPU orchestrators (ops 5-8 GPU-first via ToadStool S70+) + seasonal pipeline (GPU Stages 1-2) + streaming pipeline (GpuPipelined, GpuFused) + NPU→GPU PCIe bypass + NUCLEUS primal (17 capabilities, `lifecycle.health` wateringHole-compliant, 28/28 cross-primal pipeline) + biomeOS graph execution + ecology domain + cross-primal forwarding + **Rust 14.5× faster than Python** (21/21 parity)
+**Status**: 63 experiments, 1237/1237 Python + 817 lib + 57 forge tests + 73 binaries + 53/53 cross-spring evolution benchmark (ToadStool S71 synced) + Richards PDE rewired to upstream `barracuda::linalg::tridiagonal_solve` + configurable `RichardsConfig` + shared `biomeos` module + 78/78 pure GPU pipeline + 26/26 GPU rewire benchmark + 104/104 metalForge mixed-hardware + 75/75 cross-validation + 17 Tier A GPU orchestrators + seasonal/streaming pipeline + NUCLEUS primal (17 capabilities, 28/28 cross-primal) + bingoCube/nautilus evolutionary reservoir available + **Rust 14.5× faster than Python** (21/21 parity)
 
 ---
 

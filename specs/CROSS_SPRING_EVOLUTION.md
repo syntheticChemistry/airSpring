@@ -1,19 +1,39 @@
 # Cross-Spring Shader Evolution — airSpring Provenance
 
-**Updated**: February 28, 2026 (v0.5.6, ToadStool HEAD `e96576ee` — S68+)
+**Updated**: March 1, 2026 (v0.5.9, ToadStool HEAD `8dc01a37` — S71)
 
 ## Summary
 
-ToadStool's BarraCuda runtime contains **774+ WGSL shaders** across 41+ categories,
-built through **46+ cross-spring absorptions** (sessions S51-S68). Each Spring
+ToadStool's BarraCuda runtime contains **671 WGSL shaders** (pure math, precision per
+silicon), built through **50+ cross-spring absorptions** (sessions S42-S71). Each Spring
 contributes domain-specific GPU primitives that benefit the entire ecosystem.
 
-airSpring uses **5 shared shader families** directly, contributed **3 critical fixes**
+airSpring uses **6 shared shader families** directly, contributed **3 critical fixes**
 (TS-001, TS-003, TS-004), had its **stats metrics absorbed upstream** (S64), and
 completed the Write→Absorb→Lean cycle with **metalForge fully absorbed** (S66).
-S66 resolved the P0 GPU dispatch blocker via explicit `BindGroupLayout` (R-S66-041).
 
-### S60–S66 Cross-Spring Absorption Wave (Feb 2026)
+S71 evolution: 774→671 shaders (f32-only removed, universal precision architecture),
+66 `ComputeDispatch` migrations, DF64 transcendentals complete (15 functions),
+`HargreavesBatchGpu`, `JackknifeMeanGpu`, `BootstrapMeanGpu`, `HistogramGpu`,
+`KimuraGpu`, `fao56_et0` scalar PM. Upstream `fao56_et0` cross-validated bit-identical
+with airSpring local PM. 53/53 cross-spring evolution benchmark PASS.
+
+### bingoCube/nautilus — Evolutionary Reservoir Computing (available now)
+
+`ecoPrimals/primalTools/bingoCube/nautilus/` provides feed-forward evolutionary
+reservoir computing on BingoCube boards. Domain-agnostic: takes `Vec<f64>` inputs,
+predicts `Vec<f64>` targets via evolved board populations. Key capabilities:
+
+| Capability | API | airSpring Application |
+|------------|-----|----------------------|
+| Evolutionary reservoir | `NautilusShell::evolve_generation()` | Weather→ET₀ prediction |
+| Drift monitoring | `DriftMonitor::is_drifting()` | Detect regime changes |
+| Edge seeding | `EdgeSeeder::seed_boards()` | Focus on difficult microclimates |
+| AKD1000 NPU export | `NautilusShell::export_akd1000_weights()` | ~48µs edge inference |
+| Shell transfer/merge | `NautilusShell::continue_from()`, `merge_shell()` | Cross-field learning |
+| JSON persistence | `NautilusBrain::to_json()` | Cross-run bootstrap |
+
+### S60–S71 Cross-Spring Absorption Wave (Feb–Mar 2026)
 
 | Session | What Was Absorbed | Origin Spring | airSpring Impact |
 |---------|-------------------|---------------|------------------|
@@ -24,6 +44,12 @@ S66 resolved the P0 GPU dispatch blocker via explicit `BindGroupLayout` (R-S66-0
 | S64 | Bio GPU ops (diversity\_fusion, batched\_multinomial) | wetSpring | Available for future large-scale diversity GPU dispatch |
 | S61-63 | Sovereign compiler (SPIR-V passthrough) | `ToadStool` core | Regression: breaks `BatchedElementwiseF64` GPU dispatch (P0 fix needed) |
 | S65 | Smart refactoring + dead code removal | `ToadStool` core | Cleaner upstream codebase |
+| S66 | BindGroupLayout fix (R-S66-041) | `ToadStool` core | P0 GPU dispatch blocker resolved |
+| S67-70 | `HargreavesBatchGpu`, `fao56_et0`, `HistogramGpu` | groundSpring | GPU Hargreaves ET₀ + scalar PM available; bit-identical to airSpring local |
+| S71 | `JackknifeMeanGpu`, `BootstrapMeanGpu`, `KimuraGpu` | groundSpring + wetSpring | GPU jackknife/bootstrap CI + Kimura fixation probability |
+| S71 | Universal precision architecture (`Fp64Strategy`) | hotSpring → core | f32-only shaders removed; precision per silicon (F64, Df64, F32, F16) |
+| S71 | 66 `ComputeDispatch` migrations | `ToadStool` core | Clean dispatch API, `BindGroupLayout` consistent |
+| S71 | DF64 transcendentals complete (15 functions) | hotSpring | sinh, cosh, tanh, atanh, cbrt, hypot, log1p, expm1 now available |
 
 ---
 

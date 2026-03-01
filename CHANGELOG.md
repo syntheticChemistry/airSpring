@@ -41,6 +41,11 @@ startup, capability-based discovery. 817 tests, zero mocks in production.
 - **S71 evolution benchmark checks** (9 new): upstream `fao56_et0` vs local PM
   cross-validation (bit-identical!), kimura fixation probability, jackknife mean/variance,
   bootstrap CI, percentile. Total: 53/53 PASS.
+- **bingoCube/nautilus discovery**: `ecoPrimals/primalTools/bingoCube/nautilus/` confirmed
+  as production-ready evolutionary reservoir computing. `NautilusShell` provides
+  feed-forward evolutionary prediction, `DriftMonitor` for regime change detection,
+  `EdgeSeeder` for concept-edge focus, and `Akd1000Export` for NPU deployment.
+  Available now via path dependency while ToadStool evolves its own absorption.
 
 #### Changed
 - **Richards PDE**: Local `thomas_solve` replaced by `barracuda::linalg::tridiagonal_solve`

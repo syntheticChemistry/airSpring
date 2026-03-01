@@ -25,6 +25,7 @@ Phase 3.8 Cross-system routing — GPU+NPU+CPU dispatch proven (29/29 PASS), NUC
 Phase 3.9 NUCLEUS primal        — airSpring registered as science primal, 9 capabilities, 29/29 parity
 Phase 4.0 Cross-primal pipeline — ecology domain, capability_call routing, 28/28 PASS (Exp 063)
 Phase 4.1 Penny Irrigation      — sovereign scheduling on consumer hardware ($600 GPU + $99 NPU)
+Phase 4.2 Nautilus reservoir     — bingoCube/nautilus evolutionary ET₀ prediction + drift detect
 ```
 
 ## Faculty Summary
@@ -106,7 +107,7 @@ Phase 4.1 Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | 62 | NUCLEUS Integration Validation — Exp 062 | NUCLEUS | 29/29 | JSON-RPC science parity via biomeOS Unix socket |
 | 63 | NUCLEUS Cross-Primal Pipeline — Exp 063 | NUCLEUS | 28/28 | ecology domain, capability.call routing, cross-primal forwarding |
 
-### Rust Validation (Phase 1+3) — 72 binaries + 35/35 cross-spring benchmarks
+### Rust Validation (Phase 1+3) — 73 binaries + 53/53 cross-spring benchmarks
 
 | Binary | Checks | Modules Exercised |
 |--------|:------:|-------------------|
@@ -197,8 +198,8 @@ Phase 4.1 Penny Irrigation      — sovereign scheduling on consumer hardware ($
 |----------|---------|
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C breakdown, absorbed vs stays-local, quality gates |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
-| `wateringHole/handoffs/` | V041 active — NUCLEUS cross-primal evolution handoff |
-| `specs/CROSS_SPRING_EVOLUTION.md` | 774 WGSL shader provenance across all Springs |
+| `wateringHole/handoffs/` | V044 active — ToadStool S71 + Nautilus handoff |
+| `specs/CROSS_SPRING_EVOLUTION.md` | 671 WGSL shader provenance across all Springs (S71) |
 
 ### Next Steps (Dong Lab)
 
@@ -206,7 +207,8 @@ Phase 4.1 Penny Irrigation      — sovereign scheduling on consumer hardware ($
 - **biomeOS integration complete**: airSpring primal (16 caps), cross-primal forwarding (ToadStool + BearDog), primal discovery
 - **Graph executor fixed**: `capability_call` node type now routes through neural-api + fallback (fixes all science pipeline graphs)
 - **GPU math portability proven**: All 13 GPU modules validated CPU↔GPU identical (46/46 PASS, Exp 047)
-- **ToadStool absorption**: Ops 5-8 pending absorption; CPU fallback validated, GPU dispatch activates automatically
+- **ToadStool S71 synced**: 671 shaders, universal precision, 53/53 cross-spring evolution benchmark PASS
+- **bingoCube/nautilus**: Evolutionary reservoir available now (ET₀ prediction, drift detection, NPU export)
 - **GPU at scale**: Profile `compute_gpu()` at N=100K+ (multi-year regional grids, crossover point via `AtlasStream`)
 - **Richards + isotherm on GPU**: Move remaining Tier B modules to pure GPU via ToadStool shaders
 - **NestGate data pipeline**: Open-Meteo + NCBI 16S coupling for baseCamp 06 extension

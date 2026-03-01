@@ -66,13 +66,16 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
   barracuda::ops/linalg/stats/pde/optimize (GPU dispatch + CPU fallback)
        │
        ▼
-  ToadStool WGSL shaders (f64 precision on GPU, 774 shaders)
+  ToadStool WGSL shaders (f64 precision on GPU, 671 shaders — S71)
        │
        ▼
-  metalForge (mixed CPU + GPU + future NPU)
+  metalForge (mixed CPU + GPU + NPU)
+       │
+       ▼
+  bingoCube/nautilus (evolutionary reservoir, drift detection, NPU export)
 ```
 
-airSpring domain code (`eco::`) is validated against papers, then wrapped by GPU orchestrators (`gpu::`) that bridge to `barracuda` primitives. The primitives dispatch to ToadStool WGSL shaders for GPU or fall back to CPU. `metalForge` stages upstream absorption candidates following the "Write → Absorb → Lean" cycle.
+airSpring domain code (`eco::`) is validated against papers, then wrapped by GPU orchestrators (`gpu::`) that bridge to `barracuda` primitives. The primitives dispatch to ToadStool WGSL shaders for GPU or fall back to CPU. `metalForge` stages upstream absorption candidates following the "Write → Absorb → Lean" cycle. `bingoCube/nautilus` provides evolutionary reservoir computing for time-series prediction (ET₀ forecasting, drift detection) with AKD1000 NPU export.
 
 ### Cross-Spring Shader Evolution
 
@@ -198,15 +201,15 @@ airSpring/
 │   ├── vg_inverse/              # Van Genuchten inverse fitting (84/84)
 │   ├── season_water_budget/     # Full-season irrigation WB (34/34)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (641 lib + 20 integration, 68 binaries)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (817 lib tests, 73 binaries)
 │   ├── src/
-    │   │   ├── biomeos.rs           # biomeOS socket resolution + primal discovery (shared)
-    │   │   ├── eco/                 # Domain modules (19 validated, 8 ET₀ + runoff + infiltration + VG + Anderson)
-    │   │   ├── gpu/                 # ToadStool/BarraCuda GPU bridge (11 Tier A + 4 Tier B)
-    │   │   ├── npu.rs               # BrainChip AKD1000 NPU (feature-gated)
-    │   │   └── bin/                 # validate_*, bench_*, airspring_primal (69 src, 73 declared)
-    │   ├── tests/                   # Integration tests (7+ files + common/)
-    │   └── Cargo.toml               # v0.5.9
+│   │   ├── biomeos.rs           # biomeOS socket resolution + primal discovery (shared)
+│   │   ├── eco/                 # Domain modules (19 validated, 8 ET₀ + runoff + infiltration + VG + Anderson)
+│   │   ├── gpu/                 # ToadStool/BarraCuda GPU bridge (11 Tier A + 4 Tier B)
+│   │   ├── npu.rs               # BrainChip AKD1000 NPU (feature-gated)
+│   │   └── bin/                 # validate_*, bench_*, airspring_primal (69 src, 73 declared)
+│   ├── tests/                   # Integration tests (7+ files + common/)
+│   └── Cargo.toml               # v0.5.9
 ├── metalForge/                  # Mixed hardware dispatch (CPU+GPU+NPU)
 │   └── forge/                   # airspring-forge (31 tests, 4 binaries, live hardware probe)
 ├── specs/                       # Specifications and requirements
@@ -217,7 +220,7 @@ airSpring/
 │   └── baseCamp/                # Per-faculty research briefings + baseCamp extensions
 ├── experiments/                 # Experiment protocols and results (63 experiments)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
-│   └── handoffs/                # Versioned (V035 evolution handoff active)
+│   └── handoffs/                # Versioned (V044 active)
 ├── graphs/                      # biomeOS deployment graphs (TOML)
 ├── CHANGELOG.md                 # Keep-a-Changelog versioned history
 ├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
@@ -249,7 +252,7 @@ airSpring/
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance |
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (63 complete) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda/NUCLEUS handoffs (V043 active) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda/NUCLEUS handoffs (V044 active) |
 
 ## License
 
@@ -265,4 +268,5 @@ ToadStool S71 synced: 671 WGSL shaders, 2,773+ barracuda tests, DF64 transcenden
 66 `ComputeDispatch` migrations, pure math + precision per silicon. Upstream `fao56_et0` cross-validated ≡ local PM.
 Richards PDE rewired to `barracuda::linalg::tridiagonal_solve`. Configurable `RichardsConfig`. Shared `biomeos` module.
 Zero unsafe, zero clippy warnings, zero TODOs, zero mocks in production. Capability-based discovery everywhere.
+bingoCube/nautilus evolutionary reservoir available (ET₀ prediction, drift detection, NPU export).
 Pure Rust + BarraCuda. AGPL-3.0-or-later.*
