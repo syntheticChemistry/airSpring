@@ -2,6 +2,58 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.5.6] - 2026-03-01
+
+### ToadStool S70+ Complete Rewire + Cross-Spring Benchmark
+
+Full GPU rewire against ToadStool S70+ — all batched elementwise ops GPU-first,
+new GPU stats module, comprehensive validation and benchmarking with cross-spring
+evolution provenance tracking.
+
+#### Added
+- **Exp 057: GPU Ops 5-8 Rewire Validation + Benchmark** (26/26 PASS)
+  - All 6 batched elementwise ops (0, 1, 5, 6, 7, 8) validated GPU vs CPU
+  - Timing benchmarks: GPU throughput 64K → 11.5M items/s (N=100→50K)
+  - Cross-spring provenance table (hotSpring/wetSpring/neuralSpring/airSpring/groundSpring)
+  - Seasonal pipeline GPU Stages 1-2 parity (ET₀ < 1%, yield < 5%)
+- **`gpu::stats` module** — GPU-accelerated statistics (neuralSpring S69 → ToadStool)
+  - `sensor_regression_gpu()` — batched polynomial OLS for sensor calibration
+  - `soil_correlation_gpu()` — Pearson correlation matrix for multi-variate soil data
+  - `predict_vwc()` — apply fitted coefficients
+- **Python controls for SensorCal (op=5) and Kc Climate Adj (op=7)** in `bench_python_timing.py`
+- **5 new cross-spring GPU benchmarks** in `bench_cross_spring`
+
+#### Changed
+- Ops 5-8 rewired from CPU fallback to GPU-first dispatch via `BatchedElementwiseF64`
+  - Op 5: `SensorCalibration` (Dong 2024 Eq.5)
+  - Op 6: `HargreavesEt0` (FAO-56 Eq.52 + hotSpring acos_f64)
+  - Op 7: `KcClimateAdjust` (FAO-56 Eq.62)
+  - Op 8: `DualKcKe` (FAO-56 Ch 7/11 + hotSpring clamp patterns)
+- Seasonal pipeline: GPU Stages 1-2 (ET₀ + Kc climate adjustment)
+- `PROVENANCE` table: 15 → 19 entries (stats_f64, seasonal_pipeline.wgsl, brent_f64.wgsl, hydrology GPU-first)
+- `evolution_gaps.rs`: 15 → 17 Tier A, 7 Tier B, 1 Tier C
+- CPU vs Python benchmark: 18/18 → 20/20 parity (17.9× geometric mean)
+- Cross-spring benchmarks: 30/30 → 35/35
+- Lib tests: 636 → 640 (4 new: stats + provenance)
+- Binary count: 59 → 62 (validate_gpu_rewire_benchmark + bench updates)
+- All docs updated to v0.5.6, ToadStool HEAD `1dd7e338` (S70+++)
+
+---
+
+## [0.5.5] - 2026-03-01
+
+### ToadStool S70+ Sync + GPU Bridge Evolution
+
+Synchronized with ToadStool HEAD `1dd7e338` (S70+++). Fixed compilation against
+new `F64BuiltinCapabilities::basic_f64` field. Updated GPU bridge docs.
+
+#### Changed
+- `device_info.rs`: Fixed `F64BuiltinCapabilities` test for new `basic_f64` field
+- Barracuda Cargo.toml: version 0.5.4 → 0.5.6
+- Documentation: ToadStool HEAD reference updated to `1dd7e338`
+
+---
+
 ## [0.5.4] - 2026-02-28
 
 ### Experiment Buildout (052-054) — Pipeline Coupling + Inverse Problems

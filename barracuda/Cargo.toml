@@ -290,3 +290,7 @@ path = "src/bin/bench_cross_spring.rs"
 name = "validate_gpu_pipeline"
 path = "src/bin/validate_gpu_pipeline.rs"
 
+[[bin]]
+name = "validate_gpu_rewire_benchmark"
+path = "src/bin/validate_gpu_rewire_benchmark.rs"
+

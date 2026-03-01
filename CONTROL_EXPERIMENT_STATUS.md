@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-03-01 (v0.5.6 — 56 experiments, 1237 Python + 636 lib + 57 forge tests, 60 barracuda + 5 forge = 65 binaries, **21.0× Rust-vs-Python speedup** (18/18 parity), **pure GPU pipeline** (78/78 PASS), **mixed-hardware pipeline** (104/104 PASS), **ops 5-8 GPU-first** (ToadStool S70+ absorbed), seasonal pipeline GPU Stages 1-2, NPU→GPU PCIe bypass, NUCLEUS atomics (tower/node/nest), biomeOS graph execution, capability-based hardware discovery, AKD1000 NPU live, metalForge live (5 substrates, 18 workloads), atlas stream unified batch, clippy pedantic, zero dead code)
+**Updated**: 2026-03-01 (v0.5.6+ — 57 experiments, 1237 Python + 640 lib + 57 forge tests, 62 barracuda + 5 forge = 67 binaries, **22.7× Rust-vs-Python speedup** (18/18 parity), **pure GPU pipeline** (78/78 PASS), **GPU rewire benchmark** (26/26 PASS), **mixed-hardware pipeline** (104/104 PASS), **ops 5-8 GPU-first** (ToadStool S70+ absorbed), **GPU stats** (neuralSpring S69), seasonal pipeline GPU Stages 1-2, 35/35 cross-spring benchmarks, NPU→GPU PCIe bypass, NUCLEUS atomics (tower/node/nest), biomeOS graph execution, capability-based hardware discovery, AKD1000 NPU live, metalForge live (5 substrates, 18 workloads), atlas stream unified batch, clippy pedantic, zero dead code)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -934,14 +934,35 @@ Chapter 7, separating transpiration from soil evaporation for precision scheduli
 
 ---
 
+### Experiment 057: GPU Ops 5-8 Rewire Validation + Benchmark — PHASE 1 COMPLETE
+
+**Goal**: Validate the ToadStool S70+ absorption rewire — all 6 batched elementwise
+GPU ops (0, 1, 5, 6, 7, 8) dispatched and cross-validated against CPU baselines,
+with timing benchmarks and cross-spring evolution provenance tracking.
+
+**Phase 1 (Rust — 26/26 PASS):**
+- [x] Op 0 (FAO-56 ET₀): GPU dispatch, N=1000, range validation
+- [x] Op 1 (Water Balance): GPU dispatch, N=1000, non-negative validation
+- [x] Op 5 (SensorCal): GPU↔CPU max err < 0.01, VWC(10000) ≈ 0.1323
+- [x] Op 6 (Hargreaves): GPU↔CPU max err < 0.10 (NVK polyfill acos drift)
+- [x] Op 7 (Kc Climate): GPU↔CPU max err < 0.01, standard conditions ≈ 1.20
+- [x] Op 8 (DualKc Ke): All Ke ∈ [0, 1.5), N=1000 valid
+- [x] GPU throughput scaling: 64K→11.5M items/s (N=100→50K)
+- [x] Seasonal pipeline: GPU ET₀ parity < 1%, yield parity < 5%, mass balance < 0.5mm
+- [x] Cross-spring provenance documented (hotSpring/wetSpring/neuralSpring/airSpring/groundSpring)
+
+**Binary**: `validate_gpu_rewire_benchmark`
+
+---
+
 ## Evolution Roadmap
 
 ```
 Track 1 (Precision Agriculture):
   Phase 0  [COMPLETE]: Python baselines — 1237/1237 PASS (54 experiments)
   Phase 0+ [COMPLETE]: Real data pipeline — 15,300 station-days, ET₀ R²=0.97
-  Phase 1  [COMPLETE]: Rust validation — 636 lib + 57 forge tests, 65 binaries
-  Phase 1.5[COMPLETE]: CPU benchmark — Rust 21.0× faster than Python (18/18 parity)
+  Phase 1  [COMPLETE]: Rust validation — 640 lib + 57 forge tests, 66 binaries
+  Phase 1.5[COMPLETE]: CPU benchmark — Rust 22.7× faster than Python (18/18 parity)
   Phase 2  [COMPLETE]: Cross-validation — 75/75 MATCH (Python↔Rust, tol=1e-5)
   Phase 2.5[COMPLETE]: Ops 5-8 GPU-first — 4 orchestrators rewired (ToadStool S70+ absorbed)
   Phase 2.6[COMPLETE]: Seasonal pipeline — GPU Stages 1-2 (ET₀ + Kc), 73/73 real data (12 stations)
@@ -1012,10 +1033,11 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026 — Updated: March 1, 2026 (v0.5.5)*
-*56 experiments, 1237/1237 Python, 630 lib + 57 forge tests, 65 binaries, 75/75 cross-validation, 100 Michigan stations, 18/18 CPU parity, 78/78 GPU pipeline, 104/104 mixed-hardware pipeline.*
+*Initialized: February 16, 2026 — Updated: March 1, 2026 (v0.5.6+)*
+*57 experiments, 1237/1237 Python, 640 lib + 57 forge tests, 67 binaries, 75/75 cross-validation, 100 Michigan stations, 18/18 CPU parity, 78/78 GPU pipeline, 26/26 GPU rewire, 104/104 mixed-hardware pipeline.*
 *8 ET₀ methods + SCS-CN runoff + Green-Ampt infiltration + coupled runoff-infiltration + VG inverse + full-season WB.*
-*42+ named constants, zero dead code. Rust 25.9× faster than Python (8/8 parity).*
-*11 Tier A + 4 Tier B GPU orchestrators. AKD1000 NPU live (3 experiments).*
-*Seasonal pipeline 73/73 PASS (12 stations, 4800 results). metalForge 18 workloads, 29/29 cross-system.*
+*42+ named constants, zero dead code. Rust 22.7× faster than Python (18/18 parity).*
+*17 Tier A + 7 Tier B GPU orchestrators. Ops 5-8 GPU-first (ToadStool S70+). GPU stats (neuralSpring S69).*
+*Seasonal pipeline GPU Stages 1-2. 73/73 atlas PASS (12 stations, 4800 results). 35/35 cross-spring benchmarks.*
+*metalForge 18 workloads, 29/29 cross-system. AKD1000 NPU live (3 experiments).*
 *Quality: zero .unwrap(), zero unsafe, zero clippy pedantic + nursery warnings. AGPL-3.0-or-later.*

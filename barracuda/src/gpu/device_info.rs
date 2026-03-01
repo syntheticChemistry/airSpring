@@ -133,14 +133,23 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
     },
     ShaderProvenance {
         shader: "batched_elementwise_f64.wgsl",
-        primitives: &["fao56_et0_batch", "water_balance_batch"],
-        origin: "airSpring + ToadStool",
-        domain: "Precision agriculture: FAO-56 ET₀ + water balance",
-        evolved_by: &[
-            "airSpring (domain equations)",
-            "ToadStool S54 (orchestrator + precision fixes)",
+        primitives: &[
+            "fao56_et0_batch",
+            "water_balance_batch",
+            "sensor_cal (op=5)",
+            "hargreaves_et0 (op=6)",
+            "kc_climate_adjust (op=7)",
+            "dual_kc_ke (op=8)",
         ],
-        airspring_use: "Primary GPU dispatch for ET₀ and water balance",
+        origin: "multi-spring convergence",
+        domain: "Precision agriculture: FAO-56 ET₀, WB, sensor cal, Kc, Ke",
+        evolved_by: &[
+            "airSpring (domain equations, ops 5-8)",
+            "hotSpring S54 (acos_f64, sin_f64 for Ra/sunset angle)",
+            "neuralSpring (batch orchestrator pattern)",
+            "ToadStool S54→S70+ (unified absorption)",
+        ],
+        airspring_use: "GPU-first dispatch for ET₀, WB, SensorCal, Hargreaves, Kc, DualKc",
     },
     ShaderProvenance {
         shader: "kriging_f64.wgsl",
@@ -194,16 +203,43 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         airspring_use: "MC ET₀ parametric confidence intervals",
     },
     ShaderProvenance {
-        shader: "hydrology (CPU batch kernel)",
+        shader: "hydrology (CPU→GPU kernel)",
         primitives: &[
             "hargreaves_et0_batch",
             "crop_coefficient",
             "soil_water_balance",
         ],
         origin: "airSpring",
-        domain: "FAO-56 hydrology batch primitives",
-        evolved_by: &["airSpring metalForge → ToadStool S66 (absorption)"],
-        airspring_use: "Hargreaves batch ET₀, Kc stage interpolation",
+        domain: "FAO-56 hydrology batch primitives (GPU-first since v0.5.6)",
+        evolved_by: &[
+            "airSpring metalForge → ToadStool S66 (absorption)",
+            "airSpring v0.5.6 (GPU-first rewire via ops 5-8)",
+        ],
+        airspring_use: "Hargreaves GPU ET₀, Kc GPU adjustment, DualKc GPU Ke",
+    },
+    ShaderProvenance {
+        shader: "stats_f64 (GPU statistics)",
+        primitives: &["linear_regression", "matrix_correlation"],
+        origin: "neuralSpring S69",
+        domain: "GPU-accelerated OLS regression and correlation matrices",
+        evolved_by: &["neuralSpring S69 → ToadStool absorption"],
+        airspring_use: "Sensor calibration regression, multi-variate soil analysis",
+    },
+    ShaderProvenance {
+        shader: "seasonal_pipeline.wgsl (fused)",
+        primitives: &["fused_et0_kc_wb_stress"],
+        origin: "airSpring concept → ToadStool S70+",
+        domain: "Single-dispatch seasonal pipeline: ET₀ → Kc → WB → Stress",
+        evolved_by: &["airSpring (domain spec)", "ToadStool S70+ (WGSL implementation)"],
+        airspring_use: "Future: fused seasonal pipeline (pending Rust executor)",
+    },
+    ShaderProvenance {
+        shader: "brent_f64.wgsl (root-finding)",
+        primitives: &["brent_vg_inverse", "brent_green_ampt"],
+        origin: "airSpring concept → ToadStool S70+",
+        domain: "Brent method root-finding for VG inverse and Green-Ampt",
+        evolved_by: &["airSpring (VG inverse need)", "ToadStool S70+ (WGSL, bug on L49)"],
+        airspring_use: "Future: GPU VG inverse (pending ToadStool bug fix)",
     },
     ShaderProvenance {
         shader: "diversity (CPU bio kernel)",
@@ -319,7 +355,10 @@ mod tests {
         assert!(shaders.contains(&"math_f64.wgsl"));
         assert!(shaders.contains(&"df64_core.wgsl"));
         assert!(shaders.contains(&"crank_nicolson_f64.wgsl"));
-        assert!(shaders.contains(&"hydrology (CPU batch kernel)"));
+        assert!(shaders.contains(&"hydrology (CPU→GPU kernel)"));
+        assert!(shaders.contains(&"stats_f64 (GPU statistics)"));
+        assert!(shaders.contains(&"seasonal_pipeline.wgsl (fused)"));
+        assert!(shaders.contains(&"brent_f64.wgsl (root-finding)"));
         assert!(shaders.contains(&"diversity (CPU bio kernel)"));
         assert!(shaders.contains(&"anderson (CPU coupling kernel)"));
         assert!(shaders.contains(&"blaney_criddle (CPU ET₀ kernel)"));
@@ -333,7 +372,7 @@ mod tests {
         assert!(origins.contains(&"hotSpring"));
         assert!(origins.contains(&"wetSpring"));
         assert!(origins.contains(&"neuralSpring"));
-        assert!(origins.contains(&"airSpring + ToadStool"));
+        assert!(origins.contains(&"multi-spring convergence"));
         assert!(origins.contains(&"airSpring"));
         assert!(origins.contains(&"groundSpring"));
     }

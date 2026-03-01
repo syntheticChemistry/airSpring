@@ -1,6 +1,6 @@
 # Cross-Spring Shader Evolution — airSpring Provenance
 
-**Updated**: February 28, 2026 (v0.5.4, ToadStool HEAD `e96576ee` — S68+)
+**Updated**: February 28, 2026 (v0.5.6, ToadStool HEAD `e96576ee` — S68+)
 
 ## Summary
 
@@ -196,6 +196,7 @@ module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 | Feb 27 | airSpring v0.5.2: 4 Tier B GPU orchestrators + seasonal pipeline + atlas stream | 584 lib + 31 forge tests, 55 binaries. Ops 5-8 wired (sensor cal, Hargreaves, Kc climate, dual Kc). Seasonal pipeline chained ET₀→Kc→WB→Yield. Atlas stream 73/73 PASS (12 stations, 4800 results). metalForge 18 workloads, 29/29 cross-system. V052 ToadStool/NestGate/biomeOS handoffs |
 | Feb 28 | airSpring v0.5.3: Blaney-Criddle + SCS-CN runoff + Green-Ampt infiltration | 618 lib tests, 56 binaries, 51 experiments. 8th ET₀ method, `eco::runoff` + `eco::infiltration` modules. 42+ named constants, zero dead code, capability-based GPU. V034 deep debt handoff |
 | Feb 28 | airSpring v0.5.4: Pipeline coupling + inverse problems + season-scale audit | 618 lib tests, 59 binaries, 54 experiments. Coupled runoff-infiltration (292/292), VG inverse via Brent (84/84), full-season WB audit (34/34). V035 handoff: batched Brent GPU candidate |
+| Mar 01 | airSpring v0.5.6: ToadStool S70+ complete rewire + GPU benchmark | 640 lib tests, 67 binaries, 57 experiments. Ops 5-8 GPU-first, GPU stats (neuralSpring S69), Exp 057 (26/26), 20/20 CPU parity (17.9×), 35/35 cross-spring benchmarks. V039 handoff: full cross-spring provenance |
 
 ---
 

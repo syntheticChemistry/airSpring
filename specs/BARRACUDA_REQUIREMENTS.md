@@ -1,6 +1,6 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: March 1, 2026 (v0.5.6 — 636 lib tests, 60 barracuda + 5 forge binaries, 15 Tier A + 3 pipeline GPU orchestrators + pure GPU pipeline (78/78) + mixed-hardware pipeline (104/104 metalForge) + NUCLEUS atomics + biomeOS graph execution, 21.0× CPU speedup across 18 algorithms)
+**Last Updated**: March 1, 2026 (v0.5.6 — 640 lib tests, 61 barracuda + 5 forge binaries, 15 Tier A + 3 pipeline GPU orchestrators + pure GPU pipeline (78/78) + mixed-hardware pipeline (104/104 metalForge) + NUCLEUS atomics + biomeOS graph execution, 22.7× CPU speedup across 18 algorithms)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
 **ToadStool HEAD**: `1dd7e338` (S70+++ — ops 5-8 absorbed, seasonal pipeline WGSL, brent GPU shader, cross-spring absorption)
 
@@ -78,9 +78,9 @@
 
 ### Layer 1: BarraCuda CPU (validated, complete)
 
-All algorithms implemented in pure Rust. 628 lib tests, 50+ binaries, 651+ total checks.
+All algorithms implemented in pure Rust. 640 lib tests, 50+ binaries, 651+ total checks.
 This is the baseline for correctness — GPU and metalForge results must match.
-CPU benchmarks: 21.0× geometric mean speedup vs Python (18/18 parity across
+CPU benchmarks: 22.7× geometric mean speedup vs Python (18/18 parity across
 ET₀, dual Kc, mulched Kc, VG θ, Richards 1D, Langmuir, Freundlich, GDD,
 SCS-CN runoff, Green-Ampt, Saxton-Rawls, Priestley-Taylor, yield response,
 dual Kc step, Makkink, Blaney-Criddle, Hargreaves, sensor calibration).

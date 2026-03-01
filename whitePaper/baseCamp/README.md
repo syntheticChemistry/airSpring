@@ -2,7 +2,7 @@
 
 **Updated**: March 1, 2026
 **Project**: airSpring — Ecological & Agricultural Sciences (v0.5.6)
-**Status**: 56 experiments, 1237/1237 Python + 636 Rust lib tests + 57 forge tests + 65 binaries + 78/78 pure GPU pipeline + 104/104 mixed-hardware pipeline + ops 5-8 GPU-first (ToadStool S70+ absorbed) + seasonal pipeline GPU Stages 1-2 + NPU→GPU PCIe bypass + NUCLEUS atomics + biomeOS graph execution + 18/18 CPU parity (21.0× speedup) + atlas stream unified batch + capability-based hardware discovery
+**Status**: 57 experiments, 1237/1237 Python + 640 Rust lib tests + 57 forge tests + 67 binaries + 78/78 pure GPU + 26/26 GPU rewire + 104/104 mixed-hardware + 35/35 cross-spring benchmarks + ops 5-8 GPU-first (ToadStool S70+) + GPU stats (neuralSpring S69) + seasonal pipeline GPU Stages 1-2 + NPU→GPU PCIe bypass + NUCLEUS atomics + biomeOS graph execution + 20/20 CPU parity (17.9× speedup) + atlas stream unified batch + capability-based hardware discovery
 
 ---
 
@@ -11,9 +11,9 @@
 ```
 Phase 0   Python/R baselines    — reproduce paper results with original tools (1237/1237)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (618 lib + 1498 atlas, 59 binaries + 30 benchmarks)
-Phase 1.5 CPU benchmark         — 25.9× Rust-vs-Python geometric mean (8/8 parity)
-Phase 2   BarraCuda GPU bridge  — 15 Tier A modules wired (cross-spring S70+ fully rewired)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (640 lib + 1498 atlas, 61 binaries + 35/35 cross-spring benchmarks)
+Phase 1.5 CPU benchmark         — 17.9× Rust-vs-Python geometric mean (20/20 parity)
+Phase 2   BarraCuda GPU bridge  — 17 Tier A modules wired (cross-spring S70+ fully rewired)
 Phase 2.5 Ops 5-8 GPU-first   — Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed
 Phase 2.6 Seasonal pipeline    — GPU Stages 1-2 (ET₀ + Kc), atlas stream, MC ET₀ GPU path
 Phase 3   GPU live dispatch     — Titan V validated (24/24 PASS, 0.04% seasonal parity, 10K batch)
@@ -93,7 +93,7 @@ Phase 4   Penny Irrigation      — sovereign scheduling on consumer hardware ($
 | 53 | Van Genuchten Inverse Parameter Estimation — Exp 053 | 0→CPU | 84+84 | Forward VG, Mualem K(h), θ→h→θ round-trip via Brent inversion |
 | 54 | Full-Season Irrigation Water Budget — Exp 054 | 0→CPU | 34+34 | Synthetic weather → PM ET₀ → Kc → WB → Stewart yield, 4 crops |
 
-### Rust Validation (Phase 1+3) — 59 binaries + 30 cross-spring benchmarks
+### Rust Validation (Phase 1+3) — 61 binaries + 35/35 cross-spring benchmarks
 
 | Binary | Checks | Modules Exercised |
 |--------|:------:|-------------------|

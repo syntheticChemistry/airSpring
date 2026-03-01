@@ -303,6 +303,18 @@ def main():
     results.append(bench("blaney_criddle", blaney_criddle, N * 10,
                          25.0, math.radians(42.0), 180))
 
+    # SoilWatch 10 sensor calibration (Dong et al. 2024 Eq 5) — 100K
+    def sensor_cal_vwc(raw):
+        return ((2e-13 * raw - 4e-9) * raw + 4e-5) * raw - 0.0677
+    results.append(bench("sensor_cal", sensor_cal_vwc, N * 10, 10000.0))
+
+    # Kc climate adjustment (FAO-56 Eq 62) — 100K
+    def kc_climate_adjust(kc_table, u2, rh_min, h):
+        adj = (0.04 * (u2 - 2.0) - 0.004 * (rh_min - 45.0)) * (h / 3.0) ** 0.3
+        return max(0.0, kc_table + adj)
+    results.append(bench("kc_climate_adjust", kc_climate_adjust, N * 10,
+                         1.20, 2.0, 45.0, 2.0))
+
     out = {"benchmarks": results}
     json.dump(out, sys.stdout)
 

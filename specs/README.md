@@ -1,7 +1,7 @@
 # airSpring Specifications
 
 **Last Updated**: February 28, 2026
-**Status**: Phase 0-3 complete — 1237/1237 Python + 618 lib + 31 forge tests + 73/73 atlas stream + 75/75 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + AKD1000 NPU live + 25.9× CPU speedup + metalForge 18 workloads 29/29 + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB (34/34) (v0.5.4)
+**Status**: Phase 0-3 complete — 1237/1237 Python + 618 lib + 31 forge tests + 73/73 atlas stream + 75/75 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + AKD1000 NPU live + 25.9× CPU speedup + metalForge 18 workloads 29/29 + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB (34/34) (v0.5.6)
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling, Anderson coupling
 
 ---
@@ -19,7 +19,7 @@
 | Phase 3 (GPU) | 11 Tier A + 4 Tier B modules wired, cross-spring S68 fully rewired |
 | Phase 3.8 (Cross-system) | metalForge 18 workloads, 29/29 cross-system routing (GPU+NPU+CPU) |
 | Faculty | Dong (BAE, MSU — new lab 2026) |
-| Handoff | V035 (pipeline coupling, inverse problems, season-scale audit) in `wateringHole/handoffs/` |
+| Handoff | V038 (complete rewire benchmark) in `wateringHole/handoffs/` |
 
 ---
 
@@ -96,7 +96,7 @@ Re-run `run_all_baselines.sh` at the respective commits to verify.
 `../whitePaper/STUDY.md` → `../CONTROL_EXPERIMENT_STATUS.md` → BARRACUDA_REQUIREMENTS.md
 
 **Cross-spring evolution** (15 min):
-CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/` (V035 active)
+CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/` (V038 active)
 
 ---
 

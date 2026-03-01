@@ -17,6 +17,7 @@
 //! | [`kriging`] | Soil moisture spatial interpolation | **Integrated** (`KrigingF64`) |
 //! | [`reduce`] | Seasonal aggregation statistics | **GPU** for N≥1024 (`FusedMapReduceF64`) |
 //! | [`sensor_calibration`] | Batched `SoilWatch` 10 VWC calibration | **GPU-first** (`BatchedElementwiseF64` op=5, S70+) |
+//! | [`stats`] | GPU OLS regression + correlation matrix | **GPU** (`stats_f64`, neuralSpring S69) |
 //! | [`seasonal_pipeline`] | Full-season ET₀→Kc→WB→Yield pipeline | **GPU Stages 1-2** (ET₀ + Kc) + CPU stages 3-4 |
 //! | [`atlas_stream`] | Multi-station multi-crop regional pipeline | **GPU-capable** + streaming callback |
 //! | [`stream`] | `IoT` stream smoothing (sliding window) | **GPU** (`MovingWindowStats`, wetSpring) |
@@ -83,5 +84,6 @@ pub mod reduce;
 pub mod richards;
 pub mod seasonal_pipeline;
 pub mod sensor_calibration;
+pub mod stats;
 pub mod stream;
 pub mod water_balance;

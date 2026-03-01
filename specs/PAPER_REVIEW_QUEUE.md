@@ -1,8 +1,8 @@
 # airSpring — Paper Review Queue
 
-**Last Updated**: February 28, 2026
+**Last Updated**: March 1, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 54 completed (1237/1237 Python + 618 Rust lib tests + 1498 atlas checks + 11 Tier A modules + 59 binaries + 30/30 cross-spring benchmarks). GPU math portability 46/46. NCBI 16S coupling 14+29. ToadStool S68 sync (universal precision, 700 WGSL, zero f32-only, 6-Spring provenance). Titan V GPU live dispatch (24/24 PASS) + AKD1000 NPU live + metalForge live + CPU↔GPU parity + 26.3× Rust-vs-Python speedup. Coupled runoff-infiltration (292/292), VG inverse (84/84), full-season WB audit (34/34). All completed papers use open data and systems.
+**Status**: 57 experiments (1237/1237 Python + 640 Rust lib tests + 1498 atlas checks + 17 Tier A modules + 67 binaries + 35/35 cross-spring benchmarks). GPU math portability 46/46. Ops 5-8 GPU-first (ToadStool S70+ absorbed). GPU stats (neuralSpring S69). NCBI 16S coupling 14+29. ToadStool S70+ sync (universal precision, 703 WGSL, 6-Spring provenance). Titan V GPU live dispatch (24/24 PASS) + AKD1000 NPU live + metalForge live + CPU↔GPU parity (26/26) + 17.9× Rust-vs-Python speedup (20/20 parity). Coupled runoff-infiltration (292/292), VG inverse (84/84), full-season WB audit (34/34). All completed papers use open data and systems.
 
 ---
 
@@ -228,6 +228,7 @@ wetSpring 16S pipeline (OTU table, Shannon H′) → airSpring Anderson coupling
 - Queue items 23-24 (Tier 4) are longer-horizon explorations (evolutionary optimization, microbiome)
 - All 41 paper reproductions use **open data** — zero institutional access, zero proprietary sensors
 - Every completed paper has been validated through the full pipeline: Python → Rust CPU → GPU/NPU
-- Three compute tiers verified: 40 control dirs, 56 Rust binaries, 11 Tier A + 4 Tier B GPU modules, 3 NPU experiments
+- Three compute tiers verified: 40+ control dirs, 67 Rust binaries, 17 Tier A + 7 Tier B GPU modules, 3 NPU experiments
+- CPU parity chain: Paper → Python control → Barracuda CPU → Barracuda GPU → Pure GPU workload → metalForge cross-system
 - ET₀ method coverage: PM (FAO-56), Priestley-Taylor, Hargreaves, Thornthwaite, Makkink, Turc, Hamon, Blaney-Criddle — 8 independent methods
 - GPU math portability: all 13 GPU orchestrator modules validated (Exp 047, 46/46 checks)

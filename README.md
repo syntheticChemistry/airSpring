@@ -19,8 +19,8 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,237/1,237 PASS** | 54 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **636 lib + 1498 atlas** | 60 binaries + 30/30 cross-spring benchmarks |
-| Phase 1.5: CPU Benchmark | **20.1× faster** | Rust vs Python geometric mean (18/18 parity) |
+| Phase 1: Rust validation | **640 lib + 1498 atlas** | 61 binaries + 35/35 cross-spring benchmarks |
+| Phase 1.5: CPU Benchmark | **17.9× faster** | Rust vs Python geometric mean (20/20 parity, incl. SensorCal + Kc adj) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
 | Phase 2.6: Seasonal pipeline | **GPU Stages 1-2** | ET₀ + Kc GPU dispatch, unified batch, streaming callback |
@@ -34,7 +34,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` (barracuda) | **636 passed**, 0 failures |
+| `cargo test --lib` (barracuda) | **640 passed**, 0 failures |
 | `cargo test --lib` (metalForge) | **57 passed**, 0 failures |
 | `cargo test --tests` | **20 passed** (integration) |
 | `cargo clippy (pedantic)` | **0 warnings** (pedantic + nursery, both crates) |
@@ -194,14 +194,14 @@ airSpring/
 │   ├── vg_inverse/              # Van Genuchten inverse fitting (84/84)
 │   ├── season_water_budget/     # Full-season irrigation WB (34/34)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (618 lib + 20 integration, 59 binaries)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (640 lib + 20 integration, 61 binaries)
 │   ├── src/
 │   │   ├── eco/                 # Domain modules (19 validated, 8 ET₀ + runoff + infiltration + VG + Anderson)
 │   │   ├── gpu/                 # ToadStool/BarraCuda GPU bridge (11 Tier A + 4 Tier B)
 │   │   ├── npu.rs               # BrainChip AKD1000 NPU (feature-gated)
-│   │   └── bin/                 # validate_*, bench_*, cross_validate (59 total)
+│   │   └── bin/                 # validate_*, bench_*, cross_validate (61 total)
 │   ├── tests/                   # Integration tests (7+ files + common/)
-│   └── Cargo.toml               # v0.5.4
+│   └── Cargo.toml               # v0.5.6
 ├── metalForge/                  # Mixed hardware dispatch (CPU+GPU+NPU)
 │   └── forge/                   # airspring-forge (31 tests, 4 binaries, live hardware probe)
 ├── specs/                       # Specifications and requirements
@@ -252,9 +252,9 @@ AGPL-3.0-or-later
 
 ---
 
-*February 28, 2026 — v0.5.4. 54 experiments, 1237/1237 Python, 618 lib + 31 forge tests,
-59 binaries + 30/30 cross-spring benchmarks, 33/33 cross-validation, 15,300 station-days, 1498/1498 atlas checks, 6-Spring provenance.
-Rust 25.9× faster than Python (8/8 parity, geometric mean). 8 ET₀ methods + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34).
+*March 1, 2026 — v0.5.6. 57 experiments, 1237/1237 Python, 640 lib + 57 forge tests,
+67 binaries + 35/35 cross-spring benchmarks, 20/20 CPU parity (17.9× speedup), 15,300 station-days, 1498/1498 atlas checks, 6-Spring provenance.
+Rust 17.9× faster than Python (20/20 parity, geometric mean — now includes SensorCal op=5 and Kc adj op=7). 8 ET₀ methods + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34).
 42+ named constants (zero magic numbers in core modules).
 Zero #[allow(dead_code)], zero unsafe, zero clippy warnings. Capability-based GPU discovery.
 ToadStool S68 synced (774 WGSL). Pure Rust + BarraCuda. AGPL-3.0-or-later.*

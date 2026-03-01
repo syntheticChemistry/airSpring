@@ -40,8 +40,8 @@ fn main() {
         .init();
 
     println!("═══════════════════════════════════════════════════════════════");
-    println!("  airSpring Cross-Spring Provenance Benchmark (v0.5.2)");
-    println!("  ToadStool S68+ — Universal Precision, Pure Math Shaders");
+    println!("  airSpring Cross-Spring Provenance Benchmark (v0.5.6)");
+    println!("  ToadStool S70+ — Ops 5-8 Absorption, GPU-First Dispatch");
     println!("═══════════════════════════════════════════════════════════════\n");
 
     print_provenance_report();
@@ -98,6 +98,7 @@ fn run_all_benchmarks(device: Option<&Arc<WgpuDevice>>) -> (u32, u32) {
 
     run_et0_benchmarks(device, &mut pass, &mut fail);
     run_hargreaves_benchmarks(&mut pass, &mut fail);
+    run_ops_5_8_gpu_benchmarks(device, &mut pass, &mut fail);
     run_water_balance_benchmarks(device, &mut pass, &mut fail);
     run_reduce_benchmarks(device, &mut pass, &mut fail);
     run_stream_benchmarks(device, &mut pass, &mut fail);
@@ -260,6 +261,97 @@ fn run_hargreaves_benchmarks(pass: &mut u32, fail: &mut u32) {
         "airSpring→ToadStool S66 hydrology",
         || bench_hargreaves_batch(10_000),
     );
+}
+
+fn run_ops_5_8_gpu_benchmarks(device: Option<&Arc<WgpuDevice>>, pass: &mut u32, fail: &mut u32) {
+    use barracuda::ops::batched_elementwise_f64::{
+        self as bef64, BatchedElementwiseF64, Op,
+    };
+
+    let Some(dev) = device else {
+        println!("  [SKIP] Ops 5-8 GPU — no f64 device\n");
+        return;
+    };
+    let engine = match BatchedElementwiseF64::new(Arc::clone(dev)) {
+        Ok(e) => e,
+        Err(e) => {
+            eprintln!("  [SKIP] Ops 5-8 GPU init failed: {e}\n");
+            return;
+        }
+    };
+
+    run_bench(pass, fail, "SensorCal GPU (op=5, N=2000)", "airSpring→ToadStool S70+", || {
+        let data: Vec<f64> = (0..2000).map(|i| 5_000.0 + (i as f64 / 2000.0) * 20_000.0).collect();
+        let gpu = engine.execute(&data, 2000, Op::SensorCalibration).unwrap();
+        let cpu: Vec<f64> = data.iter().map(|&r| ((2e-13 * r - 4e-9) * r + 4e-5) * r - 0.0677).collect();
+        let max_err = gpu.iter().zip(&cpu).map(|(g, c)| (g - c).abs()).fold(0.0_f64, f64::max);
+        println!("    max_err={max_err:.2e}");
+        max_err < 0.01
+    });
+
+    run_bench(pass, fail, "Hargreaves GPU (op=6, N=2000)", "airSpring+hotSpring→S70+", || {
+        let mut data = Vec::with_capacity(2000 * 4);
+        for i in 0..2000 {
+            data.push(25.0 + (i as f64 % 10.0));
+            data.push(10.0 + (i as f64 % 5.0));
+            data.push((42.0_f64).to_radians());
+            data.push(100.0 + (i as f64 % 265.0));
+        }
+        let gpu = engine.execute(&data, 2000, Op::HargreavesEt0).unwrap();
+        let cpu: Vec<f64> = data.chunks(4)
+            .map(|c| bef64::hargreaves_et0_cpu(c[0], c[1], c[2], c[3]))
+            .collect();
+        let max_err = gpu.iter().zip(&cpu).map(|(g, c)| (g - c).abs()).fold(0.0_f64, f64::max);
+        println!("    max_err={max_err:.4} mm/day");
+        max_err < 0.1 && gpu.iter().all(|&x| x > 0.0)
+    });
+
+    run_bench(pass, fail, "Kc Climate GPU (op=7, N=2000)", "airSpring FAO-56→S70+", || {
+        let mut data = Vec::with_capacity(2000 * 4);
+        for i in 0..2000 {
+            data.push(0.8 + (i as f64 % 5.0) * 0.1);
+            data.push(1.5 + (i as f64 % 4.0));
+            data.push(30.0 + (i as f64 % 30.0));
+            data.push(0.5 + (i as f64 % 4.0) * 0.5);
+        }
+        let gpu = engine.execute(&data, 2000, Op::KcClimateAdjust).unwrap();
+        let cpu: Vec<f64> = data.chunks(4)
+            .map(|c| bef64::kc_climate_adjust_cpu(c[0], c[1], c[2], c[3]))
+            .collect();
+        let max_err = gpu.iter().zip(&cpu).map(|(g, c)| (g - c).abs()).fold(0.0_f64, f64::max);
+        println!("    max_err={max_err:.2e}");
+        max_err < 0.01
+    });
+
+    run_bench(pass, fail, "DualKc Ke GPU (op=8, N=1000)", "airSpring FAO-56 Ch7+11→S70+", || {
+        let mut data = Vec::with_capacity(1000 * 9);
+        for i in 0..1000 {
+            data.push(0.15 + (i as f64 % 10.0) * 0.1);
+            data.push(1.20);
+            data.push(0.05 + (i as f64 % 10.0) * 0.09);
+            data.push(if i % 3 == 0 { 0.4 } else { 1.0 });
+            data.push(i as f64 % 15.0);
+            data.push(9.0);
+            data.push(22.5);
+            data.push(if i % 4 == 0 { 5.0 } else { 0.0 });
+            data.push(5.0);
+        }
+        let gpu = engine.execute(&data, 1000, Op::DualKcKe).unwrap();
+        let all_valid = gpu.iter().all(|&x| x >= 0.0 && x < 1.5);
+        println!("    all Ke in [0, 1.5): {all_valid}");
+        all_valid
+    });
+
+    run_bench(pass, fail, "GPU↔CPU parity (op=5-8 sweep)", "cross-spring validation", || {
+        let vwc = engine.execute(&[10_000.0], 1, Op::SensorCalibration).unwrap()[0];
+        let kc = engine.execute(&[1.20, 2.0, 45.0, 2.0], 1, Op::KcClimateAdjust).unwrap()[0];
+        let hg = engine.execute(&[30.0, 15.0, 0.733_f64, 187.0], 1, Op::HargreavesEt0).unwrap()[0];
+        let vwc_ok = (vwc - 0.1323).abs() < 0.01;
+        let kc_ok = (kc - 1.20).abs() < 0.001;
+        let hg_ok = hg > 0.0 && hg < 12.0;
+        println!("    VWC(10k)={vwc:.4} Kc(std)={kc:.4} HG={hg:.3}");
+        vwc_ok && kc_ok && hg_ok
+    });
 }
 
 fn run_mc_et0_benchmarks(pass: &mut u32, fail: &mut u32) {

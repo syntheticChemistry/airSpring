@@ -29,6 +29,8 @@
 //! | `eco::*` (stream) | `gpu::atlas_stream` | Unified batch + streaming callback | Regional atlas | **GPU-capable** (v0.5.6) |
 //! | `eco::*` (MC) | `gpu::mc_et0` | `mc_et0_propagate_f64.wgsl` (pending) | MC uncertainty | B (wired, pending shader) |
 //! | `io::csv_ts` | `gpu::stream` | `moving_window.wgsl` | Stream smoothing | A (ready) |
+//! | `eco::sensor_calibration` (OLS) | `gpu::stats` | `linear_regression_f64.wgsl` | Sensor regression | A (GPU, neuralSpring S69) |
+//! | `eco::*` (multi-var) | `gpu::stats` | `matrix_correlation_f64.wgsl` | Soil correlation | A (GPU, neuralSpring S69) |
 //!
 //! # Current Inventory (March 1, 2026 — v0.5.6, synced to `ToadStool` HEAD `1dd7e338`)
 //!
@@ -200,7 +202,7 @@ pub enum Tier {
     C,
 }
 
-/// All known evolution gaps (23+6 entries — 15 Tier A integrated, 7 Tier B + 6 orchestrators, 1 Tier C).
+/// All known evolution gaps (25+6 entries — 17 Tier A integrated, 7 Tier B + 6 orchestrators, 1 Tier C).
 ///
 /// v0.5.6: Ops 5–8 promoted Tier B→A after `ToadStool` S70+ absorption.
 /// `SeasonalPipeline::gpu()` dispatches Stages 1-2 (ET₀ + Kc) to GPU;

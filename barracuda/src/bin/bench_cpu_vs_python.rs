@@ -490,6 +490,47 @@ fn bench_blaney_criddle(n: usize) -> (f64, f64, String) {
     )
 }
 
+fn bench_sensor_cal(n: usize) -> (f64, f64, String) {
+    use airspring_barracuda::eco::sensor_calibration;
+    let t0 = Instant::now();
+    let mut result = 0.0_f64;
+    for _ in 0..n {
+        result = black_box(sensor_calibration::soilwatch10_vwc(black_box(10_000.0)));
+    }
+    let elapsed = t0.elapsed().as_secs_f64();
+    let expected = ((2e-13 * 10_000.0 - 4e-9) * 10_000.0 + 4e-5) * 10_000.0 - 0.0677;
+    let diff = (result - expected).abs();
+    let ok = diff < 1e-10;
+    (
+        elapsed,
+        result,
+        format!("Rust={result:.6}, Python={expected:.6}, diff={diff:.2e}, ok={ok}"),
+    )
+}
+
+fn bench_kc_climate_adjust(n: usize) -> (f64, f64, String) {
+    use barracuda::ops::batched_elementwise_f64;
+    let t0 = Instant::now();
+    let mut result = 0.0_f64;
+    for _ in 0..n {
+        result = black_box(batched_elementwise_f64::kc_climate_adjust_cpu(
+            black_box(1.20),
+            black_box(2.0),
+            black_box(45.0),
+            black_box(2.0),
+        ));
+    }
+    let elapsed = t0.elapsed().as_secs_f64();
+    let expected = 1.20;
+    let diff = (result - expected).abs();
+    let ok = diff < 1e-10;
+    (
+        elapsed,
+        result,
+        format!("Rust={result:.6}, Python={expected:.6}, diff={diff:.2e}, ok={ok}"),
+    )
+}
+
 fn build_benchmarks() -> Vec<BenchEntry> {
     vec![
         (
@@ -599,6 +640,18 @@ fn build_benchmarks() -> Vec<BenchEntry> {
             "Blaney-Criddle ET₀",
             100_000,
             Box::new(bench_blaney_criddle),
+        ),
+        (
+            "sensor_cal",
+            "SensorCal VWC (op=5)",
+            100_000,
+            Box::new(bench_sensor_cal),
+        ),
+        (
+            "kc_climate_adjust",
+            "Kc Climate Adj (op=7)",
+            100_000,
+            Box::new(bench_kc_climate_adjust),
         ),
     ]
 }
