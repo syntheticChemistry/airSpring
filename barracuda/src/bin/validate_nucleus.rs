@@ -28,14 +28,12 @@
     clippy::cast_possible_truncation
 )]
 
-use std::io::{BufRead, BufReader, Write};
-use std::os::unix::net::UnixStream;
 use std::path::PathBuf;
-use std::time::Duration;
 
 use airspring_barracuda::biomeos;
 use airspring_barracuda::eco::evapotranspiration as et;
 use airspring_barracuda::eco::simple_et0;
+use airspring_barracuda::rpc;
 
 use barracuda::validation::ValidationHarness;
 
@@ -45,35 +43,6 @@ fn resolve_socket_dir() -> PathBuf {
 
 fn find_airspring_socket() -> Option<PathBuf> {
     biomeos::find_socket("airspring")
-}
-
-fn send_jsonrpc(
-    socket_path: &std::path::Path,
-    method: &str,
-    params: serde_json::Value,
-) -> Option<serde_json::Value> {
-    let mut stream = UnixStream::connect(socket_path).ok()?;
-    stream.set_read_timeout(Some(Duration::from_secs(10))).ok();
-    stream.set_write_timeout(Some(Duration::from_secs(5))).ok();
-
-    let request = serde_json::json!({
-        "jsonrpc": "2.0",
-        "method": method,
-        "params": params,
-        "id": 1,
-    });
-
-    let mut payload = serde_json::to_vec(&request).ok()?;
-    payload.push(b'\n');
-    stream.write_all(&payload).ok()?;
-    stream.flush().ok()?;
-
-    let mut reader = BufReader::new(stream);
-    let mut line = String::new();
-    reader.read_line(&mut line).ok()?;
-
-    let resp: serde_json::Value = serde_json::from_str(line.trim()).ok()?;
-    resp.get("result").cloned()
 }
 
 fn main() {
@@ -95,11 +64,12 @@ fn main() {
         v.finish();
     }
 
-    let socket = socket_path.unwrap();
+    let socket = socket_path.expect("airspring socket path required after socket_found check");
     eprintln!("  Found airSpring socket: {}", socket.display());
 
     // ── Phase 2: Health Check ──────────────────────────────────────
-    let health = send_jsonrpc(&socket, "health", serde_json::json!({}));
+    let health =
+        rpc::send(&socket, "health", &serde_json::json!({})).and_then(|r| r.get("result").cloned());
     v.check_bool("health_response", health.is_some());
 
     if let Some(ref h) = health {
@@ -139,10 +109,10 @@ fn main() {
     };
 
     let direct_result = et::daily_et0(&test_input);
-    let rpc_result = send_jsonrpc(
+    let rpc_result = rpc::send(
         &socket,
         "science.et0_fao56",
-        serde_json::json!({
+        &serde_json::json!({
             "tmax": 32.0,
             "tmin": 18.0,
             "solar_radiation": 22.5,
@@ -152,7 +122,8 @@ fn main() {
             "latitude_deg": 42.727,
             "elevation_m": 256.0,
         }),
-    );
+    )
+    .and_then(|r| r.get("result").cloned());
 
     v.check_bool("et0_fao56_response", rpc_result.is_some());
     if let Some(ref r) = rpc_result {
@@ -173,16 +144,17 @@ fn main() {
     let ra_mm = ra / 2.45;
     let direct_hg = et::hargreaves_et0(18.0, 32.0, ra_mm);
 
-    let rpc_hg = send_jsonrpc(
+    let rpc_hg = rpc::send(
         &socket,
         "science.et0_hargreaves",
-        serde_json::json!({
+        &serde_json::json!({
             "tmin": 18.0,
             "tmax": 32.0,
             "latitude_deg": 42.727,
             "day_of_year": 200,
         }),
-    );
+    )
+    .and_then(|r| r.get("result").cloned());
 
     v.check_bool("et0_hargreaves_response", rpc_hg.is_some());
     if let Some(ref r) = rpc_hg {
@@ -196,11 +168,12 @@ fn main() {
 
     // ── Phase 5: Simplified ET₀ Methods Parity ─────────────────────
     let direct_makkink = simple_et0::makkink_et0(22.5, 20.0, 250.0);
-    let rpc_mak = send_jsonrpc(
+    let rpc_mak = rpc::send(
         &socket,
         "science.et0_makkink",
-        serde_json::json!({"tmean": 22.5, "solar_radiation": 20.0, "elevation_m": 250.0}),
-    );
+        &serde_json::json!({"tmean": 22.5, "solar_radiation": 20.0, "elevation_m": 250.0}),
+    )
+    .and_then(|r| r.get("result").cloned());
     v.check_bool("et0_makkink_response", rpc_mak.is_some());
     if let Some(ref r) = rpc_mak {
         let rpc_val = r.get("et0_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
@@ -208,11 +181,12 @@ fn main() {
     }
 
     let direct_turc = simple_et0::turc_et0(22.5, 20.0, 60.0);
-    let rpc_turc = send_jsonrpc(
+    let rpc_turc = rpc::send(
         &socket,
         "science.et0_turc",
-        serde_json::json!({"tmean": 22.5, "solar_radiation": 20.0, "rh_pct": 60.0}),
-    );
+        &serde_json::json!({"tmean": 22.5, "solar_radiation": 20.0, "rh_pct": 60.0}),
+    )
+    .and_then(|r| r.get("result").cloned());
     v.check_bool("et0_turc_response", rpc_turc.is_some());
     if let Some(ref r) = rpc_turc {
         let rpc_val = r.get("et0_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
@@ -220,11 +194,12 @@ fn main() {
     }
 
     let direct_hamon = simple_et0::hamon_pet_from_location(22.5, lat_rad, 200);
-    let rpc_ham = send_jsonrpc(
+    let rpc_ham = rpc::send(
         &socket,
         "science.et0_hamon",
-        serde_json::json!({"tmean": 22.5, "latitude_deg": 42.727, "day_of_year": 200}),
-    );
+        &serde_json::json!({"tmean": 22.5, "latitude_deg": 42.727, "day_of_year": 200}),
+    )
+    .and_then(|r| r.get("result").cloned());
     v.check_bool("et0_hamon_response", rpc_ham.is_some());
     if let Some(ref r) = rpc_ham {
         let rpc_val = r.get("pet_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
@@ -232,11 +207,12 @@ fn main() {
     }
 
     let direct_bc = simple_et0::blaney_criddle_from_location(22.5, lat_rad, 200);
-    let rpc_bc = send_jsonrpc(
+    let rpc_bc = rpc::send(
         &socket,
         "science.et0_blaney_criddle",
-        serde_json::json!({"tmean": 22.5, "latitude_deg": 42.727, "day_of_year": 200}),
-    );
+        &serde_json::json!({"tmean": 22.5, "latitude_deg": 42.727, "day_of_year": 200}),
+    )
+    .and_then(|r| r.get("result").cloned());
     v.check_bool("et0_blaney_criddle_response", rpc_bc.is_some());
     if let Some(ref r) = rpc_bc {
         let rpc_val = r.get("et0_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
@@ -244,10 +220,10 @@ fn main() {
     }
 
     // ── Phase 6: Water Balance Parity ──────────────────────────────
-    let rpc_wb = send_jsonrpc(
+    let rpc_wb = rpc::send(
         &socket,
         "science.water_balance",
-        serde_json::json!({
+        &serde_json::json!({
             "et0_mm": 6.0,
             "kc": 1.15,
             "precipitation_mm": 2.5,
@@ -255,7 +231,8 @@ fn main() {
             "field_capacity_mm": 200.0,
             "wilting_point_mm": 50.0,
         }),
-    );
+    )
+    .and_then(|r| r.get("result").cloned());
 
     v.check_bool("water_balance_response", rpc_wb.is_some());
     if let Some(ref r) = rpc_wb {
@@ -272,11 +249,12 @@ fn main() {
     }
 
     // ── Phase 7: Yield Response Parity ─────────────────────────────
-    let rpc_yr = send_jsonrpc(
+    let rpc_yr = rpc::send(
         &socket,
         "science.yield_response",
-        serde_json::json!({"ky": 1.25, "eta_over_etm": 0.75, "max_yield_t_ha": 12.0}),
-    );
+        &serde_json::json!({"ky": 1.25, "eta_over_etm": 0.75, "max_yield_t_ha": 12.0}),
+    )
+    .and_then(|r| r.get("result").cloned());
 
     v.check_bool("yield_response_response", rpc_yr.is_some());
     if let Some(ref r) = rpc_yr {

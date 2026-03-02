@@ -30,47 +30,16 @@
     clippy::cast_possible_truncation
 )]
 
-use std::io::{BufRead, BufReader, Write};
-use std::os::unix::net::UnixStream;
 use std::path::PathBuf;
-use std::time::Duration;
 
 use airspring_barracuda::biomeos;
 use airspring_barracuda::eco::evapotranspiration as et;
+use airspring_barracuda::rpc;
 
 use barracuda::validation::ValidationHarness;
 
 fn find_socket(prefix: &str) -> Option<PathBuf> {
     biomeos::find_socket(prefix)
-}
-
-fn send_jsonrpc(
-    socket_path: &std::path::Path,
-    method: &str,
-    params: serde_json::Value,
-) -> Option<serde_json::Value> {
-    let mut stream = UnixStream::connect(socket_path).ok()?;
-    stream.set_read_timeout(Some(Duration::from_secs(10))).ok();
-    stream.set_write_timeout(Some(Duration::from_secs(5))).ok();
-
-    let request = serde_json::json!({
-        "jsonrpc": "2.0",
-        "method": method,
-        "params": params,
-        "id": 1,
-    });
-
-    let mut payload = serde_json::to_vec(&request).ok()?;
-    payload.push(b'\n');
-    stream.write_all(&payload).ok()?;
-    stream.flush().ok()?;
-
-    let mut reader = BufReader::new(stream);
-    let mut line = String::new();
-    reader.read_line(&mut line).ok()?;
-
-    let resp: serde_json::Value = serde_json::from_str(line.trim()).ok()?;
-    resp.get("result").cloned()
 }
 
 fn main() {
@@ -87,7 +56,8 @@ fn main() {
     let sock = airspring.unwrap();
 
     // ── Phase 1: Health + Capabilities ─────────────────────────────
-    let health = send_jsonrpc(&sock, "health", serde_json::json!({}));
+    let health =
+        rpc::send(&sock, "health", &serde_json::json!({})).and_then(|r| r.get("result").cloned());
     v.check_bool("health_response", health.is_some());
     if let Some(ref h) = health {
         v.check_bool(
@@ -112,8 +82,10 @@ fn main() {
         "day_of_year": 200, "latitude_deg": 42.727, "elevation_m": 256.0,
     });
 
-    let science_et0 = send_jsonrpc(&sock, "science.et0_fao56", test_params.clone());
-    let ecology_et0 = send_jsonrpc(&sock, "ecology.et0_fao56", test_params);
+    let science_et0 =
+        rpc::send(&sock, "science.et0_fao56", &test_params).and_then(|r| r.get("result").cloned());
+    let ecology_et0 =
+        rpc::send(&sock, "ecology.et0_fao56", &test_params).and_then(|r| r.get("result").cloned());
 
     v.check_bool("science_et0_response", science_et0.is_some());
     v.check_bool("ecology_et0_response", ecology_et0.is_some());
@@ -142,10 +114,10 @@ fn main() {
     }
 
     // ── Phase 3: Full Pipeline ─────────────────────────────────────
-    let pipeline_result = send_jsonrpc(
+    let pipeline_result = rpc::send(
         &sock,
         "ecology.full_pipeline",
-        serde_json::json!({
+        &serde_json::json!({
             "tmax": 32.0, "tmin": 18.0, "solar_radiation": 22.5,
             "wind_speed_2m": 1.8, "actual_vapour_pressure": 1.2,
             "day_of_year": 200, "latitude_deg": 42.727, "elevation_m": 256.0,
@@ -153,7 +125,8 @@ fn main() {
             "soil_water_mm": 150.0, "field_capacity_mm": 200.0, "wilting_point_mm": 50.0,
             "ky": 1.25, "max_yield_t_ha": 12.0,
         }),
-    );
+    )
+    .and_then(|r| r.get("result").cloned());
 
     v.check_bool("full_pipeline_response", pipeline_result.is_some());
     if let Some(ref p) = pipeline_result {
@@ -192,11 +165,12 @@ fn main() {
     }
 
     // ── Phase 4: Cross-Primal Forwarding ───────────────────────────
-    let toadstool_fwd = send_jsonrpc(
+    let toadstool_fwd = rpc::send(
         &sock,
         "primal.forward",
-        serde_json::json!({"primal": "toadstool", "method": "toadstool.health", "params": {}}),
-    );
+        &serde_json::json!({"primal": "toadstool", "method": "toadstool.health", "params": {}}),
+    )
+    .and_then(|r| r.get("result").cloned());
     v.check_bool("forward_toadstool_response", toadstool_fwd.is_some());
     if let Some(ref t) = toadstool_fwd {
         let inner = t.pointer("/response/result/healthy");
@@ -206,11 +180,12 @@ fn main() {
         );
     }
 
-    let beardog_fwd = send_jsonrpc(
+    let beardog_fwd = rpc::send(
         &sock,
         "primal.forward",
-        serde_json::json!({"primal": "beardog", "method": "health", "params": {}}),
-    );
+        &serde_json::json!({"primal": "beardog", "method": "health", "params": {}}),
+    )
+    .and_then(|r| r.get("result").cloned());
     v.check_bool("forward_beardog_response", beardog_fwd.is_some());
     if let Some(ref b) = beardog_fwd {
         let inner = b.pointer("/response/result/status");
@@ -221,7 +196,8 @@ fn main() {
     }
 
     // ── Phase 5: Primal Discovery ──────────────────────────────────
-    let discovery = send_jsonrpc(&sock, "primal.discover", serde_json::json!({}));
+    let discovery = rpc::send(&sock, "primal.discover", &serde_json::json!({}))
+        .and_then(|r| r.get("result").cloned());
     v.check_bool("primal_discover_response", discovery.is_some());
     if let Some(ref d) = discovery {
         let count = d.get("count").and_then(|v| v.as_u64()).unwrap_or(0);
@@ -244,10 +220,10 @@ fn main() {
     v.check_bool("neural_api_socket_found", neural_api.is_some());
 
     if let Some(ref api_sock) = neural_api {
-        let cap_result = send_jsonrpc(
+        let cap_result = rpc::send(
             api_sock,
             "capability.call",
-            serde_json::json!({
+            &serde_json::json!({
                 "capability": "ecology",
                 "operation": "et0_fao56",
                 "args": {
@@ -256,7 +232,8 @@ fn main() {
                     "day_of_year": 200, "latitude_deg": 42.727, "elevation_m": 256.0,
                 },
             }),
-        );
+        )
+        .and_then(|r| r.get("result").cloned());
 
         v.check_bool("neural_api_capability_call", cap_result.is_some());
         if let Some(ref r) = cap_result {

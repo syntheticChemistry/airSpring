@@ -1,7 +1,7 @@
 # airSpring — biomeOS Capability Registration
 
-**Updated**: February 27, 2026
-**Status**: Experimental — graph defined, capability translations proposed
+**Updated**: March 1, 2026
+**Status**: Active — ecology domain registered, 30 capabilities implemented (v0.6.0)
 **Requires**: biomeOS Tower Node (stable), ToadStool (compute), NestGate (storage)
 
 ---
@@ -26,36 +26,49 @@ capabilities = [
 ]
 
 [translations.ecology]
-# ET₀ computation — 7 validated methods
-"ecology.et0_pm" = { provider = "airspring", method = "eco.daily_et0" }
-"ecology.et0_pt" = { provider = "airspring", method = "eco.priestley_taylor_et0" }
-"ecology.et0_hargreaves" = { provider = "airspring", method = "eco.hargreaves_et0" }
-"ecology.et0_thornthwaite" = { provider = "airspring", method = "eco.thornthwaite_monthly_et0" }
-"ecology.et0_makkink" = { provider = "airspring", method = "eco.makkink_et0" }
-"ecology.et0_turc" = { provider = "airspring", method = "eco.turc_et0" }
-"ecology.et0_hamon" = { provider = "airspring", method = "eco.hamon_pet" }
-"ecology.et0_compute" = { provider = "airspring", method = "eco.et0_multi_method" }
+# Semantic mappings: ecology.{operation} → science.{method} on airSpring primal
+# Both science.* and ecology.* namespaces are accepted by the primal.
+
+# ET₀ computation — 7 validated methods + ensemble
+"ecology.et0_fao56" = { provider = "airspring", method = "science.et0_fao56" }
+"ecology.et0_hargreaves" = { provider = "airspring", method = "science.et0_hargreaves" }
+"ecology.et0_priestley_taylor" = { provider = "airspring", method = "science.et0_priestley_taylor" }
+"ecology.et0_makkink" = { provider = "airspring", method = "science.et0_makkink" }
+"ecology.et0_turc" = { provider = "airspring", method = "science.et0_turc" }
+"ecology.et0_hamon" = { provider = "airspring", method = "science.et0_hamon" }
+"ecology.et0_blaney_criddle" = { provider = "airspring", method = "science.et0_blaney_criddle" }
 
 # Soil moisture and hydraulics
-"ecology.water_balance" = { provider = "airspring", method = "eco.water_balance_season" }
-"ecology.richards_1d" = { provider = "airspring", method = "eco.richards_solve" }
-"ecology.van_genuchten" = { provider = "airspring", method = "eco.van_genuchten_theta" }
-"ecology.pedotransfer" = { provider = "airspring", method = "eco.saxton_rawls" }
+"ecology.water_balance" = { provider = "airspring", method = "science.water_balance" }
+"ecology.richards_1d" = { provider = "airspring", method = "science.richards_1d" }
+"ecology.pedotransfer" = { provider = "airspring", method = "science.pedotransfer_saxton_rawls" }
+"ecology.soil_moisture_topp" = { provider = "airspring", method = "science.soil_moisture_topp" }
+"ecology.scs_cn_runoff" = { provider = "airspring", method = "science.scs_cn_runoff" }
+"ecology.green_ampt" = { provider = "airspring", method = "science.green_ampt_infiltration" }
 
 # Crop science
-"ecology.yield_response" = { provider = "airspring", method = "eco.yield_ratio_multistage" }
-"ecology.gdd" = { provider = "airspring", method = "eco.gdd_accumulate" }
-"ecology.dual_kc" = { provider = "airspring", method = "eco.dual_kc_step" }
+"ecology.yield_response" = { provider = "airspring", method = "science.yield_response" }
+"ecology.gdd" = { provider = "airspring", method = "science.gdd" }
+"ecology.dual_kc" = { provider = "airspring", method = "science.dual_kc" }
 
 # IoT and scheduling
-"ecology.irrigation_schedule" = { provider = "airspring", method = "eco.schedule_irrigation" }
-"ecology.sensor_calibrate" = { provider = "airspring", method = "eco.calibrate_sensor" }
+"ecology.sensor_calibrate" = { provider = "airspring", method = "science.sensor_calibration" }
+
+# Biodiversity
+"ecology.shannon_diversity" = { provider = "airspring", method = "science.shannon_diversity" }
+"ecology.bray_curtis" = { provider = "airspring", method = "science.bray_curtis" }
+
+# Geophysics coupling
+"ecology.anderson_coupling" = { provider = "airspring", method = "science.anderson_coupling" }
+
+# Monthly ET
+"ecology.thornthwaite" = { provider = "airspring", method = "science.thornthwaite" }
 
 # Data acquisition
 "ecology.fetch_weather" = { provider = "nestgate", method = "storage.retrieve", fallback_provider = "airspring" }
 
 # Full pipeline orchestration
-"ecology.full_pipeline" = { provider = "airspring", method = "eco.full_pipeline" }
+"ecology.full_pipeline" = { provider = "airspring", method = "ecology.full_pipeline" }
 ```
 
 ---

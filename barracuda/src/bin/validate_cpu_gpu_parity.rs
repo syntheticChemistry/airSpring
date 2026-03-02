@@ -26,13 +26,52 @@
 use airspring_barracuda::eco::evapotranspiration::{
     self as et, actual_vapour_pressure_rh, DailyEt0Input,
 };
+use airspring_barracuda::eco::tissue::{
+    analyze_tissue_disorder, barrier_disruption_d_eff, CellTypeAbundance, SkinCompartment,
+};
 use airspring_barracuda::eco::water_balance::{daily_water_balance_step, stress_coefficient};
+use airspring_barracuda::gpu::diversity::GpuDiversity;
 use airspring_barracuda::gpu::et0::{Backend, BatchedEt0, StationDay};
 use airspring_barracuda::gpu::water_balance::{BatchedWaterBalance, FieldDayInput};
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/cpu_gpu_parity/benchmark_cpu_gpu_parity.json");
+
+// ─── Domain constants (BatchedWaterBalance defaults; fc/wp/root_depth don't affect gpu_step) ───
+
+/// Field capacity (`θ_FC` m³/m³): typical loam, FAO-56 Table 19.
+const WB_DEFAULT_FC: f64 = 0.35;
+/// Wilting point (`θ_WP` m³/m³): typical loam.
+const WB_DEFAULT_WP: f64 = 0.15;
+/// Root zone depth (mm): 1 m for validation.
+const WB_DEFAULT_ROOT_DEPTH_MM: f64 = 1000.0;
+/// Depletion fraction p: FAO-56 midpoint for field crops.
+const WB_DEFAULT_P: f64 = 0.55;
+
+/// Backend selection test: reference station (mid-latitude summer).
+const BACKEND_TMAX: f64 = 25.0;
+const BACKEND_TMIN: f64 = 15.0;
+const BACKEND_RH_MAX: f64 = 80.0;
+const BACKEND_RH_MIN: f64 = 40.0;
+const BACKEND_WIND_MS: f64 = 2.0;
+const BACKEND_RS_MJ: f64 = 20.0;
+const BACKEND_ELEVATION_M: f64 = 100.0;
+const BACKEND_LATITUDE_DEG: f64 = 45.0;
+const BACKEND_DOY: u32 = 180;
+
+/// Water balance backend test: TAW (mm), `Dr_prev`, precip, ETC, RAW.
+const WB_TEST_TAW: f64 = 120.0;
+const WB_TEST_DR_PREV: f64 = 30.0;
+const WB_TEST_PRECIP_MM: f64 = 10.0;
+const WB_TEST_ETC_MM: f64 = 5.0;
+const WB_TEST_RAW: f64 = 60.0;
+
+/// Paper 12 `barrier_disruption_d_eff`: intact=2.0, half=2.5, full=3.0 (Anderson 2024).
+const BARRIER_D_EFF_INTACT: f64 = 2.0;
+const BARRIER_D_EFF_HALF: f64 = 2.5;
+const BARRIER_D_EFF_FULL: f64 = 3.0;
 
 fn validate_et0_parity(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("ET₀ CPU vs GPU Parity");
@@ -133,7 +172,8 @@ fn validate_wb_parity(v: &mut ValidationHarness, benchmark: &serde_json::Value) 
             p,
         };
         // fc/wp/root_depth don't affect gpu_step; use reasonable defaults
-        let bwb = BatchedWaterBalance::new(0.35, 0.15, 1000.0, p);
+        let bwb =
+            BatchedWaterBalance::new(WB_DEFAULT_FC, WB_DEFAULT_WP, WB_DEFAULT_ROOT_DEPTH_MM, p);
         let gpu_result = bwb.gpu_step(&[field_input]).expect("gpu_step fallback");
 
         v.check_abs(
@@ -205,15 +245,15 @@ fn validate_backend_selection(v: &mut ValidationHarness, _benchmark: &serde_json
     // Without a WgpuDevice, BatchedEt0::cpu() should always report CPU backend
     let batcher = BatchedEt0::cpu();
     let station = StationDay {
-        tmax: 25.0,
-        tmin: 15.0,
-        rh_max: 80.0,
-        rh_min: 40.0,
-        wind_2m: 2.0,
-        rs: 20.0,
-        elevation: 100.0,
-        latitude: 45.0,
-        doy: 180,
+        tmax: BACKEND_TMAX,
+        tmin: BACKEND_TMIN,
+        rh_max: BACKEND_RH_MAX,
+        rh_min: BACKEND_RH_MIN,
+        wind_2m: BACKEND_WIND_MS,
+        rs: BACKEND_RS_MJ,
+        elevation: BACKEND_ELEVATION_M,
+        latitude: BACKEND_LATITUDE_DEG,
+        doy: BACKEND_DOY,
     };
     let result = batcher.compute_gpu(&[station]).expect("cpu fallback");
     v.check_bool(
@@ -225,15 +265,20 @@ fn validate_backend_selection(v: &mut ValidationHarness, _benchmark: &serde_json
     v.check_lower("CPU fallback produces valid ET₀", result.et0_values[0], 0.0);
 
     // BatchedWaterBalance::new() without GPU also works
-    let bwb = BatchedWaterBalance::new(0.35, 0.15, 1000.0, 0.55);
+    let bwb = BatchedWaterBalance::new(
+        WB_DEFAULT_FC,
+        WB_DEFAULT_WP,
+        WB_DEFAULT_ROOT_DEPTH_MM,
+        WB_DEFAULT_P,
+    );
     let field = FieldDayInput {
-        dr_prev: 30.0,
-        precipitation: 10.0,
+        dr_prev: WB_TEST_DR_PREV,
+        precipitation: WB_TEST_PRECIP_MM,
         irrigation: 0.0,
-        etc: 5.0,
-        taw: 120.0,
-        raw: 60.0,
-        p: 0.55,
+        etc: WB_TEST_ETC_MM,
+        taw: WB_TEST_TAW,
+        raw: WB_TEST_RAW,
+        p: WB_DEFAULT_P,
     };
     let wb_result = bwb.gpu_step(&[field]).expect("wb cpu fallback");
     v.check_bool(
@@ -242,7 +287,99 @@ fn validate_backend_selection(v: &mut ValidationHarness, _benchmark: &serde_json
     );
     v.check_bool(
         "WB Dr in valid range",
-        wb_result[0] >= 0.0 && wb_result[0] <= 120.0,
+        wb_result[0] >= 0.0 && wb_result[0] <= WB_TEST_TAW,
+    );
+}
+
+fn validate_tissue_gpu_parity(v: &mut ValidationHarness, _benchmark: &serde_json::Value) {
+    validation::section("Paper 12: Tissue Diversity CPU↔GPU Parity");
+
+    let cpu_engine = GpuDiversity::cpu();
+
+    let make_cells = |data: &[(&str, f64)]| -> Vec<CellTypeAbundance> {
+        data.iter()
+            .map(|&(name, abundance)| CellTypeAbundance {
+                cell_type: name.to_string(),
+                abundance,
+            })
+            .collect()
+    };
+
+    let epidermis_cells = make_cells(&[
+        ("keratinocyte", 85.0),
+        ("langerhans", 5.0),
+        ("melanocyte", 8.0),
+        ("merkel", 2.0),
+    ]);
+    let dermis_cells = make_cells(&[
+        ("fibroblast", 20.0),
+        ("th2_cell", 15.0),
+        ("mast_cell", 12.0),
+        ("eosinophil", 10.0),
+        ("dendritic_cell", 8.0),
+        ("nerve_ending", 5.0),
+        ("macrophage", 10.0),
+        ("neutrophil", 8.0),
+        ("endothelial", 12.0),
+    ]);
+
+    let epi_result =
+        analyze_tissue_disorder(&epidermis_cells, SkinCompartment::Epidermis, &cpu_engine)
+            .expect("epidermis analysis should succeed");
+    let derm_result =
+        analyze_tissue_disorder(&dermis_cells, SkinCompartment::PapillaryDermis, &cpu_engine)
+            .expect("dermis analysis should succeed");
+
+    v.check_bool("epidermis: shannon > 0", epi_result.diversity.shannon > 0.0);
+    v.check_bool(
+        "epidermis: evenness in (0,1)",
+        epi_result.diversity.evenness > 0.0 && epi_result.diversity.evenness < 1.0,
+    );
+    v.check_bool("epidermis: W finite", epi_result.w_effective.is_finite());
+
+    v.check_bool(
+        "dermis: shannon > epidermis shannon",
+        derm_result.diversity.shannon > epi_result.diversity.shannon,
+    );
+    v.check_bool(
+        "dermis: evenness > epidermis evenness (more diverse)",
+        derm_result.diversity.evenness > epi_result.diversity.evenness,
+    );
+    v.check_bool("dermis: W finite", derm_result.w_effective.is_finite());
+
+    let d_intact = barrier_disruption_d_eff(0.0);
+    let d_half = barrier_disruption_d_eff(0.5);
+    let d_full = barrier_disruption_d_eff(1.0);
+    v.check_abs(
+        "d_eff(0.0)=2.0",
+        d_intact,
+        BARRIER_D_EFF_INTACT,
+        f64::EPSILON,
+    );
+    v.check_abs("d_eff(0.5)=2.5", d_half, BARRIER_D_EFF_HALF, f64::EPSILON);
+    v.check_abs("d_eff(1.0)=3.0", d_full, BARRIER_D_EFF_FULL, f64::EPSILON);
+
+    let epi_abundances: Vec<f64> = epidermis_cells.iter().map(|ct| ct.abundance).collect();
+    let derm_abundances: Vec<f64> = dermis_cells.iter().map(|ct| ct.abundance).collect();
+
+    let epi_cpu = cpu_engine
+        .compute_alpha(&epi_abundances, 1, epi_abundances.len())
+        .expect("cpu alpha");
+    let derm_cpu = cpu_engine
+        .compute_alpha(&derm_abundances, 1, derm_abundances.len())
+        .expect("cpu alpha");
+
+    v.check_abs(
+        "cpu alpha path matches tissue: epidermis shannon",
+        epi_cpu[0].shannon,
+        epi_result.diversity.shannon,
+        tolerances::SENSOR_EXACT.abs_tol,
+    );
+    v.check_abs(
+        "cpu alpha path matches tissue: dermis shannon",
+        derm_cpu[0].shannon,
+        derm_result.diversity.shannon,
+        tolerances::SENSOR_EXACT.abs_tol,
     );
 }
 
@@ -258,6 +395,7 @@ fn main() {
     validate_wb_parity(&mut v, &benchmark);
     validate_batch_scaling(&mut v, &benchmark);
     validate_backend_selection(&mut v, &benchmark);
+    validate_tissue_gpu_parity(&mut v, &benchmark);
 
     v.finish();
 }

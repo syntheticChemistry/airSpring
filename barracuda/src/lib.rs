@@ -35,7 +35,18 @@
 //! - [`gpu::stream`] — `IoT` stream smoothing (`StreamSmoother` ↔ `MovingWindowStats`)
 //! - [`gpu::richards`] — 1D Richards PDE (`BatchedRichards` ↔ `pde::richards::solve_richards`)
 //! - [`gpu::isotherm`] — Batch isotherm fitting (`fit_*_nm` ↔ `optimize::nelder_mead`)
+//! - [`gpu::atlas_stream`] — Multi-station streaming with [`gpu::atlas_stream::MonitoredAtlasStream`] drift detection
 //! - [`gpu::evolution_gaps`] — Living roadmap
+//!
+//! # Immunological Anderson (Paper 12)
+//! - [`eco::tissue`] — Tissue diversity profiling: Pielou evenness → Anderson disorder W
+//! - [`eco::cytokine`] — `CytokineBrain`: 3-head Nautilus reservoir (IL-31 propagation,
+//!   tissue disorder, barrier state) for AD flare regime prediction
+//!
+//! # Nautilus Brain
+//! - [`nautilus`] — Evolutionary reservoir computing via `bingocube-nautilus` for agricultural
+//!   regime prediction (ET₀, soil moisture, crop stress), with drift detection and cross-station
+//!   shell transfer
 //!
 //! # I/O
 //! - [`io::csv_ts`] — Time series CSV streaming parser for `IoT` sensor data
@@ -53,11 +64,13 @@
 //! Capabilities consumed from the shared `barracuda` substrate (discovered at build time):
 //! - **Statistics**: `pearson_correlation`, `spearman_correlation`, `bootstrap_ci`, `std_dev`, `norm_ppf`
 //! - **Linear algebra**: `ridge_regression` → sensor calibration
-//! - **GPU ops**: `batched_elementwise_f64` (ET₀, WB), `fused_map_reduce_f64` (seasonal stats),
-//!   `kriging_f64` (spatial interpolation), `moving_window_stats` (`IoT` smoothing)
+//! - **GPU ops**: `batched_elementwise_f64` (ET₀, WB, VG, Thornthwaite, GDD, pedotransfer),
+//!   `fused_map_reduce_f64` (seasonal stats), `kriging_f64` (spatial interpolation),
+//!   `moving_window_stats` (`IoT` smoothing), `jackknife_mean`, `bootstrap_mean`, `diversity_fusion`
 //! - **PDE solvers**: `pde::richards::solve_richards` → upstream Richards equation
 //! - **Optimizers**: `nelder_mead` (isotherm fitting), `brent` (VG pressure head inversion)
 //! - **Validation**: `ValidationHarness`, `tolerances::Tolerance`
+//! - **Nautilus**: `bingocube-nautilus` (evolutionary reservoir computing, drift monitoring)
 
 pub mod biomeos;
 pub mod data;
@@ -65,9 +78,11 @@ pub mod eco;
 pub mod error;
 pub mod gpu;
 pub mod io;
+pub mod nautilus;
 #[cfg(feature = "npu")]
 pub mod npu;
 pub mod primal_science;
+pub mod rpc;
 pub mod testutil;
 pub mod tolerances;
 pub mod validation;

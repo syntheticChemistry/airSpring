@@ -25,6 +25,9 @@
 //! | `eco::sensor_calibration` | `gpu::sensor_calibration` | `batched_elementwise_f64.wgsl` (op=5) | Sensor VWC | A (GPU-first, S70+ absorbed) |
 //! | `eco::evapotranspiration` (HG) | `gpu::hargreaves` | `batched_elementwise_f64.wgsl` (op=6) | Hargreaves ET₀ | A (GPU-first, S70+ absorbed) |
 //! | `eco::crop` (Kc adj) | `gpu::kc_climate` | `batched_elementwise_f64.wgsl` (op=7) | Kc climate adjust | A (GPU-first, S70+ absorbed) |
+//! | `eco::van_genuchten` | `gpu::van_genuchten` | `batched_elementwise_f64.wgsl` (op=9,10) | VG θ/K batch | A (GPU-first, S79 absorbed) |
+//! | `eco::thornthwaite` | `gpu::thornthwaite` | `batched_elementwise_f64.wgsl` (op=11) | Monthly ET₀ | A (GPU-first, S79 absorbed) |
+//! | `eco::crop` (GDD) | `gpu::gdd` | `batched_elementwise_f64.wgsl` (op=12) | GDD batch | A (GPU-first, S79 absorbed) |
 //! | `eco::*` (pipeline) | `gpu::seasonal_pipeline` | Chained ops 0→7→1→yield | Seasonal pipeline | **GPU Stages 1-2** (v0.5.6) |
 //! | `eco::*` (stream) | `gpu::atlas_stream` | Unified batch + streaming callback | Regional atlas | **GPU-capable** (v0.5.6) |
 //! | `eco::*` (stream) | `gpu::seasonal_pipeline` | `Backend::GpuPipelined`, `Backend::GpuFused` | Streaming pipeline | **v0.5.7** |
@@ -33,7 +36,7 @@
 //! | `eco::sensor_calibration` (OLS) | `gpu::stats` | `linear_regression_f64.wgsl` | Sensor regression | A (GPU, neuralSpring S69) |
 //! | `eco::*` (multi-var) | `gpu::stats` | `matrix_correlation_f64.wgsl` | Soil correlation | A (GPU, neuralSpring S69) |
 //!
-//! # Current Inventory (March 1, 2026 — v0.5.9, synced to `ToadStool` HEAD `8dc01a37`)
+//! # Current Inventory (March 2, 2026 — v0.6.2, synced to `ToadStool` HEAD S79)
 //!
 //! `ToadStool` S42–S71: 200+ commits, 50+ cross-spring absorptions, 2,773+ barracuda tests, 671 WGSL shaders.
 //! All four airSpring issues (TS-001 through TS-004) resolved in **S54**.
@@ -91,6 +94,11 @@
 //!   all files < 1000 lines, hardcoded primal names → `primals::*` constants,
 //!   `jsonrpc_server.rs` 904→628, `network_config/types.rs` split 7 modules,
 //!   5 stale examples deleted, 2 stub test files deleted. Pure math + precision per silicon.
+//! - S78: **Deep evolution** — libc→rustix (ecoBin pure-Rust), AFIT migration (async-trait removed),
+//!   wildcard re-exports narrowed, archive cleanup, 5 `ComputeDispatch` wiring batches
+//! - S79: **Spring absorption** — ESN v2 `MultiHeadEsn`, spectral extensions, 5 `ComputeDispatch`,
+//!   ops 9-13 (`VanGenuchtenTheta`, `VanGenuchtenK`, `ThornthwaiteEt0`, `Gdd`, `PedotransferPolynomial`)
+//!   available in `batched_elementwise_f64`
 //!
 //! ## Cross-Spring Shader Provenance (validated in `cross_spring_absorption.rs` §13)
 //!
@@ -204,12 +212,12 @@ pub enum Tier {
     C,
 }
 
-/// All known evolution gaps (25+6 entries — 17 Tier A integrated, 7 Tier B + 6 orchestrators, 1 Tier C).
+/// All known evolution gaps (33+6 entries — 25 Tier A integrated, 7 Tier B + 6 orchestrators, 1 Tier C).
 ///
-/// v0.5.6: Ops 5–8 promoted Tier B→A after `ToadStool` S70+ absorption.
+/// v0.6.1: Ops 9-13 promoted Tier B→A after `ToadStool` S79 absorption.
 /// `SeasonalPipeline::gpu()` dispatches Stages 1-2 (ET₀ + Kc) to GPU;
 /// `AtlasStream::with_gpu()` + `process_streaming()` callback pattern.
-/// Synced to `ToadStool` S70+++ (1dd7e338). Universal precision architecture
+/// Synced to `ToadStool` S79. Universal precision architecture
 /// means all GPU dispatch is precision-agnostic: f64 on Titan V, Df64 on consumer
 /// GPUs, f32 fallback. S60-S65 sovereign compiler regression **RESOLVED** (S66+).
 ///
@@ -332,6 +340,64 @@ pub const GAPS: &[EvolutionGap] = &[
         tier: Tier::A,
         toadstool_primitive: Some("batched_elementwise_f64.wgsl (op=7, stride=4)"),
         action: "GPU-FIRST (v0.5.6): gpu::kc_climate → Op::KcClimateAdjust (S70+ absorbed)",
+    },
+    EvolutionGap {
+        id: "vg_theta_batch",
+        description: "Batched van Genuchten θ(h) retention curve on GPU",
+        tier: Tier::A,
+        toadstool_primitive: Some("batched_elementwise_f64.wgsl (op=9, stride=5)"),
+        action: "GPU-FIRST (v0.6.1): gpu::van_genuchten → Op::VanGenuchtenTheta (S79 absorbed)",
+    },
+    EvolutionGap {
+        id: "vg_k_batch",
+        description: "Batched van Genuchten K(h) hydraulic conductivity on GPU",
+        tier: Tier::A,
+        toadstool_primitive: Some("batched_elementwise_f64.wgsl (op=10, stride=7)"),
+        action: "GPU-FIRST (v0.6.1): gpu::van_genuchten → Op::VanGenuchtenK (S79 absorbed)",
+    },
+    EvolutionGap {
+        id: "thornthwaite_batch",
+        description: "Batched Thornthwaite monthly ET₀ on GPU",
+        tier: Tier::A,
+        toadstool_primitive: Some("batched_elementwise_f64.wgsl (op=11, stride=5)"),
+        action: "GPU-FIRST (v0.6.1): gpu::thornthwaite → Op::ThornthwaiteEt0 (S79 absorbed)",
+    },
+    EvolutionGap {
+        id: "gdd_batch",
+        description: "Batched Growing Degree Days on GPU",
+        tier: Tier::A,
+        toadstool_primitive: Some("batched_elementwise_f64.wgsl (op=12, stride=1+aux)"),
+        action: "GPU-FIRST (v0.6.1): gpu::gdd → Op::Gdd with T_base aux_param (S79 absorbed)",
+    },
+    EvolutionGap {
+        id: "pedotransfer_batch",
+        description: "Batched pedotransfer polynomial (Horner) on GPU",
+        tier: Tier::A,
+        toadstool_primitive: Some("batched_elementwise_f64.wgsl (op=13, stride=7)"),
+        action: "GPU-FIRST (v0.6.1): gpu::pedotransfer → Op::PedotransferPolynomial (S79)",
+    },
+    EvolutionGap {
+        id: "jackknife_gpu",
+        description: "GPU-accelerated jackknife mean variance estimation",
+        tier: Tier::A,
+        toadstool_primitive: Some("stats::jackknife::JackknifeMeanGpu (jackknife_mean_f64.wgsl)"),
+        action: "GPU-WIRED (v0.6.1): gpu::jackknife::GpuJackknife (groundSpring→S71 shader)",
+    },
+    EvolutionGap {
+        id: "bootstrap_gpu",
+        description: "GPU-accelerated bootstrap mean with CI",
+        tier: Tier::A,
+        toadstool_primitive: Some("stats::bootstrap::BootstrapMeanGpu (bootstrap_mean_f64.wgsl)"),
+        action: "GPU-WIRED (v0.6.1): gpu::bootstrap::GpuBootstrap (groundSpring→S71 shader)",
+    },
+    EvolutionGap {
+        id: "diversity_gpu",
+        description: "GPU-fused alpha diversity (Shannon+Simpson+evenness per sample)",
+        tier: Tier::A,
+        toadstool_primitive: Some(
+            "ops::bio::diversity_fusion::DiversityFusionGpu (diversity_fusion_f64.wgsl)",
+        ),
+        action: "GPU-WIRED (v0.6.1): gpu::diversity::GpuDiversity (wetSpring→S70 shader)",
     },
     // ── Tier B: Shader exists, needs domain adaptation ────────────────
     EvolutionGap {

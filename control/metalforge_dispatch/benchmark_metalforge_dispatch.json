@@ -1,4 +1,12 @@
 {
+    "_provenance": {
+        "method": "metalForge capability-based workload routing across GPU, NPU, CPU, Neural API substrates",
+        "baseline_script": "metalForge/forge/src/bin/validate_dispatch.rs",
+        "baseline_command": "cargo run --bin validate_dispatch",
+        "baseline_commit": "d3ecdc8",
+        "created": "2026-03-02",
+        "_tolerance_justification": "Deterministic routing validation; no numeric tolerances—expected substrate matches exactly."
+    },
     "experiment": "Exp 041 \u2014 metalForge Mixed-Hardware Dispatch Validation",
     "description": "Validates metalForge's capability-based workload routing across GPU, NPU, CPU, and Neural API substrates. Demonstrates mixed-hardware dispatch: GPU for f64 batch compute, NPU for int8 inference, Neural API for ecosystem routing, CPU as universal fallback. Tests the dispatch priority chain: GPU > NPU > Neural > CPU.",
     "references": [
@@ -146,8 +154,8 @@
             ]
         },
         "inventory_completeness": {
-            "description": "All 18 defined workloads have routing specs",
-            "expected_count": 18
+            "description": "All 21 defined workloads have routing specs",
+            "expected_count": 21
         }
     }
 }

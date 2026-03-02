@@ -23,6 +23,13 @@
 //! | [`stream`] | `IoT` stream smoothing (sliding window) | **GPU** (`MovingWindowStats`, wetSpring) |
 //! | [`richards`] | 1D Richards equation (vadose zone) | **Wired** (`pde::richards`) |
 //! | [`isotherm`] | Batch isotherm fitting (biochar) | **Wired** (`nelder_mead` + `multi_start`) |
+//! | [`van_genuchten`] | Batched VG θ(h) and K(h) | **GPU-first** (`BatchedElementwiseF64` ops 9-10, S79) |
+//! | [`thornthwaite`] | Batched Thornthwaite monthly ET₀ | **GPU-first** (`BatchedElementwiseF64` op=11, S79) |
+//! | [`gdd`] | Batched Growing Degree Days | **GPU-first** (`BatchedElementwiseF64` op=12, S79) |
+//! | [`pedotransfer`] | Batched pedotransfer polynomial | **GPU-first** (`BatchedElementwiseF64` op=13, S79) |
+//! | [`jackknife`] | Jackknife variance estimation | **GPU** (`JackknifeMeanGpu`, groundSpring→S71) |
+//! | [`bootstrap`] | Bootstrap mean + CI | **GPU** (`BootstrapMeanGpu`, groundSpring→S71) |
+//! | [`diversity`] | Alpha diversity fusion | **GPU** (`DiversityFusionGpu`, wetSpring→S70) |
 //! | [`mc_et0`] | Monte Carlo ET₀ uncertainty bands | **Wired** (`norm_ppf` + parametric CI, GPU kernel available S66+) |
 //! | [`evolution_gaps`] | Living roadmap of CPU→GPU gaps | Documentation only |
 //!
@@ -71,19 +78,26 @@
 //! ```
 
 pub mod atlas_stream;
+pub mod bootstrap;
 pub mod device_info;
+pub mod diversity;
 pub mod dual_kc;
 pub mod et0;
 pub mod evolution_gaps;
+pub mod gdd;
 pub mod hargreaves;
 pub mod isotherm;
+pub mod jackknife;
 pub mod kc_climate;
 pub mod kriging;
 pub mod mc_et0;
+pub mod pedotransfer;
 pub mod reduce;
 pub mod richards;
 pub mod seasonal_pipeline;
 pub mod sensor_calibration;
 pub mod stats;
 pub mod stream;
+pub mod thornthwaite;
+pub mod van_genuchten;
 pub mod water_balance;

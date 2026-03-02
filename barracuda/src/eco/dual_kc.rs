@@ -467,7 +467,7 @@ pub fn simulate_dual_kc_mulched(
 }
 
 #[cfg(test)]
-#[allow(clippy::float_cmp)]
+#[allow(clippy::float_cmp)] // justified: test assertions on ET values
 mod tests {
     use super::*;
     use crate::eco::crop::CropType;

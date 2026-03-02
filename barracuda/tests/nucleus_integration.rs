@@ -177,10 +177,15 @@ fn jsonrpc_request_format() {
 
 #[test]
 fn capability_register_payload_format() {
+    let socket_dir = airspring_barracuda::biomeos::resolve_socket_dir();
+    let socket_path = socket_dir
+        .join("airspring-default.sock")
+        .to_string_lossy()
+        .to_string();
     let payload = serde_json::json!({
         "primal": "airspring",
         "capability": "ecology",
-        "socket": "/run/user/1000/biomeos/airspring-default.sock",
+        "socket": socket_path,
         "semantic_mappings": {
             "et0_fao56": "science.et0_fao56",
             "water_balance": "science.water_balance",

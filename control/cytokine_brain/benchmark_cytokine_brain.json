@@ -1,0 +1,96 @@
+{
+  "_provenance": {
+    "method": "CytokineBrain evolutionary reservoir for AD flare prediction (Paper 12)",
+    "baseline_script": "control/cytokine_brain/cytokine_brain.py",
+    "baseline_command": "python3 control/cytokine_brain/cytokine_brain.py",
+    "baseline_commit": "pending",
+    "python_version": "3.10",
+    "created": "2026-03-02",
+    "_tolerance_justification": "Normalization and feature checks use 1e-4 to 1e-6; regime classification and lifecycle checks are categorical.",
+    "references": [
+      "Paper 12: Anderson Localization in Immunological Signaling",
+      "Gonzales AJ et al. (2013) Vet Dermatol 24:48-53 (IL-31 in canine AD)",
+      "Gonzales AJ et al. (2016) Vet Dermatol 27:34-e10 (IL-31 pruritus model)",
+      "Fleck TJ, Gonzales AJ (2021) Vet Dermatol 32:681-e182 (lokivetmab pharmacodynamics)",
+      "McCandless EE et al. (2014) Vet Immunol Immunopathol 157:42-48 (IL-31 targets)"
+    ],
+    "notes": [
+      "Exp 067: CytokineBrain regime prediction",
+      "Nautilus reservoir is Rust-only (no Python equivalent) — Python validates interface",
+      "Input normalization bounds, output clamping, and regime classification cross-validated",
+      "Brain lifecycle (observe → train → predict → export → import) validated in Rust"
+    ]
+  },
+  "validation_checks": {
+    "input_normalization": {
+      "description": "CytokineObservation feature normalization bounds",
+      "test_cases": [
+        {"label": "Time normalization (48h / 720)", "time_hours": 48.0, "expected_normalized": 0.066667, "tolerance": 1e-4},
+        {"label": "IL-31 normalization (250 pg/mL / 500)", "il31_level": 250.0, "expected_normalized": 0.500000, "tolerance": 1e-6},
+        {"label": "IL-4 normalization (100 pg/mL / 200)", "il4_level": 100.0, "expected_normalized": 0.500000, "tolerance": 1e-6},
+        {"label": "IL-13 normalization (60 pg/mL / 200)", "il13_level": 60.0, "expected_normalized": 0.300000, "tolerance": 1e-6},
+        {"label": "Pruritus normalization (7/10)", "pruritus_score": 7.0, "expected_normalized": 0.700000, "tolerance": 1e-6},
+        {"label": "TEWL normalization (45 g/m²/h / 100)", "tewl": 45.0, "expected_normalized": 0.450000, "tolerance": 1e-6},
+        {"label": "Pielou passthrough (0.85)", "pielou_evenness": 0.85, "expected_normalized": 0.850000, "tolerance": 1e-6}
+      ]
+    },
+    "prediction_regime": {
+      "description": "CytokinePrediction → AndersonRegime classification",
+      "test_cases": [
+        {"label": "Healthy skin (localized)", "signal_extent": 0.1, "w_predicted": 0.3, "barrier_integrity": 0.9, "expected_regime": "Localized"},
+        {"label": "AD flare (extended)", "signal_extent": 0.9, "w_predicted": 0.8, "barrier_integrity": 0.1, "expected_regime": "Extended"},
+        {"label": "Transition state (critical)", "signal_extent": 0.5, "w_predicted": 0.5, "barrier_integrity": 0.5, "expected_regime": "Critical"},
+        {"label": "High signal but intact barrier (critical)", "signal_extent": 0.8, "w_predicted": 0.6, "barrier_integrity": 0.8, "expected_regime": "Critical"},
+        {"label": "Low signal but breached barrier (critical)", "signal_extent": 0.2, "w_predicted": 0.4, "barrier_integrity": 0.2, "expected_regime": "Critical"}
+      ]
+    },
+    "brain_lifecycle": {
+      "description": "CytokineBrain observe → train → predict → export → import lifecycle",
+      "test_cases": [
+        {
+          "label": "10-observation training cycle",
+          "n_observations": 10,
+          "min_training_points": 5,
+          "expected_trained_after": true,
+          "expected_prediction_finite": true,
+          "expected_signal_extent_range": [0.0, 1.0],
+          "expected_w_range": [0.0, 1.0],
+          "expected_barrier_range": [0.0, 1.0]
+        },
+        {
+          "label": "Insufficient data (3 obs, min 5)",
+          "n_observations": 3,
+          "min_training_points": 5,
+          "expected_trained_after": false
+        },
+        {
+          "label": "Shell export/import roundtrip",
+          "n_observations": 8,
+          "min_training_points": 5,
+          "expected_trained_after": true,
+          "expected_export_nonempty": true,
+          "expected_import_trained": true
+        }
+      ]
+    },
+    "gonzales_data_profile": {
+      "description": "Gonzales G3/G4 pruritus time series structure validation",
+      "test_cases": [
+        {
+          "label": "G3 oclacitinib time points (1,6,11,16 hr)",
+          "time_points_hours": [1.0, 6.0, 11.0, 16.0],
+          "expected_n_features": 7,
+          "expected_n_targets": 3,
+          "_note": "From Gonzales AJ et al. (2016) standardized IL-31 pruritus model"
+        },
+        {
+          "label": "G4 lokivetmab duration (14,28,42 days → hours)",
+          "time_points_hours": [336.0, 672.0, 1008.0],
+          "expected_n_features": 7,
+          "expected_n_targets": 3,
+          "_note": "From Fleck/Gonzales (2021) dose-dependent duration 0.125/0.5/2.0 mg/kg"
+        }
+      ]
+    }
+  }
+}

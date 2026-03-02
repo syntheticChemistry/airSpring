@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 //! Cross-spring absorption validation — proves S64/S66/S68 upstream absorptions
 //! produce identical results to local implementations and remain stable across
 //! the universal precision refactor.

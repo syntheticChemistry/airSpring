@@ -119,6 +119,7 @@ impl BatchedRichards {
         let dz = req.depth_cm / (req.n_nodes as f64);
         let dt_s = req.dt_days * 86_400.0;
         #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+        // justified: duration/dt is non-negative, ceil yields finite usize
         let n_steps = (req.duration_days / req.dt_days).ceil() as usize;
 
         let config = pde_richards::RichardsConfig {
@@ -168,8 +169,9 @@ impl BatchedRichards {
         )?;
 
         let cpu_theta = cpu_profiles
+            .into_iter()
             .last()
-            .map(|p| p.theta.clone())
+            .map(|p| p.theta)
             .unwrap_or_default();
 
         let upstream = Self::solve_upstream(req)?;
@@ -195,6 +197,7 @@ impl BatchedRichards {
         let dx = req.depth_cm / (req.n_nodes.saturating_sub(1).max(1)) as f64;
         let dt_s = req.dt_days * 86_400.0;
         #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+        // justified: duration/dt is non-negative, ceil yields finite usize
         let n_steps = (req.duration_days / req.dt_days).ceil() as usize;
 
         let cn_config = CrankNicolsonConfig::new(d_cm_per_s, dx, dt_s, req.n_nodes)

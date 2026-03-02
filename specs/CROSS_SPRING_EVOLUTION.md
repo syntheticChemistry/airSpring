@@ -1,37 +1,61 @@
 # Cross-Spring Shader Evolution — airSpring Provenance
 
-**Updated**: March 1, 2026 (v0.6.0, ToadStool HEAD `8dc01a37` — S71)
+**Updated**: March 2, 2026 (v0.6.2, ToadStool S79 synced)
 
 ## Summary
 
-ToadStool's BarraCuda runtime contains **671 WGSL shaders** (pure math, precision per
-silicon), built through **50+ cross-spring absorptions** (sessions S42-S71). Each Spring
+ToadStool's BarraCuda runtime contains **687 WGSL shaders** (pure math, precision per
+silicon), built through **60+ cross-spring absorptions** (sessions S42-S79). Each Spring
 contributes domain-specific GPU primitives that benefit the entire ecosystem.
 
-airSpring uses **6 shared shader families** directly, contributed **3 critical fixes**
-(TS-001, TS-003, TS-004), had its **stats metrics absorbed upstream** (S64), and
-completed the Write→Absorb→Lean cycle with **metalForge fully absorbed** (S66).
+airSpring uses **8 shared shader families** directly (ops 0-13 + uncertainty stack),
+contributed **3 critical fixes** (TS-001, TS-003, TS-004), had its **stats metrics
+absorbed upstream** (S64), and completed the Write→Absorb→Lean cycle with
+**metalForge fully absorbed** (S66).
 
-S71 evolution: 774→671 shaders (f32-only removed, universal precision architecture),
-66 `ComputeDispatch` migrations, DF64 transcendentals complete (15 functions),
-`HargreavesBatchGpu`, `JackknifeMeanGpu`, `BootstrapMeanGpu`, `HistogramGpu`,
-`KimuraGpu`, `fao56_et0` scalar PM. Upstream `fao56_et0` cross-validated bit-identical
-with airSpring local PM. 53/53 cross-spring evolution benchmark PASS.
+v0.6.2: **25 Tier A GPU orchestrators**, 767 lib tests (94.25% llvm-cov),
+`AirSpringBrain` via `bingocube-nautilus`, `MonitoredAtlasStream` with
+`DriftMonitor` for regime change detection. S78/S79: `libc`→`rustix`, AFIT,
+ops 9-13 (VG θ/K, Thornthwaite, GDD, pedotransfer), `pollster`→`test_pool`,
+`JackknifeMeanGpu`, `BootstrapMeanGpu`, `DiversityFusionGpu`, `HargreavesBatchGpu`.
 
-### bingoCube/nautilus — Evolutionary Reservoir Computing (available now)
+### Paper 12 — Immunological Anderson Infrastructure (NEW)
+
+airSpring provides computational infrastructure for Paper 12 (Anderson
+localization in immunological signaling):
+
+| Module | Paper 12 Application | Status |
+|--------|---------------------|--------|
+| `eco::tissue` | Cell-type diversity → Anderson disorder W (Pielou evenness mapping) | **NEW** (8 tests) |
+| `eco::cytokine` | `CytokineBrain`: 3-head Nautilus reservoir (IL-31 propagation, tissue W, barrier state) | **NEW** (9 tests) |
+| `gpu::diversity` | GPU-accelerated Shannon/Simpson/Pielou for tissue cell populations | Existing (v0.6.1) |
+| `nautilus` | `AirSpringBrain` pattern reused for `CytokineBrain` | Existing (v0.6.2) |
+| `gpu::atlas_stream` | `MonitoredAtlasStream` → `DriftMonitor` pattern for cytokine regime changes | Existing (v0.6.2) |
+| `gpu::van_genuchten` | Barrier permeability model (porous media ↔ skin ECM analogy) | Existing (v0.6.1) |
+
+**Dimensional Promotion/Collapse Duality** (Paper 06 ↔ Paper 12):
+```
+Paper 06 (soil):  Tillage = d collapse (3D→2D) → QS FAILS    → ecosystem loss
+Paper 12 (skin):  Scratch = d promotion (2D→3D) → cytokine PROPAGATES → AD amplification
+```
+Same Anderson physics, opposite direction, opposite outcome. `eco::tissue::barrier_disruption_d_eff()`
+quantifies the dimensional promotion from barrier breach fraction.
+
+### bingoCube/nautilus — Evolutionary Reservoir Computing (INTEGRATED)
 
 `ecoPrimals/primalTools/bingoCube/nautilus/` provides feed-forward evolutionary
-reservoir computing on BingoCube boards. Domain-agnostic: takes `Vec<f64>` inputs,
-predicts `Vec<f64>` targets via evolved board populations. Key capabilities:
+reservoir computing on BingoCube boards. **Now integrated** as `airspring_barracuda::nautilus`
+with a domain-specific `AirSpringBrain` (3-head: ET₀, soil moisture, crop stress).
 
-| Capability | API | airSpring Application |
+| Capability | API | airSpring Integration |
 |------------|-----|----------------------|
-| Evolutionary reservoir | `NautilusShell::evolve_generation()` | Weather→ET₀ prediction |
-| Drift monitoring | `DriftMonitor::is_drifting()` | Detect regime changes |
-| Edge seeding | `EdgeSeeder::seed_boards()` | Focus on difficult microclimates |
-| AKD1000 NPU export | `NautilusShell::export_akd1000_weights()` | ~48µs edge inference |
-| Shell transfer/merge | `NautilusShell::continue_from()`, `merge_shell()` | Cross-field learning |
-| JSON persistence | `NautilusBrain::to_json()` | Cross-run bootstrap |
+| Evolutionary reservoir | `NautilusShell::evolve_generation()` | `AirSpringBrain::train()` — weather→ET₀/soil/crop prediction |
+| Drift monitoring | `DriftMonitor::is_drifting()` | `MonitoredAtlasStream` — regime change detection in 80-year atlas |
+| Edge seeding | `EdgeSeeder::seed_boards()` | Focus boards on concept-edge microclimates |
+| AKD1000 NPU export | `NautilusShell::export_akd1000_weights()` | ~48µs edge inference for sensor stations |
+| Shell transfer/merge | `NautilusShell::continue_from()`, `merge_shell()` | Cross-station learning (station-a → station-b) |
+| JSON persistence | `AirSpringBrain::export_json()` | Cross-run bootstrap via serde |
+| Concept edge detection | Per-observation MSE threshold | Identifies regime boundaries (drought onset, frost) |
 
 ### S60–S71 Cross-Spring Absorption Wave (Feb–Mar 2026)
 

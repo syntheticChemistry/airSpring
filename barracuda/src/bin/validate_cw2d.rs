@@ -25,16 +25,13 @@ use airspring_barracuda::eco::richards::{
 use airspring_barracuda::validation::{
     self, json_array_opt, json_f64, json_str_opt, parse_benchmark_json, ValidationHarness,
 };
-use std::process;
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/cw2d/benchmark_cw2d.json");
 
 fn media_params(benchmark: &serde_json::Value, media: &str) -> VanGenuchtenParams {
     let path = |field: &str| -> f64 {
-        json_f64(benchmark, &["cw2d_media", media, field]).unwrap_or_else(|| {
-            eprintln!("benchmark JSON: missing cw2d_media.{media}.{field}");
-            process::exit(1);
-        })
+        json_f64(benchmark, &["cw2d_media", media, field])
+            .unwrap_or_else(|| panic!("benchmark JSON: cw2d_media.{media}.{field} must exist"))
     };
     VanGenuchtenParams {
         theta_r: path("theta_r"),

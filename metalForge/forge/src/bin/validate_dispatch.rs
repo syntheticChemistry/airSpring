@@ -107,6 +107,31 @@ fn check_workload_routing(inv: &[Substrate], v: &mut ValidationHarness) {
         );
     }
 
+    println!("\n── Paper 12 Workload Routing ──");
+    let tissue_ew = workloads::tissue_diversity();
+    let tissue_r = dispatch::route(&tissue_ew.workload, inv);
+    v.check_bool(
+        &format!("{} → GPU (DiversityFusion)", tissue_ew.workload.name),
+        tissue_r
+            .as_ref()
+            .is_some_and(|d| d.substrate.kind == SubstrateKind::Gpu),
+    );
+
+    let cytokine_ew = workloads::cytokine_brain();
+    let cytokine_r = dispatch::route(&cytokine_ew.workload, inv);
+    v.check_bool(
+        &format!("{} → CPU (Nautilus reservoir)", cytokine_ew.workload.name),
+        cytokine_r.is_some(),
+    );
+
+    let ad_ew = workloads::ad_flare_classifier();
+    let ad_r = dispatch::route(&ad_ew.workload, inv);
+    v.check_bool(
+        &format!("{} → NPU (int8 classifier)", ad_ew.workload.name),
+        ad_r.as_ref()
+            .is_some_and(|d| d.substrate.kind == SubstrateKind::Npu),
+    );
+
     println!("\n── CPU Workload Routing ──");
     let ew = workloads::weather_ingest();
     let r = dispatch::route(&ew.workload, inv);
@@ -178,21 +203,21 @@ fn check_reasons_and_inventory(inv: &[Substrate], v: &mut ValidationHarness) {
     let all = workloads::all_workloads();
     v.check_bool(
         &format!("{} workloads in catalog", all.len()),
-        all.len() == 18,
+        all.len() == 21,
     );
 
     let all_route = all
         .iter()
         .all(|ew| dispatch::route(&ew.workload, inv).is_some());
-    v.check_bool("All 18 workloads route in full inventory", all_route);
+    v.check_bool("All 21 workloads route in full inventory", all_route);
 
     let (absorbed, local, npu_native, cpu_only) = workloads::origin_summary();
     v.check_bool(
         &format!(
-            "9 absorbed + 4 local + 3 NPU + 2 CPU = {}",
+            "10 absorbed + 4 local + 4 NPU + 3 CPU = {}",
             absorbed + local + npu_native + cpu_only
         ),
-        absorbed == 9 && local == 4 && npu_native == 3 && cpu_only == 2,
+        absorbed == 10 && local == 4 && npu_native == 4 && cpu_only == 3,
     );
 }
 
@@ -256,8 +281,8 @@ fn check_benchmark_expectations(v: &mut ValidationHarness) {
         .unwrap_or(0);
 
     v.check_bool(
-        &format!("inventory_completeness expected_count == 18 ({expected_count})"),
-        expected_count == 18,
+        &format!("inventory_completeness expected_count == 21 ({expected_count})"),
+        expected_count == 21,
     );
 }
 

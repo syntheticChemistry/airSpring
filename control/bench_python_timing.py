@@ -350,6 +350,50 @@ def main():
         return max(0, 1.0 - 1.25 * (1 - ratio))
     results.append(bench("seasonal_pipeline", seasonal_pipeline, N // 10))
 
+    # ─── Paper 12: Tissue diversity (Shannon → Pielou → Anderson W) ───
+    def tissue_w(abundances):
+        total = sum(abundances)
+        h = 0.0
+        for c in abundances:
+            if c > 0:
+                p = c / total
+                h -= p * math.log(p)
+        s = sum(1 for c in abundances if c > 0)
+        if s <= 1:
+            return 0.0
+        j = h / math.log(s)
+        return (1.0 - j) * math.log(s)
+    tissue_data = [85.0, 5.0, 8.0, 2.0, 15.0, 18.0, 14.0, 12.0, 10.0]
+    results.append(bench("tissue_w", tissue_w, N * 10, tissue_data))
+
+    # ─── Paper 12: Barrier d_eff (VG θ → normalized → breach → d_eff) ───
+    def barrier_d_eff(h):
+        theta_r, theta_s, alpha, n_vg = 0.05, 1.0, 0.01, 1.8
+        if h >= 0.0:
+            theta = theta_s
+        else:
+            m = 1.0 - 1.0 / n_vg
+            ah = alpha * abs(h)
+            x = ah ** n_vg
+            se = 1.0 / (1.0 + x) ** m
+            theta = theta_r + (theta_s - theta_r) * se
+        bi = (theta - theta_r) / (theta_s - theta_r)
+        f = max(0.0, min(1.0, 1.0 - bi))
+        return 2.0 + f
+    results.append(bench("barrier_d_eff", barrier_d_eff, N * 10, -100.0))
+
+    # ─── Paper 12: Anderson regime classification ───
+    def anderson_regime(w, d):
+        w_c = 4.0 if d < 2.5 else 16.26
+        margin = 0.1 * w_c
+        if w > w_c + margin:
+            return 2  # Localized
+        elif w < w_c - margin:
+            return 0  # Extended
+        else:
+            return 1  # Critical
+    results.append(bench("anderson_regime", anderson_regime, N * 10, 5.0, 3.0))
+
     out = {"benchmarks": results}
     json.dump(out, sys.stdout)
 

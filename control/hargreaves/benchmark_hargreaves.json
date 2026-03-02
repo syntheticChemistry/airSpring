@@ -11,7 +11,8 @@
       "Hargreaves GH, Samani ZA (1985) Applied Eng Agric 1(2):96-99, DOI:10.13031/2013.26773",
       "Allen et al. (1998) FAO-56 Eq. 52",
       "Droogers & Allen (2002) Irrigation & Drainage Systems 16:33-45"
-    ]
+    ],
+    "_tolerance_justification": "Analytical and Ra tests use 0.01 mm/day for Hargreaves formula rounding; FAO-56 cross-comparison uses max_ratio_diff 0.35–0.40 for HG vs PM approximation differences."
   },
   "validation_checks": {
     "analytical": {

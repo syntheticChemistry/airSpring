@@ -32,13 +32,29 @@
 //! - S71: DF64 transcendentals complete, `HargreavesBatchGpu`, `JackknifeMeanGpu`,
 //!   `BootstrapMeanGpu`, `HistogramGpu`, `KimuraGpu`, `fao56_et0` scalar PM,
 //!   66 `ComputeDispatch` migrations, pure math + precision per silicon doctrine
+//! - S78: libc→rustix, AFIT (async-trait removed), wildcard narrowing
+//! - S79: ops 9-13 (VG θ/K, Thornthwaite, GDD, Pedotransfer), ESN v2,
+//!   `DiversityFusionGpu` (wetSpring→GPU), `BootstrapMeanGpu` (groundSpring→GPU),
+//!   `JackknifeMeanGpu` (groundSpring→GPU), `HargreavesBatchGpu` (science shader)
 
 use std::time::Instant;
 
 use airspring_barracuda::eco::correction;
+use airspring_barracuda::eco::cytokine::{CytokineBrain, CytokineBrainConfig, CytokineObservation};
 use airspring_barracuda::eco::evapotranspiration::{self as et, DailyEt0Input};
 use airspring_barracuda::eco::richards::{solve_richards_1d, VanGenuchtenParams};
+use airspring_barracuda::eco::tissue::{
+    analyze_tissue_disorder, barrier_disruption_d_eff, AndersonRegime, CellTypeAbundance,
+    SkinCompartment,
+};
+use airspring_barracuda::gpu::bootstrap::{BootstrapEstimate, GpuBootstrap};
+use airspring_barracuda::gpu::diversity::{DiversityMetrics, GpuDiversity};
+use airspring_barracuda::gpu::gdd;
+use airspring_barracuda::gpu::jackknife::{GpuJackknife, JackknifeEstimate};
 use airspring_barracuda::gpu::mc_et0::{mc_et0_cpu, Et0Uncertainties};
+use airspring_barracuda::gpu::pedotransfer::{BatchedPedotransfer, PedotransferInput};
+use airspring_barracuda::gpu::thornthwaite::{BatchedThornthwaite, ThornthwaiteInput};
+use airspring_barracuda::gpu::van_genuchten;
 use barracuda::validation::ValidationHarness;
 
 fn main() {
@@ -48,8 +64,8 @@ fn main() {
         .init();
 
     println!("═══════════════════════════════════════════════════════════════");
-    println!("  Cross-Spring Evolution Benchmark (v0.5.9)");
-    println!("  ToadStool S71 — Pure Math + Precision per Silicon");
+    println!("  Cross-Spring Evolution Benchmark (v0.6.1)");
+    println!("  ToadStool S79 — Ops 0-13 Complete + GPU Uncertainty");
     println!("═══════════════════════════════════════════════════════════════\n");
 
     let mut v = ValidationHarness::new("Cross-Spring Evolution");
@@ -61,6 +77,9 @@ fn main() {
     bench_groundspring_uncertainty(&mut v);
     bench_tridiagonal_rewire(&mut v);
     bench_s71_upstream_evolution(&mut v);
+    bench_s79_ops_9_13(&mut v);
+    bench_s79_gpu_uncertainty(&mut v);
+    bench_paper12_immunological(&mut v);
 
     println!();
     v.finish();
@@ -352,7 +371,7 @@ fn bench_tridiagonal_rewire(v: &mut ValidationHarness) {
         .expect("Richards with barracuda tridiag");
 
     v.check_lower("Richards profiles non-empty", profiles.len() as f64, 1.0);
-    let last = profiles.last().unwrap();
+    let last = profiles.last().expect("non-empty result");
     v.check_bool(
         "Richards θ in [θr, θs] after rewire",
         last.theta
@@ -430,4 +449,340 @@ fn bench_s71_upstream_evolution(v: &mut ValidationHarness) {
     v.check_abs("percentile(50) of uniform [0,1) [S64]", p50, 0.5, 0.05);
 
     println!("  S71 upstream evolution: {:.1?}", t0.elapsed());
+}
+
+/// S79: Ops 9-13 — VG θ/K, Thornthwaite, GDD, Pedotransfer
+///
+/// These ops were evolved from airSpring's CPU-validated soil physics and crop
+/// science modules into `ToadStool` WGSL shaders. The GPU path uses the same
+/// `batched_elementwise_f64.wgsl` framework as ops 0-8, benefiting from:
+/// - **hotSpring** precision: `math_f64.wgsl` pow/exp/log for VG retention curves
+/// - **neuralSpring** orchestration: `BatchedElementwiseF64` batch dispatch pattern
+/// - **airSpring** domain: van Genuchten, Thornthwaite, GDD equations
+fn bench_s79_ops_9_13(v: &mut ValidationHarness) {
+    println!("\n── S79: Ops 9-13 (VG/Thornthwaite/GDD/Pedotransfer) ─────────");
+    let t0 = Instant::now();
+
+    // Op 9: VG θ(h) — sandy loam, h from -1000 to 0
+    let h_values: Vec<f64> = (0..=10).map(|i| f64::from(i) * -100.0).collect();
+    let theta = van_genuchten::compute_theta_cpu(0.065, 0.41, 0.075, 1.89, &h_values);
+    for (i, &th) in theta.iter().enumerate() {
+        v.check_lower(
+            &format!("VG θ(h={}) ≥ θr [airSpring→S79 op=9]", h_values[i]),
+            th,
+            0.065 - 1e-6,
+        );
+        v.check_upper(&format!("VG θ(h={}) ≤ θs", h_values[i]), th, 0.41 + 1e-6);
+    }
+    v.check_abs(
+        "VG θ(0) ≈ θs (saturation) [h_values[0]=0]",
+        theta[0],
+        0.41,
+        0.001,
+    );
+
+    // Op 10: VG K(h) — monotonic decrease as h becomes more negative (drier)
+    let k = van_genuchten::compute_k_cpu(10.0, 0.065, 0.41, 0.075, 1.89, 0.5, &h_values);
+    for &ki in &k {
+        v.check_lower("VG K(h) ≥ 0 [S79 op=10]", ki, -1e-12);
+    }
+    let k_mono = k.windows(2).all(|w| w[1] <= w[0] + 1e-10);
+    v.check_bool(
+        "VG K(h) decreases monotonically as h drops (drier soil)",
+        k_mono,
+    );
+
+    // Op 11: Thornthwaite ET₀
+    let engine = BatchedThornthwaite::cpu();
+    let months: Vec<ThornthwaiteInput> = (1..=12)
+        .map(|m| ThornthwaiteInput {
+            heat_index: 80.0,
+            exponent_a: 0.49,
+            daylight_hours: f64::from(m).mul_add(0.4, 10.0),
+            days_in_month: 30.0,
+            tmean: f64::from(m).mul_add(2.5, 5.0),
+        })
+        .collect();
+    let et_th = engine
+        .compute_gpu(&months)
+        .expect("GPU engine initialization");
+    let annual: f64 = et_th.iter().sum();
+    v.check_lower("Thornthwaite annual > 200 mm [S79 op=11]", annual, 200.0);
+    v.check_upper("Thornthwaite annual < 2000 mm", annual, 2000.0);
+    let summer_gt_winter = et_th[6] > et_th[0];
+    v.check_bool(
+        "Thornthwaite: July ET₀ > Jan ET₀ (Northern Hemisphere)",
+        summer_gt_winter,
+    );
+
+    // Op 12: GDD — Growing Degree Days
+    let tmeans = [5.0, 10.0, 15.0, 20.0, 25.0, 30.0];
+    let tbase = 10.0;
+    let gdds = gdd::compute_gdd_cpu(&tmeans, tbase);
+    v.check_abs("GDD(5, base=10) = 0 [S79 op=12]", gdds[0], 0.0, 1e-12);
+    v.check_abs("GDD(10, base=10) = 0", gdds[1], 0.0, 1e-12);
+    v.check_abs("GDD(20, base=10) = 10", gdds[3], 10.0, 1e-12);
+    v.check_abs("GDD(30, base=10) = 20", gdds[5], 20.0, 1e-12);
+
+    // Op 13: Pedotransfer polynomial — simple verification
+    let pt_engine = BatchedPedotransfer::cpu();
+    let identity = PedotransferInput {
+        coeffs: [0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
+        x: 42.0,
+    };
+    let pt_result = pt_engine
+        .compute(&[identity])
+        .expect("GPU engine initialization");
+    v.check_abs(
+        "Pedotransfer identity f(x)=x → 42 [S79 op=13]",
+        pt_result[0],
+        42.0,
+        1e-10,
+    );
+    let quadratic = PedotransferInput {
+        coeffs: [1.0, 0.0, 1.0, 0.0, 0.0, 0.0],
+        x: 3.0,
+    };
+    let pt_quad = pt_engine
+        .compute(&[quadratic])
+        .expect("GPU engine initialization");
+    v.check_abs("Pedotransfer 1+x² at x=3 → 10", pt_quad[0], 10.0, 1e-10);
+
+    println!("  S79 ops 9-13: {:.1?}", t0.elapsed());
+}
+
+/// S79: GPU Uncertainty — Jackknife + Bootstrap + Diversity GPU dispatch
+///
+/// Cross-spring provenance:
+/// - **groundSpring**: Jackknife and bootstrap methodologies for uncertainty bands
+/// - **wetSpring S28+**: Shannon/Simpson diversity indices
+/// - **neuralSpring**: GPU dispatch patterns
+/// - **`ToadStool` S71**: WGSL shaders for jackknife, bootstrap, diversity
+/// - **airSpring**: Agroecology application — soil microbiome, yield uncertainty
+fn bench_s79_gpu_uncertainty(v: &mut ValidationHarness) {
+    println!("\n── S79: GPU Uncertainty (Jackknife/Bootstrap/Diversity) ──────");
+    let t0 = Instant::now();
+
+    // Jackknife — CPU path
+    let jk_engine = GpuJackknife::cpu();
+    let sample = [2.0, 4.0, 6.0, 8.0, 10.0];
+    let jk: JackknifeEstimate = jk_engine
+        .estimate(&sample)
+        .expect("GPU engine initialization");
+    v.check_abs(
+        "Jackknife mean(2,4,6,8,10) = 6 [groundSpring→S71]",
+        jk.mean,
+        6.0,
+        1e-10,
+    );
+    v.check_lower("Jackknife variance > 0", jk.variance, 0.0);
+    v.check_lower("Jackknife std_error > 0", jk.std_error, 0.0);
+
+    // Bootstrap — CPU path
+    let bs_engine = GpuBootstrap::cpu();
+    let bs_data = [3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5];
+    let bs: BootstrapEstimate = bs_engine
+        .estimate_mean(&bs_data, 2000, 42)
+        .expect("GPU engine initialization");
+    v.check_abs(
+        "Bootstrap mean ≈ 5.25 [groundSpring→S71]",
+        bs.mean,
+        5.25,
+        0.3,
+    );
+    v.check_lower(
+        "Bootstrap CI: lower < upper",
+        bs.ci_upper - bs.ci_lower,
+        0.0,
+    );
+    v.check_lower("Bootstrap CI: lower < mean", bs.mean - bs.ci_lower, 0.0);
+    v.check_lower("Bootstrap CI: upper > mean", bs.ci_upper - bs.mean, 0.0);
+    v.check_lower("Bootstrap std_error > 0", bs.std_error, 0.0);
+
+    // Diversity fusion — CPU path
+    let div_engine = GpuDiversity::cpu();
+    let uniform_5 = [20.0, 20.0, 20.0, 20.0, 20.0];
+    let div: Vec<DiversityMetrics> = div_engine
+        .compute_alpha(&uniform_5, 1, 5)
+        .expect("GPU engine initialization");
+    let expected_h = (5.0_f64).ln();
+    v.check_abs(
+        "Diversity: uniform Shannon = ln(5) [wetSpring→S70]",
+        div[0].shannon,
+        expected_h,
+        0.01,
+    );
+    v.check_abs(
+        "Diversity: uniform Simpson = 0.8",
+        div[0].simpson,
+        0.8,
+        0.01,
+    );
+    v.check_abs(
+        "Diversity: uniform evenness = 1.0",
+        div[0].evenness,
+        1.0,
+        0.01,
+    );
+
+    let dominated = [95.0, 1.0, 1.0, 1.0, 1.0, 1.0];
+    let div_dom: Vec<DiversityMetrics> = div_engine
+        .compute_alpha(&dominated, 1, 6)
+        .expect("GPU engine initialization");
+    v.check_lower(
+        "Diversity: dominated Shannon < uniform",
+        expected_h - div_dom[0].shannon,
+        0.0,
+    );
+    v.check_lower(
+        "Diversity: dominated Simpson < 0.5",
+        0.5 - div_dom[0].simpson,
+        0.0,
+    );
+
+    println!("  S79 GPU uncertainty: {:.1?}", t0.elapsed());
+}
+
+/// Paper 12: Immunological Anderson — tissue diversity + `CytokineBrain`
+#[allow(clippy::too_many_lines)]
+fn bench_paper12_immunological(v: &mut ValidationHarness) {
+    println!("\n── Paper 12: Immunological Anderson ──");
+    let t0 = Instant::now();
+
+    let engine = GpuDiversity::cpu();
+
+    let epidermis_cells: Vec<CellTypeAbundance> = [85.0, 5.0, 8.0, 2.0]
+        .iter()
+        .enumerate()
+        .map(|(i, &a)| CellTypeAbundance {
+            cell_type: format!("type_{i}"),
+            abundance: a,
+        })
+        .collect();
+
+    let result = analyze_tissue_disorder(&epidermis_cells, SkinCompartment::Epidermis, &engine)
+        .expect("tissue analysis should succeed");
+
+    v.check_lower(
+        "Paper 12: epidermis Shannon > 0 [Pielou→W mapping]",
+        result.diversity.shannon,
+        0.0,
+    );
+    v.check_lower(
+        "Paper 12: epidermis evenness < 1.0 (keratinocyte dominated)",
+        1.0 - result.diversity.evenness,
+        0.0,
+    );
+    v.check_lower(
+        "Paper 12: epidermis W > 0 (non-uniform cell types)",
+        result.w_effective,
+        0.0,
+    );
+
+    let dermis_cells: Vec<CellTypeAbundance> = [20.0, 15.0, 12.0, 10.0, 8.0, 5.0, 10.0, 8.0, 12.0]
+        .iter()
+        .enumerate()
+        .map(|(i, &a)| CellTypeAbundance {
+            cell_type: format!("type_{i}"),
+            abundance: a,
+        })
+        .collect();
+
+    let dermis_result =
+        analyze_tissue_disorder(&dermis_cells, SkinCompartment::PapillaryDermis, &engine)
+            .expect("dermis analysis should succeed");
+
+    v.check_lower(
+        "Paper 12: dermis evenness > epidermis (diverse cell pop)",
+        dermis_result.diversity.evenness - result.diversity.evenness,
+        0.0,
+    );
+
+    let d_intact = barrier_disruption_d_eff(0.0);
+    let d_breached = barrier_disruption_d_eff(1.0);
+    v.check_abs(
+        "Paper 12: intact barrier d_eff = 2.0 (2D epidermis)",
+        d_intact,
+        2.0,
+        1e-10,
+    );
+    v.check_abs(
+        "Paper 12: full breach d_eff = 3.0 (dimensional promotion)",
+        d_breached,
+        3.0,
+        1e-10,
+    );
+
+    v.check_abs(
+        "Paper 12: Epidermis d=2 [Anderson prediction]",
+        SkinCompartment::Epidermis.effective_dimension_intact(),
+        2.0,
+        1e-10,
+    );
+    v.check_abs(
+        "Paper 12: PapillaryDermis d=3 [Anderson prediction]",
+        SkinCompartment::PapillaryDermis.effective_dimension_intact(),
+        3.0,
+        1e-10,
+    );
+
+    let config = CytokineBrainConfig::default();
+    let mut brain = CytokineBrain::new(config, "bench-paper12");
+    for i in 0..10 {
+        let fi = f64::from(i);
+        brain.observe(CytokineObservation {
+            time_hours: fi * 6.0,
+            il31_level: fi.mul_add(20.0, 100.0),
+            il4_level: 50.0,
+            il13_level: 40.0,
+            pruritus_score: fi.mul_add(0.5, 3.0),
+            tewl: 25.0,
+            pielou_evenness: 0.7,
+            signal_extent_observed: fi.mul_add(0.05, 0.3),
+            w_observed: 0.4,
+            barrier_integrity_observed: fi.mul_add(-0.03, 0.8),
+        });
+    }
+    let mse = brain.train();
+    v.check_bool("Paper 12: CytokineBrain trains successfully", mse.is_some());
+    v.check_bool(
+        "Paper 12: CytokineBrain is_trained after train()",
+        brain.is_trained(),
+    );
+
+    if let Some(pred) = brain.predict(&CytokineObservation {
+        time_hours: 48.0,
+        il31_level: 200.0,
+        il4_level: 50.0,
+        il13_level: 40.0,
+        pruritus_score: 5.0,
+        tewl: 30.0,
+        pielou_evenness: 0.7,
+        signal_extent_observed: 0.0,
+        w_observed: 0.0,
+        barrier_integrity_observed: 0.0,
+    }) {
+        v.check_bool(
+            "Paper 12: prediction signal_extent in [0,1]",
+            (0.0..=1.0).contains(&pred.signal_extent),
+        );
+        v.check_bool(
+            "Paper 12: prediction barrier in [0,1]",
+            (0.0..=1.0).contains(&pred.barrier_integrity),
+        );
+
+        let regime = pred.anderson_regime();
+        v.check_bool(
+            "Paper 12: regime classification valid",
+            matches!(
+                regime,
+                AndersonRegime::Extended | AndersonRegime::Localized | AndersonRegime::Critical
+            ),
+        );
+    }
+
+    let json = brain.export_json().expect("export should succeed");
+    v.check_bool("Paper 12: shell export non-empty", !json.is_empty());
+
+    println!("  Paper 12 immunological: {:.1?}", t0.elapsed());
 }

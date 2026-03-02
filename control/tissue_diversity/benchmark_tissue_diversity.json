@@ -1,0 +1,101 @@
+{
+  "_provenance": {
+    "method": "Tissue diversity profiling for immunological Anderson localization (Paper 12)",
+    "baseline_script": "control/tissue_diversity/tissue_diversity.py",
+    "baseline_command": "python3 control/tissue_diversity/tissue_diversity.py",
+    "baseline_commit": "pending",
+    "python_version": "3.10",
+    "created": "2026-03-02",
+    "_tolerance_justification": "Shannon/Pielou/W use 1e-4 to 1e-3 for entropy; barrier d_eff and compartment dimensions use 1e-10 for exact promotion model.",
+    "references": [
+      "Paper 01: Anderson QS — W_c thresholds (d=2: W_c≈4.0, d=3: W_c≈16.26±0.95)",
+      "Paper 06: No-till dimensional collapse (tillage 3D→2D → QS fails)",
+      "Paper 12: Immunological Anderson — cytokine propagation through skin tissue",
+      "Pielou EC (1966) J Theoretical Biology 13:131-144",
+      "Shannon CE (1948) Bell System Technical Journal 27(3):379-423",
+      "McCandless EE et al. (2014) Vet Immunol Immunopathol 157:42-48"
+    ],
+    "notes": [
+      "Exp 066: Tissue cell-type diversity profiling",
+      "Maps Pielou evenness to Anderson disorder W for skin compartments",
+      "Cell-type abundances based on published dermatological literature",
+      "Barrier disruption d_eff validated against Paper 12 §2.3 dimensional promotion model"
+    ]
+  },
+  "validation_checks": {
+    "tissue_shannon": {
+      "description": "Shannon entropy H' for tissue cell populations",
+      "test_cases": [
+        {"label": "Healthy epidermis (keratinocyte dominated: 85,5,8,2)", "cell_types": ["keratinocyte","langerhans","melanocyte","merkel"], "abundances": [85.0,5.0,8.0,2.0], "expected_shannon": 0.568226, "tolerance": 1e-4},
+        {"label": "Inflamed papillary dermis (9 cell types, diverse)", "cell_types": ["fibroblast","th2","mast","eosinophil","dendritic","nerve","macrophage","neutrophil","endothelial"], "abundances": [20.0,15.0,12.0,10.0,8.0,5.0,10.0,8.0,12.0], "expected_shannon": 2.129739, "tolerance": 1e-4},
+        {"label": "Reticular dermis (fibroblast dominated: 70,20,10)", "cell_types": ["fibroblast","vessel_endothelial","pericyte"], "abundances": [70.0,20.0,10.0], "expected_shannon": 0.801819, "tolerance": 1e-4},
+        {"label": "Uniform 5-type (20 each)", "cell_types": ["a","b","c","d","e"], "abundances": [20.0,20.0,20.0,20.0,20.0], "expected_shannon": 1.609438, "tolerance": 1e-4}
+      ]
+    },
+    "tissue_pielou": {
+      "description": "Pielou evenness J' = H'/ln(S) for tissue cell populations",
+      "test_cases": [
+        {"label": "Healthy epidermis (low evenness)", "abundances": [85.0,5.0,8.0,2.0], "expected_pielou": 0.409889, "tolerance": 1e-4},
+        {"label": "Inflamed papillary dermis (high evenness)", "abundances": [20.0,15.0,12.0,10.0,8.0,5.0,10.0,8.0,12.0], "expected_pielou": 0.969286, "tolerance": 1e-4},
+        {"label": "Reticular dermis (moderate evenness)", "abundances": [70.0,20.0,10.0], "expected_pielou": 0.729847, "tolerance": 1e-4},
+        {"label": "Uniform distribution (J'=1.0)", "abundances": [20.0,20.0,20.0,20.0,20.0], "expected_pielou": 1.000000, "tolerance": 1e-6}
+      ]
+    },
+    "anderson_w_effective": {
+      "description": "Effective Anderson disorder W = (1 - J') * ln(S)",
+      "test_cases": [
+        {"label": "Healthy epidermis (4 types, low evenness → moderate W)", "abundances": [85.0,5.0,8.0,2.0], "n_species": 4, "expected_w": 0.818068, "tolerance": 1e-4},
+        {"label": "Inflamed dermis (9 types, high evenness → low W)", "abundances": [20.0,15.0,12.0,10.0,8.0,5.0,10.0,8.0,12.0], "n_species": 9, "expected_w": 0.067486, "tolerance": 1e-3},
+        {"label": "Reticular dermis (3 types)", "abundances": [70.0,20.0,10.0], "n_species": 3, "expected_w": 0.296794, "tolerance": 1e-4},
+        {"label": "Uniform (W=0)", "abundances": [20.0,20.0,20.0,20.0,20.0], "n_species": 5, "expected_w": 0.000000, "tolerance": 1e-6}
+      ]
+    },
+    "anderson_regime": {
+      "description": "Anderson regime classification: Extended (W < W_c), Localized (W > W_c), Critical (near W_c)",
+      "test_cases": [
+        {"label": "Dermis (d=3, W<<16.26) → Extended", "w_effective": 1.0, "d_eff": 3.0, "expected_regime": "Extended"},
+        {"label": "Dermis (d=3, W>>16.26) → Localized", "w_effective": 20.0, "d_eff": 3.0, "expected_regime": "Localized"},
+        {"label": "Dermis (d=3, W≈16) → Critical", "w_effective": 16.0, "d_eff": 3.0, "expected_regime": "Critical"},
+        {"label": "Epidermis (d=2, W<<4.0) → Extended", "w_effective": 1.0, "d_eff": 2.0, "expected_regime": "Extended"},
+        {"label": "Epidermis (d=2, W>>4.0) → Localized", "w_effective": 6.0, "d_eff": 2.0, "expected_regime": "Localized"},
+        {"label": "Epidermis (d=2, W≈4) → Critical", "w_effective": 3.8, "d_eff": 2.0, "expected_regime": "Critical"}
+      ]
+    },
+    "barrier_disruption": {
+      "description": "Barrier disruption d_eff = 2.0 + breach_fraction (Paper 12 §2.3 dimensional promotion)",
+      "test_cases": [
+        {"label": "Intact barrier (f=0.0) → d=2.0", "breach_fraction": 0.0, "expected_d_eff": 2.0, "tolerance": 1e-10},
+        {"label": "10% breach → d=2.1", "breach_fraction": 0.1, "expected_d_eff": 2.1, "tolerance": 1e-10},
+        {"label": "25% breach → d=2.25", "breach_fraction": 0.25, "expected_d_eff": 2.25, "tolerance": 1e-10},
+        {"label": "50% breach → d=2.5", "breach_fraction": 0.5, "expected_d_eff": 2.5, "tolerance": 1e-10},
+        {"label": "75% breach → d=2.75", "breach_fraction": 0.75, "expected_d_eff": 2.75, "tolerance": 1e-10},
+        {"label": "Full breach (f=1.0) → d=3.0", "breach_fraction": 1.0, "expected_d_eff": 3.0, "tolerance": 1e-10},
+        {"label": "Over-breach clamped (f=1.5) → d=3.0", "breach_fraction": 1.5, "expected_d_eff": 3.0, "tolerance": 1e-10},
+        {"label": "Negative clamped (f=-0.5) → d=2.0", "breach_fraction": -0.5, "expected_d_eff": 2.0, "tolerance": 1e-10}
+      ]
+    },
+    "compartment_dimensions": {
+      "description": "Skin compartment effective Anderson dimension (intact)",
+      "test_cases": [
+        {"label": "Epidermis → d=2 (quasi-2D barrier)", "compartment": "Epidermis", "expected_d": 2.0, "tolerance": 1e-10},
+        {"label": "Papillary dermis → d=3 (3D matrix)", "compartment": "PapillaryDermis", "expected_d": 3.0, "tolerance": 1e-10},
+        {"label": "Reticular dermis → d=3 (3D dense matrix)", "compartment": "ReticularDermis", "expected_d": 3.0, "tolerance": 1e-10}
+      ]
+    },
+    "multi_compartment": {
+      "description": "Multi-compartment analysis: epidermis + papillary dermis stack",
+      "test_cases": [
+        {
+          "label": "Healthy skin stack (epidermis + papillary dermis)",
+          "compartments": [
+            {"compartment": "Epidermis", "abundances": [85.0, 5.0, 8.0, 2.0]},
+            {"compartment": "PapillaryDermis", "abundances": [20.0, 15.0, 12.0, 10.0, 8.0]}
+          ],
+          "expected_count": 2,
+          "expected_first_compartment": "Epidermis",
+          "expected_second_compartment": "PapillaryDermis"
+        }
+      ]
+    }
+  }
+}

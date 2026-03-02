@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
 **Updated**: March 2, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.6.0)
-**Status**: 65 experiments, 1237/1237 Python + 673 Rust lib + 58 forge tests + 75 binaries + 53/53 cross-spring evolution benchmark + 51/51 Full Dispatch (Exp 064) + 35/35 biomeOS Graph (Exp 065) + 30 NUCLEUS capabilities + `airspring_deploy.toml` deployment graph + ToadStool compute offload + Songbird sovereign TLS + 21/21 CPU parity (14.5× speedup)
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.6.3)
+**Status**: 69 experiments, 1237/1237 Python + 810 Rust lib (95.66% llvm-cov) + 57 forge tests + 79 binaries + 124/124 cross-spring evolution benchmark + 51/51 Full Dispatch (Exp 064) + 35/35 biomeOS Graph (Exp 065) + 30 NUCLEUS capabilities + `airspring_deploy.toml` deployment graph + ToadStool S79 compute offload + Songbird sovereign TLS + 21/21 CPU parity (14.5× speedup) + 25 Tier A GPU modules (ops 0-13 + uncertainty stack) + AirSpringBrain (Nautilus evolutionary reservoir) + MonitoredAtlasStream (drift detection) + Paper 12 immunological Anderson (Exp 066-069: tissue + cytokine + barrier + cross-species) + deep debt audit (zero clippy pedantic warnings, all tolerances justified, all provenance documented, cargo-deny clean)
 
 ---
 
@@ -11,13 +11,14 @@
 ```
 Phase 0   Python/R baselines    — reproduce paper results with original tools (1237/1237)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (641 lib + 1498 atlas, 72 binaries + 35/35 cross-spring benchmarks)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (810 lib + 1498 atlas, 79 binaries + 124/124 cross-spring benchmarks)
 Phase 1.5 CPU benchmark         — 14.5× Rust-vs-Python geometric mean (21/21 parity)
 Phase 2   BarraCuda GPU bridge  — 17 Tier A modules wired (cross-spring S70+ fully rewired)
 Phase 2.5 Ops 5-8 GPU-first   — Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed
 Phase 2.6 Seasonal pipeline    — GPU Stages 1-2 (ET₀ + Kc), atlas stream, MC ET₀ GPU path
 Phase 2.7 Streaming pipeline   — GpuPipelined (zero round-trip), GpuFused (sequential batch)
 Phase 2.8 Climate scenarios    — CMIP6 SSP offsets × FAO-56 chain (Exp 058, 46/46)
+Phase 2.9 ToadStool S79 sync   — ops 0-13 (VG θ/K, Thornthwaite, GDD, pedotransfer), jackknife/bootstrap/diversity GPU, pollster→test_pool, libc→rustix, async-trait→AFIT
 Phase 3   GPU live dispatch     — Titan V validated (24/24 PASS, 0.04% seasonal parity, 10K batch)
 Phase 3.5 NPU edge             — AKD1000 live: 3 experiments, ~48µs inference, LOCOMOS power budget
 Phase 3.7 metalForge live      — RTX 4070 + Titan V + AKD1000 + i9-12900K discovered, 18 workloads route
@@ -26,13 +27,15 @@ Phase 3.9 NUCLEUS primal        — airSpring registered as science primal, 9 ca
 Phase 4.0 Cross-primal pipeline — ecology domain, capability_call routing, 28/28 PASS (Exp 063)
 Phase 4.1 Penny Irrigation      — sovereign scheduling on consumer hardware ($600 GPU + $99 NPU)
 Phase 4.2 Nautilus reservoir     — bingoCube/nautilus evolutionary ET₀ prediction + drift detect
+Phase 4.3 AirSpringBrain        — 3-head Nautilus brain (ET₀/soil/crop), MonitoredAtlasStream, cross-station shell transfer
+Phase 4.4 Paper 12 immuno       — CytokineBrain (IL-31/W/barrier heads), tissue diversity (Pielou→W), dimensional promotion model
 ```
 
 ## Faculty Summary
 
 | Faculty | Institution | Track | Papers | Experiments | Checks | Domain |
 |---------|------------|-------|:------:|:-----------:|:------:|--------|
-| Dong | MSU BAE | Irrigation & Soil | 10+ | 63 | 1237+641 | ET₀ (8 methods), soil, IoT, WB, dual Kc, Richards, yield, ensemble, bias correction, GPU parity, GPU math portability, metalForge dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB audit, climate scenario, streaming pipeline, decade analysis, NASS yield, Shannon H' diversity, NUCLEUS primal, cross-primal pipeline |
+| Dong | MSU BAE | Irrigation & Soil | 10+ | 69 | 1237+810 | ET₀ (8 methods), soil, IoT, WB, dual Kc, Richards, yield, ensemble, bias correction, GPU parity, GPU math portability, metalForge dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB audit, climate scenario, streaming pipeline, decade analysis, NASS yield, Shannon H' diversity, NUCLEUS primal, cross-primal pipeline, Paper 12 immunological Anderson (tissue + cytokine + barrier + cross-species) |
 
 ## Faculty: Younsuk Dong, PhD
 
@@ -160,24 +163,33 @@ Phase 4.2 Nautilus reservoir     — bingoCube/nautilus evolutionary ET₀ predi
 | `airspring_primal` | — | biomeOS NUCLEUS primal (16 capabilities, cross-primal forwarding) |
 | `bench_cpu_vs_python` | 21/21 parity | Full pipeline Rust vs Python (14.5× geometric mean) |
 
-### GPU Orchestrators (Phase 2+2.5) — 11 Tier A + 4 Tier B + 3 pipeline
+### GPU Orchestrators (Phase 2+2.5+2.9) — 25 Tier A integrated + 3 pipeline
 
 | Orchestrator | BarraCuda Primitive | Cross-Spring Provenance | Status |
 |-------------|--------------------|----|---|
 | `BatchedEt0` | `batched_elementwise_f64` (op=0) | hotSpring `pow_f64` fix (TS-001) | **GPU-FIRST** |
 | `BatchedWaterBalance` | `batched_elementwise_f64` (op=1) | Multi-spring shared | **GPU-STEP** |
-| `BatchedDualKc` | `batched_elementwise_f64` (op=8, pending) | airSpring v0.5.2 | **Wired** (Tier B) |
-| `BatchedHargreaves` | `batched_elementwise_f64` (op=6, pending) | FAO-56 Eq. 52 | **Wired** (Tier B) |
-| `BatchedKcClimate` | `batched_elementwise_f64` (op=7, pending) | FAO-56 Eq. 62 | **Wired** (Tier B) |
-| `BatchedSensorCal` | `batched_elementwise_f64` (op=5, pending) | Dong et al. 2024 | **Wired** (Tier B) |
+| `BatchedDualKc` | `batched_elementwise_f64` (op=8) | airSpring v0.5.2 | **Integrated** |
+| `BatchedHargreaves` | `HargreavesBatchGpu` | FAO-56 Eq. 52, hotSpring precision | **Integrated** |
+| `BatchedKcClimate` | `batched_elementwise_f64` (op=7) | FAO-56 Eq. 62 | **Integrated** |
+| `BatchedSensorCal` | `batched_elementwise_f64` (op=5) | Dong et al. 2024 | **Integrated** |
+| `BatchedVanGenuchten` | `batched_elementwise_f64` (op=9, op=10) | hotSpring precision, wetSpring bio — S79 | **Integrated** |
+| `BatchedThornthwaite` | `batched_elementwise_f64` (op=11) | airSpring climate — S79 | **Integrated** |
+| `BatchedGdd` | `batched_elementwise_f64` (op=12) | airSpring phenology — S79 | **Integrated** |
+| `BatchedPedotransfer` | `batched_elementwise_f64` (op=13) | Saxton-Rawls 2006 — S79 | **Integrated** |
+| `GpuJackknife` | `JackknifeMeanGpu` | groundSpring uncertainty — S79 | **Integrated** |
+| `GpuBootstrap` | `BootstrapMeanGpu` | groundSpring uncertainty — S79 | **Integrated** |
+| `GpuDiversity` | `DiversityFusionGpu` | wetSpring bio diversity — S79 | **Integrated** |
 | `KrigingInterpolator` | `kriging_f64::KrigingF64` | wetSpring spatial interpolation | **Integrated** |
 | `SeasonalReducer` | `fused_map_reduce_f64` | wetSpring + airSpring TS-004 fix | **GPU N≥1024** |
-| `StreamSmoother` | `moving_window_stats` | wetSpring S28+ environmental | **Wired** |
-| `BatchedRichards` | `pde::richards::solve_richards` | airSpring→ToadStool S40 absorption | **Wired** |
-| `fit_*_nm/global` | `optimize::nelder_mead` + `multi_start` | neuralSpring optimizer | **Wired** |
+| `StreamSmoother` | `moving_window_stats` | wetSpring S28+ environmental | **Integrated** |
+| `BatchedRichards` | `pde::richards::solve_richards` | airSpring→ToadStool S40 absorption | **Integrated** |
+| `fit_*_nm/global` | `optimize::nelder_mead` + `multi_start` | neuralSpring optimizer | **Integrated** |
+| `mc_et0_gpu` | `mc_et0_propagate_f64.wgsl` | groundSpring xoshiro + Box-Muller | **Integrated** |
 | `SeasonalPipeline` | Chains ops 0→7→1→yield | Zero round-trip architecture | **CPU + GpuPipelined + GpuFused** |
 | `AtlasStream` | `UnidirectionalPipeline` (pending) | Multi-year regional ET₀ | **CPU chained** |
-| `mc_et0_gpu` | `mc_et0_propagate_f64.wgsl` (pending) | groundSpring xoshiro + Box-Muller | **Wired** (Tier B) |
+
+S79 modernization: `libc`→`rustix`, `async-trait`→AFIT, universal f64 precision, `pollster`→`test_pool`.
 
 ### CPU Benchmarks (v0.5.7) — Rust 14.5× Geometric Mean (21/21 Parity)
 
@@ -198,23 +210,18 @@ Phase 4.2 Nautilus reservoir     — bingoCube/nautilus evolutionary ET₀ predi
 |----------|---------|
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C breakdown, absorbed vs stays-local, quality gates |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
-| `wateringHole/handoffs/` | V044 active — ToadStool S71 + Nautilus handoff |
-| `specs/CROSS_SPRING_EVOLUTION.md` | 671 WGSL shader provenance across all Springs (S71) |
+| `wateringHole/handoffs/` | V063 active — deep debt audit + ToadStool absorption handoff |
+| `specs/CROSS_SPRING_EVOLUTION.md` | 671+ WGSL shader provenance across all Springs (S79) |
 
 ### Next Steps (Dong Lab)
 
-- **Cross-primal pipeline proven**: ecology domain registered, capability.call routes via neural-api, 28/28 (Exp 063)
-- **biomeOS integration complete**: airSpring primal (16 caps), cross-primal forwarding (ToadStool + BearDog), primal discovery
-- **Graph executor fixed**: `capability_call` node type now routes through neural-api + fallback (fixes all science pipeline graphs)
-- **GPU math portability proven**: All 13 GPU modules validated CPU↔GPU identical (46/46 PASS, Exp 047)
-- **ToadStool S71 synced**: 671 shaders, universal precision, 53/53 cross-spring evolution benchmark PASS
-- **bingoCube/nautilus**: Evolutionary reservoir available now (ET₀ prediction, drift detection, NPU export)
+- **Deep debt audit complete**: Zero clippy pedantic warnings, all `unwrap()` replaced with `.expect("context")`, all benchmark JSONs have provenance and tolerance justification, cargo-deny clean, `ValidationHarness` standardized
+- **Coverage**: 95.66% llvm-cov (810 lib tests) — target 98%+ (remaining gaps: GPU-dependent code paths)
 - **GPU at scale**: Profile `compute_gpu()` at N=100K+ (multi-year regional grids, crossover point via `AtlasStream`)
-- **Richards + isotherm on GPU**: Move remaining Tier B modules to pure GPU via ToadStool shaders
-- **NestGate data pipeline**: Open-Meteo + NCBI 16S coupling for baseCamp 06 extension
-- **NUCLEUS expansion**: Tower + Node stable, next: NestGate Unix socket integration, LAN HPC across gates
+- **NestGate data pipeline**: Open-Meteo + NCBI 16S coupling for baseCamp 06 extension (Phase 1-2 of multi-primal roadmap)
+- **NUCLEUS expansion**: Tower + Node stable, next: NestGate Unix socket integration, local NUCLEUS on Eastgate, LAN HPC across gates
 - **Paper 12+**: Multi-sensor calibration network (awaiting field data from new lab)
-- **Coverage**: 97.06% → target 98%+ (remaining gaps: GPU-dependent code paths now Tier B wired)
+- **ToadStool absorption**: Handoff prepared for toadStool team — airSpring domain modules ready for upstream review
 
 ### What Good Science Looks Like
 
@@ -232,7 +239,7 @@ $200 sensor, Open-Meteo weather data, and a $600 GPU running BarraCuda.
 
 ## Extension Explorations
 
-With 63 experiments validated and the full Python → Rust CPU → Titan V GPU live →
+With 69 experiments validated and the full Python → Rust CPU → Titan V GPU live →
 GPU math portability (13 modules, 46/46) → metalForge mixed hardware → NUCLEUS primal (16 caps, 28/28 cross-primal pipeline) proven,
 airSpring can now extend beyond reproduction into new science. These explorations use the validated stack to answer
 questions the original papers did not.
@@ -305,13 +312,19 @@ Step 1: ✓ DONE — airSpring NUCLEUS primal (16 caps, 28/28 cross-primal pipel
 Step 2: ✓ DONE — Local NUCLEUS Tower on Eastgate
         Tower atomic: BearDog + Songbird (healthy, 121 capability translations)
         7 primals discovered: airspring, beardog, songbird, squirrel, toadstool, neural-api
-Step 3: NestGate data integration — Unix socket NUCLEUS integration (currently HTTP standalone)
-        Model after ncbi_live_provider.rs — download once, store with provenance
+Step 3: NestGate weather provider — replace direct HTTP with NestGate-mediated data flow
         NestGate already has: NCBI, Ensembl, HuggingFace, OpenMeteo, NOAA CDO, USDA NASS
-Step 4: LAN HPC (Plasmodium across gates via 10G backbone)
-        Westgate=Heavy Nest (76TB ZFS), Southgate=Node (RTX 3090), Eastgate=Node+NPU
-        PCIe bypass: NPU→GPU direct (skip CPU roundtrip) via metalForge substrate routing
-Step 5: Full scale
-        Strandgate (dual EPYC, 256GB ECC), Northgate (RTX 5090, 192GB DDR5)
-        Cross-spring pipelines: airSpring+wetSpring+groundSpring via biomeOS graphs
+        Content-addressed caching via blob store, capability.call routing
+Step 4: NestGate NCBI 16S — soil microbiome pipeline for baseCamp 06 extension
+        ESearch→EFetch (FASTQ) → OTU table → Shannon H' → θ(t) → S_e → d_eff → QS
+        Cross-spring: wetSpring (16S) × airSpring (soil moisture + Anderson) × groundSpring (uncertainty)
+Step 5: ToadStool compute offload — GPU dispatch through NUCLEUS mesh
+        compute.offload for BarraCUDA GPU workloads, AtlasStream through ToadStool dispatch
+Step 6: Full NUCLEUS on Eastgate — biomeos nucleus start --mode full
+        nucleus_complete.toml + airspring_ecology_pipeline.toml end-to-end
+Step 7: LAN HPC (Plasmodium across gates via 10G backbone)
+        Eastgate=Node+NPU, Westgate=Heavy Nest (76TB ZFS), Southgate=Node (RTX 3090)
+        Strandgate=Bioinformatics (dual EPYC, 256GB ECC), Northgate=LLM (RTX 5090, 192GB DDR5)
+Step 8: Cross-primal science extensions
+        baseCamp 06 live data, field genomics (09), satellite integration, full Michigan 10km grid
 ```

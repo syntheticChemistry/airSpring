@@ -150,7 +150,9 @@ fn validate_analytical(v: &mut ValidationHarness, benchmark: &serde_json::Value)
     validation::section("Analytical Stewart Checks");
     let checks = &benchmark["validation_checks"]["analytical_checks"]["test_cases"];
     for tc in checks.as_array().expect("array") {
-        let label = tc["label"].as_str().unwrap();
+        let label = tc["label"]
+            .as_str()
+            .expect("test case label must be string");
         let ky = json_field(tc, "ky");
         let eta_etc = json_field(tc, "eta_etc");
         let expected = json_field(tc, "expected_yield_ratio");

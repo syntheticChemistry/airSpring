@@ -35,7 +35,9 @@ fn validate_analytical(v: &mut ValidationHarness, bench: &serde_json::Value) {
     v.check_abs(
         "heat_index_term(25°C)",
         hi_25,
-        an["heat_index_25C"].as_f64().unwrap(),
+        an["heat_index_25C"]
+            .as_f64()
+            .expect("benchmark heat_index_25C must be f64"),
         THORNTHWAITE_ANALYTICAL.abs_tol,
     );
 
@@ -43,7 +45,9 @@ fn validate_analytical(v: &mut ValidationHarness, bench: &serde_json::Value) {
     v.check_abs(
         "annual_heat_index(uniform 25°C)",
         hi_annual,
-        an["heat_index_annual_uniform_25C"].as_f64().unwrap(),
+        an["heat_index_annual_uniform_25C"]
+            .as_f64()
+            .expect("benchmark heat_index_annual_uniform_25C must be f64"),
         THORNTHWAITE_ANALYTICAL.abs_tol * 10.0,
     );
 
@@ -51,7 +55,9 @@ fn validate_analytical(v: &mut ValidationHarness, bench: &serde_json::Value) {
     v.check_abs(
         "exponent(uniform 25°C)",
         a,
-        an["exponent_uniform_25C"].as_f64().unwrap(),
+        an["exponent_uniform_25C"]
+            .as_f64()
+            .expect("benchmark exponent_uniform_25C must be f64"),
         THORNTHWAITE_ANALYTICAL.abs_tol,
     );
 
@@ -59,7 +65,9 @@ fn validate_analytical(v: &mut ValidationHarness, bench: &serde_json::Value) {
     v.check_abs(
         "unadjusted_et0(25°C)",
         pet_unadj,
-        an["unadjusted_et0_25C"].as_f64().unwrap(),
+        an["unadjusted_et0_25C"]
+            .as_f64()
+            .expect("benchmark unadjusted_et0_25C must be f64"),
         0.01,
     );
 
@@ -71,14 +79,20 @@ fn validate_station(v: &mut ValidationHarness, bench: &serde_json::Value, key: &
     validation::section(&format!("Station: {key}"));
     let station = &bench[key];
     let temps = parse_monthly_temps(&station["monthly_tmean_c"]);
-    let lat = station["latitude"].as_f64().unwrap();
-    let tol = station["tol"].as_f64().unwrap();
+    let lat = station["latitude"]
+        .as_f64()
+        .expect("benchmark station latitude must be f64");
+    let tol = station["tol"]
+        .as_f64()
+        .expect("benchmark station tol must be f64");
 
     let hi = et::annual_heat_index(&temps);
     v.check_abs(
         &format!("{key}: heat_index"),
         hi,
-        station["heat_index"].as_f64().unwrap(),
+        station["heat_index"]
+            .as_f64()
+            .expect("benchmark station heat_index must be f64"),
         THORNTHWAITE_ANALYTICAL.abs_tol * 100.0,
     );
 
@@ -86,16 +100,21 @@ fn validate_station(v: &mut ValidationHarness, bench: &serde_json::Value, key: &
     v.check_abs(
         &format!("{key}: exponent_a"),
         a,
-        station["exponent_a"].as_f64().unwrap(),
+        station["exponent_a"]
+            .as_f64()
+            .expect("benchmark station exponent_a must be f64"),
         THORNTHWAITE_ANALYTICAL.abs_tol,
     );
 
     let et0 = et::thornthwaite_monthly_et0(&temps, lat);
     let expected: Vec<f64> = station["monthly_et0_mm"]
         .as_array()
-        .unwrap()
+        .expect("benchmark monthly_et0_mm must be array")
         .iter()
-        .map(|x| x.as_f64().unwrap())
+        .map(|x| {
+            x.as_f64()
+                .expect("benchmark monthly_et0_mm element must be f64")
+        })
         .collect();
 
     for (m, (computed, want)) in et0.iter().zip(expected.iter()).enumerate() {
@@ -108,7 +127,9 @@ fn validate_station(v: &mut ValidationHarness, bench: &serde_json::Value, key: &
     v.check_abs(
         &format!("{key}: annual ET₀"),
         annual,
-        station["annual_et0_mm"].as_f64().unwrap(),
+        station["annual_et0_mm"]
+            .as_f64()
+            .expect("benchmark station annual_et0_mm must be f64"),
         annual_tol,
     );
 }
@@ -117,11 +138,16 @@ fn validate_monotonicity(v: &mut ValidationHarness, bench: &serde_json::Value) {
     validation::section("Monotonicity");
     let temps: Vec<f64> = bench["monotonicity_temps"]
         .as_array()
-        .unwrap()
+        .expect("benchmark monotonicity_temps must be array")
         .iter()
-        .map(|x| x.as_f64().unwrap())
+        .map(|x| {
+            x.as_f64()
+                .expect("benchmark monotonicity_temps element must be f64")
+        })
         .collect();
-    let lat = bench["monotonicity_latitude"].as_f64().unwrap();
+    let lat = bench["monotonicity_latitude"]
+        .as_f64()
+        .expect("benchmark monotonicity_latitude must be f64");
 
     let mut prev_annual = 0.0_f64;
     for &t in &temps {
@@ -145,12 +171,18 @@ fn validate_edge_cases(v: &mut ValidationHarness, bench: &serde_json::Value) {
     v.check_abs("all_frozen → 0", annual_frozen, 0.0, f64::EPSILON);
 
     let tropical_temps = parse_monthly_temps(&edges["tropical_uniform"]["monthly_tmean_c"]);
-    let tropical_lat = edges["tropical_uniform"]["latitude"].as_f64().unwrap();
+    let tropical_lat = edges["tropical_uniform"]["latitude"]
+        .as_f64()
+        .expect("benchmark tropical_uniform latitude must be f64");
     let range = edges["tropical_uniform"]["annual_range"]
         .as_array()
-        .unwrap();
-    let lo = range[0].as_f64().unwrap();
-    let hi = range[1].as_f64().unwrap();
+        .expect("benchmark tropical_uniform annual_range must be array");
+    let lo = range[0]
+        .as_f64()
+        .expect("benchmark annual_range[0] must be f64");
+    let hi = range[1]
+        .as_f64()
+        .expect("benchmark annual_range[1] must be f64");
     let et0_tropical = et::thornthwaite_monthly_et0(&tropical_temps, tropical_lat);
     let annual_tropical: f64 = et0_tropical.iter().sum();
     v.check_bool(
@@ -166,13 +198,21 @@ fn validate_pattern(v: &mut ValidationHarness, bench: &serde_json::Value) {
     for key in &["east_lansing", "wooster"] {
         let station = &bench[key];
         let temps = parse_monthly_temps(&station["monthly_tmean_c"]);
-        let lat = station["latitude"].as_f64().unwrap();
+        let lat = station["latitude"]
+            .as_f64()
+            .expect("benchmark station latitude must be f64");
         let et0 = et::thornthwaite_monthly_et0(&temps, lat);
         let annual: f64 = et0.iter().sum();
 
-        let range = thresholds["annual_et0_range_mm"].as_array().unwrap();
-        let lo = range[0].as_f64().unwrap();
-        let hi = range[1].as_f64().unwrap();
+        let range = thresholds["annual_et0_range_mm"]
+            .as_array()
+            .expect("benchmark annual_et0_range_mm must be array");
+        let lo = range[0]
+            .as_f64()
+            .expect("benchmark annual_et0_range_mm[0] must be f64");
+        let hi = range[1]
+            .as_f64()
+            .expect("benchmark annual_et0_range_mm[1] must be f64");
         v.check_bool(
             &format!("{key}: annual {annual:.0} in [{lo:.0}, {hi:.0}]"),
             (lo..=hi).contains(&annual),
@@ -186,7 +226,9 @@ fn validate_pattern(v: &mut ValidationHarness, bench: &serde_json::Value) {
         );
 
         let growing: f64 = et0[4..9].iter().sum();
-        let min_frac = thresholds["growing_season_fraction_min"].as_f64().unwrap();
+        let min_frac = thresholds["growing_season_fraction_min"]
+            .as_f64()
+            .expect("benchmark growing_season_fraction_min must be f64");
         let frac = growing / annual;
         v.check_bool(
             &format!("{key}: growing fraction {frac:.2} ≥ {min_frac}"),
@@ -196,8 +238,8 @@ fn validate_pattern(v: &mut ValidationHarness, bench: &serde_json::Value) {
         let peak = et0
             .iter()
             .enumerate()
-            .max_by(|a, b| a.1.partial_cmp(b.1).unwrap())
-            .unwrap()
+            .max_by(|a, b| a.1.partial_cmp(b.1).expect("non-NaN ET₀ comparison"))
+            .expect("non-empty monthly ET₀ for peak month")
             .0;
         v.check_bool(
             &format!("{key}: peak month {peak} in [5,7]"),

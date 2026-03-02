@@ -26,10 +26,6 @@
 //! Socket: `$XDG_RUNTIME_DIR/biomeos/airspring-{family_id}.sock`
 
 #![allow(
-    clippy::pedantic,
-    clippy::nursery,
-    clippy::unwrap_used,
-    clippy::expect_used,
     clippy::too_many_lines,
     clippy::cast_precision_loss,
     clippy::cast_possible_truncation,
@@ -39,15 +35,20 @@
 use std::io::{BufRead, BufReader, Write};
 use std::os::unix::net::{UnixListener, UnixStream};
 use std::path::{Path, PathBuf};
+
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use airspring_barracuda::biomeos;
 use airspring_barracuda::primal_science;
+use airspring_barracuda::rpc;
 
 const PRIMAL_NAME: &str = "airspring";
-const ORCHESTRATOR_SOCKET: &str = "biomeOS.sock";
+
+fn orchestrator_socket_name() -> String {
+    std::env::var("BIOMEOS_ORCHESTRATOR_SOCKET").unwrap_or_else(|_| "biomeOS.sock".to_string())
+}
 
 const ALL_CAPABILITIES: &[&str] = &[
     // ── Evapotranspiration (7 methods) ──
@@ -89,7 +90,7 @@ const ALL_CAPABILITIES: &[&str] = &[
     "primal.discover",
     // ── Compute offload (Node Atomic) ──
     "compute.offload",
-    // ── Data (NestGate routing) ──
+    // ── Data (Nest Atomic routing) ──
     "data.weather",
 ];
 
@@ -122,24 +123,16 @@ fn discover_primal_socket(primal_name: &str) -> Option<PathBuf> {
     biomeos::discover_primal_socket(primal_name)
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// JSON-RPC 2.0 (using serde_json::Value, no serde derive needed)
-// ═══════════════════════════════════════════════════════════════════
-
-fn json_rpc_success(id: &serde_json::Value, result: serde_json::Value) -> serde_json::Value {
-    serde_json::json!({
-        "jsonrpc": "2.0",
-        "result": result,
-        "id": id,
-    })
+fn discover_compute_primal() -> Option<PathBuf> {
+    std::env::var("AIRSPRING_COMPUTE_PRIMAL")
+        .ok()
+        .and_then(|name| biomeos::discover_primal_socket(&name))
 }
 
-fn json_rpc_error(id: &serde_json::Value, code: i32, message: &str) -> serde_json::Value {
-    serde_json::json!({
-        "jsonrpc": "2.0",
-        "error": { "code": code, "message": message },
-        "id": id,
-    })
+fn discover_data_primal() -> Option<PathBuf> {
+    std::env::var("AIRSPRING_DATA_PRIMAL")
+        .ok()
+        .and_then(|name| biomeos::discover_primal_socket(&name))
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -179,7 +172,7 @@ fn handle_health(state: &PrimalState) -> serde_json::Value {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Cross-primal: ToadStool compute offload (Node Atomic)
+// Cross-primal: compute offload (Node Atomic)
 // ═══════════════════════════════════════════════════════════════════
 
 fn handle_compute_offload(params: &serde_json::Value) -> serde_json::Value {
@@ -187,64 +180,78 @@ fn handle_compute_offload(params: &serde_json::Value) -> serde_json::Value {
         .get("operation")
         .and_then(|v| v.as_str())
         .unwrap_or("");
-    let toadstool_socket = discover_primal_socket("toadstool");
+    let compute_socket = discover_compute_primal();
 
-    match toadstool_socket {
-        Some(socket) => {
-            let toadstool_method = format!("compute.{operation}");
+    compute_socket.map_or_else(
+        || {
+            serde_json::json!({
+                "error": "compute primal not found — Node Atomic not running",
+                "hint": "start Node Atomic (tower_atomic_bootstrap + compute primal) to enable GPU offload",
+                "env_override": "AIRSPRING_COMPUTE_PRIMAL",
+            })
+        },
+        |socket| {
+            let compute_method = format!("compute.{operation}");
             let inner_params = params
                 .get("params")
                 .cloned()
-                .unwrap_or(serde_json::json!({}));
+                .unwrap_or_else(|| serde_json::json!({}));
 
-            match send_jsonrpc(&socket, &toadstool_method, inner_params) {
-                Some(resp) => serde_json::json!({
-                    "offloaded_to": "toadstool",
-                    "operation": operation,
-                    "response": resp,
-                    "transport": "node_atomic_unix_socket",
-                }),
-                None => serde_json::json!({
-                    "error": format!("toadstool compute.{operation} failed"),
-                    "fallback": "cpu",
-                }),
-            }
-        }
-        None => serde_json::json!({
-            "error": "toadstool not found — Node Atomic not running",
-            "hint": "start Node Atomic (tower_atomic_bootstrap + toadstool) to enable GPU offload",
-        }),
-    }
+            rpc::send(&socket, &compute_method, &inner_params).map_or_else(
+                || {
+                    serde_json::json!({
+                        "error": format!("compute.{operation} dispatch failed"),
+                        "fallback": "cpu",
+                    })
+                },
+                |resp| {
+                    serde_json::json!({
+                        "offloaded_to": socket.display().to_string(),
+                        "operation": operation,
+                        "response": resp,
+                        "transport": "node_atomic_unix_socket",
+                    })
+                },
+            )
+        },
+    )
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Data routing: NestGate weather data (Nest Atomic)
+// Data routing: weather data (Nest Atomic)
 // ═══════════════════════════════════════════════════════════════════
 
 fn handle_data_weather(params: &serde_json::Value) -> serde_json::Value {
-    let nestgate_socket = discover_primal_socket("nestgate");
+    let data_socket = discover_data_primal();
 
-    match nestgate_socket {
-        Some(socket) => match send_jsonrpc(&socket, "data.open_meteo_weather", params.clone()) {
-            Some(resp) => serde_json::json!({
-                "source": "nestgate",
-                "transport": "nest_atomic_unix_socket",
-                "response": resp,
-            }),
-            None => {
-                serde_json::json!({
-                    "error": "nestgate data.open_meteo_weather failed",
-                    "fallback": "direct_http",
-                    "hint": "falling back to direct Open-Meteo HTTP via ureq/Songbird",
-                })
-            }
+    data_socket.map_or_else(
+        || {
+            serde_json::json!({
+                "error": "data primal not found — using direct HTTP",
+                "hint": "start Nest Atomic (tower + data primal) for content-addressed caching",
+                "env_override": "AIRSPRING_DATA_PRIMAL",
+                "transport": "standalone",
+            })
         },
-        None => serde_json::json!({
-            "error": "nestgate not found — using direct HTTP",
-            "hint": "start Nest Atomic (tower + nestgate) for content-addressed caching",
-            "transport": "standalone",
-        }),
-    }
+        |socket| {
+            rpc::send(&socket, "data.open_meteo_weather", params).map_or_else(
+                || {
+                    serde_json::json!({
+                        "error": "data.open_meteo_weather dispatch failed",
+                        "fallback": "direct_http",
+                        "hint": "falling back to direct Open-Meteo HTTP",
+                    })
+                },
+                |resp| {
+                    serde_json::json!({
+                        "source": socket.display().to_string(),
+                        "transport": "nest_atomic_unix_socket",
+                        "response": resp,
+                    })
+                },
+            )
+        },
+    )
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -252,34 +259,31 @@ fn handle_data_weather(params: &serde_json::Value) -> serde_json::Value {
 // ═══════════════════════════════════════════════════════════════════
 
 fn handle_primal_forward(params: &serde_json::Value) -> serde_json::Value {
-    let primal = match params.get("primal").and_then(|v| v.as_str()) {
-        Some(p) => p,
-        None => return serde_json::json!({"error": "missing 'primal' parameter"}),
+    let Some(primal) = params.get("primal").and_then(|v| v.as_str()) else {
+        return serde_json::json!({"error": "missing 'primal' parameter"});
     };
-    let method = match params.get("method").and_then(|v| v.as_str()) {
-        Some(m) => m,
-        None => return serde_json::json!({"error": "missing 'method' parameter"}),
+    let Some(method) = params.get("method").and_then(|v| v.as_str()) else {
+        return serde_json::json!({"error": "missing 'method' parameter"});
     };
     let inner_params = params
         .get("params")
         .cloned()
-        .unwrap_or(serde_json::json!({}));
+        .unwrap_or_else(|| serde_json::json!({}));
 
-    let socket = match discover_primal_socket(primal) {
-        Some(s) => s,
-        None => return serde_json::json!({"error": format!("primal '{primal}' not found")}),
+    let Some(socket) = discover_primal_socket(primal) else {
+        return serde_json::json!({"error": format!("primal '{primal}' not found")});
     };
 
-    match send_jsonrpc(&socket, method, inner_params) {
-        Some(resp) => serde_json::json!({
-            "forwarded_to": primal,
-            "method": method,
-            "response": resp,
-        }),
-        None => serde_json::json!({
-            "error": format!("forward to {primal}:{method} failed"),
-        }),
-    }
+    rpc::send(&socket, method, &inner_params).map_or_else(
+        || serde_json::json!({"error": format!("forward to {primal}:{method} failed")}),
+        |resp| {
+            serde_json::json!({
+                "forwarded_to": primal,
+                "method": method,
+                "response": resp,
+            })
+        },
+    )
 }
 
 fn handle_primal_discover() -> serde_json::Value {
@@ -297,43 +301,8 @@ fn handle_primal_discover() -> serde_json::Value {
 // biomeOS registration (synchronous)
 // ═══════════════════════════════════════════════════════════════════
 
-fn send_jsonrpc(
-    socket_path: &Path,
-    method: &str,
-    params: serde_json::Value,
-) -> Option<serde_json::Value> {
-    let mut stream = match UnixStream::connect(socket_path) {
-        Ok(s) => s,
-        Err(e) => {
-            eprintln!("[biomeos] connect to {}: {e}", socket_path.display());
-            return None;
-        }
-    };
-
-    stream.set_read_timeout(Some(Duration::from_secs(5))).ok();
-    stream.set_write_timeout(Some(Duration::from_secs(5))).ok();
-
-    let request = serde_json::json!({
-        "jsonrpc": "2.0",
-        "method": method,
-        "params": params,
-        "id": 1,
-    });
-
-    let mut payload = serde_json::to_vec(&request).ok()?;
-    payload.push(b'\n');
-    stream.write_all(&payload).ok()?;
-    stream.flush().ok()?;
-
-    let mut reader = BufReader::new(stream);
-    let mut line = String::new();
-    reader.read_line(&mut line).ok()?;
-
-    serde_json::from_str(line.trim()).ok()
-}
-
 fn register_with_biomeos(our_socket: &Path) {
-    let biomeos_socket = resolve_socket_dir().join(ORCHESTRATOR_SOCKET);
+    let biomeos_socket = resolve_socket_dir().join(orchestrator_socket_name());
     if !biomeos_socket.exists() {
         eprintln!(
             "[biomeos] No orchestrator at {}, running standalone",
@@ -360,10 +329,10 @@ fn register_with_biomeos(our_socket: &Path) {
 }
 
 fn register_via_socket(target: &Path, our_socket: &Path) {
-    let reg_result = send_jsonrpc(
+    let reg_result = rpc::send(
         target,
         "lifecycle.register",
-        serde_json::json!({
+        &serde_json::json!({
             "name": PRIMAL_NAME,
             "socket_path": our_socket.to_string_lossy(),
             "pid": std::process::id(),
@@ -403,10 +372,10 @@ fn register_via_socket(target: &Path, our_socket: &Path) {
         "full_pipeline":          "ecology.full_pipeline",
     });
 
-    let _ = send_jsonrpc(
+    let _ = rpc::send(
         target,
         "capability.register",
-        serde_json::json!({
+        &serde_json::json!({
             "primal": PRIMAL_NAME,
             "capability": "ecology",
             "socket": &sock_str,
@@ -416,10 +385,10 @@ fn register_via_socket(target: &Path, our_socket: &Path) {
 
     let mut registered = 0;
     for cap in ALL_CAPABILITIES {
-        let cap_result = send_jsonrpc(
+        let cap_result = rpc::send(
             target,
             "capability.register",
-            serde_json::json!({
+            &serde_json::json!({
                 "primal": PRIMAL_NAME,
                 "capability": cap,
                 "socket": &sock_str,
@@ -443,6 +412,7 @@ fn register_via_socket(target: &Path, our_socket: &Path) {
 // Connection handler
 // ═══════════════════════════════════════════════════════════════════
 
+#[allow(clippy::needless_pass_by_value)] // BufReader::new consumes the stream
 fn handle_connection(stream: UnixStream, state: &PrimalState) {
     stream.set_read_timeout(Some(Duration::from_secs(60))).ok();
     stream.set_write_timeout(Some(Duration::from_secs(10))).ok();
@@ -451,6 +421,7 @@ fn handle_connection(stream: UnixStream, state: &PrimalState) {
     let mut writer = &stream;
 
     for line_result in reader.lines() {
+        #[allow(clippy::manual_let_else)]
         let line = match line_result {
             Ok(l) => l,
             Err(_) => break,
@@ -464,9 +435,9 @@ fn handle_connection(stream: UnixStream, state: &PrimalState) {
         let parsed: serde_json::Value = match serde_json::from_str(trimmed) {
             Ok(v) => v,
             Err(e) => {
-                let resp = json_rpc_error(
+                let resp = rpc::error(
                     &serde_json::Value::Null,
-                    -32700,
+                    rpc::PARSE_ERROR,
                     &format!("Parse error: {e}"),
                 );
                 let _ = writeln!(writer, "{resp}");
@@ -480,11 +451,11 @@ fn handle_connection(stream: UnixStream, state: &PrimalState) {
         let params = parsed
             .get("params")
             .cloned()
-            .unwrap_or(serde_json::json!({}));
+            .unwrap_or_else(|| serde_json::json!({}));
 
         state.requests_served.fetch_add(1, Ordering::Relaxed);
         let result = dispatch(method, &params, state);
-        let response = json_rpc_success(&id, result);
+        let response = rpc::success(&id, &result);
 
         let _ = writeln!(writer, "{response}");
         let _ = writer.flush();
@@ -495,28 +466,18 @@ fn handle_connection(stream: UnixStream, state: &PrimalState) {
 // Main
 // ═══════════════════════════════════════════════════════════════════
 
-fn main() {
+fn run() -> Result<(), String> {
     let family_id = get_family_id();
     let socket_path = resolve_socket_path(&family_id);
 
     if let Some(parent) = socket_path.parent() {
-        if let Err(e) = std::fs::create_dir_all(parent) {
-            eprintln!(
-                "[fatal] Cannot create socket directory {}: {e}",
-                parent.display()
-            );
-            std::process::exit(1);
-        }
+        std::fs::create_dir_all(parent)
+            .map_err(|e| format!("Cannot create socket directory {}: {e}", parent.display()))?;
     }
 
     if socket_path.exists() {
-        if let Err(e) = std::fs::remove_file(&socket_path) {
-            eprintln!(
-                "[fatal] Cannot remove stale socket {}: {e}",
-                socket_path.display()
-            );
-            std::process::exit(1);
-        }
+        std::fs::remove_file(&socket_path)
+            .map_err(|e| format!("Cannot remove stale socket {}: {e}", socket_path.display()))?;
     }
 
     let state = Arc::new(PrimalState {
@@ -524,15 +485,13 @@ fn main() {
         requests_served: AtomicU64::new(0),
     });
 
-    let listener = match UnixListener::bind(&socket_path) {
-        Ok(l) => l,
-        Err(e) => {
-            eprintln!("[fatal] Cannot bind to {}: {e}", socket_path.display());
-            std::process::exit(1);
-        }
-    };
+    let listener = UnixListener::bind(&socket_path)
+        .map_err(|e| format!("Cannot bind to {}: {e}", socket_path.display()))?;
 
-    eprintln!("airSpring primal listening on {}", socket_path.display());
+    eprintln!(
+        "{PRIMAL_NAME} primal listening on {}",
+        socket_path.display()
+    );
     eprintln!("  Family ID: {family_id}");
     eprintln!("  Mode: Tower (local Eastgate)");
     eprintln!("  Version: {}", env!("CARGO_PKG_VERSION"));
@@ -547,9 +506,8 @@ fn main() {
 
     let heartbeat_state = state.clone();
     let heartbeat_running = running.clone();
-    let heartbeat_path = socket_path.clone();
     std::thread::spawn(move || {
-        let biomeos_socket = resolve_socket_dir().join(ORCHESTRATOR_SOCKET);
+        let biomeos_socket = resolve_socket_dir().join(orchestrator_socket_name());
         let fallback =
             biomeos::fallback_registration_primal().and_then(|name| discover_primal_socket(&name));
         let target = if biomeos_socket.exists() {
@@ -562,12 +520,12 @@ fn main() {
             std::thread::sleep(Duration::from_secs(30));
 
             if let Some(ref t) = target {
-                let _ = send_jsonrpc(
+                let _ = rpc::send(
                     t,
                     "lifecycle.status",
-                    serde_json::json!({
+                    &serde_json::json!({
                         "name": PRIMAL_NAME,
-                        "socket_path": heartbeat_path.to_string_lossy(),
+                        "socket_path": socket_path.to_string_lossy(),
                         "status": "healthy",
                         "requests_served": heartbeat_state.requests_served.load(Ordering::Relaxed),
                     }),
@@ -593,5 +551,13 @@ fn main() {
                 eprintln!("[error] Accept failed: {e}");
             }
         }
+    }
+    Ok(())
+}
+
+fn main() {
+    if let Err(e) = run() {
+        eprintln!("[fatal] {e}");
+        std::process::exit(1);
     }
 }

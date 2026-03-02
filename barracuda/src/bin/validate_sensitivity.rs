@@ -168,7 +168,11 @@ fn validate_multi_site(
                 oat_sensitivity(&site_params, name, label, pct)
             })
             .collect();
-        site_results.sort_by(|a, b| b.abs_sensitivity.partial_cmp(&a.abs_sensitivity).unwrap());
+        site_results.sort_by(|a, b| {
+            b.abs_sensitivity
+                .partial_cmp(&a.abs_sensitivity)
+                .expect("non-NaN sensitivity comparison")
+        });
 
         let has_rad = site_results
             .iter()
@@ -212,7 +216,11 @@ fn main() {
             oat_sensitivity(&baseline, name, label, pct)
         })
         .collect();
-    results.sort_by(|a, b| b.abs_sensitivity.partial_cmp(&a.abs_sensitivity).unwrap());
+    results.sort_by(|a, b| {
+        b.abs_sensitivity
+            .partial_cmp(&a.abs_sensitivity)
+            .expect("non-NaN sensitivity comparison")
+    });
 
     for (i, r) in results.iter().enumerate() {
         println!(

@@ -577,6 +577,80 @@ fn bench_seasonal_pipeline(n: usize) -> (f64, f64, String) {
     (elapsed, yr, format!("Rust yield_ratio={yr:.6}, ok={ok}"))
 }
 
+fn bench_tissue_w(n_iter: usize) -> (f64, f64, String) {
+    let abundances = [85.0, 5.0, 8.0, 2.0, 15.0, 18.0, 14.0, 12.0, 10.0];
+    let richness = abundances.len() as f64;
+    let ln_rich = richness.ln();
+    let t0 = Instant::now();
+    let mut w_eff = 0.0_f64;
+    for _ in 0..n_iter {
+        let shannon_h = diversity::shannon(black_box(&abundances));
+        let evenness = if richness > 1.0 {
+            shannon_h / ln_rich
+        } else {
+            0.0
+        };
+        w_eff = black_box((1.0 - evenness) * ln_rich);
+    }
+    let elapsed = t0.elapsed().as_secs_f64();
+
+    let expected = {
+        let total: f64 = abundances.iter().sum();
+        let shannon_h: f64 = abundances
+            .iter()
+            .filter(|&&ct| ct > 0.0)
+            .map(|&ct| {
+                let prob = ct / total;
+                -prob * prob.ln()
+            })
+            .sum();
+        let evenness = shannon_h / ln_rich;
+        (1.0 - evenness) * ln_rich
+    };
+    let diff = (w_eff - expected).abs();
+    let ok = diff < 1e-6;
+    (
+        elapsed,
+        w_eff,
+        format!("Rust W={w_eff:.6}, expected={expected:.6}, diff={diff:.2e}, ok={ok}"),
+    )
+}
+
+fn bench_barrier_d_eff(n_iter: usize) -> (f64, f64, String) {
+    let head = -100.0_f64;
+    let t0 = Instant::now();
+    let mut d_eff = 0.0_f64;
+    for _ in 0..n_iter {
+        let theta = van_genuchten::van_genuchten_theta(black_box(head), 0.05, 1.0, 0.01, 1.8);
+        let barrier_integrity = (theta - 0.05) / (1.0 - 0.05);
+        let breach = (1.0 - barrier_integrity).clamp(0.0, 1.0);
+        d_eff = black_box(2.0 + breach);
+    }
+    let elapsed = t0.elapsed().as_secs_f64();
+    let ok = d_eff > 2.0 && d_eff < 3.0;
+    (elapsed, d_eff, format!("Rust d_eff={d_eff:.6}, ok={ok}"))
+}
+
+fn bench_anderson_regime(n_iter: usize) -> (f64, f64, String) {
+    let disorder = 5.0_f64;
+    let dim = 3.0_f64;
+    let t0 = Instant::now();
+    let mut regime = 0_u8;
+    for _ in 0..n_iter {
+        let w_c = if black_box(dim) < 2.5 { 4.0 } else { 16.26 };
+        let margin = 0.1 * w_c;
+        let bw = black_box(disorder);
+        regime = black_box(u8::from(bw >= w_c - margin) + u8::from(bw > w_c + margin));
+    }
+    let elapsed = t0.elapsed().as_secs_f64();
+    let ok = regime == 0;
+    (
+        elapsed,
+        f64::from(regime),
+        format!("Rust regime={regime} (Extended=0), ok={ok}"),
+    )
+}
+
 fn build_benchmarks() -> Vec<BenchEntry> {
     vec![
         (
@@ -704,6 +778,24 @@ fn build_benchmarks() -> Vec<BenchEntry> {
             "Seasonal Pipeline (153d)",
             1_000,
             Box::new(bench_seasonal_pipeline),
+        ),
+        (
+            "tissue_w",
+            "Tissue Anderson W (P12)",
+            100_000,
+            Box::new(bench_tissue_w),
+        ),
+        (
+            "barrier_d_eff",
+            "Barrier d_eff (P12)",
+            100_000,
+            Box::new(bench_barrier_d_eff),
+        ),
+        (
+            "anderson_regime",
+            "Anderson Regime (P12)",
+            100_000,
+            Box::new(bench_anderson_regime),
         ),
     ]
 }

@@ -48,7 +48,7 @@ pub enum LandUse {
 impl LandUse {
     /// Standard CN for this land use and soil group (AMC-II, average conditions).
     #[must_use]
-    #[allow(clippy::match_same_arms)]
+    #[allow(clippy::match_same_arms)] // justified: Impervious returns same CN for all soil groups
     pub const fn cn(self, group: SoilGroup) -> u8 {
         match (self, group) {
             (Self::FallowBare, SoilGroup::A) => 77,
@@ -127,7 +127,7 @@ pub fn scs_cn_runoff(precip_mm: f64, cn: f64, ia_ratio: f64) -> f64 {
         return 0.0;
     }
     let pe = precip_mm - ia;
-    #[allow(clippy::suspicious_operation_groupings)]
+    #[allow(clippy::suspicious_operation_groupings)] // justified: SCS-CN formula Q = pe²/(pe+S)
     {
         pe * pe / (pe + s)
     }
@@ -152,7 +152,7 @@ pub fn amc_cn_wet(cn_ii: f64) -> f64 {
 }
 
 #[cfg(test)]
-#[allow(clippy::float_cmp)]
+#[allow(clippy::float_cmp)] // justified: test assertions on runoff values
 mod tests {
     use super::*;
 

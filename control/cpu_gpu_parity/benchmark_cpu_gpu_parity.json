@@ -1,4 +1,12 @@
 {
+    "_provenance": {
+        "method": "CPU vs GPU parity validation for barracuda BatchedEt0, BatchedWaterBalance, BatchedRichards",
+        "baseline_script": "barracuda/src/bin/validate_cpu_gpu_parity.rs",
+        "baseline_command": "cargo run --bin validate_cpu_gpu_parity",
+        "baseline_commit": "8c3953b",
+        "created": "2026-03-02",
+        "_tolerance_justification": "Bit-identical parity requires 1e-10; batch scaling and metalForge routing are deterministic."
+    },
     "experiment": "Exp 040 — CPU vs GPU Parity Validation",
     "description": "Validates that barracuda GPU dispatch (BatchedEt0, BatchedWaterBalance, BatchedRichards) produces identical results to the validated CPU path. Tests the core claim: pure Rust math is portable across compute substrates. When GPU hardware is unavailable, the GPU API falls back to CPU — we validate that this fallback path produces bit-identical results to the direct CPU API.",
     "references": [

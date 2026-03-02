@@ -28,39 +28,52 @@ use airspring_barracuda::validation::{
     self, json_array_opt, json_f64, json_object_opt, json_str_opt, parse_benchmark_json,
     ValidationHarness,
 };
-use std::process;
 
 /// Benchmark JSON embedded at compile time for reproducibility.
 const BENCHMARK_JSON: &str = include_str!("../../../control/richards/benchmark_richards.json");
 
-fn soil_params(benchmark: &serde_json::Value, soil: &str) -> VanGenuchtenParams {
-    let Some(theta_r) = json_f64(benchmark, &["soil_types", soil, "theta_r"]) else {
-        eprintln!("benchmark JSON: missing soil_types.{soil}.theta_r");
-        process::exit(1);
-    };
-    let Some(theta_s) = json_f64(benchmark, &["soil_types", soil, "theta_s"]) else {
-        eprintln!("benchmark JSON: missing soil_types.{soil}.theta_s");
-        process::exit(1);
-    };
-    let Some(alpha) = json_f64(benchmark, &["soil_types", soil, "alpha"]) else {
-        eprintln!("benchmark JSON: missing soil_types.{soil}.alpha");
-        process::exit(1);
-    };
-    let Some(n_vg) = json_f64(benchmark, &["soil_types", soil, "n_vg"]) else {
-        eprintln!("benchmark JSON: missing soil_types.{soil}.n_vg");
-        process::exit(1);
-    };
-    let Some(ks) = json_f64(benchmark, &["soil_types", soil, "Ks_cm_day"]) else {
-        eprintln!("benchmark JSON: missing soil_types.{soil}.Ks_cm_day");
-        process::exit(1);
-    };
-    VanGenuchtenParams {
+fn soil_params(
+    v: &mut ValidationHarness,
+    benchmark: &serde_json::Value,
+    soil: &str,
+) -> Option<VanGenuchtenParams> {
+    let theta_r = json_f64(benchmark, &["soil_types", soil, "theta_r"]);
+    v.check_bool(
+        &format!("benchmark JSON: soil_types.{soil}.theta_r present"),
+        theta_r.is_some(),
+    );
+    let theta_r = theta_r?;
+    let theta_s = json_f64(benchmark, &["soil_types", soil, "theta_s"]);
+    v.check_bool(
+        &format!("benchmark JSON: soil_types.{soil}.theta_s present"),
+        theta_s.is_some(),
+    );
+    let theta_s = theta_s?;
+    let alpha = json_f64(benchmark, &["soil_types", soil, "alpha"]);
+    v.check_bool(
+        &format!("benchmark JSON: soil_types.{soil}.alpha present"),
+        alpha.is_some(),
+    );
+    let alpha = alpha?;
+    let n_vg = json_f64(benchmark, &["soil_types", soil, "n_vg"]);
+    v.check_bool(
+        &format!("benchmark JSON: soil_types.{soil}.n_vg present"),
+        n_vg.is_some(),
+    );
+    let n_vg = n_vg?;
+    let ks = json_f64(benchmark, &["soil_types", soil, "Ks_cm_day"]);
+    v.check_bool(
+        &format!("benchmark JSON: soil_types.{soil}.Ks_cm_day present"),
+        ks.is_some(),
+    );
+    let ks = ks?;
+    Some(VanGenuchtenParams {
         theta_r,
         theta_s,
         alpha,
         n_vg,
         ks,
-    }
+    })
 }
 
 fn validate_van_genuchten_retention(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
@@ -70,26 +83,31 @@ fn validate_van_genuchten_retention(v: &mut ValidationHarness, benchmark: &serde
         benchmark,
         &["validation_checks", "van_genuchten_retention", "test_cases"],
     ) else {
-        eprintln!("benchmark JSON: missing validation_checks.van_genuchten_retention.test_cases");
-        process::exit(1);
+        v.check_bool(
+            "benchmark JSON: validation_checks.van_genuchten_retention.test_cases present",
+            false,
+        );
+        return;
     };
     for tc in checks {
         let Some(soil) = json_str_opt(tc, &["soil"]) else {
-            eprintln!("benchmark JSON: test case missing soil");
-            process::exit(1);
+            v.check_bool("benchmark JSON: test case soil present", false);
+            continue;
         };
-        let params = soil_params(benchmark, soil);
+        let Some(params) = soil_params(v, benchmark, soil) else {
+            continue;
+        };
         let Some(h_cm) = json_f64(tc, &["h_cm"]) else {
-            eprintln!("benchmark JSON: test case missing h_cm");
-            process::exit(1);
+            v.check_bool("benchmark JSON: test case h_cm present", false);
+            continue;
         };
         let Some(expected) = json_f64(tc, &["expected_theta"]) else {
-            eprintln!("benchmark JSON: test case missing expected_theta");
-            process::exit(1);
+            v.check_bool("benchmark JSON: test case expected_theta present", false);
+            continue;
         };
         let Some(tol) = json_f64(tc, &["tolerance"]) else {
-            eprintln!("benchmark JSON: test case missing tolerance");
-            process::exit(1);
+            v.check_bool("benchmark JSON: test case tolerance present", false);
+            continue;
         };
 
         let theta = van_genuchten_theta(
@@ -110,18 +128,23 @@ fn validate_hydraulic_conductivity(v: &mut ValidationHarness, benchmark: &serde_
         benchmark,
         &["validation_checks", "hydraulic_conductivity", "test_cases"],
     ) else {
-        eprintln!("benchmark JSON: missing validation_checks.hydraulic_conductivity.test_cases");
-        process::exit(1);
+        v.check_bool(
+            "benchmark JSON: validation_checks.hydraulic_conductivity.test_cases present",
+            false,
+        );
+        return;
     };
     for tc in checks {
         let Some(soil) = json_str_opt(tc, &["soil"]) else {
-            eprintln!("benchmark JSON: test case missing soil");
-            process::exit(1);
+            v.check_bool("benchmark JSON: test case soil present", false);
+            continue;
         };
-        let params = soil_params(benchmark, soil);
+        let Some(params) = soil_params(v, benchmark, soil) else {
+            continue;
+        };
         let Some(h_cm) = json_f64(tc, &["h_cm"]) else {
-            eprintln!("benchmark JSON: test case missing h_cm");
-            process::exit(1);
+            v.check_bool("benchmark JSON: test case h_cm present", false);
+            continue;
         };
         let tol = json_f64(tc, &["tolerance"]).unwrap_or(0.01);
 
@@ -139,18 +162,19 @@ fn validate_hydraulic_conductivity(v: &mut ValidationHarness, benchmark: &serde_
             v.check_abs(&format!("{soil} h={h_cm} K/Ks"), k_ratio, expected, tol);
         } else {
             let Some(range) = json_array_opt(tc, &["expected_K_ratio_range"]) else {
-                eprintln!(
-                    "benchmark JSON: test case missing expected_K_ratio or expected_K_ratio_range"
+                v.check_bool(
+                    "benchmark JSON: expected_K_ratio or expected_K_ratio_range present",
+                    false,
                 );
-                process::exit(1);
+                continue;
             };
             let Some(low) = range.first().and_then(serde_json::Value::as_f64) else {
-                eprintln!("benchmark JSON: expected_K_ratio_range[0] not f64");
-                process::exit(1);
+                v.check_bool("benchmark JSON: expected_K_ratio_range[0] is f64", false);
+                continue;
             };
             let Some(high) = range.get(1).and_then(serde_json::Value::as_f64) else {
-                eprintln!("benchmark JSON: expected_K_ratio_range[1] not f64");
-                process::exit(1);
+                v.check_bool("benchmark JSON: expected_K_ratio_range[1] is f64", false);
+                continue;
             };
             v.check_bool(
                 &format!("{soil} h={h_cm} K/Ks in [{low}, {high}]"),
@@ -163,34 +187,48 @@ fn validate_hydraulic_conductivity(v: &mut ValidationHarness, benchmark: &serde_
 fn validate_infiltration_sand(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("infiltration_sand: 1D infiltration into dry sand");
 
-    let params = soil_params(benchmark, "sand");
+    let Some(params) = soil_params(v, benchmark, "sand") else {
+        return;
+    };
     let Some(depth) = json_f64(
         benchmark,
         &["validation_checks", "infiltration_sand", "column_depth_cm"],
     ) else {
-        eprintln!("benchmark JSON: missing validation_checks.infiltration_sand.column_depth_cm");
-        process::exit(1);
+        v.check_bool(
+            "benchmark JSON: validation_checks.infiltration_sand.column_depth_cm present",
+            false,
+        );
+        return;
     };
     let Some(h_initial) = json_f64(
         benchmark,
         &["validation_checks", "infiltration_sand", "initial_h_cm"],
     ) else {
-        eprintln!("benchmark JSON: missing validation_checks.infiltration_sand.initial_h_cm");
-        process::exit(1);
+        v.check_bool(
+            "benchmark JSON: validation_checks.infiltration_sand.initial_h_cm present",
+            false,
+        );
+        return;
     };
     let Some(h_top) = json_f64(
         benchmark,
         &["validation_checks", "infiltration_sand", "top_h_cm"],
     ) else {
-        eprintln!("benchmark JSON: missing validation_checks.infiltration_sand.top_h_cm");
-        process::exit(1);
+        v.check_bool(
+            "benchmark JSON: validation_checks.infiltration_sand.top_h_cm present",
+            false,
+        );
+        return;
     };
     let Some(duration_hours) = json_f64(
         benchmark,
         &["validation_checks", "infiltration_sand", "duration_hours"],
     ) else {
-        eprintln!("benchmark JSON: missing validation_checks.infiltration_sand.duration_hours");
-        process::exit(1);
+        v.check_bool(
+            "benchmark JSON: validation_checks.infiltration_sand.duration_hours present",
+            false,
+        );
+        return;
     };
     let duration_days = duration_hours / 24.0;
 
@@ -238,27 +276,38 @@ fn validate_infiltration_sand(v: &mut ValidationHarness, benchmark: &serde_json:
 fn validate_drainage_silt_loam(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("drainage_silt_loam: Free drainage from saturated column");
 
-    let params = soil_params(benchmark, "silt_loam");
+    let Some(params) = soil_params(v, benchmark, "silt_loam") else {
+        return;
+    };
     let Some(depth) = json_f64(
         benchmark,
         &["validation_checks", "drainage_silt_loam", "column_depth_cm"],
     ) else {
-        eprintln!("benchmark JSON: missing validation_checks.drainage_silt_loam.column_depth_cm");
-        process::exit(1);
+        v.check_bool(
+            "benchmark JSON: validation_checks.drainage_silt_loam.column_depth_cm present",
+            false,
+        );
+        return;
     };
     let Some(h_initial) = json_f64(
         benchmark,
         &["validation_checks", "drainage_silt_loam", "initial_h_cm"],
     ) else {
-        eprintln!("benchmark JSON: missing validation_checks.drainage_silt_loam.initial_h_cm");
-        process::exit(1);
+        v.check_bool(
+            "benchmark JSON: validation_checks.drainage_silt_loam.initial_h_cm present",
+            false,
+        );
+        return;
     };
     let Some(duration_hours) = json_f64(
         benchmark,
         &["validation_checks", "drainage_silt_loam", "duration_hours"],
     ) else {
-        eprintln!("benchmark JSON: missing validation_checks.drainage_silt_loam.duration_hours");
-        process::exit(1);
+        v.check_bool(
+            "benchmark JSON: validation_checks.drainage_silt_loam.duration_hours present",
+            false,
+        );
+        return;
     };
     let duration_days = duration_hours / 24.0;
 
@@ -317,11 +366,13 @@ fn validate_steady_state_flux(v: &mut ValidationHarness, benchmark: &serde_json:
         .unwrap_or(5.0);
 
     let Some(soils) = json_object_opt(benchmark, &["soil_types"]) else {
-        eprintln!("benchmark JSON: missing soil_types");
-        process::exit(1);
+        v.check_bool("benchmark JSON: soil_types present", false);
+        return;
     };
     for (soil_name, _s) in soils {
-        let params = soil_params(benchmark, soil_name);
+        let Some(params) = soil_params(v, benchmark, soil_name) else {
+            continue;
+        };
         let k_sat = van_genuchten_k(
             0.0,
             params.ks,

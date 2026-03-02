@@ -83,7 +83,7 @@ pub struct RichardsProfile {
 ///
 /// Accepts n-length padded arrays (a\[0\]=0, c\[n-1\]=0) matching the Picard assembly
 /// loop, and extracts n-1 sub/super-diagonal slices for the upstream API.
-#[allow(clippy::many_single_char_names)]
+#[allow(clippy::many_single_char_names)] // justified: standard Thomas algorithm notation (a,b,c,d,x)
 fn tridiag_solve(a: &[f64], b: &[f64], c: &[f64], d: &[f64], x: &mut [f64]) -> bool {
     let n = d.len();
     if n == 0 {
@@ -98,7 +98,7 @@ fn tridiag_solve(a: &[f64], b: &[f64], c: &[f64], d: &[f64], x: &mut [f64]) -> b
 }
 
 /// Compute flux divergence dh/dt from Richards RHS (for explicit step).
-#[allow(clippy::too_many_arguments)]
+#[allow(clippy::too_many_arguments)] // justified: Richards PDE requires all boundary/params
 fn richards_rhs(
     h: &[f64],
     params: &VanGenuchtenParams,
@@ -161,9 +161,9 @@ fn richards_rhs(
 /// # Errors
 ///
 /// Returns `AirSpringError::InvalidInput` if both methods fail.
-#[allow(clippy::too_many_arguments, clippy::too_many_lines)]
-#[allow(clippy::many_single_char_names, clippy::similar_names)]
-#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+#[allow(clippy::too_many_arguments, clippy::too_many_lines)] // justified: PDE API mirrors physics params
+#[allow(clippy::many_single_char_names, clippy::similar_names)] // justified: standard FD notation (h,q,z,i,n)
+#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)] // justified: duration/dt non-negative, ceil finite
 pub fn solve_richards_1d(
     params: &VanGenuchtenParams,
     depth_cm: f64,
@@ -194,9 +194,9 @@ pub fn solve_richards_1d(
 /// # Errors
 ///
 /// Returns `AirSpringError::InvalidInput` if inputs are invalid.
-#[allow(clippy::too_many_arguments, clippy::too_many_lines)]
-#[allow(clippy::many_single_char_names, clippy::similar_names)]
-#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+#[allow(clippy::too_many_arguments, clippy::too_many_lines)] // justified: PDE API mirrors physics params
+#[allow(clippy::many_single_char_names, clippy::similar_names)] // justified: standard FD notation (h,q,z,i,n)
+#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)] // justified: duration/dt non-negative, ceil finite
 pub fn solve_richards_1d_with_config(
     params: &VanGenuchtenParams,
     depth_cm: f64,
@@ -485,7 +485,7 @@ pub fn mass_balance_check(
 }
 
 #[cfg(test)]
-#[allow(clippy::float_cmp)]
+#[allow(clippy::float_cmp)] // justified: test assertions on physical quantities
 mod tests {
     use super::*;
     use crate::error::AirSpringError;

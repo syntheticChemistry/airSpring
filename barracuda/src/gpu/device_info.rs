@@ -69,7 +69,9 @@ impl std::fmt::Display for DevicePrecisionReport {
 #[must_use]
 pub fn probe_device(device: &WgpuDevice) -> DevicePrecisionReport {
     let profile = GpuDriverProfile::from_device(device);
-    let builtins = pollster::block_on(barracuda::device::probe::probe_f64_builtins(device));
+    let builtins = barracuda::device::test_pool::tokio_block_on(
+        barracuda::device::probe::probe_f64_builtins(device),
+    );
 
     DevicePrecisionReport {
         adapter_name: device.adapter_info().name.clone(),
@@ -94,8 +96,8 @@ pub fn probe_device(device: &WgpuDevice) -> DevicePrecisionReport {
 ///
 /// Returns `None` if no suitable GPU is available.
 pub fn try_f64_device() -> Option<Arc<WgpuDevice>> {
-    pollster::block_on(WgpuDevice::from_env())
-        .or_else(|_| pollster::block_on(WgpuDevice::new_f64_capable()))
+    barracuda::device::test_pool::tokio_block_on(WgpuDevice::from_env())
+        .or_else(|_| barracuda::device::test_pool::tokio_block_on(WgpuDevice::new_f64_capable()))
         .ok()
         .map(Arc::new)
 }
@@ -134,22 +136,28 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
     ShaderProvenance {
         shader: "batched_elementwise_f64.wgsl",
         primitives: &[
-            "fao56_et0_batch",
-            "water_balance_batch",
+            "fao56_et0_batch (op=0)",
+            "water_balance_batch (op=1)",
             "sensor_cal (op=5)",
             "hargreaves_et0 (op=6)",
             "kc_climate_adjust (op=7)",
             "dual_kc_ke (op=8)",
+            "vg_theta (op=9)",
+            "vg_k (op=10)",
+            "thornthwaite_et0 (op=11)",
+            "gdd (op=12)",
+            "pedotransfer_poly (op=13)",
         ],
         origin: "multi-spring convergence",
-        domain: "Precision agriculture: FAO-56 ET₀, WB, sensor cal, Kc, Ke",
+        domain: "Precision agriculture: FAO-56 ET₀, WB, VG, Thornthwaite, GDD, pedotransfer",
         evolved_by: &[
-            "airSpring (domain equations, ops 5-8)",
+            "airSpring (domain equations, ops 0-1, 5-8 → v0.5.6)",
             "hotSpring S54 (acos_f64, sin_f64 for Ra/sunset angle)",
             "neuralSpring (batch orchestrator pattern)",
-            "ToadStool S54→S70+ (unified absorption)",
+            "ToadStool S54→S70+ (ops 0-8 unified absorption)",
+            "ToadStool S79 (ops 9-13: VG, Thornthwaite, GDD, pedotransfer)",
         ],
-        airspring_use: "GPU-first dispatch for ET₀, WB, SensorCal, Hargreaves, Kc, DualKc",
+        airspring_use: "GPU-first dispatch: 14 ops covering all soil physics + crop science",
     },
     ShaderProvenance {
         shader: "kriging_f64.wgsl",
@@ -314,6 +322,102 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         evolved_by: &["airSpring Exp-051 (Rawls 1983 parameters)"],
         airspring_use: "Infiltration modeling, ponding prediction, 7-soil parameter table",
     },
+    // ── S79 Cross-Spring Evolution ─────────────────────────────────────
+    ShaderProvenance {
+        shader: "jackknife_mean_f64.wgsl",
+        primitives: &["jackknife_leave_one_out", "jackknife_variance"],
+        origin: "groundSpring",
+        domain: "Leave-one-out uncertainty estimation",
+        evolved_by: &[
+            "groundSpring (methodology)",
+            "neuralSpring (GPU dispatch pattern)",
+            "ToadStool S71 (WGSL shader)",
+        ],
+        airspring_use: "ET₀ and yield estimate uncertainty quantification",
+    },
+    ShaderProvenance {
+        shader: "bootstrap_mean_f64.wgsl",
+        primitives: &["bootstrap_resample", "bootstrap_mean"],
+        origin: "groundSpring",
+        domain: "Non-parametric bootstrap confidence intervals",
+        evolved_by: &[
+            "groundSpring (bootstrap methodology)",
+            "neuralSpring (GPU dispatch)",
+            "ToadStool S71 (xoshiro PRNG + WGSL shader)",
+        ],
+        airspring_use: "RMSE confidence intervals, yield prediction uncertainty",
+    },
+    ShaderProvenance {
+        shader: "diversity_fusion_f64.wgsl",
+        primitives: &["shannon_gpu", "simpson_gpu", "pielou_evenness_gpu"],
+        origin: "wetSpring",
+        domain: "GPU-fused alpha diversity (Shannon + Simpson + evenness in one dispatch)",
+        evolved_by: &[
+            "wetSpring S28 (CPU diversity indices)",
+            "ToadStool S70 (GPU fusion shader)",
+            "airSpring (agroecology: cover crop, soil 16S, pollinator)",
+        ],
+        airspring_use: "Multi-sample diversity profiling for soil microbiome studies",
+    },
+    ShaderProvenance {
+        shader: "hargreaves_batch_f64.wgsl (science shader)",
+        primitives: &["hargreaves_et0_gpu", "extraterrestrial_radiation"],
+        origin: "airSpring",
+        domain: "Hargreaves-Samani ET₀ with internal Ra computation",
+        evolved_by: &[
+            "airSpring (Hargreaves domain need)",
+            "ToadStool S71 (HargreavesBatchGpu — science shader path)",
+        ],
+        airspring_use: "Alternative to op=6 when Ra is not precomputed",
+    },
+    ShaderProvenance {
+        shader: "mc_et0_propagate_f64.wgsl",
+        primitives: &["mc_et0_propagate", "box_muller", "xoshiro128"],
+        origin: "groundSpring",
+        domain: "Monte Carlo ET₀ uncertainty propagation",
+        evolved_by: &[
+            "groundSpring (MC methodology, xoshiro PRNG)",
+            "airSpring (FAO-56 domain equations)",
+            "ToadStool S66+ (WGSL shader, Box-Muller transform)",
+        ],
+        airspring_use: "GPU Monte Carlo ET₀ uncertainty bands (N=10K+ samples)",
+    },
+    // ── v0.6.2 primalTools integration ──────────────────────────────────
+    ShaderProvenance {
+        shader: "bingocube-nautilus (Rust reservoir, no WGSL)",
+        primitives: &[
+            "NautilusShell::evolve_generation",
+            "DriftMonitor::is_drifting",
+            "EdgeSeeder::seed_boards",
+        ],
+        origin: "hotSpring (v0.6.15)",
+        domain: "Evolutionary reservoir computing via BingoCube board populations",
+        evolved_by: &[
+            "hotSpring (NautilusBrain for QCD — β scan cost reduction)",
+            "primalTools/bingoCube (domain-agnostic extraction)",
+            "airSpring v0.6.2 (AirSpringBrain: ET₀/soil/crop heads, MonitoredAtlasStream)",
+        ],
+        airspring_use:
+            "Agricultural regime prediction, drift detection in 80yr atlas, cross-station transfer",
+    },
+    // ── Paper 12 — Immunological Anderson ──────────────────────────────
+    ShaderProvenance {
+        shader: "tissue-cytokine (CPU immunological kernel)",
+        primitives: &[
+            "tissue::analyze_tissue_disorder",
+            "tissue::barrier_disruption_d_eff",
+            "cytokine::CytokineBrain::train",
+        ],
+        origin: "airSpring (Paper 12)",
+        domain: "Immunological Anderson localization — cytokine propagation through skin tissue",
+        evolved_by: &[
+            "Paper 01 (Anderson QS — W_c thresholds, level spacing ratio)",
+            "Paper 06 (no-till dimensional collapse ↔ Paper 12 dimensional promotion duality)",
+            "bingocube-nautilus (CytokineBrain inherits AirSpringBrain pattern)",
+            "wetSpring (GpuDiversity → Pielou evenness as disorder W)",
+        ],
+        airspring_use: "AD flare prediction via CytokineBrain, tissue disorder profiling, Gonzales data pipeline",
+    },
 ];
 
 /// Cross-spring shader provenance record.
@@ -370,6 +474,13 @@ mod tests {
         assert!(shaders.contains(&"blaney_criddle (CPU ET₀ kernel)"));
         assert!(shaders.contains(&"scs_cn (CPU runoff kernel)"));
         assert!(shaders.contains(&"green_ampt (CPU infiltration kernel)"));
+        assert!(shaders.contains(&"jackknife_mean_f64.wgsl"));
+        assert!(shaders.contains(&"bootstrap_mean_f64.wgsl"));
+        assert!(shaders.contains(&"diversity_fusion_f64.wgsl"));
+        assert!(shaders.contains(&"hargreaves_batch_f64.wgsl (science shader)"));
+        assert!(shaders.contains(&"mc_et0_propagate_f64.wgsl"));
+        assert!(shaders.contains(&"bingocube-nautilus (Rust reservoir, no WGSL)"));
+        assert!(shaders.contains(&"tissue-cytokine (CPU immunological kernel)"));
     }
 
     #[test]

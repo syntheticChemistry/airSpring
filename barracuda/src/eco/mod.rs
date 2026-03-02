@@ -4,6 +4,7 @@
 pub mod anderson;
 pub mod correction;
 pub mod crop;
+pub mod cytokine;
 pub mod diversity;
 pub mod dual_kc;
 pub mod et0_ensemble;
@@ -17,6 +18,7 @@ pub mod simple_et0;
 pub mod soil_moisture;
 pub mod solar;
 pub mod thornthwaite;
+pub mod tissue;
 pub mod van_genuchten;
 pub mod water_balance;
 pub mod yield_response;

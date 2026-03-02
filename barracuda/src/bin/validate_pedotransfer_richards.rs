@@ -69,7 +69,14 @@ fn validate_pedotransfer(v: &mut ValidationHarness, benchmark: &serde_json::Valu
 
         let range = |key: &str| -> (f64, f64) {
             let arr = ref_data[key].as_array().expect("range");
-            (arr[0].as_f64().unwrap(), arr[1].as_f64().unwrap())
+            (
+                arr[0]
+                    .as_f64()
+                    .expect("benchmark range element must be f64"),
+                arr[1]
+                    .as_f64()
+                    .expect("benchmark range element must be f64"),
+            )
         };
 
         let (lo, hi) = range("theta_r_range");
@@ -201,8 +208,9 @@ fn validate_richards_drainage(v: &mut ValidationHarness, benchmark: &serde_json:
 
                 let initial_avg: f64 =
                     profiles[0].theta.iter().sum::<f64>() / profiles[0].theta.len() as f64;
-                let final_avg: f64 = profiles.last().unwrap().theta.iter().sum::<f64>()
-                    / profiles.last().unwrap().theta.len() as f64;
+                let final_profile = profiles.last().expect("non-empty profile result");
+                let final_avg: f64 =
+                    final_profile.theta.iter().sum::<f64>() / final_profile.theta.len() as f64;
                 v.check_lower(
                     &format!("{label}: avg θ decreases ({initial_avg:.4} → {final_avg:.4})"),
                     initial_avg,

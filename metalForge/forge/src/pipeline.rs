@@ -33,6 +33,8 @@
 //! - Remote: [`TransferPath::NeuralApi`] (biomeOS)
 
 use crate::dispatch::{self, Workload};
+#[cfg(test)]
+use crate::substrate::pci;
 use crate::substrate::{Substrate, SubstrateKind};
 
 /// How data moves between pipeline stages.
@@ -206,7 +208,7 @@ mod tests {
         Substrate {
             kind: SubstrateKind::Gpu,
             identity: Identity {
-                pci_id: Some("10de:1db6".to_string()),
+                pci_id: Some(pci::NVIDIA_TITAN_V.to_string()),
                 ..Identity::named(name)
             },
             properties: Properties {

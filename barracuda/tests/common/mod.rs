@@ -4,7 +4,7 @@
 /// Try to create an `f64`-capable `WgpuDevice`. Returns `None` on CI/headless
 /// or if the GPU doesn't support `SHADER_F64`.
 pub fn try_create_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
-    pollster::block_on(barracuda::device::WgpuDevice::new_f64_capable())
+    barracuda::device::test_pool::tokio_block_on(barracuda::device::WgpuDevice::new_f64_capable())
         .ok()
         .map(std::sync::Arc::new)
 }

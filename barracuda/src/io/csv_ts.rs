@@ -212,8 +212,9 @@ pub fn parse_csv_reader<R: BufRead>(
     let mut column_index = HashMap::with_capacity(headers.len().saturating_sub(1));
     for (i, name) in headers.iter().enumerate() {
         if i != ts_idx {
-            column_index.insert(name.clone(), column_names.len());
-            column_names.push(name.clone());
+            let owned = name.clone();
+            column_index.insert(owned.clone(), column_names.len());
+            column_names.push(owned);
         }
     }
 

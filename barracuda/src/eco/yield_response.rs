@@ -167,6 +167,7 @@ pub fn ky_table(crop: &str) -> Option<YieldResponseFactor> {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)] // justified: test code may use unwrap for clarity
 mod tests {
     use super::*;
 

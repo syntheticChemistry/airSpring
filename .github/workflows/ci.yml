@@ -88,6 +88,10 @@ jobs:
         working-directory: airSpring/metalForge/forge
         run: cargo clippy --all-targets -- -D warnings -W clippy::pedantic
 
+      - name: cargo doc
+        working-directory: airSpring/metalForge/forge
+        run: cargo doc --no-deps
+
       - name: cargo test
         working-directory: airSpring/metalForge/forge
         run: cargo test
@@ -150,6 +154,10 @@ jobs:
           python3 control/neural_api/neural_api_parity.py
           python3 control/seasonal_batch_et0/seasonal_batch_et0.py
           python3 control/metalforge_dispatch/metalforge_dispatch.py
+          python3 control/barrier_skin/barrier_skin.py
+          python3 control/cross_species_skin/cross_species_skin.py
+          python3 control/cytokine_brain/cytokine_brain.py
+          python3 control/tissue_diversity/tissue_diversity.py
 
   coverage:
     name: Code Coverage (llvm-cov)
@@ -197,3 +205,76 @@ jobs:
             exit 1
           fi
           echo "All production files under 1000 lines"
+
+  validate:
+    name: Validation Binaries (CPU)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: airSpring
+
+      - uses: actions/checkout@v4
+        with:
+          repository: syntheticChemistry/ecoPrimals
+          path: phase1
+          sparse-checkout: toadstool/crates/barracuda
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Build validation binaries
+        working-directory: airSpring/barracuda
+        run: cargo build --bins
+
+      - name: Run CPU validation binaries
+        working-directory: airSpring/barracuda
+        run: |
+          cargo run --bin validate_et0
+          cargo run --bin validate_hargreaves
+          cargo run --bin validate_water_balance
+          cargo run --bin validate_soil
+          cargo run --bin validate_sensor_calibration
+          cargo run --bin validate_yield
+          cargo run --bin validate_scheduling
+          cargo run --bin validate_dual_kc
+          cargo run --bin validate_cover_crop
+          cargo run --bin validate_lysimeter
+          cargo run --bin validate_sensitivity
+          cargo run --bin validate_priestley_taylor
+          cargo run --bin validate_thornthwaite
+          cargo run --bin validate_gdd
+          cargo run --bin validate_pedotransfer_richards
+          cargo run --bin validate_et0_intercomparison
+          cargo run --bin validate_makkink
+          cargo run --bin validate_turc
+          cargo run --bin validate_hamon
+          cargo run --bin validate_blaney_criddle
+          cargo run --bin validate_scs_cn
+          cargo run --bin validate_green_ampt
+          cargo run --bin validate_coupled_runoff
+          cargo run --bin validate_vg_inverse
+          cargo run --bin validate_anderson
+          cargo run --bin validate_barrier_skin
+          cargo run --bin validate_cross_species
+          cargo run --bin validate_cytokine
+          cargo run --bin validate_tissue
+          cargo run --bin validate_gpu_math
+          cargo run --bin cross_validate
+
+  deny:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: airSpring
+
+      - uses: actions/checkout@v4
+        with:
+          repository: syntheticChemistry/ecoPrimals
+          path: phase1
+          sparse-checkout: toadstool/crates/barracuda
+
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          manifest-path: airSpring/barracuda/Cargo.toml

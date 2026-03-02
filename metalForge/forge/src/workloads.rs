@@ -311,6 +311,47 @@ pub fn sensor_anomaly() -> EcoWorkload {
     w
 }
 
+// ── Paper 12 — Immunological Anderson ────────────────────────────────
+
+/// Tissue diversity profiling — cell-type Pielou evenness → Anderson disorder W.
+///
+/// Dispatches to `GpuDiversity` (Shannon/Simpson/Pielou) for tissue samples.
+/// GPU path available via `DiversityFusionGpu` (`ToadStool` S70+).
+#[must_use]
+pub fn tissue_diversity() -> EcoWorkload {
+    EcoWorkload::new_static(ShaderOrigin::Absorbed)
+        .named(
+            "tissue_diversity",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        )
+        .with_primitive("DiversityFusionF64")
+}
+
+/// `CytokineBrain` evolutionary reservoir — AD flare regime prediction.
+///
+/// CPU-only: Nautilus reservoir computing (`bingocube-nautilus`). No WGSL shader.
+/// NPU export available for edge deployment via `NautilusShell::export_akd1000_weights()`.
+#[must_use]
+pub fn cytokine_brain() -> EcoWorkload {
+    EcoWorkload::new_static(ShaderOrigin::CpuOnly)
+        .named("cytokine_brain", vec![Capability::F64Compute])
+}
+
+/// AD flare classifier — NPU binary (healthy / flare) from cytokine panel.
+///
+/// Input: 7 features (time, IL-31, IL-4, IL-13, pruritus, TEWL, Pielou).
+/// Output: 2-class softmax (int8 quantized FC from `CytokineBrain` export).
+/// Enables edge deployment on AKD1000 for real-time disease state monitoring.
+#[must_use]
+pub fn ad_flare_classifier() -> EcoWorkload {
+    let mut w = EcoWorkload::new_static(ShaderOrigin::NpuNative).named(
+        "ad_flare_classifier",
+        vec![Capability::QuantizedInference { bits: 8 }],
+    );
+    w.workload.preferred_substrate = Some(SubstrateKind::Npu);
+    w
+}
+
 // ── CPU-only domains ────────────────────────────────────────────────
 
 /// Validation harness — CPU sequential checks.
@@ -352,6 +393,10 @@ pub fn all_workloads() -> Vec<EcoWorkload> {
         crop_stress_classifier(),
         irrigation_decision(),
         sensor_anomaly(),
+        // Paper 12 — Immunological Anderson
+        tissue_diversity(),
+        cytokine_brain(),
+        ad_flare_classifier(),
         // CPU-only
         validation_harness(),
         weather_ingest(),
@@ -377,16 +422,16 @@ mod tests {
     #[test]
     fn all_workloads_has_entries() {
         let all = all_workloads();
-        assert_eq!(all.len(), 18, "18 eco workloads");
+        assert_eq!(all.len(), 21, "21 eco workloads");
     }
 
     #[test]
     fn origin_counts_match() {
         let (absorbed, local, npu_native, cpu_only) = origin_summary();
-        assert_eq!(absorbed, 9, "9 absorbed GPU domains");
+        assert_eq!(absorbed, 10, "10 absorbed GPU domains");
         assert_eq!(local, 4, "4 local WGSL extensions");
-        assert_eq!(npu_native, 3, "3 NPU-native classifiers");
-        assert_eq!(cpu_only, 2, "2 CPU-only domains");
+        assert_eq!(npu_native, 4, "4 NPU-native classifiers");
+        assert_eq!(cpu_only, 3, "3 CPU-only domains");
     }
 
     #[test]
@@ -395,6 +440,7 @@ mod tests {
             crop_stress_classifier(),
             irrigation_decision(),
             sensor_anomaly(),
+            ad_flare_classifier(),
         ] {
             assert!(w.is_npu_native());
             assert_eq!(w.workload.preferred_substrate, Some(SubstrateKind::Npu));

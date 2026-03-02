@@ -115,7 +115,7 @@ mod tests {
     use super::*;
 
     fn try_device() -> Option<Arc<WgpuDevice>> {
-        pollster::block_on(WgpuDevice::new_f64_capable())
+        barracuda::device::test_pool::tokio_block_on(WgpuDevice::new_f64_capable())
             .ok()
             .map(Arc::new)
     }

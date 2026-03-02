@@ -16,6 +16,7 @@ use std::ops::Range;
 use std::sync::Arc;
 
 use barracuda::device::WgpuDevice;
+use bingocube_nautilus::DriftMonitor;
 
 use crate::gpu::seasonal_pipeline::{CropConfig, SeasonResult, SeasonalPipeline, WeatherDay};
 
@@ -122,7 +123,7 @@ impl AtlasStream {
                 let result = self.pipeline.run_season(&batch.weather, crop_config);
                 let crop_name = crop_config.crop_type.coefficients().name.to_string();
                 on_result(StationSeasonResult {
-                    station_id: batch.station_id.clone(),
+                    station_id: batch.station_id.clone(), // justified: ownership needed for storage in StationSeasonResult
                     year: batch.year,
                     crop_name,
                     result,
@@ -166,7 +167,7 @@ impl AtlasStream {
                     SeasonalPipeline::run_season_with_et0(&batch.weather, crop_config, et0_slice);
                 let crop_name = crop_config.crop_type.coefficients().name.to_string();
                 results.push(StationSeasonResult {
-                    station_id: batch.station_id.clone(),
+                    station_id: batch.station_id.clone(), // justified: ownership needed for storage in StationSeasonResult
                     year: batch.year,
                     crop_name,
                     result,
@@ -194,6 +195,166 @@ impl AtlasStream {
 }
 
 impl Default for AtlasStream {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+/// Regime change snapshot from `DriftMonitor` during multi-year atlas processing.
+///
+/// Emitted by [`MonitoredAtlasStream`] when the monitor detects a shift in
+/// agricultural conditions (drought onset, irrigation regime change, etc.).
+#[derive(Debug, Clone)]
+pub struct RegimeChange {
+    /// Station where the regime change was detected.
+    pub station_id: String,
+    /// Year where the change was flagged.
+    pub year: u32,
+    /// Crop name.
+    pub crop_name: String,
+    /// The `N_e * s` value at the time of detection.
+    pub ne_s: f64,
+}
+
+/// Atlas stream with integrated `DriftMonitor` for regime change detection.
+///
+/// Wraps [`AtlasStream`] and feeds year-over-year yield/ET₀ into a
+/// `bingocube_nautilus::DriftMonitor`, flagging stations and years where
+/// `N_e * s` drops below the drift threshold for ≥3 consecutive seasons.
+///
+/// The "population" analogy: each station's yearly yield ratio is an
+/// "organism" fitness; drought or regime shifts cause fitness collapse,
+/// which the drift detector flags.
+#[derive(Debug)]
+pub struct MonitoredAtlasStream {
+    inner: AtlasStream,
+    monitor: DriftMonitor,
+    regime_changes: Vec<RegimeChange>,
+    generation: usize,
+}
+
+impl MonitoredAtlasStream {
+    /// Create a monitored atlas stream (CPU backend).
+    #[must_use]
+    pub fn new() -> Self {
+        Self {
+            inner: AtlasStream::new(),
+            monitor: DriftMonitor::default(),
+            regime_changes: Vec::new(),
+            generation: 0,
+        }
+    }
+
+    /// Create a monitored atlas stream with GPU acceleration.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the GPU device cannot initialise.
+    pub fn with_gpu(device: Arc<WgpuDevice>) -> crate::error::Result<Self> {
+        Ok(Self {
+            inner: AtlasStream::with_gpu(device)?,
+            monitor: DriftMonitor::default(),
+            regime_changes: Vec::new(),
+            generation: 0,
+        })
+    }
+
+    /// Process a batch and track regime changes year-over-year.
+    ///
+    /// Each station-season result is fed into the drift monitor.
+    /// Yield ratio is used as the "fitness" signal: `mean_fitness` is the
+    /// average yield ratio across all crops for a station-year, and
+    /// `best_fitness` is the maximum.
+    #[must_use]
+    pub fn process_monitored(
+        &mut self,
+        batches: &[StationBatch],
+        config: &AtlasStreamConfig,
+    ) -> Vec<StationSeasonResult> {
+        let results = self.inner.process_batch(batches, config);
+
+        let mut by_station_year: std::collections::HashMap<
+            (String, u32),
+            Vec<&StationSeasonResult>,
+        > = std::collections::HashMap::new();
+        for r in &results {
+            by_station_year
+                .entry((r.station_id.clone(), r.year)) // justified: HashMap key requires owned String
+                .or_default()
+                .push(r);
+        }
+
+        let pop_size = config.crop_configs.len().max(1);
+        let mut keys: Vec<_> = by_station_year.keys().cloned().collect();
+        keys.sort();
+
+        for key in &keys {
+            if let Some(group) = by_station_year.get(key) {
+                let yields: Vec<f64> = group.iter().map(|r| r.result.yield_ratio).collect();
+                let mean_yield = yields.iter().sum::<f64>() / yields.len() as f64;
+                let best_yield = yields.iter().fold(0.0_f64, |a, &b| a.max(b));
+
+                self.monitor
+                    .record(self.generation, pop_size, mean_yield, best_yield);
+
+                if self.monitor.is_drifting() {
+                    let crop_name = group
+                        .iter()
+                        .min_by(|a, b| {
+                            a.result
+                                .yield_ratio
+                                .partial_cmp(&b.result.yield_ratio)
+                                .unwrap_or(std::cmp::Ordering::Equal)
+                        })
+                        .map_or_else(String::new, |r| r.crop_name.clone());
+
+                    self.regime_changes.push(RegimeChange {
+                        station_id: key.0.clone(), // justified: ownership needed for storage in RegimeChange
+                        year: key.1,
+                        crop_name,
+                        ne_s: self.monitor.latest_ne_s(),
+                    });
+                }
+                self.generation += 1;
+            }
+        }
+
+        results
+    }
+
+    /// Whether any regime changes have been detected.
+    #[must_use]
+    pub const fn has_regime_changes(&self) -> bool {
+        !self.regime_changes.is_empty()
+    }
+
+    /// All detected regime changes.
+    #[must_use]
+    pub fn regime_changes(&self) -> &[RegimeChange] {
+        &self.regime_changes
+    }
+
+    /// Reference to the underlying drift monitor.
+    #[must_use]
+    pub const fn drift_monitor(&self) -> &DriftMonitor {
+        &self.monitor
+    }
+
+    /// Whether the monitor is currently in a drifting state.
+    #[must_use]
+    pub fn is_drifting(&self) -> bool {
+        self.monitor.is_drifting()
+    }
+
+    /// Reset the monitor for a new multi-year run.
+    pub fn reset(&mut self) {
+        self.monitor = DriftMonitor::default();
+        self.regime_changes.clear();
+        self.generation = 0;
+    }
+}
+
+impl Default for MonitoredAtlasStream {
     fn default() -> Self {
         Self::new()
     }
@@ -385,9 +546,11 @@ mod tests {
     }
 
     fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
-        pollster::block_on(barracuda::device::WgpuDevice::new_f64_capable())
-            .ok()
-            .map(std::sync::Arc::new)
+        barracuda::device::test_pool::tokio_block_on(
+            barracuda::device::WgpuDevice::new_f64_capable(),
+        )
+        .ok()
+        .map(std::sync::Arc::new)
     }
 
     #[test]
@@ -477,5 +640,75 @@ mod tests {
             cpu_results[0].result.total_et0,
             et0_pct
         );
+    }
+
+    #[test]
+    fn monitored_stream_processes_ok() {
+        let mut stream = MonitoredAtlasStream::new();
+        let batches = vec![StationBatch {
+            station_id: "MON-001".to_string(),
+            year: 2024,
+            weather: growing_season(),
+        }];
+        let config = AtlasStreamConfig {
+            crop_configs: vec![CropConfig::standard(CropType::Corn)],
+            year_range: 2024..2025,
+        };
+
+        let results = stream.process_monitored(&batches, &config);
+
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].station_id, "MON-001");
+    }
+
+    #[test]
+    fn monitored_stream_tracks_multi_year() {
+        let mut stream = MonitoredAtlasStream::new();
+        let config = AtlasStreamConfig {
+            crop_configs: vec![
+                CropConfig::standard(CropType::Corn),
+                CropConfig::standard(CropType::Soybean),
+            ],
+            year_range: 2020..2025,
+        };
+
+        for year in 2020..2025 {
+            let batches = vec![StationBatch {
+                station_id: "DECADE-A".to_string(),
+                year,
+                weather: growing_season(),
+            }];
+            let _ = stream.process_monitored(&batches, &config);
+        }
+
+        let dm = stream.drift_monitor();
+        assert!(!dm.is_drifting() || stream.has_regime_changes());
+    }
+
+    #[test]
+    fn monitored_stream_reset() {
+        let mut stream = MonitoredAtlasStream::new();
+        let batches = vec![StationBatch {
+            station_id: "RST".to_string(),
+            year: 2024,
+            weather: growing_season(),
+        }];
+        let config = AtlasStreamConfig {
+            crop_configs: vec![CropConfig::standard(CropType::Corn)],
+            year_range: 2024..2025,
+        };
+
+        let _ = stream.process_monitored(&batches, &config);
+        stream.reset();
+
+        assert!(stream.regime_changes().is_empty());
+        assert!(!stream.is_drifting());
+    }
+
+    #[test]
+    fn monitored_default_impl() {
+        let stream = MonitoredAtlasStream::default();
+        assert!(!stream.is_drifting());
+        assert!(!stream.has_regime_changes());
     }
 }

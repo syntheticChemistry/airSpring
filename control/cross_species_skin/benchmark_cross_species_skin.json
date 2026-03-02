@@ -1,0 +1,137 @@
+{
+  "_provenance": {
+    "method": "Cross-species skin comparison: canine vs human Anderson predictions (Paper 12 §4.1 Exp 274)",
+    "baseline_script": "control/cross_species_skin/cross_species_skin.py",
+    "baseline_command": "python3 control/cross_species_skin/cross_species_skin.py",
+    "baseline_commit": "pending",
+    "python_version": "3.10",
+    "created": "2026-03-02",
+    "_tolerance_justification": "Exact regime/dimension checks use 1e-10; species-specific diversity and breach thresholds use expected ranges.",
+    "references": [
+      "Paper 12: Immunological Anderson — cross-species validation",
+      "Gonzales AJ et al. (2013) Vet Dermatol 24:48-53 (canine AD)",
+      "Simpson et al. (2020) NEJM (human AD dupilumab)",
+      "Marsella R, De Benedetto A (2017) Vet Dermatol 28:306-e69 (comparative skin barrier)"
+    ],
+    "notes": [
+      "Exp 069: Cross-species skin comparison",
+      "Canine epidermis thinner (20-30μm) vs human (50-100μm) → different d_eff",
+      "One Health Anderson validation: same physics, different barrier geometry",
+      "Validates Gonzales comparative approach (canine model → human translation)"
+    ]
+  },
+  "validation_checks": {
+    "species_barrier_params": {
+      "description": "Species-specific skin barrier parameters",
+      "test_cases": [
+        {
+          "label": "Human healthy skin",
+          "species": "human",
+          "epidermis_thickness_um": 75.0,
+          "barrier_alpha": 0.01,
+          "barrier_n": 1.8,
+          "baseline_tewl_g_m2_h": 8.0,
+          "d_eff_intact": 2.0,
+          "_note": "Thick epidermis = strong 2D barrier"
+        },
+        {
+          "label": "Canine healthy skin",
+          "species": "canine",
+          "epidermis_thickness_um": 25.0,
+          "barrier_alpha": 0.03,
+          "barrier_n": 1.5,
+          "baseline_tewl_g_m2_h": 15.0,
+          "d_eff_intact": 2.0,
+          "_note": "Thin epidermis = weaker 2D barrier, higher baseline TEWL"
+        },
+        {
+          "label": "Feline healthy skin",
+          "species": "feline",
+          "epidermis_thickness_um": 35.0,
+          "barrier_alpha": 0.02,
+          "barrier_n": 1.6,
+          "baseline_tewl_g_m2_h": 12.0,
+          "d_eff_intact": 2.0,
+          "_note": "Intermediate epidermis thickness"
+        }
+      ]
+    },
+    "breach_threshold": {
+      "description": "Species-specific scratch-to-breach threshold (thinner barrier → easier breach)",
+      "test_cases": [
+        {"label": "Canine breaches before human at same scratch intensity", "canine_breach_at": 0.3, "human_breach_at": 0.6, "expected_canine_first": true},
+        {"label": "Both species fully breached at high intensity", "scratch_intensity": 1.0, "expected_canine_d": 3.0, "expected_human_d": 3.0, "tolerance": 1e-10}
+      ]
+    },
+    "anderson_predictions": {
+      "description": "Cross-species Anderson regime predictions under identical W",
+      "test_cases": [
+        {
+          "label": "Low W (healthy tissue, W=0.5): both Extended in all d",
+          "w": 0.5,
+          "expected_regime_d2": "Extended",
+          "expected_regime_d3": "Extended"
+        },
+        {
+          "label": "Moderate W (mild inflammation, W=5.0): Localized in 2D, Extended in 3D",
+          "w": 5.0,
+          "expected_regime_d2": "Localized",
+          "expected_regime_d3": "Extended"
+        },
+        {
+          "label": "High W (severe inflammation, W=20.0): Localized in both",
+          "w": 20.0,
+          "expected_regime_d2": "Localized",
+          "expected_regime_d3": "Localized"
+        }
+      ]
+    },
+    "comparative_diversity": {
+      "description": "Cell-type diversity comparison across species",
+      "test_cases": [
+        {
+          "label": "Human epidermis (4 cell types)",
+          "species": "human",
+          "cell_abundances": [85.0, 5.0, 8.0, 2.0],
+          "expected_richness": 4,
+          "expected_evenness_range": [0.3, 0.6]
+        },
+        {
+          "label": "Canine epidermis (4 cell types, similar distribution)",
+          "species": "canine",
+          "cell_abundances": [80.0, 8.0, 8.0, 4.0],
+          "expected_richness": 4,
+          "expected_evenness_range": [0.4, 0.7]
+        },
+        {
+          "label": "AD-affected canine dermis (9 cell types, highly diverse)",
+          "species": "canine_ad",
+          "cell_abundances": [15.0, 18.0, 14.0, 12.0, 10.0, 8.0, 8.0, 7.0, 8.0],
+          "expected_richness": 9,
+          "expected_evenness_range": [0.9, 1.0]
+        }
+      ]
+    },
+    "one_health_bridge": {
+      "description": "Gonzales One Health validation: canine model predicts human outcomes",
+      "test_cases": [
+        {
+          "label": "Apoquel (canine JAK1) predicts tofacitinib (human JAK1)",
+          "canine_drug": "oclacitinib",
+          "human_equivalent": "tofacitinib",
+          "pathway": "JAK1",
+          "canine_ic50_nm": 10.0,
+          "human_ic50_nm": 3.2,
+          "expected_same_target": true
+        },
+        {
+          "label": "Cytopoint (canine anti-IL31) predicts nemolizumab (human anti-IL31RA)",
+          "canine_drug": "lokivetmab",
+          "human_equivalent": "nemolizumab",
+          "pathway": "IL-31",
+          "expected_same_target": true
+        }
+      ]
+    }
+  }
+}

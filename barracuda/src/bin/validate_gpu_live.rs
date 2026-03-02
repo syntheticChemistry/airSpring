@@ -51,7 +51,7 @@ fn create_device() -> Option<Arc<WgpuDevice>> {
         println!("  No GPU adapter hint — using runtime discovery");
     }
 
-    match pollster::block_on(WgpuDevice::from_env()) {
+    match barracuda::device::test_pool::tokio_block_on(WgpuDevice::from_env()) {
         Ok(dev) => {
             println!("  GPU device created");
             Some(Arc::new(dev))
@@ -59,7 +59,7 @@ fn create_device() -> Option<Arc<WgpuDevice>> {
         Err(e) => {
             eprintln!("  WARN: Could not create Titan V device: {e}");
             eprintln!("  Trying auto-discovery (any f64-capable GPU)...");
-            match pollster::block_on(WgpuDevice::new_f64_capable()) {
+            match barracuda::device::test_pool::tokio_block_on(WgpuDevice::new_f64_capable()) {
                 Ok(dev) => {
                     println!("  GPU device created via auto-discovery");
                     Some(Arc::new(dev))

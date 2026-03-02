@@ -9,6 +9,16 @@
 
 use std::fmt;
 
+/// Well-known PCI vendor:device IDs for substrate identification.
+pub mod pci {
+    /// NVIDIA Titan V (GV100).
+    pub const NVIDIA_TITAN_V: &str = "10de:1db6";
+    /// NVIDIA `GeForce` RTX 4070.
+    pub const NVIDIA_RTX_4070: &str = "10de:2786";
+    /// `BrainChip` Akida AKD1000 Neural Processor.
+    pub const BRAINCHIP_AKD1000: &str = "1e7c:1000";
+}
+
 /// A compute substrate discovered at runtime.
 #[derive(Debug, Clone)]
 pub struct Substrate {

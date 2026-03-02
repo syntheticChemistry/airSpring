@@ -16,7 +16,6 @@ use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{
     self, json_array_opt, json_object_opt, parse_benchmark_json, ValidationHarness,
 };
-use std::process;
 
 /// Benchmark JSON embedded at compile time for reproducibility.
 const BENCHMARK_JSON: &str = include_str!("../../../control/biochar/benchmark_biochar.json");
@@ -29,31 +28,47 @@ fn main() {
     let benchmark =
         parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_biochar.json must parse");
 
-    let Some(datasets) = json_object_opt(&benchmark, &["isotherm_data", "datasets"]) else {
-        eprintln!("benchmark JSON: missing isotherm_data.datasets");
-        process::exit(1);
+    let datasets = json_object_opt(&benchmark, &["isotherm_data", "datasets"]);
+    v.check_bool(
+        "benchmark JSON: isotherm_data.datasets present",
+        datasets.is_some(),
+    );
+    let Some(datasets) = datasets else {
+        v.finish();
     };
 
-    let Some(validation) = benchmark.get("validation_checks") else {
-        eprintln!("benchmark JSON: missing validation_checks");
-        process::exit(1);
+    let validation = benchmark.get("validation_checks");
+    v.check_bool(
+        "benchmark JSON: validation_checks present",
+        validation.is_some(),
+    );
+    let Some(validation) = validation else {
+        v.finish();
     };
 
     let mut results: std::collections::HashMap<String, DatasetResult> =
         std::collections::HashMap::new();
 
     for (ds_name, ds) in datasets {
-        let Some(ce_arr) = json_array_opt(ds, &["Ce"]) else {
-            eprintln!("benchmark JSON: dataset {ds_name} missing Ce");
-            process::exit(1);
+        let ce_arr = json_array_opt(ds, &["Ce"]);
+        v.check_bool(
+            &format!("benchmark JSON: dataset {ds_name} Ce present"),
+            ce_arr.is_some(),
+        );
+        let Some(ce_arr) = ce_arr else {
+            continue;
         };
         let ce: Vec<f64> = ce_arr
             .iter()
             .filter_map(serde_json::Value::as_f64)
             .collect();
-        let Some(qe_arr) = json_array_opt(ds, &["qe"]) else {
-            eprintln!("benchmark JSON: dataset {ds_name} missing qe");
-            process::exit(1);
+        let qe_arr = json_array_opt(ds, &["qe"]);
+        v.check_bool(
+            &format!("benchmark JSON: dataset {ds_name} qe present"),
+            qe_arr.is_some(),
+        );
+        let Some(qe_arr) = qe_arr else {
+            continue;
         };
         let qe: Vec<f64> = qe_arr
             .iter()
@@ -117,81 +132,83 @@ fn main() {
     // ── Langmuir validation checks ─────────────────────────────────────
     validation::section("Langmuir fit validation");
 
-    let Some(lang_checks) = json_array_opt(validation, &["langmuir_fit", "checks"]) else {
-        eprintln!("benchmark JSON: missing validation_checks.langmuir_fit.checks");
-        process::exit(1);
-    };
+    let lang_checks = json_array_opt(validation, &["langmuir_fit", "checks"]);
+    v.check_bool(
+        "benchmark JSON: validation_checks.langmuir_fit.checks present",
+        lang_checks.is_some(),
+    );
+    if let Some(lang_checks) = lang_checks {
+        for c in lang_checks {
+            let cid = c.get("id").and_then(|v| v.as_str()).unwrap_or("");
+            let desc = c.get("description").and_then(|v| v.as_str()).unwrap_or("");
 
-    for c in lang_checks {
-        let cid = c.get("id").and_then(|v| v.as_str()).unwrap_or("");
-        let desc = c.get("description").and_then(|v| v.as_str()).unwrap_or("");
-
-        if cid == "wood_qmax_range" {
-            let Some(r) = results.get("wood_biochar_500C") else {
-                eprintln!("benchmark JSON: wood_biochar_500C not in results");
-                process::exit(1);
-            };
-            let min_v = c
-                .get("min")
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
-            let max_v = c
-                .get("max")
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(f64::INFINITY);
-            v.check_bool(
-                &format!("{desc}: qmax={:.4} mg/g", r.qmax),
-                r.qmax >= min_v && r.qmax <= max_v,
-            );
-        } else if cid == "wood_KL_positive" {
-            let Some(r) = results.get("wood_biochar_500C") else {
-                eprintln!("benchmark JSON: wood_biochar_500C not in results");
-                process::exit(1);
-            };
-            v.check_bool(&format!("{desc}: KL={:.6}", r.kl), r.kl > 0.0);
-        } else if cid == "wood_r2" {
-            let Some(r) = results.get("wood_biochar_500C") else {
-                eprintln!("benchmark JSON: wood_biochar_500C not in results");
-                process::exit(1);
-            };
-            let min_r2 = c
-                .get("min_r2")
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
-            v.check_bool(
-                &format!("{desc}: R²={:.4}", r.r2_langmuir),
-                r.r2_langmuir >= min_r2,
-            );
-        } else if cid == "sugar_qmax_range" {
-            let Some(r) = results.get("sugar_beet_biochar") else {
-                eprintln!("benchmark JSON: sugar_beet_biochar not in results");
-                process::exit(1);
-            };
-            let min_v = c
-                .get("min")
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
-            let max_v = c
-                .get("max")
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(f64::INFINITY);
-            v.check_bool(
-                &format!("{desc}: qmax={:.4} mg/g", r.qmax),
-                r.qmax >= min_v && r.qmax <= max_v,
-            );
-        } else if cid == "sugar_r2" {
-            let Some(r) = results.get("sugar_beet_biochar") else {
-                eprintln!("benchmark JSON: sugar_beet_biochar not in results");
-                process::exit(1);
-            };
-            let min_r2 = c
-                .get("min_r2")
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
-            v.check_bool(
-                &format!("{desc}: R²={:.4}", r.r2_langmuir),
-                r.r2_langmuir >= min_r2,
-            );
+            if cid == "wood_qmax_range" {
+                let r = results.get("wood_biochar_500C");
+                v.check_bool("benchmark JSON: wood_biochar_500C in results", r.is_some());
+                if let Some(r) = r {
+                    let min_v = c
+                        .get("min")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0);
+                    let max_v = c
+                        .get("max")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(f64::INFINITY);
+                    v.check_bool(
+                        &format!("{desc}: qmax={:.4} mg/g", r.qmax),
+                        r.qmax >= min_v && r.qmax <= max_v,
+                    );
+                }
+            } else if cid == "wood_KL_positive" {
+                let r = results.get("wood_biochar_500C");
+                v.check_bool("benchmark JSON: wood_biochar_500C in results", r.is_some());
+                if let Some(r) = r {
+                    v.check_bool(&format!("{desc}: KL={:.6}", r.kl), r.kl > 0.0);
+                }
+            } else if cid == "wood_r2" {
+                let r = results.get("wood_biochar_500C");
+                v.check_bool("benchmark JSON: wood_biochar_500C in results", r.is_some());
+                if let Some(r) = r {
+                    let min_r2 = c
+                        .get("min_r2")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0);
+                    v.check_bool(
+                        &format!("{desc}: R²={:.4}", r.r2_langmuir),
+                        r.r2_langmuir >= min_r2,
+                    );
+                }
+            } else if cid == "sugar_qmax_range" {
+                let r = results.get("sugar_beet_biochar");
+                v.check_bool("benchmark JSON: sugar_beet_biochar in results", r.is_some());
+                if let Some(r) = r {
+                    let min_v = c
+                        .get("min")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0);
+                    let max_v = c
+                        .get("max")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(f64::INFINITY);
+                    v.check_bool(
+                        &format!("{desc}: qmax={:.4} mg/g", r.qmax),
+                        r.qmax >= min_v && r.qmax <= max_v,
+                    );
+                }
+            } else if cid == "sugar_r2" {
+                let r = results.get("sugar_beet_biochar");
+                v.check_bool("benchmark JSON: sugar_beet_biochar in results", r.is_some());
+                if let Some(r) = r {
+                    let min_r2 = c
+                        .get("min_r2")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0);
+                    v.check_bool(
+                        &format!("{desc}: R²={:.4}", r.r2_langmuir),
+                        r.r2_langmuir >= min_r2,
+                    );
+                }
+            }
         }
     }
 
@@ -199,67 +216,69 @@ fn main() {
     println!();
     validation::section("Freundlich fit validation");
 
-    let Some(freund_checks) = json_array_opt(validation, &["freundlich_fit", "checks"]) else {
-        eprintln!("benchmark JSON: missing validation_checks.freundlich_fit.checks");
-        process::exit(1);
-    };
+    let freund_checks = json_array_opt(validation, &["freundlich_fit", "checks"]);
+    v.check_bool(
+        "benchmark JSON: validation_checks.freundlich_fit.checks present",
+        freund_checks.is_some(),
+    );
+    if let Some(freund_checks) = freund_checks {
+        for c in freund_checks {
+            let cid = c.get("id").and_then(|v| v.as_str()).unwrap_or("");
+            let desc = c.get("description").and_then(|v| v.as_str()).unwrap_or("");
 
-    for c in freund_checks {
-        let cid = c.get("id").and_then(|v| v.as_str()).unwrap_or("");
-        let desc = c.get("description").and_then(|v| v.as_str()).unwrap_or("");
-
-        if cid == "wood_KF_positive" {
-            let Some(r) = results.get("wood_biochar_500C") else {
-                eprintln!("benchmark JSON: wood_biochar_500C not in results");
-                process::exit(1);
-            };
-            v.check_bool(&format!("{desc}: KF={:.4}", r.kf), r.kf > 0.0);
-        } else if cid == "wood_n_favorable" {
-            let Some(r) = results.get("wood_biochar_500C") else {
-                eprintln!("benchmark JSON: wood_biochar_500C not in results");
-                process::exit(1);
-            };
-            let min_n = c
-                .get("min_n")
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(1.0);
-            v.check_bool(&format!("{desc}: n={:.4}", r.n), r.n >= min_n);
-        } else if cid == "wood_r2" {
-            let Some(r) = results.get("wood_biochar_500C") else {
-                eprintln!("benchmark JSON: wood_biochar_500C not in results");
-                process::exit(1);
-            };
-            let min_r2 = c
-                .get("min_r2")
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
-            v.check_bool(
-                &format!("{desc}: R²={:.4}", r.r2_freundlich),
-                r.r2_freundlich >= min_r2,
-            );
-        } else if cid == "sugar_KF_positive" {
-            let Some(r) = results.get("sugar_beet_biochar") else {
-                eprintln!("benchmark JSON: sugar_beet_biochar not in results");
-                process::exit(1);
-            };
-            v.check_bool(&format!("{desc}: KF={:.4}", r.kf), r.kf > 0.0);
-        } else if cid == "sugar_n_range" {
-            let Some(r) = results.get("sugar_beet_biochar") else {
-                eprintln!("benchmark JSON: sugar_beet_biochar not in results");
-                process::exit(1);
-            };
-            let min_v = c
-                .get("min")
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(0.0);
-            let max_v = c
-                .get("max")
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(f64::INFINITY);
-            v.check_bool(
-                &format!("{desc}: n={:.4}", r.n),
-                r.n >= min_v && r.n <= max_v,
-            );
+            if cid == "wood_KF_positive" {
+                let r = results.get("wood_biochar_500C");
+                v.check_bool("benchmark JSON: wood_biochar_500C in results", r.is_some());
+                if let Some(r) = r {
+                    v.check_bool(&format!("{desc}: KF={:.4}", r.kf), r.kf > 0.0);
+                }
+            } else if cid == "wood_n_favorable" {
+                let r = results.get("wood_biochar_500C");
+                v.check_bool("benchmark JSON: wood_biochar_500C in results", r.is_some());
+                if let Some(r) = r {
+                    let min_n = c
+                        .get("min_n")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(1.0);
+                    v.check_bool(&format!("{desc}: n={:.4}", r.n), r.n >= min_n);
+                }
+            } else if cid == "wood_r2" {
+                let r = results.get("wood_biochar_500C");
+                v.check_bool("benchmark JSON: wood_biochar_500C in results", r.is_some());
+                if let Some(r) = r {
+                    let min_r2 = c
+                        .get("min_r2")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0);
+                    v.check_bool(
+                        &format!("{desc}: R²={:.4}", r.r2_freundlich),
+                        r.r2_freundlich >= min_r2,
+                    );
+                }
+            } else if cid == "sugar_KF_positive" {
+                let r = results.get("sugar_beet_biochar");
+                v.check_bool("benchmark JSON: sugar_beet_biochar in results", r.is_some());
+                if let Some(r) = r {
+                    v.check_bool(&format!("{desc}: KF={:.4}", r.kf), r.kf > 0.0);
+                }
+            } else if cid == "sugar_n_range" {
+                let r = results.get("sugar_beet_biochar");
+                v.check_bool("benchmark JSON: sugar_beet_biochar in results", r.is_some());
+                if let Some(r) = r {
+                    let min_v = c
+                        .get("min")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(0.0);
+                    let max_v = c
+                        .get("max")
+                        .and_then(serde_json::Value::as_f64)
+                        .unwrap_or(f64::INFINITY);
+                    v.check_bool(
+                        &format!("{desc}: n={:.4}", r.n),
+                        r.n >= min_v && r.n <= max_v,
+                    );
+                }
+            }
         }
     }
 
@@ -267,41 +286,43 @@ fn main() {
     println!();
     validation::section("Model comparison");
 
-    let Some(model_checks) = json_array_opt(validation, &["model_comparison", "checks"]) else {
-        eprintln!("benchmark JSON: missing validation_checks.model_comparison.checks");
-        process::exit(1);
-    };
+    let model_checks = json_array_opt(validation, &["model_comparison", "checks"]);
+    v.check_bool(
+        "benchmark JSON: validation_checks.model_comparison.checks present",
+        model_checks.is_some(),
+    );
+    if let Some(model_checks) = model_checks {
+        for c in model_checks {
+            let cid = c.get("id").and_then(|v| v.as_str()).unwrap_or("");
+            let desc = c.get("description").and_then(|v| v.as_str()).unwrap_or("");
 
-    for c in model_checks {
-        let cid = c.get("id").and_then(|v| v.as_str()).unwrap_or("");
-        let desc = c.get("description").and_then(|v| v.as_str()).unwrap_or("");
-
-        if cid == "langmuir_better_wood" {
-            let Some(r) = results.get("wood_biochar_500C") else {
-                eprintln!("benchmark JSON: wood_biochar_500C not in results");
-                process::exit(1);
-            };
-            v.check_bool(
-                &format!(
-                    "{desc}: Langmuir R²={:.4}, Freundlich R²={:.4}",
-                    r.r2_langmuir, r.r2_freundlich
-                ),
-                r.r2_langmuir >= r.r2_freundlich,
-            );
-        } else if cid == "both_positive_params" {
-            let all_pos = results
-                .values()
-                .all(|r| r.qmax > 0.0 && r.kl > 0.0 && r.kf > 0.0 && r.n > 0.0);
-            v.check_bool(desc, all_pos);
-        } else if cid == "residuals_random" {
-            let max_mean = results
-                .values()
-                .map(|r| r.max_mean_residual)
-                .fold(0.0_f64, f64::max);
-            v.check_bool(
-                &format!("{desc}: max |mean residual|={max_mean:.4} mg/g"),
-                max_mean < tolerances::ISOTHERM_MEAN_RESIDUAL.abs_tol,
-            );
+            if cid == "langmuir_better_wood" {
+                let r = results.get("wood_biochar_500C");
+                v.check_bool("benchmark JSON: wood_biochar_500C in results", r.is_some());
+                if let Some(r) = r {
+                    v.check_bool(
+                        &format!(
+                            "{desc}: Langmuir R²={:.4}, Freundlich R²={:.4}",
+                            r.r2_langmuir, r.r2_freundlich
+                        ),
+                        r.r2_langmuir >= r.r2_freundlich,
+                    );
+                }
+            } else if cid == "both_positive_params" {
+                let all_pos = results
+                    .values()
+                    .all(|r| r.qmax > 0.0 && r.kl > 0.0 && r.kf > 0.0 && r.n > 0.0);
+                v.check_bool(desc, all_pos);
+            } else if cid == "residuals_random" {
+                let max_mean = results
+                    .values()
+                    .map(|r| r.max_mean_residual)
+                    .fold(0.0_f64, f64::max);
+                v.check_bool(
+                    &format!("{desc}: max |mean residual|={max_mean:.4} mg/g"),
+                    max_mean < tolerances::ISOTHERM_MEAN_RESIDUAL.abs_tol,
+                );
+            }
         }
     }
 
@@ -309,25 +330,27 @@ fn main() {
     println!();
     validation::section("Separation factor RL");
 
-    let Some(sep_checks) = json_array_opt(validation, &["separation_factor", "checks"]) else {
-        eprintln!("benchmark JSON: missing validation_checks.separation_factor.checks");
-        process::exit(1);
-    };
+    let sep_checks = json_array_opt(validation, &["separation_factor", "checks"]);
+    v.check_bool(
+        "benchmark JSON: validation_checks.separation_factor.checks present",
+        sep_checks.is_some(),
+    );
+    if let Some(sep_checks) = sep_checks {
+        for c in sep_checks {
+            let cid = c.get("id").and_then(|v| v.as_str()).unwrap_or("");
+            let desc = c.get("description").and_then(|v| v.as_str()).unwrap_or("");
 
-    for c in sep_checks {
-        let cid = c.get("id").and_then(|v| v.as_str()).unwrap_or("");
-        let desc = c.get("description").and_then(|v| v.as_str()).unwrap_or("");
-
-        if cid == "rl_favorable" {
-            let c0 = c
-                .get("C0")
-                .and_then(serde_json::Value::as_f64)
-                .unwrap_or(100.0);
-            let all_favorable = results.values().all(|r| {
-                let rl = langmuir_rl(r.kl, c0);
-                rl > 0.0 && rl < 1.0
-            });
-            v.check_bool(&format!("{desc}: C0={c0} mg/L"), all_favorable);
+            if cid == "rl_favorable" {
+                let c0 = c
+                    .get("C0")
+                    .and_then(serde_json::Value::as_f64)
+                    .unwrap_or(100.0);
+                let all_favorable = results.values().all(|r| {
+                    let rl = langmuir_rl(r.kl, c0);
+                    rl > 0.0 && rl < 1.0
+                });
+                v.check_bool(&format!("{desc}: C0={c0} mg/L"), all_favorable);
+            }
         }
     }
 

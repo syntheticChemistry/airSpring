@@ -31,6 +31,7 @@ fn u32_p(params: &serde_json::Value, key: &str) -> Option<u32> {
 ///
 /// Returns `Some(result)` if the method is a known science method,
 /// `None` if it should be handled elsewhere (cross-primal, lifecycle, etc.).
+#[must_use]
 #[allow(clippy::too_many_lines)]
 pub fn dispatch_science(method: &str, params: &serde_json::Value) -> Option<serde_json::Value> {
     let result = match method {
@@ -359,4 +360,263 @@ fn thornthwaite_handler(params: &serde_json::Value) -> serde_json::Value {
     let m =
         thornthwaite::thornthwaite_monthly_et0(&arr, f64_p(params, "latitude_deg").unwrap_or(42.7));
     serde_json::json!({"monthly_et0_mm": m.to_vec(), "annual_et0_mm": m.iter().sum::<f64>(), "method": "thornthwaite_1948"})
+}
+
+#[cfg(test)]
+#[allow(clippy::unwrap_used)]
+mod tests {
+    use super::dispatch_science;
+
+    fn empty_params() -> serde_json::Value {
+        serde_json::json!({})
+    }
+
+    #[test]
+    fn test_dispatch_returns_some_for_all_science_methods() {
+        let params = empty_params();
+        let science_methods = [
+            "science.et0_fao56",
+            "science.et0_hargreaves",
+            "science.et0_priestley_taylor",
+            "science.et0_makkink",
+            "science.et0_turc",
+            "science.et0_hamon",
+            "science.et0_blaney_criddle",
+            "science.water_balance",
+            "science.yield_response",
+            "science.richards_1d",
+            "science.scs_cn_runoff",
+            "science.green_ampt_infiltration",
+            "science.soil_moisture_topp",
+            "science.pedotransfer_saxton_rawls",
+            "science.dual_kc",
+            "science.sensor_calibration",
+            "science.gdd",
+            "science.shannon_diversity",
+            "science.bray_curtis",
+            "science.anderson_coupling",
+            "science.thornthwaite",
+        ];
+        for method in science_methods {
+            let params_for_method = if method == "science.shannon_diversity" {
+                serde_json::json!({"counts": [10.0, 5.0, 3.0]})
+            } else if method == "science.bray_curtis" {
+                serde_json::json!({"sample_a": [1.0, 2.0, 3.0], "sample_b": [2.0, 3.0, 4.0]})
+            } else if method == "science.thornthwaite" {
+                serde_json::json!({"monthly_temps_c": [5.0, 6.0, 8.0, 12.0, 16.0, 20.0, 22.0, 21.0, 18.0, 13.0, 8.0, 6.0]})
+            } else {
+                params.clone()
+            };
+            let result = dispatch_science(method, &params_for_method);
+            assert!(
+                result.is_some(),
+                "dispatch_science should return Some for {method}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_dispatch_returns_some_for_all_ecology_methods() {
+        let params = empty_params();
+        let ecology_methods = [
+            "ecology.et0_fao56",
+            "ecology.et0_hargreaves",
+            "ecology.et0_priestley_taylor",
+            "ecology.et0_makkink",
+            "ecology.et0_turc",
+            "ecology.et0_hamon",
+            "ecology.et0_blaney_criddle",
+            "ecology.water_balance",
+            "ecology.yield_response",
+            "ecology.full_pipeline",
+        ];
+        for method in ecology_methods {
+            let result = dispatch_science(method, &params);
+            assert!(
+                result.is_some(),
+                "dispatch_science should return Some for {method}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_dispatch_returns_none_for_unknown_methods() {
+        let params = empty_params();
+        let unknown = [
+            "science.unknown",
+            "ecology.unknown",
+            "foo.bar",
+            "science.",
+            "ecology.",
+            "",
+        ];
+        for method in unknown {
+            let result = dispatch_science(method, &params);
+            assert!(
+                result.is_none(),
+                "dispatch_science should return None for '{method}'"
+            );
+        }
+    }
+
+    #[test]
+    fn test_dispatch_et0_fao56_has_et0_mm() {
+        let r = dispatch_science("science.et0_fao56", &empty_params()).unwrap();
+        assert!(r.get("et0_mm").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_et0_hargreaves_has_et0_mm() {
+        let r = dispatch_science("science.et0_hargreaves", &empty_params()).unwrap();
+        assert!(r.get("et0_mm").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_et0_priestley_taylor_has_et0_mm() {
+        let r = dispatch_science("science.et0_priestley_taylor", &empty_params()).unwrap();
+        assert!(r.get("et0_mm").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_et0_makkink_has_et0_mm() {
+        let r = dispatch_science("science.et0_makkink", &empty_params()).unwrap();
+        assert!(r.get("et0_mm").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_et0_turc_has_et0_mm() {
+        let r = dispatch_science("science.et0_turc", &empty_params()).unwrap();
+        assert!(r.get("et0_mm").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_et0_hamon_has_pet_mm() {
+        let r = dispatch_science("science.et0_hamon", &empty_params()).unwrap();
+        assert!(r.get("pet_mm").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_et0_blaney_criddle_has_et0_mm() {
+        let r = dispatch_science("science.et0_blaney_criddle", &empty_params()).unwrap();
+        assert!(r.get("et0_mm").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_water_balance_has_etc_and_soil_water() {
+        let r = dispatch_science("science.water_balance", &empty_params()).unwrap();
+        assert!(r.get("etc_mm").is_some());
+        assert!(r.get("soil_water_mm").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_yield_response_has_yield_fields() {
+        let r = dispatch_science("science.yield_response", &empty_params()).unwrap();
+        assert!(r.get("yield_t_ha").is_some());
+        assert!(r.get("yield_ratio").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_full_pipeline_has_pipeline_and_stages() {
+        let r = dispatch_science("ecology.full_pipeline", &empty_params()).unwrap();
+        assert!(r.get("pipeline").is_some());
+        assert!(r.get("stages").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_richards_1d_has_mean_theta_or_error() {
+        let r = dispatch_science("science.richards_1d", &empty_params()).unwrap();
+        assert!(r.get("mean_theta").is_some() || r.get("error").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_scs_cn_runoff_has_runoff_mm() {
+        let r = dispatch_science("science.scs_cn_runoff", &empty_params()).unwrap();
+        assert!(r.get("runoff_mm").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_green_ampt_has_cumulative_infiltration_cm() {
+        let r = dispatch_science("science.green_ampt_infiltration", &empty_params()).unwrap();
+        assert!(r.get("cumulative_infiltration_cm").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_soil_moisture_topp_has_volumetric_water_content() {
+        let r = dispatch_science("science.soil_moisture_topp", &empty_params()).unwrap();
+        assert!(r.get("volumetric_water_content").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_pedotransfer_has_field_capacity() {
+        let r = dispatch_science("science.pedotransfer_saxton_rawls", &empty_params()).unwrap();
+        assert!(r.get("field_capacity").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_dual_kc_has_kc_max() {
+        let r = dispatch_science("science.dual_kc", &empty_params()).unwrap();
+        assert!(r.get("kc_max").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_sensor_cal_has_volumetric_water_content() {
+        let r = dispatch_science("science.sensor_calibration", &empty_params()).unwrap();
+        assert!(r.get("volumetric_water_content").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_gdd_has_gdd() {
+        let r = dispatch_science("science.gdd", &empty_params()).unwrap();
+        assert!(r.get("gdd").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_shannon_diversity_has_shannon() {
+        let params = serde_json::json!({"counts": [10.0, 5.0, 3.0, 2.0]});
+        let r = dispatch_science("science.shannon_diversity", &params).unwrap();
+        assert!(r.get("shannon").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_bray_curtis_has_bray_curtis_dissimilarity() {
+        let params = serde_json::json!({"sample_a": [1.0, 2.0, 3.0], "sample_b": [2.0, 3.0, 4.0]});
+        let r = dispatch_science("science.bray_curtis", &params).unwrap();
+        assert!(r.get("bray_curtis_dissimilarity").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_anderson_coupling_has_effective_saturation() {
+        let r = dispatch_science("science.anderson_coupling", &empty_params()).unwrap();
+        assert!(r.get("effective_saturation").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_thornthwaite_has_monthly_et0_mm() {
+        let params = serde_json::json!({
+            "monthly_temps_c": [5.0, 6.0, 8.0, 12.0, 16.0, 20.0, 22.0, 21.0, 18.0, 13.0, 8.0, 6.0]
+        });
+        let r = dispatch_science("science.thornthwaite", &params).unwrap();
+        assert!(r.get("monthly_et0_mm").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_shannon_diversity_empty_counts_returns_error() {
+        let params = serde_json::json!({"counts": []});
+        let r = dispatch_science("science.shannon_diversity", &params).unwrap();
+        assert!(r.get("error").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_bray_curtis_mismatched_lengths_returns_error() {
+        let params = serde_json::json!({"sample_a": [1.0, 2.0], "sample_b": [1.0, 2.0, 3.0]});
+        let r = dispatch_science("science.bray_curtis", &params).unwrap();
+        assert!(r.get("error").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_thornthwaite_wrong_months_returns_error() {
+        let params = serde_json::json!({"monthly_temps_c": [5.0, 6.0, 8.0]});
+        let r = dispatch_science("science.thornthwaite", &params).unwrap();
+        assert!(r.get("error").is_some());
+    }
 }

@@ -12,6 +12,7 @@
 use airspring_forge::dispatch::Workload;
 use airspring_forge::nucleus::{AtomicKind, NucleusAtomic, NucleusMesh};
 use airspring_forge::pipeline::{self, TransferPath};
+use airspring_forge::substrate::pci;
 use airspring_forge::substrate::{Capability, Identity, Properties, Substrate, SubstrateKind};
 use barracuda::validation::ValidationHarness;
 
@@ -19,7 +20,7 @@ fn titan_v() -> Substrate {
     Substrate {
         kind: SubstrateKind::Gpu,
         identity: Identity {
-            pci_id: Some("10de:1db6".to_string()),
+            pci_id: Some(pci::NVIDIA_TITAN_V.to_string()),
             driver: Some("NVIDIA (580.119.02)".to_string()),
             backend: Some("Vulkan".to_string()),
             ..Identity::named("NVIDIA TITAN V")
@@ -44,7 +45,7 @@ fn rtx_4070() -> Substrate {
     Substrate {
         kind: SubstrateKind::Gpu,
         identity: Identity {
-            pci_id: Some("10de:2786".to_string()),
+            pci_id: Some(pci::NVIDIA_RTX_4070.to_string()),
             driver: Some("NVIDIA (580.119.02)".to_string()),
             backend: Some("Vulkan".to_string()),
             ..Identity::named("NVIDIA GeForce RTX 4070")
@@ -69,7 +70,7 @@ fn akd1000() -> Substrate {
     Substrate {
         kind: SubstrateKind::Npu,
         identity: Identity {
-            pci_id: Some("1e7c:1000".to_string()),
+            pci_id: Some(pci::BRAINCHIP_AKD1000.to_string()),
             device_node: Some("/dev/akida0".to_string()),
             ..Identity::named("BrainChip AKD1000")
         },

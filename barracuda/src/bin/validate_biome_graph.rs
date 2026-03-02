@@ -91,9 +91,7 @@ fn main() {
 // ═══════════════════════════════════════════════════════════════════
 
 fn phase_1_graph_topology(v: &mut ValidationHarness) {
-    let deploy_toml = include_str!(
-        "../../../metalForge/deploy/airspring_deploy.toml"
-    );
+    let deploy_toml = include_str!("../../../metalForge/deploy/airspring_deploy.toml");
 
     v.check_bool("graph_toml_loadable", !deploy_toml.is_empty());
 
@@ -114,14 +112,11 @@ fn phase_1_graph_topology(v: &mut ValidationHarness) {
         deploy_toml.contains("airspring") || deploy_toml.contains("airSpring"),
     );
 
-    let node_count = deploy_toml.matches("[[graph.node]]").count()
-        + deploy_toml.matches("[[node]]").count();
+    let node_count =
+        deploy_toml.matches("[[graph.node]]").count() + deploy_toml.matches("[[node]]").count();
     v.check_bool("graph_node_count_ge_4", node_count >= 4);
 
-    v.check_bool(
-        "graph_has_ecology_caps",
-        deploy_toml.contains("ecology."),
-    );
+    v.check_bool("graph_has_ecology_caps", deploy_toml.contains("ecology."));
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -159,7 +154,10 @@ fn phase_2_capability_registry(v: &mut ValidationHarness) {
     v.check_abs("cap_data", data_caps as f64, 1.0, 1.0);
 
     let unique: std::collections::HashSet<_> = AIRSPRING_CAPABILITIES.iter().collect();
-    v.check_bool("cap_all_unique", unique.len() == AIRSPRING_CAPABILITIES.len());
+    v.check_bool(
+        "cap_all_unique",
+        unique.len() == AIRSPRING_CAPABILITIES.len(),
+    );
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -177,7 +175,13 @@ fn phase_3_offline_pipeline(v: &mut ValidationHarness) {
                 rh_min: 40.0,
                 wind_2m: 1.5 + 0.5 * phase.cos(),
                 solar_rad: 16.0 + 7.0 * phase.sin(),
-                precipitation: if d % 5 == 0 { 15.0 } else if d % 11 == 0 { 5.0 } else { 0.0 },
+                precipitation: if d % 5 == 0 {
+                    15.0
+                } else if d % 11 == 0 {
+                    5.0
+                } else {
+                    0.0
+                },
                 elevation: 256.0,
                 latitude_deg: 42.727,
                 day_of_year: 100 + d,
@@ -193,7 +197,10 @@ fn phase_3_offline_pipeline(v: &mut ValidationHarness) {
     v.check_bool("pipe_completes_182d", result.n_days == 182);
     v.check_bool("pipe_et0_positive", result.total_et0 > 0.0);
     v.check_bool("pipe_actual_et_positive", result.total_actual_et > 0.0);
-    v.check_bool("pipe_et0_gt_actual_et", result.total_et0 >= result.total_actual_et);
+    v.check_bool(
+        "pipe_et0_gt_actual_et",
+        result.total_et0 >= result.total_actual_et,
+    );
     v.check_abs("pipe_yield_ratio", result.yield_ratio, 0.9, 0.15);
     v.check_bool("pipe_stress_days_ge_0", result.stress_days < 182);
     v.check_bool("pipe_et0_daily_len", result.et0_daily.len() == 182);
@@ -221,7 +228,7 @@ fn phase_3_offline_pipeline(v: &mut ValidationHarness) {
         ),
         elevation_m: weather[90].elevation,
         latitude_deg: weather[90].latitude_deg,
-        day_of_year: weather[90].day_of_year as u32,
+        day_of_year: weather[90].day_of_year,
     });
     v.check_abs(
         "pipe_et0_day90_matches_manual",
@@ -311,19 +318,25 @@ fn phase_5_evolution_manifest(v: &mut ValidationHarness) {
     );
 
     let et0_gap = GAPS.iter().find(|g| g.id == "batched_et0_gpu");
-    v.check_bool("manifest_et0_tier_a", et0_gap.map_or(false, |g| g.tier == Tier::A));
-
-    let wb_gap = GAPS.iter().find(|g| g.id == "batched_water_balance_gpu");
-    v.check_bool("manifest_wb_tier_a", wb_gap.map_or(false, |g| g.tier == Tier::A));
-
-    let richards_gap = GAPS.iter().find(|g| g.id.contains("richards"));
     v.check_bool(
-        "manifest_richards_tracked",
-        richards_gap.is_some(),
+        "manifest_et0_tier_a",
+        et0_gap.is_some_and(|g| g.tier == Tier::A),
     );
 
+    let wb_gap = GAPS.iter().find(|g| g.id == "batched_water_balance_gpu");
+    v.check_bool(
+        "manifest_wb_tier_a",
+        wb_gap.is_some_and(|g| g.tier == Tier::A),
+    );
+
+    let richards_gap = GAPS.iter().find(|g| g.id.contains("richards"));
+    v.check_bool("manifest_richards_tracked", richards_gap.is_some());
+
     let kriging_gap = GAPS.iter().find(|g| g.id.contains("kriging"));
-    v.check_bool("manifest_kriging_tier_a", kriging_gap.map_or(false, |g| g.tier == Tier::A));
+    v.check_bool(
+        "manifest_kriging_tier_a",
+        kriging_gap.is_some_and(|g| g.tier == Tier::A),
+    );
 
     let pipeline_gaps = GAPS
         .iter()
