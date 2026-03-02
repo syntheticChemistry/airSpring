@@ -17,6 +17,9 @@
 //! - Baldocchi (2003) Global Change Biology 9(4):479-492
 //! - Allen et al. (1998) FAO-56, Crop evapotranspiration
 //! - Wilson et al. (2002) Ag Forest Met 113:223-243
+//!
+//! script=`control/ameriflux_et/ameriflux_et_validation.py`, commit=8c3953b, date=2026-02-27
+//! Run: `python3 control/ameriflux_et/ameriflux_et_validation.py`
 
 use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
 

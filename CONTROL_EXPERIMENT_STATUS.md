@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-03-01 (v0.6.0 — 63 experiments, 1237 Python + 641 lib + 57 forge tests, 67 barracuda + 5 forge = 72 binaries, **14.5× Rust-vs-Python speedup** (21/21 parity), **pure GPU pipeline** (78/78 PASS), **GPU rewire benchmark** (26/26 PASS), **mixed-hardware pipeline** (104/104 PASS), **ops 5-8 GPU-first** (ToadStool S70+ absorbed), **GPU stats** (neuralSpring S69), seasonal pipeline GPU Stages 1-2, **Exp 058 Climate Scenario** (46/46 PASS), streaming pipeline (Backend::GpuPipelined, GpuFused), 35/35 cross-spring benchmarks, NPU→GPU PCIe bypass, NUCLEUS primal (16 capabilities, 28/28 cross-primal pipeline), biomeOS ecology domain (capability.call routing), cross-primal forwarding (ToadStool, BearDog), atlas decade 80yr (102/102), NASS real yield (99/99), NCBI diversity (63/63), clippy pedantic, zero dead code)
+**Updated**: 2026-03-02 (v0.6.4 — 72 experiments, 1237 Python + 813 lib + 57 forge tests, 78 barracuda + 4 forge = 82 binaries, **13,000× Rust-vs-Python atlas-scale speedup** (34/34 CPU parity benchmark), **GPU streaming multi-field** (57/57 PASS, 6.8M field-days/s), **pure GPU end-to-end** (46/46 PASS, 19.7× dispatch reduction), **mixed-hardware pipeline** (66/66 PASS, 7-stage seasonal), **GPU Stages 1-3** (WB via `gpu_step`), 124/124 cross-spring benchmarks, NUCLEUS mesh routing, Paper 12 immunological Anderson (Exp 066-069))
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -59,7 +59,7 @@ bash run_all_baselines.sh
 #    Cached to: control/long_term_wb/data/wooster_era5_1960_2023.json
 python control/long_term_wb/long_term_water_balance.py
 
-# 7. Run Rust validation binaries (853+1393 checks across 55 binaries)
+# 7. Run Rust validation binaries (853+1498 checks across 79 binaries)
 cd barracuda
 for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   validate_sensor_calibration validate_real_data cross_validate \
@@ -975,7 +975,7 @@ across ET₀, water balance, and yield response for scenario-based planning.
 Track 1 (Precision Agriculture):
   Phase 0  [COMPLETE]: Python baselines — 1237/1237 PASS (54 experiments)
   Phase 0+ [COMPLETE]: Real data pipeline — 15,300 station-days, ET₀ R²=0.97
-  Phase 1  [COMPLETE]: Rust validation — 641 lib + 57 forge tests, 72 binaries
+  Phase 1  [COMPLETE]: Rust validation — 810 lib + 57 forge tests, 79 binaries
   Phase 1.5[COMPLETE]: CPU benchmark — Rust 14.5× faster than Python (21/21 parity)
   Phase 2  [COMPLETE]: Cross-validation — 75/75 MATCH (Python↔Rust, tol=1e-5)
   Phase 2.5[COMPLETE]: Ops 5-8 GPU-first — 4 orchestrators rewired (ToadStool S70+ absorbed)
@@ -1049,11 +1049,11 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026 — Updated: March 1, 2026 (v0.5.8)*
-*63 experiments, 1237/1237 Python, 641 lib + 57 forge tests, 72 binaries, 75/75 cross-validation, 100 Michigan stations, 21/21 CPU parity, 78/78 GPU pipeline, 26/26 GPU rewire, 104/104 mixed-hardware pipeline.*
+*Initialized: February 16, 2026 — Updated: March 1, 2026 (v0.6.3)*
+*69 experiments, 1237/1237 Python, 810 lib + 57 forge tests, 79 binaries, 75/75 cross-validation, 100 Michigan stations, 21/21 CPU parity, 78/78 GPU pipeline, 26/26 GPU rewire, 104/104 mixed-hardware pipeline.*
 *8 ET₀ methods + SCS-CN runoff + Green-Ampt infiltration + coupled runoff-infiltration + VG inverse + full-season WB + Exp 058 Climate Scenario (46/46).*
 *NUCLEUS primal (16 capabilities, 28/28 cross-primal pipeline). Atlas decade 80yr (102/102). NASS real (99/99). NCBI diversity (63/63).*
-*17 Tier A + 7 Tier B GPU orchestrators. Ops 5-8 GPU-first (ToadStool S70+). GPU stats (neuralSpring S69).*
-*Seasonal pipeline GPU Stages 1-2. 73/73 atlas PASS (12 stations, 4800 results). 35/35 cross-spring benchmarks.*
+*17 Tier A + 7 Tier B GPU orchestrators. Ops 5-8 GPU-first (ToadStool S79). GPU stats (neuralSpring S69).*
+*Seasonal pipeline GPU Stages 1-2. 73/73 atlas PASS (12 stations, 4800 results). 124/124 cross-spring benchmarks. Exp 064-069 immunological Anderson (Paper 12).*
 *metalForge 18 workloads, 29/29 cross-system. AKD1000 NPU live (3 experiments).*
 *Quality: zero .unwrap(), zero unsafe, zero clippy pedantic + nursery warnings. AGPL-3.0-or-later.*

@@ -14,6 +14,9 @@
 //! OAT (one-at-a-time) ±10% perturbation of 6 input variables.
 //! Verifies: baseline ET₀, monotonicity, elasticity bounds, symmetry,
 //! ranking consistency across 3 climatic conditions.
+//!
+//! script=`control/sensitivity/et0_sensitivity.py`, commit=e651409, date=2026-02-26
+//! Run: `python3 control/sensitivity/et0_sensitivity.py`
 
 use airspring_barracuda::eco::evapotranspiration as et;
 use airspring_barracuda::validation::{

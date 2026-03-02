@@ -16,6 +16,9 @@
 //! References:
 //! - Hamon WR (1961) J Hydraulics Div ASCE 87(HY3):107-120
 //! - Lu J, et al. (2005) J Am Water Resour Assoc 41(3):621-633
+//!
+//! script=`control/hamon/hamon_pet.py`, commit=d3ecdc8, date=2026-02-27
+//! Run: `python3 control/hamon/hamon_pet.py`
 
 use airspring_barracuda::eco::evapotranspiration::{daylight_hours, hamon_pet};
 use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};

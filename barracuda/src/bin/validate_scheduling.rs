@@ -16,6 +16,9 @@
 //!
 //! Uses deterministic weather (sinusoidal ET₀ + periodic rain) to avoid
 //! RNG mismatch between Python (numpy MT19937) and Rust.
+//!
+//! script=`control/scheduling/irrigation_scheduling.py`, commit=e651409, date=2026-02-26
+//! Run: `python3 control/scheduling/irrigation_scheduling.py`
 
 use airspring_barracuda::eco::water_balance;
 use airspring_barracuda::eco::yield_response::{

@@ -101,6 +101,28 @@
                         "F64",
                         "ShaderDispatch"
                     ]
+                },
+                {
+                    "workload": "tissue_diversity",
+                    "expected_substrate": "GPU",
+                    "required_caps": [
+                        "F64",
+                        "ShaderDispatch"
+                    ]
+                },
+                {
+                    "workload": "cytokine_brain",
+                    "expected_substrate": "GPU",
+                    "required_caps": [
+                        "F64"
+                    ]
+                },
+                {
+                    "workload": "ad_flare_classifier",
+                    "expected_substrate": "NPU",
+                    "required_caps": [
+                        "QuantizedInference"
+                    ]
                 }
             ]
         },

@@ -14,6 +14,8 @@
 //! uses CPU fallback until `ToadStool` absorbs ops 5-8).
 //!
 //! Pipeline: Weather → `ET₀`(GPU) → `Kc`(GPU) → `WB`(GPU) → Yield → Validate
+//!
+//! Provenance: GPU multi-stage pipeline validation
 
 use std::time::Instant;
 

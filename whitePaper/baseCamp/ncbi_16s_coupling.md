@@ -1,7 +1,7 @@
 # NCBI 16S + Soil Moisture Coupling
 
 **Date:** February 28, 2026
-**Status:** Planned — NestGate providers validated, pipeline designed
+**Status:** Complete — Exp 048 done (14+29 checks)
 **Extension of:** baseCamp Sub-thesis 06 (No-Till Anderson)
 **Cross-Spring:** airSpring (θ(t), ET₀, Anderson coupling) × wetSpring (16S pipeline, Anderson QS) × groundSpring (uncertainty, rare biosphere) × NestGate (NCBI data acquisition)
 
@@ -11,9 +11,9 @@
 
 baseCamp 06 validates the Anderson localization framework for no-till soil
 health using published data (Islam 2014, Brandt farm metrics, OSU 60-year
-experiment). The next step is to couple **real NCBI 16S rRNA metagenome data**
+experiment). This experiment couples **real NCBI 16S rRNA metagenome data**
 from agricultural soil studies to airSpring's moisture-driven Anderson QS
-model, creating a quantitative pipeline from weather → soil moisture →
+model, in a quantitative pipeline from weather → soil moisture →
 pore geometry → microbial community state.
 
 This is the first experiment that exercises the full cross-primal pipeline:
@@ -167,9 +167,10 @@ Strandgate (dual EPYC + RTX 3090) available for bioinformatics scale-up.
 | Richards PDE | Exp 009 | 14+15 | PASS |
 | Saxton-Rawls pedotransfer | Exp 023 | 70+58 | PASS |
 | Anderson coupling | Exp 045 | 55+95 | PASS |
+| NCBI 16S + Anderson coupling | Exp 048 | 14+29 | PASS |
 | GPU math portability | Exp 047 | 46/46 | PASS |
 | NestGate NCBI provider | Provider test | 23/23 | PASS |
-| Open-Meteo download | 115 CSVs | Atlas 1393 | PASS |
+| Open-Meteo download | 115 CSVs | Atlas 1498 | PASS |
 
 ---
 

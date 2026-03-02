@@ -220,45 +220,50 @@ pub fn forecast_scheduling() -> EcoWorkload {
         .with_primitive("BatchedForecastF64")
 }
 
-// ── Tier B GPU orchestrators (pending ToadStool absorption) ──────────
+// ── GPU orchestrators (absorbed by ToadStool S70+) ──────────────────
 
 /// Hargreaves-Samani ET₀ batch — temperature-only ET₀ estimate.
+/// Absorbed via `HargreavesBatchGpu` (S71).
 #[must_use]
 pub fn hargreaves_et0_batch() -> EcoWorkload {
-    EcoWorkload::new_static(ShaderOrigin::Local)
+    EcoWorkload::new_static(ShaderOrigin::Absorbed)
         .named(
             "hargreaves_et0_batch",
             vec![Capability::F64Compute, Capability::ShaderDispatch],
         )
-        .with_primitive("BatchedHargreavesF64")
+        .with_primitive("HargreavesBatchGpu")
 }
 
 /// Kc climate adjustment batch — FAO-56 Eq. 62 for wind/humidity.
+/// Absorbed via `BatchedElementwiseF64` op=7 (S70+).
 #[must_use]
 pub fn kc_climate_batch() -> EcoWorkload {
-    EcoWorkload::new_static(ShaderOrigin::Local)
+    EcoWorkload::new_static(ShaderOrigin::Absorbed)
         .named(
             "kc_climate_batch",
             vec![Capability::F64Compute, Capability::ShaderDispatch],
         )
-        .with_primitive("BatchedKcClimateF64")
+        .with_primitive("BatchedElementwiseF64_op7")
 }
 
 /// Sensor calibration batch — `SoilWatch` 10 raw→VWC.
+/// Absorbed via `BatchedElementwiseF64` op=5 (S70+).
 #[must_use]
 pub fn sensor_calibration_batch() -> EcoWorkload {
-    EcoWorkload::new_static(ShaderOrigin::Local)
+    EcoWorkload::new_static(ShaderOrigin::Absorbed)
         .named(
             "sensor_calibration_batch",
             vec![Capability::F64Compute, Capability::ShaderDispatch],
         )
-        .with_primitive("BatchedSensorCalF64")
+        .with_primitive("BatchedElementwiseF64_op5")
 }
 
 /// Seasonal pipeline — ET₀→Kc→WB→Yield chained pipeline.
+/// Stages 1-2 GPU via `BatchedElementwiseF64`, stages 3-4 CPU fallback.
+/// Full GPU pending `BatchedEncoder` (S80+).
 #[must_use]
 pub fn seasonal_pipeline() -> EcoWorkload {
-    EcoWorkload::new_static(ShaderOrigin::Local)
+    EcoWorkload::new_static(ShaderOrigin::Absorbed)
         .named(
             "seasonal_pipeline",
             vec![Capability::F64Compute, Capability::ShaderDispatch],
@@ -384,7 +389,7 @@ pub fn all_workloads() -> Vec<EcoWorkload> {
         gdd_accumulate(),
         dual_kc_batch(),
         forecast_scheduling(),
-        // Tier B GPU orchestrators (pending)
+        // GPU orchestrators (absorbed S70+)
         hargreaves_et0_batch(),
         kc_climate_batch(),
         sensor_calibration_batch(),
@@ -428,8 +433,8 @@ mod tests {
     #[test]
     fn origin_counts_match() {
         let (absorbed, local, npu_native, cpu_only) = origin_summary();
-        assert_eq!(absorbed, 10, "10 absorbed GPU domains");
-        assert_eq!(local, 4, "4 local WGSL extensions");
+        assert_eq!(absorbed, 14, "14 absorbed GPU domains (9 original + 4 S70+ ops + tissue)");
+        assert_eq!(local, 0, "0 local WGSL extensions (all absorbed)");
         assert_eq!(npu_native, 4, "4 NPU-native classifiers");
         assert_eq!(cpu_only, 3, "3 CPU-only domains");
     }

@@ -2,7 +2,7 @@
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
 **Date**: March 2, 2026
-**Version**: 0.6.3
+**Version**: 0.6.4
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -13,21 +13,23 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → biomeOS (NUCLEUS atomics, deployment graphs) → Penny Irrigation
 ```
 
-## Current Status (v0.6.3)
+## Current Status (v0.6.4)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
-| Phase 0: Paper baselines (Python) | **1,237/1,237 PASS** | 54 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB |
+| Phase 0: Paper baselines (Python) | **1,237/1,237 PASS** | 57 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **810 lib + 1498 atlas** | 79 binaries + 124/124 cross-spring benchmarks |
-| Phase 1.5: CPU Benchmark | **14.5× faster** | Rust vs Python geometric mean (21/21 parity, incl. seasonal_pipeline) |
+| Phase 1: Rust validation | **813 lib + 1498 atlas** | 82 binaries + 124/124 cross-spring benchmarks |
+| Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (34/34 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
-| Phase 2.6: Seasonal pipeline | **GPU Stages 1-2** | ET₀ + Kc GPU dispatch, unified batch, streaming callback |
+| Phase 2.6: Seasonal pipeline | **GPU Stages 1-3** | ET₀ + Kc + WB GPU dispatch, multi-field `gpu_step()`, streaming |
+| Phase 2.7: GPU streaming multi-field | **57/57 PASS** | M fields × N days, Stage 3 GPU per-day, 6.8M field-days/s (Exp 070) |
 | Phase 3: GPU live dispatch | **78/78 PASS** | Pure GPU workload validation (Exp 055), 0.04% seasonal parity |
+| Phase 3.1: Pure GPU end-to-end | **46/46 PASS** | All 4 stages on GPU, 19.7× dispatch reduction (Exp 072) |
 | Phase 3.5: NPU edge | **AKD1000 live** | 3 experiments, 95/95 NPU checks, ~48µs inference |
-| Phase 3.7: metalForge live | **5 substrates discovered** | RTX 4070 + Titan V + AKD1000 + i9-12900K, 18 workloads route |
-| Phase 3.8: Mixed-hardware pipeline | **104/104 PASS** | NPU→GPU PCIe bypass, NUCLEUS atomics, biomeOS graphs |
+| Phase 3.7: metalForge live | **5 substrates discovered** | RTX 4070 + Titan V + AKD1000 + i9-12900K, 21 workloads route |
+| Phase 3.8: Mixed-hardware pipeline | **66/66 PASS** | 7-stage GPU→NPU PCIe bypass, NUCLEUS mesh routing |
 | Phase 3.9: NUCLEUS primal | **30 capabilities** | airSpring biomeOS primal, 30 science capabilities, JSON-RPC |
 | Phase 4.0: Cross-primal pipeline | **28/28 PASS** | ecology domain, capability.call routing, cross-primal forwarding |
 | Phase 4.1: Full dispatch experiment | **51/51 PASS** | CPU vs GPU parity across all domains (Exp 064) |
@@ -39,7 +41,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` (barracuda) | **810 passed**, 0 failures |
+| `cargo test --lib` (barracuda) | **813 passed**, 0 failures |
 | `cargo test --lib` (metalForge) | **58 passed**, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **95.66% line coverage** |
 | `cargo clippy (pedantic)` | **0 warnings** (pedantic, both crates) |
@@ -73,7 +75,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
   barracuda::ops/linalg/stats/pde/optimize (GPU dispatch + CPU fallback)
        │
        ▼
-  ToadStool WGSL shaders (f64 precision on GPU, 671 shaders — S71)
+  ToadStool WGSL shaders (f64 precision on GPU, 844 shaders — S79)
        │
        ▼
   metalForge (mixed CPU + GPU + NPU)
@@ -100,50 +102,48 @@ ToadStool contains **844 WGSL shaders** (S79: 2,773+ barracuda tests, pure math 
 S79: ops 0-13 (VG θ/K, Thornthwaite, GDD, pedotransfer), jackknife/bootstrap/diversity GPU, `libc`→`rustix`, `async-trait`→AFIT, `pollster`→`test_pool`.
 See `specs/CROSS_SPRING_EVOLUTION.md`.
 
-### BarraCuda Integration (11 Tier A + 4 Tier B + 3 pipeline)
+### BarraCuda Integration (25 Tier A + 7 Tier B + 3 pipeline)
 
-| airSpring Module | BarraCuda Primitive | Origin | Status |
+| airSpring Module | BarraCuda Primitive | Op/Shader | Status |
 |-----------------|--------------------|----|---|
-| `gpu::et0` | `ops::batched_elementwise_f64` (op=0) | barracuda | **GPU-FIRST** |
-| `gpu::water_balance` | `ops::batched_elementwise_f64` (op=1) | barracuda | **GPU-STEP** |
-| `gpu::kriging` | `ops::kriging_f64::KrigingF64` | barracuda | **Integrated** |
-| `gpu::reduce` | `ops::fused_map_reduce_f64` | barracuda | **GPU N≥1024** |
-| `gpu::stream` | `ops::moving_window_stats` | barracuda | **Wired** |
-| `gpu::richards` | `pde::richards::solve_richards` | barracuda::pde | **Wired** |
-| `gpu::isotherm` | `optimize::nelder_mead` + `multi_start` | barracuda::optimize | **Wired** |
-| `gpu::mc_et0` | `mc_et0_propagate_f64.wgsl` + `norm_ppf` | barracuda | **Wired** (Tier B) |
-| `gpu::hargreaves` | `batched_elementwise_f64` (op=6, pending) | barracuda | **Wired** (Tier B) |
-| `gpu::kc_climate` | `batched_elementwise_f64` (op=7, pending) | barracuda | **Wired** (Tier B) |
-| `gpu::dual_kc` | `batched_elementwise_f64` (op=8, pending) | barracuda | **Wired** (Tier B) |
-| `gpu::sensor_calibration` | `batched_elementwise_f64` (op=5, pending) | barracuda | **Wired** (Tier B) |
-| `gpu::seasonal_pipeline` | Chains ops 0→7→1→yield | airSpring | **CPU chained** |
-| `gpu::atlas_stream` | `UnidirectionalPipeline` (pending) | airSpring | **CPU chained** |
-| `eco::correction::fit_ridge` | `linalg::ridge::ridge_regression` | barracuda::linalg | **Wired** |
-| `eco::richards::inverse_van_genuchten_h` | `optimize::brent` | barracuda::optimize | **Wired** |
-| `eco::diversity` | `stats::diversity` | barracuda::stats | **Leaning** |
+| `gpu::et0` | `batched_elementwise_f64` | op=0 | **GPU-FIRST** |
+| `gpu::water_balance` | `batched_elementwise_f64` | op=1 | **GPU-STEP** |
+| `gpu::sensor_calibration` | `batched_elementwise_f64` | op=5 | **Integrated** |
+| `gpu::hargreaves` | `HargreavesBatchGpu` | dedicated | **Integrated** |
+| `gpu::kc_climate` | `batched_elementwise_f64` | op=7 | **Integrated** |
+| `gpu::dual_kc` | `batched_elementwise_f64` | op=8 | **Integrated** |
+| `gpu::van_genuchten` | `batched_elementwise_f64` | op=9,10 | **Integrated** (S79) |
+| `gpu::thornthwaite` | `batched_elementwise_f64` | op=11 | **Integrated** (S79) |
+| `gpu::gdd` | `batched_elementwise_f64` | op=12 | **Integrated** (S79) |
+| `gpu::pedotransfer` | `batched_elementwise_f64` | op=13 | **Integrated** (S79) |
+| `gpu::kriging` | `kriging_f64::KrigingF64` | dedicated | **Integrated** |
+| `gpu::reduce` | `fused_map_reduce_f64` | dedicated | **GPU N≥1024** |
+| `gpu::stream` | `moving_window_stats` | dedicated | **Integrated** |
+| `gpu::richards` | `pde::richards::solve_richards` | dedicated | **Integrated** |
+| `gpu::isotherm` | `optimize::nelder_mead` + `multi_start` | dedicated | **Integrated** |
+| `gpu::mc_et0` | `mc_et0_propagate_f64.wgsl` | dedicated | **Integrated** |
+| `gpu::jackknife` | `JackknifeMeanGpu` | dedicated | **Integrated** (S79) |
+| `gpu::bootstrap` | `BootstrapMeanGpu` | dedicated | **Integrated** (S79) |
+| `gpu::diversity` | `DiversityFusionGpu` | dedicated | **Integrated** (S79) |
+| `gpu::stats` | `linear_regression_f64` + `matrix_correlation_f64` | dedicated | **Integrated** |
+| `eco::correction::fit_ridge` | `linalg::ridge::ridge_regression` | CPU | **Integrated** |
+| `eco::richards::inverse_vg_h` | `optimize::brent` | CPU | **Integrated** |
+| `eco::diversity` | `stats::diversity` | CPU | **Leaning** |
+| `gpu::seasonal_pipeline` | Chains ops 0→7→1→yield | fused | **CPU + GpuPipelined** |
+| `gpu::atlas_stream` | `UnidirectionalPipeline` | streaming | **CPU chained** |
 
 Also wired: `validation::ValidationHarness` (neuralSpring), `stats::pearson`, `spearman`, `bootstrap_ci`, `stats::metrics` re-exports (airSpring→upstream S64).
 
 25 Tier A GPU modules (ops 0-13 + jackknife/bootstrap/diversity uncertainty stack). ToadStool S79 synced.
-See `barracuda/src/gpu/evolution_gaps.rs` for the full roadmap.
+See `barracuda/src/gpu/evolution_gaps.rs` and `barracuda/EVOLUTION_READINESS.md` for the full roadmap.
 
-### CPU Benchmarks: Rust vs Python (25.9× geometric mean speedup)
+### CPU Benchmarks: Rust vs Python (14.5× geometric mean speedup, 21/21 parity)
 
-| Algorithm | N | Rust (s) | Python (s) | Speedup | Parity |
-|-----------|---:|---:|---:|---:|:---:|
-| FAO-56 PM ET₀ | 10K | 0.0008 | 0.012 | **15×** | ✓ |
-| Hargreaves-Samani | 10K | 0.00001 | 0.001 | **114×** | ✓ |
-| Water Balance Step | 10K | 0.00001 | 0.001 | **190×** | ✓ |
-| Anderson Coupling | 100K | 0.0002 | 0.023 | **94×** | ✓ |
-| Season Sim (153d) | 1K | 0.001 | 0.056 | **44×** | ✓ |
-| Shannon Diversity | 10K | 0.0002 | 0.005 | **26×** | ✓ |
-| Van Genuchten θ(h) | 100K | 0.002 | 0.015 | **6×** | ✓ |
-| Thornthwaite PET | 10K | 0.084 | 0.081 | **1×** | ✓ |
-
-Same algorithms, same f64 precision, same inputs, same outputs. 8/8 parity,
-25.9× geometric mean speedup. Thornthwaite 1× is expected — Rust computes
-daylight hours for every day (365 trig calls) while Python uses mid-month
-approximation (12 calls). Run `cargo run --release --bin bench_cpu_vs_python`.
+Run `cargo run --release --bin bench_cpu_vs_python`. 21 algorithms, same f64
+precision, same inputs, same outputs. 14.5× geometric mean includes the seasonal
+pipeline (ET₀→Kc→WB→Yield chain) which gives Python a relative advantage due to
+NumPy vectorization. Individual algorithm speedups range from 1× (Thornthwaite —
+Rust computes daylight per-day vs Python mid-month) to 190× (water balance step).
 
 ## Quick Start
 
@@ -262,7 +262,7 @@ airSpring/
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance |
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (69 experiments) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda/NUCLEUS handoffs (V044 active) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda/NUCLEUS handoffs (V046 active) |
 
 ## License
 

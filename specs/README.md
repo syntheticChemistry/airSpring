@@ -1,7 +1,7 @@
 # airSpring Specifications
 
 **Last Updated**: March 1, 2026
-**Status**: Phase 0-4 complete — 1237/1237 Python + 641 lib + 57 forge tests + 73/73 atlas stream + 75/75 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + AKD1000 NPU live + 14.5× CPU speedup (21/21 parity) + metalForge 18 workloads 29/29 + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB (34/34) + NUCLEUS primal (16 capabilities, 28/28 cross-primal) + ecology domain + 63 experiments + 72 binaries (v0.6.0)
+**Status**: Phase 0-4 complete — 1237/1237 Python + 810 lib + 57 forge tests + 73/73 atlas stream + 75/75 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + AKD1000 NPU live + 14.5× CPU speedup (21/21 parity) + metalForge 18 workloads 29/29 + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB (34/34) + NUCLEUS primal (16 capabilities, 28/28 cross-primal) + ecology domain + 69 experiments + 79 binaries (v0.6.3)
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling, Anderson coupling
 
 ---
@@ -12,7 +12,7 @@
 |--------|-------|
 | Phase 0 (Python) | 1237/1237 PASS — 54 experiments (FAO-56, soil, IoT, WB, dual Kc, cover crops, regional ET₀, Richards, biochar, 60yr WB, yield, CW2D, scheduling, lysimeter, sensitivity, Priestley-Taylor, 3-method intercomparison, Thornthwaite, GDD, pedotransfer, AmeriFlux, Hargreaves, diversity, multi-crop, NPU eco, forecast, SCAN moisture, NASS yield, Anderson coupling, Blaney-Criddle, SCS-CN, Green-Ampt, coupled runoff-infiltration, VG inverse, full-season WB) |
 | Phase 0+ (Real data) | 15,300 station-days, R²=0.967 across 100 Michigan stations |
-| Phase 1 (Rust) | 641 lib + 57 forge tests — 72 binaries (67 barracuda + 5 forge) |
+| Phase 1 (Rust) | 810 lib + 57 forge tests — 79 binaries (74 barracuda + 5 forge) |
 | Phase 1.5 (CPU benchmark) | Rust 14.5× faster than Python (geometric mean, 21/21 parity) |
 | Phase 2 (Cross-validation) | 75/75 Python↔Rust match within 1e-5; 690 crop-station yield pairs within 0.01 |
 | Phase 2.5 (Tier B GPU) | 4 Tier B orchestrators wired (ops 5-8), seasonal pipeline, atlas stream |
@@ -21,7 +21,8 @@
 | Faculty | Dong (BAE, MSU — new lab 2026) |
 | Phase 3.9 (NUCLEUS primal) | 29/29 biomeOS primal parity, 9 science capabilities |
 | Phase 4.0 (Cross-primal) | 28/28 PASS — ecology domain, capability.call, cross-primal forwarding |
-| Handoff | V041 (NUCLEUS cross-primal evolution) in `wateringHole/handoffs/` |
+| Handoff | V046 in `wateringHole/handoffs/` |
+| ToadStool | S79 |
 
 ---
 
@@ -98,7 +99,7 @@ Re-run `run_all_baselines.sh` at the respective commits to verify.
 `../whitePaper/STUDY.md` → `../CONTROL_EXPERIMENT_STATUS.md` → BARRACUDA_REQUIREMENTS.md
 
 **Cross-spring evolution** (15 min):
-CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/` (V038 active)
+CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/` (V046 active)
 
 ---
 

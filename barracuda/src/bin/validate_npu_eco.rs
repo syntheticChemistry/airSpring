@@ -16,6 +16,8 @@
 //! 3. Irrigation decision feature quantization
 //! 4. Sensor anomaly feature quantization
 //! 5. Live NPU DMA inference (if hardware present)
+//!
+//! Provenance: AKD1000 NPU ecological classification validation
 
 use airspring_barracuda::validation::{self, ValidationHarness};
 

@@ -7,16 +7,18 @@
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V045** | [AIRSPRING_V045_FULL_DISPATCH_BIOME_GRAPH_HANDOFF_MAR02_2026.md](handoffs/AIRSPRING_V045_FULL_DISPATCH_BIOME_GRAPH_HANDOFF_MAR02_2026.md) | 2026-03-02 | **current** — v0.6.0: 30 capabilities, Exp 064 (51/51 dispatch), Exp 065 (35/35 biomeOS graph), ToadStool absorption manifest, airspring_deploy.toml |
-| V041 | [archive](handoffs/archive/AIRSPRING_V041_NUCLEUS_CROSS_PRIMAL_EVOLUTION_HANDOFF_MAR01_2026.md) | 2026-03-01 | v0.5.8: NUCLEUS primal (16 caps), cross-primal pipeline (28/28), ecology domain, 5 new experiments (059-063), 72 binaries |
-| V040 | [archive](handoffs/archive/AIRSPRING_V040_SCIENCE_EXTENSIONS_STREAMING_HANDOFF_MAR01_2026.md) | 2026-03-01 | v0.5.7: science extensions (Exp 058), streaming pipeline, 21/21 CPU parity |
-| V039 | [archive](handoffs/archive/AIRSPRING_V039_TOADSTOOL_BARRACUDA_EVOLUTION_HANDOFF_MAR01_2026.md) | 2026-03-01 | v0.5.6: ToadStool/BarraCuda evolution handoff, cross-spring provenance |
+| **V047** | [AIRSPRING_V047_GPU_PIPELINE_EVOLUTION_HANDOFF_MAR02_2026.md](handoffs/AIRSPRING_V047_GPU_PIPELINE_EVOLUTION_HANDOFF_MAR02_2026.md) | 2026-03-02 | **current** — v0.6.4: GPU multi-field pipeline (Exp 070-072), 13,000× speedup, pure GPU 46/46, metalForge 66/66, ToadStool evolution roadmap |
+| V046 | [AIRSPRING_V046_PAPER12_DEEP_AUDIT_HANDOFF_MAR02_2026.md](handoffs/AIRSPRING_V046_PAPER12_DEEP_AUDIT_HANDOFF_MAR02_2026.md) | 2026-03-02 | v0.6.3: Paper 12 (Exp 066-069), deep debt audit, ToadStool S79 (124/124) |
+| — | [AIRSPRING_TOADSTOOL_ABSORPTION_HANDOFF_MAR02_2026.md](handoffs/AIRSPRING_TOADSTOOL_ABSORPTION_HANDOFF_MAR02_2026.md) | 2026-03-02 | Absorption recommendations: 25 Tier A modules, patterns, evolution opportunities |
+| — | [AIRSPRING_MULTI_PRIMAL_INTEGRATION_ROADMAP_MAR02_2026.md](handoffs/AIRSPRING_MULTI_PRIMAL_INTEGRATION_ROADMAP_MAR02_2026.md) | 2026-03-02 | Multi-primal integration: NUCLEUS, NestGate, Songbird, biomeOS |
+| V045 | [archive](handoffs/archive/) | 2026-03-02 | v0.6.0: full dispatch + biome graph (superseded by V046) |
+| V041 | [archive](handoffs/archive/) | 2026-03-01 | v0.5.8: NUCLEUS primal, cross-primal pipeline |
 
 ## Cross-Spring Documents
 
 | File | Purpose |
 |------|---------|
-| `../specs/CROSS_SPRING_EVOLUTION.md` | 774+ WGSL shader provenance (hotSpring/wetSpring/neuralSpring/airSpring/groundSpring) |
+| `../specs/CROSS_SPRING_EVOLUTION.md` | 844+ WGSL shader provenance (hotSpring/wetSpring/neuralSpring/airSpring/groundSpring) — ToadStool S79 |
 | `../specs/BIOMEOS_CAPABILITIES.md` | Ecology capability domain for biomeOS Neural API |
 | `../specs/NUCLEUS_INTEGRATION.md` | NUCLEUS deployment: graphs, workloads, Neural API bridge |
 | `../graphs/airspring_eco_pipeline.toml` | biomeOS deployment graph: weather → ET₀ → WB → yield |
@@ -29,6 +31,10 @@
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_V063_DEEP_DEBT_AUDIT_HANDOFF_MAR02_2026.md` | v0.6.3: deep debt audit, provenance, hardcoding elimination (superseded by V046) |
+| `handoffs/archive/AIRSPRING_V062_NAUTILUS_BRAIN_DRIFT_INTEGRATION_MAR02_2026.md` | v0.6.2: Nautilus/AirSpringBrain, CytokineBrain, DriftMonitor (superseded by V046) |
+| `handoffs/archive/AIRSPRING_V061_TOADSTOOL_S79_SYNC_HANDOFF_MAR02_2026.md` | v0.6.1: ToadStool S79 sync, 124/124 cross-spring benchmarks (superseded by V046) |
+| `handoffs/archive/AIRSPRING_V045_FULL_DISPATCH_BIOME_GRAPH_HANDOFF_MAR02_2026.md` | v0.6.0: full dispatch, biome graph, 30 capabilities (superseded by V046) |
 | `handoffs/archive/AIRSPRING_V040_SCIENCE_EXTENSIONS_STREAMING_HANDOFF_MAR01_2026.md` | v0.5.7: science extensions (Exp 058), streaming pipeline, 21/21 CPU parity, technical debt |
 | `handoffs/archive/AIRSPRING_V034_EXPERIMENT_BUILDOUT_DEBT_RESOLUTION_HANDOFF_FEB28_2026.md` | v0.5.3: 3 new experiments (049-051), deep technical debt resolution, 42+ named constants |
 | `handoffs/archive/AIRSPRING_V032_TOADSTOOL_S68_SYNC_REVALIDATION_HANDOFF_FEB28_2026.md` | v0.5.2: ToadStool S68 full review, zero breaking changes, binary registration fix |

@@ -17,6 +17,9 @@
 //! 3. Multi-stage product formula against analytical solutions
 //! 4. Water use efficiency (WUE) calculations
 //! 5. Scheduling strategy comparison (corn, Michigan synthetic weather)
+//!
+//! script=`control/yield_response/yield_response.py`, commit=e651409, date=2026-02-26
+//! Run: `python3 control/yield_response/yield_response.py`
 
 use airspring_barracuda::eco::water_balance;
 use airspring_barracuda::eco::yield_response::{

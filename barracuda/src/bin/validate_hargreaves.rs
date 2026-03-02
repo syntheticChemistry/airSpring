@@ -16,6 +16,9 @@
 //! References:
 //! - Hargreaves & Samani (1985) Applied Eng Agric 1(2):96-99
 //! - Allen et al. (1998) FAO-56 Eq. 52
+//!
+//! script=`control/hargreaves/hargreaves_samani.py`, commit=dbfb53a, date=2026-03-02
+//! Run: `python3 control/hargreaves/hargreaves_samani.py`
 
 use airspring_barracuda::eco::evapotranspiration::{extraterrestrial_radiation, hargreaves_et0};
 use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};

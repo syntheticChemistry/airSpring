@@ -12,7 +12,7 @@
 //! 1. `NEURAL_API_SOCKET` env var
 //! 2. `$XDG_RUNTIME_DIR/biomeos/neural-api-{family_id}.sock`
 //! 3. `/run/user/{uid}/biomeos/neural-api-{family_id}.sock`
-//! 4. `/tmp/biomeos/neural-api-{family_id}.sock`
+//! 4. `{temp_dir}/biomeos/neural-api-{family_id}.sock` (platform temp dir)
 //!
 //! # Usage
 //!
@@ -256,8 +256,10 @@ fn resolve_socket() -> Option<PathBuf> {
         return Some(p);
     }
 
-    // Tier 4: /tmp fallback
-    let p = PathBuf::from(format!("/tmp/biomeos/neural-api-{family_id}.sock"));
+    // Tier 4: platform temp-dir fallback (no hardcoded /tmp)
+    let p = std::env::temp_dir()
+        .join("biomeos")
+        .join(format!("neural-api-{family_id}.sock"));
     if p.exists() {
         return Some(p);
     }

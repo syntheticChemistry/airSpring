@@ -17,6 +17,9 @@
 //! 2. Water deficit (ET₀ - precip) correlates with yield depression
 //! 3. Yield ratios stay in [0.3, 1.0] for realistic weather
 //! 4. Crop sensitivity ordering matches Ky values
+//!
+//! Provenance: NASS API (no Python baseline)
+//! commit=88d07c0, date=2026-03-01
 
 use airspring_barracuda::eco::yield_response;
 use airspring_barracuda::validation::ValidationHarness;

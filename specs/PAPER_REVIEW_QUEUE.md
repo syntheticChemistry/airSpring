@@ -2,7 +2,7 @@
 
 **Last Updated**: March 1, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 63 experiments (1237/1237 Python + 641 Rust lib tests + 1498 atlas checks + 17 Tier A modules + 72 binaries + 35/35 cross-spring benchmarks). GPU math portability 46/46. Ops 5-8 GPU-first (ToadStool S70+ absorbed). GPU stats (neuralSpring S69). NCBI 16S coupling 14+29. ToadStool S70+ sync (universal precision, 774 WGSL, 6-Spring provenance). Titan V GPU live dispatch (24/24 PASS) + AKD1000 NPU live + metalForge live + CPU↔GPU parity (26/26) + 14.5× Rust-vs-Python speedup (21/21 parity). NUCLEUS primal (16 caps, 28/28 cross-primal pipeline, ecology domain). Exp 058 Climate Scenario (46/46). Atlas decade 80yr (102/102). NASS real yield (99/99). NCBI diversity (63/63). Coupled runoff-infiltration (292/292), VG inverse (84/84), full-season WB audit (34/34). All completed papers use open data and systems.
+**Status**: 72 experiments (1237/1237 Python + 813 Rust lib tests + 1498 atlas checks + 25 Tier A modules + 82 binaries + 124/124 cross-spring benchmarks). GPU math portability 46/46. GPU streaming multi-field 57/57. CPU parity benchmark 34/34. Pure GPU end-to-end 46/46. Ops 5-8 GPU-first (ToadStool S79 absorbed). GPU stats (neuralSpring S69). NCBI 16S coupling 14+29. ToadStool S79 sync (universal precision, 774 WGSL, 6-Spring provenance). Titan V GPU live dispatch (24/24 PASS) + AKD1000 NPU live + metalForge live (66/66) + CPU↔GPU parity (26/26) + 13,000× Rust-vs-Python atlas-scale speedup. NUCLEUS primal (16 caps, 28/28 cross-primal pipeline, ecology domain). Exp 058 Climate Scenario (46/46). Atlas decade 80yr (102/102). NASS real yield (99/99). NCBI diversity (63/63). Coupled runoff-infiltration (292/292), VG inverse (84/84), full-season WB audit (34/34). Paper 12 immunological Anderson (Exp 066-069). V046 handoff. All completed papers use open data and systems.
 
 ---
 
@@ -60,17 +60,25 @@
 | 48 | SCS-CN + Green-Ampt Coupled Runoff-Infiltration — Exp 052 | 0+1 | 292+292 | Standard | `benchmark_coupled_runoff.json` | NEH-4 + Rawls (1983) (open literature) |
 | 49 | Van Genuchten Inverse Parameter Estimation — Exp 053 | 0+1 | 84+84 | Standard | `benchmark_vg_inverse.json` | Carsel & Parrish (1988) Table 1 (open literature) |
 | 50 | Full-Season Irrigation Water Budget — Exp 054 | 0+1 | 34+34 | Standard | `benchmark_season_wb.json` | FAO-56 Ch 2-8 + Stewart (1977) (open literature) |
+| 51 | Anderson Soil-Moisture Coupling — Exp 045 | 0+1 | 55+95 | Standard | `benchmark_anderson_coupling.json` | VG + Anderson localization (open literature) |
+| 52 | Climate Scenario Analysis — Exp 058 | 1 | 46 | Standard | `benchmark_climate_scenario.json` | Synthetic scenarios (open) |
+| 53 | NCBI 16S + Soil Microbiome Anderson — Exp 048 | 0+1 | 14+29 | Standard | `benchmark_ncbi_16s_coupling.json` | NCBI 16S (public) |
+| 54 | Tissue Diversity (Paper 12) — Exp 066 | 0+1 | 30+30 | Anderson | `benchmark_tissue_diversity.json` | Analytical (open literature) |
+| 55 | GPU Streaming Multi-Field — Exp 070 | 2 | 57 | — | `validate_gpu_streaming_multi_field` | Multi-field CPU parity + atlas-scale (50 stations) |
+| 56 | CPU Parity & Speedup Benchmark — Exp 071 | 1+2 | 34 | Standard | `validate_cpu_parity_benchmark` | 9 domains, 10M ET₀/s, 13K× Python atlas-scale |
+| 57 | Pure GPU End-to-End — Exp 072 | 2+3 | 46 | — | `validate_pure_gpu_multi_field` | 4-stage GPU, CPU↔GPU parity, 19.7× dispatch reduction |
 
 ### Controls Audit
 
-All 54 completed papers have:
-- **Digitized benchmarks** in `control/*/benchmark_*.json`
-- **Python control scripts** that validate against benchmarks
-- **Rust validation binaries** (44 barracuda + 1 forge = 45 binaries) that load the same benchmarks
+All 57+ completed papers have:
+- **Digitized benchmarks** in `control/*/benchmark_*.json` (56 benchmark JSONs)
+- **Python control scripts** that validate against benchmarks (1237/1237 Python checks)
+- **Rust validation binaries** (78 barracuda + 4 forge = 82 binaries) that load the same benchmarks
 - **Open or published data** (no institutional access required)
 - **Cross-validation** (75/75 Python↔Rust match at 1e-5; 690 crop-station yield pairs within 0.01; PT↔PM cross-validated)
-- **GPU wiring**: 11 Tier A modules (BatchedEt0, BatchedWB, Kriging, Reduce, Stream, fit_ridge, BatchedRichards, fit_nm, diversity, norm_ppf, brent)
-- **CPU benchmarks**: 12.7M ET₀/s, 36.5M VG θ/s, 59M Kc/s, 57M Langmuir fits/s
+- **GPU wiring**: 25 Tier A modules (ops 0-13, kriging, reduce, stream, richards, isotherm, mc_et0, jackknife, bootstrap, diversity, stats, correction)
+- **CPU benchmarks**: 10M ET₀/s, 36.5M VG θ/s, 1.9B Kc/s, 57M Langmuir fits/s, 13,000× Rust-vs-Python (atlas-scale)
+- **GPU pipeline**: Multi-field GPU WB Stage 3 (57/57), CPU↔GPU parity (46/46), 19.7× dispatch reduction
 
 ### Compute Pipeline Per Paper
 
@@ -120,6 +128,19 @@ All 54 completed papers have:
 | 48 | 292/292 | 292/292 (`validate_coupled_runoff`) | `BatchedElementwise` (CN+GA) | `runoff` + `infiltration` |
 | 49 | 84/84 | 84/84 (`validate_vg_inverse`) | `BatchedOptimize` (Tier B, Brent) | `van_genuchten` (inverse) |
 | 50 | 34/34 | 34/34 (`validate_season_wb`) | `SeasonalPipeline` (ET₀→Kc→WB→Yield) | All hydrology modules |
+| 39 | 22/22 | 26/26 (`validate_cpu_gpu_parity`) | `BatchedEt0` + `BatchedWB` CPU↔GPU proof | `metrics` (parity) |
+| 40 | 14/14 | 18/18 (`validate_dispatch`) | GPU/NPU/Neural/CPU routing | All substrates (5) |
+| 41 | 18/18 | 21/21 (`validate_seasonal_batch`) | `BatchedEt0` 365×4 batch | `evapotranspiration` (GPU scale) |
+| 42 | — | 24/24 (`validate_gpu_live`) | Titan V WGSL dispatch (live) | N/A (pure BarraCuda GPU) |
+| 43 | — | 17/17 (`validate_live_hardware`) | RTX 4070 + Titan V + AKD1000 | All substrates (live) |
+| 44 | 21/21 | 46/46 (`validate_gpu_math`) | All 13 GPU orchestrators | N/A (portability) |
+| 51 | 55/55 | 95/95 (`validate_anderson`) | `DiversityFusionGpu` + Anderson W | `anderson` (θ→d_eff→QS) |
+| 52 | — | 46/46 (`validate_climate_scenario`) | `SeasonalPipeline` (multi-scenario) | `yield_response` (climate) |
+| 53 | 14/14 | 29/29 (`validate_ncbi_16s_coupling`) | `DiversityFusionGpu` + Anderson | `diversity` + `anderson` |
+| 54 | 30/30 | 30/30 (`validate_tissue`) | `DiversityFusionGpu` | `tissue` (Anderson W) |
+| 55 | — | 57/57 (`validate_gpu_streaming_multi_field`) | Multi-field `gpu_step()` per-day | `seasonal_pipeline` (M fields) |
+| 56 | — | 34/34 (`validate_cpu_parity_benchmark`) | All 9 domains CPU parity | All modules (speedup) |
+| 57 | — | 46/46 (`validate_pure_gpu_multi_field`) | All stages GPU + scaling | `seasonal_pipeline` (GPU) |
 
 ---
 

@@ -13,6 +13,9 @@
 //! References:
 //!   van Genuchten (1980) SSSA J 44:892-898
 //!   Carsel RF, Parrish RS (1988) WRR 24:755-769
+//!
+//! script=`control/vg_inverse/vg_inverse_fitting.py`, commit=6be822f, date=2026-02-28
+//! Run: `python3 control/vg_inverse/vg_inverse_fitting.py`
 
 use airspring_barracuda::eco::van_genuchten::{
     inverse_van_genuchten_h, van_genuchten_k, van_genuchten_theta, VanGenuchtenParams,

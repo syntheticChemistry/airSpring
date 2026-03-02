@@ -16,6 +16,9 @@
 //! - Paper 12 §2.3: Dimensional promotion via barrier disruption
 //! - van Genuchten (1980) SSSA J 44:892-898
 //! - Tagami H (2008) Br J Dermatol 158:431-436
+//!
+//! script=`control/barrier_skin/barrier_skin.py`, commit=dbfb53a, date=2026-03-02
+//! Run: `python3 control/barrier_skin/barrier_skin.py`
 
 use airspring_barracuda::eco::tissue::barrier_disruption_d_eff;
 use airspring_barracuda::eco::van_genuchten::{van_genuchten_k, van_genuchten_theta};

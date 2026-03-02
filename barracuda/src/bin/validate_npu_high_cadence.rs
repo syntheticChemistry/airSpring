@@ -20,6 +20,8 @@
 //! - **S4 — Ensemble Classification**: 10 weight sets per reading, consensus
 //! - **S5 — Sliding Window Anomaly**: 60-reading buffer, consecutive triggers
 //! - **S6 — Weight Hot-Swap Benchmark**: Classifier swap latency at cadence
+//!
+//! Provenance: AKD1000 NPU high-cadence streaming validation
 
 use airspring_barracuda::validation::{self, ValidationHarness};
 

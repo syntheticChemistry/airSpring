@@ -19,6 +19,9 @@
 //! - Paper 12: Immunological Anderson — cytokine propagation
 //! - Pielou (1966) J Theoretical Biology 13:131-144
 //! - `McCandless` et al. (2014) Vet Immunol Immunopathol 157:42-48
+//!
+//! script=`control/tissue_diversity/tissue_diversity.py`, commit=dbfb53a, date=2026-03-02
+//! Run: `python3 control/tissue_diversity/tissue_diversity.py`
 
 use airspring_barracuda::eco::tissue::{
     analyze_tissue_disorder, barrier_disruption_d_eff, multi_compartment_analysis, AndersonRegime,

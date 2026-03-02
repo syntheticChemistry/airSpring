@@ -15,6 +15,9 @@
 //! and benchmark from `control/long_term_wb/benchmark_long_term_wb.json`.
 //!
 //! If the weather cache does not exist, skips with a message and exits 0.
+//!
+//! script=`control/long_term_wb/long_term_water_balance.py`, commit=5684b1e, date=2026-02-26
+//! Run: `python3 control/long_term_wb/long_term_water_balance.py`
 
 use airspring_barracuda::eco::{
     crop::CropType,

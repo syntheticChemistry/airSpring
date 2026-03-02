@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
 **Updated**: March 2, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.6.3)
-**Status**: 69 experiments, 1237/1237 Python + 810 Rust lib (95.66% llvm-cov) + 57 forge tests + 79 binaries + 124/124 cross-spring evolution benchmark + 51/51 Full Dispatch (Exp 064) + 35/35 biomeOS Graph (Exp 065) + 30 NUCLEUS capabilities + `airspring_deploy.toml` deployment graph + ToadStool S79 compute offload + Songbird sovereign TLS + 21/21 CPU parity (14.5× speedup) + 25 Tier A GPU modules (ops 0-13 + uncertainty stack) + AirSpringBrain (Nautilus evolutionary reservoir) + MonitoredAtlasStream (drift detection) + Paper 12 immunological Anderson (Exp 066-069: tissue + cytokine + barrier + cross-species) + deep debt audit (zero clippy pedantic warnings, all tolerances justified, all provenance documented, cargo-deny clean)
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.6.4)
+**Status**: 72 experiments, 1237/1237 Python + 813 Rust lib + 57 forge tests + 82 binaries + 124/124 cross-spring + 57/57 GPU streaming multi-field (Exp 070) + 34/34 CPU parity benchmark (Exp 071, 13,000× Python) + 46/46 pure GPU end-to-end (Exp 072, 19.7× dispatch reduction) + 66/66 metalForge cross-system (7-stage GPU→NPU→CPU) + 25 Tier A GPU modules (ops 0-13 + uncertainty stack) + GPU Stages 1-3 WB via `gpu_step` + Paper 12 immunological Anderson (Exp 066-069) + deep debt audit (zero clippy pedantic, all provenance documented, cargo-deny clean)
 
 ---
 

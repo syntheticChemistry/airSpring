@@ -17,6 +17,9 @@
 //! 3. Gravel infiltration: fast drainage, solver converges
 //! 4. Organic drainage: high retention, positive drainage
 //! 5. Mass balance on CW2D media simulations
+//!
+//! script=`control/cw2d/cw2d_richards.py`, commit=e651409, date=2026-02-26
+//! Run: `python3 control/cw2d/cw2d_richards.py`
 
 use airspring_barracuda::eco::richards::{
     self as richards, mass_balance_check, solve_richards_1d, van_genuchten_k, van_genuchten_theta,

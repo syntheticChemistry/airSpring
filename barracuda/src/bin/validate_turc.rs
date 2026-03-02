@@ -16,6 +16,9 @@
 //! References:
 //! - Turc L (1961) Annales Agronomiques 12:13-49
 //! - Xu CY, Singh VP (2002) Water Resources Management 16:197-219
+//!
+//! script=`control/turc/turc_et0.py`, commit=d3ecdc8, date=2026-02-27
+//! Run: `python3 control/turc/turc_et0.py`
 
 use airspring_barracuda::eco::evapotranspiration::turc_et0;
 use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};

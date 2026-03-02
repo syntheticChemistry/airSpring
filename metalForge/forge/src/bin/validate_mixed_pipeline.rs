@@ -124,6 +124,9 @@ fn main() {
     validate_nucleus_mesh(&mut v);
     validate_mesh_routing(&mut v);
     validate_full_eco_pipeline(&mut v);
+    validate_full_seasonal_cross_system(&mut v);
+    validate_mesh_pipeline_routing(&mut v);
+    validate_cross_node_pipeline(&mut v);
 
     v.finish();
 }
@@ -403,4 +406,214 @@ fn validate_full_eco_pipeline(v: &mut ValidationHarness) {
         pipe.cpu_roundtrips == 1,
     );
     v.check_bool("1 `PCIe` bypass", pipe.pcie_bypasses == 1);
+}
+
+fn validate_full_seasonal_cross_system(v: &mut ValidationHarness) {
+    println!("\n── Full Seasonal Pipeline Cross-System (7-stage) ──");
+
+    let substrates = [akd1000(), titan_v(), rtx_4070(), i9_cpu()];
+    let workloads = [
+        Workload::new("weather_ingest", vec![Capability::CpuCompute]),
+        Workload::new(
+            "et0_batch",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        ),
+        Workload::new(
+            "kc_climate_batch",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        ),
+        Workload::new(
+            "water_balance_batch",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        ),
+        Workload::new(
+            "yield_response_surface",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        ),
+        Workload::new(
+            "crop_stress_classifier",
+            vec![Capability::QuantizedInference { bits: 8 }],
+        )
+        .prefer(SubstrateKind::Npu),
+        Workload::new("validation_harness", vec![Capability::CpuCompute]),
+    ];
+
+    let pipe = pipeline::route_pipeline(&workloads, &substrates).expect("7-stage route");
+    v.check_bool("7-stage seasonal pipeline", pipe.stages.len() == 7);
+
+    v.check_bool(
+        "Stage 1 weather_ingest → CPU",
+        pipe.stages[0].substrate.kind == SubstrateKind::Cpu,
+    );
+    v.check_bool(
+        "Stage 2 et0_batch → GPU",
+        pipe.stages[1].substrate.kind == SubstrateKind::Gpu,
+    );
+    v.check_bool(
+        "Stage 3 kc_climate → GPU",
+        pipe.stages[2].substrate.kind == SubstrateKind::Gpu,
+    );
+    v.check_bool(
+        "Stage 4 water_balance → GPU",
+        pipe.stages[3].substrate.kind == SubstrateKind::Gpu,
+    );
+    v.check_bool(
+        "Stage 5 yield_response → GPU",
+        pipe.stages[4].substrate.kind == SubstrateKind::Gpu,
+    );
+    v.check_bool(
+        "Stage 6 crop_stress → NPU",
+        pipe.stages[5].substrate.kind == SubstrateKind::Npu,
+    );
+    v.check_bool(
+        "Stage 7 validation → CPU",
+        pipe.stages[6].substrate.kind == SubstrateKind::Cpu,
+    );
+
+    v.check_bool(
+        "GPU stages stay on device (2→3→4→5)",
+        pipe.stages[2].transfer_in == TransferPath::None
+            && pipe.stages[3].transfer_in == TransferPath::None
+            && pipe.stages[4].transfer_in == TransferPath::None,
+    );
+    v.check_bool(
+        "GPU→NPU via PCIe P2P",
+        pipe.stages[5].transfer_in == TransferPath::PciePeerToPeer,
+    );
+
+    let route_summary: Vec<String> = pipe
+        .stages
+        .iter()
+        .map(|s| format!("{}→{}", s.workload.name, s.substrate.kind))
+        .collect();
+    println!("  Route: {}", route_summary.join(" | "));
+    println!("  CPU roundtrips: {}", pipe.cpu_roundtrips);
+    println!("  PCIe bypasses: {}", pipe.pcie_bypasses);
+}
+
+fn validate_mesh_pipeline_routing(v: &mut ValidationHarness) {
+    println!("\n── Mesh Pipeline Routing (Single-Node) ──");
+
+    let mut mesh = NucleusMesh::new();
+    mesh.register(NucleusAtomic::new(
+        AtomicKind::Node,
+        "eastgate",
+        vec![titan_v(), akd1000(), i9_cpu()],
+    ));
+
+    let workloads = [
+        Workload::new(
+            "crop_stress_classifier",
+            vec![Capability::QuantizedInference { bits: 8 }],
+        )
+        .prefer(SubstrateKind::Npu),
+        Workload::new(
+            "et0_batch",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        ),
+        Workload::new(
+            "water_balance_batch",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        ),
+    ];
+
+    let mp = mesh.route_pipeline(&workloads).expect("should route on mesh");
+    v.check_bool(
+        "Mesh pipeline: 3 stages",
+        mp.stage_count() == 3,
+    );
+    v.check_bool(
+        "Mesh pipeline: single node",
+        mp.is_single_node(),
+    );
+    v.check_bool(
+        "Mesh pipeline: zero cross-node hops",
+        mp.cross_node_hops == 0,
+    );
+    v.check_bool(
+        "Stage 1 on NPU",
+        mp.stages[0].substrate_kind == SubstrateKind::Npu,
+    );
+    v.check_bool(
+        "Stage 2 on GPU",
+        mp.stages[1].substrate_kind == SubstrateKind::Gpu,
+    );
+    v.check_bool(
+        "Stage 3 on GPU",
+        mp.stages[2].substrate_kind == SubstrateKind::Gpu,
+    );
+    v.check_bool(
+        "All stages same_node=true",
+        mp.stages.iter().all(|s| s.same_node),
+    );
+}
+
+fn validate_cross_node_pipeline(v: &mut ValidationHarness) {
+    println!("\n── Cross-Node Pipeline (Multi-Node Mesh) ──");
+
+    let mut mesh = NucleusMesh::new();
+    mesh.register(NucleusAtomic::new(
+        AtomicKind::Node,
+        "gpu-node",
+        vec![titan_v(), i9_cpu()],
+    ));
+    mesh.register(NucleusAtomic::new(
+        AtomicKind::Node,
+        "npu-node",
+        vec![akd1000(), i9_cpu()],
+    ));
+    mesh.register(NucleusAtomic::new(AtomicKind::Tower, "tower-01", vec![]));
+
+    let workloads = [
+        Workload::new(
+            "et0_batch",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        ),
+        Workload::new(
+            "crop_stress_classifier",
+            vec![Capability::QuantizedInference { bits: 8 }],
+        ),
+        Workload::new(
+            "water_balance_batch",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        ),
+    ];
+
+    let mp = mesh.route_pipeline(&workloads).expect("should route cross-node");
+    v.check_bool(
+        "Cross-node pipeline: 3 stages",
+        mp.stage_count() == 3,
+    );
+    v.check_bool(
+        "Cross-node pipeline: NOT single node",
+        !mp.is_single_node(),
+    );
+    v.check_bool(
+        "Cross-node: has hops",
+        mp.cross_node_hops > 0,
+    );
+    v.check_bool(
+        "Stage 1 (GPU workload) → gpu-node",
+        mp.stages[0].node_id == "gpu-node",
+    );
+    v.check_bool(
+        "Stage 2 (NPU workload) → npu-node",
+        mp.stages[1].node_id == "npu-node",
+    );
+    v.check_bool(
+        "Stage 3 (GPU workload) → gpu-node",
+        mp.stages[2].node_id == "gpu-node",
+    );
+
+    println!("  Mesh route:");
+    for (i, stage) in mp.stages.iter().enumerate() {
+        println!(
+            "    Stage {}: {} → {} (same_node={})",
+            i + 1,
+            stage.node_id,
+            stage.substrate_kind,
+            stage.same_node
+        );
+    }
+    println!("  Cross-node hops: {}", mp.cross_node_hops);
 }

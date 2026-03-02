@@ -16,6 +16,9 @@
 //!
 //! Benchmark: `control/multicrop_budget/benchmark_multicrop.json`
 //! Python baseline: `control/multicrop_budget/multicrop_water_budget.py`
+//!
+//! script=`control/multicrop_budget/multicrop_water_budget.py`, commit=8c3953b, date=2026-02-27
+//! Run: `python3 control/multicrop_budget/multicrop_water_budget.py`
 
 use airspring_barracuda::eco::water_balance;
 use airspring_barracuda::eco::yield_response::yield_ratio_single;

@@ -20,6 +20,8 @@
 //! ```sh
 //! FAMILY_ID=8ff3b864a4bc589a cargo run --release --bin airspring_primal
 //! ```
+//!
+//! Provenance: `biomeOS` NUCLEUS mixed-hardware pipeline validation
 
 #![allow(
     clippy::pedantic,

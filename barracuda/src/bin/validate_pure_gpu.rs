@@ -36,6 +36,8 @@
 //! | Hargreaves ET₀ | 6 | `gpu::hargreaves` | Tier B |
 //! | Kc climate adjustment | 7 | `gpu::kc_climate` | Tier B |
 //! | Dual Kc (Ke batch) | 8 | `gpu::dual_kc` | Tier B |
+//!
+//! Provenance: `ToadStool` `BarraCuda` GPU pipeline validation
 
 use airspring_barracuda::eco::crop::CropType;
 use airspring_barracuda::gpu::et0::{BatchedEt0, StationDay};

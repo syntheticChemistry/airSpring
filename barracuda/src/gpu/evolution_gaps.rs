@@ -31,12 +31,12 @@
 //! | `eco::*` (pipeline) | `gpu::seasonal_pipeline` | Chained ops 0→7→1→yield | Seasonal pipeline | **GPU Stages 1-2** (v0.5.6) |
 //! | `eco::*` (stream) | `gpu::atlas_stream` | Unified batch + streaming callback | Regional atlas | **GPU-capable** (v0.5.6) |
 //! | `eco::*` (stream) | `gpu::seasonal_pipeline` | `Backend::GpuPipelined`, `Backend::GpuFused` | Streaming pipeline | **v0.5.7** |
-//! | `eco::*` (MC) | `gpu::mc_et0` | `mc_et0_propagate_f64.wgsl` (pending) | MC uncertainty | B (wired, pending shader) |
+//! | `eco::*` (MC) | `gpu::mc_et0` | CPU perturb → `BatchedEt0` GPU → CPU reduce | MC uncertainty | **A (GPU-accelerated, v0.6.3)** |
 //! | `io::csv_ts` | `gpu::stream` | `moving_window.wgsl` | Stream smoothing | A (ready) |
 //! | `eco::sensor_calibration` (OLS) | `gpu::stats` | `linear_regression_f64.wgsl` | Sensor regression | A (GPU, neuralSpring S69) |
 //! | `eco::*` (multi-var) | `gpu::stats` | `matrix_correlation_f64.wgsl` | Soil correlation | A (GPU, neuralSpring S69) |
 //!
-//! # Current Inventory (March 2, 2026 — v0.6.2, synced to `ToadStool` HEAD S79)
+//! # Current Inventory (March 2, 2026 — v0.6.4, synced to `ToadStool` HEAD S79)
 //!
 //! `ToadStool` S42–S71: 200+ commits, 50+ cross-spring absorptions, 2,773+ barracuda tests, 671 WGSL shaders.
 //! All four airSpring issues (TS-001 through TS-004) resolved in **S54**.
@@ -212,9 +212,13 @@ pub enum Tier {
     C,
 }
 
-/// All known evolution gaps (33+6 entries — 25 Tier A integrated, 7 Tier B + 6 orchestrators, 1 Tier C).
+/// All known evolution gaps (33+6 entries — 26 Tier A integrated, 6 Tier B + 6 orchestrators, 1 Tier C).
 ///
+/// v0.6.4: Multi-field GPU pipeline (Stage 3 `gpu_step()` across M fields),
+///         Exp 070-072 (streaming + CPU parity + pure GPU end-to-end).
+/// v0.6.3: MC ET₀ promoted Tier B→A via `BatchedEt0` GPU dispatch.
 /// v0.6.1: Ops 9-13 promoted Tier B→A after `ToadStool` S79 absorption.
+/// `SeasonalPipeline::run_multi_field()` dispatches Stage 3 WB to GPU per-day.
 /// `SeasonalPipeline::gpu()` dispatches Stages 1-2 (ET₀ + Kc) to GPU;
 /// `AtlasStream::with_gpu()` + `process_streaming()` callback pattern.
 /// Synced to `ToadStool` S79. Universal precision architecture
@@ -461,10 +465,11 @@ pub const GAPS: &[EvolutionGap] = &[
     EvolutionGap {
         id: "mc_et0_gpu",
         description: "Monte Carlo ET₀ uncertainty propagation on GPU",
-        tier: Tier::B,
-        toadstool_primitive: Some("mc_et0_propagate_f64.wgsl (xoshiro + Box-Muller)"),
-        action: "WIRED (v0.5.2): gpu::mc_et0::mc_et0_gpu() — CPU fallback, \
-                 GPU activates when WGSL_MC_ET0_PROPAGATE_F64 wired",
+        tier: Tier::A,
+        toadstool_primitive: Some("BatchedEt0 (CPU perturb → GPU batch ET₀ → CPU reduce)"),
+        action: "GPU-ACCELERATED (v0.6.3): gpu::mc_et0::mc_et0_gpu() — CPU generates N \
+                 perturbations, BatchedEt0 dispatches all N ET₀ computations to GPU, \
+                 CPU reduces to mean/std/percentiles. Full GPU mc_et0_propagate_f64.wgsl future.",
     },
     // ── Tier C: Needs new primitive ──────────────────────────────────
     EvolutionGap {

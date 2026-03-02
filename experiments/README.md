@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: March 2, 2026
-**Status**: 69 experiments, 1306/1306 Python + 810 lib (95.66% llvm-cov) + 57 forge tests + 79 binaries + 124/124 cross-spring evolution benchmark (ToadStool S79 synced) + Paper 12 immunological Anderson (Exp 066-069, tissue + cytokine + barrier + cross-species) + 32/32 metalForge dispatch (21 workloads) + **Rust 14.5× faster than Python** (21/21 parity)
+**Status**: 72 experiments, 1306/1306 Python + 813 lib + 57 forge tests + 82 binaries + 124/124 cross-spring evolution benchmark (ToadStool S79 synced) + Paper 12 immunological Anderson (Exp 066-069) + 66/66 metalForge cross-system (21 workloads) + GPU streaming multi-field (57/57) + CPU parity (34/34) + pure GPU end-to-end (46/46) + **Rust 13,000× faster than Python (atlas-scale)**
 
 ---
 
@@ -78,8 +78,11 @@
 | 067 | CytokineBrain Regime Prediction (Paper 12) | Immunological | **Complete** | Python + Rust CPU | `eco::cytokine` — Nautilus reservoir, 3-head AD flare prediction, DriftMonitor | 14+28 |
 | 068 | Barrier State Model (Paper 12) | Immunological | **Complete** | Python + Rust CPU | `eco::van_genuchten` + `eco::tissue` — VG θ(h)/K(h) for skin, dimensional promotion | 16+16 |
 | 069 | Cross-Species Skin Comparison (Paper 12) | Immunological | **Complete** | Python + Rust CPU | `eco::diversity` + `eco::tissue` — canine/human/feline Anderson, One Health bridge | 19+20 |
+| 070 | GPU Streaming Multi-Field Pipeline | GPU Pipeline | **Complete** | Rust CPU + GPU | `SeasonalPipeline::run_multi_field()` — M fields × N days, Stage 3 `gpu_step()`, 6.8M field-days/s | 57 |
+| 071 | CPU Parity & Speedup Benchmark | CPU Parity | **Complete** | Rust CPU | All 9 domains (ET₀, HG, PT, WB, Kc, Yield, Diversity, Seasonal, Atlas), 10M ET₀/s, 13K× Python | 34 |
+| 072 | Pure GPU End-to-End Multi-Field | Pure GPU | **Complete** | Rust CPU + GPU | All 4 stages on GPU, CPU↔GPU parity, 19.7× dispatch reduction, scaling 1→50 fields | 46 |
 
-**Grand Total**: 1237 Python + **810 lib (95.66% llvm-cov) + 57 forge tests** + 1498/1498 atlas + 33/33 cross-validation + 25 Tier A + 3 pipeline GPU orchestrators + seasonal pipeline GPU Stages 1-2 + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge (5 substrates, 18 workloads, 29/29 cross-system) + GPU math portability (46/46) + NCBI 16S coupling (14+29) + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34) + Exp 058 Climate Scenario (46/46) + NUCLEUS primal (29/29 + 28/28) + atlas decade (102/102) + NASS real (99/99) + NCBI diversity (63/63) + Paper 12 immunological Anderson (Exp 066-069) + 79 binaries + 124/124 cross-spring benchmarks (6 Springs) + ToadStool S79 synced + 21/21 CPU parity
+**Grand Total**: 1237 Python + **813 lib + 57 forge tests** + 1498/1498 atlas + 33/33 cross-validation + 25 Tier A + 3 pipeline GPU orchestrators + seasonal pipeline GPU Stages 1-3 + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge (5 substrates, 21 workloads, 66/66 cross-system) + GPU math portability (46/46) + GPU streaming multi-field (57/57) + CPU parity benchmark (34/34) + pure GPU end-to-end (46/46) + NCBI 16S coupling (14+29) + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34) + Exp 058 Climate Scenario (46/46) + NUCLEUS primal (29/29 + 28/28) + atlas decade (102/102) + NASS real (99/99) + NCBI diversity (63/63) + Paper 12 immunological Anderson (Exp 066-069) + 82 binaries + 124/124 cross-spring benchmarks (6 Springs) + ToadStool S79 synced + 21/21 CPU parity
 
 ---
 

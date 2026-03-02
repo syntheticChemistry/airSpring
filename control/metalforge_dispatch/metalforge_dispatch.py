@@ -34,7 +34,7 @@ WORKLOAD_CAPS = {
     "gdd_accumulate": {"F64", "ShaderDispatch"},
     "dual_kc_batch": {"F64", "ShaderDispatch"},
     "forecast_scheduling": {"F64", "ShaderDispatch"},
-    # Tier B GPU orchestrators (pending absorption)
+    # GPU orchestrators (absorbed S70+)
     "hargreaves_et0_batch": {"F64", "ShaderDispatch"},
     "kc_climate_batch": {"F64", "ShaderDispatch"},
     "sensor_calibration_batch": {"F64", "ShaderDispatch"},
@@ -43,6 +43,10 @@ WORKLOAD_CAPS = {
     "crop_stress_classifier": {"QuantizedInference"},
     "irrigation_decision": {"QuantizedInference"},
     "sensor_anomaly": {"QuantizedInference"},
+    # Paper 12 — Immunological Anderson
+    "tissue_diversity": {"F64", "ShaderDispatch"},
+    "cytokine_brain": {"F64"},
+    "ad_flare_classifier": {"QuantizedInference"},
     # CPU-only domains
     "validation_harness": {"CpuCompute"},
     "weather_ingest": {"CpuCompute"},

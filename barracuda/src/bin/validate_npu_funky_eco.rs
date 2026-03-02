@@ -31,6 +31,8 @@
 //!   cadence (every 15 min) fits within solar/battery field power envelope.
 //! - **S5 — Noise Resilience**: Anderson-style disorder sweep on sensor
 //!   noise levels (σ = 0 to 0.15 VWC), verify classification robustness.
+//!
+//! Provenance: AKD1000 NPU multi-head streaming validation
 
 use airspring_barracuda::validation::{self, ValidationHarness};
 

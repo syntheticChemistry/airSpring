@@ -9,6 +9,9 @@
 //!
 //! Thornthwaite C.W. (1948) "An approach toward a rational classification
 //! of climate." Geographical Review, 38(1), 55-94.
+//!
+//! script=`control/thornthwaite/thornthwaite_et0.py`, commit=8c3953b, date=2026-02-27
+//! Run: `python3 control/thornthwaite/thornthwaite_et0.py`
 
 use airspring_barracuda::eco::evapotranspiration as et;
 use airspring_barracuda::tolerances::THORNTHWAITE_ANALYTICAL;

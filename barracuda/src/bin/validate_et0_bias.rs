@@ -13,6 +13,9 @@
 //!
 //! Benchmark: `control/et0_bias_correction/benchmark_et0_bias.json`
 //! Baseline: `control/et0_bias_correction/et0_bias_correction.py` (24/24 PASS)
+//!
+//! script=`control/et0_bias_correction/et0_bias_correction.py`, commit=97e7533, date=2026-02-28
+//! Run: `python3 control/et0_bias_correction/et0_bias_correction.py`
 
 use airspring_barracuda::eco::evapotranspiration::{et0_ensemble, EnsembleInput};
 use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};

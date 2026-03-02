@@ -18,6 +18,9 @@
 //!   4. Load cell calibration (known-mass linear fit)
 //!   5. Hourly diurnal ET pattern (sinusoidal, night ≈ 0)
 //!   6. Synthetic daily lysimeter vs ET₀ comparison
+//!
+//! script=`control/lysimeter/lysimeter_et.py`, commit=e651409, date=2026-02-26
+//! Run: `python3 control/lysimeter/lysimeter_et.py`
 
 use airspring_barracuda::validation::{
     self, json_field, json_str, parse_benchmark_json, ValidationHarness,

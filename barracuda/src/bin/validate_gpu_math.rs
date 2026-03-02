@@ -29,6 +29,8 @@
 //! | `gpu::mc_et0` | `mc_et0_cpu()` | CI contains central |
 //! | `gpu::seasonal_pipeline` | `SeasonalPipeline::cpu()` | End-to-end chain |
 //! | `gpu::atlas_stream` | `AtlasStream` | Multi-station batch |
+//!
+//! Provenance: `ToadStool` TS-001/003/004 S54 GPU precision validation
 
 use airspring_barracuda::eco::crop::CropType;
 use airspring_barracuda::eco::dual_kc::{DualKcInput, EvaporationLayerState};

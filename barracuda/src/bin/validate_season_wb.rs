@@ -11,6 +11,9 @@
 //!
 //! Benchmark: `control/season_water_budget/benchmark_season_wb.json`
 //! Baseline: `control/season_water_budget/season_water_budget.py` (34/34 PASS)
+//!
+//! script=`control/season_water_budget/season_water_budget.py`, commit=6be822f, date=2026-02-28
+//! Run: `python3 control/season_water_budget/season_water_budget.py`
 
 use airspring_barracuda::eco::evapotranspiration::{self as et, daily_et0, DailyEt0Input};
 use airspring_barracuda::eco::water_balance::{

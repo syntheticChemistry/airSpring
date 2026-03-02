@@ -172,6 +172,116 @@ impl NucleusMesh {
             .flat_map(|a| a.substrates.iter())
             .collect()
     }
+
+    /// Route a pipeline across the mesh, selecting the best node per stage.
+    ///
+    /// For each workload, finds the best capable node and its best substrate.
+    /// Returns a `MeshPipeline` with per-stage node assignments and
+    /// inter-node transfer characterisation.
+    #[must_use]
+    pub fn route_pipeline(&self, workloads: &[crate::dispatch::Workload]) -> Option<MeshPipeline<'_>> {
+        if workloads.is_empty() {
+            return Some(MeshPipeline {
+                stages: Vec::new(),
+                cross_node_hops: 0,
+                local_pcie_bypasses: 0,
+            });
+        }
+
+        let mut stages = Vec::with_capacity(workloads.len());
+        let mut cross_node_hops = 0_usize;
+        let mut local_pcie_bypasses = 0_usize;
+        let mut prev_node_id: Option<&str> = None;
+
+        for wl in workloads {
+            let capable_nodes = self.find_capable_nodes(wl);
+            if capable_nodes.is_empty() {
+                return None;
+            }
+
+            let node = prev_node_id.map_or_else(
+                || capable_nodes[0],
+                |prev| {
+                    capable_nodes
+                        .iter()
+                        .find(|n| n.node_id == prev)
+                        .copied()
+                        .unwrap_or(capable_nodes[0])
+                },
+            );
+
+            let decision = crate::dispatch::route(wl, &node.substrates)?;
+            let same_node = prev_node_id.is_none_or(|p| p == node.node_id);
+
+            if !same_node {
+                cross_node_hops += 1;
+            }
+
+            if same_node && decision.substrate.kind == crate::substrate::SubstrateKind::Gpu {
+                if let Some(npu_sub) = node
+                    .substrates
+                    .iter()
+                    .find(|s| s.kind == crate::substrate::SubstrateKind::Npu)
+                {
+                    if npu_sub.identity.pci_id.is_some()
+                        && decision.substrate.identity.pci_id.is_some()
+                    {
+                        local_pcie_bypasses += 1;
+                    }
+                }
+            }
+
+            stages.push(MeshStage {
+                node_id: &node.node_id,
+                substrate_kind: decision.substrate.kind,
+                same_node,
+            });
+
+            prev_node_id = Some(&node.node_id);
+        }
+
+        Some(MeshPipeline {
+            stages,
+            cross_node_hops,
+            local_pcie_bypasses,
+        })
+    }
+}
+
+/// A stage in a mesh-routed pipeline.
+#[derive(Debug)]
+pub struct MeshStage<'a> {
+    /// Which mesh node handles this stage.
+    pub node_id: &'a str,
+    /// Which substrate kind executes the workload.
+    pub substrate_kind: crate::substrate::SubstrateKind,
+    /// Whether this stage runs on the same node as the previous stage.
+    pub same_node: bool,
+}
+
+/// A pipeline routed across the NUCLEUS mesh.
+#[derive(Debug)]
+pub struct MeshPipeline<'a> {
+    /// Ordered sequence of mesh stages.
+    pub stages: Vec<MeshStage<'a>>,
+    /// Number of cross-node hops (biomeOS Neural API transfers).
+    pub cross_node_hops: usize,
+    /// Number of local `PCIe` P2P bypass opportunities.
+    pub local_pcie_bypasses: usize,
+}
+
+impl MeshPipeline<'_> {
+    /// Whether the entire pipeline runs on a single node.
+    #[must_use]
+    pub const fn is_single_node(&self) -> bool {
+        self.cross_node_hops == 0
+    }
+
+    /// Number of stages.
+    #[must_use]
+    pub const fn stage_count(&self) -> usize {
+        self.stages.len()
+    }
 }
 
 #[cfg(test)]
@@ -365,5 +475,107 @@ mod tests {
         assert_eq!(pipeline.stages.len(), 2);
         assert_eq!(pipeline.stages[0].substrate.kind, SubstrateKind::Npu);
         assert_eq!(pipeline.stages[1].substrate.kind, SubstrateKind::Gpu);
+    }
+
+    #[test]
+    fn mesh_pipeline_single_node() {
+        let mut mesh = NucleusMesh::new();
+        mesh.register(NucleusAtomic::new(
+            AtomicKind::Node,
+            "eastgate",
+            vec![gpu("TITAN V"), npu(), cpu()],
+        ));
+
+        let workloads = [
+            crate::dispatch::Workload::new(
+                "crop_stress",
+                vec![Capability::QuantizedInference { bits: 8 }],
+            )
+            .prefer(SubstrateKind::Npu),
+            crate::dispatch::Workload::new(
+                "et0_batch",
+                vec![Capability::F64Compute, Capability::ShaderDispatch],
+            ),
+            crate::dispatch::Workload::new(
+                "yield_response",
+                vec![Capability::F64Compute, Capability::ShaderDispatch],
+            ),
+        ];
+
+        let pipeline = mesh.route_pipeline(&workloads).expect("should route");
+        assert_eq!(pipeline.stage_count(), 3);
+        assert!(pipeline.is_single_node());
+        assert_eq!(pipeline.cross_node_hops, 0);
+    }
+
+    #[test]
+    fn mesh_pipeline_cross_node_hop() {
+        let mut mesh = NucleusMesh::new();
+        mesh.register(NucleusAtomic::new(
+            AtomicKind::Node,
+            "gpu-node",
+            vec![gpu("TITAN V"), cpu()],
+        ));
+        mesh.register(NucleusAtomic::new(
+            AtomicKind::Node,
+            "npu-node",
+            vec![npu(), cpu()],
+        ));
+
+        let workloads = [
+            crate::dispatch::Workload::new(
+                "et0_batch",
+                vec![Capability::F64Compute, Capability::ShaderDispatch],
+            ),
+            crate::dispatch::Workload::new(
+                "crop_stress",
+                vec![Capability::QuantizedInference { bits: 8 }],
+            ),
+        ];
+
+        let pipeline = mesh.route_pipeline(&workloads).expect("should route");
+        assert_eq!(pipeline.stage_count(), 2);
+        assert!(!pipeline.is_single_node());
+        assert_eq!(pipeline.cross_node_hops, 1);
+        assert_eq!(pipeline.stages[0].node_id, "gpu-node");
+        assert_eq!(pipeline.stages[1].node_id, "npu-node");
+    }
+
+    #[test]
+    fn mesh_pipeline_empty() {
+        let mesh = NucleusMesh::new();
+        let pipeline = mesh.route_pipeline(&[]).expect("empty should route");
+        assert!(pipeline.is_single_node());
+        assert_eq!(pipeline.stage_count(), 0);
+    }
+
+    #[test]
+    fn mesh_pipeline_prefers_same_node() {
+        let mut mesh = NucleusMesh::new();
+        mesh.register(NucleusAtomic::new(
+            AtomicKind::Node,
+            "node-a",
+            vec![gpu("TITAN V"), cpu()],
+        ));
+        mesh.register(NucleusAtomic::new(
+            AtomicKind::Node,
+            "node-b",
+            vec![gpu("RTX 4070"), cpu()],
+        ));
+
+        let workloads = [
+            crate::dispatch::Workload::new(
+                "et0_batch",
+                vec![Capability::F64Compute, Capability::ShaderDispatch],
+            ),
+            crate::dispatch::Workload::new(
+                "water_balance",
+                vec![Capability::F64Compute, Capability::ShaderDispatch],
+            ),
+        ];
+
+        let pipeline = mesh.route_pipeline(&workloads).expect("should route");
+        assert!(pipeline.is_single_node(), "should stay on same node");
+        assert_eq!(pipeline.stages[0].node_id, pipeline.stages[1].node_id);
     }
 }

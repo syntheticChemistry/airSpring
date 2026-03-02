@@ -16,6 +16,9 @@
 //!
 //! Benchmark: `control/forecast_scheduling/benchmark_forecast_scheduling.json`
 //! Python baseline: `control/forecast_scheduling/forecast_scheduling.py`
+//!
+//! script=`control/forecast_scheduling/forecast_scheduling.py`, commit=8c3953b, date=2026-02-27
+//! Run: `python3 control/forecast_scheduling/forecast_scheduling.py`
 
 use airspring_barracuda::eco::water_balance;
 use airspring_barracuda::eco::yield_response::{clamp_yield_ratio, yield_ratio_single};

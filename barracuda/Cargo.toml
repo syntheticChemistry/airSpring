@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.6.3"
+version = "0.6.4"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
@@ -303,6 +303,18 @@ path = "src/bin/bench_cross_spring/main.rs"
 [[bin]]
 name = "validate_gpu_pipeline"
 path = "src/bin/validate_gpu_pipeline.rs"
+
+[[bin]]
+name = "validate_gpu_streaming_multi_field"
+path = "src/bin/validate_gpu_streaming_multi_field.rs"
+
+[[bin]]
+name = "validate_cpu_parity_benchmark"
+path = "src/bin/validate_cpu_parity_benchmark.rs"
+
+[[bin]]
+name = "validate_pure_gpu_multi_field"
+path = "src/bin/validate_pure_gpu_multi_field.rs"
 
 [[bin]]
 name = "validate_gpu_rewire_benchmark"

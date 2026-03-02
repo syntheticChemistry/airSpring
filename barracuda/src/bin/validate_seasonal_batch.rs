@@ -15,6 +15,9 @@
 //!
 //! Benchmark: `control/seasonal_batch_et0/benchmark_seasonal_batch.json`
 //! Baseline: `control/seasonal_batch_et0/seasonal_batch_et0.py` (18/18 PASS)
+//!
+//! script=`control/seasonal_batch_et0/seasonal_batch_et0.py`, commit=97e7533, date=2026-02-28
+//! Run: `python3 control/seasonal_batch_et0/seasonal_batch_et0.py`
 
 use airspring_barracuda::gpu::et0::{Backend, BatchedEt0, StationDay};
 use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};

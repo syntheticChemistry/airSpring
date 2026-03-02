@@ -14,6 +14,9 @@
 //!
 //! Python control: `control/regional_et0/regional_et0_intercomparison.py`
 //! (61/61 PASS)
+//!
+//! script=`control/regional_et0/regional_et0_intercomparison.py`, commit=97e7533, date=2026-02-28
+//! Run: `python3 control/regional_et0/regional_et0_intercomparison.py`
 
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};

@@ -16,6 +16,9 @@
 //! References:
 //! - Makkink GF (1957) J Inst Water Eng 11:277-288
 //! - de Bruin HAR (1987) From Penman to Makkink, TNO, pp 5-31
+//!
+//! script=`control/makkink/makkink_et0.py`, commit=d3ecdc8, date=2026-02-27
+//! Run: `python3 control/makkink/makkink_et0.py`
 
 use airspring_barracuda::eco::evapotranspiration::makkink_et0;
 use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};

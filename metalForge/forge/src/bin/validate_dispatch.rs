@@ -214,10 +214,10 @@ fn check_reasons_and_inventory(inv: &[Substrate], v: &mut ValidationHarness) {
     let (absorbed, local, npu_native, cpu_only) = workloads::origin_summary();
     v.check_bool(
         &format!(
-            "10 absorbed + 4 local + 4 NPU + 3 CPU = {}",
+            "14 absorbed + 0 local + 4 NPU + 3 CPU = {}",
             absorbed + local + npu_native + cpu_only
         ),
-        absorbed == 10 && local == 4 && npu_native == 4 && cpu_only == 3,
+        absorbed == 14 && local == 0 && npu_native == 4 && cpu_only == 3,
     );
 }
 

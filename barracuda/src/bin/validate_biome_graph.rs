@@ -23,6 +23,8 @@
 //! This experiment runs **standalone** (no live primals needed). It simulates
 //! the biomeOS graph coordination by exercising each pipeline stage locally
 //! and validating that results compose correctly end-to-end.
+//!
+//! Provenance: `biomeOS` deployment graph parsing validation
 
 use std::time::Instant;
 

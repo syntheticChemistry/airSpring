@@ -1,14 +1,14 @@
 # airSpring Study: Precision Agriculture on Consumer Hardware
 
 **Status**: Working draft
-**Date**: February 2026
+**Date**: March 2, 2026
 **See also**: [METHODOLOGY.md](METHODOLOGY.md) for validation protocol
 
 ---
 
 ## Abstract
 
-We independently replicate 54 precision agriculture and environmental systems computational methods — FAO-56 Penman-Monteith ET₀, soil moisture calibration, IoT irrigation, daily water balance, dual crop coefficient, cover crops, regional ET₀, Richards equation, biochar isotherms, yield response, CW2D, 60-year WB, scheduling, lysimeter ET, sensitivity, Priestley-Taylor, 3-method intercomparison, Thornthwaite, GDD, pedotransfer, AmeriFlux eddy covariance, Hargreaves-Samani, ecological diversity, multi-crop budget, NPU edge inference, forecast scheduling, SCAN soil moisture, NASS yield, Anderson soil-moisture coupling, Blaney-Criddle PET, SCS Curve Number runoff, Green-Ampt infiltration, coupled runoff-infiltration, Van Genuchten inverse estimation, and full-season water budget audit — using only open-source tools and publicly available data. Python baselines (1237/1237 checks) validate against digitized paper benchmarks. A real data pipeline using Open-Meteo historical weather (15,300 station-days, 100 Michigan stations, 2023 growing season) produces ET₀ with R²=0.967 against independent computation. Water balance simulations show 53-72% water savings with smart scheduling. A Rust implementation via BarraCuda passes 618 lib + 31 forge tests across 59 binaries, with 75/75 Python-Rust cross-validation matches within 1e-5 tolerance. CPU benchmarks show Rust is 25.9× faster than Python (geometric mean, 6×–190× range, 8/8 parity). 11 Tier A + 4 Tier B GPU orchestrators wired, seasonal pipeline chained (73/73 real data, 12 stations, 4800 crop-year results), metalForge 18 workloads with cross-system routing (29/29 PASS) — establishing the foundation for GPU-accelerated precision irrigation on consumer hardware.
+We independently replicate 69 precision agriculture and environmental systems computational methods — FAO-56 Penman-Monteith ET₀, soil moisture calibration, IoT irrigation, daily water balance, dual crop coefficient, cover crops, regional ET₀, Richards equation, biochar isotherms, yield response, CW2D, 60-year WB, scheduling, lysimeter ET, sensitivity, Priestley-Taylor, 3-method intercomparison, Thornthwaite, GDD, pedotransfer, AmeriFlux eddy covariance, Hargreaves-Samani, ecological diversity, multi-crop budget, NPU edge inference, forecast scheduling, SCAN soil moisture, NASS yield, Anderson soil-moisture coupling, Blaney-Criddle PET, SCS Curve Number runoff, Green-Ampt infiltration, coupled runoff-infiltration, Van Genuchten inverse estimation, and full-season water budget audit — using only open-source tools and publicly available data. Python baselines (1237/1237 checks) validate against digitized paper benchmarks. A real data pipeline using Open-Meteo historical weather (15,300 station-days, 100 Michigan stations, 2023 growing season) produces ET₀ with R²=0.967 against independent computation. Water balance simulations show 53-72% water savings with smart scheduling. A Rust implementation via BarraCuda passes 810 lib + 57 forge tests across 79 binaries, with 75/75 Python-Rust cross-validation matches within 1e-5 tolerance. CPU benchmarks show Rust is 14.5× faster than Python (geometric mean, 21/21 parity). 11 Tier A + 4 Tier B GPU orchestrators wired, seasonal pipeline chained (73/73 real data, 12 stations, 4800 crop-year results), metalForge 18 workloads with cross-system routing (29/29 PASS). Phase 4: NUCLEUS primal (16 capabilities, ecology domain), biomeOS capability routing, Paper 12 immunological Anderson (Exp 066-069) — establishing the foundation for GPU-accelerated precision irrigation on consumer hardware.
 
 ---
 
@@ -34,7 +34,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda) 
 
 ---
 
-## 2. Phase 0: Python/R Control (1109/1109 PASS)
+## 2. Phase 0: Python/R Control (1237/1237 PASS)
 
 | Experiment | Paper | Checks | Key Validation |
 |------------|-------|:------:|----------------|
@@ -140,7 +140,7 @@ All mass balances close to 0.0000 mm. Water savings of 53-72% are consistent wit
 
 ---
 
-## 4. Phase 1: Rust BarraCuda (499 tests + 853 validation + 1393 atlas checks, 38 binaries)
+## 4. Phase 1: Rust BarraCuda (810 lib + 57 forge tests + 1498 atlas checks, 79 binaries)
 
 ### 4.1 Module Structure
 
@@ -263,5 +263,5 @@ The same BarraCuda/ToadStool infrastructure supports both domains. The key share
 
 ---
 
-*February 2026 — 1109 Python + 651 Rust tests + 1393 atlas checks, 54 binaries all pass,
-15,300 station-days (100 stations) real data, 75/75 cross-validation match, 25.9× Rust-vs-Python speedup (8/8 parity), zero synthetic*
+*March 2, 2026 — 1237 Python + 810 lib + 57 forge tests + 1498 atlas checks, 79 binaries all pass,
+15,300 station-days (100 stations) real data, 75/75 cross-validation match, 14.5× Rust-vs-Python speedup (21/21 parity), zero synthetic*

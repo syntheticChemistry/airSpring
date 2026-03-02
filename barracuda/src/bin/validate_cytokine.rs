@@ -17,6 +17,9 @@
 //! - Paper 12: Immunological Anderson
 //! - Gonzales AJ et al. (2016) Vet Dermatol 27:34-e10
 //! - Fleck TJ, Gonzales AJ (2021) Vet Dermatol 32:681-e182
+//!
+//! script=`control/cytokine_brain/cytokine_brain.py`, commit=dbfb53a, date=2026-03-02
+//! Run: `python3 control/cytokine_brain/cytokine_brain.py`
 
 use airspring_barracuda::eco::cytokine::{
     CytokineBrain, CytokineBrainConfig, CytokineObservation, CytokinePrediction,

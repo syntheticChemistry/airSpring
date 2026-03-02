@@ -19,6 +19,8 @@
 //!
 //! Benchmark: `control/cpu_gpu_parity/benchmark_cpu_gpu_parity.json`
 //! Baseline: Exp 040 (26/26 PASS on CPU fallback)
+//!
+//! Provenance: Live GPU hardware validation (Titan V, RTX 3090)
 
 use std::sync::Arc;
 use std::time::Instant;

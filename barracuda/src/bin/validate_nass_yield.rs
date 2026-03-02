@@ -17,6 +17,9 @@
 //!
 //! Benchmark: `control/nass_yield/benchmark_nass_yield.json`
 //! Python baseline: `control/nass_yield/nass_yield_validation.py`
+//!
+//! script=`control/nass_yield/nass_yield_validation.py`, commit=8c3953b, date=2026-02-27
+//! Run: `python3 control/nass_yield/nass_yield_validation.py`
 
 use airspring_barracuda::eco::water_balance;
 use airspring_barracuda::eco::yield_response::{clamp_yield_ratio, ky_table, yield_ratio_single};

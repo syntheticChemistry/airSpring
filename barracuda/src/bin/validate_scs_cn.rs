@@ -14,6 +14,9 @@
 //! Baseline: `control/scs_curve_number/scs_curve_number.py` (38/38 PASS)
 //!
 //! Reference: USDA-SCS (1972) NEH-4; USDA-SCS (1986) TR-55.
+//!
+//! script=`control/scs_curve_number/scs_curve_number.py`, commit=6be822f, date=2026-02-28
+//! Run: `python3 control/scs_curve_number/scs_curve_number.py`
 
 use airspring_barracuda::eco::runoff::{
     amc_cn_dry, amc_cn_wet, potential_retention, scs_cn_runoff, scs_cn_runoff_standard, LandUse,

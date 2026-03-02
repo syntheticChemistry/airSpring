@@ -15,6 +15,9 @@
 //!
 //! Benchmark: `control/pedotransfer_richards/benchmark_pedotransfer_richards.json`
 //! Baseline: `control/pedotransfer_richards/pedotransfer_richards.py` (29/29 PASS)
+//!
+//! script=`control/pedotransfer_richards/pedotransfer_richards.py`, commit=97e7533, date=2026-02-28
+//! Run: `python3 control/pedotransfer_richards/pedotransfer_richards.py`
 
 use airspring_barracuda::eco::richards::{
     cumulative_drainage, solve_richards_1d, VanGenuchtenParams,

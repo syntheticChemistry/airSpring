@@ -14,6 +14,9 @@
 //!
 //! Uses Open-Meteo ERA5 daily CSVs and the validated FAO-56 pipeline to
 //! compute seasonal ET₀ by decade, then compares against Python benchmarks.
+//!
+//! script=`control/atlas_decade/atlas_decade_analysis.py`, commit=88d07c0, date=2026-03-01
+//! Run: `python3 control/atlas_decade/atlas_decade_analysis.py`
 
 use airspring_barracuda::eco::evapotranspiration::{self as et, DailyEt0Input};
 use airspring_barracuda::validation::ValidationHarness;

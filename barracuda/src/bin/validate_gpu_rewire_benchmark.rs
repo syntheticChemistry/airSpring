@@ -27,6 +27,8 @@
 //! | Batch orchestrator | neuralSpring | `BatchedElementwiseF64` pattern |
 //! | Ops 5-8 WGSL | airSpring → S70+ | `SensorCal`, Hargreaves, Kc, `DualKc` |
 //! | Universal precision | hotSpring S67-68 | f64 canonical → Df64/f32/f16 |
+//!
+//! Provenance: `ToadStool` S68+ cross-spring absorption validation
 
 use std::sync::Arc;
 use std::time::Instant;

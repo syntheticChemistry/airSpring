@@ -2,6 +2,123 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.6.4] - 2026-03-02
+
+### GPU Multi-Field Pipeline + CPU Parity Benchmark + Pure GPU End-to-End
+
+Wired `BatchedWaterBalance::gpu_step()` into `SeasonalPipeline` for M-field
+GPU-parallel water balance dispatch. Three new experiments (070-072) prove
+the full CPU→GPU→Pure GPU pipeline: Python matches Rust CPU matches GPU.
+metalForge cross-system extended to 7-stage seasonal pipeline with GPU→NPU
+PCIe bypass. Comprehensive speedup benchmark: 13,000× Python at atlas scale.
+
+#### Added
+- **Exp 070: GPU Streaming Multi-Field Pipeline** (57/57 PASS)
+  - `SeasonalPipeline::run_multi_field()` — M fields × N days parallel WB
+  - `MultiFieldResult` struct with GPU dispatch tracking
+  - `BatchedWaterBalance::gpu_only()` for engine-only construction
+  - Atlas-scale: 50 stations × 153 days at 6.8M field-days/s
+- **Exp 071: CPU Parity & Speedup Benchmark** (34/34 PASS)
+  - 9 domains: ET₀ (10M/s), HG (20M/s), PT (1.7B/s), WB (162M/s),
+    Kc (1.9B/s), Yield (3.8T/s), Diversity, Seasonal (59K/s), Atlas (6.8M/s)
+  - 13,000× Rust-vs-Python at atlas scale
+- **Exp 072: Pure GPU End-to-End Multi-Field** (46/46 PASS)
+  - All 4 stages on GPU (ET₀ + Kc + WB + Yield)
+  - CPU↔GPU parity within 2mm seasonal ET₀
+  - 19.7× GPU dispatch reduction (155 vs 3,060 for 20 fields)
+  - Scaling validated: 1→10→50 fields
+- **metalForge**: 7-stage seasonal cross-system pipeline (66/66 PASS)
+  - Weather(CPU) → ET₀(GPU) → Kc(GPU) → WB(GPU) → Yield(GPU) → Stress(NPU) → Validation(CPU)
+  - GPU stages 2-5 stay on device (zero round-trips)
+  - GPU→NPU via PCIe peer-to-peer bypass
+
+#### Changed
+- `barracuda`: 810 → 813 lib tests, 79 → 82 binaries
+- `metalForge`: 56 → 66 mixed-hardware validation checks
+- `evolution_gaps.rs`: v0.6.4 — multi-field GPU pipeline documented
+- Experiments: 69 → 72
+- Seasonal pipeline GPU Stages 1-2 → Stages 1-3 (WB via `gpu_step`)
+
+## [0.6.3] - 2026-03-02
+
+### Paper 12 Immunological Anderson + Deep Debt Audit + ToadStool Absorption Handoff
+
+Paper 12 extends the Anderson localization framework from soil-geophysics (Exp 045)
+to immunological tissue analysis: tissue diversity profiling, CytokineBrain regime
+prediction via Nautilus evolutionary reservoir, barrier state modeling via VG retention
+analogy, and cross-species skin comparison bridging veterinary/human medicine.
+Deep debt audit resolves all validation provenance gaps, hardens /tmp→temp_dir paths,
+and documents dependency evolution. ToadStool S79 absorption handoff prepared.
+
+#### Added
+- **Exp 066: Tissue Diversity Profiling** (30+30 checks)
+  - `eco::tissue` — Shannon/Pielou→Anderson W effective disorder, regime classification,
+    barrier disruption d_eff, multi-compartment analysis (epidermis, dermis, hypodermis)
+- **Exp 067: CytokineBrain Regime Prediction** (14+28 checks)
+  - `eco::cytokine` — Nautilus/BingoCube evolutionary reservoir, 3-head AD flare prediction,
+    DriftMonitor regime change detection, brain serialization/import
+- **Exp 068: Barrier State Model** (16+16 checks)
+  - VG θ(h)/K(h) retention analogy for skin barrier, dimensional promotion from soil to tissue
+- **Exp 069: Cross-Species Skin Comparison** (19+20 checks)
+  - Canine/human/feline Anderson W comparison, One Health bridge, cross-species diversity
+- **4 Python controls**: barrier_skin, cross_species_skin, tissue_diversity, cytokine_brain
+- **4 new validation binaries**: validate_barrier_skin, validate_cross_species, validate_tissue, validate_cytokine
+- **CPU↔GPU parity (Exp 064)**: 51/51 dispatch validation — all CPU science, GPU domains, batch scaling, absorption audit
+- **biomeOS graph (Exp 065)**: 35/35 graph topology, 30 capabilities, offline pipeline, GPU parity, evolution manifest
+
+#### Changed
+- Validation provenance: all 79 binaries now have script/commit/date/command or cross-spring provenance
+- `tolerances.rs`: added Baseline Provenance table mapping all 19 tolerance domains to Python control experiments
+- `neural.rs`: hardcoded `/tmp/biomeos/` → `std::env::temp_dir()` (platform-agnostic)
+- `nucleus_integration.rs`: hardcoded `/tmp/test_biomeos_dir` → `std::env::temp_dir()`
+- `EVOLUTION_READINESS.md`: added Dependency Evolution Analysis (ureq→Songbird path, ring C-dep documented)
+- Experiments: 63 → 69, Binaries: 72 → 79, Lib tests: 641 → 810
+- ToadStool S79 synced (844 WGSL shaders, ops 0-13, GPU uncertainty stack)
+
+#### Compliance
+- `cargo fmt`, `cargo clippy --pedantic`, `cargo doc`: PASS (0 warnings, both crates)
+- `cargo llvm-cov`: 95.58% line / 96.33% function coverage
+- Zero unsafe, zero todo!/unimplemented!, zero mocks in production
+- All SPDX AGPL-3.0-or-later, all files under 1000 lines
+
+## [0.6.2] - 2026-03-02
+
+### Nautilus/AirSpringBrain + CytokineBrain + Drift Detection
+
+Integrated bingoCube/nautilus evolutionary reservoir computing. AirSpringBrain
+wraps NautilusShell for ET₀ time-series prediction. CytokineBrain extends the
+pattern to immunological cytokine regime prediction (Paper 12 sub-thesis).
+DriftMonitor detects N_e·s boundary regime changes.
+
+#### Added
+- **`nautilus` module** (`src/nautilus.rs`) — AirSpringBrain wrapping NautilusShell
+  for feed-forward evolutionary prediction, DriftMonitor, EdgeSeeder
+- **`eco::cytokine` module** — CytokineBrain with 3-head AD flare prediction,
+  observation normalization, JSON serialization/import
+- **bingoCube/nautilus** path dependency for evolutionary reservoir computing
+
+#### Changed
+- Lib tests: 688 → 810 (nautilus, cytokine, tissue tests)
+- Binaries: 73 → 79 (6 new: tissue, cytokine, barrier_skin, cross_species, dispatch_experiment, biome_graph)
+
+## [0.6.1] - 2026-03-02
+
+### ToadStool S79 Sync + Cross-Spring Evolution
+
+Synchronized with ToadStool S79 (844 WGSL shaders, ops 0-13 validated).
+Cross-spring evolution benchmark expanded to 124/124 PASS. GPU uncertainty
+stack (jackknife, bootstrap, diversity) wired and validated.
+
+#### Added
+- **bench_cross_spring_evolution**: 124/124 PASS (6-Spring provenance, S79 checks)
+- **GPU uncertainty stack**: JackknifeMeanGpu, BootstrapMeanGpu, DiversityFusionGpu
+
+#### Changed
+- ToadStool pin: S71 → S79 (844 WGSL shaders, f97fc2ae)
+- Cross-spring benchmarks: 53/53 → 124/124
+- ops 0-13: all validated GPU-first
+- `libc` → `rustix`, `async-trait` → AFIT, `pollster` → `test_pool` (upstream)
+
 ## [0.6.0] - 2026-03-01
 
 ### biomeOS NUCLEUS Integration + Science Capability Expansion

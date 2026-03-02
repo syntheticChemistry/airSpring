@@ -10,6 +10,9 @@
 //! Benchmark source: `control/biochar/benchmark_biochar.json`
 //! Provenance: Kumari, Dong & Safferman (2025) Applied Water Science 15(7):162.
 //! Baseline: `control/biochar/biochar_isotherms.py` (14/14 PASS).
+//!
+//! script=`control/biochar/biochar_isotherms.py`, commit=5684b1e, date=2026-02-26
+//! Run: `python3 control/biochar/biochar_isotherms.py`
 
 use airspring_barracuda::eco::isotherm::{self, langmuir_rl};
 use airspring_barracuda::tolerances;

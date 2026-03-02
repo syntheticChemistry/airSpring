@@ -16,6 +16,9 @@
 //! - Paper 12: Immunological Anderson — cross-species validation
 //! - Gonzales AJ et al. (2013) Vet Dermatol 24:48-53
 //! - Marsella R, De Benedetto A (2017) Vet Dermatol 28:306-e69
+//!
+//! script=`control/cross_species_skin/cross_species_skin.py`, commit=dbfb53a, date=2026-03-02
+//! Run: `python3 control/cross_species_skin/cross_species_skin.py`
 
 use airspring_barracuda::eco::diversity;
 use airspring_barracuda::eco::tissue::{barrier_disruption_d_eff, AndersonRegime};

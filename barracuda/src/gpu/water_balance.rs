@@ -136,6 +136,26 @@ impl BatchedWaterBalance {
         }
     }
 
+    /// Create a GPU-only engine for multi-field dispatch.
+    ///
+    /// Used by `SeasonalPipeline::run_multi_field()` where each field has its
+    /// own `WaterBalanceState`. The engine's internal state is unused — only
+    /// `gpu_step()` is called with per-field inputs.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if GPU device or `BatchedElementwiseF64` cannot init.
+    pub fn gpu_only() -> crate::error::Result<Self> {
+        let device = barracuda::device::test_pool::tokio_block_on(
+            barracuda::device::WgpuDevice::new_f64_capable(),
+        )?;
+        let engine = BatchedElementwiseF64::new(std::sync::Arc::new(device))?;
+        Ok(Self {
+            state: WaterBalanceState::new(0.30, 0.12, 600.0, 0.50),
+            gpu_engine: Some(engine),
+        })
+    }
+
     /// GPU step: compute one timestep across M fields in parallel.
     ///
     /// Returns the new depletion for each field. This is the GPU-accelerated

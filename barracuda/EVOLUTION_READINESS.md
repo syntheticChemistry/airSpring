@@ -294,3 +294,62 @@ Prior V032 cleanup:
   added `gpu::device_info` (Fp64Strategy probing), added `bench_cross_spring` (16→30 benchmarks)
 
 Revalidation: 618/618 tests, 0 clippy, 33/33 cross-validation, 1498/1498 atlas, 46/46 GPU math, 29/29 NCBI 16S, 30/30 benchmarks
+
+---
+
+## Dependency Evolution Analysis (v0.6.3)
+
+### Direct Dependencies
+
+| Crate | Version | C deps? | Purpose | Evolution Path |
+|-------|---------|---------|---------|----------------|
+| `barracuda` | 0.2.0 (path) | wgpu (vulkan) | GPU primitives, stats, validation | **Core** — stays, evolves with ToadStool |
+| `bingocube-nautilus` | 0.1.0 (path) | None | Evolutionary reservoir computing | **Core** — stays, pure Rust |
+| `serde` | 1.0 | None | Brain state serialization | **Stays** — pure Rust, ecosystem standard |
+| `serde_json` | 1.0 | None | Benchmark JSON + JSON-RPC | **Stays** — pure Rust, ecosystem standard |
+| `tracing-subscriber` | 0.3 | None | Validation output logging | **Stays** — pure Rust, ecosystem standard |
+| `ureq` | 3.2 | **ring** (C/asm via rustls) | HTTP client (data providers) | **Evolve** → Songbird (sovereign TLS) |
+
+### Transitive C/Assembly Dependencies
+
+| Crate | Pulled By | C/ASM? | Sovereignty Risk | Evolution |
+|-------|-----------|--------|-----------------|-----------|
+| `ring` 0.17 | ureq → rustls | **Yes** (C, assembly) | **Medium** — crypto primitives are C/asm | **Evolve**: ureq → Songbird (BearDog pure-Rust TLS 1.3) |
+| `wgpu` (via barracuda) | barracuda | Vulkan driver | **Low** — GPU driver is inherently platform-specific | Stays — hardware interface |
+
+### Evolution Path: `ureq` → Songbird Capability
+
+`ureq` is the only dependency pulling C code (`ring` via `rustls`). The evolution:
+
+1. **Current (standalone)**: `ureq` for direct HTTPS to Open-Meteo, NOAA, etc.
+2. **Sovereign**: `Songbird` pure-Rust TLS 1.3 via BearDog crypto delegation.
+   Route HTTPS through `capability.call("tls", "request", {...})`.
+3. **Discovery**: `data::provider::discover_transport()` already selects Songbird
+   when `SONGBIRD_SOCKET` is set, falling back to ureq otherwise.
+
+The transport tier is already abstracted — when Tower Atomic is running, all
+HTTPS routes through Songbird. No airSpring code changes needed; the dependency
+simply becomes unused.
+
+### Audit Results
+
+- `cargo deny check`: **Clean** — all dependencies AGPL/MIT/Apache/BSD licensed
+- `#![forbid(unsafe_code)]`: Both crates — no unsafe Rust
+- No `openssl`, `reqwest`, or other heavy C dependencies
+- Pure Rust stack except `ring` (via ureq→rustls) and GPU drivers (via wgpu)
+
+### Quality Gates (v0.6.3)
+
+| Gate | Result |
+|------|--------|
+| `cargo fmt --check` | **PASS** (both crates) |
+| `cargo clippy --workspace -- -D warnings -W clippy::pedantic` | **PASS** — 0 warnings (both crates) |
+| `cargo doc --no-deps` | **PASS** (both crates) |
+| `cargo test --lib` | **810 PASS** (barracuda) |
+| `cargo llvm-cov --lib --summary-only` | **95.58% line** / **96.33% function** coverage |
+| `cargo deny check` | **PASS** |
+| SPDX headers | **All .rs files**: `AGPL-3.0-or-later` |
+| File size limit | **All files < 1000 lines** (max: 935, bench binary) |
+| `#![forbid(unsafe_code)]` | **Both crates** |
+| Validation provenance | **All 79 binaries** have script/commit/date or cross-spring provenance |
+| Tolerance provenance | **47/47 constants** with mathematical justification + baseline table |

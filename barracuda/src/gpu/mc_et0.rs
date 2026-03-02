@@ -210,23 +210,131 @@ pub fn mc_et0_cpu(
     }
 }
 
-/// Monte Carlo ET₀ uncertainty propagation (GPU path, Tier B).
+/// Monte Carlo ET₀ uncertainty propagation (GPU-accelerated).
 ///
-/// When `ToadStool` wires `mc_et0_propagate_f64.wgsl`, this dispatches
-/// N MC samples to the GPU via Box-Muller + xoshiro128** kernel.
-/// Currently falls back to [`mc_et0_cpu`].
+/// CPU generates N perturbed input sets (Box-Muller + Lehmer LCG), then
+/// dispatches all N ET₀ computations to GPU in a single `BatchedEt0` call.
+/// The heavy work (N Penman-Monteith evaluations) runs on GPU while the
+/// lightweight perturbation generation and reduction remain on CPU.
+///
+/// Falls back to [`mc_et0_cpu`] if `BatchedEt0` GPU initialisation fails.
+///
+/// # Evolution Path
+///
+/// | Phase | Architecture |
+/// |-------|-------------|
+/// | v0.5.x | CPU fallback only |
+/// | **v0.6.3** | **CPU perturb → GPU batch ET₀ → CPU reduce** |
+/// | Future | Full GPU: `mc_et0_propagate_f64.wgsl` (xoshiro + Box-Muller + ET₀ + reduce) |
 ///
 /// # Errors
 ///
-/// Returns an error if the GPU dispatch fails (future).
+/// Returns an error only if GPU dispatch produces irrecoverable failure.
+/// GPU init failure silently falls back to CPU.
 pub fn mc_et0_gpu(
-    _device: &Arc<WgpuDevice>,
+    device: &Arc<WgpuDevice>,
     base_input: &DailyEt0Input,
     uncertainties: &Et0Uncertainties,
     n_samples: usize,
     seed: u64,
 ) -> crate::error::Result<McEt0Result> {
-    Ok(mc_et0_cpu(base_input, uncertainties, n_samples, seed))
+    use crate::gpu::et0::{BatchedEt0, StationDay};
+
+    let central = et::daily_et0(base_input).et0;
+
+    if n_samples == 0 {
+        return Ok(McEt0Result {
+            et0_central: central,
+            et0_mean: central,
+            et0_std: 0.0,
+            et0_p05: central,
+            et0_p95: central,
+            n_samples: 0,
+        });
+    }
+
+    let Ok(batched) = BatchedEt0::gpu(Arc::clone(device)) else {
+        return Ok(mc_et0_cpu(base_input, uncertainties, n_samples, seed));
+    };
+
+    let mut rng_state = seed.wrapping_add(1);
+    let mut station_days = Vec::with_capacity(n_samples);
+
+    for _ in 0..n_samples {
+        let z_tmax = box_muller_next(&mut rng_state);
+        let z_tmin = box_muller_next(&mut rng_state);
+        let z_rh_max = box_muller_next(&mut rng_state);
+        let z_rh_min = box_muller_next(&mut rng_state);
+        let z_wind = box_muller_next(&mut rng_state);
+        let z_rs = box_muller_next(&mut rng_state);
+
+        let tmax_p = base_input.tmax + z_tmax * uncertainties.sigma_tmax;
+        let tmin_p = base_input.tmin + z_tmin * uncertainties.sigma_tmin;
+
+        let rh_max_base =
+            base_input.actual_vapour_pressure / et::saturation_vapour_pressure(base_input.tmin);
+        let rh_min_base =
+            base_input.actual_vapour_pressure / et::saturation_vapour_pressure(base_input.tmax);
+
+        let rh_max_p = rh_max_base
+            .mul_add(100.0, z_rh_max * uncertainties.sigma_rh_max)
+            .clamp(1.0, 100.0);
+        let rh_min_p = rh_min_base
+            .mul_add(100.0, z_rh_min * uncertainties.sigma_rh_min)
+            .clamp(1.0, 100.0);
+
+        let wind_p =
+            (base_input.wind_speed_2m * (1.0 + z_wind * uncertainties.sigma_wind_frac)).max(0.01);
+        let rs_p =
+            (base_input.solar_radiation * (1.0 + z_rs * uncertainties.sigma_rs_frac)).max(0.01);
+
+        station_days.push(StationDay {
+            tmax: tmax_p,
+            tmin: tmin_p,
+            rh_max: rh_max_p,
+            rh_min: rh_min_p,
+            wind_2m: wind_p,
+            rs: rs_p,
+            elevation: base_input.elevation_m,
+            latitude: base_input.latitude_deg,
+            doy: base_input.day_of_year,
+        });
+    }
+
+    let gpu_result = batched.compute_gpu(&station_days)?;
+    let samples: Vec<f64> = gpu_result
+        .et0_values
+        .iter()
+        .copied()
+        .filter(|v| v.is_finite() && *v > 0.0)
+        .collect();
+
+    if samples.is_empty() {
+        return Ok(McEt0Result {
+            et0_central: central,
+            et0_mean: central,
+            et0_std: 0.0,
+            et0_p05: central,
+            et0_p95: central,
+            n_samples: 0,
+        });
+    }
+
+    let n = samples.len();
+    let mean_val = barracuda::stats::mean(&samples);
+    let variance = samples.iter().map(|x| (x - mean_val).powi(2)).sum::<f64>() / n as f64;
+    let std_val = variance.sqrt();
+    let p05 = barracuda::stats::percentile(&samples, 5.0);
+    let p95 = barracuda::stats::percentile(&samples, 95.0);
+
+    Ok(McEt0Result {
+        et0_central: central,
+        et0_mean: mean_val,
+        et0_std: std_val,
+        et0_p05: p05,
+        et0_p95: p95,
+        n_samples: n,
+    })
 }
 
 fn lehmer_next(state: &mut u64) -> f64 {
@@ -358,21 +466,38 @@ mod tests {
     }
 
     #[test]
-    #[allow(clippy::float_cmp)]
-    fn test_mc_et0_gpu_fallback_matches_cpu() {
+    fn test_mc_et0_gpu_statistically_consistent_with_cpu() {
         let Some(device) = try_device() else {
             return;
         };
         let input = sample_input();
         let unc = Et0Uncertainties::default();
-        let cpu_result = mc_et0_cpu(&input, &unc, 500, 42);
-        let gpu_result = mc_et0_gpu(&device, &input, &unc, 500, 42).unwrap();
-        assert_eq!(cpu_result.et0_central, gpu_result.et0_central);
-        assert_eq!(cpu_result.et0_mean, gpu_result.et0_mean);
-        assert_eq!(cpu_result.et0_std, gpu_result.et0_std);
-        assert_eq!(cpu_result.et0_p05, gpu_result.et0_p05);
-        assert_eq!(cpu_result.et0_p95, gpu_result.et0_p95);
-        assert_eq!(cpu_result.n_samples, gpu_result.n_samples);
+        let cpu_result = mc_et0_cpu(&input, &unc, 2000, 42);
+        let gpu_result = mc_et0_gpu(&device, &input, &unc, 2000, 42).unwrap();
+
+        assert!(
+            (cpu_result.et0_central - gpu_result.et0_central).abs() < f64::EPSILON,
+            "Central ET₀ must be identical (same equation, same input)"
+        );
+
+        // GPU uses op=0 shader math which may differ from CPU by ~1e-3 due to
+        // internal ea computation path (RH-based vs pre-computed). Same seed
+        // produces same perturbations, but ET₀ values may differ slightly.
+        let mean_diff = (cpu_result.et0_mean - gpu_result.et0_mean).abs();
+        assert!(
+            mean_diff < 0.15,
+            "MC mean should agree within 0.15 mm/day: CPU={:.4} GPU={:.4} diff={mean_diff:.4}",
+            cpu_result.et0_mean,
+            gpu_result.et0_mean
+        );
+
+        let std_ratio = gpu_result.et0_std / cpu_result.et0_std;
+        assert!(
+            (0.5..=2.0).contains(&std_ratio),
+            "MC std should be in same ballpark: CPU={:.4} GPU={:.4}",
+            cpu_result.et0_std,
+            gpu_result.et0_std
+        );
     }
 
     fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {

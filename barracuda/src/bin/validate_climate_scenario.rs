@@ -20,6 +20,9 @@
 //! Season: 153-day Michigan growing season (May 1 – Sep 30)
 //!
 //! Reference: CMIP6 AR6 WG1 Ch4
+//!
+//! script=`control/climate_scenario/climate_scenario_analysis.py`, commit=1a40b1e, date=2026-03-01
+//! Run: `python3 control/climate_scenario/climate_scenario_analysis.py`
 
 use std::f64::consts::PI;
 

@@ -18,9 +18,10 @@ use airspring_barracuda::data::provider::{
 #[test]
 fn socket_dir_uses_env_override() {
     let original = std::env::var("BIOMEOS_SOCKET_DIR").ok();
-    std::env::set_var("BIOMEOS_SOCKET_DIR", "/tmp/test_biomeos_dir");
+    let test_dir = std::env::temp_dir().join("test_biomeos_dir");
+    std::env::set_var("BIOMEOS_SOCKET_DIR", test_dir.as_os_str());
     let dir = biomeos::resolve_socket_dir();
-    assert_eq!(dir.to_string_lossy(), "/tmp/test_biomeos_dir");
+    assert_eq!(dir, test_dir);
 
     if let Some(orig) = original {
         std::env::set_var("BIOMEOS_SOCKET_DIR", orig);
