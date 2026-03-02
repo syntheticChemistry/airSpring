@@ -118,6 +118,7 @@ fn validate_hydraulic(v: &mut ValidationHarness, benchmark: &serde_json::Value) 
 fn validate_paw_and_trigger(v: &mut ValidationHarness) {
     validation::section("Plant available water calculations");
 
+    // Analytical: PAW = (θ_FC − θ_WP) × depth = (0.33 − 0.13) × 600 = 120 mm
     let paw = sm::plant_available_water(0.33, 0.13, 600.0);
     v.check_abs(
         "SiltLoam PAW (600 mm)",
@@ -126,6 +127,7 @@ fn validate_paw_and_trigger(v: &mut ValidationHarness) {
         tolerances::ANALYTICAL_COMPUTATION.abs_tol,
     );
 
+    // Analytical: SWD = (θ_FC − θ) × depth = (0.33 − 0.25) × 600 = 48 mm
     let swd = sm::soil_water_deficit(0.33, 0.25, 600.0);
     v.check_abs(
         "SiltLoam SWD (θ=0.25)",

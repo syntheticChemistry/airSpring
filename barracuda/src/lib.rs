@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![forbid(unsafe_code)]
 #![allow(
     clippy::cast_precision_loss,
     clippy::cast_possible_truncation,
@@ -66,6 +67,7 @@ pub mod gpu;
 pub mod io;
 #[cfg(feature = "npu")]
 pub mod npu;
+pub mod primal_science;
 pub mod testutil;
 pub mod tolerances;
 pub mod validation;

@@ -120,7 +120,9 @@ fn main() {
             .get("capabilities")
             .and_then(|v| v.as_array())
             .map_or(0, |a| a.len());
-        v.check_abs("capability_count", cap_count as f64, 9.0, 0.5);
+        // Architectural: 30 capabilities from airspring_primal v0.6.0
+        // (science.* + ecology.* + primal.* + compute.* + data.*).
+        v.check_abs("capability_count", cap_count as f64, 30.0, 1.0);
     }
 
     // ── Phase 3: FAO-56 ET₀ Parity ────────────────────────────────

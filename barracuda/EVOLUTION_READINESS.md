@@ -1,6 +1,6 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: March 1, 2026 (v0.5.8 — 641 lib tests, 72 binaries, 63 experiments, 1237 Python, 16 NUCLEUS capabilities, 28/28 cross-primal pipeline)
+**Last Updated**: March 1, 2026 (v0.6.0 — 641 lib tests, 72 binaries, 63 experiments, 1237 Python, 16 NUCLEUS capabilities, 28/28 cross-primal pipeline)
 **ToadStool PIN**: S70+++ HEAD (`1dd7e338` — universal f64 canonical, dual-layer precision, device-lost resilience, 774 WGSL shaders, cross-spring ops 5-8 absorbed)
 **Handoff**: V041 (NUCLEUS cross-primal evolution — ecology domain, capability.call, cross-primal forwarding, 5 new experiments)
 **License**: AGPL-3.0-or-later

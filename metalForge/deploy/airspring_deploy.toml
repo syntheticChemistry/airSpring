@@ -1,0 +1,119 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# biomeOS deployment graph: airSpring ecology primal atop Node Atomic.
+#
+# Sequence: BearDog → Songbird → ToadStool → airSpring
+# This graph extends tower_atomic_bootstrap with compute (ToadStool)
+# and the airSpring ecology/agriculture science pipeline.
+#
+# Usage:
+#   biomeos deploy --graph metalForge/deploy/airspring_deploy.toml
+
+[graph]
+name = "airspring_ecology"
+description = "airSpring ecology pipeline on Node Atomic (Tower + ToadStool + airSpring)"
+version = "0.6.0"
+
+# ── Node 1: BearDog (crypto + key management) ─────────────────────
+[[graph.node]]
+name = "beardog"
+binary = "beardog_primal"
+order = 1
+required = true
+health_method = "health"
+capabilities = [
+    "crypto.sign",
+    "crypto.verify",
+    "crypto.encrypt",
+    "crypto.keygen",
+]
+
+# ── Node 2: Songbird (network + sovereign TLS 1.3) ────────────────
+[[graph.node]]
+name = "songbird"
+binary = "songbird_primal"
+order = 2
+required = true
+depends_on = ["beardog"]
+health_method = "health"
+capabilities = [
+    "network.tls_connect",
+    "network.http_fetch",
+    "network.dns_resolve",
+]
+
+# ── Node 3: ToadStool (GPU/CPU compute dispatch) ──────────────────
+[[graph.node]]
+name = "toadstool"
+binary = "toadstool_primal"
+order = 3
+required = false
+depends_on = ["beardog", "songbird"]
+health_method = "compute.health"
+capabilities = [
+    "compute.health",
+    "compute.version",
+    "compute.execute",
+    "compute.batch",
+    "compute.precision_probe",
+]
+
+[graph.node.env]
+TOADSTOOL_PRECISION = "auto"
+TOADSTOOL_MULTI_DEVICE = "true"
+
+# ── Node 4: airSpring (ecology + agriculture science) ──────────────
+[[graph.node]]
+name = "airspring"
+binary = "airspring_primal"
+order = 4
+required = true
+depends_on = ["beardog", "songbird", "toadstool"]
+health_method = "science.health"
+by_capability = "ecology"
+capabilities = [
+    # ET₀ methods (9)
+    "ecology.et0.penman_monteith",
+    "ecology.et0.hargreaves",
+    "ecology.et0.priestley_taylor",
+    "ecology.et0.makkink",
+    "ecology.et0.turc",
+    "ecology.et0.hamon",
+    "ecology.et0.blaney_criddle",
+    "ecology.et0.thornthwaite",
+    "ecology.et0.ensemble",
+    "ecology.et0.bias_correct",
+    # Water balance (2)
+    "ecology.water_balance.daily_step",
+    "ecology.water_balance.simulate_season",
+    # Crop (4)
+    "ecology.dual_kc.compute",
+    "ecology.crop.gdd",
+    "ecology.crop.yield_response",
+    "ecology.crop.kc_schedule",
+    # Soil (3)
+    "ecology.soil.pedotransfer",
+    "ecology.soil.topp_equation",
+    "ecology.sensor.soilwatch10_calibrate",
+    # Hydrology (3)
+    "ecology.runoff.scs_cn",
+    "ecology.infiltration.green_ampt",
+    "ecology.richards.solve_1d",
+    # Diversity (3)
+    "ecology.diversity.shannon",
+    "ecology.diversity.simpson",
+    "ecology.diversity.bray_curtis",
+    # Physics (1)
+    "ecology.anderson.coupling_chain",
+    # Cross-primal (2)
+    "science.health",
+    "science.version",
+    "compute.offload",
+    "data.weather",
+]
+
+[graph.node.env]
+BEARDOG_SOCKET = "/run/nucleus/beardog-default.sock"
+SONGBIRD_SOCKET = "/run/nucleus/songbird-default.sock"
+TOADSTOOL_SOCKET = "/run/nucleus/toadstool-default.sock"
+AIRSPRING_FAMILY_ID = "8ff3b864a4bc589a"

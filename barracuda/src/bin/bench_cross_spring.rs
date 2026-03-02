@@ -90,6 +90,12 @@ fn run_bench(
     );
 }
 
+macro_rules! bench_suite {
+    ($pass:expr, $fail:expr, $(($name:expr, $origin:expr, $body:expr)),+ $(,)?) => {
+        $(run_bench($pass, $fail, $name, $origin, $body);)+
+    };
+}
+
 fn run_all_benchmarks(device: Option<&Arc<WgpuDevice>>) -> (u32, u32) {
     let mut pass = 0u32;
     let mut fail = 0u32;
@@ -116,41 +122,31 @@ fn run_all_benchmarks(device: Option<&Arc<WgpuDevice>>) -> (u32, u32) {
 }
 
 fn run_et0_benchmarks(device: Option<&Arc<WgpuDevice>>, pass: &mut u32, fail: &mut u32) {
-    run_bench(
+    bench_suite!(
         pass,
         fail,
-        "ET₀ CPU baseline (N=365)",
-        "hotSpring math_f64",
-        || bench_et0_cpu(365),
-    );
-    run_bench(
-        pass,
-        fail,
-        "ET₀ CPU batch (N=10000)",
-        "hotSpring math_f64",
-        || bench_et0_cpu(10_000),
+        ("ET₀ CPU baseline (N=365)", "hotSpring math_f64", || {
+            bench_et0_cpu(365)
+        }),
+        ("ET₀ CPU batch (N=10000)", "hotSpring math_f64", || {
+            bench_et0_cpu(10_000)
+        }),
     );
     if let Some(dev) = device {
-        run_bench(
+        bench_suite!(
             pass,
             fail,
-            "ET₀ GPU (N=365)",
-            "hotSpring→ToadStool→GPU",
-            || bench_et0_gpu(dev, 365),
-        );
-        run_bench(
-            pass,
-            fail,
-            "ET₀ GPU (N=10000)",
-            "hotSpring→ToadStool→GPU",
-            || bench_et0_gpu(dev, 10_000),
-        );
-        run_bench(
-            pass,
-            fail,
-            "ET₀ CPU↔GPU parity (N=200)",
-            "cross-spring validation",
-            || bench_et0_parity(dev, 200),
+            ("ET₀ GPU (N=365)", "hotSpring→ToadStool→GPU", || {
+                bench_et0_gpu(dev, 365)
+            }),
+            ("ET₀ GPU (N=10000)", "hotSpring→ToadStool→GPU", || {
+                bench_et0_gpu(dev, 10_000)
+            }),
+            (
+                "ET₀ CPU↔GPU parity (N=200)",
+                "cross-spring validation",
+                || bench_et0_parity(dev, 200)
+            ),
         );
     }
 }
@@ -206,60 +202,58 @@ fn run_stream_benchmarks(device: Option<&Arc<WgpuDevice>>, pass: &mut u32, fail:
 }
 
 fn run_richards_benchmarks(pass: &mut u32, fail: &mut u32) {
-    run_bench(
+    bench_suite!(
         pass,
         fail,
-        "Richards CPU (sand, 0.1d)",
-        "airSpring→ToadStool S40",
-        bench_richards_cpu,
-    );
-    run_bench(
-        pass,
-        fail,
-        "Richards upstream CN (sand, 0.1d)",
-        "hotSpring CN f64 S62",
-        bench_richards_upstream,
-    );
-    run_bench(
-        pass,
-        fail,
-        "Richards CN diffusion (sand, 0.1d)",
-        "hotSpring CN f64 S62",
-        bench_richards_cn_diffusion,
+        (
+            "Richards CPU (sand, 0.1d)",
+            "airSpring→ToadStool S40",
+            bench_richards_cpu
+        ),
+        (
+            "Richards upstream CN (sand, 0.1d)",
+            "hotSpring CN f64 S62",
+            bench_richards_upstream
+        ),
+        (
+            "Richards CN diffusion (sand, 0.1d)",
+            "hotSpring CN f64 S62",
+            bench_richards_cn_diffusion
+        ),
     );
 }
 
 fn run_isotherm_benchmarks(pass: &mut u32, fail: &mut u32) {
-    run_bench(
+    bench_suite!(
         pass,
         fail,
-        "Isotherm NM (Langmuir, wood char)",
-        "neuralSpring nelder_mead",
-        bench_isotherm_nm,
-    );
-    run_bench(
-        pass,
-        fail,
-        "Isotherm Global (LHS, 8 starts)",
-        "neuralSpring multi_start_NM",
-        bench_isotherm_global,
+        (
+            "Isotherm NM (Langmuir, wood char)",
+            "neuralSpring nelder_mead",
+            bench_isotherm_nm
+        ),
+        (
+            "Isotherm Global (LHS, 8 starts)",
+            "neuralSpring multi_start_NM",
+            bench_isotherm_global
+        ),
     );
 }
 
 fn run_hargreaves_benchmarks(pass: &mut u32, fail: &mut u32) {
-    run_bench(
+    bench_suite!(
         pass,
         fail,
-        "Hargreaves batch CPU (N=365)",
-        "airSpring→ToadStool S66 hydrology",
-        || bench_hargreaves_batch(365),
-    );
-    run_bench(
-        pass,
-        fail,
-        "Hargreaves batch CPU (N=10000)",
-        "airSpring→ToadStool S66 hydrology",
-        || bench_hargreaves_batch(10_000),
+        (
+            "Hargreaves batch CPU (N=365)",
+            "airSpring→ToadStool S66 hydrology",
+            || bench_hargreaves_batch(365)
+        ),
+        (
+            "Hargreaves batch CPU (N=10000)",
+            "airSpring→ToadStool S66 hydrology",
+            || bench_hargreaves_batch(10_000)
+        ),
     );
 }
 
@@ -423,60 +417,58 @@ fn run_mc_et0_benchmarks(pass: &mut u32, fail: &mut u32) {
 }
 
 fn run_diversity_benchmarks(pass: &mut u32, fail: &mut u32) {
-    run_bench(
+    bench_suite!(
         pass,
         fail,
-        "Diversity alpha (5-species mix)",
-        "wetSpring→ToadStool S64 bio",
-        bench_diversity_alpha,
-    );
-    run_bench(
-        pass,
-        fail,
-        "Bray-Curtis matrix (20 samples)",
-        "wetSpring→ToadStool S64 bio",
-        bench_bray_curtis_matrix,
-    );
-    run_bench(
-        pass,
-        fail,
-        "Shannon from frequencies (pre-norm)",
-        "wetSpring→ToadStool S66",
-        bench_shannon_frequencies,
+        (
+            "Diversity alpha (5-species mix)",
+            "wetSpring→ToadStool S64 bio",
+            bench_diversity_alpha
+        ),
+        (
+            "Bray-Curtis matrix (20 samples)",
+            "wetSpring→ToadStool S64 bio",
+            bench_bray_curtis_matrix
+        ),
+        (
+            "Shannon from frequencies (pre-norm)",
+            "wetSpring→ToadStool S66",
+            bench_shannon_frequencies
+        ),
     );
 }
 
 fn run_crop_kc_benchmarks(pass: &mut u32, fail: &mut u32) {
-    run_bench(
+    bench_suite!(
         pass,
         fail,
-        "Crop Kc stage interpolation (180d)",
-        "airSpring→ToadStool S66 hydrology",
-        bench_crop_kc_stage,
-    );
-    run_bench(
-        pass,
-        fail,
-        "Kc from GDD (corn season)",
-        "airSpring domain (FAO-56 Table 12)",
-        bench_kc_from_gdd,
+        (
+            "Crop Kc stage interpolation (180d)",
+            "airSpring→ToadStool S66 hydrology",
+            bench_crop_kc_stage
+        ),
+        (
+            "Kc from GDD (corn season)",
+            "airSpring domain (FAO-56 Table 12)",
+            bench_kc_from_gdd
+        ),
     );
 }
 
 fn run_anderson_benchmarks(pass: &mut u32, fail: &mut u32) {
-    run_bench(
+    bench_suite!(
         pass,
         fail,
-        "Anderson coupling chain (10K θ)",
-        "groundSpring→airSpring cross-spring",
-        bench_anderson_chain,
-    );
-    run_bench(
-        pass,
-        fail,
-        "Anderson regime classification",
-        "groundSpring spectral→airSpring eco",
-        bench_anderson_regimes,
+        (
+            "Anderson coupling chain (10K θ)",
+            "groundSpring→airSpring cross-spring",
+            bench_anderson_chain
+        ),
+        (
+            "Anderson regime classification",
+            "groundSpring spectral→airSpring eco",
+            bench_anderson_regimes
+        ),
     );
 }
 
@@ -491,36 +483,36 @@ fn run_blaney_criddle_benchmarks(pass: &mut u32, fail: &mut u32) {
 }
 
 fn run_scs_cn_benchmarks(pass: &mut u32, fail: &mut u32) {
-    run_bench(
+    bench_suite!(
         pass,
         fail,
-        "SCS-CN runoff (10K events)",
-        "airSpring hydrology",
-        bench_scs_cn,
-    );
-    run_bench(
-        pass,
-        fail,
-        "SCS-CN AMC adjustment",
-        "airSpring hydrology",
-        bench_scs_cn_amc,
+        (
+            "SCS-CN runoff (10K events)",
+            "airSpring hydrology",
+            bench_scs_cn
+        ),
+        (
+            "SCS-CN AMC adjustment",
+            "airSpring hydrology",
+            bench_scs_cn_amc
+        ),
     );
 }
 
 fn run_green_ampt_benchmarks(pass: &mut u32, fail: &mut u32) {
-    run_bench(
+    bench_suite!(
         pass,
         fail,
-        "Green-Ampt infiltration (7 soils)",
-        "airSpring soil physics",
-        bench_green_ampt_soils,
-    );
-    run_bench(
-        pass,
-        fail,
-        "Green-Ampt ponding time",
-        "airSpring soil physics",
-        bench_green_ampt_ponding,
+        (
+            "Green-Ampt infiltration (7 soils)",
+            "airSpring soil physics",
+            bench_green_ampt_soils
+        ),
+        (
+            "Green-Ampt ponding time",
+            "airSpring soil physics",
+            bench_green_ampt_ponding
+        ),
     );
 }
 

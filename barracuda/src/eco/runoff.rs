@@ -152,6 +152,7 @@ pub fn amc_cn_wet(cn_ii: f64) -> f64 {
 }
 
 #[cfg(test)]
+#[allow(clippy::float_cmp)]
 mod tests {
     use super::*;
 
@@ -237,5 +238,109 @@ mod tests {
         let q_std = scs_cn_runoff(50.0, 75.0, 0.2);
         let q_upd = scs_cn_runoff(50.0, 75.0, 0.05);
         assert!(q_upd > q_std, "Updated Ia should give more runoff");
+    }
+
+    #[test]
+    fn scs_runoff_p_le_ia_returns_zero() {
+        let q = scs_cn_runoff(5.0, 90.0, 0.2);
+        assert!(q < 0.01, "P <= Ia should give Q ≈ 0, got Q={q}");
+    }
+
+    #[test]
+    fn scs_runoff_cn_zero_returns_zero() {
+        assert!(scs_cn_runoff(50.0, 0.0, 0.2).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn scs_runoff_negative_precip_returns_zero() {
+        assert!(scs_cn_runoff(-10.0, 75.0, 0.2).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn potential_retention_cn_zero_returns_max() {
+        let s = potential_retention(0.0);
+        assert_eq!(s, f64::MAX);
+    }
+
+    #[test]
+    fn potential_retention_negative_cn() {
+        let s = potential_retention(-10.0);
+        assert_eq!(s, f64::MAX);
+    }
+
+    #[test]
+    fn initial_abstraction_standard() {
+        let s = potential_retention(75.0);
+        let ia = initial_abstraction(s, 0.2);
+        assert!((ia - 16.93).abs() < 0.1, "Ia = 0.2*S for CN=75");
+    }
+
+    #[test]
+    fn land_use_impervious_all_soil_groups() {
+        for group in [SoilGroup::A, SoilGroup::B, SoilGroup::C, SoilGroup::D] {
+            assert_eq!(LandUse::Impervious.cn(group), 98);
+        }
+    }
+
+    #[test]
+    fn land_use_meadow_all_groups() {
+        assert_eq!(LandUse::Meadow.cn(SoilGroup::A), 30);
+        assert_eq!(LandUse::Meadow.cn(SoilGroup::B), 58);
+        assert_eq!(LandUse::Meadow.cn(SoilGroup::C), 71);
+        assert_eq!(LandUse::Meadow.cn(SoilGroup::D), 78);
+    }
+
+    #[test]
+    fn land_use_woods_good_all_groups() {
+        assert_eq!(LandUse::WoodsGood.cn(SoilGroup::A), 30);
+        assert_eq!(LandUse::WoodsGood.cn(SoilGroup::B), 55);
+        assert_eq!(LandUse::WoodsGood.cn(SoilGroup::C), 70);
+        assert_eq!(LandUse::WoodsGood.cn(SoilGroup::D), 77);
+    }
+
+    #[test]
+    fn land_use_fallow_bare_all_groups() {
+        assert_eq!(LandUse::FallowBare.cn(SoilGroup::A), 77);
+        assert_eq!(LandUse::FallowBare.cn(SoilGroup::D), 94);
+    }
+
+    #[test]
+    fn amc_cn_dry_lower_than_ii() {
+        let cn_ii = 75.0;
+        let cn_i = amc_cn_dry(cn_ii);
+        assert!(cn_i < cn_ii, "AMC I (dry) should be lower than AMC II");
+    }
+
+    #[test]
+    fn amc_cn_wet_higher_than_ii() {
+        let cn_ii = 75.0;
+        let cn_iii = amc_cn_wet(cn_ii);
+        assert!(cn_iii > cn_ii, "AMC III (wet) should be higher than AMC II");
+    }
+
+    #[test]
+    fn scs_runoff_amc_adjusted_dry_less_runoff() {
+        let cn_ii = 75.0;
+        let cn_i = amc_cn_dry(cn_ii);
+        let q_ii = scs_cn_runoff_standard(50.0, cn_ii);
+        let q_i = scs_cn_runoff_standard(50.0, cn_i);
+        assert!(q_i < q_ii, "Dry AMC should produce less runoff");
+    }
+
+    #[test]
+    fn scs_runoff_amc_adjusted_wet_more_runoff() {
+        let cn_ii = 75.0;
+        let cn_iii = amc_cn_wet(cn_ii);
+        let q_ii = scs_cn_runoff_standard(50.0, cn_ii);
+        let q_iii = scs_cn_runoff_standard(50.0, cn_iii);
+        assert!(q_iii > q_ii, "Wet AMC should produce more runoff");
+    }
+
+    #[test]
+    fn p_exactly_at_ia_boundary() {
+        let s = potential_retention(80.0);
+        let ia = initial_abstraction(s, 0.2);
+        let q = scs_cn_runoff(ia, 80.0, 0.2);
+        assert!(q < 0.001, "P exactly at Ia should give Q ≈ 0");
     }
 }

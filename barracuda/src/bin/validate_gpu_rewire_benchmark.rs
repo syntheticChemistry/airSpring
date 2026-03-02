@@ -127,6 +127,9 @@ fn main() {
     let vwc_10k = engine
         .execute(&[10_000.0], 1, Op::SensorCalibration)
         .unwrap()[0];
+    // Provenance: SoilWatch 10 Topp polynomial, Topp et al. (1980).
+    // VWC(ε=10000) verified against control/soil_sensors/calibration_dong2020.py
+    // commit 502f2ada, 2026-02-16.
     v.check_abs("op=5 VWC(10000) ≈ 0.1323", vwc_10k, 0.1323, 0.01);
 
     let t_gpu_sc = bench_execute(&engine, &sensor_data, n_sensor, Op::SensorCalibration, 20);
@@ -200,6 +203,8 @@ fn main() {
     let std_kc = engine
         .execute(&[1.20, 2.0, 45.0, 2.0], 1, Op::KcClimateAdjust)
         .unwrap()[0];
+    // Provenance: FAO-56 Eq. 62 Kc_adj identity — standard conditions
+    // (u2=2.0 m/s, RHmin=45%) produce no adjustment, so Kc_adj = Kc_tab = 1.20.
     v.check_abs("op=7 standard conditions ≈ 1.20", std_kc, 1.20, 0.001);
 
     let t_gpu_kc = bench_execute(&engine, &kc_data, n_kc, Op::KcClimateAdjust, 20);

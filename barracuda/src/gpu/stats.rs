@@ -109,6 +109,9 @@ pub fn predict_vwc(coefficients: &[f64], raw_count: f64) -> f64 {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::float_cmp)]
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
+
     use super::*;
 
     fn try_device() -> Option<Arc<WgpuDevice>> {
@@ -212,5 +215,49 @@ mod tests {
             corr[2] < -0.99,
             "x1 and x3=-x1+50 should be highly anti-correlated"
         );
+    }
+
+    #[test]
+    fn predict_vwc_empty_coeffs_constant_zero() {
+        let vwc = predict_vwc(&[], 1000.0);
+        assert_eq!(vwc, 0.0);
+    }
+
+    #[test]
+    fn predict_vwc_single_coeff_constant() {
+        let coeffs = [0.42];
+        assert!((predict_vwc(&coeffs, 0.0) - 0.42).abs() < 1e-10);
+        assert!((predict_vwc(&coeffs, 10_000.0) - 0.42).abs() < 1e-10);
+    }
+
+    #[test]
+    fn predict_vwc_zero_raw() {
+        let coeffs = [0.1, 0.002];
+        let vwc = predict_vwc(&coeffs, 0.0);
+        assert!((vwc - 0.1).abs() < 1e-10);
+    }
+
+    #[test]
+    fn predict_vwc_quadratic() {
+        let coeffs = [1.0, 0.5, 0.01];
+        let vwc = predict_vwc(&coeffs, 10.0);
+        let expected = 0.01f64.mul_add(100.0, 0.5f64.mul_add(10.0, 1.0));
+        assert!((vwc - expected).abs() < 1e-10);
+    }
+
+    #[test]
+    fn predict_vwc_summary_statistics() {
+        let coeffs = [0.05, 0.00002];
+        let raw_values = [0.0, 5_000.0, 10_000.0, 15_000.0, 20_000.0];
+        let predicted: Vec<f64> = raw_values
+            .iter()
+            .map(|&r| predict_vwc(&coeffs, r))
+            .collect();
+        assert!(predicted[0] < predicted[1]);
+        assert!(predicted[1] < predicted[2]);
+        assert!(predicted[2] < predicted[3]);
+        assert!(predicted[3] < predicted[4]);
+        assert!((predicted[0] - 0.05).abs() < 1e-10);
+        assert!((predicted[2] - 0.25).abs() < 1e-10);
     }
 }

@@ -1,7 +1,7 @@
 # airSpring Experiments
 
-**Updated**: March 1, 2026
-**Status**: 63 experiments, 1237/1237 Python + 817 lib + 57 forge tests + 73 binaries + 53/53 cross-spring evolution benchmark (ToadStool S71 synced) + Richards PDE rewired to upstream `barracuda::linalg::tridiagonal_solve` + configurable `RichardsConfig` + shared `biomeos` module + 78/78 pure GPU pipeline + 26/26 GPU rewire benchmark + 104/104 metalForge mixed-hardware + 75/75 cross-validation + 17 Tier A GPU orchestrators + seasonal/streaming pipeline + NUCLEUS primal (17 capabilities, 28/28 cross-primal) + bingoCube/nautilus evolutionary reservoir available + **Rust 14.5× faster than Python** (21/21 parity)
+**Updated**: March 2, 2026
+**Status**: 65 experiments, 1237/1237 Python + 673 lib + 58 forge tests + 75 binaries + 53/53 cross-spring evolution benchmark (ToadStool S71 synced) + 51/51 Full Dispatch Experiment (Exp 064) + 35/35 biomeOS Graph (Exp 065) + 30 NUCLEUS capabilities + **Rust 14.5× faster than Python** (21/21 parity)
 
 ---
 
@@ -72,6 +72,8 @@
 | 061 | Cross-Spring Diversity (NCBI 16S) | Biodiversity | **Complete** | Rust CPU | `eco::diversity` + wetSpring Shannon H' | 63 |
 | 062 | NUCLEUS Integration Validation | NUCLEUS | **Complete** | Rust + biomeOS | `airspring_primal` — JSON-RPC parity (9 science methods) | 29 |
 | 063 | NUCLEUS Cross-Primal Pipeline | NUCLEUS | **Complete** | Rust + biomeOS + neural-api | ecology domain, cross-primal forwarding, capability.call routing | 28 |
+| 064 | Full Dispatch Experiment | GPU+CPU | **Complete** | Rust CPU+GPU | 21 CPU science + 5 GPU domains + batch scaling + absorption audit + mixed pipeline | 51 |
+| 065 | biomeOS Graph Experiment | NUCLEUS | **Complete** | Rust + biomeOS | deployment graph topology, 30 capabilities, offline pipeline, GPU parity, evolution manifest | 35 |
 
 **Grand Total**: 1237 Python + **641 lib + 57 forge tests** + 1498/1498 atlas + 33/33 cross-validation + 17 Tier A + 7 Tier B GPU orchestrators + seasonal pipeline GPU Stages 1-2 + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge (5 substrates, 18 workloads, 29/29 cross-system) + GPU math portability (46/46) + NCBI 16S coupling (14+29) + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34) + Exp 058 Climate Scenario (46/46) + NUCLEUS primal (29/29 + 28/28) + atlas decade (102/102) + NASS real (99/99) + NCBI diversity (63/63) + 72 binaries + 35/35 cross-spring benchmarks (6 Springs) + ToadStool S70+ synced + 21/21 CPU parity
 

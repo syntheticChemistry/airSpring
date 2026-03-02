@@ -306,6 +306,7 @@ pub fn interpolate_soil_moisture(
 }
 
 #[cfg(test)]
+#[allow(clippy::float_cmp)]
 mod tests {
     use super::*;
 
@@ -324,5 +325,240 @@ mod tests {
         };
         let _b1 = to_barracuda_variogram(sph);
         let _b2 = to_barracuda_variogram(exp);
+    }
+
+    /// Expanded test: verify `to_barracuda_variogram` produces correct model types.
+    #[test]
+    fn test_to_barracuda_variogram_expanded() {
+        let sph = SoilVariogram::Spherical {
+            nugget: 0.001,
+            sill: 0.01,
+            range: 15.0,
+        };
+        let exp = SoilVariogram::Exponential {
+            nugget: 0.002,
+            sill: 0.02,
+            range: 30.0,
+        };
+        let b_sph = to_barracuda_variogram(sph);
+        let b_exp = to_barracuda_variogram(exp);
+        // Verify both convert without panic; barracuda VariogramModel is opaque.
+        let _ = (b_sph, b_exp);
+    }
+
+    #[test]
+    fn test_interpolate_empty_sensors_returns_zeros_and_infinity() {
+        let sensors: &[SensorReading] = &[];
+        let targets = &[
+            TargetPoint { x: 0.0, y: 0.0 },
+            TargetPoint { x: 1.0, y: 1.0 },
+        ];
+        let variogram = SoilVariogram::Spherical {
+            nugget: 0.001,
+            sill: 0.01,
+            range: 15.0,
+        };
+        let result = interpolate_soil_moisture(sensors, targets, variogram);
+        assert_eq!(result.vwc_values.len(), 2);
+        assert_eq!(result.variances.len(), 2);
+        assert!(result.vwc_values.iter().all(|&v| v == 0.0));
+        assert!(result.variances.iter().all(|&v| v == f64::INFINITY));
+    }
+
+    #[test]
+    fn test_interpolate_empty_targets_returns_empty() {
+        let sensors = &[SensorReading {
+            x: 0.0,
+            y: 0.0,
+            vwc: 0.25,
+        }];
+        let targets: &[TargetPoint] = &[];
+        let variogram = SoilVariogram::Spherical {
+            nugget: 0.001,
+            sill: 0.01,
+            range: 15.0,
+        };
+        let result = interpolate_soil_moisture(sensors, targets, variogram);
+        assert!(result.vwc_values.is_empty());
+        assert!(result.variances.is_empty());
+    }
+
+    #[test]
+    fn test_interpolate_single_sensor_exact_value_at_location() {
+        let sensors = &[SensorReading {
+            x: 10.0,
+            y: 20.0,
+            vwc: 0.35,
+        }];
+        let targets = &[TargetPoint { x: 10.0, y: 20.0 }];
+        let variogram = SoilVariogram::Spherical {
+            nugget: 0.001,
+            sill: 0.01,
+            range: 15.0,
+        };
+        let result = interpolate_soil_moisture(sensors, targets, variogram);
+        assert_eq!(result.vwc_values.len(), 1);
+        assert!((result.vwc_values[0] - 0.35).abs() < 1e-10);
+        assert!(result.variances[0] < 0.01); // collocated → nugget
+    }
+
+    #[test]
+    fn test_interpolate_collocated_point_returns_exact_sensor_value() {
+        let sensors = &[SensorReading {
+            x: 5.0,
+            y: 5.0,
+            vwc: 0.28,
+        }];
+        // Point within COLLOCATED_DIST_SQ (1e-10) — effectively same location
+        let targets = &[TargetPoint {
+            x: 5.0 + 1e-6,
+            y: 5.0 + 1e-6,
+        }];
+        let variogram = SoilVariogram::Spherical {
+            nugget: 0.001,
+            sill: 0.01,
+            range: 15.0,
+        };
+        let result = interpolate_soil_moisture(sensors, targets, variogram);
+        assert!((result.vwc_values[0] - 0.28).abs() < 1e-6);
+        assert!(result.variances[0] < 0.01);
+    }
+
+    #[test]
+    fn test_interpolate_multiple_sensors_idw_hand_computed() {
+        // Two sensors: (0,0) vwc=0.2, (2,0) vwc=0.4
+        // Target at (1,0): dist to sensor1=1, dist to sensor2=1
+        // IDW: w1 = 1/1² = 1, w2 = 1/1² = 1
+        // weighted = (0.2*1 + 0.4*1) / (1+1) = 0.6/2 = 0.3
+        let sensors = &[
+            SensorReading {
+                x: 0.0,
+                y: 0.0,
+                vwc: 0.2,
+            },
+            SensorReading {
+                x: 2.0,
+                y: 0.0,
+                vwc: 0.4,
+            },
+        ];
+        let targets = &[TargetPoint { x: 1.0, y: 0.0 }];
+        let variogram = SoilVariogram::Spherical {
+            nugget: 0.001,
+            sill: 0.01,
+            range: 15.0,
+        };
+        let result = interpolate_soil_moisture(sensors, targets, variogram);
+        assert!((result.vwc_values[0] - 0.3).abs() < 1e-10);
+    }
+
+    #[test]
+    fn test_interpolate_spherical_variogram_variance_correct() {
+        let sensors = &[
+            SensorReading {
+                x: 0.0,
+                y: 0.0,
+                vwc: 0.25,
+            },
+            SensorReading {
+                x: 10.0,
+                y: 0.0,
+                vwc: 0.30,
+            },
+        ];
+        let targets = &[TargetPoint { x: 5.0, y: 0.0 }];
+        let variogram = SoilVariogram::Spherical {
+            nugget: 0.002,
+            sill: 0.02,
+            range: 20.0,
+        };
+        let result = interpolate_soil_moisture(sensors, targets, variogram);
+        // Variance uses exponential approx: nugget + sill*(1 - exp(-h/range))
+        // h = 5, range = 20 → variance > nugget
+        assert!(result.variances[0] >= 0.002);
+        assert!(result.variances[0] < 0.1);
+    }
+
+    #[test]
+    fn test_interpolate_exponential_variogram_variance_correct() {
+        let sensors = &[
+            SensorReading {
+                x: 0.0,
+                y: 0.0,
+                vwc: 0.25,
+            },
+            SensorReading {
+                x: 10.0,
+                y: 0.0,
+                vwc: 0.30,
+            },
+        ];
+        let targets = &[TargetPoint { x: 5.0, y: 0.0 }];
+        let variogram = SoilVariogram::Exponential {
+            nugget: 0.001,
+            sill: 0.015,
+            range: 25.0,
+        };
+        let result = interpolate_soil_moisture(sensors, targets, variogram);
+        assert!(result.variances[0] >= 0.001);
+        assert!(result.variances[0] < 0.1);
+    }
+
+    #[test]
+    fn test_interpolate_nearer_sensors_weighted_more() {
+        // Sensor at (0,0) vwc=0.1, sensor at (100,0) vwc=0.9
+        // Target at (1,0): much closer to first sensor → result near 0.1
+        let sensors = &[
+            SensorReading {
+                x: 0.0,
+                y: 0.0,
+                vwc: 0.1,
+            },
+            SensorReading {
+                x: 100.0,
+                y: 0.0,
+                vwc: 0.9,
+            },
+        ];
+        let targets = &[TargetPoint { x: 1.0, y: 0.0 }];
+        let variogram = SoilVariogram::Spherical {
+            nugget: 0.001,
+            sill: 0.01,
+            range: 15.0,
+        };
+        let result = interpolate_soil_moisture(sensors, targets, variogram);
+        assert!(result.vwc_values[0] < 0.2); // nearer sensor dominates
+    }
+
+    #[test]
+    fn test_sensor_reading_target_point_variogram_result_clone_debug() {
+        let sr = SensorReading {
+            x: 1.0,
+            y: 2.0,
+            vwc: 0.3,
+        };
+        let sr2 = sr;
+        assert_eq!(sr.x, sr2.x);
+        let _ = format!("{sr:?}");
+
+        let tp = TargetPoint { x: 3.0, y: 4.0 };
+        let tp2 = tp;
+        assert_eq!(tp.x, tp2.x);
+        let _ = format!("{tp:?}");
+
+        let v = SoilVariogram::Spherical {
+            nugget: 0.0,
+            sill: 1.0,
+            range: 10.0,
+        };
+        let _ = format!("{v:?}");
+
+        let res = InterpolationResult {
+            vwc_values: vec![0.1, 0.2],
+            variances: vec![0.01, 0.02],
+        };
+        let res2 = res.clone();
+        assert_eq!(res.vwc_values, res2.vwc_values);
+        let _ = format!("{res:?}");
     }
 }

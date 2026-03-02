@@ -2,6 +2,43 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.6.0] - 2026-03-01
+
+### biomeOS NUCLEUS Integration + Science Capability Expansion
+
+airSpring evolves from standalone primal to full NUCLEUS ecosystem participant.
+30 science capabilities registered (up from 16). Sovereign HTTPS via Songbird
+transport tier. Cross-primal compute offload to ToadStool. NestGate data routing.
+Deployment graph for biomeOS-managed lifecycle. 688 tests, zero mocks in production.
+
+#### Added
+- **`primal_science` module** (`src/primal_science.rs`) — Extracted science JSON-RPC
+  handlers from the primal binary into the library. Reduces binary to 597 lines.
+- **14 new science capabilities**: Richards PDE (`science.richards_1d`), SCS-CN runoff,
+  Green-Ampt infiltration, Topp TDR, Saxton-Rawls pedotransfer, dual Kc (FAO-56),
+  sensor calibration (SoilWatch 10), GDD, Shannon/Simpson/Chao1 diversity,
+  Bray-Curtis dissimilarity, Anderson soil-geophysics coupling, Thornthwaite monthly ET.
+- **Songbird transport tier** — `HttpTransport` trait with `SongbirdTransport` and
+  `UreqTransport` implementations. `OpenMeteoProvider` and `NassProvider` auto-discover
+  Songbird for sovereign HTTPS (pure-Rust TLS 1.3 via `BearDog` crypto delegation).
+- **ToadStool compute offload** (`compute.offload`) — Routes GPU workloads to ToadStool
+  when Node Atomic is running; graceful CPU fallback when unavailable.
+- **NestGate data routing** (`data.weather`) — Routes weather data through NestGate's
+  content-addressed cache when Nest Atomic is available.
+- **`airspring_deploy.toml`** — biomeOS deployment graph: Tower → ToadStool → airSpring
+  with capability registration and health validation.
+- **Capability registry update** — 22 ecology translations in `capability_registry.toml`
+  covering all science domains.
+- **NUCLEUS integration tests** (`tests/nucleus_integration.rs`) — 15 tests covering
+  socket resolution, transport discovery, primal discovery, JSON-RPC payload formats,
+  cross-primal forwarding, compute offload, and data routing payloads.
+
+#### Changed
+- `OpenMeteoProvider` and `NassProvider` now use `HttpTransport` trait instead of
+  direct `ureq` calls. Transport is auto-discovered (Songbird preferred, ureq fallback).
+- Primal binary refactored: science dispatch delegated to `primal_science::dispatch_science()`,
+  binary focused on server infrastructure and cross-primal handlers (597 lines).
+
 ## [0.5.9] - 2026-03-01
 
 ### ToadStool S71 Sync + Cross-Spring Evolution Rewire + Deep Debt Resolution
@@ -100,7 +137,7 @@ capability registry. capability_call node type wired in biomeOS graph executor.
 - **Cross-primal forwarding**: `primal.forward` (call ToadStool/BearDog/Songbird through airSpring)
 - **Primal discovery**: `primal.discover` (list all NUCLEUS primals at runtime)
 - **biomeOS graph**: `airspring_ecology_pipeline.toml` (weather → ET₀ → WB → yield)
-- **Data providers**: `data::open_meteo`, `data::usda_nass` (pure Rust via ureq)
+- **Data providers**: `data::open_meteo`, `data::usda_nass` (standalone via ureq; sovereign path routes through Songbird TLS)
 
 #### Changed
 - Binaries: 68 → 72 (airspring_primal + validate_nucleus + validate_nucleus_pipeline + validate_atlas_decade + validate_nass_real + validate_ncbi_diversity)

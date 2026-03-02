@@ -48,15 +48,25 @@ pub enum TransferPath {
     NeuralApi,
 }
 
+/// Relative latency ranks for transfer-path cost estimation.
+///
+/// Values are ordinal (not calibrated measurements). The ratio between
+/// tiers encodes the typical order-of-magnitude penalty:
+///   zero-copy < P2P DMA < host staging < JSON-RPC.
+const LATENCY_RANK_ZERO_COPY: u32 = 0;
+const LATENCY_RANK_PCIE_P2P: u32 = 1;
+const LATENCY_RANK_CPU_MEMCPY: u32 = 10;
+const LATENCY_RANK_NEURAL_API: u32 = 100;
+
 impl TransferPath {
     /// Estimated relative latency (lower is better).
     #[must_use]
     pub const fn latency_rank(&self) -> u32 {
         match self {
-            Self::None => 0,
-            Self::PciePeerToPeer => 1,
-            Self::CpuMemcpy => 10,
-            Self::NeuralApi => 100,
+            Self::None => LATENCY_RANK_ZERO_COPY,
+            Self::PciePeerToPeer => LATENCY_RANK_PCIE_P2P,
+            Self::CpuMemcpy => LATENCY_RANK_CPU_MEMCPY,
+            Self::NeuralApi => LATENCY_RANK_NEURAL_API,
         }
     }
 

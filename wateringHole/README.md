@@ -1,16 +1,16 @@
 # airSpring wateringHole
 
-**Updated**: March 1, 2026
+**Updated**: March 2, 2026
 **Purpose**: Spring-local handoffs to ToadStool/BarraCuda, biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V041** | [AIRSPRING_V041_NUCLEUS_CROSS_PRIMAL_EVOLUTION_HANDOFF_MAR01_2026.md](handoffs/AIRSPRING_V041_NUCLEUS_CROSS_PRIMAL_EVOLUTION_HANDOFF_MAR01_2026.md) | 2026-03-01 | **current** — v0.5.8: NUCLEUS primal (16 caps), cross-primal pipeline (28/28), ecology domain, 5 new experiments (059-063), 72 binaries |
+| **V045** | [AIRSPRING_V045_FULL_DISPATCH_BIOME_GRAPH_HANDOFF_MAR02_2026.md](handoffs/AIRSPRING_V045_FULL_DISPATCH_BIOME_GRAPH_HANDOFF_MAR02_2026.md) | 2026-03-02 | **current** — v0.6.0: 30 capabilities, Exp 064 (51/51 dispatch), Exp 065 (35/35 biomeOS graph), ToadStool absorption manifest, airspring_deploy.toml |
+| V041 | [archive](handoffs/archive/AIRSPRING_V041_NUCLEUS_CROSS_PRIMAL_EVOLUTION_HANDOFF_MAR01_2026.md) | 2026-03-01 | v0.5.8: NUCLEUS primal (16 caps), cross-primal pipeline (28/28), ecology domain, 5 new experiments (059-063), 72 binaries |
 | V040 | [archive](handoffs/archive/AIRSPRING_V040_SCIENCE_EXTENSIONS_STREAMING_HANDOFF_MAR01_2026.md) | 2026-03-01 | v0.5.7: science extensions (Exp 058), streaming pipeline, 21/21 CPU parity |
 | V039 | [archive](handoffs/archive/AIRSPRING_V039_TOADSTOOL_BARRACUDA_EVOLUTION_HANDOFF_MAR01_2026.md) | 2026-03-01 | v0.5.6: ToadStool/BarraCuda evolution handoff, cross-spring provenance |
-| V038 | [archive](handoffs/archive/AIRSPRING_V038_COMPLETE_REWIRE_BENCHMARK_HANDOFF_MAR01_2026.md) | 2026-03-01 | v0.5.6: complete rewire benchmark handoff |
 
 ## Cross-Spring Documents
 

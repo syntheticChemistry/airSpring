@@ -44,13 +44,13 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use airspring_barracuda::biomeos;
-use airspring_barracuda::eco::evapotranspiration as et;
-use airspring_barracuda::eco::simple_et0;
+use airspring_barracuda::primal_science;
 
 const PRIMAL_NAME: &str = "airspring";
 const ORCHESTRATOR_SOCKET: &str = "biomeOS.sock";
 
 const ALL_CAPABILITIES: &[&str] = &[
+    // ── Evapotranspiration (7 methods) ──
     "science.et0_fao56",
     "science.et0_hargreaves",
     "science.et0_priestley_taylor",
@@ -58,15 +58,39 @@ const ALL_CAPABILITIES: &[&str] = &[
     "science.et0_turc",
     "science.et0_hamon",
     "science.et0_blaney_criddle",
+    // ── Water balance & yield ──
     "science.water_balance",
     "science.yield_response",
+    // ── Soil physics ──
+    "science.richards_1d",
+    "science.scs_cn_runoff",
+    "science.green_ampt_infiltration",
+    "science.soil_moisture_topp",
+    "science.pedotransfer_saxton_rawls",
+    // ── Crop & irrigation ──
+    "science.dual_kc",
+    "science.sensor_calibration",
+    "science.gdd",
+    // ── Biodiversity ──
+    "science.shannon_diversity",
+    "science.bray_curtis",
+    // ── Geophysics coupling ──
+    "science.anderson_coupling",
+    // ── Monthly ET ──
+    "science.thornthwaite",
+    // ── Ecology aliases ──
     "ecology.et0_fao56",
     "ecology.et0_hargreaves",
     "ecology.water_balance",
     "ecology.yield_response",
     "ecology.full_pipeline",
+    // ── Cross-primal ──
     "primal.forward",
     "primal.discover",
+    // ── Compute offload (Node Atomic) ──
+    "compute.offload",
+    // ── Data (NestGate routing) ──
+    "data.weather",
 ];
 
 // ═══════════════════════════════════════════════════════════════════
@@ -123,28 +147,19 @@ fn json_rpc_error(id: &serde_json::Value, code: i32, message: &str) -> serde_jso
 // ═══════════════════════════════════════════════════════════════════
 
 fn dispatch(method: &str, params: &serde_json::Value, state: &PrimalState) -> serde_json::Value {
+    if method == "lifecycle.health" || method == "health" {
+        return handle_health(state);
+    }
+
+    if let Some(result) = primal_science::dispatch_science(method, params) {
+        return result;
+    }
+
     match method {
-        "lifecycle.health" | "health" => handle_health(state),
-
-        "science.et0_fao56" | "ecology.et0_fao56" => handle_et0_fao56(params),
-        "science.et0_hargreaves" | "ecology.et0_hargreaves" => handle_et0_hargreaves(params),
-        "science.et0_priestley_taylor" | "ecology.et0_priestley_taylor" => {
-            handle_et0_priestley_taylor(params)
-        }
-        "science.et0_makkink" | "ecology.et0_makkink" => handle_et0_makkink(params),
-        "science.et0_turc" | "ecology.et0_turc" => handle_et0_turc(params),
-        "science.et0_hamon" | "ecology.et0_hamon" => handle_et0_hamon(params),
-        "science.et0_blaney_criddle" | "ecology.et0_blaney_criddle" => {
-            handle_et0_blaney_criddle(params)
-        }
-        "science.water_balance" | "ecology.water_balance" => handle_water_balance(params),
-        "science.yield_response" | "ecology.yield_response" => handle_yield_response(params),
-
-        "ecology.full_pipeline" => handle_full_pipeline(params),
-
         "primal.forward" => handle_primal_forward(params),
         "primal.discover" => handle_primal_discover(),
-
+        "compute.offload" => handle_compute_offload(params),
+        "data.weather" => handle_data_weather(params),
         _ => serde_json::json!({"error": "method_not_found", "method": method}),
     }
 }
@@ -163,234 +178,78 @@ fn handle_health(state: &PrimalState) -> serde_json::Value {
     })
 }
 
-fn f64_param(params: &serde_json::Value, key: &str) -> Option<f64> {
-    params.get(key).and_then(|v| v.as_f64())
-}
+// ═══════════════════════════════════════════════════════════════════
+// Cross-primal: ToadStool compute offload (Node Atomic)
+// ═══════════════════════════════════════════════════════════════════
 
-fn u32_param(params: &serde_json::Value, key: &str) -> Option<u32> {
-    params.get(key).and_then(|v| v.as_u64()).map(|v| v as u32)
-}
+fn handle_compute_offload(params: &serde_json::Value) -> serde_json::Value {
+    let operation = params
+        .get("operation")
+        .and_then(|v| v.as_str())
+        .unwrap_or("");
+    let toadstool_socket = discover_primal_socket("toadstool");
 
-fn handle_et0_fao56(params: &serde_json::Value) -> serde_json::Value {
-    let input = et::DailyEt0Input {
-        tmax: f64_param(params, "tmax").unwrap_or(30.0),
-        tmin: f64_param(params, "tmin").unwrap_or(15.0),
-        tmean: f64_param(params, "tmean"),
-        solar_radiation: f64_param(params, "solar_radiation").unwrap_or(20.0),
-        wind_speed_2m: f64_param(params, "wind_speed_2m").unwrap_or(2.0),
-        actual_vapour_pressure: f64_param(params, "actual_vapour_pressure").unwrap_or(1.5),
-        day_of_year: u32_param(params, "day_of_year").unwrap_or(180),
-        latitude_deg: f64_param(params, "latitude_deg").unwrap_or(42.7),
-        elevation_m: f64_param(params, "elevation_m").unwrap_or(250.0),
-    };
+    match toadstool_socket {
+        Some(socket) => {
+            let toadstool_method = format!("compute.{operation}");
+            let inner_params = params
+                .get("params")
+                .cloned()
+                .unwrap_or(serde_json::json!({}));
 
-    let result = et::daily_et0(&input);
-    serde_json::json!({
-        "et0_mm": result.et0,
-        "rn_mj": result.rn,
-        "method": "fao56_penman_monteith",
-    })
-}
-
-fn handle_et0_hargreaves(params: &serde_json::Value) -> serde_json::Value {
-    let tmin = f64_param(params, "tmin").unwrap_or(15.0);
-    let tmax = f64_param(params, "tmax").unwrap_or(30.0);
-    let lat_deg = f64_param(params, "latitude_deg").unwrap_or(42.7);
-    let doy = u32_param(params, "day_of_year").unwrap_or(180);
-
-    let lat_rad = lat_deg.to_radians();
-    let ra = airspring_barracuda::eco::solar::extraterrestrial_radiation(lat_rad, doy);
-    let ra_mm = ra / 2.45;
-    let et0 = et::hargreaves_et0(tmin, tmax, ra_mm);
-
-    serde_json::json!({
-        "et0_mm": et0,
-        "ra_mm_day": ra_mm,
-        "method": "hargreaves",
-    })
-}
-
-fn handle_et0_priestley_taylor(params: &serde_json::Value) -> serde_json::Value {
-    let rn = f64_param(params, "rn").unwrap_or(10.0);
-    let g = f64_param(params, "g").unwrap_or(0.0);
-    let tmean = f64_param(params, "tmean").unwrap_or(22.5);
-    let elevation = f64_param(params, "elevation_m").unwrap_or(250.0);
-
-    let et0 = et::priestley_taylor_et0(rn, g, tmean, elevation);
-    serde_json::json!({
-        "et0_mm": et0,
-        "method": "priestley_taylor",
-    })
-}
-
-fn handle_et0_makkink(params: &serde_json::Value) -> serde_json::Value {
-    let tmean = f64_param(params, "tmean").unwrap_or(22.5);
-    let rs = f64_param(params, "solar_radiation").unwrap_or(20.0);
-    let elevation = f64_param(params, "elevation_m").unwrap_or(250.0);
-
-    let et0 = simple_et0::makkink_et0(tmean, rs, elevation);
-    serde_json::json!({
-        "et0_mm": et0,
-        "method": "makkink",
-    })
-}
-
-fn handle_et0_turc(params: &serde_json::Value) -> serde_json::Value {
-    let tmean = f64_param(params, "tmean").unwrap_or(22.5);
-    let rs = f64_param(params, "solar_radiation").unwrap_or(20.0);
-    let rh = f64_param(params, "rh_pct").unwrap_or(60.0);
-
-    let et0 = simple_et0::turc_et0(tmean, rs, rh);
-    serde_json::json!({
-        "et0_mm": et0,
-        "method": "turc",
-    })
-}
-
-fn handle_et0_hamon(params: &serde_json::Value) -> serde_json::Value {
-    let tmean = f64_param(params, "tmean").unwrap_or(22.5);
-    let lat_deg = f64_param(params, "latitude_deg").unwrap_or(42.7);
-    let doy = u32_param(params, "day_of_year").unwrap_or(180);
-
-    let lat_rad = lat_deg.to_radians();
-    let et0 = simple_et0::hamon_pet_from_location(tmean, lat_rad, doy);
-    serde_json::json!({
-        "pet_mm": et0,
-        "method": "hamon",
-    })
-}
-
-fn handle_et0_blaney_criddle(params: &serde_json::Value) -> serde_json::Value {
-    let tmean = f64_param(params, "tmean").unwrap_or(22.5);
-    let lat_deg = f64_param(params, "latitude_deg").unwrap_or(42.7);
-    let doy = u32_param(params, "day_of_year").unwrap_or(180);
-
-    let lat_rad = lat_deg.to_radians();
-    let et0 = simple_et0::blaney_criddle_from_location(tmean, lat_rad, doy);
-    serde_json::json!({
-        "et0_mm": et0,
-        "method": "blaney_criddle",
-    })
-}
-
-fn handle_water_balance(params: &serde_json::Value) -> serde_json::Value {
-    let et0 = f64_param(params, "et0_mm").unwrap_or(5.0);
-    let kc = f64_param(params, "kc").unwrap_or(1.0);
-    let precip = f64_param(params, "precipitation_mm").unwrap_or(3.0);
-    let irrigation = f64_param(params, "irrigation_mm").unwrap_or(0.0);
-    let soil_water = f64_param(params, "soil_water_mm").unwrap_or(100.0);
-    let field_cap = f64_param(params, "field_capacity_mm").unwrap_or(200.0);
-    let wilt = f64_param(params, "wilting_point_mm").unwrap_or(50.0);
-
-    let etc = et0 * kc;
-    let input = soil_water + precip + irrigation;
-    let new_sw = (input - etc).clamp(wilt, field_cap);
-    let deep_perc = (input - etc - field_cap).max(0.0);
-    let deficit = field_cap - new_sw;
-
-    serde_json::json!({
-        "etc_mm": etc,
-        "soil_water_mm": new_sw,
-        "deep_percolation_mm": deep_perc,
-        "deficit_mm": deficit,
-        "method": "fao56_water_balance",
-    })
-}
-
-fn handle_yield_response(params: &serde_json::Value) -> serde_json::Value {
-    let ky = f64_param(params, "ky").unwrap_or(1.25);
-    let eta_over_etm = f64_param(params, "eta_over_etm").unwrap_or(0.8);
-    let max_yield = f64_param(params, "max_yield_t_ha").unwrap_or(12.0);
-
-    let ratio = 1.0 - ky * (1.0 - eta_over_etm);
-    let actual_yield = max_yield * ratio.max(0.0);
-
-    serde_json::json!({
-        "yield_t_ha": actual_yield,
-        "yield_ratio": ratio.max(0.0),
-        "ky": ky,
-        "method": "stewart_1977",
-    })
+            match send_jsonrpc(&socket, &toadstool_method, inner_params) {
+                Some(resp) => serde_json::json!({
+                    "offloaded_to": "toadstool",
+                    "operation": operation,
+                    "response": resp,
+                    "transport": "node_atomic_unix_socket",
+                }),
+                None => serde_json::json!({
+                    "error": format!("toadstool compute.{operation} failed"),
+                    "fallback": "cpu",
+                }),
+            }
+        }
+        None => serde_json::json!({
+            "error": "toadstool not found — Node Atomic not running",
+            "hint": "start Node Atomic (tower_atomic_bootstrap + toadstool) to enable GPU offload",
+        }),
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Cross-primal and pipeline handlers
+// Data routing: NestGate weather data (Nest Atomic)
 // ═══════════════════════════════════════════════════════════════════
 
-fn handle_full_pipeline(params: &serde_json::Value) -> serde_json::Value {
-    let tmax = f64_param(params, "tmax").unwrap_or(32.0);
-    let tmin = f64_param(params, "tmin").unwrap_or(18.0);
-    let solar_rad = f64_param(params, "solar_radiation").unwrap_or(22.5);
-    let wind = f64_param(params, "wind_speed_2m").unwrap_or(2.0);
-    let ea = f64_param(params, "actual_vapour_pressure").unwrap_or(1.5);
-    let doy = u32_param(params, "day_of_year").unwrap_or(180);
-    let lat_deg = f64_param(params, "latitude_deg").unwrap_or(42.7);
-    let elevation = f64_param(params, "elevation_m").unwrap_or(250.0);
+fn handle_data_weather(params: &serde_json::Value) -> serde_json::Value {
+    let nestgate_socket = discover_primal_socket("nestgate");
 
-    let kc = f64_param(params, "kc").unwrap_or(1.0);
-    let precip = f64_param(params, "precipitation_mm").unwrap_or(3.0);
-    let irrigation = f64_param(params, "irrigation_mm").unwrap_or(0.0);
-    let soil_water = f64_param(params, "soil_water_mm").unwrap_or(100.0);
-    let field_cap = f64_param(params, "field_capacity_mm").unwrap_or(200.0);
-    let wilt = f64_param(params, "wilting_point_mm").unwrap_or(50.0);
-
-    let ky = f64_param(params, "ky").unwrap_or(1.25);
-    let max_yield = f64_param(params, "max_yield_t_ha").unwrap_or(12.0);
-
-    // Stage 1: ET₀
-    let input = et::DailyEt0Input {
-        tmax,
-        tmin,
-        tmean: None,
-        solar_radiation: solar_rad,
-        wind_speed_2m: wind,
-        actual_vapour_pressure: ea,
-        day_of_year: doy,
-        latitude_deg: lat_deg,
-        elevation_m: elevation,
-    };
-    let et0_result = et::daily_et0(&input);
-    let et0 = et0_result.et0.max(0.0);
-
-    // Stage 2: Water balance
-    let etc = et0 * kc;
-    let wb_input = soil_water + precip + irrigation;
-    let new_sw = (wb_input - etc).clamp(wilt, field_cap);
-    let deep_perc = (wb_input - etc - field_cap).max(0.0);
-    let deficit = field_cap - new_sw;
-
-    // Stage 3: Yield response
-    let eta_over_etm = if et0 > 0.0 {
-        (etc - deficit.min(etc)) / etc
-    } else {
-        1.0
-    };
-    let yield_ratio = (1.0 - ky * (1.0 - eta_over_etm)).max(0.0);
-    let actual_yield = max_yield * yield_ratio;
-
-    serde_json::json!({
-        "pipeline": "ecology.full_pipeline",
-        "stages": {
-            "et0": {
-                "et0_mm": et0,
-                "rn_mj": et0_result.rn,
-                "method": "fao56_penman_monteith",
-            },
-            "water_balance": {
-                "etc_mm": etc,
-                "soil_water_mm": new_sw,
-                "deep_percolation_mm": deep_perc,
-                "deficit_mm": deficit,
-            },
-            "yield": {
-                "yield_t_ha": actual_yield,
-                "yield_ratio": yield_ratio,
-                "eta_over_etm": eta_over_etm,
-                "ky": ky,
-            },
+    match nestgate_socket {
+        Some(socket) => match send_jsonrpc(&socket, "data.open_meteo_weather", params.clone()) {
+            Some(resp) => serde_json::json!({
+                "source": "nestgate",
+                "transport": "nest_atomic_unix_socket",
+                "response": resp,
+            }),
+            None => {
+                serde_json::json!({
+                    "error": "nestgate data.open_meteo_weather failed",
+                    "fallback": "direct_http",
+                    "hint": "falling back to direct Open-Meteo HTTP via ureq/Songbird",
+                })
+            }
         },
-    })
+        None => serde_json::json!({
+            "error": "nestgate not found — using direct HTTP",
+            "hint": "start Nest Atomic (tower + nestgate) for content-addressed caching",
+            "transport": "standalone",
+        }),
+    }
 }
+
+// ═══════════════════════════════════════════════════════════════════
+// Cross-primal handlers
+// ═══════════════════════════════════════════════════════════════════
 
 fn handle_primal_forward(params: &serde_json::Value) -> serde_json::Value {
     let primal = match params.get("primal").and_then(|v| v.as_str()) {
@@ -520,16 +379,28 @@ fn register_via_socket(target: &Path, our_socket: &Path) {
 
     // Register the ecology domain with semantic mappings for capability.call routing
     let ecology_mappings = serde_json::json!({
-        "et0_fao56":         "science.et0_fao56",
-        "et0_hargreaves":    "science.et0_hargreaves",
-        "et0_priestley_taylor": "science.et0_priestley_taylor",
-        "et0_makkink":       "science.et0_makkink",
-        "et0_turc":          "science.et0_turc",
-        "et0_hamon":         "science.et0_hamon",
-        "et0_blaney_criddle":"science.et0_blaney_criddle",
-        "water_balance":     "science.water_balance",
-        "yield_response":    "science.yield_response",
-        "full_pipeline":     "ecology.full_pipeline",
+        "et0_fao56":              "science.et0_fao56",
+        "et0_hargreaves":         "science.et0_hargreaves",
+        "et0_priestley_taylor":   "science.et0_priestley_taylor",
+        "et0_makkink":            "science.et0_makkink",
+        "et0_turc":               "science.et0_turc",
+        "et0_hamon":              "science.et0_hamon",
+        "et0_blaney_criddle":     "science.et0_blaney_criddle",
+        "water_balance":          "science.water_balance",
+        "yield_response":         "science.yield_response",
+        "richards_1d":            "science.richards_1d",
+        "scs_cn_runoff":          "science.scs_cn_runoff",
+        "green_ampt_infiltration":"science.green_ampt_infiltration",
+        "soil_moisture_topp":     "science.soil_moisture_topp",
+        "pedotransfer":           "science.pedotransfer_saxton_rawls",
+        "dual_kc":                "science.dual_kc",
+        "sensor_calibration":     "science.sensor_calibration",
+        "gdd":                    "science.gdd",
+        "shannon_diversity":      "science.shannon_diversity",
+        "bray_curtis":            "science.bray_curtis",
+        "anderson_coupling":      "science.anderson_coupling",
+        "thornthwaite":           "science.thornthwaite",
+        "full_pipeline":          "ecology.full_pipeline",
     });
 
     let _ = send_jsonrpc(

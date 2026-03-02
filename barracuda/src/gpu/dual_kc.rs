@@ -255,6 +255,9 @@ pub struct SeasonFieldSummary {
 
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::float_cmp)]
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
+
     use super::*;
 
     fn silt_loam_state() -> EvaporationLayerState {
@@ -445,5 +448,96 @@ mod tests {
         };
         let result = batch.step_cpu(&input);
         assert!(result.outputs.is_empty());
+    }
+
+    #[test]
+    fn test_gpu_engine_none_for_cpu_only() {
+        let batch = BatchedDualKc::new(vec![FieldDualKcConfig {
+            kcb: 1.15,
+            kc_max: 1.20,
+            few: 0.05,
+            mulch_factor: 1.0,
+            state: silt_loam_state(),
+        }]);
+        assert!(batch.gpu_engine().is_none());
+    }
+
+    #[test]
+    fn test_pack_gpu_timestep_format() {
+        let batch = BatchedDualKc::new(vec![
+            FieldDualKcConfig {
+                kcb: 1.0,
+                kc_max: 1.2,
+                few: 0.1,
+                mulch_factor: 1.0,
+                state: EvaporationLayerState {
+                    de: 5.0,
+                    rew: 9.0,
+                    tew: 22.5,
+                },
+            },
+            FieldDualKcConfig {
+                kcb: 0.5,
+                kc_max: 1.2,
+                few: 0.2,
+                mulch_factor: 0.4,
+                state: EvaporationLayerState {
+                    de: 0.0,
+                    rew: 9.0,
+                    tew: 22.5,
+                },
+            },
+        ]);
+        let input = DualKcInput {
+            et0: 4.0,
+            precipitation: 2.0,
+            irrigation: 3.0,
+        };
+        let packed = batch.pack_gpu_timestep(&input);
+        assert_eq!(packed.len(), 2 * 9);
+        let p_eff = 5.0_f64;
+        assert!((packed[0] - 1.0).abs() < f64::EPSILON);
+        assert!((packed[3] - 1.0).abs() < f64::EPSILON);
+        assert!((packed[4] - 5.0).abs() < f64::EPSILON);
+        assert!((packed[7] - p_eff).abs() < f64::EPSILON);
+        assert!((packed[8] - 4.0).abs() < f64::EPSILON);
+        assert!((packed[9] - 0.5).abs() < f64::EPSILON);
+        assert!((packed[12] - 0.4).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_simulate_season_empty_inputs() {
+        let mut batch = BatchedDualKc::new(vec![FieldDualKcConfig {
+            kcb: 1.15,
+            kc_max: 1.20,
+            few: 0.05,
+            mulch_factor: 1.0,
+            state: silt_loam_state(),
+        }]);
+        let summaries = batch.simulate_season(&[]);
+        assert_eq!(summaries.len(), 1);
+        assert_eq!(summaries[0].days, 0);
+        assert_eq!(summaries[0].total_etc, 0.0);
+        assert_eq!(summaries[0].total_ke, 0.0);
+    }
+
+    #[test]
+    fn test_step_gpu_no_device_uses_cpu_path() {
+        let configs = vec![FieldDualKcConfig {
+            kcb: 1.15,
+            kc_max: 1.20,
+            few: 0.05,
+            mulch_factor: 1.0,
+            state: silt_loam_state(),
+        }];
+        let mut batch = BatchedDualKc::new(configs);
+        let input = DualKcInput {
+            et0: 5.0,
+            precipitation: 0.0,
+            irrigation: 0.0,
+        };
+        let result = batch.step_gpu(&input).expect("step_gpu should not fail");
+        assert_eq!(result.outputs.len(), 1);
+        assert!(result.outputs[0].etc > 0.0);
     }
 }

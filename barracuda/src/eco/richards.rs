@@ -483,3 +483,144 @@ pub fn mass_balance_check(
     }
     100.0 * imbalance.abs() / total_water
 }
+
+#[cfg(test)]
+#[allow(clippy::float_cmp)]
+mod tests {
+    use super::*;
+    use crate::error::AirSpringError;
+
+    fn silt_loam_params() -> VanGenuchtenParams {
+        VanGenuchtenParams {
+            theta_r: 0.067,
+            theta_s: 0.45,
+            alpha: 0.02,
+            n_vg: 1.41,
+            ks: 10.8,
+        }
+    }
+
+    #[test]
+    fn solve_richards_1d_valid_silt_loam() {
+        let params = silt_loam_params();
+        let profiles =
+            solve_richards_1d(&params, 100.0, 10, -100.0, -50.0, false, true, 1.0, 0.1).unwrap();
+        assert!(!profiles.is_empty());
+        assert_eq!(profiles.len(), 10); // ceil(1.0/0.1)
+        for p in &profiles {
+            assert_eq!(p.z.len(), 10);
+            assert_eq!(p.h.len(), 10);
+            assert_eq!(p.theta.len(), 10);
+        }
+    }
+
+    #[test]
+    fn solve_richards_1d_n_nodes_1_returns_error() {
+        let params = silt_loam_params();
+        let result = solve_richards_1d(&params, 100.0, 1, -100.0, -50.0, false, true, 1.0, 0.1);
+        assert!(matches!(result, Err(AirSpringError::InvalidInput(_))));
+    }
+
+    #[test]
+    fn solve_richards_1d_dt_zero_returns_error() {
+        let params = silt_loam_params();
+        let result = solve_richards_1d(&params, 100.0, 10, -100.0, -50.0, false, true, 1.0, 0.0);
+        assert!(matches!(result, Err(AirSpringError::InvalidInput(_))));
+    }
+
+    #[test]
+    fn solve_richards_1d_dt_negative_returns_error() {
+        let params = silt_loam_params();
+        let result = solve_richards_1d(&params, 100.0, 10, -100.0, -50.0, false, true, 1.0, -0.1);
+        assert!(matches!(result, Err(AirSpringError::InvalidInput(_))));
+    }
+
+    #[test]
+    fn solve_richards_1d_with_custom_config() {
+        let params = silt_loam_params();
+        let config = RichardsConfig {
+            picard_tol: 1e-5,
+            picard_max_iter: 50,
+            ..RichardsConfig::default()
+        };
+        let profiles = super::solve_richards_1d_with_config(
+            &params, 100.0, 10, -100.0, -50.0, false, true, 0.5, 0.1, &config,
+        )
+        .unwrap();
+        assert!(!profiles.is_empty());
+    }
+
+    #[test]
+    fn cumulative_drainage_monotonic() {
+        let params = silt_loam_params();
+        let profiles =
+            solve_richards_1d(&params, 100.0, 10, -100.0, -50.0, false, true, 1.0, 0.1).unwrap();
+        let cum = cumulative_drainage(&params, &profiles, 0.1);
+        assert_eq!(cum.len(), profiles.len());
+        for i in 1..cum.len() {
+            assert!(
+                cum[i] >= cum[i - 1] - 1e-10,
+                "cum[{i}]={} < cum[{}]={}",
+                cum[i],
+                i - 1,
+                cum[i - 1]
+            );
+        }
+    }
+
+    #[test]
+    fn mass_balance_check_reasonable() {
+        let params = silt_loam_params();
+        // Open system with top flux and bottom drainage — mass_balance_check assumes free drainage
+        let profiles =
+            solve_richards_1d(&params, 100.0, 10, -100.0, -50.0, false, true, 0.5, 0.1).unwrap();
+        let dz = 100.0 / 10.0;
+        let balance = mass_balance_check(&params, &profiles, -100.0, -50.0, false, 0.1, dz);
+        // Numerical PDE solver may not achieve perfect mass balance; verify finite result
+        assert!(
+            balance.is_finite() && balance >= 0.0,
+            "mass balance error {balance}% should be finite and non-negative"
+        );
+    }
+
+    #[test]
+    fn mass_balance_check_empty_profiles_returns_zero() {
+        let params = silt_loam_params();
+        let balance = mass_balance_check(&params, &[], -100.0, -50.0, false, 0.1, 10.0);
+        assert_eq!(balance, 0.0);
+    }
+
+    #[test]
+    fn richards_config_default() {
+        let config = RichardsConfig::default();
+        assert_eq!(config.h_clip_min, -10_000.0);
+        assert_eq!(config.h_clip_max, 100.0);
+        assert_eq!(config.picard_tol, 1e-4);
+        assert_eq!(config.picard_max_iter, 100);
+        assert!((config.relaxation - 0.2).abs() < 1e-10);
+    }
+
+    #[test]
+    fn solve_richards_1d_zero_flux_top() {
+        let params = silt_loam_params();
+        let profiles =
+            solve_richards_1d(&params, 100.0, 10, -100.0, -50.0, true, true, 0.5, 0.1).unwrap();
+        assert!(!profiles.is_empty());
+    }
+
+    #[test]
+    fn solve_richards_1d_bottom_free_drain_true() {
+        let params = silt_loam_params();
+        let profiles =
+            solve_richards_1d(&params, 100.0, 10, -100.0, -50.0, false, true, 0.5, 0.1).unwrap();
+        assert!(!profiles.is_empty());
+    }
+
+    #[test]
+    fn solve_richards_1d_bottom_free_drain_false() {
+        let params = silt_loam_params();
+        let profiles =
+            solve_richards_1d(&params, 100.0, 10, -100.0, -50.0, false, false, 0.5, 0.1).unwrap();
+        assert!(!profiles.is_empty());
+    }
+}

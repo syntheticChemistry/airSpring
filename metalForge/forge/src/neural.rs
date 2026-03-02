@@ -265,11 +265,16 @@ fn resolve_socket() -> Option<PathBuf> {
     None
 }
 
-const FALLBACK_UID: u32 = 1000;
 const PROC_STATUS_PATH: &str = "/proc/self/status";
 
-/// Extract UID from `/proc/self/status` (safe, no libc).
+/// Extract real UID from `/proc/self/status` (safe, no libc).
+///
+/// Falls back to `nobody` (65534) rather than assuming a specific user.
+/// A hardcoded UID like 1000 is fragile — different distros assign different
+/// first-user UIDs.  65534 is the POSIX `nobody` sentinel and will fail
+/// visibly rather than silently resolve to the wrong user's runtime dir.
 fn uid_from_runtime_dir() -> u32 {
+    const NOBODY_UID: u32 = 65534;
     std::fs::read_to_string(PROC_STATUS_PATH)
         .ok()
         .and_then(|status| {
@@ -279,7 +284,7 @@ fn uid_from_runtime_dir() -> u32 {
                     .and_then(|s| s.parse::<u32>().ok())
             })
         })
-        .unwrap_or(FALLBACK_UID)
+        .unwrap_or(NOBODY_UID)
 }
 
 fn parse_response(response: &serde_json::Value) -> Result<CallResult, NeuralError> {

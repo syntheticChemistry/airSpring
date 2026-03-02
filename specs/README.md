@@ -1,7 +1,7 @@
 # airSpring Specifications
 
 **Last Updated**: March 1, 2026
-**Status**: Phase 0-4 complete — 1237/1237 Python + 641 lib + 57 forge tests + 73/73 atlas stream + 75/75 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + AKD1000 NPU live + 14.5× CPU speedup (21/21 parity) + metalForge 18 workloads 29/29 + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB (34/34) + NUCLEUS primal (16 capabilities, 28/28 cross-primal) + ecology domain + 63 experiments + 72 binaries (v0.5.8)
+**Status**: Phase 0-4 complete — 1237/1237 Python + 641 lib + 57 forge tests + 73/73 atlas stream + 75/75 cross-validation + 11 Tier A + 4 Tier B GPU orchestrators + seasonal pipeline + AKD1000 NPU live + 14.5× CPU speedup (21/21 parity) + metalForge 18 workloads 29/29 + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB (34/34) + NUCLEUS primal (16 capabilities, 28/28 cross-primal) + ecology domain + 63 experiments + 72 binaries (v0.6.0)
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling, Anderson coupling
 
 ---

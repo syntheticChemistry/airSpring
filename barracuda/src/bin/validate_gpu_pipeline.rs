@@ -83,11 +83,14 @@ fn validate_et0_gpu_parity(v: &mut ValidationHarness) {
     let cpu_result = batched.compute(&cpu_inputs);
     let n = cpu_result.et0_values.len();
 
+    // Analytical: 10 synthetic stations × 153 growing-season days = 1530.
     v.check_abs("batch size = 10 stations × 153 days", n as f64, 1530.0, 1.0);
 
     let all_positive = cpu_result.et0_values.iter().all(|&x| x > 0.0);
     v.check_bool("all ET₀ > 0", all_positive);
 
+    // Plausibility: Michigan growing-season ET₀ range 2–8 mm/day
+    // (Allen et al. 1998, Table 2 — humid temperate stations).
     let mean_et0 = cpu_result.et0_values.iter().sum::<f64>() / n as f64;
     v.check_lower("mean daily ET₀ > 2 mm", mean_et0, 2.0);
     v.check_upper("mean daily ET₀ < 8 mm", mean_et0, 8.0);
@@ -114,6 +117,9 @@ fn validate_et0_gpu_parity(v: &mut ValidationHarness) {
         .map(|(a, b)| (a - b).abs())
         .fold(0.0, f64::max);
 
+    // GPU↔CPU tolerance: ToadStool TS-001/003 (S54) validated WGSL f64
+    // shaders to ≤1e-5 relative. 0.5 mm/day is conservative for full
+    // ET₀ pipeline including atmospheric chain rounding.
     v.check_upper("CPU↔GPU max diff < 0.5 mm/d", max_diff, 0.5);
 }
 

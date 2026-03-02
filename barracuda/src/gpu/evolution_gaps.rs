@@ -158,17 +158,6 @@
 //! |------|-------------|-----------|
 //! | HTTP/JSON data client | Open-Meteo, NOAA CDO APIs | Low — not GPU, but needed |
 //!
-//! ## Deprecated Patterns (Clean Up)
-//!
-//! | Pattern | Status | Replacement |
-//! |---------|--------|-------------|
-//! | `rayon` dependency | **Removed** (v0.2.0) | `ToadStool` GPU dispatch replaces thread pool |
-//! | Ad-hoc `String` errors | **Replaced** (v0.2.0) | `AirSpringError` enum |
-//! | `HashMap` CSV storage | **Replaced** (v0.2.0) | Columnar `Vec<Vec<f64>>` |
-//! | Hardcoded runoff model | **Replaced** (v0.2.0) | `RunoffModel` enum |
-//! | CPU-only GPU stubs | **Replaced** (v0.3.0) | GPU-first via `BatchedElementwiseF64` |
-//! | Local `ValidationRunner` | **Replaced** (v0.3.6) | `barracuda::validation::ValidationHarness` |
-//!
 //! ## Shader Precision (All Resolved)
 //!
 //! All precision issues fixed in `ToadStool` commit `0c477306`:

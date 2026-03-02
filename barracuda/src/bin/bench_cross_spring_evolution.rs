@@ -404,8 +404,8 @@ fn bench_s71_upstream_evolution(v: &mut ValidationHarness) {
     );
     v.check_upper("kimura fixation p < 1.0", fix, 1.0);
 
-    let jk = barracuda::stats::jackknife_mean_variance(&[1.0, 2.0, 3.0, 4.0, 5.0])
-        .expect("jackknife");
+    let jk =
+        barracuda::stats::jackknife_mean_variance(&[1.0, 2.0, 3.0, 4.0, 5.0]).expect("jackknife");
     v.check_abs(
         "jackknife mean of 1..5 = 3.0 [neuralSpring → S70+]",
         jk.estimate,

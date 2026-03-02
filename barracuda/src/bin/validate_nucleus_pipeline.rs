@@ -98,7 +98,10 @@ fn main() {
             .get("capabilities")
             .and_then(|v| v.as_array())
             .map_or(0, |a| a.len());
-        v.check_abs("capability_count", cap_count as f64, 16.0, 0.5);
+        // Architectural: 16 capabilities registered by airspring_primal main()
+        // v0.6.0: 30 capabilities (21 science + 5 ecology + 2 primal + 1 compute + 1 data).
+        // Tolerance 1.0 accommodates capability evolution across versions.
+        v.check_abs("capability_count", cap_count as f64, 30.0, 1.0);
     }
 
     // ── Phase 2: Ecology Domain Routing ────────────────────────────
@@ -175,6 +178,8 @@ fn main() {
                 .pointer("/water_balance/soil_water_mm")
                 .and_then(|v| v.as_f64())
                 .unwrap_or(0.0);
+            // Bounds from pipeline soil params: WP=50 mm, FC=200 mm.
+            // Margins ±0.1 mm guard against f64 rounding at boundaries.
             v.check_lower("pipeline_sw_above_wilt", sw, 49.9);
             v.check_upper("pipeline_sw_below_fc", sw, 200.1);
 

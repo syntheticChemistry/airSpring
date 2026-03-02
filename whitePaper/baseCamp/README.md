@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
-**Updated**: March 1, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.5.9)
-**Status**: 63 experiments, 1237/1237 Python + 817 Rust lib tests + 57 forge tests + 73 binaries + 44/44 cross-spring evolution benchmark + Richards PDE rewired to `barracuda::linalg::tridiagonal_solve` + configurable `RichardsConfig` + shared `biomeos` module + `lifecycle.health` (wateringHole-compliant) + zero mocks in production + capability-based discovery everywhere + 78/78 pure GPU + 26/26 GPU rewire + 104/104 mixed-hardware + ops 5-8 GPU-first (ToadStool S70+) + seasonal pipeline GPU Stages 1-2 + streaming pipeline (GpuPipelined, GpuFused) + NPU→GPU PCIe bypass + NUCLEUS primal (17 capabilities, 28/28 cross-primal pipeline) + biomeOS graph execution + 21/21 CPU parity (14.5× speedup) + atlas stream unified batch + data provider trait (OpenMeteo + NASS) + decade analysis (102/102) + NASS yield (99/99) + Shannon H' diversity (63/63) + cross-primal forwarding + ecology domain in biomeOS registry
+**Updated**: March 2, 2026
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.6.0)
+**Status**: 65 experiments, 1237/1237 Python + 673 Rust lib + 58 forge tests + 75 binaries + 53/53 cross-spring evolution benchmark + 51/51 Full Dispatch (Exp 064) + 35/35 biomeOS Graph (Exp 065) + 30 NUCLEUS capabilities + `airspring_deploy.toml` deployment graph + ToadStool compute offload + Songbird sovereign TLS + 21/21 CPU parity (14.5× speedup)
 
 ---
 
