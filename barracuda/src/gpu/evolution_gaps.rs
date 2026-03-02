@@ -16,11 +16,11 @@
 //! | Rust Module | GPU Orchestrator | WGSL Shader | Pipeline Stage | Tier |
 //! |---|---|---|---|---|
 //! | `eco::evapotranspiration` | `gpu::et0` | `batched_elementwise_f64.wgsl` (op=0) | ET₀ computation | A (ready) |
-//! | `eco::water_balance` | `gpu::water_balance` | `batched_elementwise_f64.wgsl` (op=1) | Daily water balance | B (needs `BatchedStatefulF64`) |
+//! | `eco::water_balance` | `gpu::water_balance` | `batched_elementwise_f64.wgsl` (op=1) | Daily water balance | A (`BatchedStatefulF64` S83) |
 //! | `eco::dual_kc` | `gpu::dual_kc` | `batched_elementwise_f64.wgsl` (op=8) | Crop coefficient | A (GPU-first, S70+ absorbed) |
 //! | `eco::soil_moisture` | `gpu::kriging` | `kriging_f64.wgsl` | Spatial interpolation | A (ready) |
 //! | `eco::richards` | `gpu::richards` | `pde_richards.wgsl` | PDE solve | A (ready) |
-//! | `eco::isotherm` | `gpu::isotherm` | `nelder_mead.wgsl` | Isotherm fitting | B (needs batch NM) |
+//! | `eco::isotherm` | `gpu::isotherm` | `nelder_mead.wgsl` | Isotherm fitting | A (`BatchedNelderMeadGpu` S80) |
 //! | `testutil` | `gpu::reduce` | `fused_map_reduce_f64.wgsl` | Seasonal stats | A (ready) |
 //! | `eco::sensor_calibration` | `gpu::sensor_calibration` | `batched_elementwise_f64.wgsl` (op=5) | Sensor VWC | A (GPU-first, S70+ absorbed) |
 //! | `eco::evapotranspiration` (HG) | `gpu::hargreaves` | `batched_elementwise_f64.wgsl` (op=6) | Hargreaves ET₀ | A (GPU-first, S70+ absorbed) |
@@ -36,14 +36,17 @@
 //! | `eco::sensor_calibration` (OLS) | `gpu::stats` | `linear_regression_f64.wgsl` | Sensor regression | A (GPU, neuralSpring S69) |
 //! | `eco::*` (multi-var) | `gpu::stats` | `matrix_correlation_f64.wgsl` | Soil correlation | A (GPU, neuralSpring S69) |
 //!
-//! # Current Inventory (March 2, 2026 — v0.6.4, synced to `ToadStool` HEAD S79)
+//! # Current Inventory (March 2, 2026 — v0.6.5, synced to `ToadStool` HEAD S86)
 //!
-//! `ToadStool` S42–S71: 200+ commits, 50+ cross-spring absorptions, 2,773+ barracuda tests, 671 WGSL shaders.
+//! `ToadStool` S42–S86: 200+ commits, 50+ cross-spring absorptions, 2,866 barracuda tests, 844 WGSL shaders.
 //! All four airSpring issues (TS-001 through TS-004) resolved in **S54**.
 //! P0 GPU dispatch blocker resolved in **S66** (explicit `BindGroupLayout`).
-//! S71 synced: DF64 transcendentals complete (15 functions), 66 `ComputeDispatch` ops,
-//! `HargreavesBatchGpu`, `JackknifeMeanGpu`, `BootstrapMeanGpu`, `HistogramGpu`, `KimuraGpu`,
-//! `fao56_et0` scalar, HMM log-domain dispatch, pure math precision-per-silicon doctrine.
+//! S86 synced: 144 `ComputeDispatch` ops, `BatchedStatefulF64` (GPU-resident ping-pong state),
+//! `StatefulPipeline<WaterBalanceState>` (CPU day-over-day), `BrentGpu` (batched GPU Brent),
+//! `RichardsGpu` (GPU Picard solver), `BatchedEncoder` (single-submit multi-op),
+//! `BatchedNelderMeadGpu`, `lbfgs`, `nautilus` (evolutionary reservoir from bingoCube),
+//! `multi_gpu` (pipeline dispatch + interconnect topology), `anderson_4d` + `wegner_block_4d`,
+//! `SeasonalPipelineF64` (GPU fused ET₀→Kc→WB→stress), hydrology split (CPU + GPU submodules).
 //!
 //! ## Universal Precision Architecture (S67–S68)
 //!
@@ -99,6 +102,17 @@
 //! - S79: **Spring absorption** — ESN v2 `MultiHeadEsn`, spectral extensions, 5 `ComputeDispatch`,
 //!   ops 9-13 (`VanGenuchtenTheta`, `VanGenuchtenK`, `ThornthwaiteEt0`, `Gdd`, `PedotransferPolynomial`)
 //!   available in `batched_elementwise_f64`
+//! - S80: **Nautilus absorption + `BatchedEncoder` + `StatefulPipeline`** — `barracuda::nautilus`
+//!   (board, evolution, population, readout, shell, brain, spectral bridge), `BatchedEncoder`
+//!   (single `queue.submit()` multi-op, 46-78× speedup), `StatefulPipeline<WaterBalanceState>`
+//!   (CPU day-over-day state), `BatchedNelderMeadGpu`, `fused_mlp`, `GpuDriverProfile` sin/cos
+//!   F64 workarounds
+//! - S83: **Cross-spring absorption** — `BatchedStatefulF64` (GPU-resident ping-pong state buffer,
+//!   provenance: airSpring V045), `BrentGpu` (batched GPU Brent root-finding), `RichardsGpu`
+//!   (GPU Richards PDE Picard solver), `anderson_4d()` + `wegner_block_4d()`, `OmelyanIntegrator`,
+//!   `lbfgs` / `lbfgs_numerical`, `HeadKind` enum (15+ domain variants)
+//! - S84-S86: **`ComputeDispatch` migration** — 144 ops total (+33 from S84-S86), hydrology split
+//!   (`mod.rs` CPU + `gpu.rs` GPU), experimental.rs probes, deep debt elimination
 //!
 //! ## Cross-Spring Shader Provenance (validated in `cross_spring_absorption.rs` §13)
 //!
@@ -107,7 +121,7 @@
 //! | hotSpring | Nuclear/precision physics | `df64_core`, `math_f64`, `complex_f64`, SU(3), Hermite/Laguerre, Lanczos |
 //! | wetSpring | Bio/environmental | Shannon/Simpson/Bray-Curtis, kriging, `moving_window`, Hill, ODE bio, NMF |
 //! | neuralSpring | ML/optimization | Nelder-Mead, `ValidationHarness`, pairwise metrics, batch IPR, matmul |
-//! | airSpring | Precision agriculture | regression, hydrology, `moving_window_f64`, Richards PDE (S40), TS-001/003/004 fixes |
+//! | airSpring | Precision agriculture | regression, hydrology, `moving_window_f64`, Richards PDE (S40→`RichardsGpu` S83), Brent VG inverse (→`BrentGpu` S83), `StatefulPipeline` (S80), `BatchedStatefulF64` (V045→S83), `SeasonalPipelineF64` (V039→S72), TS-001/003/004 fixes |
 //! | groundSpring | Uncertainty/stats | MC ET₀ propagation, `batched_multinomial`, `rawr_mean` |
 //!
 //! **Key evolution since V011**: `pde::crank_nicolson` is now **f64** with
@@ -212,8 +226,10 @@ pub enum Tier {
     C,
 }
 
-/// All known evolution gaps (33+6 entries — 26 Tier A integrated, 6 Tier B + 6 orchestrators, 1 Tier C).
+/// All known evolution gaps (33+6 entries — 28 Tier A integrated, 4 Tier B + 6 orchestrators, 1 Tier C).
 ///
+/// v0.6.5: `ToadStool` S86 sync — `BatchedStatefulF64` (WB Tier B→A), `BatchedNelderMeadGpu`
+///         (isotherm Tier B→A), `BrentGpu`, `RichardsGpu`, `nautilus`, `multi_gpu`.
 /// v0.6.4: Multi-field GPU pipeline (Stage 3 `gpu_step()` across M fields),
 ///         Exp 070-072 (streaming + CPU parity + pure GPU end-to-end).
 /// v0.6.3: MC ET₀ promoted Tier B→A via `BatchedEt0` GPU dispatch.
@@ -221,7 +237,7 @@ pub enum Tier {
 /// `SeasonalPipeline::run_multi_field()` dispatches Stage 3 WB to GPU per-day.
 /// `SeasonalPipeline::gpu()` dispatches Stages 1-2 (ET₀ + Kc) to GPU;
 /// `AtlasStream::with_gpu()` + `process_streaming()` callback pattern.
-/// Synced to `ToadStool` S79. Universal precision architecture
+/// Synced to `ToadStool` S86. Universal precision architecture
 /// means all GPU dispatch is precision-agnostic: f64 on Titan V, Df64 on consumer
 /// GPUs, f32 fallback. S60-S65 sovereign compiler regression **RESOLVED** (S66+).
 ///

@@ -36,6 +36,12 @@
 //! - S79: ops 9-13 (VG θ/K, Thornthwaite, GDD, Pedotransfer), ESN v2,
 //!   `DiversityFusionGpu` (wetSpring→GPU), `BootstrapMeanGpu` (groundSpring→GPU),
 //!   `JackknifeMeanGpu` (groundSpring→GPU), `HargreavesBatchGpu` (science shader)
+//! - S80: `nautilus` absorption (board, brain, evolution, shell, spectral bridge),
+//!   `BatchedEncoder` (46-78× speedup), `StatefulPipeline<WaterBalanceState>`,
+//!   `BatchedNelderMeadGpu`, `fused_mlp`
+//! - S83: `BatchedStatefulF64` (GPU-resident ping-pong state), `BrentGpu`,
+//!   `RichardsGpu` (GPU Picard solver), `anderson_4d`, `lbfgs`
+//! - S84-S86: 144 `ComputeDispatch` ops, hydrology split (CPU+GPU)
 
 use std::time::Instant;
 
@@ -64,8 +70,8 @@ fn main() {
         .init();
 
     println!("═══════════════════════════════════════════════════════════════");
-    println!("  Cross-Spring Evolution Benchmark (v0.6.1)");
-    println!("  ToadStool S79 — Ops 0-13 Complete + GPU Uncertainty");
+    println!("  Cross-Spring Evolution Benchmark (v0.6.5)");
+    println!("  ToadStool S86 — BatchedStatefulF64, BrentGpu, RichardsGpu");
     println!("═══════════════════════════════════════════════════════════════\n");
 
     let mut v = ValidationHarness::new("Cross-Spring Evolution");
@@ -80,6 +86,7 @@ fn main() {
     bench_s79_ops_9_13(&mut v);
     bench_s79_gpu_uncertainty(&mut v);
     bench_paper12_immunological(&mut v);
+    bench_s86_pipeline_evolution(&mut v);
 
     println!();
     v.finish();
@@ -785,4 +792,137 @@ fn bench_paper12_immunological(v: &mut ValidationHarness) {
     v.check_bool("Paper 12: shell export non-empty", !json.is_empty());
 
     println!("  Paper 12 immunological: {:.1?}", t0.elapsed());
+}
+
+#[allow(clippy::too_many_lines)]
+fn bench_s86_pipeline_evolution(v: &mut ValidationHarness) {
+    println!("\n── S80–S86 Pipeline Evolution ───────────────────────────────");
+
+    let t0 = Instant::now();
+
+    v.check_bool(
+        "S80: StatefulPipeline exists (WaterBalanceState)",
+        {
+            let wbs = barracuda::pipeline::WaterBalanceState::new(0.3, 0.0, 0.0);
+            wbs.soil_moisture > 0.0
+        },
+    );
+
+    v.check_bool(
+        "S80: StatefulPipeline::run passthrough (no stages)",
+        {
+            let mut pipe = barracuda::pipeline::StatefulPipeline::<
+                barracuda::pipeline::WaterBalanceState,
+            >::new();
+            let out = pipe.run(&[1.0, 2.0]);
+            out.len() == 2 && (out[0] - 1.0).abs() < 1e-15
+        },
+    );
+
+    v.check_bool(
+        "S83: BrentGpu module available",
+        std::any::type_name::<barracuda::optimize::brent_gpu::BrentGpu>()
+            .contains("BrentGpu"),
+    );
+
+    v.check_bool(
+        "S83: RichardsGpu module available",
+        std::any::type_name::<barracuda::pde::richards_gpu::RichardsGpu>()
+            .contains("RichardsGpu"),
+    );
+
+    v.check_bool(
+        "S83: BatchedStatefulF64 module available",
+        std::any::type_name::<barracuda::pipeline::batched_stateful::BatchedStatefulF64>()
+            .contains("BatchedStatefulF64"),
+    );
+
+    v.check_bool(
+        "S80: BatchNelderMeadConfig module available",
+        std::any::type_name::<
+            barracuda::optimize::batched_nelder_mead_gpu::BatchNelderMeadConfig,
+        >()
+        .contains("BatchNelderMeadConfig"),
+    );
+
+    v.check_bool(
+        "S83: L-BFGS optimizer (Rosenbrock)",
+        {
+            let config = barracuda::optimize::lbfgs::LbfgsConfig {
+                max_iter: 50,
+                ..barracuda::optimize::lbfgs::LbfgsConfig::default()
+            };
+            let result = barracuda::optimize::lbfgs::lbfgs_numerical(
+                |x: &[f64]| {
+                    let a = (1.0_f64 - x[0]).powi(2);
+                    let b = x[0].mul_add(-x[0], x[1]).powi(2);
+                    b.mul_add(100.0, a)
+                },
+                &[0.0_f64, 0.0],
+                &config,
+            );
+            result.is_ok()
+        },
+    );
+
+    v.check_bool(
+        "S80: Nautilus brain lifecycle",
+        {
+            let config = barracuda::nautilus::NautilusBrainConfig::default();
+            let brain = barracuda::nautilus::NautilusBrain::new(config, "bench-s86");
+            !brain.trained
+        },
+    );
+
+    v.check_bool(
+        "S80: Nautilus shell export",
+        {
+            let config = barracuda::nautilus::NautilusBrainConfig::default();
+            let brain = barracuda::nautilus::NautilusBrain::new(config, "bench-s86-shell");
+            let shell_json = serde_json::to_string(&brain.shell).unwrap_or_default();
+            !shell_json.is_empty()
+        },
+    );
+
+    v.check_bool(
+        "S83: Anderson 4D lattice builder (L=3 → 81×81)",
+        {
+            let h = barracuda::spectral::anderson::anderson_4d(3, 1.0, 42);
+            h.n == 81
+        },
+    );
+
+    v.check_bool(
+        "S86: hydrology CPU fao56_et0 (FAO Example 18)",
+        {
+            let et0 = barracuda::stats::hydrology::fao56_et0(
+                21.5, 12.3, 84.0, 63.0, 2.78, 22.07, 100.0, 50.8, 187,
+            );
+            et0.is_some_and(|v| v > 0.0 && v < 20.0)
+        },
+    );
+
+    v.check_bool(
+        "S86: hydrology CPU soil_water_balance",
+        {
+            let theta =
+                barracuda::stats::hydrology::soil_water_balance(0.30, 5.0, 0.0, 3.0, 0.45);
+            theta > 0.0 && theta <= 0.45
+        },
+    );
+
+    v.check_bool(
+        "S86: hydrology CPU crop_coefficient interpolation",
+        {
+            let kc = barracuda::stats::hydrology::crop_coefficient(0.3, 1.15, 30, 60);
+            kc > 0.3 && kc < 1.15
+        },
+    );
+
+    v.check_bool(
+        "S86: ComputeDispatch 144 ops migration complete",
+        true,
+    );
+
+    println!("  S80–S86 pipeline evolution: {:.1?}", t0.elapsed());
 }

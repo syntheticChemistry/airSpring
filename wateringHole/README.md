@@ -7,7 +7,8 @@
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V047** | [AIRSPRING_V047_GPU_PIPELINE_EVOLUTION_HANDOFF_MAR02_2026.md](handoffs/AIRSPRING_V047_GPU_PIPELINE_EVOLUTION_HANDOFF_MAR02_2026.md) | 2026-03-02 | **current** — v0.6.4: GPU multi-field pipeline (Exp 070-072), 13,000× speedup, pure GPU 46/46, metalForge 66/66, ToadStool evolution roadmap |
+| **V048** | [AIRSPRING_V048_TOADSTOOL_S86_SYNC_HANDOFF_MAR02_2026.md](handoffs/AIRSPRING_V048_TOADSTOOL_S86_SYNC_HANDOFF_MAR02_2026.md) | 2026-03-02 | **current** — v0.6.5: ToadStool S86 sync, 138/138 cross-spring, Tier B→A (`BatchedStatefulF64`, `BatchedNelderMeadGpu`), `BrentGpu`, `RichardsGpu`, `nautilus`, `lbfgs` |
+| V047 | [AIRSPRING_V047_GPU_PIPELINE_EVOLUTION_HANDOFF_MAR02_2026.md](handoffs/AIRSPRING_V047_GPU_PIPELINE_EVOLUTION_HANDOFF_MAR02_2026.md) | 2026-03-02 | v0.6.4: GPU multi-field pipeline (Exp 070-072), 13,000× speedup, pure GPU 46/46, metalForge 66/66 |
 | V046 | [AIRSPRING_V046_PAPER12_DEEP_AUDIT_HANDOFF_MAR02_2026.md](handoffs/AIRSPRING_V046_PAPER12_DEEP_AUDIT_HANDOFF_MAR02_2026.md) | 2026-03-02 | v0.6.3: Paper 12 (Exp 066-069), deep debt audit, ToadStool S79 (124/124) |
 | — | [AIRSPRING_TOADSTOOL_ABSORPTION_HANDOFF_MAR02_2026.md](handoffs/AIRSPRING_TOADSTOOL_ABSORPTION_HANDOFF_MAR02_2026.md) | 2026-03-02 | Absorption recommendations: 25 Tier A modules, patterns, evolution opportunities |
 | — | [AIRSPRING_MULTI_PRIMAL_INTEGRATION_ROADMAP_MAR02_2026.md](handoffs/AIRSPRING_MULTI_PRIMAL_INTEGRATION_ROADMAP_MAR02_2026.md) | 2026-03-02 | Multi-primal integration: NUCLEUS, NestGate, Songbird, biomeOS |
@@ -18,7 +19,7 @@
 
 | File | Purpose |
 |------|---------|
-| `../specs/CROSS_SPRING_EVOLUTION.md` | 844+ WGSL shader provenance (hotSpring/wetSpring/neuralSpring/airSpring/groundSpring) — ToadStool S79 |
+| `../specs/CROSS_SPRING_EVOLUTION.md` | 844+ WGSL shader provenance (hotSpring/wetSpring/neuralSpring/airSpring/groundSpring) — ToadStool S86 |
 | `../specs/BIOMEOS_CAPABILITIES.md` | Ecology capability domain for biomeOS Neural API |
 | `../specs/NUCLEUS_INTEGRATION.md` | NUCLEUS deployment: graphs, workloads, Neural API bridge |
 | `../graphs/airspring_eco_pipeline.toml` | biomeOS deployment graph: weather → ET₀ → WB → yield |

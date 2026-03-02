@@ -2,7 +2,7 @@
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
 **Date**: March 2, 2026
-**Version**: 0.6.4
+**Version**: 0.6.5
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -13,7 +13,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → biomeOS (NUCLEUS atomics, deployment graphs) → Penny Irrigation
 ```
 
-## Current Status (v0.6.4)
+## Current Status (v0.6.5)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
@@ -48,7 +48,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | `cargo fmt --check` | **Clean** |
 | `cargo doc --no-deps` | **Clean** (both crates) |
 | `cargo-deny check` | **Clean** (AGPL-3.0-or-later) |
-| `bench_cross_spring_evolution` | **124/124 PASS** (release, S79 sync) |
+| `bench_cross_spring_evolution` | **138/138 PASS** (release, S86 sync) |
 | `validate_dispatch_experiment` | **51/51 PASS** — CPU/GPU/batch/absorption/pipeline |
 | `validate_biome_graph` | **35/35 PASS** — graph topology, capabilities, offline pipeline |
 

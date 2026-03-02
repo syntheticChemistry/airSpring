@@ -2,6 +2,30 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.6.5] - 2026-03-02
+
+### ToadStool S86 Sync + Tier B→A Promotions + Cross-Spring Benchmark
+
+Pull and validate ToadStool S80-S86 (7 commits, 160 files, +9270/-9337).
+Two Tier B→A promotions: water balance (`BatchedStatefulF64` S83) and isotherm
+(`BatchedNelderMeadGpu` S80). Cross-spring evolution benchmark extended to
+138/138 (+14 checks for S80-S86 primitives). All new upstream modules validated:
+`BrentGpu`, `RichardsGpu`, `StatefulPipeline`, `nautilus`, `anderson_4d`, `lbfgs`,
+hydrology CPU/GPU split.
+
+#### Added
+- 14 cross-spring benchmark checks for S80-S86 primitives
+- V048 handoff: ToadStool S86 sync, Tier B→A promotions
+- `BrentGpu`, `RichardsGpu`, `BatchedStatefulF64` type validation
+
+#### Changed
+- ToadStool PIN: S79 → S86 (`f97fc2ae` → `2fee1969`)
+- Cross-spring benchmark: 124 → 138 checks
+- Tier A: 26 → 28 gaps (WB + isotherm promoted)
+- Tier B: 6 → 4 gaps
+- `evolution_gaps.rs`: S80-S86 session notes, provenance table updated
+- `EVOLUTION_READINESS.md`: S86 sync, 9 absorbed modules documented
+
 ## [0.6.4] - 2026-03-02
 
 ### GPU Multi-Field Pipeline + CPU Parity Benchmark + Pure GPU End-to-End

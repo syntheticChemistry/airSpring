@@ -1,8 +1,8 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: March 1, 2026 (v0.6.0 — 641 lib tests, 72 binaries, 63 experiments, 1237 Python, 16 NUCLEUS capabilities, 28/28 cross-primal pipeline)
-**ToadStool PIN**: S70+++ HEAD (`1dd7e338` — universal f64 canonical, dual-layer precision, device-lost resilience, 774 WGSL shaders, cross-spring ops 5-8 absorbed)
-**Handoff**: V041 (NUCLEUS cross-primal evolution — ecology domain, capability.call, cross-primal forwarding, 5 new experiments)
+**Last Updated**: March 2, 2026 (v0.6.5 — 813 lib tests, 82 binaries, 72 experiments, 1237 Python, 30 NUCLEUS capabilities, 66/66 metalForge cross-system)
+**ToadStool PIN**: S86 HEAD (`2fee1969` — 2,866 tests, 844 WGSL shaders, 144 `ComputeDispatch` ops, `BatchedStatefulF64`, `BrentGpu`, `RichardsGpu`, `nautilus`, `multi_gpu`)
+**Handoff**: V048 (S86 sync — Tier B→A promotions, `BatchedStatefulF64`, `BatchedNelderMeadGpu`, `BrentGpu`, `RichardsGpu`)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -16,9 +16,15 @@ validate against papers, hand off to ToadStool/BarraCuda, lean on upstream.
 
 | Module | Absorbed Into | When | Status |
 |--------|--------------|------|--------|
-| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all 72 binaries use upstream |
+| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all 82 binaries use upstream |
 | `van_genuchten` | `barracuda::pde::richards::SoilParams` | S40 | **Leaning** — `gpu::richards` bridges to upstream |
 | `isotherm NM` | `barracuda::optimize::nelder_mead` | S62 | **Leaning** — `gpu::isotherm` bridges to upstream |
+| `StatefulPipeline` | `barracuda::pipeline::stateful::StatefulPipeline` | S80 | **Leaning** — `WaterBalanceState` day-over-day |
+| `BatchedStatefulF64` | `barracuda::pipeline::batched_stateful` | S83 | **Available** — GPU-resident ping-pong state |
+| `BrentGpu` | `barracuda::optimize::brent_gpu` | S83 | **Available** — batched GPU Brent root-finding |
+| `RichardsGpu` | `barracuda::pde::richards_gpu` | S83 | **Available** — GPU Picard solver |
+| `BatchedNelderMeadGpu` | `barracuda::optimize::batched_nelder_mead_gpu` | S80 | **Available** — parallel NM optimizations |
+| `nautilus` | `barracuda::nautilus` | S80 | **Available** — evolutionary reservoir (bingoCube) |
 
 ### Absorbed Upstream (6/6 metalForge modules — Write→Absorb→Lean complete)
 
