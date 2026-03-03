@@ -35,8 +35,42 @@
 //! | `io::csv_ts` | `gpu::stream` | `moving_window.wgsl` | Stream smoothing | A (ready) |
 //! | `eco::sensor_calibration` (OLS) | `gpu::stats` | `linear_regression_f64.wgsl` | Sensor regression | A (GPU, neuralSpring S69) |
 //! | `eco::*` (multi-var) | `gpu::stats` | `matrix_correlation_f64.wgsl` | Soil correlation | A (GPU, neuralSpring S69) |
+//! | `eco::infiltration` | `gpu::infiltration` | `brent_f64.wgsl` (GA residual, S83) | Green-Ampt infiltration | A (`BrentGpu`) |
+//! | `eco::runoff` | `gpu::runoff` | `local_elementwise.wgsl` (op=0) | SCS-CN runoff | A (GPU-local, f32) |
+//! | `eco::yield_response` | `gpu::yield_response` | `local_elementwise.wgsl` (op=1) | Stewart yield | A (GPU-local, f32) |
+//! | `eco::evapotranspiration` (Makkink/Turc/Hamon/BC) | `gpu::simple_et0` | `local_elementwise.wgsl` (ops 2-5) | Simple ET₀ batch | A (GPU-local, f32) |
 //!
-//! # Current Inventory (March 2, 2026 — v0.6.5, synced to `ToadStool` HEAD S86)
+//! # Current Inventory (March 2, 2026 — v0.6.8, synced to `ToadStool` HEAD S86)
+//!
+//! ## v0.6.8: Local GPU Compute Evolution + NUCLEUS Full-Pipeline
+//!
+//! | Module | Status | Notes |
+//! |--------|--------|------|
+//! | `gpu::local_dispatch` | **NEW** | `LocalElementwise` — wgpu compute pipeline for local WGSL shaders |
+//! | `gpu::runoff` | **GPU-local** | `GpuRunoff` — SCS-CN via `local_elementwise.wgsl` op=0 (f32) |
+//! | `gpu::yield_response` | **GPU-local** | `GpuYieldResponse` — Stewart via `local_elementwise.wgsl` op=1 (f32) |
+//! | `gpu::simple_et0` | **GPU-local** | `GpuSimpleEt0` — 4 methods via `local_elementwise.wgsl` ops 2-5 (f32) |
+//!
+//! Exp 075 `validate_local_gpu`: ALL PASS — 6 ops, CPU/GPU parity within f32 precision.
+//! Exp 076 `validate_nucleus_routing`: 60/60 PASS — 27 workloads, NUCLEUS mesh, `PCIe` bypass.
+//!
+//! ## v0.6.7: Four New GPU Orchestrators + Paper Chain Validation
+//!
+//! | Module | Status | Notes |
+//! |--------|--------|------|
+//! | `gpu::infiltration` | **WIRED** | `BrentGpu::solve_green_ampt()` — Green-Ampt via `brent_f64.wgsl` GA residual |
+//!
+//! Exp 074 `validate_paper_chain`: 79/79 PASS — 28 domains (22 GPU, 6 CPU-only).
+//!
+//! ## v0.6.6 Rewire: `BrentGpu`, `RichardsGpu`, Cross-Spring Provenance
+//!
+//! | Rewire | Origin | GPU Shader |
+//! |--------|--------|------------|
+//! | `BrentGpu` VG inverse θ→h | S83 (`brent_f64.wgsl`, hotSpring precision) | ✓ Wired |
+//! | `RichardsGpu` Picard solver | S83 (`richards_picard_f64.wgsl`, hotSpring + neuralSpring) | ✓ Wired |
+//! | `StatefulPipeline` passthrough | S80 (`pipeline::StatefulPipeline`) | CPU validated |
+//! | `BatchedStatefulF64` type | S83 (`pipeline::batched_stateful`) | Available |
+//! | Cross-spring provenance (Exp 073) | All springs | 68/68 PASS |
 //!
 //! `ToadStool` S42–S86: 200+ commits, 50+ cross-spring absorptions, 2,866 barracuda tests, 844 WGSL shaders.
 //! All four airSpring issues (TS-001 through TS-004) resolved in **S54**.

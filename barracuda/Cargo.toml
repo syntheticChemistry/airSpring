@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.6.5"
+version = "0.6.8"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
@@ -41,6 +41,14 @@ bingocube-nautilus = { path = "../../primalTools/bingoCube/nautilus" }
 
 # Serde: needed for Nautilus brain serialization (observations, shell state).
 serde = { version = "1", features = ["derive"] }
+
+# wgpu: local GPU compute dispatch for airSpring-evolved shaders.
+# Same version as ToadStool's workspace (wgpu 22) to guarantee type compatibility.
+# Used by gpu::local_dispatch for local WGSL shaders pending ToadStool absorption.
+wgpu = { version = "22", default-features = false, features = ["wgsl", "vulkan-portability"] }
+
+# bytemuck: safe transmute for GPU buffer I/O (f32 ↔ bytes).
+bytemuck = { version = "1", features = ["derive"] }
 
 # BrainChip AKD1000 NPU driver — pure Rust, optional.
 akida-driver = { path = "../../phase1/toadstool/crates/neuromorphic/akida-driver", optional = true }
@@ -317,6 +325,10 @@ name = "validate_pure_gpu_multi_field"
 path = "src/bin/validate_pure_gpu_multi_field.rs"
 
 [[bin]]
+name = "validate_cross_spring_rewire"
+path = "src/bin/validate_cross_spring_rewire.rs"
+
+[[bin]]
 name = "validate_gpu_rewire_benchmark"
 path = "src/bin/validate_gpu_rewire_benchmark.rs"
 
@@ -375,4 +387,13 @@ path = "src/bin/validate_cytokine.rs"
 [[bin]]
 name = "validate_tissue"
 path = "src/bin/validate_tissue.rs"
+
+[[bin]]
+name = "validate_paper_chain"
+path = "src/bin/validate_paper_chain.rs"
+
+[[bin]]
+name = "validate_local_gpu"
+path = "src/bin/validate_local_gpu.rs"
+
 

@@ -12,7 +12,11 @@
 //! | [`device_info`] | Precision probing, `Fp64Strategy`, provenance | Device + cross-spring |
 //! | [`et0`] | Batched FAO-56 ET₀ for `N` station-days | **GPU-first** (`BatchedElementwiseF64`) |
 //! | [`hargreaves`] | Batched Hargreaves-Samani ET₀ (temp-only) | **GPU-first** (`BatchedElementwiseF64` op=6, S70+) |
+//! | [`simple_et0`] | Batched Makkink/Turc/Hamon/Blaney-Criddle | **GPU-local** (f32 WGSL, `ToadStool` f64 pending) |
 //! | [`water_balance`] | Batched season simulation + GPU step | **GPU-step** + CPU season |
+//! | [`infiltration`] | Batched Green-Ampt via `BrentGpu` | **GPU** (`brent_f64.wgsl` GA residual, S83) |
+//! | [`runoff`] | Batched SCS-CN runoff computation | **GPU-local** (f32 WGSL, `ToadStool` f64 pending) |
+//! | [`yield_response`] | Batched Stewart yield-water function | **GPU-local** (f32 WGSL, `ToadStool` f64 pending) |
 //! | [`dual_kc`] | Batched dual Kc (`Ke` + `ETc`) for M fields | **GPU-first** (`BatchedElementwiseF64` op=8, S70+) |
 //! | [`kriging`] | Soil moisture spatial interpolation | **Integrated** (`KrigingF64`) |
 //! | [`reduce`] | Seasonal aggregation statistics | **GPU** for N≥1024 (`FusedMapReduceF64`) |
@@ -86,18 +90,23 @@ pub mod et0;
 pub mod evolution_gaps;
 pub mod gdd;
 pub mod hargreaves;
+pub mod infiltration;
 pub mod isotherm;
 pub mod jackknife;
 pub mod kc_climate;
+pub mod local_dispatch;
 pub mod kriging;
 pub mod mc_et0;
 pub mod pedotransfer;
 pub mod reduce;
 pub mod richards;
+pub mod runoff;
 pub mod seasonal_pipeline;
 pub mod sensor_calibration;
+pub mod simple_et0;
 pub mod stats;
 pub mod stream;
 pub mod thornthwaite;
 pub mod van_genuchten;
 pub mod water_balance;
+pub mod yield_response;

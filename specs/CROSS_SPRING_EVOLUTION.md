@@ -1,23 +1,23 @@
 # Cross-Spring Shader Evolution — airSpring Provenance
 
-**Updated**: March 2, 2026 (v0.6.2, ToadStool S79 synced)
+**Updated**: March 2, 2026 (v0.6.8, ToadStool S86 synced)
 
 ## Summary
 
-ToadStool's BarraCuda runtime contains **687 WGSL shaders** (pure math, precision per
-silicon), built through **60+ cross-spring absorptions** (sessions S42-S79). Each Spring
+ToadStool's BarraCuda runtime contains **844 WGSL shaders** (pure math, precision per
+silicon), built through **60+ cross-spring absorptions** (sessions S42-S86). Each Spring
 contributes domain-specific GPU primitives that benefit the entire ecosystem.
 
 airSpring uses **8 shared shader families** directly (ops 0-13 + uncertainty stack),
 contributed **3 critical fixes** (TS-001, TS-003, TS-004), had its **stats metrics
 absorbed upstream** (S64), and completed the Write→Absorb→Lean cycle with
-**metalForge fully absorbed** (S66).
+**metalForge fully absorbed** (S66). v0.6.8 adds **6 local WGSL compute shaders**
+(`local_elementwise.wgsl`) evolved locally for ToadStool to absorb.
 
-v0.6.2: **25 Tier A GPU orchestrators**, 767 lib tests (94.25% llvm-cov),
-`AirSpringBrain` via `bingocube-nautilus`, `MonitoredAtlasStream` with
-`DriftMonitor` for regime change detection. S78/S79: `libc`→`rustix`, AFIT,
-ops 9-13 (VG θ/K, Thornthwaite, GDD, pedotransfer), `pollster`→`test_pool`,
-`JackknifeMeanGpu`, `BootstrapMeanGpu`, `DiversityFusionGpu`, `HargreavesBatchGpu`.
+v0.6.8: **25 Tier A + 6 GPU-local** orchestrators, 846 lib tests,
+`gpu::local_dispatch::LocalElementwise` for wgpu direct compute (SCS-CN, Stewart,
+Makkink, Turc, Hamon, Blaney-Criddle). 27 metalForge workloads, NUCLEUS mesh
+routing (Exp 076: 60/60). S86: BrentGpu, RichardsGpu, StatefulPipeline.
 
 ### Paper 12 — Immunological Anderson Infrastructure (NEW)
 

@@ -30,8 +30,12 @@
 //! Uses the validated `eco::richards` module directly (implicit Euler + Picard),
 //! preserving exact validation fidelity.
 
+use std::sync::Arc;
+
+use barracuda::device::WgpuDevice;
 use barracuda::pde::crank_nicolson::{CrankNicolsonConfig, HeatEquation1D};
 use barracuda::pde::richards as pde_richards;
+use barracuda::pde::richards_gpu::RichardsGpu;
 
 use crate::eco::richards::{self, VanGenuchtenParams};
 
@@ -99,8 +103,16 @@ pub fn solve_batch_cpu(
 
 /// GPU-backed batched Richards solver.
 ///
-/// Wraps `barracuda::pde::richards::solve_richards` with unit conversion
-/// and domain-specific API. Falls back to CPU when no device is available.
+/// Wraps `barracuda::pde::richards` (CPU) and `barracuda::pde::richards_gpu` (GPU)
+/// with unit conversion and domain-specific API.
+///
+/// # Cross-Spring Provenance
+///
+/// | Solver | Origin | Shader |
+/// |--------|--------|--------|
+/// | CPU Picard+CN | airSpring S40 → `barracuda::pde::richards` | None (CPU) |
+/// | GPU Picard | airSpring V045 → S83 `RichardsGpu` | `richards_picard_f64.wgsl` |
+/// | CN diffusion | hotSpring S62 → `barracuda::pde::crank_nicolson` | `crank_nicolson_f64.wgsl` |
 pub struct BatchedRichards;
 
 impl BatchedRichards {
@@ -211,6 +223,57 @@ impl BatchedRichards {
         let theta: Vec<f64> = h_final.iter().map(|&h| soil.theta(h)).collect();
 
         Ok(theta)
+    }
+
+    /// Solve using `RichardsGpu` (S83, `richards_picard_f64.wgsl`).
+    ///
+    /// GPU Picard iteration with Crank-Nicolson time stepping and Thomas
+    /// tridiagonal solve — all on GPU via three WGSL compute passes per
+    /// Picard iteration.
+    ///
+    /// Cross-spring provenance: airSpring Richards (S40) + hotSpring
+    /// precision math (`pow_f64`, `exp_f64`) + neuralSpring tridiagonal
+    /// solver (`cyclic_reduction_f64.wgsl`).
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if GPU solver fails or device unavailable.
+    pub fn solve_gpu(
+        device: Arc<WgpuDevice>,
+        req: &RichardsRequest,
+    ) -> crate::error::Result<pde_richards::RichardsResult> {
+        let soil = to_barracuda_params(&req.params);
+        let dz = req.depth_cm / (req.n_nodes as f64);
+        let dt_s = req.dt_days * 86_400.0;
+        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+        let n_steps = (req.duration_days / req.dt_days).ceil() as usize;
+
+        let config = pde_richards::RichardsConfig {
+            soil,
+            dz,
+            dt: dt_s,
+            n_nodes: req.n_nodes,
+            max_picard_iter: 100,
+            picard_tol: 1e-4,
+        };
+
+        let h0 = vec![req.h_initial; req.n_nodes];
+
+        let top_bc = if req.zero_flux_top {
+            pde_richards::RichardsBc::Flux(0.0)
+        } else {
+            pde_richards::RichardsBc::PressureHead(req.h_top)
+        };
+        let bottom_bc = if req.bottom_free_drain {
+            pde_richards::RichardsBc::Flux(0.0)
+        } else {
+            pde_richards::RichardsBc::PressureHead(req.h_initial)
+        };
+
+        let gpu_solver = RichardsGpu::new(device);
+        gpu_solver
+            .solve(&config, &h0, n_steps, top_bc, bottom_bc)
+            .map_err(crate::error::AirSpringError::from)
     }
 }
 
@@ -361,6 +424,39 @@ mod tests {
                 "upstream θ[{i}]={ut:.4} outside [{:.3}, {:.3}]",
                 p.theta_r,
                 p.theta_s
+            );
+        }
+    }
+
+    #[test]
+    fn test_gpu_richards_drainage() {
+        use super::super::device_info::try_f64_device;
+        let Some(device) = try_f64_device() else {
+            eprintln!("SKIP: No GPU device for RichardsGpu");
+            return;
+        };
+        let req = RichardsRequest {
+            params: sand(),
+            depth_cm: 100.0,
+            n_nodes: 20,
+            h_initial: -5.0,
+            h_top: -5.0,
+            zero_flux_top: true,
+            bottom_free_drain: true,
+            duration_days: 0.1,
+            dt_days: 0.01,
+        };
+        let result = BatchedRichards::solve_gpu(device, &req);
+        assert!(result.is_ok(), "GPU Richards failed: {result:?}");
+        let r = result.unwrap();
+        assert_eq!(r.h.len(), 20);
+        assert!(r.time_steps_completed > 0);
+        let soil = to_barracuda_params(&sand());
+        for (i, &h) in r.h.iter().enumerate() {
+            let theta = soil.theta(h);
+            assert!(
+                theta >= sand().theta_r - 1e-4 && theta <= sand().theta_s + 1e-4,
+                "GPU θ[{i}]={theta:.4} outside physical range"
             );
         }
     }

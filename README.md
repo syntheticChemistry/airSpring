@@ -2,7 +2,7 @@
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
 **Date**: March 2, 2026
-**Version**: 0.6.5
+**Version**: 0.6.8
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -13,13 +13,13 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → biomeOS (NUCLEUS atomics, deployment graphs) → Penny Irrigation
 ```
 
-## Current Status (v0.6.5)
+## Current Status (v0.6.8)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,237/1,237 PASS** | 57 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **813 lib + 1498 atlas** | 82 binaries + 124/124 cross-spring benchmarks |
+| Phase 1: Rust validation | **846 lib + 1498 atlas** | 85 binaries + 138/138 cross-spring benchmarks |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (34/34 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -27,9 +27,12 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | Phase 2.7: GPU streaming multi-field | **57/57 PASS** | M fields × N days, Stage 3 GPU per-day, 6.8M field-days/s (Exp 070) |
 | Phase 3: GPU live dispatch | **78/78 PASS** | Pure GPU workload validation (Exp 055), 0.04% seasonal parity |
 | Phase 3.1: Pure GPU end-to-end | **46/46 PASS** | All 4 stages on GPU, 19.7× dispatch reduction (Exp 072) |
+| Phase 3.2: Cross-spring rewire | **68/68 PASS** | `BrentGpu` VG inverse, `RichardsGpu` Picard, full provenance (Exp 073) |
+| Phase 3.3: Paper chain validation | **79/79 PASS** | Full CPU→GPU→metalForge chain for 28 domains (22 GPU, 6 CPU-only) (Exp 074) |
+| Phase 3.4: Local GPU compute | **6 ops GPU-local** | SCS-CN, Stewart, Makkink, Turc, Hamon, Blaney-Criddle via `local_elementwise.wgsl` (Exp 075) |
 | Phase 3.5: NPU edge | **AKD1000 live** | 3 experiments, 95/95 NPU checks, ~48µs inference |
-| Phase 3.7: metalForge live | **5 substrates discovered** | RTX 4070 + Titan V + AKD1000 + i9-12900K, 21 workloads route |
-| Phase 3.8: Mixed-hardware pipeline | **66/66 PASS** | 7-stage GPU→NPU PCIe bypass, NUCLEUS mesh routing |
+| Phase 3.7: metalForge live | **5 substrates discovered** | RTX 4070 + Titan V + AKD1000 + i9-12900K, 27 workloads route |
+| Phase 3.8: Mixed-hardware pipeline | **66/66 PASS** | 7-stage GPU→NPU PCIe bypass, NUCLEUS mesh routing (Exp 076: 60/60) |
 | Phase 3.9: NUCLEUS primal | **30 capabilities** | airSpring biomeOS primal, 30 science capabilities, JSON-RPC |
 | Phase 4.0: Cross-primal pipeline | **28/28 PASS** | ecology domain, capability.call routing, cross-primal forwarding |
 | Phase 4.1: Full dispatch experiment | **51/51 PASS** | CPU vs GPU parity across all domains (Exp 064) |
@@ -41,8 +44,8 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` (barracuda) | **813 passed**, 0 failures |
-| `cargo test --lib` (metalForge) | **58 passed**, 0 failures |
+| `cargo test --lib` (barracuda) | **846 passed**, 0 failures |
+| `cargo test --lib` (metalForge) | **61 passed**, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **95.66% line coverage** |
 | `cargo clippy (pedantic)` | **0 warnings** (pedantic, both crates) |
 | `cargo fmt --check` | **Clean** |
@@ -75,7 +78,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
   barracuda::ops/linalg/stats/pde/optimize (GPU dispatch + CPU fallback)
        │
        ▼
-  ToadStool WGSL shaders (f64 precision on GPU, 844 shaders — S79)
+  ToadStool WGSL shaders (f64 precision on GPU, 844 shaders — S86)
        │
        ▼
   metalForge (mixed CPU + GPU + NPU)
@@ -102,7 +105,7 @@ ToadStool contains **844 WGSL shaders** (S79: 2,773+ barracuda tests, pure math 
 S79: ops 0-13 (VG θ/K, Thornthwaite, GDD, pedotransfer), jackknife/bootstrap/diversity GPU, `libc`→`rustix`, `async-trait`→AFIT, `pollster`→`test_pool`.
 See `specs/CROSS_SPRING_EVOLUTION.md`.
 
-### BarraCuda Integration (25 Tier A + 7 Tier B + 3 pipeline)
+### BarraCuda Integration (25 Tier A + 6 GPU-local + 3 pipeline)
 
 | airSpring Module | BarraCuda Primitive | Op/Shader | Status |
 |-----------------|--------------------|----|---|
@@ -126,6 +129,10 @@ See `specs/CROSS_SPRING_EVOLUTION.md`.
 | `gpu::bootstrap` | `BootstrapMeanGpu` | dedicated | **Integrated** (S79) |
 | `gpu::diversity` | `DiversityFusionGpu` | dedicated | **Integrated** (S79) |
 | `gpu::stats` | `linear_regression_f64` + `matrix_correlation_f64` | dedicated | **Integrated** |
+| `gpu::runoff` | `local_elementwise.wgsl` (op=0) | local f32 | **GPU-local** (v0.6.8) |
+| `gpu::yield_response` | `local_elementwise.wgsl` (op=1) | local f32 | **GPU-local** (v0.6.8) |
+| `gpu::simple_et0` | `local_elementwise.wgsl` (ops 2-5) | local f32 | **GPU-local** (v0.6.8) |
+| `gpu::local_dispatch` | `LocalElementwise` (wgpu direct) | 6 ops | **NEW** (v0.6.8) |
 | `eco::correction::fit_ridge` | `linalg::ridge::ridge_regression` | CPU | **Integrated** |
 | `eco::richards::inverse_vg_h` | `optimize::brent` | CPU | **Integrated** |
 | `eco::diversity` | `stats::diversity` | CPU | **Leaning** |
@@ -134,7 +141,7 @@ See `specs/CROSS_SPRING_EVOLUTION.md`.
 
 Also wired: `validation::ValidationHarness` (neuralSpring), `stats::pearson`, `spearman`, `bootstrap_ci`, `stats::metrics` re-exports (airSpring→upstream S64).
 
-25 Tier A GPU modules (ops 0-13 + jackknife/bootstrap/diversity uncertainty stack). ToadStool S79 synced.
+25 Tier A GPU modules (ops 0-13 + jackknife/bootstrap/diversity uncertainty stack) + 6 GPU-local (f32 WGSL via `local_elementwise.wgsl`). ToadStool S86 synced.
 See `barracuda/src/gpu/evolution_gaps.rs` and `barracuda/EVOLUTION_READINESS.md` for the full roadmap.
 
 ### CPU Benchmarks: Rust vs Python (14.5× geometric mean speedup, 21/21 parity)
@@ -208,29 +215,29 @@ airSpring/
 │   ├── vg_inverse/              # Van Genuchten inverse fitting (84/84)
 │   ├── season_water_budget/     # Full-season irrigation WB (34/34)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (810 lib tests, 79 binaries)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (846 lib tests, 85 binaries)
 │   ├── src/
 │   │   ├── biomeos.rs           # biomeOS socket resolution + primal discovery (shared)
 │   │   ├── eco/                 # Domain modules (19 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine)
-│   │   ├── gpu/                 # ToadStool/BarraCuda GPU bridge (25 Tier A + 3 pipeline)
+│   │   ├── gpu/                 # ToadStool/BarraCuda GPU bridge (25 Tier A + 6 GPU-local + BrentGpu + RichardsGpu)
 │   │   ├── nautilus.rs          # bingoCube/nautilus evolutionary reservoir (AirSpringBrain)
 │   │   ├── rpc.rs               # JSON-RPC 2.0 inter-primal communication
 │   │   ├── npu.rs               # BrainChip AKD1000 NPU (feature-gated)
-│   │   └── bin/                 # validate_*, bench_*, airspring_primal (79 declared)
+│   │   └── bin/                 # validate_*, bench_*, airspring_primal (84 declared)
 │   ├── tests/                   # Integration + property tests (9 files + common/)
-│   └── Cargo.toml               # v0.6.3
+│   └── Cargo.toml               # v0.6.8
 ├── metalForge/                  # Mixed hardware dispatch (CPU+GPU+NPU)
 │   ├── deploy/                  # biomeOS deployment graphs (airspring_deploy.toml)
-│   └── forge/                   # airspring-forge (58 tests, 4 binaries, live hardware probe)
+│   └── forge/                   # airspring-forge (61 tests, 5 binaries, live hardware probe)
 ├── specs/                       # Specifications and requirements
-│   ├── PAPER_REVIEW_QUEUE.md    # Paper reproduction queue (69 experiments)
+│   ├── PAPER_REVIEW_QUEUE.md    # Paper reproduction queue (76 experiments)
 │   ├── BARRACUDA_REQUIREMENTS.md# GPU + NPU kernel requirements
-│   └── CROSS_SPRING_EVOLUTION.md# Cross-spring shader provenance (S79)
+│   └── CROSS_SPRING_EVOLUTION.md# Cross-spring shader provenance (S86)
 ├── whitePaper/                  # Methodology and study documentation
 │   └── baseCamp/                # Per-faculty research briefings + baseCamp extensions
-├── experiments/                 # Experiment protocols and results (69 experiments)
+├── experiments/                 # Experiment protocols and results (76 experiments)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
-│   └── handoffs/                # Versioned + roadmap
+│   └── handoffs/                # Versioned + roadmap (V051 active)
 ├── graphs/                      # biomeOS deployment graphs (TOML)
 ├── CHANGELOG.md                 # Keep-a-Changelog versioned history
 ├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
@@ -255,14 +262,14 @@ airSpring/
 | Document | Purpose |
 |----------|---------|
 | `CHANGELOG.md` | Versioned change history |
-| `CONTROL_EXPERIMENT_STATUS.md` | Detailed experiment results (69 experiments) |
+| `CONTROL_EXPERIMENT_STATUS.md` | Detailed experiment results (76 experiments) |
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C GPU evolution, absorbed/stays-local |
-| `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66), 18 workloads |
+| `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66), 27 workloads |
 | `metalForge/forge/` | Mixed hardware dispatch: live probe + capability routing |
-| `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance |
-| `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (69 experiments) |
+| `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance (S86) |
+| `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (76 experiments) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda/NUCLEUS handoffs (V046 active) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda/NUCLEUS handoffs (V051 active) |
 
 ## License
 
@@ -270,13 +277,14 @@ AGPL-3.0-or-later
 
 ---
 
-*March 2, 2026 — v0.6.3. 69 experiments, 1237/1237 Python, 810 lib (95.66% llvm-cov) + 58 forge tests,
-79 binaries + 124/124 cross-spring evolution benchmarks (S79 sync), 21/21 CPU parity (14.5× speedup),
-15,300 station-days, 1498/1498 atlas checks, 6-Spring provenance.
+*March 2, 2026 — v0.6.8. 76 experiments, 1237/1237 Python, 846 lib + 61 forge tests,
+85 binaries (80 barracuda + 5 forge), 138/138 cross-spring evolution benchmarks (S86 sync),
+68/68 cross-spring rewire (BrentGpu VG inverse + RichardsGpu Picard, 5/5 springs),
+13,000× Rust-vs-Python atlas-scale speedup, 15,300 station-days, 1498/1498 atlas checks.
 NUCLEUS primal (30 capabilities), ecology domain in biomeOS registry.
-ToadStool S79 synced: 844 WGSL shaders, ops 0-13, GPU uncertainty stack (jackknife/bootstrap/diversity).
-Deep debt audit: zero unsafe, zero clippy pedantic warnings, zero mocks in production, zero `unwrap()` in binaries,
-all tolerances justified, all benchmark JSONs with provenance, capability-based discovery everywhere.
-AirSpringBrain (Nautilus evolutionary reservoir), MonitoredAtlasStream (drift detection),
-Paper 12 immunological Anderson (tissue diversity, CytokineBrain, barrier state, cross-species).
+ToadStool S86 synced: 844 WGSL shaders, ops 0-13, GPU uncertainty stack (jackknife/bootstrap/diversity),
+BrentGpu, RichardsGpu, StatefulPipeline, BatchedStatefulF64, nautilus, L-BFGS.
+v0.6.8: 6 local WGSL compute shaders (local\_elementwise.wgsl) — SCS-CN, Stewart yield, Makkink, Turc, Hamon, Blaney-Criddle.
+gpu::local\_dispatch (LocalElementwise wgpu pipeline), 27 metalForge workloads, NUCLEUS mesh routing (Exp 076: 60/60).
+Deep debt audit: zero unsafe, zero clippy pedantic warnings, zero mocks in production, zero `unwrap()` in binaries.
 cargo-deny clean, all SPDX AGPL-3.0-or-later. Pure Rust + BarraCuda.*

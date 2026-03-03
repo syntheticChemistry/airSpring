@@ -1,8 +1,8 @@
 # airSpring — Paper Review Queue
 
-**Last Updated**: March 1, 2026
+**Last Updated**: March 2, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 72 experiments (1237/1237 Python + 813 Rust lib tests + 1498 atlas checks + 25 Tier A modules + 82 binaries + 124/124 cross-spring benchmarks). GPU math portability 46/46. GPU streaming multi-field 57/57. CPU parity benchmark 34/34. Pure GPU end-to-end 46/46. Ops 5-8 GPU-first (ToadStool S79 absorbed). GPU stats (neuralSpring S69). NCBI 16S coupling 14+29. ToadStool S79 sync (universal precision, 774 WGSL, 6-Spring provenance). Titan V GPU live dispatch (24/24 PASS) + AKD1000 NPU live + metalForge live (66/66) + CPU↔GPU parity (26/26) + 13,000× Rust-vs-Python atlas-scale speedup. NUCLEUS primal (16 caps, 28/28 cross-primal pipeline, ecology domain). Exp 058 Climate Scenario (46/46). Atlas decade 80yr (102/102). NASS real yield (99/99). NCBI diversity (63/63). Coupled runoff-infiltration (292/292), VG inverse (84/84), full-season WB audit (34/34). Paper 12 immunological Anderson (Exp 066-069). V046 handoff. All completed papers use open data and systems.
+**Status**: 73 experiments (1237/1237 Python + 815 Rust lib tests + 1498 atlas checks + 25 Tier A modules + 83 binaries + 138/138 cross-spring benchmarks + 68/68 cross-spring rewire). GPU streaming multi-field 57/57. CPU parity benchmark 34/34. Pure GPU end-to-end 46/46. Cross-spring rewire 68/68 (BrentGpu + RichardsGpu, 5/5 springs). ToadStool S86 sync (844 WGSL, `BatchedStatefulF64`, `BrentGpu`, `RichardsGpu`, `nautilus`, `L-BFGS`). Titan V GPU live dispatch (24/24 PASS) + AKD1000 NPU live + metalForge live (66/66) + 13,000× Rust-vs-Python atlas-scale speedup. NUCLEUS primal (30 caps, 28/28 cross-primal pipeline, ecology domain). V049 handoff. All completed papers use open data and systems.
 
 ---
 
@@ -71,14 +71,15 @@
 ### Controls Audit
 
 All 57+ completed papers have:
-- **Digitized benchmarks** in `control/*/benchmark_*.json` (56 benchmark JSONs)
+- **Digitized benchmarks** in `control/*/benchmark_*.json` (56 benchmark JSONs, 56 control directories)
 - **Python control scripts** that validate against benchmarks (1237/1237 Python checks)
-- **Rust validation binaries** (78 barracuda + 4 forge = 82 binaries) that load the same benchmarks
+- **Rust validation binaries** (79 barracuda + 4 forge = 83 binaries) that load the same benchmarks
 - **Open or published data** (no institutional access required)
 - **Cross-validation** (75/75 Python↔Rust match at 1e-5; 690 crop-station yield pairs within 0.01; PT↔PM cross-validated)
-- **GPU wiring**: 25 Tier A modules (ops 0-13, kriging, reduce, stream, richards, isotherm, mc_et0, jackknife, bootstrap, diversity, stats, correction)
+- **GPU wiring**: 25 Tier A modules (ops 0-13, kriging, reduce, stream, richards, isotherm, mc_et0, jackknife, bootstrap, diversity, stats, correction) + `BrentGpu` (VG inverse) + `RichardsGpu` (Picard)
 - **CPU benchmarks**: 10M ET₀/s, 36.5M VG θ/s, 1.9B Kc/s, 57M Langmuir fits/s, 13,000× Rust-vs-Python (atlas-scale)
-- **GPU pipeline**: Multi-field GPU WB Stage 3 (57/57), CPU↔GPU parity (46/46), 19.7× dispatch reduction
+- **GPU pipeline**: Multi-field GPU WB Stage 3 (57/57), CPU↔GPU parity (46/46), 19.7× dispatch reduction, cross-spring rewire (68/68)
+- **Cross-spring provenance**: 138/138 benchmarks across 5 springs (ToadStool S86 sync)
 
 ### Compute Pipeline Per Paper
 

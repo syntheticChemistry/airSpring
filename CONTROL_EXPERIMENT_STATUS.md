@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-03-02 (v0.6.4 — 72 experiments, 1237 Python + 813 lib + 57 forge tests, 78 barracuda + 4 forge = 82 binaries, **13,000× Rust-vs-Python atlas-scale speedup** (34/34 CPU parity benchmark), **GPU streaming multi-field** (57/57 PASS, 6.8M field-days/s), **pure GPU end-to-end** (46/46 PASS, 19.7× dispatch reduction), **mixed-hardware pipeline** (66/66 PASS, 7-stage seasonal), **GPU Stages 1-3** (WB via `gpu_step`), 124/124 cross-spring benchmarks, NUCLEUS mesh routing, Paper 12 immunological Anderson (Exp 066-069))
+**Updated**: 2026-03-02 (v0.6.8 — 76 experiments, 1237 Python + 846 lib + 67 forge tests, 85 binaries, **local GPU evolution** (6 WGSL shaders, f32 compute dispatch, CPU/GPU parity validated), **NUCLEUS full-pipeline routing** (60/60 PASS, 27 workloads, PCIe P2P bypass), **cross-spring rewire** (68/68 PASS, `BrentGpu` VG inverse + `RichardsGpu` Picard, 5/5 springs), **13,000× Rust-vs-Python atlas-scale speedup** (34/34 CPU parity benchmark), **GPU streaming multi-field** (57/57 PASS, 6.8M field-days/s), **pure GPU end-to-end** (46/46 PASS, 19.7× dispatch reduction), **mixed-hardware pipeline** (66/66 PASS, 7-stage seasonal), **GPU Stages 1-3** (WB via `gpu_step`), 138/138 cross-spring benchmarks, NUCLEUS mesh routing, Paper 12 immunological Anderson (Exp 066-069))
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 

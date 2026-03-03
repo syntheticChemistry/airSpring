@@ -2,7 +2,7 @@
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 
-**Last updated**: 2026-02-28 (v0.5.6, ToadStool S68+ `e96576ee`)
+**Last updated**: 2026-03-02 (v0.6.8, ToadStool S86)
 **Sources**: `EVOLUTION_READINESS.md`, `gpu/evolution_gaps.rs`, `BARRACUDA_REQUIREMENTS.md`
 
 ---
@@ -11,7 +11,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 | Tier | Definition |
 |------|------------|
-| **A** | GPU-integrated — primitive wired, validated, GPU-first (or GPU N≥1024) |
+| **A** | GPU-integrated — ToadStool f64 primitive wired, validated, GPU-first (or GPU N≥1024) |
+| **A-local** | GPU-local — airSpring `local_elementwise.wgsl` (f32), ToadStool f64 absorption pending |
 | **B** | Orchestrator with CPU fallback — ToadStool primitive exists but ops not yet absorbed |
 | **C** | CPU-only — needs new WGSL shader or is inherently serial/non-GPU |
 
@@ -23,18 +24,31 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 |--------|------|-------------|----------------|---------|
 | `gpu::et0` | **A** | `batched_elementwise_f64` (op=0) | FAO-56 PM ET₀ | — |
 | `gpu::water_balance` | **A** | `batched_elementwise_f64` (op=1) | Daily water balance | — |
+| `gpu::sensor_calibration` | **A** | `batched_elementwise_f64` (op=5) | SoilWatch VWC | — (S70+) |
+| `gpu::hargreaves` | **A** | `HargreavesBatchGpu` | Hargreaves ET₀ | — (S70+) |
+| `gpu::kc_climate` | **A** | `batched_elementwise_f64` (op=7) | Kc climate adjustment | — (S70+) |
+| `gpu::dual_kc` | **A** | `batched_elementwise_f64` (op=8) | Dual Kc (Ke batch) | — (S70+) |
+| `gpu::van_genuchten` | **A** | `batched_elementwise_f64` (op=9,10) | VG θ/K batch | — (S79) |
+| `gpu::thornthwaite` | **A** | `batched_elementwise_f64` (op=11) | Monthly ET₀ | — (S79) |
+| `gpu::gdd` | **A** | `batched_elementwise_f64` (op=12) | GDD batch | — (S79) |
+| `gpu::pedotransfer` | **A** | `batched_elementwise_f64` (op=13) | Saxton-Rawls | — (S79) |
 | `gpu::kriging` | **A** | `kriging_f64` | Spatial interpolation | — |
 | `gpu::reduce` | **A** | `fused_map_reduce_f64` | Seasonal stats (N≥1024) | — |
 | `gpu::stream` | **A** | `moving_window_f64` | IoT stream smoothing | — |
-| `gpu::richards` | **A** | `van_genuchten_f64` (θ/K eval) | Richards PDE | — |
-| `gpu::isotherm` | **A** | CPU `nelder_mead` | Isotherm fitting | `NelderMeadGpu` exists upstream but not batch-wired |
-| `gpu::sensor_calibration` | **B** | `batched_elementwise_f64` (op=5) | SoilWatch VWC | ToadStool op=5 absorption |
-| `gpu::hargreaves` | **B** | `batched_elementwise_f64` (op=6) | Hargreaves ET₀ | ToadStool op=6 absorption |
-| `gpu::kc_climate` | **B** | `batched_elementwise_f64` (op=7) | Kc climate adjustment | ToadStool op=7 absorption |
-| `gpu::dual_kc` | **B** | `batched_elementwise_f64` (op=8) | Dual Kc (Ke batch) | ToadStool op=8 absorption |
-| `gpu::mc_et0` | **B** | `mc_et0_propagate_f64` (exists) | MC uncertainty | GPU dispatch not wired |
-| `gpu::seasonal_pipeline` | **B** | Chained ops 0→7→1→yield | End-to-end season | CPU-chained; needs ops 5–8 absorbed |
-| `gpu::atlas_stream` | **B** | `UnidirectionalPipeline` (pending) | Regional atlas | Needs GPU streaming primitive |
+| `gpu::richards` | **A** | `pde_richards.wgsl` | Richards PDE | — |
+| `gpu::infiltration` | **A** | `brent_f64.wgsl` | Green-Ampt infiltration | — (S83) |
+| `gpu::isotherm` | **A** | `nelder_mead.wgsl` | Isotherm fitting | — |
+| `gpu::mc_et0` | **A** | `mc_et0_propagate_f64.wgsl` | MC uncertainty | — |
+| `gpu::jackknife` | **A** | `JackknifeMeanGpu` | Jackknife CI | — (S79) |
+| `gpu::bootstrap` | **A** | `BootstrapMeanGpu` | Bootstrap CI | — (S79) |
+| `gpu::diversity` | **A** | `DiversityFusionGpu` | Diversity indices | — (S79) |
+| `gpu::stats` | **A** | `linear_regression_f64` + `matrix_correlation_f64` | Sensor regression | — |
+| `gpu::runoff` | **A-local** | `local_elementwise.wgsl` (op=0) | SCS-CN runoff | ToadStool f64 absorption |
+| `gpu::yield_response` | **A-local** | `local_elementwise.wgsl` (op=1) | Stewart yield | ToadStool f64 absorption |
+| `gpu::simple_et0` | **A-local** | `local_elementwise.wgsl` (ops 2-5) | Makkink/Turc/Hamon/BC | ToadStool f64 absorption |
+| `gpu::local_dispatch` | — | `local_elementwise.wgsl` | wgpu dispatch engine | Infrastructure module |
+| `gpu::seasonal_pipeline` | **B** | Chained ops 0→7→1→yield | End-to-end season | Fused GPU pipeline |
+| `gpu::atlas_stream` | **B** | `UnidirectionalPipeline` (pending) | Regional atlas | GPU streaming primitive |
 | `gpu::device_info` | — | N/A | Precision probing | Documentation module |
 | `gpu::evolution_gaps` | — | N/A | Living roadmap | Documentation module |
 
@@ -45,22 +59,25 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 | Module | GPU Tier | GPU Wrapper | Blocker |
 |--------|----------|-------------|---------|
 | `eco::evapotranspiration` (PM) | **A** | `gpu::et0` | — |
-| `eco::evapotranspiration` (HG) | **B** | `gpu::hargreaves` | ToadStool op=6 |
+| `eco::evapotranspiration` (HG) | **A** | `gpu::hargreaves` | — |
+| `eco::evapotranspiration` (Makkink/Turc/Hamon/BC) | **A-local** | `gpu::simple_et0` | ToadStool f64 absorption |
 | `eco::water_balance` | **A** | `gpu::water_balance` | — |
 | `eco::richards` | **A** | `gpu::richards` | — |
-| `eco::van_genuchten` | **A** | via `gpu::richards` | — |
+| `eco::van_genuchten` | **A** | `gpu::van_genuchten` | — |
+| `eco::infiltration` | **A** | `gpu::infiltration` | — |
 | `eco::isotherm` | **A** | `gpu::isotherm` | — |
 | `eco::soil_moisture` | **A** | `gpu::kriging` | — |
 | `eco::correction` | **A** | CPU `linalg::ridge` | — (small N, no GPU benefit) |
-| `eco::diversity` | **A** | CPU `stats::diversity` | `DiversityFusionGpu` upstream, not wired |
-| `eco::sensor_calibration` | **B** | `gpu::sensor_calibration` | ToadStool op=5 |
-| `eco::dual_kc` | **B** | `gpu::dual_kc` | ToadStool op=8 |
-| `eco::crop` (Kc adj) | **B** | `gpu::kc_climate` | ToadStool op=7 |
+| `eco::diversity` | **A** | `gpu::diversity` | — |
+| `eco::sensor_calibration` | **A** | `gpu::sensor_calibration` | — |
+| `eco::dual_kc` | **A** | `gpu::dual_kc` | — |
+| `eco::crop` (Kc adj) | **A** | `gpu::kc_climate` | — |
+| `eco::thornthwaite` | **A** | `gpu::thornthwaite` | — |
+| `eco::crop` (GDD) | **A** | `gpu::gdd` | — |
+| `eco::runoff` | **A-local** | `gpu::runoff` | ToadStool f64 absorption |
+| `eco::yield_response` | **A-local** | `gpu::yield_response` | ToadStool f64 absorption |
 | `eco::anderson` | **C** | — | Needs new WGSL shader |
-| `eco::thornthwaite` | **C** | — | Monthly; low parallelism |
-| `eco::yield_response` | **C** | — | No batch primitive |
 | `eco::et0_ensemble` | **C** | — | CPU ensemble logic |
-| `eco::crop` (GDD) | **C** | — | Domain data; serial scan |
 | `eco::solar` | — | Used by ET₀ | Supporting module |
 
 ---
@@ -69,15 +86,17 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 | Shader | Location | Used By | Status |
 |--------|----------|---------|--------|
-| `batched_elementwise_f64.wgsl` | `shaders/science/` | et0, water_balance | Ops 0,1 wired; 5–8 pending |
+| `batched_elementwise_f64.wgsl` | `shaders/science/` | et0, water_balance, sensor_cal, HG, kc, dual_kc, VG, thornthwaite, gdd, pedotransfer | Ops 0-13 wired |
 | `kriging_f64.wgsl` | `shaders/interpolation/` | kriging | Wired |
 | `fused_map_reduce_f64.wgsl` | `shaders/reduce/` | reduce | Wired |
 | `moving_window_f64.wgsl` | `shaders/stats/` | stream | Wired |
-| `van_genuchten_f64.wgsl` | `shaders/science/` | richards | Wired (θ/K eval) |
-| `crank_nicolson_f64.wgsl` | `shaders/pde/` | richards (CN cross-val) | Available |
-| `mc_et0_propagate_f64.wgsl` | `shaders/bio/` | mc_et0 | Exists; dispatch not wired |
-| `bray_curtis_f64.wgsl` | `shaders/math/` | diversity (potential) | Available; not wired |
-| `diversity_fusion_f64.wgsl` | `shaders/bio/` | diversity (potential) | Available; not wired |
+| `pde_richards.wgsl` | `shaders/pde/` | richards | Wired |
+| `brent_f64.wgsl` | `shaders/optimize/` | infiltration (GA residual) | Wired (S83) |
+| `nelder_mead.wgsl` | `shaders/optimize/` | isotherm | Wired |
+| `mc_et0_propagate_f64.wgsl` | `shaders/bio/` | mc_et0 | Wired |
+| `linear_regression_f64.wgsl` | `shaders/stats/` | stats | Wired |
+| `matrix_correlation_f64.wgsl` | `shaders/stats/` | stats | Wired |
+| `local_elementwise.wgsl` | `barracuda/src/shaders/` | runoff, yield, simple_et0 | **Local** (airSpring f32, ToadStool f64 pending) |
 
 ---
 
@@ -85,11 +104,10 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 | Blocker | Modules | Resolution |
 |---------|---------|------------|
-| ToadStool ops 5–8 | sensor_cal, hargreaves, kc_climate, dual_kc | Add cases to `batched_elementwise_f64.wgsl` |
-| MC ET₀ GPU dispatch | mc_et0 | Wire existing `mc_et0_propagate_f64.wgsl` |
+| ToadStool f64 absorption of local ops | runoff, yield_response, simple_et0 (6 ops) | Absorb `local_elementwise.wgsl` into canonical f64 `batched_elementwise_f64.wgsl` ops 14-19 |
+| Fused GPU seasonal pipeline | seasonal_pipeline | Fuse ops 0→7→1→yield in single dispatch |
 | `UnidirectionalPipeline` | atlas_stream | Implement fire-and-forget GPU streaming |
 | Anderson shader | anderson | New WGSL for θ→S_e→d_eff→QS coupling |
-| `NelderMeadGpu` batch | isotherm | Wire upstream `NelderMeadGpu` for batch fitting |
 
 ---
 
@@ -97,6 +115,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 | Tier | Count | Evolution Path |
 |------|-------|----------------|
-| **A** | 11 | Ready for sovereign pipeline |
-| **B** | 9 | Blocked on ToadStool absorption → automatic A when resolved |
-| **C** | 5+ | Needs new shaders or architectural decision |
+| **A** | 21 | GPU-first via ToadStool f64 |
+| **A-local** | 6 | GPU-local f32 WGSL → ToadStool f64 absorption |
+| **B** | 2 | Pipeline/streaming GPU evolution |
+| **C** | 2 | Needs new shaders or architectural decision |

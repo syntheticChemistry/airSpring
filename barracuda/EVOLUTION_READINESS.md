@@ -1,8 +1,8 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: March 2, 2026 (v0.6.5 — 813 lib tests, 82 binaries, 72 experiments, 1237 Python, 30 NUCLEUS capabilities, 66/66 metalForge cross-system)
+**Last Updated**: March 2, 2026 (v0.6.8 — 846 lib tests, 85 binaries, 76 experiments, 1237 Python, 30 NUCLEUS capabilities, 67/67 metalForge cross-system, 6 local WGSL shaders)
 **ToadStool PIN**: S86 HEAD (`2fee1969` — 2,866 tests, 844 WGSL shaders, 144 `ComputeDispatch` ops, `BatchedStatefulF64`, `BrentGpu`, `RichardsGpu`, `nautilus`, `multi_gpu`)
-**Handoff**: V048 (S86 sync — Tier B→A promotions, `BatchedStatefulF64`, `BatchedNelderMeadGpu`, `BrentGpu`, `RichardsGpu`)
+**Handoff**: V050 (Full evolution handoff — 14 modules contributed, 25+ consumed, CPU→GPU→metalForge progression, lessons for ToadStool)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -57,7 +57,7 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 
 ## GPU Evolution Tiers
 
-### Tier A: Integrated (11 modules — GPU primitive wired, validated)
+### Tier A: Integrated (15 modules — GPU primitive wired or CPU batch ready)
 
 | airSpring Module | BarraCuda Primitive | Status |
 |-----------------|--------------------|----|
@@ -66,6 +66,10 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 | `gpu::kriging::KrigingInterpolator` | `ops::kriging_f64::KrigingF64` | **INTEGRATED** |
 | `gpu::reduce::SeasonalReducer` | `ops::fused_map_reduce_f64` | **GPU N≥1024** |
 | `gpu::stream::StreamSmoother` | `ops::moving_window_stats` | **WIRED** |
+| `gpu::infiltration` | `BrentGpu::solve_green_ampt()` (brent_f64.wgsl GA residual) | **WIRED** (S83) |
+| `gpu::runoff` | Batched SCS-CN (CPU-vectorised, ToadStool op pending) | **CPU batch** |
+| `gpu::yield_response` | Batched Stewart (CPU-vectorised, ToadStool op pending) | **CPU batch** |
+| `gpu::simple_et0` | Batched Makkink/Turc/Hamon/Blaney-Criddle (CPU-vectorised, ToadStool ops pending) | **CPU batch** |
 | `eco::correction::fit_ridge` | `linalg::ridge::ridge_regression` | **WIRED** |
 | `gpu::richards::BatchedRichards` | `pde::richards::solve_richards` | **WIRED** (+ CN f64 cross-val) |
 | `gpu::isotherm::fit_*_nm/global` | `optimize::nelder_mead` + `multi_start` | **WIRED** |

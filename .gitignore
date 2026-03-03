@@ -44,6 +44,9 @@ lcov.info
 *.profraw
 *.profdata
 
+# pytest
+.pytest_cache/
+
 # Secrets
 .env
 credentials*

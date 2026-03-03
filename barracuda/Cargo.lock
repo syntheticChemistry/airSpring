@@ -19,17 +19,19 @@ dependencies = [
 
 [[package]]
 name = "airspring-barracuda"
-version = "0.6.5"
+version = "0.6.8"
 dependencies = [
  "akida-driver",
  "barracuda",
  "bingocube-nautilus",
+ "bytemuck",
  "proptest",
  "serde",
  "serde_json",
  "serial_test",
  "tracing-subscriber",
  "ureq",
+ "wgpu",
 ]
 
 [[package]]

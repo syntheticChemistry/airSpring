@@ -1,7 +1,7 @@
 # airSpring — biomeOS Capability Registration
 
-**Updated**: March 1, 2026
-**Status**: Active — ecology domain registered, 30 capabilities implemented (v0.6.0)
+**Updated**: March 2, 2026
+**Status**: Active — ecology domain registered, 30 capabilities implemented (v0.6.8)
 **Requires**: biomeOS Tower Node (stable), ToadStool (compute), NestGate (storage)
 
 ---

@@ -2,6 +2,74 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.6.8] - 2026-03-02
+
+### Local GPU Compute Evolution + NUCLEUS Full-Pipeline Routing
+
+- **Local GPU evolution**: 6 WGSL compute shaders (`local_elementwise.wgsl`) for
+  SCS-CN runoff, Stewart yield, Makkink/Turc/Hamon/Blaney-Criddle ET₀ —
+  f32 GPU dispatch via `gpu::local_dispatch::LocalElementwise`, pending ToadStool
+  absorption to f64 via `compile_shader_universal`
+- **`gpu::local_dispatch`**: New module — minimal wgpu compute pipeline for
+  airSpring-evolved shaders. Compiles WGSL once, reuses pipeline for batched dispatch
+- **GPU-wired modules**: `gpu::runoff`, `gpu::yield_response`, `gpu::simple_et0`
+  upgraded from CPU-vectorised to GPU-local with `GpuRunoff`, `GpuYieldResponse`,
+  `GpuSimpleEt0` structs
+- **Exp 075** (`validate_local_gpu`): CPU vs GPU parity for all 6 local ops —
+  ALL PASS with f32 precision (max |Δ| < 0.002 mm)
+- **Exp 076** (`validate_nucleus_routing`): 60/60 PASS — 27 workloads through
+  NUCLEUS mesh (Tower/Node/Nest), PCIe P2P bypass, 7-stage mixed-hardware pipeline,
+  multi-node cross-hop routing
+- **metalForge workloads**: 21 → 27 (6 new `ShaderOrigin::Local`)
+- 846 lib tests (↑13), 85 binaries (↑1), 76 experiments (↑2)
+- GPU coverage: 86% of 28 domains (24/28 GPU, 4 CPU-only)
+- metalForge: 61 → 67 forge tests (66 pipeline + 1 doc)
+
+## [0.6.7] - 2026-03-02
+
+### Four New GPU Orchestrator Modules + Paper Chain Validation
+
+- **4 new GPU orchestrator modules**:
+  - `gpu::infiltration` — GPU Green-Ampt via `BrentGpu::solve_green_ampt()` (brent_f64.wgsl GA residual, S83)
+  - `gpu::runoff` — Batched SCS-CN runoff (CPU-vectorised, ToadStool op pending)
+  - `gpu::yield_response` — Batched Stewart yield response (CPU-vectorised, ToadStool op pending)
+  - `gpu::simple_et0` — Batched Makkink/Turc/Hamon/Blaney-Criddle (CPU-vectorised, ToadStool ops pending)
+- **Exp 074** (`validate_paper_chain`): 79/79 PASS — validates full CPU→GPU→metalForge chain for 28 domains (22 GPU, 6 CPU-only)
+- 833 lib tests (↑18), 84 binaries (↑1), 74 experiments (↑1)
+- Green-Ampt GPU parity: max error 1.4e-6 cm vs CPU
+- SCS-CN batch: 963M events/s, Yield batch: 547M fields/s
+- GPU coverage: 79% of 28 domains (22/28 GPU, 6 CPU-only awaiting ToadStool ops 14-17)
+
+## [0.6.6] - 2026-03-02
+
+### Cross-Spring Rewire: BrentGpu, RichardsGpu, Provenance Validation
+
+Complete rewiring of airSpring to use modern ToadStool S86 GPU primitives:
+
+- **BrentGpu** wired into `gpu::van_genuchten::compute_inverse_gpu` for batched
+  Van Genuchten inverse θ→h on GPU (hotSpring f64 precision math).
+- **RichardsGpu** wired into `gpu::richards::solve_gpu` for GPU Picard+CN+Thomas
+  Richards PDE (hotSpring precision + neuralSpring tridiagonal solver).
+- **Exp 073** (`validate_cross_spring_rewire`): 68/68 PASS — validates all 5 springs'
+  contributions, benchmarks GPU vs CPU, documents full shader provenance tree.
+- 815 lib tests (↑2), 83 binaries (↑1), 0 clippy warnings.
+- Cross-spring provenance: hotSpring (erf, gamma, anderson_4d), wetSpring (Shannon),
+  neuralSpring (Brent, L-BFGS), groundSpring (bootstrap CI), airSpring (FAO-56 PM ET₀).
+
+### Documentation Cleanup & ToadStool Evolution Handoff
+
+- Root docs: Fixed stale footer (v0.6.3→v0.6.6), directory section (810→815 tests,
+  58→61 forge, 79→83 binaries, S79→S86, V046→V050), Document Index.
+- specs/README.md: Full refresh — all phases current, canonical metrics.
+- specs/PAPER_REVIEW_QUEUE.md: Updated to 73 experiments, 815 lib, 83 binaries,
+  138/138 cross-spring, 68/68 rewire, ToadStool S86, V050 handoff.
+- experiments/README.md: Grand Total and Test Breakdown updated (v0.6.6).
+- whitePaper/baseCamp/README.md: v0.6.6 metrics, cross-spring rewire noted.
+- ecoPrimals/whitePaper/gen3/baseCamp: v0.6.6 immediate section, medium-term updated.
+- V050 handoff: Comprehensive ToadStool evolution handoff — 14 modules contributed,
+  25+ consumed, lessons learned, CPU→GPU→metalForge progression, pending papers.
+- All stale version references updated across 12+ files.
+
 ## [0.6.5] - 2026-03-02
 
 ### ToadStool S86 Sync + Tier B→A Promotions + Cross-Spring Benchmark

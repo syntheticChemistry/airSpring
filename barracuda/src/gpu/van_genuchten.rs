@@ -1,9 +1,16 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! GPU-accelerated van Genuchten hydraulics — θ(h) and K(h) batch computation.
+//! GPU-accelerated van Genuchten hydraulics — θ(h), K(h), and θ→h inverse.
 //!
-//! Wraps `BatchedElementwiseF64` ops 9 (`VanGenuchtenTheta`) and 10 (`VanGenuchtenK`)
-//! from `ToadStool` S79. CPU reference implementations available at
-//! `barracuda::ops::batched_elementwise_f64::{van_genuchten_theta_cpu, van_genuchten_k_cpu}`.
+//! Forward: `BatchedElementwiseF64` ops 9/10 (`ToadStool` S79).
+//! Inverse: `BrentGpu::solve_vg_inverse` (`ToadStool` S83, `brent_f64.wgsl`).
+//!
+//! # Cross-Spring Provenance
+//!
+//! | Primitive | Origin | Shader |
+//! |-----------|--------|--------|
+//! | θ(h) op=9 | airSpring V039 → S76 | `batched_elementwise_f64.wgsl` |
+//! | K(h) op=10 | airSpring V039 → S76 | `batched_elementwise_f64.wgsl` |
+//! | θ→h inverse | airSpring V045 → S83 | `brent_f64.wgsl` (hotSpring precision math) |
 
 use std::sync::Arc;
 
@@ -11,6 +18,7 @@ use barracuda::device::WgpuDevice;
 use barracuda::ops::batched_elementwise_f64::{
     van_genuchten_k_cpu, van_genuchten_theta_cpu, BatchedElementwiseF64, Op,
 };
+use barracuda::optimize::brent_gpu::BrentGpu;
 
 #[cfg(test)]
 use super::device_info::try_f64_device;
@@ -93,6 +101,46 @@ impl BatchedVanGenuchten {
         Ok(self
             .engine
             .execute(&packed, h_values.len(), Op::VanGenuchtenK)?)
+    }
+
+    /// Batch compute inverse θ→h for N target moisture values using GPU Brent root-finding.
+    ///
+    /// Uses `BrentGpu::solve_vg_inverse` (S83, `brent_f64.wgsl`) — hotSpring precision
+    /// math (`pow_f64`, `exp_f64`) applied to airSpring soil hydraulics.
+    ///
+    /// Returns `None` roots as `f64::NAN` for targets outside [θr, θs].
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if GPU Brent dispatch fails.
+    #[allow(clippy::too_many_arguments)]
+    pub fn compute_inverse_gpu(
+        &self,
+        theta_r: f64,
+        theta_s: f64,
+        alpha: f64,
+        n_vg: f64,
+        theta_targets: &[f64],
+    ) -> crate::error::Result<Vec<f64>> {
+        if theta_targets.is_empty() {
+            return Ok(Vec::new());
+        }
+
+        let brent = BrentGpu::new(Arc::clone(&self.device), 100, 1e-10)?;
+
+        let lower = vec![-1e6; theta_targets.len()];
+        let upper = vec![-1e-6; theta_targets.len()];
+
+        let result = brent.solve_vg_inverse(
+            &lower,
+            &upper,
+            theta_targets,
+            theta_r,
+            theta_s,
+            alpha,
+            n_vg,
+        )?;
+        Ok(result.roots)
     }
 
     fn pack_theta_input(
@@ -223,6 +271,33 @@ mod tests {
         assert_eq!(gpu.len(), cpu.len());
         for (g, c) in gpu.iter().zip(&cpu) {
             assert!((g - c).abs() < 0.1, "GPU K={g:.6} vs CPU K={c:.6}");
+        }
+    }
+
+    #[test]
+    fn test_gpu_inverse_matches_cpu() {
+        let Some(device) = try_device() else {
+            eprintln!("SKIP: No GPU device for BatchedVanGenuchten inverse");
+            return;
+        };
+        let vg = BatchedVanGenuchten::gpu(device).unwrap();
+        let theta_r = 0.065;
+        let theta_s = 0.41;
+        let alpha = 0.075;
+        let n = 1.89;
+
+        let h_values = [-500.0, -100.0, -50.0, -10.0, -1.0];
+        let theta_targets = compute_theta_cpu(theta_r, theta_s, alpha, n, &h_values);
+
+        let gpu_h = vg
+            .compute_inverse_gpu(theta_r, theta_s, alpha, n, &theta_targets)
+            .unwrap();
+        assert_eq!(gpu_h.len(), h_values.len());
+        for (i, (&got, &expected)) in gpu_h.iter().zip(h_values.iter()).enumerate() {
+            assert!(
+                (got - expected).abs() < 1.0,
+                "GPU inverse h[{i}]={got:.2} vs expected={expected:.2}"
+            );
         }
     }
 

@@ -357,6 +357,86 @@ pub fn ad_flare_classifier() -> EcoWorkload {
     w
 }
 
+// ── Local WGSL shaders (pending ToadStool absorption) ───────────────
+
+/// SCS-CN runoff batch — element-wise Q from (P, CN, Ia ratio).
+///
+/// Local f32 WGSL shader. Becomes `BatchedElementwiseF64` op=14 on absorption.
+#[must_use]
+pub fn scs_cn_batch() -> EcoWorkload {
+    EcoWorkload::new_static(ShaderOrigin::Local)
+        .named(
+            "scs_cn_batch",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        )
+        .with_primitive("LocalElementwise_op0")
+}
+
+/// Stewart yield response batch — element-wise Ya/Ymax from (Ky, `ETa/ETc`).
+///
+/// Local f32 WGSL shader. Becomes `BatchedElementwiseF64` op=15 on absorption.
+#[must_use]
+pub fn stewart_yield_batch() -> EcoWorkload {
+    EcoWorkload::new_static(ShaderOrigin::Local)
+        .named(
+            "stewart_yield_batch",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        )
+        .with_primitive("LocalElementwise_op1")
+}
+
+/// Makkink ET₀ batch — radiation-based ET₀ from (T, Rs, elev).
+///
+/// Local f32 WGSL shader. Becomes `BatchedElementwiseF64` op=16 on absorption.
+#[must_use]
+pub fn makkink_et0_batch() -> EcoWorkload {
+    EcoWorkload::new_static(ShaderOrigin::Local)
+        .named(
+            "makkink_et0_batch",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        )
+        .with_primitive("LocalElementwise_op2")
+}
+
+/// Turc ET₀ batch — temp-radiation-humidity from (T, Rs, RH).
+///
+/// Local f32 WGSL shader. Becomes `BatchedElementwiseF64` op=17 on absorption.
+#[must_use]
+pub fn turc_et0_batch() -> EcoWorkload {
+    EcoWorkload::new_static(ShaderOrigin::Local)
+        .named(
+            "turc_et0_batch",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        )
+        .with_primitive("LocalElementwise_op3")
+}
+
+/// Hamon PET batch — temperature-only PET from (T, lat, DOY).
+///
+/// Local f32 WGSL shader. Becomes `BatchedElementwiseF64` op=18 on absorption.
+#[must_use]
+pub fn hamon_pet_batch() -> EcoWorkload {
+    EcoWorkload::new_static(ShaderOrigin::Local)
+        .named(
+            "hamon_pet_batch",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        )
+        .with_primitive("LocalElementwise_op4")
+}
+
+/// Blaney-Criddle ET₀ batch — daylight-based ET₀ from (T, lat, DOY).
+///
+/// Local f32 WGSL shader. Becomes `BatchedElementwiseF64` op=19 on absorption.
+#[must_use]
+pub fn blaney_criddle_et0_batch() -> EcoWorkload {
+    EcoWorkload::new_static(ShaderOrigin::Local)
+        .named(
+            "blaney_criddle_et0_batch",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        )
+        .with_primitive("LocalElementwise_op5")
+}
+
 // ── CPU-only domains ────────────────────────────────────────────────
 
 /// Validation harness — CPU sequential checks.
@@ -402,6 +482,13 @@ pub fn all_workloads() -> Vec<EcoWorkload> {
         tissue_diversity(),
         cytokine_brain(),
         ad_flare_classifier(),
+        // Local WGSL shaders (pending ToadStool absorption)
+        scs_cn_batch(),
+        stewart_yield_batch(),
+        makkink_et0_batch(),
+        turc_et0_batch(),
+        hamon_pet_batch(),
+        blaney_criddle_et0_batch(),
         // CPU-only
         validation_harness(),
         weather_ingest(),
@@ -427,14 +514,14 @@ mod tests {
     #[test]
     fn all_workloads_has_entries() {
         let all = all_workloads();
-        assert_eq!(all.len(), 21, "21 eco workloads");
+        assert_eq!(all.len(), 27, "27 eco workloads (21 + 6 local WGSL)");
     }
 
     #[test]
     fn origin_counts_match() {
         let (absorbed, local, npu_native, cpu_only) = origin_summary();
         assert_eq!(absorbed, 14, "14 absorbed GPU domains (9 original + 4 S70+ ops + tissue)");
-        assert_eq!(local, 0, "0 local WGSL extensions (all absorbed)");
+        assert_eq!(local, 6, "6 local WGSL shaders (SCS-CN, Stewart, Makkink, Turc, Hamon, BC)");
         assert_eq!(npu_native, 4, "4 NPU-native classifiers");
         assert_eq!(cpu_only, 3, "3 CPU-only domains");
     }

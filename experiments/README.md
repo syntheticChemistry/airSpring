@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: March 2, 2026
-**Status**: 72 experiments, 1306/1306 Python + 813 lib + 57 forge tests + 82 binaries + **138/138 cross-spring evolution benchmark (ToadStool S86 synced)** + Paper 12 immunological Anderson (Exp 066-069) + 66/66 metalForge cross-system (21 workloads) + GPU streaming multi-field (57/57) + CPU parity (34/34) + pure GPU end-to-end (46/46) + **Rust 13,000× faster than Python (atlas-scale)** + Tier B→A: `BatchedStatefulF64` (WB), `BatchedNelderMeadGpu` (isotherm)
+**Status**: 76 experiments, 1237/1237 Python + 846 lib + 61 forge tests + 85 binaries + **138/138 cross-spring evolution benchmark (ToadStool S86 synced)** + Paper 12 immunological Anderson (Exp 066-069) + 66/66 metalForge cross-system (27 workloads) + GPU streaming multi-field (57/57) + CPU parity (34/34) + pure GPU end-to-end (46/46) + **cross-spring rewire (68/68)** + **paper chain validation (79/79)** + **local GPU parity (Exp 075: 6 ops)** + **NUCLEUS routing (Exp 076: 60/60)** + **Rust 13,000× faster than Python (atlas-scale)** + Tier B→A: `BatchedStatefulF64` (WB), `BatchedNelderMeadGpu` (isotherm)
 
 ---
 
@@ -81,20 +81,24 @@
 | 070 | GPU Streaming Multi-Field Pipeline | GPU Pipeline | **Complete** | Rust CPU + GPU | `SeasonalPipeline::run_multi_field()` — M fields × N days, Stage 3 `gpu_step()`, 6.8M field-days/s | 57 |
 | 071 | CPU Parity & Speedup Benchmark | CPU Parity | **Complete** | Rust CPU | All 9 domains (ET₀, HG, PT, WB, Kc, Yield, Diversity, Seasonal, Atlas), 10M ET₀/s, 13K× Python | 34 |
 | 072 | Pure GPU End-to-End Multi-Field | Pure GPU | **Complete** | Rust CPU + GPU | All 4 stages on GPU, CPU↔GPU parity, 19.7× dispatch reduction, scaling 1→50 fields | 46 |
+| 073 | Cross-Spring Evolution Rewire | GPU Rewire | **Complete** | Rust CPU + GPU | `BrentGpu` VG inverse, `RichardsGpu` Picard, `StatefulPipeline`, hydrology parity, 5-spring provenance, benchmarks | 68 |
+| 074 | Paper Chain Validation | Integration | **Complete** | Rust CPU + GPU | Full CPU→GPU→metalForge chain for 28 domains (22 GPU, 6 CPU-only), `validate_paper_chain` binary | 79 |
+| 075 | Local GPU Parity Validation | GPU Local | **Complete** | Rust CPU + GPU (wgpu) | 6 local WGSL ops (SCS-CN, Stewart, Makkink, Turc, Hamon, BC), f32 GPU vs f64 CPU parity, batch scaling, edge cases | ALL |
+| 076 | NUCLEUS Mixed-Hardware Routing | metalForge | **Complete** | Rust (forge) | 27 workloads, NUCLEUS mesh routing, PCIe P2P bypass, 7-stage pipeline, Tower/Node/Nest atomics, multi-node cross-hop | 60 |
 
-**Grand Total**: 1237 Python + **813 lib + 57 forge tests** + 1498/1498 atlas + 33/33 cross-validation + 25 Tier A + 3 pipeline GPU orchestrators + seasonal pipeline GPU Stages 1-3 + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge (5 substrates, 21 workloads, 66/66 cross-system) + GPU math portability (46/46) + GPU streaming multi-field (57/57) + CPU parity benchmark (34/34) + pure GPU end-to-end (46/46) + NCBI 16S coupling (14+29) + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34) + Exp 058 Climate Scenario (46/46) + NUCLEUS primal (29/29 + 28/28) + atlas decade (102/102) + NASS real (99/99) + NCBI diversity (63/63) + Paper 12 immunological Anderson (Exp 066-069) + 82 binaries + 124/124 cross-spring benchmarks (6 Springs) + ToadStool S79 synced + 21/21 CPU parity
+**Grand Total**: 1237 Python + **846 lib + 61 forge tests** + 1498/1498 atlas + 33/33 cross-validation + 25 Tier A + 6 GPU-local + 4 GPU orchestrators (infiltration, runoff, yield_response, simple_et0) + `BrentGpu` + `RichardsGpu` + 3 pipeline GPU orchestrators + seasonal pipeline GPU Stages 1-3 + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge (5 substrates, 27 workloads, 66/66 cross-system) + GPU math portability (46/46) + GPU streaming multi-field (57/57) + CPU parity benchmark (34/34) + pure GPU end-to-end (46/46) + cross-spring rewire (68/68, 5 springs) + paper chain validation (79/79, 28 domains) + local GPU parity (Exp 075, 6 ops) + NUCLEUS routing (Exp 076, 60/60) + NCBI 16S coupling (14+29) + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34) + Exp 058 Climate Scenario (46/46) + NUCLEUS primal (29/29 + 28/28) + atlas decade (102/102) + NASS real (99/99) + NCBI diversity (63/63) + Paper 12 immunological Anderson (Exp 066-069) + 85 binaries + 138/138 cross-spring benchmarks (6 Springs) + ToadStool S86 synced + 13,000× Rust-vs-Python speedup
 
 ---
 
-## Test Breakdown (v0.6.3)
+## Test Breakdown (v0.6.8)
 
 | Category | Tests | Source |
 |----------|:-----:|--------|
-| Barracuda lib (unit + doc) | 810 | `cargo test --lib` (incl. nautilus, rpc, biomeos, cytokine, tissue, property tests, all GPU orchestrators, streaming, Anderson, diversity) |
-| Barracuda validation binaries | 79 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
-| Forge | 57 | `metalForge/forge/` (substrate, dispatch, probe, workloads, cross-system routing) |
-| Forge binaries | 4 | `validate_dispatch`, `validate_live_hardware`, `validate_dispatch_routing` |
-| **Total project tests** | **810 lib + 57 forge** | |
+| Barracuda lib (unit + doc) | 846 | `cargo test --lib` (incl. nautilus, rpc, biomeos, cytokine, tissue, property tests, all GPU orchestrators, BrentGpu, RichardsGpu, streaming, Anderson, diversity, infiltration, runoff, yield_response, simple_et0, local_dispatch) |
+| Barracuda validation binaries | 85 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
+| Forge | 61 | `metalForge/forge/` (substrate, dispatch, probe, workloads, cross-system routing) |
+| Forge binaries | 5 | `validate_dispatch`, `validate_live_hardware`, `validate_dispatch_routing`, `validate_mixed_pipeline`, `validate_nucleus_routing` |
+| **Total project tests** | **846 lib + 61 forge** | |
 | Line coverage | 95.66% | `cargo llvm-cov --lib --fail-under-lines 90` |
 | Atlas stream (real data) | 73 | `validate_atlas_stream` (12 stations, 4800 crop-year results) |
 | Atlas checks | 1393 | `validate_atlas` (100 stations × 13 checks each) |
@@ -378,6 +382,9 @@ Experiments follow `NNN_name` format:
 - `052`: Coupled runoff-infiltration (SCS-CN + Green-Ampt)
 - `053`: Van Genuchten inverse parameter estimation
 - `054`: Full-season irrigation water budget audit
+- `055`–`074`: GPU live, mixed-hardware, NUCLEUS, paper chain, streaming, cross-spring rewire
+- `075`: Local GPU parity validation (6 ops via `local_elementwise.wgsl`)
+- `076`: NUCLEUS mixed-hardware routing (27 workloads, mesh routing, PCIe bypass)
 
 Gap (013) reserved. See `specs/PAPER_REVIEW_QUEUE.md`.
 
