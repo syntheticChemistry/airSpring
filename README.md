@@ -19,7 +19,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,237/1,237 PASS** | 57 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **846 lib + 1498 atlas** | 85 binaries + 138/138 cross-spring benchmarks |
+| Phase 1: Rust validation | **846 lib + 1498 atlas** | 86 binaries + 138/138 cross-spring benchmarks |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (34/34 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -215,7 +215,7 @@ airSpring/
 │   ├── vg_inverse/              # Van Genuchten inverse fitting (84/84)
 │   ├── season_water_budget/     # Full-season irrigation WB (34/34)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (846 lib tests, 85 binaries)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (846 lib tests, 86 binaries)
 │   ├── src/
 │   │   ├── biomeos.rs           # biomeOS socket resolution + primal discovery (shared)
 │   │   ├── eco/                 # Domain modules (19 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine)
@@ -230,12 +230,12 @@ airSpring/
 │   ├── deploy/                  # biomeOS deployment graphs (airspring_deploy.toml)
 │   └── forge/                   # airspring-forge (61 tests, 5 binaries, live hardware probe)
 ├── specs/                       # Specifications and requirements
-│   ├── PAPER_REVIEW_QUEUE.md    # Paper reproduction queue (76 experiments)
+│   ├── PAPER_REVIEW_QUEUE.md    # Paper reproduction queue (77 experiments)
 │   ├── BARRACUDA_REQUIREMENTS.md# GPU + NPU kernel requirements
 │   └── CROSS_SPRING_EVOLUTION.md # Cross-spring shader provenance (S87)
 ├── whitePaper/                  # Methodology and study documentation
 │   └── baseCamp/                # Per-faculty research briefings + baseCamp extensions
-├── experiments/                 # Experiment protocols and results (76 experiments)
+├── experiments/                 # Experiment protocols and results (77 experiments)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
 │   └── handoffs/                # Versioned + roadmap (V051 active)
 ├── graphs/                      # biomeOS deployment graphs (TOML)
@@ -262,12 +262,12 @@ airSpring/
 | Document | Purpose |
 |----------|---------|
 | `CHANGELOG.md` | Versioned change history |
-| `CONTROL_EXPERIMENT_STATUS.md` | Detailed experiment results (76 experiments) |
+| `CONTROL_EXPERIMENT_STATUS.md` | Detailed experiment results (77 experiments) |
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C GPU evolution, absorbed/stays-local |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66), 27 workloads |
 | `metalForge/forge/` | Mixed hardware dispatch: live probe + capability routing |
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance (S87) |
-| `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (76 experiments) |
+| `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (77 experiments) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
 | `wateringHole/handoffs/` | ToadStool/BarraCuda/NUCLEUS handoffs (V051 active) |
 
@@ -277,8 +277,8 @@ AGPL-3.0-or-later
 
 ---
 
-*March 2, 2026 — v0.6.8. 76 experiments, 1237/1237 Python, 846 lib + 61 forge tests,
-85 binaries (80 barracuda + 5 forge), 138/138 cross-spring evolution benchmarks (S87 sync),
+*March 2, 2026 — v0.6.8. 77 experiments, 1237/1237 Python, 846 lib + 61 forge tests,
+86 binaries (80 barracuda + 5 forge), 138/138 cross-spring evolution benchmarks (S87 sync),
 68/68 cross-spring rewire (BrentGpu VG inverse + RichardsGpu Picard, 5/5 springs),
 13,000× Rust-vs-Python atlas-scale speedup, 15,300 station-days, 1498/1498 atlas checks.
 NUCLEUS primal (30 capabilities), ecology domain in biomeOS registry.

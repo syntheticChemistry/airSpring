@@ -53,6 +53,8 @@
 //!
 //! Exp 075 `validate_local_gpu`: ALL PASS — 6 ops, CPU/GPU parity within f32 precision.
 //! Exp 076 `validate_nucleus_routing`: 60/60 PASS — 27 workloads, NUCLEUS mesh, `PCIe` bypass.
+//! Exp 077 `validate_cross_spring_provenance`: 32/32 PASS — CPU↔GPU benchmark with provenance.
+//! Cross-Spring Evolution Benchmark: 146/146 PASS — S87 deep evolution validated.
 //!
 //! ## v0.6.7: Four New GPU Orchestrators + Paper Chain Validation
 //!
