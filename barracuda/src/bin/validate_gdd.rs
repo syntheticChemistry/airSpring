@@ -10,8 +10,7 @@
 //! `McMaster` GS, Wilhelm WW (1997) "Growing degree-days: one equation,
 //! two interpretations." Agricultural and Forest Meteorology, 87:291-300.
 //!
-//! script=`control/gdd/growing_degree_days.py`, commit=8c3953b, date=2026-02-27
-//! Run: `python3 control/gdd/growing_degree_days.py`
+//! Provenance: script=`control/gdd/growing_degree_days.py`, commit=8c3953b, date=2026-02-27
 
 use airspring_barracuda::eco::crop::{
     accumulated_gdd_avg, accumulated_gdd_clamp, gdd_avg, gdd_clamp, kc_from_gdd, CropType,

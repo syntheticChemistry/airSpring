@@ -117,7 +117,10 @@ pub fn compute_thornthwaite_cpu(inputs: &[ThornthwaiteInput]) -> Vec<f64> {
 }
 
 #[cfg(test)]
-#[allow(clippy::suboptimal_flops)]
+#[expect(
+    clippy::suboptimal_flops,
+    reason = "test code matches reference Thornthwaite formula term-by-term"
+)]
 mod tests {
     use super::*;
 

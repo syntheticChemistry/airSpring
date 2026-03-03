@@ -266,14 +266,15 @@ fn main() {
         v.check_abs("yield_parity", yield_val, expected_yield, 1e-10);
     }
 
-    // ── Phase 8: Cross-Primal Discovery ────────────────────────────
-    let primal_names_env = std::env::var("BIOMEOS_EXPECTED_PRIMALS")
-        .unwrap_or_else(|_| "beardog,songbird,squirrel,toadstool".to_string());
-    let primals: Vec<&str> = primal_names_env.split(',').map(str::trim).collect();
+    // ── Phase 8: Capability-Based Discovery ─────────────────────────
+    let expected_capabilities = std::env::var("BIOMEOS_EXPECTED_CAPABILITIES")
+        .unwrap_or_else(|_| "crypto.tls,mesh.discovery,compute.dispatch".to_string());
+    let caps: Vec<&str> = expected_capabilities.split(',').map(str::trim).collect();
     let discovered = biomeos::discover_all_primals();
-    for name in &primals {
-        let discoverable = discovered.iter().any(|d| d == name);
-        v.check_bool(&format!("primal_{name}_discoverable"), discoverable);
+    v.check_bool("ecosystem_has_primals", !discovered.is_empty());
+    for cap in &caps {
+        let provided = discovered.iter().any(|d| d.contains(cap));
+        v.check_bool(&format!("capability_{cap}_discoverable"), provided);
     }
 
     v.finish();

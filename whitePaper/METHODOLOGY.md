@@ -40,7 +40,7 @@ Re-implement the same computations in pure Rust using BarraCuda. Compare:
 - **Reproducibility**: Deterministic results
 - **GPU readiness**: Architecture suitable for ToadStool GPU acceleration
 - **Code quality**: Zero clippy pedantic and nursery warnings, proper error types, idiomatic Rust
-- **Binaries**: 79 binaries (74 barracuda + 5 forge)
+- **Binaries**: 86 binaries (81 barracuda + 5 forge)
 
 ### Phase 2: Cross-Validation (Python↔Rust)
 
@@ -169,17 +169,17 @@ All experiments run on a single consumer workstation:
 | IoT Pipeline | SoilWatch 10 + irrigation correct | — | CSV stats + calibration match | ≤1e-5 tolerance |
 | Water Balance | Mass balance < 0.001 mm | Savings per Dong (2024) | Mass balance match Python | ≤1e-5 tolerance |
 
-### Grand Total: 1237 Python + 810 Lib + 57 Forge Tests + 1498 Atlas + 15,300 Real Data Points
+### Grand Total: 1237 Python + 846 Lib + 62 Forge Tests + 1498 Atlas + 15,300 Real Data Points
 
 | Phase | Checks | Description |
 |-------|:------:|-------------|
 | Phase 0 (Python control) | 1237 | 54+ experiments: FAO-56, soil, IoT, water balance, dual Kc, cover crops, regional ET₀, Richards, biochar, 60yr WB, yield, CW2D, scheduling, lysimeter, sensitivity, PT ET₀, ET₀ intercomparison, Thornthwaite, GDD, pedotransfer, AmeriFlux, Hargreaves, diversity, Anderson coupling |
-| Phase 1 (Rust validation) | 79 binaries | All pass: same benchmarks validated in Rust |
-| Phase 1 (Rust tests) | 810 lib + 57 forge | lib + forge |
+| Phase 1 (Rust validation) | 86 binaries | All pass: same benchmarks validated in Rust |
+| Phase 1 (Rust tests) | 846 lib + 62 forge | lib + forge |
 | Phase 1 (Atlas validation) | 1498 | 100 Michigan stations |
 | Phase 1.5 (CPU benchmark) | 21/21 | Rust 14.5× faster than Python (geometric mean, 21/21 parity) |
 | Phase 2 (Cross-validation) | 75 + 690 | Python↔Rust identical (tol=1e-5); 690 crop-station yield pairs within 0.01 |
-| **Total** | **1237 + 810 + 57 + 1498 + 75** | **All pass** |
+| **Total** | **1237 + 846 + 62 + 1498 + 75** | **All pass** |
 | Phase 0+ (Real data) | 15,300 station-days | R²=0.967, 100 Michigan stations, zero synthetic |
 
 ---

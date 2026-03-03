@@ -50,16 +50,14 @@ use airspring_barracuda::eco::evapotranspiration::{self as et, DailyEt0Input, Et
 use airspring_barracuda::eco::richards::VanGenuchtenParams;
 use airspring_barracuda::eco::van_genuchten;
 use airspring_barracuda::gpu::richards::{BatchedRichards, RichardsRequest};
-use airspring_barracuda::gpu::van_genuchten::{BatchedVanGenuchten, compute_theta_cpu};
+use airspring_barracuda::gpu::van_genuchten::{compute_theta_cpu, BatchedVanGenuchten};
 use airspring_barracuda::validation;
 use barracuda::validation::ValidationHarness;
 
 fn try_gpu_device() -> Option<Arc<barracuda::device::WgpuDevice>> {
-    barracuda::device::test_pool::tokio_block_on(
-        barracuda::device::WgpuDevice::new_f64_capable(),
-    )
-    .ok()
-    .map(Arc::new)
+    barracuda::device::test_pool::tokio_block_on(barracuda::device::WgpuDevice::new_f64_capable())
+        .ok()
+        .map(Arc::new)
 }
 
 fn main() {
@@ -196,10 +194,7 @@ fn validate_richards_gpu(v: &mut ValidationHarness) {
     v.check_bool("GPU Richards (Picard) succeeds", gpu_result.is_ok());
 
     if let (Ok(cpu_r), Ok(gpu_r)) = (&cpu_result, &gpu_result) {
-        v.check_bool(
-            "GPU node count matches CPU",
-            gpu_r.h.len() == cpu_r.h.len(),
-        );
+        v.check_bool("GPU node count matches CPU", gpu_r.h.len() == cpu_r.h.len());
         v.check_bool(
             "GPU completed time steps > 0",
             gpu_r.time_steps_completed > 0,
@@ -216,9 +211,36 @@ fn validate_richards_gpu(v: &mut ValidationHarness) {
     }
 
     let soils = [
-        ("Sand", VanGenuchtenParams { theta_r: 0.045, theta_s: 0.43, alpha: 0.145, n_vg: 2.68, ks: 712.8 }),
-        ("SiltLoam", VanGenuchtenParams { theta_r: 0.067, theta_s: 0.45, alpha: 0.020, n_vg: 1.41, ks: 10.8 }),
-        ("Clay", VanGenuchtenParams { theta_r: 0.068, theta_s: 0.38, alpha: 0.008, n_vg: 1.09, ks: 4.8 }),
+        (
+            "Sand",
+            VanGenuchtenParams {
+                theta_r: 0.045,
+                theta_s: 0.43,
+                alpha: 0.145,
+                n_vg: 2.68,
+                ks: 712.8,
+            },
+        ),
+        (
+            "SiltLoam",
+            VanGenuchtenParams {
+                theta_r: 0.067,
+                theta_s: 0.45,
+                alpha: 0.020,
+                n_vg: 1.41,
+                ks: 10.8,
+            },
+        ),
+        (
+            "Clay",
+            VanGenuchtenParams {
+                theta_r: 0.068,
+                theta_s: 0.38,
+                alpha: 0.008,
+                n_vg: 1.09,
+                ks: 4.8,
+            },
+        ),
     ];
 
     for (name, params) in &soils {
@@ -234,10 +256,7 @@ fn validate_richards_gpu(v: &mut ValidationHarness) {
             dt_days: 0.005,
         };
         let result = BatchedRichards::solve_gpu(Arc::clone(&device), &req);
-        v.check_bool(
-            &format!("RichardsGpu {name}: dispatch OK"),
-            result.is_ok(),
-        );
+        v.check_bool(&format!("RichardsGpu {name}: dispatch OK"), result.is_ok());
     }
 
     println!("  RichardsGpu validation: {:.1?}", t0.elapsed());
@@ -251,12 +270,21 @@ fn validate_stateful_pipeline(v: &mut ValidationHarness) {
     let t0 = Instant::now();
 
     let wbs = barracuda::pipeline::WaterBalanceState::new(0.30, 0.0, 0.0);
-    v.check_abs("WaterBalanceState soil_moisture = 0.30", wbs.soil_moisture, 0.30, 1e-15);
-    v.check_abs("WaterBalanceState snow = 0.0", wbs.snow_water_eq, 0.0, 1e-15);
+    v.check_abs(
+        "WaterBalanceState soil_moisture = 0.30",
+        wbs.soil_moisture,
+        0.30,
+        1e-15,
+    );
+    v.check_abs(
+        "WaterBalanceState snow = 0.0",
+        wbs.snow_water_eq,
+        0.0,
+        1e-15,
+    );
 
-    let mut pipe = barracuda::pipeline::StatefulPipeline::<
-        barracuda::pipeline::WaterBalanceState,
-    >::new();
+    let mut pipe =
+        barracuda::pipeline::StatefulPipeline::<barracuda::pipeline::WaterBalanceState>::new();
     let out = pipe.run(&[1.0, 2.0, 3.0]);
     v.check_bool(
         "StatefulPipeline passthrough preserves input",
@@ -272,7 +300,15 @@ fn validate_stateful_pipeline(v: &mut ValidationHarness) {
     println!("  StatefulPipeline validation: {:.1?}", t0.elapsed());
 }
 
-fn make_et0_input(tmin: f64, tmax: f64, rs: f64, wind: f64, elev: f64, lat: f64, doy: u32) -> DailyEt0Input {
+fn make_et0_input(
+    tmin: f64,
+    tmax: f64,
+    rs: f64,
+    wind: f64,
+    elev: f64,
+    lat: f64,
+    doy: u32,
+) -> DailyEt0Input {
     let tmean = f64::midpoint(tmin, tmax);
     let ea = 0.6108 * (17.27 * tmean / (tmean + 237.3)).exp() * 0.70;
     DailyEt0Input {
@@ -308,19 +344,11 @@ fn validate_hydrology_cpu_gpu_parity(v: &mut ValidationHarness) {
     v.check_bool("local PM ET₀ > 0", local_result.et0 > 0.0);
 
     let hg_upstream = barracuda::stats::hydrology::hargreaves_et0(22.07, 21.5, 12.3);
-    v.check_bool(
-        "Hargreaves upstream returns Some",
-        hg_upstream.is_some(),
-    );
+    v.check_bool("Hargreaves upstream returns Some", hg_upstream.is_some());
 
     let hg_local = et::hargreaves_et0(12.3, 21.5, 22.07);
     if let Some(hg_up) = hg_upstream {
-        v.check_abs(
-            "Hargreaves local↔upstream parity",
-            hg_local,
-            hg_up,
-            0.5,
-        );
+        v.check_abs("Hargreaves local↔upstream parity", hg_local, hg_up, 0.5);
     }
 
     let theta = barracuda::stats::hydrology::soil_water_balance(0.30, 5.0, 0.0, 3.0, 0.45);
@@ -336,10 +364,7 @@ fn validate_hydrology_cpu_gpu_parity(v: &mut ValidationHarness) {
     );
 
     let th_et0 = barracuda::stats::hydrology::thornthwaite_et0(18.0, 50.0, 12.0, 30.0);
-    v.check_bool(
-        "Thornthwaite ET₀ returns Some",
-        th_et0.is_some(),
-    );
+    v.check_bool("Thornthwaite ET₀ returns Some", th_et0.is_some());
 
     let mk_et0 = barracuda::stats::hydrology::makkink_et0(18.0, 22.0);
     v.check_bool("Makkink ET₀ returns Some", mk_et0.is_some());
@@ -360,24 +385,36 @@ fn validate_cross_spring_provenance(v: &mut ValidationHarness) {
     let t0 = Instant::now();
 
     let erf_val = barracuda::math::erf(1.0);
-    v.check_abs("hotSpring: erf(1) precision", erf_val, 0.842_700_792_949_715, 1e-6);
+    v.check_abs(
+        "hotSpring: erf(1) precision",
+        erf_val,
+        0.842_700_792_949_715,
+        1e-6,
+    );
 
     let gamma_val = barracuda::math::gamma(5.0).expect("gamma(5) should not fail");
     v.check_abs("hotSpring: Γ(5) = 24", gamma_val, 24.0, 1e-4);
 
     let h = barracuda::spectral::anderson::anderson_4d(3, 1.0, 42);
-    v.check_bool(
-        "hotSpring S83: anderson_4d L=3 → 81 sites",
-        h.n == 81,
-    );
+    v.check_bool("hotSpring S83: anderson_4d L=3 → 81 sites", h.n == 81);
 
     let div = barracuda::stats::diversity::shannon(&[0.2, 0.2, 0.2, 0.2, 0.2]);
-    v.check_abs("wetSpring: Shannon uniform(5) ≈ ln(5)", div, 5.0_f64.ln(), 0.01);
+    v.check_abs(
+        "wetSpring: Shannon uniform(5) ≈ ln(5)",
+        div,
+        5.0_f64.ln(),
+        0.01,
+    );
 
     let brent_result = barracuda::optimize::brent(|x| x.mul_add(x, -2.0), 0.0, 2.0, 1e-10, 100);
     v.check_bool("neuralSpring: CPU Brent √2 converges", brent_result.is_ok());
     if let Ok(r) = brent_result {
-        v.check_abs("neuralSpring: Brent √2 = 1.4142...", r.root, std::f64::consts::SQRT_2, 1e-8);
+        v.check_abs(
+            "neuralSpring: Brent √2 = 1.4142...",
+            r.root,
+            std::f64::consts::SQRT_2,
+            1e-8,
+        );
     }
 
     let config = barracuda::optimize::lbfgs::LbfgsConfig {
@@ -393,7 +430,10 @@ fn validate_cross_spring_provenance(v: &mut ValidationHarness) {
         &[0.0, 0.0],
         &config,
     );
-    v.check_bool("neuralSpring S83: L-BFGS Rosenbrock runs", lbfgs_result.is_ok());
+    v.check_bool(
+        "neuralSpring S83: L-BFGS Rosenbrock runs",
+        lbfgs_result.is_ok(),
+    );
 
     let ci = barracuda::stats::bootstrap_ci(
         &[1.0, 2.0, 3.0, 4.0, 5.0],
@@ -416,7 +456,10 @@ fn validate_cross_spring_provenance(v: &mut ValidationHarness) {
 }
 
 /// Part 6: Modern rewire benchmarks
-#[allow(clippy::similar_names)]
+#[expect(
+    clippy::similar_names,
+    reason = "benchmark variables intentionally mirror rewired vs original naming"
+)]
 fn benchmark_modern_rewire(v: &mut ValidationHarness) {
     println!("\n── Part 6: Modern Rewire Benchmarks ────────────────────────");
 
@@ -479,7 +522,11 @@ fn benchmark_modern_rewire(v: &mut ValidationHarness) {
     );
 
     let sand = VanGenuchtenParams {
-        theta_r: 0.045, theta_s: 0.43, alpha: 0.145, n_vg: 2.68, ks: 712.8,
+        theta_r: 0.045,
+        theta_s: 0.43,
+        alpha: 0.145,
+        n_vg: 2.68,
+        ks: 712.8,
     };
     let req = RichardsRequest {
         params: sand,

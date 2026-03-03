@@ -520,8 +520,14 @@ mod tests {
     #[test]
     fn origin_counts_match() {
         let (absorbed, local, npu_native, cpu_only) = origin_summary();
-        assert_eq!(absorbed, 14, "14 absorbed GPU domains (9 original + 4 S70+ ops + tissue)");
-        assert_eq!(local, 6, "6 local WGSL shaders (SCS-CN, Stewart, Makkink, Turc, Hamon, BC)");
+        assert_eq!(
+            absorbed, 14,
+            "14 absorbed GPU domains (9 original + 4 S70+ ops + tissue)"
+        );
+        assert_eq!(
+            local, 6,
+            "6 local WGSL shaders (SCS-CN, Stewart, Makkink, Turc, Hamon, BC)"
+        );
         assert_eq!(npu_native, 4, "4 NPU-native classifiers");
         assert_eq!(cpu_only, 3, "3 CPU-only domains");
     }

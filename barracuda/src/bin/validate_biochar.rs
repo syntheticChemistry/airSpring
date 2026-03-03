@@ -11,8 +11,7 @@
 //! Provenance: Kumari, Dong & Safferman (2025) Applied Water Science 15(7):162.
 //! Baseline: `control/biochar/biochar_isotherms.py` (14/14 PASS).
 //!
-//! script=`control/biochar/biochar_isotherms.py`, commit=5684b1e, date=2026-02-26
-//! Run: `python3 control/biochar/biochar_isotherms.py`
+//! Provenance: script=`control/biochar/biochar_isotherms.py`, commit=5684b1e, date=2026-02-26
 
 use airspring_barracuda::eco::isotherm::{self, langmuir_rl};
 use airspring_barracuda::tolerances;
@@ -23,7 +22,10 @@ use airspring_barracuda::validation::{
 /// Benchmark JSON embedded at compile time for reproducibility.
 const BENCHMARK_JSON: &str = include_str!("../../../control/biochar/benchmark_biochar.json");
 
-#[allow(clippy::too_many_lines)]
+#[expect(
+    clippy::too_many_lines,
+    reason = "biochar validation covers Langmuir, Freundlich, and Kumari benchmarks"
+)]
 fn main() {
     validation::init_tracing();
     validation::banner("Biochar Adsorption Isotherms Validation");

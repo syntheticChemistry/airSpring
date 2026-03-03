@@ -9,11 +9,13 @@ description = "Cross-system compute dispatch for airSpring ecological pipelines 
 [workspace]
 
 [dependencies]
-wgpu = { version = "24", features = ["vulkan-portability"] }
+# wgpu 22 — matches barraCuda's pinned version for type compatibility.
+wgpu = { version = "22", default-features = false, features = ["wgsl", "vulkan-portability"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 toml = "0.8"
-barracuda = { path = "../../../phase1/toadstool/crates/barracuda" }
+# BarraCuda standalone primal (ecoPrimals/barraCuda) — universal math engine.
+barracuda = { path = "../../../barraCuda/crates/barracuda" }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
 

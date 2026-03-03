@@ -24,6 +24,7 @@ use airspring_barracuda::eco::richards::{
 };
 use airspring_barracuda::eco::soil_moisture::{saxton_rawls, SaxtonRawlsInput};
 use airspring_barracuda::eco::van_genuchten::{van_genuchten_k, van_genuchten_theta};
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
 
 const BENCHMARK_JSON: &str =
@@ -122,10 +123,20 @@ fn validate_vg_retention(v: &mut ValidationHarness, benchmark: &serde_json::Valu
         );
 
         let theta_sat = van_genuchten_theta(0.0, vg.theta_r, vg.theta_s, vg.alpha, vg.n_vg);
-        v.check_abs(&format!("{label}: θ(0)=θ_s"), theta_sat, vg.theta_s, 1e-6);
+        v.check_abs(
+            &format!("{label}: θ(0)=θ_s"),
+            theta_sat,
+            vg.theta_s,
+            tolerances::PEDOTRANSFER_MOISTURE.abs_tol,
+        );
 
         let k_sat = van_genuchten_k(0.0, vg.ks, vg.theta_r, vg.theta_s, vg.alpha, vg.n_vg);
-        v.check_abs(&format!("{label}: K(0)=Ks"), k_sat, vg.ks, 1e-6);
+        v.check_abs(
+            &format!("{label}: K(0)=Ks"),
+            k_sat,
+            vg.ks,
+            tolerances::PEDOTRANSFER_MOISTURE.abs_tol,
+        );
 
         let theta_wet = van_genuchten_theta(-50.0, vg.theta_r, vg.theta_s, vg.alpha, vg.n_vg);
         let theta_dry = van_genuchten_theta(-500.0, vg.theta_r, vg.theta_s, vg.alpha, vg.n_vg);

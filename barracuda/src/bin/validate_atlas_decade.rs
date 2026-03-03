@@ -338,7 +338,6 @@ fn main() {
         }
 
         if decade_means.len() >= 3 {
-            #[allow(clippy::suspicious_operation_groupings)]
             let slope = {
                 let n = decade_means.len() as f64;
                 let sum_x: f64 = decade_means.iter().map(|(x, _)| x).sum();

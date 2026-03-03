@@ -510,6 +510,36 @@ pub const NPU_STRESS_DEPLETION: Tolerance = Tolerance {
     justification: "FAO-56 p-factor: stress onset when Dr > 0.55 × TAW (Allen et al. 1998 Eq 84, midpoint for field crops)",
 };
 
+// ═══════════════════════════════════════════════════════════════════
+// Biodiversity indices (Shannon, Simpson, Bray-Curtis)
+// Aligned with barraCuda 0.3.1 `tolerances::BIO_DIVERSITY_*`.
+// ═══════════════════════════════════════════════════════════════════
+
+/// Shannon diversity index H': exact to 8 digits for deterministic OTU tables.
+pub const BIO_DIVERSITY_SHANNON: Tolerance = Tolerance {
+    name: "bio_diversity_shannon",
+    abs_tol: 1e-8,
+    rel_tol: 1e-8,
+    justification: "Shannon H' is a summation of -p·ln(p); f64 accumulation matches Python scipy.stats.entropy to 1e-8",
+};
+
+/// Simpson diversity index 1-D: exact to 10 digits for deterministic OTU tables.
+pub const BIO_DIVERSITY_SIMPSON: Tolerance = Tolerance {
+    name: "bio_diversity_simpson",
+    abs_tol: 1e-10,
+    rel_tol: 1e-10,
+    justification:
+        "Simpson 1-D is a summation of p²; pure f64 arithmetic matches Python exactly to 1e-10",
+};
+
+/// Bray-Curtis dissimilarity: pairwise distance matrix, f64 summation.
+pub const BIO_BRAY_CURTIS: Tolerance = Tolerance {
+    name: "bio_bray_curtis",
+    abs_tol: 1e-8,
+    rel_tol: 1e-8,
+    justification: "Bray-Curtis is |Σ|aᵢ-bᵢ|| / Σ(aᵢ+bᵢ); f64 matches scipy.spatial.distance.braycurtis to 1e-8",
+};
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -135,7 +135,10 @@ fn argmax(vals: &[i8]) -> usize {
 
 /// Synthetic soil moisture stream: 500 readings at 15-min cadence,
 /// spanning a 5-day irrigation cycle with rain event and sensor glitch.
-#[allow(clippy::bool_to_int_with_if)]
+#[expect(
+    clippy::bool_to_int_with_if,
+    reason = "explicit if/else maps sensor glitch flag to class label"
+)]
 fn generate_soil_stream(rng: &mut Lcg) -> Vec<(f64, f64, f64, u8)> {
     let mut stream = Vec::with_capacity(500);
     let mut theta = 0.30;
@@ -271,7 +274,6 @@ fn validate_streaming_soil_moisture(v: &mut ValidationHarness) {
 // S2: Seasonal Weight Evolution (1+1)-ES
 // ═══════════════════════════════════════════════════════════════════
 
-#[allow(clippy::too_many_lines)]
 fn validate_seasonal_evolution(v: &mut ValidationHarness) {
     validation::section("S2: Seasonal Weight Evolution");
 
@@ -460,7 +462,10 @@ fn validate_multicrop_crosstalk(v: &mut ValidationHarness) {
 // S4: LOCOMOS Power Budget
 // ═══════════════════════════════════════════════════════════════════
 
-#[allow(clippy::similar_names)]
+#[expect(
+    clippy::similar_names,
+    reason = "LoCoMoS power budget variables intentionally mirror hardware spec names"
+)]
 fn validate_locomos_power_budget(v: &mut ValidationHarness) {
     validation::section("S4: LOCOMOS Power Budget");
 
@@ -643,7 +648,10 @@ fn validate_noise_resilience(v: &mut ValidationHarness) {
 // ═══════════════════════════════════════════════════════════════════
 
 #[cfg(feature = "npu")]
-#[allow(clippy::too_many_lines)]
+#[expect(
+    clippy::too_many_lines,
+    reason = "live NPU validation covers multiple sensor streams and regime transitions"
+)]
 fn validate_live_npu_funky(v: &mut ValidationHarness) {
     use airspring_barracuda::npu;
 

@@ -69,12 +69,13 @@ fn validate_et0_domain(v: &mut ValidationHarness) {
     let elapsed = start.elapsed();
     let throughput = N_BENCH as f64 / elapsed.as_secs_f64();
 
-    v.check_bool("ET₀ result stable", (sum / N_BENCH as f64 - result.et0).abs() < 1e-10);
+    v.check_bool(
+        "ET₀ result stable",
+        (sum / N_BENCH as f64 - result.et0).abs() < 1e-10,
+    );
     v.check_lower("ET₀ throughput > 100K/s", throughput, 100_000.0);
 
-    println!(
-        "  Rust ET₀ throughput: {throughput:.0}/s ({elapsed:?} for {N_BENCH} calls)"
-    );
+    println!("  Rust ET₀ throughput: {throughput:.0}/s ({elapsed:?} for {N_BENCH} calls)");
     println!(
         "  Python baseline: ~8,700/s → speedup ~{:.1}×",
         throughput / 8700.0
@@ -159,7 +160,11 @@ fn validate_water_balance_domain(v: &mut ValidationHarness) {
     let start = Instant::now();
     for doy in 0..n_days {
         let precip = if doy % 7 == 0 { 8.0 } else { 0.0 };
-        let irr = if state.depletion > state.raw { 25.0 } else { 0.0 };
+        let irr = if state.depletion > state.raw {
+            25.0
+        } else {
+            0.0
+        };
         let input = airspring_barracuda::eco::water_balance::DailyInput {
             precipitation: precip,
             irrigation: irr,
@@ -261,7 +266,10 @@ fn validate_diversity_domain(v: &mut ValidationHarness) {
     let elapsed = start.elapsed();
     let throughput = N_BENCH as f64 / elapsed.as_secs_f64();
 
-    v.check_bool("diversity stable", (sum / N_BENCH as f64 - shannon).abs() < 1e-10);
+    v.check_bool(
+        "diversity stable",
+        (sum / N_BENCH as f64 - shannon).abs() < 1e-10,
+    );
     v.check_lower("diversity throughput > 5M/s", throughput, 5_000_000.0);
     println!("  Rust diversity throughput: {throughput:.0}/s");
 }
@@ -299,7 +307,12 @@ fn validate_seasonal_pipeline_domain(v: &mut ValidationHarness) {
     v.check_upper("seasonal ET₀ < 1200 mm", result.total_et0, 1200.0);
     v.check_lower("yield ratio > 0", result.yield_ratio, 0.0);
     v.check_upper("yield ratio ≤ 1", result.yield_ratio, 1.001);
-    v.check_abs("mass balance < 1 mm", result.mass_balance_error.abs(), 0.0, 1.0);
+    v.check_abs(
+        "mass balance < 1 mm",
+        result.mass_balance_error.abs(),
+        0.0,
+        1.0,
+    );
 
     let n_seasons = 1000;
     let start = Instant::now();
@@ -381,7 +394,11 @@ fn validate_multi_field_domain(v: &mut ValidationHarness) {
 
     let total_field_days = n_fields * 153;
     let throughput = f64::from(total_field_days) / elapsed.as_secs_f64();
-    v.check_lower("atlas throughput > 100K field-days/s", throughput, 100_000.0);
+    v.check_lower(
+        "atlas throughput > 100K field-days/s",
+        throughput,
+        100_000.0,
+    );
 
     println!("  Rust atlas-scale throughput: {throughput:.0} field-days/s");
     println!(

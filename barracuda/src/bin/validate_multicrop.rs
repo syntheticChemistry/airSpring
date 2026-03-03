@@ -112,7 +112,10 @@ const CROPS: &[CropDef] = &[
     },
 ];
 
-#[allow(clippy::cast_precision_loss)]
+#[expect(
+    clippy::cast_precision_loss,
+    reason = "usize index fits in f64 for weather generation"
+)]
 fn generate_weather(season_days: usize, seed: u64) -> (Vec<f64>, Vec<f64>) {
     let mut et0 = Vec::with_capacity(season_days);
     let mut precip = Vec::with_capacity(season_days);
@@ -148,7 +151,10 @@ fn generate_weather(season_days: usize, seed: u64) -> (Vec<f64>, Vec<f64>) {
     (et0, precip)
 }
 
-#[allow(clippy::cast_precision_loss)]
+#[expect(
+    clippy::cast_precision_loss,
+    reason = "usize day/total fits in f64 for Kc interpolation"
+)]
 fn kc_at_day(day: usize, n_days: usize, crop: &CropDef) -> f64 {
     let frac = day as f64 / n_days as f64;
     if frac < 0.15 {
@@ -166,7 +172,10 @@ fn kc_at_day(day: usize, n_days: usize, crop: &CropDef) -> f64 {
     }
 }
 
-#[allow(clippy::cast_precision_loss)]
+#[expect(
+    clippy::cast_precision_loss,
+    reason = "usize day/total fits in f64 for Kcb interpolation"
+)]
 fn kcb_at_day(day: usize, n_days: usize, crop: &CropDef) -> f64 {
     let frac = day as f64 / n_days as f64;
     if frac < 0.15 {

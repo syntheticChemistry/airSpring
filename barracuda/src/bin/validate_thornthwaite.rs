@@ -10,8 +10,7 @@
 //! Thornthwaite C.W. (1948) "An approach toward a rational classification
 //! of climate." Geographical Review, 38(1), 55-94.
 //!
-//! script=`control/thornthwaite/thornthwaite_et0.py`, commit=8c3953b, date=2026-02-27
-//! Run: `python3 control/thornthwaite/thornthwaite_et0.py`
+//! Provenance: script=`control/thornthwaite/thornthwaite_et0.py`, commit=8c3953b, date=2026-02-27
 
 use airspring_barracuda::eco::evapotranspiration as et;
 use airspring_barracuda::tolerances::THORNTHWAITE_ANALYTICAL;
@@ -71,7 +70,7 @@ fn validate_analytical(v: &mut ValidationHarness, bench: &serde_json::Value) {
         an["unadjusted_et0_25C"]
             .as_f64()
             .expect("benchmark unadjusted_et0_25C must be f64"),
-        0.01,
+        THORNTHWAITE_ANALYTICAL.abs_tol,
     );
 
     let freezing = et::thornthwaite_unadjusted_et0(-5.0, 50.0, 1.5);

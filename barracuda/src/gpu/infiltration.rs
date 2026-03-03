@@ -70,11 +70,13 @@ impl BatchedInfiltration {
         let lower = vec![1e-8; times_hr.len()];
         let upper: Vec<f64> = times_hr
             .iter()
-            .map(|&t| ks.mul_add(t, (2.0 * ks * psi_dt * t).sqrt()).mul_add(3.0, 1.0))
+            .map(|&t| {
+                ks.mul_add(t, (2.0 * ks * psi_dt * t).sqrt())
+                    .mul_add(3.0, 1.0)
+            })
             .collect();
 
-        let result =
-            brent.solve_green_ampt(&lower, &upper, times_hr, ks, psi_dt)?;
+        let result = brent.solve_green_ampt(&lower, &upper, times_hr, ks, psi_dt)?;
         Ok(result.roots)
     }
 
@@ -140,10 +142,7 @@ mod tests {
 
         assert_eq!(gpu.len(), cpu.len());
         for (i, (g, c)) in gpu.iter().zip(&cpu).enumerate() {
-            assert!(
-                (g - c).abs() < 0.5,
-                "F[{i}] GPU={g:.4} vs CPU={c:.4}"
-            );
+            assert!((g - c).abs() < 0.5, "F[{i}] GPU={g:.4} vs CPU={c:.4}");
         }
     }
 
@@ -164,10 +163,7 @@ mod tests {
         let cpu = cumulative_cpu(&params, &times);
 
         for (i, (g, c)) in gpu.iter().zip(&cpu).enumerate() {
-            assert!(
-                (g - c).abs() < 0.5,
-                "Clay F[{i}] GPU={g:.4} vs CPU={c:.4}"
-            );
+            assert!((g - c).abs() < 0.5, "Clay F[{i}] GPU={g:.4} vs CPU={c:.4}");
         }
     }
 
@@ -204,12 +200,7 @@ mod tests {
 
         let gpu = solver.cumulative_gpu(&params, &times).unwrap();
         for w in gpu.windows(2) {
-            assert!(
-                w[1] >= w[0] - 1e-6,
-                "F not monotonic: {} > {}",
-                w[0],
-                w[1]
-            );
+            assert!(w[1] >= w[0] - 1e-6, "F not monotonic: {} > {}", w[0], w[1]);
         }
     }
 
@@ -220,9 +211,7 @@ mod tests {
             return;
         };
         let solver = BatchedInfiltration::new(device);
-        let result = solver
-            .cumulative_gpu(&GreenAmptParams::LOAM, &[])
-            .unwrap();
+        let result = solver.cumulative_gpu(&GreenAmptParams::LOAM, &[]).unwrap();
         assert!(result.is_empty());
     }
 

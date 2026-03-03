@@ -69,7 +69,11 @@ fn load_uccle_inputs() -> UccleInputs {
     let rs =
         json_f64(uccle, &["intermediates", "rs_mj_m2_day"]).expect("intermediates.rs_mj_m2_day");
 
-    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+    #[expect(
+        clippy::cast_possible_truncation,
+        clippy::cast_sign_loss,
+        reason = "DOY is non-negative integer from JSON f64"
+    )]
     let doy = doy_f.round() as u32;
 
     UccleInputs {
@@ -200,7 +204,11 @@ fn uccle_extended(u: &UccleInputs) -> serde_json::Value {
 }
 
 /// Soil/sensor cross-validation: Topp, `SoilWatch` 10, irrigation, stats, SVP.
-#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+#[expect(
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    reason = "sensor/soil parameters from JSON f64 are non-negative integers"
+)]
 fn soil_and_sensor_values() -> serde_json::Value {
     let eps_values = [3.0, 5.0, 10.0, 15.0, 20.0, 25.0, 30.0];
     let topp_results: serde_json::Map<String, serde_json::Value> = eps_values

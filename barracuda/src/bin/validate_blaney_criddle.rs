@@ -15,8 +15,7 @@
 //!
 //! Reference: Blaney HF, Criddle WD (1950) USDA-SCS Tech Paper 96.
 //!
-//! script=`control/blaney_criddle/blaney_criddle_et0.py`, commit=6be822f, date=2026-02-28
-//! Run: `python3 control/blaney_criddle/blaney_criddle_et0.py`
+//! Provenance: script=`control/blaney_criddle/blaney_criddle_et0.py`, commit=6be822f, date=2026-02-28
 
 use airspring_barracuda::eco::evapotranspiration::{
     blaney_criddle_et0, blaney_criddle_from_location, blaney_criddle_p,

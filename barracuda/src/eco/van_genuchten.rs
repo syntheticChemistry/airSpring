@@ -35,6 +35,15 @@ const CAPACITY_CEIL: f64 = 1e2;
 /// Pressure head lower bound for K(h) and inverse search (cm).
 const H_CLIP_MIN: f64 = -10_000.0;
 
+/// Near-zero upper bracket for Brent inverse search (cm).
+const BRENT_INVERSE_UPPER: f64 = -1e-6;
+
+/// Convergence tolerance for Brent inverse search.
+const BRENT_INVERSE_TOL: f64 = 1e-8;
+
+/// Maximum iterations for Brent inverse θ→h search.
+const BRENT_INVERSE_MAX_ITER: usize = 100;
+
 /// Van Genuchten soil parameters.
 #[derive(Debug, Clone, Copy)]
 pub struct VanGenuchtenParams {
@@ -146,7 +155,15 @@ pub fn inverse_van_genuchten_h(
 
     let f = |h: f64| van_genuchten_theta(h, theta_r, theta_s, alpha, n_vg) - theta_target;
 
-    brent(f, H_CLIP_MIN, -1e-6, 1e-8, 100).ok().map(|r| r.root)
+    brent(
+        f,
+        H_CLIP_MIN,
+        BRENT_INVERSE_UPPER,
+        BRENT_INVERSE_TOL,
+        BRENT_INVERSE_MAX_ITER,
+    )
+    .ok()
+    .map(|r| r.root)
 }
 
 #[cfg(test)]

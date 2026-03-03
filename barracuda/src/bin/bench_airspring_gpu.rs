@@ -100,7 +100,10 @@ fn time_fn<F: FnMut() -> f64>(mut f: F, warmup: usize, measure: usize) -> (f64, 
         checksum += f();
     }
     let elapsed_us = start.elapsed().as_micros();
-    #[allow(clippy::cast_precision_loss)]
+    #[expect(
+        clippy::cast_precision_loss,
+        reason = "u128 microseconds fit in f64 for benchmark timing"
+    )]
     let per_call_us = elapsed_us as f64 / measure as f64;
     (per_call_us, checksum)
 }
@@ -112,7 +115,10 @@ fn bench_et0() {
     for &n in &[10, 100, 1_000, 10_000] {
         let inputs = make_station_days(n);
         let (cpu_us, _) = time_fn(|| bench_et0_cpu(&inputs), WARMUP, MEASURE);
-        #[allow(clippy::cast_precision_loss)]
+        #[expect(
+            clippy::cast_precision_loss,
+            reason = "usize count fits in f64 for ops/sec calculation"
+        )]
         let ops_per_sec = (n as f64) / (cpu_us / 1_000_000.0);
         println!("  {n:>8}  {cpu_us:>12.1}  {ops_per_sec:>12.0}");
     }

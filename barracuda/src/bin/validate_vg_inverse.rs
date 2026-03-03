@@ -100,7 +100,7 @@ const SOILS: &[(&str, VanGenuchtenParams)] = &[
 
 fn validate_forward(harness: &mut ValidationHarness) {
     validation::section("Forward Model — Carsel & Parrish (1988)");
-    let tol = 1e-10;
+    let tol = tolerances::SENSOR_EXACT.abs_tol;
 
     for &(name, ref p) in SOILS {
         let theta_sat = van_genuchten_theta(0.0, p.theta_r, p.theta_s, p.alpha, p.n_vg);
@@ -136,7 +136,7 @@ fn validate_benchmark_parity(harness: &mut ValidationHarness, benchmark: &serde_
 
 fn validate_round_trip(harness: &mut ValidationHarness) {
     validation::section("Round-Trip θ → h → θ via Brent Inversion");
-    let tol = 1e-6;
+    let tol = tolerances::KRIGING_INTERPOLATION.abs_tol;
 
     for &(name, ref p) in SOILS {
         for &se_frac in &[0.1, 0.25, 0.5, 0.75, 0.9] {
@@ -190,7 +190,12 @@ fn validate_boundary(harness: &mut ValidationHarness) {
         let se_at_sat = (van_genuchten_theta(0.0, p.theta_r, p.theta_s, p.alpha, p.n_vg)
             - p.theta_r)
             / (p.theta_s - p.theta_r);
-        harness.check_abs(&format!("{name}_Se_sat"), se_at_sat, 1.0, 1e-10);
+        harness.check_abs(
+            &format!("{name}_Se_sat"),
+            se_at_sat,
+            1.0,
+            tolerances::SENSOR_EXACT.abs_tol,
+        );
 
         let k_dry = van_genuchten_k(-5000.0, p.ks, p.theta_r, p.theta_s, p.alpha, p.n_vg);
         harness.check_bool(&format!("{name}_K_dry_small"), k_dry < 1e-3);

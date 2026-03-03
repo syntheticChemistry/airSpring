@@ -8,9 +8,7 @@
 //! Validate soil moisture sensor calibration against published values.
 //!
 //! Benchmark source: `control/soil_sensors/benchmark_dong2020.json`
-//! Provenance: Topp et al. (1980) WRR 16(3), Dong et al. (2020) Agriculture 10(12).
-//! script=`control/soil_sensors/calibration_dong2020.py`, commit=502f2ada, date=2026-02-16
-//! Run: `python3 control/soil_sensors/calibration_dong2020.py`
+//! Provenance: script=`control/soil_sensors/calibration_dong2020.py`, commit=502f2ada, date=2026-02-16
 //!
 //! All expected values and tolerances are sourced from the benchmark JSON,
 //! never hardcoded inline.

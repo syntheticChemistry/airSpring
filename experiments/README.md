@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: March 2, 2026
-**Status**: 77 experiments, 1237/1237 Python + 846 lib + 61 forge tests + 86 binaries + **146/146 cross-spring evolution benchmark (ToadStool S87)** + **Exp 077 cross-spring provenance (32/32)** + Paper 12 immunological Anderson (Exp 066-069) + 66/66 metalForge cross-system (27 workloads) + GPU streaming multi-field (57/57) + CPU parity (34/34) + pure GPU end-to-end (46/46) + **cross-spring rewire (68/68)** + **paper chain validation (79/79)** + **local GPU parity (Exp 075: 6 ops)** + **NUCLEUS routing (Exp 076: 60/60)** + **Rust 13,000× faster than Python (atlas-scale)** + Tier B→A: `BatchedStatefulF64` (WB), `BatchedNelderMeadGpu` (isotherm)
+**Status**: 77 experiments, 1237/1237 Python + 846 lib + 62 forge tests + 86 binaries + **146/146 cross-spring evolution benchmark (ToadStool S87)** + **Exp 077 cross-spring provenance (32/32)** + Paper 12 immunological Anderson (Exp 066-069) + 66/66 metalForge cross-system (27 workloads) + GPU streaming multi-field (57/57) + CPU parity (34/34) + pure GPU end-to-end (46/46) + **cross-spring rewire (68/68)** + **paper chain validation (79/79)** + **local GPU parity (Exp 075: 6 ops)** + **NUCLEUS routing (Exp 076: 60/60)** + **Rust 13,000× faster than Python (atlas-scale)** + Tier B→A: `BatchedStatefulF64` (WB), `BatchedNelderMeadGpu` (isotherm)
 
 ---
 
@@ -87,7 +87,7 @@
 | 076 | NUCLEUS Mixed-Hardware Routing | metalForge | **Complete** | Rust (forge) | 27 workloads, NUCLEUS mesh routing, PCIe P2P bypass, 7-stage pipeline, Tower/Node/Nest atomics, multi-node cross-hop | 60 |
 | 077 | Cross-Spring Provenance & CPU↔GPU Benchmark | GPU + Cross-Spring | **Complete** | Rust (barracuda) | CPU vs GPU timing for ET₀/WB/Hargreaves/Kc/VG/GDD/pedotransfer, shader provenance tracking (5 springs), precision lineage validation (hotSpring→all), seasonal pipeline parity, uncertainty (jackknife/bootstrap/diversity) | 32 |
 
-**Grand Total**: 1237 Python + **846 lib + 61 forge tests** + 1498/1498 atlas + 33/33 cross-validation + 25 Tier A + 6 GPU-local + 4 GPU orchestrators (infiltration, runoff, yield_response, simple_et0) + `BrentGpu` + `RichardsGpu` + 3 pipeline GPU orchestrators + seasonal pipeline GPU Stages 1-3 + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge (5 substrates, 27 workloads, 66/66 cross-system) + GPU math portability (46/46) + GPU streaming multi-field (57/57) + CPU parity benchmark (34/34) + pure GPU end-to-end (46/46) + cross-spring rewire (68/68, 5 springs) + paper chain validation (79/79, 28 domains) + local GPU parity (Exp 075, 6 ops) + NUCLEUS routing (Exp 076, 60/60) + NCBI 16S coupling (14+29) + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34) + Exp 058 Climate Scenario (46/46) + NUCLEUS primal (29/29 + 28/28) + atlas decade (102/102) + NASS real (99/99) + NCBI diversity (63/63) + Paper 12 immunological Anderson (Exp 066-069) + 86 binaries + 146/146 cross-spring evolution benchmarks + 32/32 Exp 077 cross-spring provenance (5 Springs) + ToadStool S87 synced + 13,000× Rust-vs-Python speedup
+**Grand Total**: 1237 Python + **846 lib + 62 forge tests** + 1498/1498 atlas + 33/33 cross-validation + 25 Tier A + 6 GPU-local + 4 GPU orchestrators (infiltration, runoff, yield_response, simple_et0) + `BrentGpu` + `RichardsGpu` + 3 pipeline GPU orchestrators + seasonal pipeline GPU Stages 1-3 + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge (5 substrates, 27 workloads, 66/66 cross-system) + GPU math portability (46/46) + GPU streaming multi-field (57/57) + CPU parity benchmark (34/34) + pure GPU end-to-end (46/46) + cross-spring rewire (68/68, 5 springs) + paper chain validation (79/79, 28 domains) + local GPU parity (Exp 075, 6 ops) + NUCLEUS routing (Exp 076, 60/60) + NCBI 16S coupling (14+29) + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34) + Exp 058 Climate Scenario (46/46) + NUCLEUS primal (29/29 + 28/28) + atlas decade (102/102) + NASS real (99/99) + NCBI diversity (63/63) + Paper 12 immunological Anderson (Exp 066-069) + 86 binaries + 146/146 cross-spring evolution benchmarks + 32/32 Exp 077 cross-spring provenance (5 Springs) + ToadStool S87 synced + 13,000× Rust-vs-Python speedup
 
 ---
 
@@ -97,9 +97,9 @@
 |----------|:-----:|--------|
 | Barracuda lib (unit + doc) | 846 | `cargo test --lib` (incl. nautilus, rpc, biomeos, cytokine, tissue, property tests, all GPU orchestrators, BrentGpu, RichardsGpu, streaming, Anderson, diversity, infiltration, runoff, yield_response, simple_et0, local_dispatch) |
 | Barracuda validation binaries | 86 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
-| Forge | 61 | `metalForge/forge/` (substrate, dispatch, probe, workloads, cross-system routing) |
+| Forge | 62 | `metalForge/forge/` (substrate, dispatch, probe, workloads, cross-system routing) |
 | Forge binaries | 5 | `validate_dispatch`, `validate_live_hardware`, `validate_dispatch_routing`, `validate_mixed_pipeline`, `validate_nucleus_routing` |
-| **Total project tests** | **846 lib + 61 forge** | |
+| **Total project tests** | **846 lib + 62 forge** | |
 | Line coverage | 95.66% | `cargo llvm-cov --lib --fail-under-lines 90` |
 | Atlas stream (real data) | 73 | `validate_atlas_stream` (12 stations, 4800 crop-year results) |
 | Atlas checks | 1393 | `validate_atlas` (100 stations × 13 checks each) |
@@ -529,7 +529,7 @@ cargo run --release --bin bench_cpu_vs_python
 ## GPU Benchmark: CPU vs GPU Orchestrators
 
 The GPU benchmark measures throughput for 11 Tier A wired modules through
-ToadStool's shader evolution (774 WGSL shaders, 46+ cross-spring absorptions):
+ToadStool's shader evolution (845 WGSL shaders, 46+ cross-spring absorptions):
 
 | Orchestrator | CPU (items/s) | Notes |
 |---|---:|---|

@@ -78,7 +78,10 @@ fn generate_synthetic_comparison(n_days: usize) -> (Vec<f64>, Vec<f64>) {
     (et0, et_lys)
 }
 
-#[allow(clippy::too_many_lines)]
+#[expect(
+    clippy::too_many_lines,
+    reason = "lysimeter validation covers hourly and sub-hourly data points"
+)]
 fn main() {
     validation::init_tracing();
     validation::banner("Lysimeter ET Direct Measurement (Exp 016)");
@@ -164,7 +167,11 @@ fn main() {
     let hr_cases = &benchmark["validation_checks"]["hourly_et_pattern"]["test_cases"];
     for tc in hr_cases.as_array().expect("array") {
         let label = json_str(tc, "label");
-        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+        #[expect(
+            clippy::cast_possible_truncation,
+            clippy::cast_sign_loss,
+            reason = "hour from JSON f64 is a non-negative integer"
+        )]
         let hour = json_field(tc, "hour") as u32;
         let frac = hourly_et_fraction(hour);
         if tc

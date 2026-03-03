@@ -132,7 +132,10 @@ pub struct StreamClassification {
 /// threshold for stress classification. Designed for CPU-side pre-screening
 /// before optional NPU inference.
 #[must_use]
-#[allow(clippy::bool_to_int_with_if)]
+#[expect(
+    clippy::bool_to_int_with_if,
+    reason = "explicit if/else mapping to class labels is clearer than bool-to-int conversion"
+)]
 pub fn classify_reading(
     reading: f64,
     stats: &RollingStats,
@@ -333,7 +336,7 @@ mod tests {
         }
         let fc = 0.38;
         let wp = 0.15;
-        let theta_at_boundary = fc - 0.55 * (fc - wp);
+        let theta_at_boundary = 0.55_f64.mul_add(-(fc - wp), fc);
         let below = classify_reading(theta_at_boundary - 0.01, &stats, fc, wp, 3.0);
         let above = classify_reading(theta_at_boundary + 0.01, &stats, fc, wp, 3.0);
         assert_eq!(below.class, 1, "below boundary should be stressed");

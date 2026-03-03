@@ -28,7 +28,6 @@ use super::device_info::try_f64_device;
 /// Dispatches to `BatchedElementwiseF64` ops 9 and 10 when a GPU engine
 /// is configured; falls back to CPU otherwise.
 pub struct BatchedVanGenuchten {
-    #[allow(dead_code)]
     device: Arc<WgpuDevice>,
     engine: BatchedElementwiseF64,
 }
@@ -83,7 +82,10 @@ impl BatchedVanGenuchten {
     /// # Errors
     ///
     /// Returns an error if GPU dispatch fails.
-    #[allow(clippy::too_many_arguments)]
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "van Genuchten K(θ) requires soil params, residual/saturated moisture, and GPU config"
+    )]
     pub fn compute_k_gpu(
         &self,
         k_s: f64,
@@ -113,7 +115,6 @@ impl BatchedVanGenuchten {
     /// # Errors
     ///
     /// Returns an error if GPU Brent dispatch fails.
-    #[allow(clippy::too_many_arguments)]
     pub fn compute_inverse_gpu(
         &self,
         theta_r: f64,
@@ -131,15 +132,8 @@ impl BatchedVanGenuchten {
         let lower = vec![-1e6; theta_targets.len()];
         let upper = vec![-1e-6; theta_targets.len()];
 
-        let result = brent.solve_vg_inverse(
-            &lower,
-            &upper,
-            theta_targets,
-            theta_r,
-            theta_s,
-            alpha,
-            n_vg,
-        )?;
+        let result =
+            brent.solve_vg_inverse(&lower, &upper, theta_targets, theta_r, theta_s, alpha, n_vg)?;
         Ok(result.roots)
     }
 

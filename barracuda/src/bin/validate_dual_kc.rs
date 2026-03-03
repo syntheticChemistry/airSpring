@@ -24,6 +24,7 @@
 use airspring_barracuda::eco::crop::CropType;
 use airspring_barracuda::eco::dual_kc::{self, DualKcInput, EvaporationLayerState};
 use airspring_barracuda::eco::soil_moisture::SoilTexture;
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{
     self, json_array, json_field, json_str, parse_benchmark_json, ValidationHarness,
 };
@@ -41,7 +42,12 @@ fn validate_eq69(v: &mut ValidationHarness, bench: &serde_json::Value) {
             json_field(tc, "ke"),
             json_field(tc, "et0"),
         );
-        v.check_abs(label, result, json_field(tc, "expected_etc"), 1e-6);
+        v.check_abs(
+            label,
+            result,
+            json_field(tc, "expected_etc"),
+            tolerances::KRIGING_INTERPOLATION.abs_tol,
+        );
     }
 }
 
@@ -60,7 +66,7 @@ fn validate_kc_max(v: &mut ValidationHarness, bench: &serde_json::Value) {
             json_str(tc, "label"),
             result,
             json_field(tc, "expected_kc_max"),
-            0.01,
+            tolerances::DUAL_KC_PRECISION.abs_tol,
         );
     }
 }
@@ -79,7 +85,7 @@ fn validate_tew(v: &mut ValidationHarness, bench: &serde_json::Value) {
             json_str(tc, "label"),
             result,
             json_field(tc, "expected_tew"),
-            1e-6,
+            tolerances::KRIGING_INTERPOLATION.abs_tol,
         );
     }
 }
@@ -98,7 +104,7 @@ fn validate_kr(v: &mut ValidationHarness, bench: &serde_json::Value) {
             json_str(tc, "label"),
             result,
             json_field(tc, "expected_kr"),
-            1e-6,
+            tolerances::KRIGING_INTERPOLATION.abs_tol,
         );
     }
 }
@@ -111,25 +117,25 @@ fn validate_ke_boundaries(v: &mut ValidationHarness) {
         "Ke=0 when Kr=0 (dry)",
         dual_kc::soil_evaporation_ke(0.0, 1.15, 1.20, 1.0),
         0.0,
-        1e-10,
+        tolerances::SENSOR_EXACT.abs_tol,
     );
     v.check_abs(
         "Ke=1.05 bare wet soil",
         dual_kc::soil_evaporation_ke(1.0, 0.15, 1.20, 1.0),
         1.05,
-        1e-6,
+        tolerances::KRIGING_INTERPOLATION.abs_tol,
     );
     v.check_abs(
         "Ke limited by few×Kc_max",
         dual_kc::soil_evaporation_ke(1.0, 0.15, 1.20, 0.3),
         0.36,
-        1e-6,
+        tolerances::KRIGING_INTERPOLATION.abs_tol,
     );
     v.check_abs(
         "Ke small under full cover",
         dual_kc::soil_evaporation_ke(1.0, 1.15, 1.20, 0.05),
         0.05,
-        1e-6,
+        tolerances::KRIGING_INTERPOLATION.abs_tol,
     );
 }
 
@@ -228,7 +234,7 @@ fn validate_bare_soil_drydown(v: &mut ValidationHarness, bench: &serde_json::Val
 
     v.check_bool(
         "Day 1 Kr=1.0 (stage 1)",
-        (outputs[0].kr - 1.0).abs() < 1e-10,
+        (outputs[0].kr - 1.0).abs() < tolerances::SENSOR_EXACT.abs_tol,
     );
     v.check_bool("Kr declines", outputs[0].kr >= outputs[6].kr);
     v.check_bool("De increases", outputs[0].de <= outputs[6].de);
@@ -252,7 +258,12 @@ fn validate_bare_soil_drydown(v: &mut ValidationHarness, bench: &serde_json::Val
     //   Origin:  FAO-56 Eq. 72 bare soil drydown Kr time series (7 days)
     let py_kr = [1.0, 1.0, 0.6975, 0.3313, 0.1643, 0.0746, 0.0394];
     for (i, (&py, out)) in py_kr.iter().zip(outputs.iter()).enumerate() {
-        v.check_abs(&format!("Day {} Kr vs Python", i + 1), out.kr, py, 0.001);
+        v.check_abs(
+            &format!("Day {} Kr vs Python", i + 1),
+            out.kr,
+            py,
+            tolerances::RICHARDS_STEADY.abs_tol,
+        );
     }
 }
 
@@ -287,7 +298,7 @@ fn validate_corn_mid_season(v: &mut ValidationHarness, bench: &serde_json::Value
         let ratio = out.etc / et0;
         v.check_bool(
             &format!("Day {}: ETc/ET₀ ({ratio:.3}) ≈ Kcb ({kcb})", i + 1),
-            (ratio - kcb).abs() < 0.10,
+            (ratio - kcb).abs() < tolerances::ANALYTICAL_COMPUTATION.abs_tol,
         );
     }
 }

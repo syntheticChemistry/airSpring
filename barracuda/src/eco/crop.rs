@@ -370,7 +370,7 @@ pub fn kc_from_gdd(
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used)] // justified: test code may use unwrap for clarity
+#[expect(clippy::unwrap_used, reason = "test code may use unwrap for clarity")]
 mod tests {
     use super::*;
 

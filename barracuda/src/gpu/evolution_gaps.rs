@@ -7,9 +7,9 @@
 //! # Gap Categories
 //!
 //! - **Integrated**: GPU primitive wired and validated (GPU-first, CPU fallback).
-//! - **Ready**: `ToadStool` primitive exists, airSpring just needs to wire it.
+//! - **Ready**: `BarraCuda` primitive exists, airSpring just needs to wire it.
 //! - **Needs Adaptation**: Shader exists, needs domain customisation.
-//! - **Needs Primitive**: No `ToadStool` implementation yet.
+//! - **Needs Primitive**: No `BarraCuda` implementation yet.
 //!
 //! # Shader Promotion Mapping
 //!
@@ -40,7 +40,7 @@
 //! | `eco::yield_response` | `gpu::yield_response` | `local_elementwise.wgsl` (op=1) | Stewart yield | A (GPU-local, f32) |
 //! | `eco::evapotranspiration` (Makkink/Turc/Hamon/BC) | `gpu::simple_et0` | `local_elementwise.wgsl` (ops 2-5) | Simple ET₀ batch | A (GPU-local, f32) |
 //!
-//! # Current Inventory (March 2, 2026 — v0.6.8, synced to `ToadStool` HEAD S87)
+//! # Current Inventory (March 3, 2026 — v0.6.8, barraCuda 0.3.1 standalone, `ToadStool` S93)
 //!
 //! ## v0.6.8: Local GPU Compute Evolution + NUCLEUS Full-Pipeline
 //!
@@ -149,10 +149,19 @@
 //!   `lbfgs` / `lbfgs_numerical`, `HeadKind` enum (15+ domain variants)
 //! - S84-S86: **`ComputeDispatch` migration** — 144 ops total (+33 from S84-S86), hydrology split
 //!   (`mod.rs` CPU + `gpu.rs` GPU), experimental.rs probes, deep debt elimination
+//! - S87: `TODO(afit)` → `NOTE(async-dyn)`, FHE shader fixes, `gpu_helpers` refactor, unsafe audit
+//! - S88: Cross-spring absorption — `anderson_4d`, `wegner_block_4d`, `SeasonalGpuParams::new()`,
+//!   `LbfgsGpu`, new hydrology tolerances (`HYDRO_ET0`, `HYDRO_SOIL_MOISTURE`, etc.)
+//! - **S89: barraCuda extraction** — 956 Rust files, 767 WGSL shaders extracted from `ToadStool`
+//!   into standalone `ecoPrimals/barraCuda` primal. Springs depend on barraCuda directly.
+//!   `toadstool-core`, `akida-driver` removed from barraCuda. hotSpring validated 716/716.
+//! - S90: REST API removed (JSON-RPC 2.0 only), capability-based discovery, SPDX universal
+//! - S92: Sovereignty deprecations, +47 tests (5,369 total), `BearDog` strings neutralized
+//! - S93: D-DF64 ownership transferred to barraCuda team, stale docs removed
 //!
 //! ## Cross-Spring Shader Provenance (validated in `cross_spring_absorption.rs` §13)
 //!
-//! | Spring | Domain | Contributed to `ToadStool` |
+//! | Spring | Domain | Contributed to `BarraCuda` |
 //! |--------|--------|------------------------|
 //! | hotSpring | Nuclear/precision physics | `df64_core`, `math_f64`, `complex_f64`, SU(3), Hermite/Laguerre, Lanczos |
 //! | wetSpring | Bio/environmental | Shannon/Simpson/Bray-Curtis, kriging, `moving_window`, Hill, ODE bio, NMF |
@@ -167,7 +176,7 @@
 //!
 //! ## Tier A: Integrated (GPU primitive wired, validated, GPU-first)
 //!
-//! | airSpring Module | `ToadStool` Primitive | Status |
+//! | airSpring Module | `BarraCuda` Primitive | Status |
 //! |-----------------|--------------------|----|
 //! | `gpu::et0::BatchedEt0` | `ops::batched_elementwise_f64` (op=0) | **GPU-FIRST** via `fao56_et0_batch()` |
 //! | `gpu::water_balance::BatchedWaterBalance` | `ops::batched_elementwise_f64` (op=1) | **GPU-STEP** via `water_balance_batch()` |
@@ -194,7 +203,7 @@
 //!
 //! ## Tier B: Upstream Primitive Exists, Needs Domain Wiring
 //!
-//! | Need | Closest `ToadStool` Primitive | Gap |
+//! | Need | Closest `BarraCuda` Primitive | Gap |
 //! |------|---------------------------|-----|
 //! | 1D Richards equation | `pde::richards::solve_richards` (VG-Mualem, Picard+CN+Thomas) | **PROMOTED to Tier A** — `gpu::richards::BatchedRichards` (v0.4.0) |
 //! | Crank-Nicolson cross-val | `pde::crank_nicolson::CrankNicolson1D` (f64 + GPU) | **NEW** — available for Richards CN comparison (was f32-only, now f64) |

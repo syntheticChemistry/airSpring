@@ -143,7 +143,8 @@ fn validate_streaming_vs_per_stage(v: &mut ValidationHarness) {
         .expect("GPU device init"),
     );
 
-    let per_stage = SeasonalPipeline::gpu(Arc::clone(&device)).unwrap_or_else(|_| SeasonalPipeline::cpu());
+    let per_stage =
+        SeasonalPipeline::gpu(Arc::clone(&device)).unwrap_or_else(|_| SeasonalPipeline::cpu());
     let streaming = SeasonalPipeline::streaming(device).unwrap_or_else(|_| SeasonalPipeline::cpu());
 
     let weather = synthetic_field_weather(42.5, 200.0);
@@ -152,7 +153,12 @@ fn validate_streaming_vs_per_stage(v: &mut ValidationHarness) {
     let ps_result = per_stage.run_season(&weather, &config);
     let st_result = streaming.run_season(&weather, &config);
 
-    v.check_abs("ET₀ per-stage = streaming", ps_result.total_et0, st_result.total_et0, 0.01);
+    v.check_abs(
+        "ET₀ per-stage = streaming",
+        ps_result.total_et0,
+        st_result.total_et0,
+        0.01,
+    );
     v.check_abs(
         "actual_ET per-stage = streaming",
         ps_result.total_actual_et,
@@ -194,8 +200,7 @@ fn validate_dispatch_reduction(v: &mut ValidationHarness) {
         )
         .expect("GPU device init"),
     );
-    let gpu_pipe =
-        SeasonalPipeline::gpu(device).unwrap_or_else(|_| SeasonalPipeline::cpu());
+    let gpu_pipe = SeasonalPipeline::gpu(device).unwrap_or_else(|_| SeasonalPipeline::cpu());
 
     let weather: Vec<Vec<WeatherDay>> = (0..n_fields)
         .map(|i| {
@@ -248,8 +253,7 @@ fn validate_pure_gpu_scaling(v: &mut ValidationHarness) {
         )
         .expect("GPU device init"),
     );
-    let pipe =
-        SeasonalPipeline::gpu(device).unwrap_or_else(|_| SeasonalPipeline::cpu());
+    let pipe = SeasonalPipeline::gpu(device).unwrap_or_else(|_| SeasonalPipeline::cpu());
 
     for &n_fields in &[1, 10, 50] {
         let weather: Vec<Vec<WeatherDay>> = (0..n_fields)
@@ -279,9 +283,7 @@ fn validate_pure_gpu_scaling(v: &mut ValidationHarness) {
             throughput,
             100.0,
         );
-        println!(
-            "  {n_fields:>3} fields: {elapsed:?}, {throughput:.0} field-days/s"
-        );
+        println!("  {n_fields:>3} fields: {elapsed:?}, {throughput:.0} field-days/s");
     }
 }
 

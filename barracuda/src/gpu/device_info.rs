@@ -19,6 +19,10 @@
 //! in chained SU(3) matrix multiplications). airSpring benefits: the Titan V
 //! runs our ET₀ shaders in native f64, while the RTX 4070 can use `Df64` with
 //! ~48-bit mantissa precision — still adequate for FAO-56 (which only needs ~6 digits).
+//!
+//! **Note**: Session references (S40, S54, S66, etc.) in shader provenance below
+//! are historical `ToadStool` sessions. Since S89, all math primitives live in the
+//! standalone `barraCuda` primal (`ecoPrimals/barraCuda`).
 
 use std::sync::Arc;
 
@@ -253,7 +257,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
             "airSpring (VG inverse need)",
             "ToadStool S70+ (WGSL, bug on L49)",
         ],
-        airspring_use: "Future: GPU VG inverse (pending ToadStool bug fix)",
+        airspring_use: "Future: GPU VG inverse (pending barraCuda shader bug fix on L49)",
     },
     ShaderProvenance {
         shader: "diversity (CPU bio kernel)",

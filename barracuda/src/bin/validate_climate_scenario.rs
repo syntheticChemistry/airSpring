@@ -50,7 +50,10 @@ const PRECIP_MM: &[f64; 153] = &[
     0., 3., 3., 0., 0., 3., 0., 0., 3.,
 ];
 
-#[allow(clippy::too_many_lines)]
+#[expect(
+    clippy::too_many_lines,
+    reason = "climate scenario validation covers multiple RCP pathways"
+)]
 fn main() {
     validation::init_tracing();
     validation::banner("Exp 058: Climate Scenario Water Demand Analysis");

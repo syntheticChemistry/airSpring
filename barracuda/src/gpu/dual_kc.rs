@@ -84,7 +84,10 @@ impl BatchedDualKc {
     }
 
     /// Create a new batched dual Kc orchestrator for M fields (CPU only).
-    #[allow(clippy::missing_const_for_fn)]
+    #[expect(
+        clippy::missing_const_for_fn,
+        reason = "method may gain runtime logic when GPU dispatch is wired"
+    )]
     #[must_use]
     pub fn new(configs: Vec<FieldDualKcConfig>) -> Self {
         Self {

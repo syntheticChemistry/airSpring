@@ -166,53 +166,59 @@ fn main() {
         }
     }
 
-    // ── Phase 4: Cross-Primal Forwarding ───────────────────────────
-    let toadstool_fwd = rpc::send(
+    // ── Phase 4: Capability-Based Forwarding ────────────────────────
+    let compute_fwd = rpc::send(
         &sock,
-        "primal.forward",
-        &serde_json::json!({"primal": "toadstool", "method": "toadstool.health", "params": {}}),
+        "capability.forward",
+        &serde_json::json!({"capability": "compute.dispatch", "method": "health", "params": {}}),
     )
     .and_then(|r| r.get("result").cloned());
-    v.check_bool("forward_toadstool_response", toadstool_fwd.is_some());
-    if let Some(ref t) = toadstool_fwd {
+    v.check_bool("forward_compute_response", compute_fwd.is_some());
+    if let Some(ref t) = compute_fwd {
         let inner = t.pointer("/response/result/healthy");
         v.check_bool(
-            "toadstool_healthy",
+            "compute_provider_healthy",
             inner.and_then(|v| v.as_bool()).unwrap_or(false),
         );
     }
 
-    let beardog_fwd = rpc::send(
+    let crypto_fwd = rpc::send(
         &sock,
-        "primal.forward",
-        &serde_json::json!({"primal": "beardog", "method": "health", "params": {}}),
+        "capability.forward",
+        &serde_json::json!({"capability": "crypto.tls", "method": "health", "params": {}}),
     )
     .and_then(|r| r.get("result").cloned());
-    v.check_bool("forward_beardog_response", beardog_fwd.is_some());
-    if let Some(ref b) = beardog_fwd {
+    v.check_bool("forward_crypto_response", crypto_fwd.is_some());
+    if let Some(ref b) = crypto_fwd {
         let inner = b.pointer("/response/result/status");
         v.check_bool(
-            "beardog_healthy",
+            "crypto_provider_healthy",
             inner.and_then(|v| v.as_str()) == Some("healthy"),
         );
     }
 
-    // ── Phase 5: Primal Discovery ──────────────────────────────────
-    let discovery = rpc::send(&sock, "primal.discover", &serde_json::json!({}))
+    // ── Phase 5: Capability Discovery ──────────────────────────────
+    let discovery = rpc::send(&sock, "capability.discover", &serde_json::json!({}))
         .and_then(|r| r.get("result").cloned());
-    v.check_bool("primal_discover_response", discovery.is_some());
+    v.check_bool("capability_discover_response", discovery.is_some());
     if let Some(ref d) = discovery {
         let count = d.get("count").and_then(|v| v.as_u64()).unwrap_or(0);
-        v.check_lower("discover_multiple_primals", count as f64, 3.0);
+        v.check_lower("discover_multiple_capabilities", count as f64, 3.0);
 
-        let primals = d.get("primals").and_then(|v| v.as_array());
-        if let Some(primals) = primals {
-            let names: Vec<&str> = primals.iter().filter_map(|v| v.as_str()).collect();
-            v.check_bool("discover_airspring", names.contains(&"airspring"));
-            v.check_bool("discover_beardog", names.contains(&"beardog"));
+        let capabilities = d.get("capabilities").and_then(|v| v.as_array());
+        if let Some(caps) = capabilities {
+            let names: Vec<&str> = caps.iter().filter_map(|v| v.as_str()).collect();
             v.check_bool(
-                "discover_toadstool",
-                names.iter().any(|n| n.starts_with("toadstool")),
+                "discover_science",
+                names.iter().any(|n| n.starts_with("science.")),
+            );
+            v.check_bool(
+                "discover_crypto",
+                names.iter().any(|n| n.starts_with("crypto.")),
+            );
+            v.check_bool(
+                "discover_compute",
+                names.iter().any(|n| n.starts_with("compute.")),
             );
         }
     }

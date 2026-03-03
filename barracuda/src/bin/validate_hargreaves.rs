@@ -17,8 +17,7 @@
 //! - Hargreaves & Samani (1985) Applied Eng Agric 1(2):96-99
 //! - Allen et al. (1998) FAO-56 Eq. 52
 //!
-//! script=`control/hargreaves/hargreaves_samani.py`, commit=dbfb53a, date=2026-03-02
-//! Run: `python3 control/hargreaves/hargreaves_samani.py`
+//! Provenance: script=`control/hargreaves/hargreaves_samani.py`, commit=dbfb53a, date=2026-03-02
 
 use airspring_barracuda::eco::evapotranspiration::{extraterrestrial_radiation, hargreaves_et0};
 use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
@@ -49,7 +48,10 @@ fn validate_ra(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     let checks = &benchmark["validation_checks"]["ra_computation"]["test_cases"];
     for tc in checks.as_array().expect("array") {
         let latitude = json_field(tc, "latitude");
-        #[allow(clippy::cast_sign_loss)]
+        #[expect(
+            clippy::cast_sign_loss,
+            reason = "DOY from JSON f64 is a non-negative integer"
+        )]
         let doy = json_field(tc, "doy") as u32;
         let expected = json_field(tc, "expected_ra_mm");
         let tol = json_field(tc, "tolerance");
@@ -69,7 +71,10 @@ fn validate_cross_comparison(v: &mut ValidationHarness, benchmark: &serde_json::
     for tc in checks.as_array().expect("array") {
         let city = tc["city"].as_str().unwrap_or("city");
         let latitude = json_field(tc, "latitude");
-        #[allow(clippy::cast_sign_loss)]
+        #[expect(
+            clippy::cast_sign_loss,
+            reason = "DOY from JSON f64 is a non-negative integer"
+        )]
         let doy = json_field(tc, "doy") as u32;
         let tmin = json_field(tc, "tmin");
         let tmax = json_field(tc, "tmax");

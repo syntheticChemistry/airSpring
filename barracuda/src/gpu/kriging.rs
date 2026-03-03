@@ -306,7 +306,10 @@ pub fn interpolate_soil_moisture(
 }
 
 #[cfg(test)]
-#[allow(clippy::float_cmp)]
+#[expect(
+    clippy::float_cmp,
+    reason = "test assertions on deterministic kriging interpolation results"
+)]
 mod tests {
     use super::*;
 

@@ -52,20 +52,30 @@ pub enum AtomicKind {
 }
 
 impl AtomicKind {
-    /// Components included in this atomic.
+    /// Capabilities provided by this atomic.
     #[must_use]
-    pub const fn components(&self) -> &[&str] {
+    pub const fn capabilities(&self) -> &[&str] {
         match self {
-            Self::Tower => &["BearDog (crypto/TLS)", "Songbird (mesh/discovery)"],
+            Self::Tower => &["crypto.tls", "mesh.discovery"],
+            Self::Node => &["crypto.tls", "mesh.discovery", "compute.dispatch"],
+            Self::Nest => &["crypto.tls", "mesh.discovery", "storage.provenance"],
+        }
+    }
+
+    /// Human-readable component descriptions (primal names resolved at runtime).
+    #[must_use]
+    pub const fn component_descriptions(&self) -> &[&str] {
+        match self {
+            Self::Tower => &["crypto/TLS provider", "mesh/discovery provider"],
             Self::Node => &[
-                "BearDog (crypto/TLS)",
-                "Songbird (mesh/discovery)",
-                "ToadStool (compute/GPU)",
+                "crypto/TLS provider",
+                "mesh/discovery provider",
+                "compute/GPU dispatch",
             ],
             Self::Nest => &[
-                "BearDog (crypto/TLS)",
-                "Songbird (mesh/discovery)",
-                "NestGate (storage/provenance)",
+                "crypto/TLS provider",
+                "mesh/discovery provider",
+                "storage/provenance tracker",
             ],
         }
     }
@@ -179,7 +189,10 @@ impl NucleusMesh {
     /// Returns a `MeshPipeline` with per-stage node assignments and
     /// inter-node transfer characterisation.
     #[must_use]
-    pub fn route_pipeline(&self, workloads: &[crate::dispatch::Workload]) -> Option<MeshPipeline<'_>> {
+    pub fn route_pipeline(
+        &self,
+        workloads: &[crate::dispatch::Workload],
+    ) -> Option<MeshPipeline<'_>> {
         if workloads.is_empty() {
             return Some(MeshPipeline {
                 stages: Vec::new(),
@@ -332,8 +345,10 @@ mod tests {
     }
 
     #[test]
-    fn tower_components() {
-        assert_eq!(AtomicKind::Tower.components().len(), 2);
+    fn tower_capabilities() {
+        assert_eq!(AtomicKind::Tower.capabilities().len(), 2);
+        assert!(AtomicKind::Tower.capabilities().contains(&"crypto.tls"));
+        assert!(AtomicKind::Tower.capabilities().contains(&"mesh.discovery"));
         assert!(!AtomicKind::Tower.has_compute());
         assert!(!AtomicKind::Tower.has_storage());
         assert!(AtomicKind::Tower.has_mesh());
@@ -342,13 +357,19 @@ mod tests {
     #[test]
     fn node_has_compute() {
         assert!(AtomicKind::Node.has_compute());
-        assert_eq!(AtomicKind::Node.components().len(), 3);
+        assert_eq!(AtomicKind::Node.capabilities().len(), 3);
+        assert!(AtomicKind::Node
+            .capabilities()
+            .contains(&"compute.dispatch"));
     }
 
     #[test]
     fn nest_has_storage() {
         assert!(AtomicKind::Nest.has_storage());
-        assert_eq!(AtomicKind::Nest.components().len(), 3);
+        assert_eq!(AtomicKind::Nest.capabilities().len(), 3);
+        assert!(AtomicKind::Nest
+            .capabilities()
+            .contains(&"storage.provenance"));
     }
 
     #[test]

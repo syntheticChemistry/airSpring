@@ -16,6 +16,7 @@ use airspring_barracuda::eco::anderson::{self, QsRegime};
 use airspring_barracuda::eco::evapotranspiration as et;
 use airspring_barracuda::eco::solar;
 use airspring_barracuda::eco::water_balance;
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{self, ValidationHarness};
 
 const BENCHMARK: &str =
@@ -44,12 +45,24 @@ fn validate_anderson_coupling(v: &mut ValidationHarness) {
 
     v.check_bool("S_e wet in [0,1]", (0.0..=1.0).contains(&r_wet.se));
     v.check_bool("S_e dry in [0,1]", (0.0..=1.0).contains(&r_dry.se));
-    v.check_bool("S_e saturated = 1.0", (r_sat.se - 1.0).abs() < 1e-10);
-    v.check_bool("S_e residual = 0.0", r_res.se.abs() < 1e-10);
+    v.check_bool(
+        "S_e saturated = 1.0",
+        (r_sat.se - 1.0).abs() < tolerances::SENSOR_EXACT.abs_tol,
+    );
+    v.check_bool(
+        "S_e residual = 0.0",
+        r_res.se.abs() < tolerances::SENSOR_EXACT.abs_tol,
+    );
 
     v.check_bool("d_eff wet > d_eff dry", r_wet.d_eff > r_dry.d_eff);
-    v.check_bool("d_eff saturated = 3.0", (r_sat.d_eff - 3.0).abs() < 1e-10);
-    v.check_bool("d_eff residual = 0.0", r_res.d_eff.abs() < 1e-10);
+    v.check_bool(
+        "d_eff saturated = 3.0",
+        (r_sat.d_eff - 3.0).abs() < tolerances::SENSOR_EXACT.abs_tol,
+    );
+    v.check_bool(
+        "d_eff residual = 0.0",
+        r_res.d_eff.abs() < tolerances::SENSOR_EXACT.abs_tol,
+    );
 
     v.check_bool("W wet < W dry", r_wet.disorder < r_dry.disorder);
     v.check_bool(

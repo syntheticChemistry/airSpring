@@ -2,14 +2,30 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
-## [0.6.8] - 2026-03-02
+## [0.6.8] - 2026-03-03
 
-### Local GPU Compute Evolution + NUCLEUS Full-Pipeline Routing
+### barraCuda 0.3.1 Standalone Rewire + Deep Debt Resolution
 
-- **ToadStool S87 sync** (2dc26792)
+- **Rewired to standalone barraCuda 0.3.1** (`ecoPrimals/barraCuda`) — extracted from
+  ToadStool S89, universal math engine. Zero breaking changes on rewire.
+- **Capability-based discovery**: All hardcoded primal names (`toadstool`, `beardog`,
+  `songbird`) replaced with capability strings (`compute.dispatch`, `crypto.tls`,
+  `mesh.discovery`). `AtomicKind::components()` → `capabilities()` + `component_descriptions()`.
+- **API modernization**: `to_toadstool()` → `to_barracuda()` across GPU modules.
+  `exit_no_gpu()` wired into all GPU validation binaries. Bio diversity tolerances added.
+- **Deep debt resolution**: Magic numbers extracted to named constants (Brent params,
+  primal timeouts). `unwrap()` in production code replaced with `Result` handling.
+  Evolution docs updated for barraCuda standalone + ToadStool S93.
+- **ToadStool S93 sync** (845 WGSL shaders, 5,369 tests)
+- 1132 workspace tests (846 lib + 286 integration), 62 forge tests, 86 binaries
+- 94.91% line coverage / 95.81% function coverage
+- Zero clippy pedantic warnings, zero unsafe code
+
+### Local GPU Compute Evolution + NUCLEUS Full-Pipeline Routing (pre-rewire)
+
 - **Local GPU evolution**: 6 WGSL compute shaders (`local_elementwise.wgsl`) for
   SCS-CN runoff, Stewart yield, Makkink/Turc/Hamon/Blaney-Criddle ET₀ —
-  f32 GPU dispatch via `gpu::local_dispatch::LocalElementwise`, pending ToadStool
+  f32 GPU dispatch via `gpu::local_dispatch::LocalElementwise`, pending barraCuda
   absorption to f64 via `compile_shader_universal`
 - **`gpu::local_dispatch`**: New module — minimal wgpu compute pipeline for
   airSpring-evolved shaders. Compiles WGSL once, reuses pipeline for batched dispatch
@@ -24,9 +40,9 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 - **Exp 077** (`validate_cross_spring_evolution`): 32/32 PASS — CPU↔GPU benchmark
   with shader provenance (146/146 bench + 32/32 Exp 077)
 - **metalForge workloads**: 21 → 27 (6 new `ShaderOrigin::Local`)
-- 846 lib tests (↑13), 86 binaries (↑2), 77 experiments (↑3)
+- 77 experiments (↑3)
 - GPU coverage: 86% of 28 domains (24/28 GPU, 4 CPU-only)
-- metalForge: 61 → 67 forge tests (66 pipeline + 1 doc)
+- metalForge: 62 forge tests (61 pipeline + 1 doc)
 
 ## [0.6.7] - 2026-03-02
 

@@ -1,7 +1,7 @@
 # airSpring — Ecological & Agricultural Sciences
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
-**Date**: March 2, 2026
+**Date**: March 3, 2026
 **Version**: 0.6.8
 **License**: AGPL-3.0-or-later
 
@@ -19,7 +19,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,237/1,237 PASS** | 57 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **846 lib + 1498 atlas** | 86 binaries + 138/138 cross-spring benchmarks |
+| Phase 1: Rust validation | **846 lib + 1498 atlas** | 86 binaries + 146/146 + 32/32 provenance cross-spring benchmarks |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (34/34 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -45,7 +45,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | Check | Status |
 |-------|--------|
 | `cargo test --lib` (barracuda) | **846 passed**, 0 failures |
-| `cargo test --lib` (metalForge) | **61 passed**, 0 failures |
+| `cargo test --lib` (metalForge) | **62 passed**, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **95.66% line coverage** |
 | `cargo clippy (pedantic)` | **0 warnings** (pedantic, both crates) |
 | `cargo fmt --check` | **Clean** |
@@ -79,7 +79,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
   barracuda::ops/linalg/stats/pde/optimize (GPU dispatch + CPU fallback)
        │
        ▼
-  ToadStool WGSL shaders (f64 precision on GPU, 844 shaders — S87)
+  ToadStool WGSL shaders (f64 precision on GPU, 845 shaders — S93)
        │
        ▼
   metalForge (mixed CPU + GPU + NPU)
@@ -92,7 +92,7 @@ airSpring domain code (`eco::`) is validated against papers, then wrapped by GPU
 
 ### Cross-Spring Shader Evolution
 
-ToadStool contains **844 WGSL shaders** (S79: 2,773+ barracuda tests, pure math + precision per silicon). airSpring uses 6 shared shader families, contributed **3 upstream fixes**, and had **all metalForge modules absorbed upstream** (S64 + S66):
+ToadStool contains **845 WGSL shaders** (S93: 5,369 tests, pure math + precision per silicon). airSpring uses 6 shared shader families, contributed **3 upstream fixes**, and had **all metalForge modules absorbed upstream** (S64 + S66):
 
 | Spring | Shaders | What airSpring Gets | What airSpring Gave Back |
 |--------|---------|--------------------|-----------------------|
@@ -104,7 +104,7 @@ ToadStool contains **844 WGSL shaders** (S79: 2,773+ barracuda tests, pure math 
 
 50+ cross-spring absorptions (S42-S87). All metalForge absorbed. DF64 transcendentals complete (15 functions).
 S87: ops 0-13, GPU uncertainty stack, `BrentGpu`, `RichardsGpu`, `BatchedStatefulF64`, `nautilus`, L-BFGS,
-`gpu_helpers` refactor, `is_device_lost()`, MatMul validation, 844 WGSL shaders (zero f32-only).
+`gpu_helpers` refactor, `is_device_lost()`, MatMul validation, 845 WGSL shaders (zero f32-only).
 See `specs/CROSS_SPRING_EVOLUTION.md`.
 
 ### BarraCuda Integration (25 Tier A + 6 GPU-local + 3 pipeline)
@@ -279,12 +279,12 @@ AGPL-3.0-or-later
 
 ---
 
-*March 2, 2026 — v0.6.8. 77 experiments, 1237/1237 Python, 846 lib + 61 forge tests,
+*March 3, 2026 — v0.6.8. barraCuda 0.3.1 standalone rewire. 77 experiments, 1237/1237 Python, 846 lib + 62 forge tests,
 86 binaries (81 barracuda + 5 forge), 146/146 cross-spring evolution benchmarks + 32/32 Exp 077 provenance (S87 sync),
 68/68 cross-spring rewire (BrentGpu VG inverse + RichardsGpu Picard, 5/5 springs),
 13,000× Rust-vs-Python atlas-scale speedup, 15,300 station-days, 1498/1498 atlas checks.
 NUCLEUS primal (30 capabilities), ecology domain in biomeOS registry.
-ToadStool S87 synced: 844 WGSL shaders, ops 0-13, GPU uncertainty stack (jackknife/bootstrap/diversity),
+ToadStool S93 synced: 845 WGSL shaders, ops 0-13, GPU uncertainty stack (jackknife/bootstrap/diversity),
 BrentGpu, RichardsGpu, StatefulPipeline, BatchedStatefulF64, nautilus, L-BFGS.
 v0.6.8: 6 local WGSL compute shaders (local\_elementwise.wgsl) — SCS-CN, Stewart yield, Makkink, Turc, Hamon, Blaney-Criddle.
 gpu::local\_dispatch (LocalElementwise wgpu pipeline), 27 metalForge workloads, NUCLEUS mesh routing (Exp 076: 60/60).

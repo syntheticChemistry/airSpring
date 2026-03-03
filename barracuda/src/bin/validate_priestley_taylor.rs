@@ -11,8 +11,7 @@
 //! and evaporation using large-scale parameters." Monthly Weather Review
 //! 100(2): 81-92.
 //!
-//! script=`control/priestley_taylor/priestley_taylor_et0.py`, commit=9a84ae5, date=2026-02-26
-//! Run: `python3 control/priestley_taylor/priestley_taylor_et0.py`
+//! Provenance: script=`control/priestley_taylor/priestley_taylor_et0.py`, commit=9a84ae5, date=2026-02-26
 
 use airspring_barracuda::eco::evapotranspiration::{self as et, DailyEt0Input};
 use airspring_barracuda::validation::{self, parse_benchmark_json, ValidationHarness};

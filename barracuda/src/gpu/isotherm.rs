@@ -4,10 +4,15 @@
 //! # Cross-Spring Provenance
 //!
 //! `nelder_mead` and `multi_start_nelder_mead` come from `barracuda::optimize`
-//! (absorbed into `ToadStool` S62). airSpring
-//! uses these for 2-parameter isotherm fitting (Langmuir qm/KL, Freundlich
-//! Kf/n). The `NelderMeadGpu` variant (S52+) exists for 5-50 parameter
-//! problems but is not cost-effective for 2-parameter isotherms.
+//! (absorbed S62, now in standalone barraCuda 0.3.1). airSpring uses these
+//! for 2-parameter isotherm fitting (Langmuir qm/KL, Freundlich Kf/n).
+//!
+//! # Evolution: Batch GPU Fitting
+//!
+//! [`barracuda::optimize::batched_nelder_mead_gpu`] (barraCuda 0.3.1) provides
+//! parallel optimization of many independent problems. Useful when fitting
+//! isotherms across many soil samples simultaneously. For single-sample
+//! 2-parameter fitting, the CPU `multi_start` path remains more cost-effective.
 //!
 //! # Three API Levels
 //!

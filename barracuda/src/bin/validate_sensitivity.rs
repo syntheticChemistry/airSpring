@@ -41,7 +41,11 @@ struct MeteoParams {
 
 impl MeteoParams {
     fn from_json(v: &serde_json::Value) -> Self {
-        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+        #[expect(
+            clippy::cast_possible_truncation,
+            clippy::cast_sign_loss,
+            reason = "DOY from JSON f64 is a non-negative integer"
+        )]
         let doy = json_field(v, "day_of_year") as u32;
         Self {
             tmin_c: json_field(v, "tmin_c"),

@@ -211,7 +211,10 @@ fn run_hargreaves_benchmarks(pass: &mut u32, fail: &mut u32) {
     );
 }
 
-#[allow(clippy::too_many_lines)]
+#[expect(
+    clippy::too_many_lines,
+    reason = "GPU benchmark suite covers ops 5-8 with setup and validation"
+)]
 fn run_ops_5_8_gpu_benchmarks(device: Option<&Arc<WgpuDevice>>, pass: &mut u32, fail: &mut u32) {
     use barracuda::ops::batched_elementwise_f64::{self as bef64, BatchedElementwiseF64, Op};
 

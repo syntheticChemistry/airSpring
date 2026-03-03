@@ -56,7 +56,10 @@ fn validate_benchmark_provenance(v: &mut ValidationHarness) {
 
 fn quantize_i8(val: f64, lo: f64, hi: f64) -> i8 {
     let normalized = ((val - lo) / (hi - lo)).clamp(0.0, 1.0);
-    #[allow(clippy::cast_possible_truncation)]
+    #[expect(
+        clippy::cast_possible_truncation,
+        reason = "f64→i8 quantization for NPU input is intentional 7-bit range"
+    )]
     let result = (normalized * 127.0) as i8;
     result
 }

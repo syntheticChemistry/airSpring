@@ -8,7 +8,7 @@ use std::fs;
 /// Probe all GPU adapters via wgpu.
 #[must_use]
 pub fn probe_gpus() -> Vec<Substrate> {
-    let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {
+    let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
         backends: wgpu::Backends::all(),
         ..Default::default()
     });

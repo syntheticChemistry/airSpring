@@ -162,10 +162,26 @@ mod tests {
         };
         let gpu_solver = GpuRunoff::new(device).unwrap();
         let inputs = vec![
-            RunoffInput { precip_mm: 50.0, cn: 75.0, ia_ratio: 0.2 },
-            RunoffInput { precip_mm: 100.0, cn: 85.0, ia_ratio: 0.2 },
-            RunoffInput { precip_mm: 25.0, cn: 65.0, ia_ratio: 0.2 },
-            RunoffInput { precip_mm: 0.0, cn: 80.0, ia_ratio: 0.2 },
+            RunoffInput {
+                precip_mm: 50.0,
+                cn: 75.0,
+                ia_ratio: 0.2,
+            },
+            RunoffInput {
+                precip_mm: 100.0,
+                cn: 85.0,
+                ia_ratio: 0.2,
+            },
+            RunoffInput {
+                precip_mm: 25.0,
+                cn: 65.0,
+                ia_ratio: 0.2,
+            },
+            RunoffInput {
+                precip_mm: 0.0,
+                cn: 80.0,
+                ia_ratio: 0.2,
+            },
         ];
         let gpu = gpu_solver.compute(&inputs).unwrap();
         let cpu = BatchedRunoff::compute(&inputs);
@@ -179,9 +195,21 @@ mod tests {
     #[test]
     fn test_batch_compute() {
         let inputs = vec![
-            RunoffInput { precip_mm: 50.0, cn: 75.0, ia_ratio: 0.2 },
-            RunoffInput { precip_mm: 100.0, cn: 85.0, ia_ratio: 0.2 },
-            RunoffInput { precip_mm: 25.0, cn: 65.0, ia_ratio: 0.2 },
+            RunoffInput {
+                precip_mm: 50.0,
+                cn: 75.0,
+                ia_ratio: 0.2,
+            },
+            RunoffInput {
+                precip_mm: 100.0,
+                cn: 85.0,
+                ia_ratio: 0.2,
+            },
+            RunoffInput {
+                precip_mm: 25.0,
+                cn: 65.0,
+                ia_ratio: 0.2,
+            },
         ];
         let result = BatchedRunoff::compute(&inputs);
         assert_eq!(result.runoff_mm.len(), 3);

@@ -8,8 +8,7 @@
 //! Validate yield response model against FAO-56 Table 24 and Stewart (1977).
 //!
 //! Benchmark source: `control/yield_response/benchmark_yield_response.json`
-//! Provenance: FAO-56 Ch. 10, Stewart (1977), Doorenbos & Kassam (1979).
-//! Python baseline: `control/yield_response/yield_response.py`
+//! Provenance: analytical — FAO-56 Ch. 10, Stewart (1977).
 //!
 //! Tests:
 //! 1. Ky values match FAO-56 Table 24
@@ -17,9 +16,6 @@
 //! 3. Multi-stage product formula against analytical solutions
 //! 4. Water use efficiency (WUE) calculations
 //! 5. Scheduling strategy comparison (corn, Michigan synthetic weather)
-//!
-//! script=`control/yield_response/yield_response.py`, commit=e651409, date=2026-02-26
-//! Run: `python3 control/yield_response/yield_response.py`
 
 use airspring_barracuda::eco::water_balance;
 use airspring_barracuda::eco::yield_response::{
@@ -132,7 +128,11 @@ fn validate_scheduling(v: &mut ValidationHarness, benchmark: &serde_json::Value)
     let scenario = &benchmark["validation_checks"]["scheduling_comparison"]["scenario"];
     let strategies = &benchmark["validation_checks"]["scheduling_comparison"]["strategies"];
 
-    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+    #[expect(
+        clippy::cast_possible_truncation,
+        clippy::cast_sign_loss,
+        reason = "season_days from JSON f64 is a non-negative integer"
+    )]
     let season_days = f64_field(scenario, "season_days") as usize;
     let ky_total = f64_field(scenario, "ky_total");
     let theta_fc = f64_field(scenario, "theta_fc");
@@ -192,9 +192,17 @@ fn validate_scheduling(v: &mut ValidationHarness, benchmark: &serde_json::Value)
         let sd_range = strat["expected_stress_days_range"]
             .as_array()
             .expect("range array");
-        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+        #[expect(
+            clippy::cast_possible_truncation,
+            clippy::cast_sign_loss,
+            reason = "yield range bounds from JSON f64 are non-negative integers"
+        )]
         let sd_lo = sd_range[0].as_f64().unwrap() as usize;
-        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+        #[expect(
+            clippy::cast_possible_truncation,
+            clippy::cast_sign_loss,
+            reason = "yield range upper bound from JSON f64 is a non-negative integer"
+        )]
         let sd_hi = sd_range[1].as_f64().unwrap() as usize;
 
         v.check_bool(

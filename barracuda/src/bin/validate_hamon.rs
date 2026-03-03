@@ -17,8 +17,7 @@
 //! - Hamon WR (1961) J Hydraulics Div ASCE 87(HY3):107-120
 //! - Lu J, et al. (2005) J Am Water Resour Assoc 41(3):621-633
 //!
-//! script=`control/hamon/hamon_pet.py`, commit=d3ecdc8, date=2026-02-27
-//! Run: `python3 control/hamon/hamon_pet.py`
+//! Provenance: script=`control/hamon/hamon_pet.py`, commit=d3ecdc8, date=2026-02-27
 
 use airspring_barracuda::eco::evapotranspiration::{daylight_hours, hamon_pet};
 use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
@@ -48,7 +47,10 @@ fn validate_day_length(v: &mut ValidationHarness, benchmark: &serde_json::Value)
     let checks = &benchmark["validation_checks"]["day_length_computation"]["test_cases"];
     for tc in checks.as_array().expect("array") {
         let lat = json_field(tc, "latitude");
-        #[allow(clippy::cast_sign_loss)]
+        #[expect(
+            clippy::cast_sign_loss,
+            reason = "DOY from JSON f64 is a non-negative integer"
+        )]
         let doy = json_field(tc, "doy") as u32;
         let expected = json_field(tc, "expected_hours");
         let tol = json_field(tc, "tolerance");
@@ -81,7 +83,6 @@ fn validate_monotonicity(v: &mut ValidationHarness, benchmark: &serde_json::Valu
     let checks = &benchmark["validation_checks"]["monotonicity"]["test_cases"];
     for tc in checks.as_array().expect("array") {
         let label = tc["label"].as_str().unwrap_or("mono");
-        #[allow(clippy::manual_map)]
         let (low, high) = if tc.get("base_t").is_some() && tc.get("base_dl").is_some() {
             (
                 hamon_pet(json_field(tc, "base_t"), json_field(tc, "base_dl")),

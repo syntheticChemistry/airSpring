@@ -80,7 +80,11 @@ fn validate_delta_table(v: &mut ValidationHarness, benchmark: &serde_json::Value
 
 /// Validate Example 18 (Uccle, daily) — primary validation target.
 /// Returns Uccle ET₀ for reuse in boundary checks.
-#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+#[expect(
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    reason = "DOY from JSON f64 is a non-negative integer"
+)]
 fn validate_uccle(v: &mut ValidationHarness, benchmark: &serde_json::Value) -> f64 {
     println!();
     validation::section("FAO-56 Example 18: Uccle, Belgium (daily, benchmark JSON)");

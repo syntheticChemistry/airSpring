@@ -59,9 +59,9 @@ pub struct StationDay {
 }
 
 impl StationDay {
-    /// Convert to `ToadStool` `StationDayInput` tuple.
+    /// Convert to `BarraCuda` `StationDayInput` tuple for GPU dispatch.
     #[must_use]
-    pub const fn to_toadstool(self) -> bef64::StationDayInput {
+    pub const fn to_barracuda(self) -> bef64::StationDayInput {
         (
             self.tmax,
             self.tmin,
@@ -81,7 +81,7 @@ impl StationDay {
 pub enum Backend {
     /// Validated CPU path.
     Cpu,
-    /// GPU path via `ToadStool` `BatchedElementwiseF64` — **default** (all TS issues resolved).
+    /// GPU path via `BarraCuda` `BatchedElementwiseF64` — **default**.
     #[default]
     Gpu,
 }
@@ -150,7 +150,7 @@ impl BatchedEt0 {
     pub fn compute_gpu(&self, inputs: &[StationDay]) -> crate::error::Result<BatchedEt0Result> {
         if let Some(engine) = &self.gpu_engine {
             let station_days: Vec<bef64::StationDayInput> =
-                inputs.iter().map(|s| s.to_toadstool()).collect();
+                inputs.iter().map(|s| s.to_barracuda()).collect();
             let et0_values = engine.fao56_et0_batch(&station_days)?;
             Ok(BatchedEt0Result {
                 et0_values,
@@ -314,9 +314,9 @@ mod tests {
     }
 
     #[test]
-    fn test_station_day_to_toadstool() {
+    fn test_station_day_to_barracuda() {
         let sd = sample_station_day();
-        let tt = sd.to_toadstool();
+        let tt = sd.to_barracuda();
         assert!((tt.0 - sd.tmax).abs() < f64::EPSILON);
         assert!((tt.1 - sd.tmin).abs() < f64::EPSILON);
         assert_eq!(tt.8, sd.doy);

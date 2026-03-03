@@ -197,8 +197,11 @@ fn main() {
     println!("\n── 4. Mixed-Hardware Pipeline ──\n");
 
     let seven_stage = [
-        Workload::new("crop_stress", vec![Capability::QuantizedInference { bits: 8 }])
-            .prefer(SubstrateKind::Npu),
+        Workload::new(
+            "crop_stress",
+            vec![Capability::QuantizedInference { bits: 8 }],
+        )
+        .prefer(SubstrateKind::Npu),
         Workload::new(
             "et0_batch",
             vec![Capability::F64Compute, Capability::ShaderDispatch],
@@ -256,13 +259,21 @@ fn main() {
     println!("\n── 5. NUCLEUS Mesh Routing ──\n");
 
     let mut mesh = NucleusMesh::new();
-    mesh.register(NucleusAtomic::new(AtomicKind::Tower, "tower-eastgate", vec![]));
+    mesh.register(NucleusAtomic::new(
+        AtomicKind::Tower,
+        "tower-eastgate",
+        vec![],
+    ));
     mesh.register(NucleusAtomic::new(
         AtomicKind::Node,
         "node-eastgate",
         vec![gpu.clone(), npu.clone(), cpu.clone()],
     ));
-    mesh.register(NucleusAtomic::new(AtomicKind::Nest, "nest-eastgate", vec![]));
+    mesh.register(NucleusAtomic::new(
+        AtomicKind::Nest,
+        "nest-eastgate",
+        vec![],
+    ));
 
     check!(
         "mesh_tower",
@@ -280,9 +291,7 @@ fn main() {
         "1 Nest atomic"
     );
 
-    let mesh_pipeline = mesh
-        .route_pipeline(&seven_stage)
-        .expect("mesh pipeline");
+    let mesh_pipeline = mesh.route_pipeline(&seven_stage).expect("mesh pipeline");
     check!(
         "mesh_single_node",
         mesh_pipeline.is_single_node(),
@@ -318,9 +327,14 @@ fn main() {
             "et0_batch",
             vec![Capability::F64Compute, Capability::ShaderDispatch],
         ),
-        Workload::new("crop_stress", vec![Capability::QuantizedInference { bits: 8 }]),
+        Workload::new(
+            "crop_stress",
+            vec![Capability::QuantizedInference { bits: 8 }],
+        ),
     ];
-    let mp = multi_mesh.route_pipeline(&cross_pipeline).expect("cross-node");
+    let mp = multi_mesh
+        .route_pipeline(&cross_pipeline)
+        .expect("cross-node");
     check!(
         "multi_node_cross_hop",
         mp.cross_node_hops == 1,
@@ -340,23 +354,35 @@ fn main() {
     println!("\n── 7. Atomic Component Verification ──\n");
 
     check!(
-        "tower_components",
-        AtomicKind::Tower.components().len() == 2,
-        "BearDog + Songbird"
+        "tower_capabilities",
+        AtomicKind::Tower.capabilities().len() == 2,
+        "crypto.tls + mesh.discovery"
     );
     check!(
-        "node_components",
-        AtomicKind::Node.components().len() == 3,
-        "BearDog + Songbird + ToadStool"
+        "node_capabilities",
+        AtomicKind::Node.capabilities().len() == 3,
+        "crypto.tls + mesh.discovery + compute.dispatch"
     );
     check!(
-        "nest_components",
-        AtomicKind::Nest.components().len() == 3,
-        "BearDog + Songbird + NestGate"
+        "nest_capabilities",
+        AtomicKind::Nest.capabilities().len() == 3,
+        "crypto.tls + mesh.discovery + storage.provenance"
     );
-    check!("node_has_compute", AtomicKind::Node.has_compute(), "Node dispatches compute");
-    check!("nest_has_storage", AtomicKind::Nest.has_storage(), "Nest stores provenance");
-    check!("tower_has_mesh", AtomicKind::Tower.has_mesh(), "Tower discovers mesh");
+    check!(
+        "node_has_compute",
+        AtomicKind::Node.has_compute(),
+        "Node dispatches compute"
+    );
+    check!(
+        "nest_has_storage",
+        AtomicKind::Nest.has_storage(),
+        "Nest stores provenance"
+    );
+    check!(
+        "tower_has_mesh",
+        AtomicKind::Tower.has_mesh(),
+        "Tower discovers mesh"
+    );
 
     println!("\n── 8. Transfer Path Latency Ranking ──\n");
 

@@ -184,8 +184,16 @@ mod tests {
         };
         let gpu_solver = GpuSimpleEt0::new(device).unwrap();
         let inputs = vec![
-            MakkinkInput { tmean_c: 20.0, rs_mj: 15.0, elevation_m: 100.0 },
-            MakkinkInput { tmean_c: 30.0, rs_mj: 25.0, elevation_m: 0.0 },
+            MakkinkInput {
+                tmean_c: 20.0,
+                rs_mj: 15.0,
+                elevation_m: 100.0,
+            },
+            MakkinkInput {
+                tmean_c: 30.0,
+                rs_mj: 25.0,
+                elevation_m: 0.0,
+            },
         ];
         let gpu = gpu_solver.makkink(&inputs).unwrap();
         let cpu = BatchedSimpleEt0::makkink(&inputs);
@@ -203,8 +211,16 @@ mod tests {
         };
         let gpu_solver = GpuSimpleEt0::new(device).unwrap();
         let inputs = vec![
-            TurcInput { tmean_c: 20.0, rs_mj: 15.0, rh_pct: 70.0 },
-            TurcInput { tmean_c: 25.0, rs_mj: 20.0, rh_pct: 40.0 },
+            TurcInput {
+                tmean_c: 20.0,
+                rs_mj: 15.0,
+                rh_pct: 70.0,
+            },
+            TurcInput {
+                tmean_c: 25.0,
+                rs_mj: 20.0,
+                rh_pct: 40.0,
+            },
         ];
         let gpu = gpu_solver.turc(&inputs).unwrap();
         let cpu = BatchedSimpleEt0::turc(&inputs);
@@ -223,8 +239,16 @@ mod tests {
         let gpu_solver = GpuSimpleEt0::new(device).unwrap();
         let lat_rad = 42.7_f64.to_radians();
         let inputs = vec![
-            HamonInput { tmean_c: 20.0, latitude_rad: lat_rad, doy: 180 },
-            HamonInput { tmean_c: 10.0, latitude_rad: lat_rad, doy: 90 },
+            HamonInput {
+                tmean_c: 20.0,
+                latitude_rad: lat_rad,
+                doy: 180,
+            },
+            HamonInput {
+                tmean_c: 10.0,
+                latitude_rad: lat_rad,
+                doy: 90,
+            },
         ];
         let gpu = gpu_solver.hamon(&inputs).unwrap();
         let cpu = BatchedSimpleEt0::hamon(&inputs);
@@ -243,8 +267,16 @@ mod tests {
         let gpu_solver = GpuSimpleEt0::new(device).unwrap();
         let lat_rad = 42.7_f64.to_radians();
         let inputs = vec![
-            BlaneyCriddleInput { tmean_c: 25.0, latitude_rad: lat_rad, doy: 180 },
-            BlaneyCriddleInput { tmean_c: 5.0, latitude_rad: lat_rad, doy: 15 },
+            BlaneyCriddleInput {
+                tmean_c: 25.0,
+                latitude_rad: lat_rad,
+                doy: 180,
+            },
+            BlaneyCriddleInput {
+                tmean_c: 5.0,
+                latitude_rad: lat_rad,
+                doy: 15,
+            },
         ];
         let gpu = gpu_solver.blaney_criddle(&inputs).unwrap();
         let cpu = BatchedSimpleEt0::blaney_criddle(&inputs);
@@ -257,8 +289,16 @@ mod tests {
     #[test]
     fn test_makkink_batch() {
         let inputs = vec![
-            MakkinkInput { tmean_c: 20.0, rs_mj: 15.0, elevation_m: 100.0 },
-            MakkinkInput { tmean_c: 30.0, rs_mj: 25.0, elevation_m: 0.0 },
+            MakkinkInput {
+                tmean_c: 20.0,
+                rs_mj: 15.0,
+                elevation_m: 100.0,
+            },
+            MakkinkInput {
+                tmean_c: 30.0,
+                rs_mj: 25.0,
+                elevation_m: 0.0,
+            },
         ];
         let results = BatchedSimpleEt0::makkink(&inputs);
         assert_eq!(results.len(), 2);
@@ -270,8 +310,16 @@ mod tests {
     #[test]
     fn test_turc_batch() {
         let inputs = vec![
-            TurcInput { tmean_c: 20.0, rs_mj: 15.0, rh_pct: 70.0 },
-            TurcInput { tmean_c: 25.0, rs_mj: 20.0, rh_pct: 60.0 },
+            TurcInput {
+                tmean_c: 20.0,
+                rs_mj: 15.0,
+                rh_pct: 70.0,
+            },
+            TurcInput {
+                tmean_c: 25.0,
+                rs_mj: 20.0,
+                rh_pct: 60.0,
+            },
         ];
         let results = BatchedSimpleEt0::turc(&inputs);
         assert_eq!(results.len(), 2);
@@ -284,8 +332,16 @@ mod tests {
     fn test_hamon_batch() {
         let lat_rad = 42.7_f64.to_radians();
         let inputs = vec![
-            HamonInput { tmean_c: 20.0, latitude_rad: lat_rad, doy: 180 },
-            HamonInput { tmean_c: 10.0, latitude_rad: lat_rad, doy: 90 },
+            HamonInput {
+                tmean_c: 20.0,
+                latitude_rad: lat_rad,
+                doy: 180,
+            },
+            HamonInput {
+                tmean_c: 10.0,
+                latitude_rad: lat_rad,
+                doy: 90,
+            },
         ];
         let results = BatchedSimpleEt0::hamon(&inputs);
         assert_eq!(results.len(), 2);
@@ -296,8 +352,16 @@ mod tests {
     fn test_blaney_criddle_batch() {
         let lat_rad = 42.7_f64.to_radians();
         let inputs = vec![
-            BlaneyCriddleInput { tmean_c: 25.0, latitude_rad: lat_rad, doy: 180 },
-            BlaneyCriddleInput { tmean_c: 5.0, latitude_rad: lat_rad, doy: 15 },
+            BlaneyCriddleInput {
+                tmean_c: 25.0,
+                latitude_rad: lat_rad,
+                doy: 180,
+            },
+            BlaneyCriddleInput {
+                tmean_c: 5.0,
+                latitude_rad: lat_rad,
+                doy: 15,
+            },
         ];
         let results = BatchedSimpleEt0::blaney_criddle(&inputs);
         assert_eq!(results.len(), 2);

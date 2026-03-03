@@ -98,12 +98,11 @@ impl LocalElementwise {
                 ],
             });
 
-        let pipeline_layout =
-            wgpu_device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-                label: Some("local_elementwise_pl"),
-                bind_group_layouts: &[&bind_group_layout],
-                push_constant_ranges: &[],
-            });
+        let pipeline_layout = wgpu_device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: Some("local_elementwise_pl"),
+            bind_group_layouts: &[&bind_group_layout],
+            push_constant_ranges: &[],
+        });
 
         let pipeline = wgpu_device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
             label: Some("local_elementwise_pipeline"),
@@ -129,14 +128,11 @@ impl LocalElementwise {
     /// # Errors
     ///
     /// Returns an error if GPU buffer mapping or submission fails.
-    #[allow(clippy::too_many_lines)]
-    pub fn dispatch(
-        &self,
-        op: LocalOp,
-        a: &[f64],
-        b: &[f64],
-        c: &[f64],
-    ) -> Result<Vec<f64>> {
+    #[expect(
+        clippy::too_many_lines,
+        reason = "GPU buffer setup, dispatch, and readback are inherently sequential steps"
+    )]
+    pub fn dispatch(&self, op: LocalOp, a: &[f64], b: &[f64], c: &[f64]) -> Result<Vec<f64>> {
         let n = a.len();
         if n == 0 {
             return Ok(Vec::new());
@@ -240,9 +236,11 @@ impl LocalElementwise {
         queue.submit(std::iter::once(encoder.finish()));
 
         let (tx, rx) = std::sync::mpsc::channel();
-        buf_staging.slice(..).map_async(wgpu::MapMode::Read, move |result| {
-            let _ = tx.send(result);
-        });
+        buf_staging
+            .slice(..)
+            .map_async(wgpu::MapMode::Read, move |result| {
+                let _ = tx.send(result);
+            });
         wgpu_device.poll(wgpu::Maintain::Wait);
 
         rx.recv()
@@ -294,7 +292,10 @@ mod tests {
 
         let gpu = le.dispatch(LocalOp::ScsCnRunoff, &p, &cn, &ia).unwrap();
 
-        let cpu: Vec<f64> = p.iter().zip(&cn).zip(&ia)
+        let cpu: Vec<f64> = p
+            .iter()
+            .zip(&cn)
+            .zip(&ia)
             .map(|((&pp, &cc), &ii)| crate::eco::runoff::scs_cn_runoff(pp, cc, ii))
             .collect();
 
@@ -314,12 +315,18 @@ mod tests {
         let ratio = [0.8, 0.7, 1.0];
         let zeros = [0.0; 3];
 
-        let gpu = le.dispatch(LocalOp::StewartYield, &ky, &ratio, &zeros).unwrap();
+        let gpu = le
+            .dispatch(LocalOp::StewartYield, &ky, &ratio, &zeros)
+            .unwrap();
 
         for (i, (&k, &r)) in ky.iter().zip(&ratio).enumerate() {
             let cpu = crate::eco::yield_response::yield_ratio_single(k, r);
             let tol = cpu.abs().mul_add(1e-4, 1e-6);
-            assert!((gpu[i] - cpu).abs() < tol, "Stewart[{i}] GPU={:.6} CPU={cpu:.6}", gpu[i]);
+            assert!(
+                (gpu[i] - cpu).abs() < tol,
+                "Stewart[{i}] GPU={:.6} CPU={cpu:.6}",
+                gpu[i]
+            );
         }
     }
 
@@ -338,7 +345,11 @@ mod tests {
         for (i, ((&tt, &rr), &ee)) in t.iter().zip(&rs).zip(&elev).enumerate() {
             let cpu = crate::eco::simple_et0::makkink_et0(tt, rr, ee);
             let tol = cpu.abs().mul_add(2e-3, 0.01);
-            assert!((gpu[i] - cpu).abs() < tol, "Makkink[{i}] GPU={:.4} CPU={cpu:.4}", gpu[i]);
+            assert!(
+                (gpu[i] - cpu).abs() < tol,
+                "Makkink[{i}] GPU={:.4} CPU={cpu:.4}",
+                gpu[i]
+            );
         }
     }
 
@@ -357,7 +368,11 @@ mod tests {
         for (i, ((&tt, &rr), &hh)) in t.iter().zip(&rs).zip(&rh).enumerate() {
             let cpu = crate::eco::simple_et0::turc_et0(tt, rr, hh);
             let tol = cpu.abs().mul_add(2e-3, 0.01);
-            assert!((gpu[i] - cpu).abs() < tol, "Turc[{i}] GPU={:.4} CPU={cpu:.4}", gpu[i]);
+            assert!(
+                (gpu[i] - cpu).abs() < tol,
+                "Turc[{i}] GPU={:.4} CPU={cpu:.4}",
+                gpu[i]
+            );
         }
     }
 
@@ -376,7 +391,11 @@ mod tests {
         for (i, ((&tt, &ll), &dd)) in t.iter().zip(&lat).zip(&doy).enumerate() {
             let cpu = crate::eco::simple_et0::hamon_pet_from_location(tt, ll, dd as u32);
             let tol = cpu.abs().mul_add(5e-3, 0.02);
-            assert!((gpu[i] - cpu).abs() < tol, "Hamon[{i}] GPU={:.4} CPU={cpu:.4}", gpu[i]);
+            assert!(
+                (gpu[i] - cpu).abs() < tol,
+                "Hamon[{i}] GPU={:.4} CPU={cpu:.4}",
+                gpu[i]
+            );
         }
     }
 
@@ -390,14 +409,17 @@ mod tests {
         let lat = [42.7_f64.to_radians(), 42.7_f64.to_radians()];
         let doy = [180.0, 15.0];
 
-        let gpu = le.dispatch(LocalOp::BlaneyCriddleEt0, &t, &lat, &doy).unwrap();
+        let gpu = le
+            .dispatch(LocalOp::BlaneyCriddleEt0, &t, &lat, &doy)
+            .unwrap();
 
         for (i, ((&tt, &ll), &dd)) in t.iter().zip(&lat).zip(&doy).enumerate() {
             let cpu = crate::eco::simple_et0::blaney_criddle_from_location(tt, ll, dd as u32);
             let tol = cpu.abs().mul_add(5e-3, 0.02);
             assert!(
                 (gpu[i] - cpu).abs() < tol,
-                "BC[{i}] GPU={:.4} CPU={cpu:.4}", gpu[i]
+                "BC[{i}] GPU={:.4} CPU={cpu:.4}",
+                gpu[i]
             );
         }
     }

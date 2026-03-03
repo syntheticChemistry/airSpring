@@ -320,7 +320,10 @@ pub fn bench_blaney_criddle() -> bool {
     for i in 0..10_000_i32 {
         let tmean = 5.0 + f64::from(i % 30);
         let lat_rad = (40.0 + f64::from(i % 20) * 0.1).to_radians();
-        #[allow(clippy::cast_sign_loss)]
+        #[expect(
+            clippy::cast_sign_loss,
+            reason = "modular index is always non-negative for DOY conversion"
+        )]
         let doy = (i % 365) as u32 + 1;
         sum += et::blaney_criddle_from_location(tmean, lat_rad, doy);
     }

@@ -22,6 +22,7 @@
 use airspring_barracuda::eco::dual_kc::{
     self, CoverCropType, DualKcInput, EvaporationLayerState, ResidueLevel,
 };
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{
     self, json_array, json_f64, json_field, json_str, parse_benchmark_json, ValidationHarness,
 };
@@ -82,7 +83,7 @@ fn validate_mulch_ke(v: &mut ValidationHarness, bench: &serde_json::Value) {
             json_str(tc, "label"),
             result,
             json_field(tc, "expected_ke"),
-            1e-6,
+            tolerances::CROSS_VALIDATION.abs_tol,
         );
     }
 }

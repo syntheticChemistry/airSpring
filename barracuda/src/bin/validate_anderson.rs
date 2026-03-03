@@ -7,13 +7,14 @@
 //! (`control/anderson_coupling/anderson_coupling.py`).
 //!
 //! Benchmark: `control/anderson_coupling/benchmark_anderson_coupling.json`
-//! script=`control/anderson_coupling/anderson_coupling.py`, commit=0500398, date=2026-02-27
-//! Run: `python3 control/anderson_coupling/anderson_coupling.py`
+//!
+//! Provenance: script=`control/anderson_coupling/anderson_coupling.py`, commit=0500398, date=2026-02-27
 //!
 //! Tests: point coupling, monotonicity, boundaries, disorder, seasonal regime,
 //! tillage effects, and numeric reference parity at 1e-10.
 
 use airspring_barracuda::eco::anderson::{self, CouplingResult, D_EFF_CRITICAL};
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{self, ValidationHarness};
 
 const BENCHMARK_JSON: &str =
@@ -77,7 +78,7 @@ fn check_point_coupling(
             &format!("point({soil_key}, θ={theta:.2}): d_eff vs Python"),
             r.d_eff,
             expected_d_eff,
-            1e-10,
+            tolerances::SENSOR_EXACT.abs_tol,
         );
     }
 }
@@ -109,14 +110,14 @@ fn check_boundaries(v: &mut ValidationHarness, soils: &[SoilParams]) {
             &format!("boundary({}, θ=θ_s) → d_eff=3.0", soil.key),
             sat.d_eff,
             3.0,
-            1e-10,
+            tolerances::SENSOR_EXACT.abs_tol,
         );
         let dry = anderson::coupling_chain(soil.theta_r, soil.theta_r, soil.theta_s);
         v.check_abs(
             &format!("boundary({}, θ=θ_r) → d_eff=0.0", soil.key),
             dry.d_eff,
             0.0,
-            1e-10,
+            tolerances::SENSOR_EXACT.abs_tol,
         );
     }
 }
@@ -243,19 +244,19 @@ fn check_reference_values(
             &format!("ref({soil_key}, θ={theta:.4}): se"),
             r.se,
             expected_se,
-            1e-12,
+            tolerances::SENSOR_EXACT.abs_tol,
         );
         v.check_abs(
             &format!("ref({soil_key}, θ={theta:.4}): d_eff"),
             r.d_eff,
             expected_d_eff,
-            1e-10,
+            tolerances::SENSOR_EXACT.abs_tol,
         );
         v.check_abs(
             &format!("ref({soil_key}, θ={theta:.4}): disorder"),
             r.disorder,
             expected_disorder,
-            1e-10,
+            tolerances::SENSOR_EXACT.abs_tol,
         );
     }
 }

@@ -5,7 +5,7 @@
     clippy::cast_precision_loss,
     clippy::doc_markdown,
     clippy::similar_names,
-    clippy::too_many_lines,
+    clippy::too_many_lines
 )]
 
 //! Exp 077: Cross-Spring Provenance & CPU↔GPU Benchmark
@@ -97,7 +97,11 @@ fn main() {
     let has_gpu = device.is_some();
     println!(
         "  GPU: {}",
-        if has_gpu { "AVAILABLE" } else { "not available (CPU-only benchmarks)" }
+        if has_gpu {
+            "AVAILABLE"
+        } else {
+            "not available (CPU-only benchmarks)"
+        }
     );
 
     bench_et0_cpu_vs_gpu(&mut v, device.as_ref());
@@ -171,7 +175,11 @@ fn bench_et0_cpu_vs_gpu(v: &mut ValidationHarness, device: Option<&Arc<WgpuDevic
             let gpu_start = Instant::now();
             if let Ok(gpu_result) = batched.compute_gpu(&station_days) {
                 let gpu_elapsed = gpu_start.elapsed();
-                let n_valid = gpu_result.et0_values.iter().filter(|r| r.is_finite()).count();
+                let n_valid = gpu_result
+                    .et0_values
+                    .iter()
+                    .filter(|r| r.is_finite())
+                    .count();
                 v.check_bool(
                     &format!(
                         "ET₀ GPU: {N} days ({gpu_elapsed:.1?}) — {:.1}× vs CPU",
@@ -201,7 +209,10 @@ fn bench_water_balance_cpu_vs_gpu(v: &mut ValidationHarness, device: Option<&Arc
     }
     let cpu_elapsed = cpu_start.elapsed();
     v.check_bool(
-        &format!("WB CPU: {N} days ({cpu_elapsed:.1?}), Dr={:.1}", state.depletion),
+        &format!(
+            "WB CPU: {N} days ({cpu_elapsed:.1?}), Dr={:.1}",
+            state.depletion
+        ),
         state.depletion >= 0.0 && state.depletion <= state.taw,
     );
 
@@ -329,7 +340,11 @@ fn bench_vg_theta_k_provenance(v: &mut ValidationHarness, device: Option<&Arc<Wg
     let cpu_start = Instant::now();
     let cpu_theta: Vec<f64> = h_values
         .iter()
-        .map(|&h| airspring_barracuda::eco::van_genuchten::van_genuchten_theta(h, 0.045, 0.43, 0.036, 1.56))
+        .map(|&h| {
+            airspring_barracuda::eco::van_genuchten::van_genuchten_theta(
+                h, 0.045, 0.43, 0.036, 1.56,
+            )
+        })
         .collect();
     let cpu_elapsed = cpu_start.elapsed();
 
@@ -499,7 +514,9 @@ fn bench_uncertainty_provenance(v: &mut ValidationHarness, device: Option<&Arc<W
         match div_result {
             Ok(Some((result, elapsed))) => {
                 v.check_bool(
-                    &format!("Diversity GPU: fused Shannon+Simpson ({elapsed:.1?}) [wetSpring→S70]"),
+                    &format!(
+                        "Diversity GPU: fused Shannon+Simpson ({elapsed:.1?}) [wetSpring→S70]"
+                    ),
                     !result.is_empty() && result[0].shannon > 0.0,
                 );
             }

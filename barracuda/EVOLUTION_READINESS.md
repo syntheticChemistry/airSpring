@@ -1,8 +1,9 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: March 2, 2026 (v0.6.8 — 846 lib tests, 86 binaries, 77 experiments, 1237 Python, 30 NUCLEUS capabilities, 67/67 metalForge cross-system, 6 local WGSL shaders)
-**ToadStool PIN**: S87 HEAD (`2dc26792` — 2,866 tests, 844 WGSL shaders, 144 `ComputeDispatch` ops, `BatchedStatefulF64`, `BrentGpu`, `RichardsGpu`, `nautilus`, `multi_gpu`)
-**Handoff**: V050 (Full evolution handoff — 14 modules contributed, 25+ consumed, CPU→GPU→metalForge progression, lessons for ToadStool)
+**Last Updated**: March 3, 2026 (v0.6.8 — 1132 tests, 86 binaries, 77 experiments, 1237 Python, 30 NUCLEUS capabilities, 67/67 metalForge cross-system, 6 local WGSL shaders)
+**barraCuda**: v0.3.1 standalone primal (`ecoPrimals/barraCuda` — 767 WGSL shaders, 957 Rust files, extracted from ToadStool S89)
+**ToadStool**: S93 (5,369 tests, 845 WGSL shaders, sovereignty cleanup, DF64 ownership transferred to barraCuda)
+**Handoff**: V0.6.8 (barraCuda 0.3.1 standalone rewire + absorption — capability-based discovery, 6 shaders for upstream, deep debt resolved)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -10,7 +11,12 @@
 ## Write → Absorb → Lean Status
 
 airSpring follows the same pattern as hotSpring and wetSpring: implement locally,
-validate against papers, hand off to ToadStool/BarraCuda, lean on upstream.
+validate against papers, hand off to barraCuda, lean on upstream.
+
+**Architecture (S89+)**: barraCuda is the standalone sovereign math engine —
+"math is universal, precision is silicon." ToadStool dispatches across hardware;
+barraCuda provides universal math primitives. Springs depend on barraCuda directly,
+not through ToadStool.
 
 ### Already Absorbed (Lean)
 
@@ -184,10 +190,12 @@ ToadStool underwent massive evolution since S42. Key milestones:
 
 | Check | Status |
 |-------|--------|
-| `cargo fmt --check` | **Clean** |
-| `cargo clippy --all-targets` | **0 warnings** (pedantic + nursery via `[lints.clippy]`, `--all-targets` clean) |
+| `cargo fmt --check` | **Clean** (both crates) |
+| `cargo clippy --all-targets -W pedantic` | **0 warnings** (both crates) |
 | `cargo doc --no-deps` | **Builds**, 0 warnings |
-| `cargo test --lib` | **641 passed** (lib + doc + integration) |
+| `cargo test --workspace` | **1132 passed** (lib + bin + doc + integration) |
+| `cargo llvm-cov --lib --summary-only` | **95.11% line** / **95.81% function** coverage |
+| barraCuda version | **0.3.1** standalone primal (`ecoPrimals/barraCuda`) |
 | `unsafe` code | **Zero** |
 | `unwrap()` in lib | **Zero** (all in `#[cfg(test)]` or validation-binary JSON helpers) |
 | Files > 1000 lines | **Zero** (max src: 872 `eco/evapotranspiration.rs` after Thornthwaite extraction) |
@@ -305,6 +313,32 @@ Prior V032 cleanup:
 
 Revalidation: 618/618 tests, 0 clippy, 33/33 cross-validation, 1498/1498 atlas, 46/46 GPU math, 29/29 NCBI 16S, 30/30 benchmarks
 
+### S89–S93 HEAD Sync — barraCuda Standalone Rewire (March 3, 2026)
+
+ToadStool S87→S93 includes the most significant architectural change: **barraCuda extraction**
+as a standalone sovereign math engine (S89), followed by sovereignty cleanup (S90–S92) and
+DF64 ownership transfer (S93).
+
+**S88**: Cross-spring absorption — `anderson_4d`, `wegner_block_4d`, `SeasonalGpuParams::new()`,
+`LbfgsGpu`, new hydrology tolerances.
+
+**S89**: **barraCuda extraction** — 956 Rust files, 767 WGSL shaders extracted from ToadStool
+into `ecoPrimals/barraCuda`. `toadstool-core`, `akida-driver` dependencies removed. All Springs
+now depend on barraCuda directly. hotSpring validated 716/716 with path swap only.
+
+**S90**: REST API removed (JSON-RPC 2.0 only), `get_socket_path_for_capability()`,
+SPDX headers universal, 5,322 tests.
+
+**S92**: Sovereignty deprecations, +47 tests (5,369 total), BearDog strings neutralized.
+
+**S93**: D-DF64 ownership transferred to barraCuda team, 12 stale docs removed, root docs refreshed.
+
+**airSpring rewire**: Updated `barracuda` path from `../../phase1/toadstool/crates/barracuda` →
+`../../barraCuda/crates/barracuda` (both `barracuda/Cargo.toml` and `metalForge/forge/Cargo.toml`).
+Zero code changes needed — all imports, traits, shader references stable.
+
+Revalidation: 1132/1132 tests, 0 clippy warnings (pedantic), 0 fmt diffs, docs build clean.
+
 ---
 
 ## Dependency Evolution Analysis (v0.6.8)
@@ -313,7 +347,7 @@ Revalidation: 618/618 tests, 0 clippy, 33/33 cross-validation, 1498/1498 atlas, 
 
 | Crate | Version | C deps? | Purpose | Evolution Path |
 |-------|---------|---------|---------|----------------|
-| `barracuda` | 0.2.0 (path) | wgpu (vulkan) | GPU primitives, stats, validation | **Core** — stays, evolves with ToadStool |
+| `barracuda` | 0.3.1 (path) | wgpu (vulkan) | GPU primitives, stats, validation | **Core** — standalone primal (`ecoPrimals/barraCuda`) |
 | `bingocube-nautilus` | 0.1.0 (path) | None | Evolutionary reservoir computing | **Core** — stays, pure Rust |
 | `serde` | 1.0 | None | Brain state serialization | **Stays** — pure Rust, ecosystem standard |
 | `serde_json` | 1.0 | None | Benchmark JSON + JSON-RPC | **Stays** — pure Rust, ecosystem standard |
@@ -348,18 +382,19 @@ simply becomes unused.
 - No `openssl`, `reqwest`, or other heavy C dependencies
 - Pure Rust stack except `ring` (via ureq→rustls) and GPU drivers (via wgpu)
 
-### Quality Gates (v0.6.8)
+### Quality Gates (v0.6.8 — barraCuda 0.3.1 rewire)
 
 | Gate | Result |
 |------|--------|
 | `cargo fmt --check` | **PASS** (both crates) |
 | `cargo clippy --workspace -- -D warnings -W clippy::pedantic` | **PASS** — 0 warnings (both crates) |
 | `cargo doc --no-deps` | **PASS** (both crates) |
-| `cargo test --lib` | **810 PASS** (barracuda) |
-| `cargo llvm-cov --lib --summary-only` | **95.58% line** / **96.33% function** coverage |
+| `cargo test --workspace` | **1132 PASS** (lib + bin + doc + integration) |
+| `cargo llvm-cov --lib --summary-only` | **95.11% line** / **95.81% function** coverage |
 | `cargo deny check` | **PASS** |
 | SPDX headers | **All .rs files**: `AGPL-3.0-or-later` |
 | File size limit | **All files < 1000 lines** (max: 935, bench binary) |
 | `#![forbid(unsafe_code)]` | **Both crates** |
 | Validation provenance | **All 79 binaries** have script/commit/date or cross-spring provenance |
 | Tolerance provenance | **47/47 constants** with mathematical justification + baseline table |
+| barraCuda source | **`ecoPrimals/barraCuda/crates/barracuda`** v0.3.1 standalone |

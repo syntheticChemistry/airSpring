@@ -15,8 +15,7 @@
 //!
 //! Reference: Green WH, Ampt GA (1911) J Agr Sci 4(1):1-24.
 //!
-//! script=`control/green_ampt/green_ampt_infiltration.py`, commit=6be822f, date=2026-02-28
-//! Run: `python3 control/green_ampt/green_ampt_infiltration.py`
+//! Provenance: script=`control/green_ampt/green_ampt_infiltration.py`, commit=6be822f, date=2026-02-28
 
 use airspring_barracuda::eco::infiltration::{
     cumulative_infiltration, infiltration_rate, ponding_time, GreenAmptParams,

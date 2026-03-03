@@ -475,7 +475,6 @@ impl SeasonalPipeline {
     /// # Errors
     ///
     /// Returns an error if GPU water balance dispatch fails irrecoverably.
-    #[allow(clippy::too_many_lines)]
     pub fn run_multi_field(
         &self,
         weather_per_field: &[&[WeatherDay]],
@@ -536,13 +535,28 @@ impl SeasonalPipeline {
         let mut total_irr: Vec<f64> = vec![0.0; m];
 
         for day in 0..n_days {
-            let (field_inputs, daily_inputs_per_field) =
-                Self::build_day_inputs(m, day, &states, configs, &kc_per_field, &et0_per_field, weather_per_field, &mut total_irr);
+            let (field_inputs, daily_inputs_per_field) = Self::build_day_inputs(
+                m,
+                day,
+                &states,
+                configs,
+                &kc_per_field,
+                &et0_per_field,
+                weather_per_field,
+                &mut total_irr,
+            );
 
             if let Some(ref wb_engine) = wb_gpu {
                 let dr_new = wb_engine.gpu_step(&field_inputs)?;
                 gpu_wb_dispatches += 1;
-                Self::apply_gpu_wb_outputs(day, &dr_new, &mut states, &mut wb_outputs, &kc_per_field, &et0_per_field);
+                Self::apply_gpu_wb_outputs(
+                    day,
+                    &dr_new,
+                    &mut states,
+                    &mut wb_outputs,
+                    &kc_per_field,
+                    &et0_per_field,
+                );
             } else {
                 for (f, state) in states.iter_mut().enumerate() {
                     wb_outputs[f].push(state.step(&daily_inputs_per_field[f]));
@@ -554,13 +568,30 @@ impl SeasonalPipeline {
             }
         }
 
-        let fields = Self::collect_field_results(m, n_days, &et0_per_field, &wb_outputs, &wb_inputs, &total_irr, &states, configs, weather_per_field);
-        Ok(MultiFieldResult { fields, gpu_wb_dispatches, gpu_wb_used })
+        let fields = Self::collect_field_results(
+            m,
+            n_days,
+            &et0_per_field,
+            &wb_outputs,
+            &wb_inputs,
+            &total_irr,
+            &states,
+            configs,
+            weather_per_field,
+        );
+        Ok(MultiFieldResult {
+            fields,
+            gpu_wb_dispatches,
+            gpu_wb_used,
+        })
     }
 }
 
 impl SeasonalPipeline {
-    #[allow(clippy::too_many_arguments)]
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "daily input construction requires weather, soil, crop, and state parameters"
+    )]
     fn build_day_inputs(
         m: usize,
         day: usize,
@@ -570,13 +601,20 @@ impl SeasonalPipeline {
         et0_per_field: &[Vec<f64>],
         weather_per_field: &[&[WeatherDay]],
         total_irr: &mut [f64],
-    ) -> (Vec<crate::gpu::water_balance::FieldDayInput>, Vec<DailyInput>) {
+    ) -> (
+        Vec<crate::gpu::water_balance::FieldDayInput>,
+        Vec<DailyInput>,
+    ) {
         use crate::gpu::water_balance::FieldDayInput;
         let mut field_inputs = Vec::with_capacity(m);
         let mut daily_inputs = Vec::with_capacity(m);
 
         for (f, state) in states.iter().enumerate() {
-            let irr = if state.depletion > state.raw { configs[f].irrigation_depth_mm } else { 0.0 };
+            let irr = if state.depletion > state.raw {
+                configs[f].irrigation_depth_mm
+            } else {
+                0.0
+            };
             total_irr[f] += irr;
             let etc = kc_per_field[f][day] * et0_per_field[f][day];
 
@@ -627,7 +665,10 @@ impl SeasonalPipeline {
         }
     }
 
-    #[allow(clippy::too_many_arguments)]
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "result collection aggregates across multiple field dimensions"
+    )]
     fn collect_field_results(
         m: usize,
         n_days: usize,
@@ -643,7 +684,11 @@ impl SeasonalPipeline {
         for f in 0..m {
             let total_actual_et: f64 = wb_outputs[f].iter().map(|o| o.actual_et).sum();
             let total_etc: f64 = wb_outputs[f].iter().map(|o| o.etc).sum();
-            let eta_etc = if total_etc > 0.0 { total_actual_et / total_etc } else { 1.0 };
+            let eta_etc = if total_etc > 0.0 {
+                total_actual_et / total_etc
+            } else {
+                1.0
+            };
             let yield_ratio = yield_response::clamp_yield_ratio(
                 yield_response::yield_ratio_single(configs[f].ky, eta_etc),
             );

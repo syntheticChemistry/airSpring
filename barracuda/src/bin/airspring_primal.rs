@@ -45,6 +45,9 @@ use airspring_barracuda::primal_science;
 use airspring_barracuda::rpc;
 
 const PRIMAL_NAME: &str = "airspring";
+const READ_TIMEOUT_SECS: u64 = 60;
+const WRITE_TIMEOUT_SECS: u64 = 10;
+const HEARTBEAT_INTERVAL_SECS: u64 = 30;
 
 fn orchestrator_socket_name() -> String {
     std::env::var("BIOMEOS_ORCHESTRATOR_SOCKET").unwrap_or_else(|_| "biomeOS.sock".to_string())
@@ -412,16 +415,26 @@ fn register_via_socket(target: &Path, our_socket: &Path) {
 // Connection handler
 // ═══════════════════════════════════════════════════════════════════
 
-#[allow(clippy::needless_pass_by_value)] // BufReader::new consumes the stream
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "BufReader::new consumes the stream"
+)]
 fn handle_connection(stream: UnixStream, state: &PrimalState) {
-    stream.set_read_timeout(Some(Duration::from_secs(60))).ok();
-    stream.set_write_timeout(Some(Duration::from_secs(10))).ok();
+    stream
+        .set_read_timeout(Some(Duration::from_secs(READ_TIMEOUT_SECS)))
+        .ok();
+    stream
+        .set_write_timeout(Some(Duration::from_secs(WRITE_TIMEOUT_SECS)))
+        .ok();
 
     let reader = BufReader::new(&stream);
     let mut writer = &stream;
 
     for line_result in reader.lines() {
-        #[allow(clippy::manual_let_else)]
+        #[expect(
+            clippy::manual_let_else,
+            reason = "manual match handles logging on error before continue"
+        )]
         let line = match line_result {
             Ok(l) => l,
             Err(_) => break,
@@ -517,7 +530,7 @@ fn run() -> Result<(), String> {
         };
 
         while heartbeat_running.load(Ordering::Relaxed) {
-            std::thread::sleep(Duration::from_secs(30));
+            std::thread::sleep(Duration::from_secs(HEARTBEAT_INTERVAL_SECS));
 
             if let Some(ref t) = target {
                 let _ = rpc::send(

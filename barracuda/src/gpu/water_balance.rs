@@ -17,6 +17,15 @@
 //!
 //! Use GPU when you have M >> 1 fields at the same timestep.
 //! Use CPU for a single field's season simulation.
+//!
+//! # Evolution: GPU-Resident State
+//!
+//! [`barracuda::pipeline::batched_stateful::BatchedStatefulF64`] (barraCuda 0.3.1)
+//! provides ping-pong GPU buffers that could eliminate per-day CPU readback.
+//! The evolution path: bind `state_in()` + daily inputs to the water balance
+//! shader, write new depletion to `state_out()`, swap, and only read back at
+//! season end. This requires a custom shader pipeline binding — tracked in
+//! `EVOLUTION_READINESS.md` as a Tier B item.
 
 use std::sync::Arc;
 
@@ -27,7 +36,7 @@ use crate::eco::water_balance::{self as wb, DailyInput, DailyOutput, WaterBalanc
 
 /// One field's daily state for the GPU water balance step.
 ///
-/// Maps to `ToadStool` `WaterBalanceInput`: `(dr_prev, P, I, ETc, TAW, RAW, p)`.
+/// Maps to `BarraCuda` `WaterBalanceInput`: `(dr_prev, P, I, ETc, TAW, RAW, p)`.
 #[derive(Debug, Clone, Copy)]
 pub struct FieldDayInput {
     /// Previous day's root zone depletion (mm).
@@ -47,9 +56,9 @@ pub struct FieldDayInput {
 }
 
 impl FieldDayInput {
-    /// Convert to `ToadStool` `WaterBalanceInput` tuple.
+    /// Convert to `BarraCuda` `WaterBalanceInput` tuple for GPU dispatch.
     #[must_use]
-    pub const fn to_toadstool(self) -> bef64::WaterBalanceInput {
+    pub const fn to_barracuda(self) -> bef64::WaterBalanceInput {
         (
             self.dr_prev,
             self.precipitation,
@@ -187,7 +196,7 @@ impl BatchedWaterBalance {
             },
             |engine| {
                 let inputs: Vec<bef64::WaterBalanceInput> =
-                    fields.iter().map(|f| f.to_toadstool()).collect();
+                    fields.iter().map(|f| f.to_barracuda()).collect();
                 engine
                     .water_balance_batch(&inputs)
                     .map_err(crate::error::AirSpringError::from)
@@ -349,7 +358,7 @@ mod tests {
     }
 
     #[test]
-    fn test_field_day_input_to_toadstool() {
+    fn test_field_day_input_to_barracuda() {
         let f = FieldDayInput {
             dr_prev: 20.0,
             precipitation: 5.0,
@@ -359,7 +368,7 @@ mod tests {
             raw: 50.0,
             p: 0.5,
         };
-        let tt = f.to_toadstool();
+        let tt = f.to_barracuda();
         assert!((tt.0 - 20.0).abs() < f64::EPSILON);
         assert!((tt.6 - 0.5).abs() < f64::EPSILON);
     }

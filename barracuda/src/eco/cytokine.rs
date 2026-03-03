@@ -334,8 +334,11 @@ impl CytokineBrain {
                     .sum::<f64>()
                     / pred.len() as f64;
                 if mse > self.config.concept_edge_threshold {
-                    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-                    // justified: time_hours is non-negative, finite
+                    #[expect(
+                        clippy::cast_possible_truncation,
+                        clippy::cast_sign_loss,
+                        reason = "time_hours is non-negative, finite"
+                    )]
                     let hours = obs.time_hours as u32;
                     self.concept_edge_hours.push(hours);
                 }
@@ -348,7 +351,11 @@ impl CytokineBrain {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, clippy::suboptimal_flops)] // justified: test code; flops match reference formulas
+#[expect(
+    clippy::unwrap_used,
+    clippy::suboptimal_flops,
+    reason = "test code; flops match reference formulas"
+)]
 mod tests {
     use super::*;
 

@@ -254,7 +254,11 @@ fn main() {
 
     let crop = &benchmark["crop_parameters"];
     let soil = &benchmark["soil_parameters"];
-    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+    #[expect(
+        clippy::cast_possible_truncation,
+        clippy::cast_sign_loss,
+        reason = "season length from JSON f64 is a non-negative integer"
+    )]
     let season_len = json_field(&benchmark["season_parameters"], "length_days") as usize;
 
     let taw = json_field(soil, "taw_mm");

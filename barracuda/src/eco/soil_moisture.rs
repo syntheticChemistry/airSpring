@@ -228,14 +228,20 @@ pub struct SaxtonRawlsResult {
 
 // Saxton-Rawls regressions use plain arithmetic to match Python baseline bit-for-bit.
 // mul_add reordering changes float rounding enough to break validation tolerances.
-#[allow(clippy::suboptimal_flops)] // justified: match reference implementation bit-for-bit
+#[expect(
+    clippy::suboptimal_flops,
+    reason = "match reference implementation bit-for-bit"
+)]
 /// First estimate of wilting point moisture (Saxton & Rawls 2006).
 #[must_use]
 fn sr_theta_1500_first(s: f64, c: f64, om: f64) -> f64 {
     -0.024 * s + 0.487 * c + 0.006 * om + 0.005 * s * om - 0.013 * c * om + 0.068 * s * c + 0.031
 }
 
-#[allow(clippy::suboptimal_flops)] // justified: match reference implementation bit-for-bit
+#[expect(
+    clippy::suboptimal_flops,
+    reason = "match reference implementation bit-for-bit"
+)]
 /// Wilting point θ at −1500 kPa.
 #[must_use]
 fn sr_theta_1500(s: f64, c: f64, om: f64) -> f64 {
@@ -243,14 +249,20 @@ fn sr_theta_1500(s: f64, c: f64, om: f64) -> f64 {
     first + 0.14 * first - 0.02
 }
 
-#[allow(clippy::suboptimal_flops)] // justified: match reference implementation bit-for-bit
+#[expect(
+    clippy::suboptimal_flops,
+    reason = "match reference implementation bit-for-bit"
+)]
 /// First estimate of field capacity moisture.
 #[must_use]
 fn sr_theta_33_first(s: f64, c: f64, om: f64) -> f64 {
     -0.251 * s + 0.195 * c + 0.011 * om + 0.006 * s * om - 0.027 * c * om + 0.452 * s * c + 0.299
 }
 
-#[allow(clippy::suboptimal_flops)] // justified: match reference implementation bit-for-bit
+#[expect(
+    clippy::suboptimal_flops,
+    reason = "match reference implementation bit-for-bit"
+)]
 /// Field capacity θ at −33 kPa.
 #[must_use]
 fn sr_theta_33(s: f64, c: f64, om: f64) -> f64 {
@@ -258,14 +270,20 @@ fn sr_theta_33(s: f64, c: f64, om: f64) -> f64 {
     first + 1.283 * first * first - 0.374 * first - 0.015
 }
 
-#[allow(clippy::suboptimal_flops)] // justified: match reference implementation bit-for-bit
+#[expect(
+    clippy::suboptimal_flops,
+    reason = "match reference implementation bit-for-bit"
+)]
 /// First estimate of moisture between saturation and field capacity.
 #[must_use]
 fn sr_theta_s_33_first(s: f64, c: f64, om: f64) -> f64 {
     0.278 * s + 0.034 * c + 0.022 * om - 0.018 * s * om - 0.027 * c * om - 0.584 * s * c + 0.078
 }
 
-#[allow(clippy::suboptimal_flops)] // justified: match reference implementation bit-for-bit
+#[expect(
+    clippy::suboptimal_flops,
+    reason = "match reference implementation bit-for-bit"
+)]
 /// Moisture between saturation and field capacity.
 #[must_use]
 fn sr_theta_s_33(s: f64, c: f64, om: f64) -> f64 {
@@ -273,7 +291,10 @@ fn sr_theta_s_33(s: f64, c: f64, om: f64) -> f64 {
     first + 0.636 * first - 0.107
 }
 
-#[allow(clippy::suboptimal_flops)] // justified: match reference implementation bit-for-bit
+#[expect(
+    clippy::suboptimal_flops,
+    reason = "match reference implementation bit-for-bit"
+)]
 /// Saturation moisture content (porosity).
 #[must_use]
 fn sr_theta_s(s: f64, c: f64, om: f64) -> f64 {

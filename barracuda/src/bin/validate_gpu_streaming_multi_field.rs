@@ -28,11 +28,7 @@ use airspring_barracuda::eco::crop::CropType;
 use airspring_barracuda::gpu::seasonal_pipeline::{CropConfig, SeasonalPipeline, WeatherDay};
 use airspring_barracuda::validation::{self, ValidationHarness};
 
-fn synthetic_field_weather(
-    lat: f64,
-    elev: f64,
-    precip_period: u32,
-) -> Vec<WeatherDay> {
+fn synthetic_field_weather(lat: f64, elev: f64, precip_period: u32) -> Vec<WeatherDay> {
     let phase = 2.0 * std::f64::consts::PI / 153.0;
     (121..=273)
         .map(|doy| {
@@ -152,10 +148,7 @@ fn validate_streaming_pipeline(v: &mut ValidationHarness) {
             &format!("field_{i}_yield_valid"),
             field.yield_ratio > 0.0 && field.yield_ratio <= 1.0,
         );
-        v.check_bool(
-            &format!("field_{i}_et0_positive"),
-            field.total_et0 > 0.0,
-        );
+        v.check_bool(&format!("field_{i}_et0_positive"), field.total_et0 > 0.0);
         v.check_bool(
             &format!("field_{i}_actual_et_bounded"),
             field.total_actual_et <= field.total_et0 * 2.0,
@@ -167,8 +160,8 @@ fn validate_streaming_pipeline(v: &mut ValidationHarness) {
     v.check_lower("mean yield > 0.5", mean_yield, 0.5);
     v.check_upper("mean yield <= 1.0", mean_yield, 1.0);
 
-    let et0_spread: f64 = cpu_result.fields.iter().map(|f| f.total_et0).sum::<f64>()
-        / f64::from(n_fields);
+    let et0_spread: f64 =
+        cpu_result.fields.iter().map(|f| f.total_et0).sum::<f64>() / f64::from(n_fields);
     v.check_lower("mean ET₀ > 200 mm", et0_spread, 200.0);
     v.check_upper("mean ET₀ < 1000 mm", et0_spread, 1000.0);
 
@@ -223,10 +216,7 @@ fn validate_atlas_scale(v: &mut ValidationHarness) {
     let n_days_correct = result.fields.iter().all(|f| f.n_days == 153);
     v.check_bool("all 50 fields = 153 days", n_days_correct);
 
-    v.check_bool(
-        "completes in < 30s",
-        elapsed.as_secs_f64() < 30.0,
-    );
+    v.check_bool("completes in < 30s", elapsed.as_secs_f64() < 30.0);
 
     println!("  Atlas-scale time: {elapsed:?}");
     println!(

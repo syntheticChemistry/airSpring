@@ -32,7 +32,6 @@ fn u32_p(params: &serde_json::Value, key: &str) -> Option<u32> {
 /// Returns `Some(result)` if the method is a known science method,
 /// `None` if it should be handled elsewhere (cross-primal, lifecycle, etc.).
 #[must_use]
-#[allow(clippy::too_many_lines)]
 pub fn dispatch_science(method: &str, params: &serde_json::Value) -> Option<serde_json::Value> {
     let result = match method {
         "science.et0_fao56" | "ecology.et0_fao56" => et0_fao56(params),
@@ -237,7 +236,9 @@ fn richards_1d(params: &serde_json::Value) -> serde_json::Value {
         f64_p(params, "dt_days").unwrap_or(0.1),
     ) {
         Ok(profiles) => {
-            let last = profiles.last().unwrap();
+            let Some(last) = profiles.last() else {
+                return serde_json::json!({"error": "solver returned no profiles"});
+            };
             let mean = last.theta.iter().sum::<f64>() / last.theta.len() as f64;
             serde_json::json!({"mean_theta": mean, "n_nodes": last.theta.len(), "n_timesteps": profiles.len(), "final_theta": last.theta, "method": "richards_1d_implicit_euler_picard"})
         }
@@ -363,7 +364,7 @@ fn thornthwaite_handler(params: &serde_json::Value) -> serde_json::Value {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used)]
+#[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::dispatch_science;
 

@@ -15,8 +15,7 @@
 //!   Priestley & Taylor (1972) MWR 100(2).
 //!   Jensen et al. (1990) ASCE Manual No. 70.
 //!
-//! script=`control/et0_intercomparison/et0_three_method.py`, commit=9a84ae5, date=2026-02-26
-//! Run: `python3 control/et0_intercomparison/et0_three_method.py`
+//! Provenance: script=`control/et0_intercomparison/et0_three_method.py`, commit=9a84ae5, date=2026-02-26
 
 use airspring_barracuda::validation::{self, parse_benchmark_json, ValidationHarness};
 

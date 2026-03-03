@@ -422,7 +422,10 @@ fn process_station(
         for (day, &et0) in days.iter().zip(&et0_series) {
             *yearly.entry(day.year).or_default() += et0;
         }
-        #[allow(clippy::cast_precision_loss)]
+        #[expect(
+            clippy::cast_precision_loss,
+            reason = "year count fits in f64 for mean calculation"
+        )]
         {
             yearly.values().sum::<f64>() / yearly.len().max(1) as f64
         }
@@ -544,7 +547,10 @@ fn validate_atlas_summary(results: &[StationResult], v: &mut ValidationHarness) 
     }
 
     let n = results.len();
-    #[allow(clippy::cast_precision_loss)]
+    #[expect(
+        clippy::cast_precision_loss,
+        reason = "station count fits in f64 for mean ET₀"
+    )]
     let mean_et0 = results.iter().map(|r| r.mean_annual_et0).sum::<f64>() / n as f64;
     let total_station_days: usize = results.iter().map(|r| r.n_days).sum();
     let total_station_years: usize = results.iter().map(|r| r.n_years).sum();

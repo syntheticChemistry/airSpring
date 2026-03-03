@@ -74,10 +74,10 @@ fn validate_et0_methods_cpu(v: &mut ValidationHarness) {
     let hg = et::hargreaves_et0(18.0, 28.0, 12.5);
     v.check_bool("HG_positive", hg > 0.0);
 
-    let monthly_temps = [0.0, 2.0, 7.0, 12.0, 18.0, 23.0, 25.0, 24.0, 19.0, 13.0, 6.0, 1.0];
-    let th = airspring_barracuda::eco::thornthwaite::thornthwaite_monthly_et0(
-        &monthly_temps, 42.7,
-    );
+    let monthly_temps = [
+        0.0, 2.0, 7.0, 12.0, 18.0, 23.0, 25.0, 24.0, 19.0, 13.0, 6.0, 1.0,
+    ];
+    let th = airspring_barracuda::eco::thornthwaite::thornthwaite_monthly_et0(&monthly_temps, 42.7);
     v.check_bool("TH_positive", th[6] > 0.0);
 
     let mk = simple_et0::makkink_et0(20.0, 15.0, 100.0);
@@ -92,7 +92,10 @@ fn validate_et0_methods_cpu(v: &mut ValidationHarness) {
     let bc = simple_et0::blaney_criddle_from_location(25.0, 0.745, 180);
     v.check_bool("BC_positive", bc > 0.0);
 
-    v.check_bool("all_methods_positive", pt > 0.0 && hg > 0.0 && mk > 0.0 && tu > 0.0 && ha > 0.0 && bc > 0.0);
+    v.check_bool(
+        "all_methods_positive",
+        pt > 0.0 && hg > 0.0 && mk > 0.0 && tu > 0.0 && ha > 0.0 && bc > 0.0,
+    );
     v.check_bool("all_8_computed", true);
 }
 
@@ -100,32 +103,68 @@ fn validate_et0_gpu_batch(v: &mut ValidationHarness) {
     validation::section("Chain 2b: Simple ET₀ GPU batch");
 
     let mk_inputs = vec![
-        MakkinkInput { tmean_c: 20.0, rs_mj: 15.0, elevation_m: 100.0 },
-        MakkinkInput { tmean_c: 25.0, rs_mj: 20.0, elevation_m: 0.0 },
-        MakkinkInput { tmean_c: 30.0, rs_mj: 25.0, elevation_m: 50.0 },
+        MakkinkInput {
+            tmean_c: 20.0,
+            rs_mj: 15.0,
+            elevation_m: 100.0,
+        },
+        MakkinkInput {
+            tmean_c: 25.0,
+            rs_mj: 20.0,
+            elevation_m: 0.0,
+        },
+        MakkinkInput {
+            tmean_c: 30.0,
+            rs_mj: 25.0,
+            elevation_m: 50.0,
+        },
     ];
     let mk_batch = BatchedSimpleEt0::makkink(&mk_inputs);
     v.check_bool("MK_batch_len", mk_batch.len() == 3);
     v.check_bool("MK_batch_monotonic", mk_batch[0] < mk_batch[2]);
 
     let tu_inputs = vec![
-        TurcInput { tmean_c: 20.0, rs_mj: 15.0, rh_pct: 70.0 },
-        TurcInput { tmean_c: 30.0, rs_mj: 25.0, rh_pct: 55.0 },
+        TurcInput {
+            tmean_c: 20.0,
+            rs_mj: 15.0,
+            rh_pct: 70.0,
+        },
+        TurcInput {
+            tmean_c: 30.0,
+            rs_mj: 25.0,
+            rh_pct: 55.0,
+        },
     ];
     let tu_batch = BatchedSimpleEt0::turc(&tu_inputs);
     v.check_bool("TU_batch_monotonic", tu_batch[0] < tu_batch[1]);
 
     let lat_rad = 42.7_f64.to_radians();
     let ha_inputs = vec![
-        HamonInput { tmean_c: 20.0, latitude_rad: lat_rad, doy: 180 },
-        HamonInput { tmean_c: 10.0, latitude_rad: lat_rad, doy: 90 },
+        HamonInput {
+            tmean_c: 20.0,
+            latitude_rad: lat_rad,
+            doy: 180,
+        },
+        HamonInput {
+            tmean_c: 10.0,
+            latitude_rad: lat_rad,
+            doy: 90,
+        },
     ];
     let ha_batch = BatchedSimpleEt0::hamon(&ha_inputs);
     v.check_bool("HA_summer>spring", ha_batch[0] > ha_batch[1]);
 
     let bc_inputs = vec![
-        BlaneyCriddleInput { tmean_c: 25.0, latitude_rad: lat_rad, doy: 180 },
-        BlaneyCriddleInput { tmean_c: 5.0, latitude_rad: lat_rad, doy: 15 },
+        BlaneyCriddleInput {
+            tmean_c: 25.0,
+            latitude_rad: lat_rad,
+            doy: 180,
+        },
+        BlaneyCriddleInput {
+            tmean_c: 5.0,
+            latitude_rad: lat_rad,
+            doy: 15,
+        },
     ];
     let bc_batch = BatchedSimpleEt0::blaney_criddle(&bc_inputs);
     v.check_bool("BC_summer>winter", bc_batch[0] > bc_batch[1]);
@@ -143,12 +182,20 @@ fn validate_water_balance_cpu(v: &mut ValidationHarness) {
     for day in 0..90_i32 {
         let p: f64 = if day % 7 == 0 { 15.0 } else { 0.0 };
         let etc: f64 = 2.0_f64.mul_add((f64::from(day) * std::f64::consts::PI / 90.0).sin(), 4.0);
-        let ks = if dr > raw { (taw - dr) / (taw - raw) } else { 1.0 };
+        let ks = if dr > raw {
+            (taw - dr) / (taw - raw)
+        } else {
+            1.0
+        };
         let eta = etc * ks.clamp(0.0, 1.0);
 
         dr = dr - p + eta;
-        if dr < 0.0 { dr = 0.0; }
-        if dr > taw { dr = taw; }
+        if dr < 0.0 {
+            dr = 0.0;
+        }
+        if dr > taw {
+            dr = taw;
+        }
 
         total_et += eta;
         total_p += p;
@@ -183,7 +230,10 @@ fn validate_scs_cn_cpu_gpu(v: &mut ValidationHarness) {
         .fold(0.0_f64, f64::max);
     v.check_abs("SCS_CPU_batch_parity", max_diff, 0.0, 1e-10);
     v.check_bool("SCS_monotonic", batch.windows(2).all(|w| w[0] <= w[1]));
-    v.check_bool("SCS_Q_leq_P", precips.iter().zip(&batch).all(|(p, q)| q <= &(p + 0.001)));
+    v.check_bool(
+        "SCS_Q_leq_P",
+        precips.iter().zip(&batch).all(|(p, q)| q <= &(p + 0.001)),
+    );
 
     let dry = BatchedRunoff::compute_amc_dry(&[50.0, 100.0], cn);
     let wet = BatchedRunoff::compute_amc_wet(&[50.0, 100.0], cn);
@@ -197,7 +247,10 @@ fn validate_scs_cn_cpu_gpu(v: &mut ValidationHarness) {
     );
 }
 
-fn validate_green_ampt_cpu_gpu(v: &mut ValidationHarness, device: Option<Arc<barracuda::device::WgpuDevice>>) {
+fn validate_green_ampt_cpu_gpu(
+    v: &mut ValidationHarness,
+    device: Option<Arc<barracuda::device::WgpuDevice>>,
+) {
     validation::section("Chain 5: Green-Ampt Infiltration (CPU → GPU)");
 
     let params = GreenAmptParams {
@@ -228,7 +281,10 @@ fn validate_green_ampt_cpu_gpu(v: &mut ValidationHarness, device: Option<Arc<bar
             .map(|(a, b)| (a - b).abs())
             .fold(0.0_f64, f64::max);
         v.check_abs("GA_GPU_parity", max_diff, 0.0, 0.5);
-        v.check_bool("GA_gpu_monotonic", gpu.windows(2).all(|w| w[1] >= w[0] - 0.5));
+        v.check_bool(
+            "GA_gpu_monotonic",
+            gpu.windows(2).all(|w| w[1] >= w[0] - 0.5),
+        );
 
         let cpu_fallback = gpu_infiltration::cumulative_cpu(&params, &times);
         let fb_diff = cpu
@@ -281,12 +337,12 @@ fn validate_yield_response(v: &mut ValidationHarness) {
     v.check_bool("YR_full_water=1", (batch[10] - 1.0).abs() < 1e-10);
     v.check_bool("YR_no_water=0", batch[0] < 0.01);
 
-    let uniform = BatchedYieldResponse::compute_uniform(
-        ky,
-        &[400.0, 500.0, 600.0],
-        &[600.0, 600.0, 600.0],
+    let uniform =
+        BatchedYieldResponse::compute_uniform(ky, &[400.0, 500.0, 600.0], &[600.0, 600.0, 600.0]);
+    v.check_bool(
+        "YR_uniform_monotonic",
+        uniform[0] <= uniform[1] && uniform[1] <= uniform[2],
     );
-    v.check_bool("YR_uniform_monotonic", uniform[0] <= uniform[1] && uniform[1] <= uniform[2]);
 
     let wue = BatchedYieldResponse::water_use_efficiency(&[0.8, 0.9], &[500.0, 550.0]);
     v.check_bool("YR_wue_positive", wue.iter().all(|&w| w > 0.0));
@@ -296,16 +352,23 @@ fn validate_pedotransfer_chain(v: &mut ValidationHarness) {
     validation::section("Chain 7: Pedotransfer → VG → Richards (CPU → GPU)");
 
     let sr_input = airspring_barracuda::eco::soil_moisture::SaxtonRawlsInput {
-        sand: 0.4, clay: 0.2, om_pct: 2.5,
+        sand: 0.4,
+        clay: 0.2,
+        om_pct: 2.5,
     };
     let sr = airspring_barracuda::eco::soil_moisture::saxton_rawls(&sr_input);
     v.check_abs("PT_wp", sr.theta_wp, 0.137, 0.005);
     v.check_abs("PT_fc", sr.theta_fc, 0.280, 0.005);
     v.check_abs("PT_sat", sr.theta_s, 0.459, 0.005);
     v.check_bool("PT_awc_positive", sr.theta_fc > sr.theta_wp);
-    v.check_bool("PT_ordering", sr.theta_wp < sr.theta_fc && sr.theta_fc < sr.theta_s);
+    v.check_bool(
+        "PT_ordering",
+        sr.theta_wp < sr.theta_fc && sr.theta_fc < sr.theta_s,
+    );
 
-    let theta = airspring_barracuda::eco::van_genuchten::van_genuchten_theta(-100.0, 0.065, 0.41, 0.075, 1.89);
+    let theta = airspring_barracuda::eco::van_genuchten::van_genuchten_theta(
+        -100.0, 0.065, 0.41, 0.075, 1.89,
+    );
     v.check_bool("VG_theta_bounded", (0.065..=0.41).contains(&theta));
 
     let f_cum = infiltration::cumulative_infiltration(&GreenAmptParams::LOAM, 1.0);

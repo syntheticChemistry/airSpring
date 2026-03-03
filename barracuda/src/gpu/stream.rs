@@ -78,7 +78,10 @@ impl StreamSmoother {
             )));
         }
 
-        #[allow(clippy::cast_possible_truncation)]
+        #[expect(
+            clippy::cast_possible_truncation,
+            reason = "f64→f32 downcast for f32 GPU shader input; precision loss is intentional"
+        )]
         let f32_data: Vec<f32> = data.iter().map(|&x| x as f32).collect();
 
         let result = self.inner.compute(&f32_data, window_size)?;
@@ -278,7 +281,10 @@ mod tests {
             .collect();
         let result = smooth_cpu(&data, 10).unwrap();
         let input_var = crate::gpu::reduce::sample_variance(&data);
-        #[allow(clippy::cast_precision_loss)]
+        #[expect(
+            clippy::cast_precision_loss,
+            reason = "usize→f64 for statistical mean; window sizes are small"
+        )]
         let output_var_mean: f64 =
             result.variance.iter().sum::<f64>() / result.variance.len() as f64;
         // Smoothed output should have lower average variance per window

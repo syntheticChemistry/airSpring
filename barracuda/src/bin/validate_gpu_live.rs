@@ -358,8 +358,7 @@ fn main() {
     let seasonal_bm = parse_benchmark_json(SEASONAL_JSON).expect("seasonal benchmark must parse");
 
     let Some(device) = create_device() else {
-        println!("SKIP: No GPU available — all GPU tests skipped");
-        return;
+        validation::exit_no_gpu();
     };
 
     validate_gpu_parity(&mut v, &device, &parity_bm);

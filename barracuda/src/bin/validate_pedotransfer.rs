@@ -10,8 +10,7 @@
 //! Saxton KE, Rawls WJ (2006) "Soil water characteristic estimates by texture
 //! and organic matter for hydrologic solutions." SSSAJ 70(5):1569-1578.
 //!
-//! script=`control/pedotransfer/saxton_rawls.py`, commit=8c3953b, date=2026-02-27
-//! Run: `python3 control/pedotransfer/saxton_rawls.py`
+//! Provenance: script=`control/pedotransfer/saxton_rawls.py`, commit=8c3953b, date=2026-02-27
 
 use airspring_barracuda::eco::soil_moisture::{saxton_rawls, SaxtonRawlsInput};
 use airspring_barracuda::tolerances::{PEDOTRANSFER_KSAT, PEDOTRANSFER_MOISTURE};

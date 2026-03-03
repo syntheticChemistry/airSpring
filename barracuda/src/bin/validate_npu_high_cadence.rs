@@ -180,7 +180,6 @@ fn validate_multi_sensor_fusion(v: &mut ValidationHarness) {
 // S2: 1-Minute Cadence Stream
 // ═══════════════════════════════════════════════════════════════════
 
-#[allow(clippy::too_many_lines)]
 fn validate_one_minute_cadence(v: &mut ValidationHarness) {
     validation::section("S2: 1-Minute Cadence (1440 readings/day)");
 
@@ -596,7 +595,10 @@ fn validate_weight_hotswap(v: &mut ValidationHarness) {
 // ═══════════════════════════════════════════════════════════════════
 
 #[cfg(feature = "npu")]
-#[allow(clippy::too_many_lines)]
+#[expect(
+    clippy::too_many_lines,
+    reason = "live high-cadence validation covers AKD1000 hardware streaming"
+)]
 fn validate_live_high_cadence(v: &mut ValidationHarness) {
     use airspring_barracuda::npu;
 

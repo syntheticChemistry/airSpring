@@ -4,7 +4,7 @@ version = "0.6.8"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
-description = "Ecological & agricultural science pipelines — Rust + GPU + NPU via BarraCuda/ToadStool"
+description = "Ecological & agricultural science pipelines — Rust + GPU + NPU via BarraCuda"
 
 [workspace]
 
@@ -13,9 +13,11 @@ default = []
 npu = ["dep:akida-driver"]
 
 [dependencies]
-# BarraCuda: GPU-promotion target. airSpring validates that Rust baselines
-# can be faithfully ported to BarraCuda shaders. Used for stats + validation primitives.
-barracuda = { path = "../../phase1/toadstool/crates/barracuda" }
+# BarraCuda: standalone sovereign math engine (ecoPrimals/barraCuda).
+# Extracted from ToadStool S89 — universal math, precision per hardware.
+# airSpring validates that Rust baselines can be faithfully ported to
+# BarraCuda shaders. Used for stats, validation, GPU ops, and PDE primitives.
+barracuda = { path = "../../barraCuda/crates/barracuda" }
 
 # JSON parsing: loads benchmark JSON files (control/fao56/*.json, etc.)
 # with full provenance for validation fidelity.
@@ -42,9 +44,8 @@ bingocube-nautilus = { path = "../../primalTools/bingoCube/nautilus" }
 # Serde: needed for Nautilus brain serialization (observations, shell state).
 serde = { version = "1", features = ["derive"] }
 
-# wgpu: local GPU compute dispatch for airSpring-evolved shaders.
-# Same version as ToadStool's workspace (wgpu 22) to guarantee type compatibility.
-# Used by gpu::local_dispatch for local WGSL shaders pending ToadStool absorption.
+# wgpu 22 — matches barraCuda's pinned version for type compatibility.
+# Used by gpu::local_dispatch for local WGSL shaders pending barraCuda absorption.
 wgpu = { version = "22", default-features = false, features = ["wgsl", "vulkan-portability"] }
 
 # bytemuck: safe transmute for GPU buffer I/O (f32 ↔ bytes).

@@ -273,16 +273,16 @@ fn validate_nucleus_mesh(v: &mut ValidationHarness) {
     v.check_bool("Nest has storage", AtomicKind::Nest.has_storage());
 
     v.check_bool(
-        "Tower: 2 components",
-        AtomicKind::Tower.components().len() == 2,
+        "Tower: 2 capabilities",
+        AtomicKind::Tower.capabilities().len() == 2,
     );
     v.check_bool(
-        "Node: 3 components",
-        AtomicKind::Node.components().len() == 3,
+        "Node: 3 capabilities",
+        AtomicKind::Node.capabilities().len() == 3,
     );
     v.check_bool(
-        "Nest: 3 components",
-        AtomicKind::Nest.components().len() == 3,
+        "Nest: 3 capabilities",
+        AtomicKind::Nest.capabilities().len() == 3,
     );
 }
 
@@ -517,15 +517,11 @@ fn validate_mesh_pipeline_routing(v: &mut ValidationHarness) {
         ),
     ];
 
-    let mp = mesh.route_pipeline(&workloads).expect("should route on mesh");
-    v.check_bool(
-        "Mesh pipeline: 3 stages",
-        mp.stage_count() == 3,
-    );
-    v.check_bool(
-        "Mesh pipeline: single node",
-        mp.is_single_node(),
-    );
+    let mp = mesh
+        .route_pipeline(&workloads)
+        .expect("should route on mesh");
+    v.check_bool("Mesh pipeline: 3 stages", mp.stage_count() == 3);
+    v.check_bool("Mesh pipeline: single node", mp.is_single_node());
     v.check_bool(
         "Mesh pipeline: zero cross-node hops",
         mp.cross_node_hops == 0,
@@ -579,19 +575,12 @@ fn validate_cross_node_pipeline(v: &mut ValidationHarness) {
         ),
     ];
 
-    let mp = mesh.route_pipeline(&workloads).expect("should route cross-node");
-    v.check_bool(
-        "Cross-node pipeline: 3 stages",
-        mp.stage_count() == 3,
-    );
-    v.check_bool(
-        "Cross-node pipeline: NOT single node",
-        !mp.is_single_node(),
-    );
-    v.check_bool(
-        "Cross-node: has hops",
-        mp.cross_node_hops > 0,
-    );
+    let mp = mesh
+        .route_pipeline(&workloads)
+        .expect("should route cross-node");
+    v.check_bool("Cross-node pipeline: 3 stages", mp.stage_count() == 3);
+    v.check_bool("Cross-node pipeline: NOT single node", !mp.is_single_node());
+    v.check_bool("Cross-node: has hops", mp.cross_node_hops > 0);
     v.check_bool(
         "Stage 1 (GPU workload) → gpu-node",
         mp.stages[0].node_id == "gpu-node",

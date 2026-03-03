@@ -71,10 +71,18 @@ impl GpuYieldResponse {
         let ky: Vec<f64> = inputs.iter().map(|i| i.ky).collect();
         let ratio: Vec<f64> = inputs
             .iter()
-            .map(|i| if i.et_crop > 0.0 { i.et_actual / i.et_crop } else { 1.0 })
+            .map(|i| {
+                if i.et_crop > 0.0 {
+                    i.et_actual / i.et_crop
+                } else {
+                    1.0
+                }
+            })
             .collect();
         let zeros = vec![0.0; inputs.len()];
-        let results = self.dispatcher.dispatch(LocalOp::StewartYield, &ky, &ratio, &zeros)?;
+        let results = self
+            .dispatcher
+            .dispatch(LocalOp::StewartYield, &ky, &ratio, &zeros)?;
         Ok(results.iter().map(|&v| v.clamp(0.0, 1.0)).collect())
     }
 
@@ -96,7 +104,9 @@ impl GpuYieldResponse {
             .map(|(&a, &c)| if c > 0.0 { a / c } else { 1.0 })
             .collect();
         let zeros = vec![0.0; et_actual.len()];
-        let results = self.dispatcher.dispatch(LocalOp::StewartYield, &kys, &ratios, &zeros)?;
+        let results = self
+            .dispatcher
+            .dispatch(LocalOp::StewartYield, &kys, &ratios, &zeros)?;
         Ok(results.iter().map(|&v| v.clamp(0.0, 1.0)).collect())
     }
 }
@@ -139,13 +149,7 @@ impl BatchedYieldResponse {
         yield_ratios
             .iter()
             .zip(et_actual)
-            .map(|(&yr, &eta)| {
-                if eta > 0.0 {
-                    yr / eta
-                } else {
-                    0.0
-                }
-            })
+            .map(|(&yr, &eta)| if eta > 0.0 { yr / eta } else { 0.0 })
             .collect()
     }
 }
@@ -162,9 +166,21 @@ mod tests {
         };
         let gpu_solver = GpuYieldResponse::new(device).unwrap();
         let inputs = vec![
-            YieldInput { ky: 1.25, et_actual: 500.0, et_crop: 600.0 },
-            YieldInput { ky: 0.85, et_actual: 400.0, et_crop: 600.0 },
-            YieldInput { ky: 1.0, et_actual: 600.0, et_crop: 600.0 },
+            YieldInput {
+                ky: 1.25,
+                et_actual: 500.0,
+                et_crop: 600.0,
+            },
+            YieldInput {
+                ky: 0.85,
+                et_actual: 400.0,
+                et_crop: 600.0,
+            },
+            YieldInput {
+                ky: 1.0,
+                et_actual: 600.0,
+                et_crop: 600.0,
+            },
         ];
         let gpu = gpu_solver.compute(&inputs).unwrap();
         let cpu = BatchedYieldResponse::compute(&inputs);
@@ -178,9 +194,21 @@ mod tests {
     #[test]
     fn test_batch_compute() {
         let inputs = vec![
-            YieldInput { ky: 1.25, et_actual: 500.0, et_crop: 600.0 },
-            YieldInput { ky: 0.85, et_actual: 400.0, et_crop: 600.0 },
-            YieldInput { ky: 1.0, et_actual: 600.0, et_crop: 600.0 },
+            YieldInput {
+                ky: 1.25,
+                et_actual: 500.0,
+                et_crop: 600.0,
+            },
+            YieldInput {
+                ky: 0.85,
+                et_actual: 400.0,
+                et_crop: 600.0,
+            },
+            YieldInput {
+                ky: 1.0,
+                et_actual: 600.0,
+                et_crop: 600.0,
+            },
         ];
         let ratios = BatchedYieldResponse::compute(&inputs);
         assert_eq!(ratios.len(), 3);

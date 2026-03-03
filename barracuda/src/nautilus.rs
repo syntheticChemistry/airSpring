@@ -336,7 +336,11 @@ pub struct AgPrediction {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, clippy::suboptimal_flops)]
+#[expect(
+    clippy::unwrap_used,
+    clippy::suboptimal_flops,
+    reason = "test code; flops match reference reservoir formulas"
+)]
 mod tests {
     use super::*;
 

@@ -98,16 +98,16 @@ fn phase_1_graph_topology(v: &mut ValidationHarness) {
     v.check_bool("graph_toml_loadable", !deploy_toml.is_empty());
 
     v.check_bool(
-        "graph_has_beardog",
-        deploy_toml.contains("beardog") || deploy_toml.contains("BearDog"),
+        "graph_has_crypto_capability",
+        deploy_toml.contains("crypto") || deploy_toml.contains("tls"),
     );
     v.check_bool(
-        "graph_has_songbird",
-        deploy_toml.contains("songbird") || deploy_toml.contains("Songbird"),
+        "graph_has_mesh_capability",
+        deploy_toml.contains("mesh") || deploy_toml.contains("discovery"),
     );
     v.check_bool(
-        "graph_has_toadstool",
-        deploy_toml.contains("toadstool") || deploy_toml.contains("ToadStool"),
+        "graph_has_compute_capability",
+        deploy_toml.contains("compute") || deploy_toml.contains("dispatch"),
     );
     v.check_bool(
         "graph_has_airspring",

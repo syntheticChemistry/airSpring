@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-03-02 (v0.6.8 — 77 experiments, 1237 Python + 846 lib + 61 forge tests, 86 binaries, **local GPU evolution** (6 WGSL shaders, f32 compute dispatch, CPU/GPU parity validated), **NUCLEUS full-pipeline routing** (60/60 PASS, 27 workloads, PCIe P2P bypass), **cross-spring rewire** (68/68 PASS, `BrentGpu` VG inverse + `RichardsGpu` Picard, 5/5 springs), **13,000× Rust-vs-Python atlas-scale speedup** (34/34 CPU parity benchmark), **GPU streaming multi-field** (57/57 PASS, 6.8M field-days/s), **pure GPU end-to-end** (46/46 PASS, 19.7× dispatch reduction), **mixed-hardware pipeline** (66/66 PASS, 7-stage seasonal), **GPU Stages 1-3** (WB via `gpu_step`), 146/146 + 32/32 cross-spring benchmarks (Exp 077), NUCLEUS mesh routing, Paper 12 immunological Anderson (Exp 066-069))
+**Updated**: 2026-03-02 (v0.6.8 — 77 experiments, 1237 Python + 846 lib + 62 forge tests, 86 binaries, **local GPU evolution** (6 WGSL shaders, f32 compute dispatch, CPU/GPU parity validated), **NUCLEUS full-pipeline routing** (60/60 PASS, 27 workloads, PCIe P2P bypass), **cross-spring rewire** (68/68 PASS, `BrentGpu` VG inverse + `RichardsGpu` Picard, 5/5 springs), **13,000× Rust-vs-Python atlas-scale speedup** (34/34 CPU parity benchmark), **GPU streaming multi-field** (57/57 PASS, 6.8M field-days/s), **pure GPU end-to-end** (46/46 PASS, 19.7× dispatch reduction), **mixed-hardware pipeline** (66/66 PASS, 7-stage seasonal), **GPU Stages 1-3** (WB via `gpu_step`), 146/146 + 32/32 cross-spring benchmarks (Exp 077), NUCLEUS mesh routing, Paper 12 immunological Anderson (Exp 066-069))
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -59,7 +59,7 @@ bash run_all_baselines.sh
 #    Cached to: control/long_term_wb/data/wooster_era5_1960_2023.json
 python control/long_term_wb/long_term_water_balance.py
 
-# 7. Run Rust validation binaries (853+1498 checks across 79 binaries)
+# 7. Run Rust validation binaries (853+1498 checks across 86 binaries)
 cd barracuda
 for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   validate_sensor_calibration validate_real_data cross_validate \
@@ -975,7 +975,7 @@ across ET₀, water balance, and yield response for scenario-based planning.
 Track 1 (Precision Agriculture):
   Phase 0  [COMPLETE]: Python baselines — 1237/1237 PASS (54 experiments)
   Phase 0+ [COMPLETE]: Real data pipeline — 15,300 station-days, ET₀ R²=0.97
-  Phase 1  [COMPLETE]: Rust validation — 810 lib + 57 forge tests, 79 binaries
+  Phase 1  [COMPLETE]: Rust validation — 846 lib + 62 forge tests, 86 binaries
   Phase 1.5[COMPLETE]: CPU benchmark — Rust 14.5× faster than Python (21/21 parity)
   Phase 2  [COMPLETE]: Cross-validation — 75/75 MATCH (Python↔Rust, tol=1e-5)
   Phase 2.5[COMPLETE]: Ops 5-8 GPU-first — 4 orchestrators rewired (ToadStool S70+ absorbed)
