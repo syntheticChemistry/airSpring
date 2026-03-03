@@ -1,7 +1,7 @@
 # airSpring BarraCuda — Evolution Readiness
 
 **Last Updated**: March 2, 2026 (v0.6.8 — 846 lib tests, 85 binaries, 76 experiments, 1237 Python, 30 NUCLEUS capabilities, 67/67 metalForge cross-system, 6 local WGSL shaders)
-**ToadStool PIN**: S86 HEAD (`2fee1969` — 2,866 tests, 844 WGSL shaders, 144 `ComputeDispatch` ops, `BatchedStatefulF64`, `BrentGpu`, `RichardsGpu`, `nautilus`, `multi_gpu`)
+**ToadStool PIN**: S87 HEAD (`2dc26792` — 2,866 tests, 844 WGSL shaders, 144 `ComputeDispatch` ops, `BatchedStatefulF64`, `BrentGpu`, `RichardsGpu`, `nautilus`, `multi_gpu`)
 **Handoff**: V050 (Full evolution handoff — 14 modules contributed, 25+ consumed, CPU→GPU→metalForge progression, lessons for ToadStool)
 **License**: AGPL-3.0-or-later
 

@@ -2,7 +2,7 @@
 
 **Last Updated**: March 2, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 73 experiments (1237/1237 Python + 815 Rust lib tests + 1498 atlas checks + 25 Tier A modules + 83 binaries + 138/138 cross-spring benchmarks + 68/68 cross-spring rewire). GPU streaming multi-field 57/57. CPU parity benchmark 34/34. Pure GPU end-to-end 46/46. Cross-spring rewire 68/68 (BrentGpu + RichardsGpu, 5/5 springs). ToadStool S86 sync (844 WGSL, `BatchedStatefulF64`, `BrentGpu`, `RichardsGpu`, `nautilus`, `L-BFGS`). Titan V GPU live dispatch (24/24 PASS) + AKD1000 NPU live + metalForge live (66/66) + 13,000× Rust-vs-Python atlas-scale speedup. NUCLEUS primal (30 caps, 28/28 cross-primal pipeline, ecology domain). V049 handoff. All completed papers use open data and systems.
+**Status**: 73 experiments (1237/1237 Python + 815 Rust lib tests + 1498 atlas checks + 25 Tier A modules + 83 binaries + 138/138 cross-spring benchmarks + 68/68 cross-spring rewire). GPU streaming multi-field 57/57. CPU parity benchmark 34/34. Pure GPU end-to-end 46/46. Cross-spring rewire 68/68 (BrentGpu + RichardsGpu, 5/5 springs). ToadStool S87 sync (844 WGSL, `BatchedStatefulF64`, `BrentGpu`, `RichardsGpu`, `nautilus`, `L-BFGS`). Titan V GPU live dispatch (24/24 PASS) + AKD1000 NPU live + metalForge live (66/66) + 13,000× Rust-vs-Python atlas-scale speedup. NUCLEUS primal (30 caps, 28/28 cross-primal pipeline, ecology domain). V049 handoff. All completed papers use open data and systems.
 
 ---
 
@@ -79,7 +79,7 @@ All 57+ completed papers have:
 - **GPU wiring**: 25 Tier A modules (ops 0-13, kriging, reduce, stream, richards, isotherm, mc_et0, jackknife, bootstrap, diversity, stats, correction) + `BrentGpu` (VG inverse) + `RichardsGpu` (Picard)
 - **CPU benchmarks**: 10M ET₀/s, 36.5M VG θ/s, 1.9B Kc/s, 57M Langmuir fits/s, 13,000× Rust-vs-Python (atlas-scale)
 - **GPU pipeline**: Multi-field GPU WB Stage 3 (57/57), CPU↔GPU parity (46/46), 19.7× dispatch reduction, cross-spring rewire (68/68)
-- **Cross-spring provenance**: 138/138 benchmarks across 5 springs (ToadStool S86 sync)
+- **Cross-spring provenance**: 138/138 benchmarks across 5 springs (ToadStool S87 sync)
 
 ### Compute Pipeline Per Paper
 

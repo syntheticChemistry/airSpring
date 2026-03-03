@@ -1,7 +1,7 @@
 # airSpring Specifications
 
 **Last Updated**: March 2, 2026
-**Status**: Phase 0–4 complete — 1237/1237 Python + 846 lib + 61 forge tests + 85 binaries (80 barracuda + 5 forge) + 138/138 cross-spring (S86) + 68/68 cross-spring rewire (BrentGpu + RichardsGpu) + 25 Tier A + 6 GPU-local modules + seasonal pipeline GPU Stages 1-3 + AKD1000 NPU live + 13,000× CPU speedup + metalForge 27 workloads 66/66 + NUCLEUS primal (30 capabilities) + 76 experiments (v0.6.8)
+**Status**: Phase 0–4 complete — 1237/1237 Python + 846 lib + 61 forge tests + 85 binaries (80 barracuda + 5 forge) + 138/138 cross-spring (S87) + 68/68 cross-spring rewire (BrentGpu + RichardsGpu) + 25 Tier A + 6 GPU-local modules + seasonal pipeline GPU Stages 1-3 + AKD1000 NPU live + 13,000× CPU speedup + metalForge 27 workloads 66/66 + NUCLEUS primal (30 capabilities) + 76 experiments (v0.6.8)
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling, Anderson coupling
 
 ---
@@ -27,7 +27,7 @@
 | Phase 4.0 (Cross-primal) | 28/28 PASS — capability.call routing, cross-primal forwarding |
 | Faculty | Dong (BAE, MSU — new lab 2026) |
 | Handoff | V051 in `wateringHole/handoffs/` |
-| ToadStool | S86 HEAD (`2fee1969`) |
+| ToadStool | S87 HEAD (`2dc26792`) |
 
 ---
 
@@ -39,7 +39,7 @@
 |------|--------|-------------|
 | [PAPER_REVIEW_QUEUE.md](PAPER_REVIEW_QUEUE.md) | Active | Papers to review/reproduce with controls audit |
 | [BARRACUDA_REQUIREMENTS.md](BARRACUDA_REQUIREMENTS.md) | Active | GPU kernel requirements + compute pipeline |
-| [CROSS_SPRING_EVOLUTION.md](CROSS_SPRING_EVOLUTION.md) | Active | Cross-spring shader provenance and evolution story (S86) |
+| [CROSS_SPRING_EVOLUTION.md](CROSS_SPRING_EVOLUTION.md) | Active | Cross-spring shader provenance and evolution story (S87) |
 | [ATLAS_STATION_LIST.md](ATLAS_STATION_LIST.md) | Planning | Michigan 100-station expansion for crop water atlas |
 | [NUCLEUS_INTEGRATION.md](NUCLEUS_INTEGRATION.md) | **Complete** | NUCLEUS deployment — primal registered, ecology domain, 28/28 pipeline |
 | [BIOMEOS_CAPABILITIES.md](BIOMEOS_CAPABILITIES.md) | **Complete** | Ecology capability domain for biomeOS Neural API |

@@ -4,7 +4,7 @@
 
 //! Exp 073: Cross-Spring Evolution Rewire Validation
 //!
-//! Validates airSpring's rewiring to modern `ToadStool` S86 primitives and
+//! Validates airSpring's rewiring to modern `ToadStool` S87 primitives and
 //! benchmarks the cross-spring shader evolution — documenting when and
 //! where each capability evolved across the ecosystem.
 //!
@@ -64,7 +64,7 @@ fn try_gpu_device() -> Option<Arc<barracuda::device::WgpuDevice>> {
 
 fn main() {
     validation::init_tracing();
-    validation::banner("Exp 073: Cross-Spring Evolution Rewire (ToadStool S86)");
+    validation::banner("Exp 073: Cross-Spring Evolution Rewire (ToadStool S87)");
 
     let mut v = ValidationHarness::new("Cross-Spring Rewire");
 

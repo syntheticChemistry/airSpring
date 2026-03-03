@@ -40,7 +40,7 @@
 //! | `eco::yield_response` | `gpu::yield_response` | `local_elementwise.wgsl` (op=1) | Stewart yield | A (GPU-local, f32) |
 //! | `eco::evapotranspiration` (Makkink/Turc/Hamon/BC) | `gpu::simple_et0` | `local_elementwise.wgsl` (ops 2-5) | Simple ET₀ batch | A (GPU-local, f32) |
 //!
-//! # Current Inventory (March 2, 2026 — v0.6.8, synced to `ToadStool` HEAD S86)
+//! # Current Inventory (March 2, 2026 — v0.6.8, synced to `ToadStool` HEAD S87)
 //!
 //! ## v0.6.8: Local GPU Compute Evolution + NUCLEUS Full-Pipeline
 //!
@@ -72,10 +72,10 @@
 //! | `BatchedStatefulF64` type | S83 (`pipeline::batched_stateful`) | Available |
 //! | Cross-spring provenance (Exp 073) | All springs | 68/68 PASS |
 //!
-//! `ToadStool` S42–S86: 200+ commits, 50+ cross-spring absorptions, 2,866 barracuda tests, 844 WGSL shaders.
+//! `ToadStool` S42–S87: 200+ commits, 50+ cross-spring absorptions, 2,866 barracuda tests, 844 WGSL shaders.
 //! All four airSpring issues (TS-001 through TS-004) resolved in **S54**.
 //! P0 GPU dispatch blocker resolved in **S66** (explicit `BindGroupLayout`).
-//! S86 synced: 144 `ComputeDispatch` ops, `BatchedStatefulF64` (GPU-resident ping-pong state),
+//! S87 synced: 144 `ComputeDispatch` ops, `BatchedStatefulF64` (GPU-resident ping-pong state),
 //! `StatefulPipeline<WaterBalanceState>` (CPU day-over-day), `BrentGpu` (batched GPU Brent),
 //! `RichardsGpu` (GPU Picard solver), `BatchedEncoder` (single-submit multi-op),
 //! `BatchedNelderMeadGpu`, `lbfgs`, `nautilus` (evolutionary reservoir from bingoCube),
@@ -262,7 +262,7 @@ pub enum Tier {
 
 /// All known evolution gaps (33+6 entries — 28 Tier A integrated, 4 Tier B + 6 orchestrators, 1 Tier C).
 ///
-/// v0.6.5: `ToadStool` S86 sync — `BatchedStatefulF64` (WB Tier B→A), `BatchedNelderMeadGpu`
+/// v0.6.5: `ToadStool` S87 sync — `BatchedStatefulF64` (WB Tier B→A), `BatchedNelderMeadGpu`
 ///         (isotherm Tier B→A), `BrentGpu`, `RichardsGpu`, `nautilus`, `multi_gpu`.
 /// v0.6.4: Multi-field GPU pipeline (Stage 3 `gpu_step()` across M fields),
 ///         Exp 070-072 (streaming + CPU parity + pure GPU end-to-end).
@@ -271,7 +271,7 @@ pub enum Tier {
 /// `SeasonalPipeline::run_multi_field()` dispatches Stage 3 WB to GPU per-day.
 /// `SeasonalPipeline::gpu()` dispatches Stages 1-2 (ET₀ + Kc) to GPU;
 /// `AtlasStream::with_gpu()` + `process_streaming()` callback pattern.
-/// Synced to `ToadStool` S86. Universal precision architecture
+/// Synced to `ToadStool` S87. Universal precision architecture
 /// means all GPU dispatch is precision-agnostic: f64 on Titan V, Df64 on consumer
 /// GPUs, f32 fallback. S60-S65 sovereign compiler regression **RESOLVED** (S66+).
 ///

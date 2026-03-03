@@ -6,6 +6,7 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ### Local GPU Compute Evolution + NUCLEUS Full-Pipeline Routing
 
+- **ToadStool S87 sync** (2dc26792)
 - **Local GPU evolution**: 6 WGSL compute shaders (`local_elementwise.wgsl`) for
   SCS-CN runoff, Stewart yield, Makkink/Turc/Hamon/Blaney-Criddle ET₀ —
   f32 GPU dispatch via `gpu::local_dispatch::LocalElementwise`, pending ToadStool

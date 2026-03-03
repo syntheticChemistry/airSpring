@@ -51,7 +51,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | `cargo fmt --check` | **Clean** |
 | `cargo doc --no-deps` | **Clean** (both crates) |
 | `cargo-deny check` | **Clean** (AGPL-3.0-or-later) |
-| `bench_cross_spring_evolution` | **138/138 PASS** (release, S86 sync) |
+| `bench_cross_spring_evolution` | **138/138 PASS** (release, S87 sync) |
 | `validate_dispatch_experiment` | **51/51 PASS** — CPU/GPU/batch/absorption/pipeline |
 | `validate_biome_graph` | **35/35 PASS** — graph topology, capabilities, offline pipeline |
 
@@ -78,7 +78,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
   barracuda::ops/linalg/stats/pde/optimize (GPU dispatch + CPU fallback)
        │
        ▼
-  ToadStool WGSL shaders (f64 precision on GPU, 844 shaders — S86)
+  ToadStool WGSL shaders (f64 precision on GPU, 844 shaders — S87)
        │
        ▼
   metalForge (mixed CPU + GPU + NPU)
@@ -141,7 +141,7 @@ See `specs/CROSS_SPRING_EVOLUTION.md`.
 
 Also wired: `validation::ValidationHarness` (neuralSpring), `stats::pearson`, `spearman`, `bootstrap_ci`, `stats::metrics` re-exports (airSpring→upstream S64).
 
-25 Tier A GPU modules (ops 0-13 + jackknife/bootstrap/diversity uncertainty stack) + 6 GPU-local (f32 WGSL via `local_elementwise.wgsl`). ToadStool S86 synced.
+25 Tier A GPU modules (ops 0-13 + jackknife/bootstrap/diversity uncertainty stack) + 6 GPU-local (f32 WGSL via `local_elementwise.wgsl`). ToadStool S87 synced.
 See `barracuda/src/gpu/evolution_gaps.rs` and `barracuda/EVOLUTION_READINESS.md` for the full roadmap.
 
 ### CPU Benchmarks: Rust vs Python (14.5× geometric mean speedup, 21/21 parity)
@@ -232,7 +232,7 @@ airSpring/
 ├── specs/                       # Specifications and requirements
 │   ├── PAPER_REVIEW_QUEUE.md    # Paper reproduction queue (76 experiments)
 │   ├── BARRACUDA_REQUIREMENTS.md# GPU + NPU kernel requirements
-│   └── CROSS_SPRING_EVOLUTION.md# Cross-spring shader provenance (S86)
+│   └── CROSS_SPRING_EVOLUTION.md # Cross-spring shader provenance (S87)
 ├── whitePaper/                  # Methodology and study documentation
 │   └── baseCamp/                # Per-faculty research briefings + baseCamp extensions
 ├── experiments/                 # Experiment protocols and results (76 experiments)
@@ -266,7 +266,7 @@ airSpring/
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C GPU evolution, absorbed/stays-local |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66), 27 workloads |
 | `metalForge/forge/` | Mixed hardware dispatch: live probe + capability routing |
-| `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance (S86) |
+| `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance (S87) |
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (76 experiments) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
 | `wateringHole/handoffs/` | ToadStool/BarraCuda/NUCLEUS handoffs (V051 active) |
@@ -278,11 +278,11 @@ AGPL-3.0-or-later
 ---
 
 *March 2, 2026 — v0.6.8. 76 experiments, 1237/1237 Python, 846 lib + 61 forge tests,
-85 binaries (80 barracuda + 5 forge), 138/138 cross-spring evolution benchmarks (S86 sync),
+85 binaries (80 barracuda + 5 forge), 138/138 cross-spring evolution benchmarks (S87 sync),
 68/68 cross-spring rewire (BrentGpu VG inverse + RichardsGpu Picard, 5/5 springs),
 13,000× Rust-vs-Python atlas-scale speedup, 15,300 station-days, 1498/1498 atlas checks.
 NUCLEUS primal (30 capabilities), ecology domain in biomeOS registry.
-ToadStool S86 synced: 844 WGSL shaders, ops 0-13, GPU uncertainty stack (jackknife/bootstrap/diversity),
+ToadStool S87 synced: 844 WGSL shaders, ops 0-13, GPU uncertainty stack (jackknife/bootstrap/diversity),
 BrentGpu, RichardsGpu, StatefulPipeline, BatchedStatefulF64, nautilus, L-BFGS.
 v0.6.8: 6 local WGSL compute shaders (local\_elementwise.wgsl) — SCS-CN, Stewart yield, Makkink, Turc, Hamon, Blaney-Criddle.
 gpu::local\_dispatch (LocalElementwise wgpu pipeline), 27 metalForge workloads, NUCLEUS mesh routing (Exp 076: 60/60).

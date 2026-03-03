@@ -71,7 +71,7 @@ fn main() {
 
     println!("═══════════════════════════════════════════════════════════════");
     println!("  Cross-Spring Evolution Benchmark (v0.6.5)");
-    println!("  ToadStool S86 — BatchedStatefulF64, BrentGpu, RichardsGpu");
+    println!("  ToadStool S87 — BatchedStatefulF64, BrentGpu, RichardsGpu");
     println!("═══════════════════════════════════════════════════════════════\n");
 
     let mut v = ValidationHarness::new("Cross-Spring Evolution");

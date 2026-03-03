@@ -2,7 +2,7 @@
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 
-**Last updated**: 2026-03-02 (v0.6.8, ToadStool S86)
+**Last updated**: 2026-03-02 (v0.6.8, ToadStool S87)
 **Sources**: `EVOLUTION_READINESS.md`, `gpu/evolution_gaps.rs`, `BARRACUDA_REQUIREMENTS.md`
 
 ---

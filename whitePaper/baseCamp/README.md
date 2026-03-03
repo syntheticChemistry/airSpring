@@ -2,7 +2,7 @@
 
 **Updated**: March 2, 2026
 **Project**: airSpring — Ecological & Agricultural Sciences (v0.6.8)
-**Status**: 76 experiments, 1237/1237 Python + 846 Rust lib + 61 forge tests + 85 binaries + 138/138 cross-spring (S86) + 68/68 cross-spring rewire (Exp 073, BrentGpu + RichardsGpu) + 57/57 GPU streaming multi-field (Exp 070) + 34/34 CPU parity benchmark (Exp 071, 13,000× Python) + 46/46 pure GPU end-to-end (Exp 072, 19.7× dispatch reduction) + 66/66 metalForge cross-system (7-stage GPU→NPU→CPU) + 25 Tier A + 6 GPU-local modules (ops 0-13 + local ops 0-5 + uncertainty stack) + GPU Stages 1-3 WB via `gpu_step` + Paper 12 immunological Anderson (Exp 066-069) + Exp 075 local GPU parity + Exp 076 NUCLEUS routing (60/60) + deep debt audit (zero clippy pedantic, cargo-deny clean)
+**Status**: 76 experiments, 1237/1237 Python + 846 Rust lib + 61 forge tests + 85 binaries + 138/138 cross-spring (S87) + 68/68 cross-spring rewire (Exp 073, BrentGpu + RichardsGpu) + 57/57 GPU streaming multi-field (Exp 070) + 34/34 CPU parity benchmark (Exp 071, 13,000× Python) + 46/46 pure GPU end-to-end (Exp 072, 19.7× dispatch reduction) + 66/66 metalForge cross-system (7-stage GPU→NPU→CPU) + 25 Tier A + 6 GPU-local modules (ops 0-13 + local ops 0-5 + uncertainty stack) + GPU Stages 1-3 WB via `gpu_step` + Paper 12 immunological Anderson (Exp 066-069) + Exp 075 local GPU parity + Exp 076 NUCLEUS routing (60/60) + deep debt audit (zero clippy pedantic, cargo-deny clean)
 
 ---
 
@@ -13,7 +13,7 @@ Phase 0   Python/R baselines    — reproduce paper results with original tools 
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
 Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (846 lib + 1498 atlas, 85 binaries + 138/138 cross-spring benchmarks)
 Phase 1.5 CPU benchmark         — 14.5× Rust-vs-Python geometric mean (21/21 parity)
-Phase 2   BarraCuda GPU bridge  — 25 Tier A + 6 GPU-local modules wired (cross-spring S86 fully rewired)
+Phase 2   BarraCuda GPU bridge  — 25 Tier A + 6 GPU-local modules wired (cross-spring S87 fully rewired)
 Phase 2.5 Ops 5-8 GPU-first   — Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed
 Phase 2.6 Seasonal pipeline    — GPU Stages 1-2 (ET₀ + Kc), atlas stream, MC ET₀ GPU path
 Phase 2.7 Streaming pipeline   — GpuPipelined (zero round-trip), GpuFused (sequential batch)
@@ -213,7 +213,7 @@ S79 modernization: `libc`→`rustix`, `async-trait`→AFIT, universal f64 precis
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C breakdown, absorbed vs stays-local, quality gates |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
 | `wateringHole/handoffs/` | V051 active — local GPU evolution + ToadStool absorption handoff |
-| `specs/CROSS_SPRING_EVOLUTION.md` | 844 WGSL shader provenance across all Springs (S86) |
+| `specs/CROSS_SPRING_EVOLUTION.md` | 844 WGSL shader provenance across all Springs (S87) |
 
 ### Next Steps (Dong Lab)
 

@@ -1,6 +1,6 @@
 # Cross-Spring Shader Evolution — airSpring Provenance
 
-**Updated**: March 2, 2026 (v0.6.8, ToadStool S86 synced)
+**Updated**: March 2, 2026 (v0.6.8, ToadStool S87 synced)
 
 ## Summary
 
@@ -17,7 +17,7 @@ absorbed upstream** (S64), and completed the Write→Absorb→Lean cycle with
 v0.6.8: **25 Tier A + 6 GPU-local** orchestrators, 846 lib tests,
 `gpu::local_dispatch::LocalElementwise` for wgpu direct compute (SCS-CN, Stewart,
 Makkink, Turc, Hamon, Blaney-Criddle). 27 metalForge workloads, NUCLEUS mesh
-routing (Exp 076: 60/60). S86: BrentGpu, RichardsGpu, StatefulPipeline.
+routing (Exp 076: 60/60). S87: BrentGpu, RichardsGpu, StatefulPipeline.
 
 ### Paper 12 — Immunological Anderson Infrastructure (NEW)
 
