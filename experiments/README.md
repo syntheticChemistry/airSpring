@@ -87,7 +87,7 @@
 | 076 | NUCLEUS Mixed-Hardware Routing | metalForge | **Complete** | Rust (forge) | 27 workloads, NUCLEUS mesh routing, PCIe P2P bypass, 7-stage pipeline, Tower/Node/Nest atomics, multi-node cross-hop | 60 |
 | 077 | Cross-Spring Provenance & CPU↔GPU Benchmark | GPU + Cross-Spring | **Complete** | Rust (barracuda) | CPU vs GPU timing for ET₀/WB/Hargreaves/Kc/VG/GDD/pedotransfer, shader provenance tracking (5 springs), precision lineage validation (hotSpring→all), seasonal pipeline parity, uncertainty (jackknife/bootstrap/diversity) | 32 |
 
-**Grand Total**: 1237 Python + **846 lib + 61 forge tests** + 1498/1498 atlas + 33/33 cross-validation + 25 Tier A + 6 GPU-local + 4 GPU orchestrators (infiltration, runoff, yield_response, simple_et0) + `BrentGpu` + `RichardsGpu` + 3 pipeline GPU orchestrators + seasonal pipeline GPU Stages 1-3 + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge (5 substrates, 27 workloads, 66/66 cross-system) + GPU math portability (46/46) + GPU streaming multi-field (57/57) + CPU parity benchmark (34/34) + pure GPU end-to-end (46/46) + cross-spring rewire (68/68, 5 springs) + paper chain validation (79/79, 28 domains) + local GPU parity (Exp 075, 6 ops) + NUCLEUS routing (Exp 076, 60/60) + NCBI 16S coupling (14+29) + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34) + Exp 058 Climate Scenario (46/46) + NUCLEUS primal (29/29 + 28/28) + atlas decade (102/102) + NASS real (99/99) + NCBI diversity (63/63) + Paper 12 immunological Anderson (Exp 066-069) + 85 binaries + 138/138 cross-spring benchmarks (6 Springs) + ToadStool S86 synced + 13,000× Rust-vs-Python speedup
+**Grand Total**: 1237 Python + **846 lib + 61 forge tests** + 1498/1498 atlas + 33/33 cross-validation + 25 Tier A + 6 GPU-local + 4 GPU orchestrators (infiltration, runoff, yield_response, simple_et0) + `BrentGpu` + `RichardsGpu` + 3 pipeline GPU orchestrators + seasonal pipeline GPU Stages 1-3 + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge (5 substrates, 27 workloads, 66/66 cross-system) + GPU math portability (46/46) + GPU streaming multi-field (57/57) + CPU parity benchmark (34/34) + pure GPU end-to-end (46/46) + cross-spring rewire (68/68, 5 springs) + paper chain validation (79/79, 28 domains) + local GPU parity (Exp 075, 6 ops) + NUCLEUS routing (Exp 076, 60/60) + NCBI 16S coupling (14+29) + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34) + Exp 058 Climate Scenario (46/46) + NUCLEUS primal (29/29 + 28/28) + atlas decade (102/102) + NASS real (99/99) + NCBI diversity (63/63) + Paper 12 immunological Anderson (Exp 066-069) + 86 binaries + 146/146 cross-spring evolution benchmarks + 32/32 Exp 077 cross-spring provenance (5 Springs) + ToadStool S87 synced + 13,000× Rust-vs-Python speedup
 
 ---
 
@@ -96,7 +96,7 @@
 | Category | Tests | Source |
 |----------|:-----:|--------|
 | Barracuda lib (unit + doc) | 846 | `cargo test --lib` (incl. nautilus, rpc, biomeos, cytokine, tissue, property tests, all GPU orchestrators, BrentGpu, RichardsGpu, streaming, Anderson, diversity, infiltration, runoff, yield_response, simple_et0, local_dispatch) |
-| Barracuda validation binaries | 85 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
+| Barracuda validation binaries | 86 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
 | Forge | 61 | `metalForge/forge/` (substrate, dispatch, probe, workloads, cross-system routing) |
 | Forge binaries | 5 | `validate_dispatch`, `validate_live_hardware`, `validate_dispatch_routing`, `validate_mixed_pipeline`, `validate_nucleus_routing` |
 | **Total project tests** | **846 lib + 61 forge** | |
@@ -386,6 +386,7 @@ Experiments follow `NNN_name` format:
 - `055`–`074`: GPU live, mixed-hardware, NUCLEUS, paper chain, streaming, cross-spring rewire
 - `075`: Local GPU parity validation (6 ops via `local_elementwise.wgsl`)
 - `076`: NUCLEUS mixed-hardware routing (27 workloads, mesh routing, PCIe bypass)
+- `077`: Cross-spring provenance & CPU↔GPU benchmark (5-spring shader provenance, precision lineage)
 
 Gap (013) reserved. See `specs/PAPER_REVIEW_QUEUE.md`.
 

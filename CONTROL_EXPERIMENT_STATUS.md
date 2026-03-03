@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-03-02 (v0.6.8 — 76 experiments, 1237 Python + 846 lib + 67 forge tests, 85 binaries, **local GPU evolution** (6 WGSL shaders, f32 compute dispatch, CPU/GPU parity validated), **NUCLEUS full-pipeline routing** (60/60 PASS, 27 workloads, PCIe P2P bypass), **cross-spring rewire** (68/68 PASS, `BrentGpu` VG inverse + `RichardsGpu` Picard, 5/5 springs), **13,000× Rust-vs-Python atlas-scale speedup** (34/34 CPU parity benchmark), **GPU streaming multi-field** (57/57 PASS, 6.8M field-days/s), **pure GPU end-to-end** (46/46 PASS, 19.7× dispatch reduction), **mixed-hardware pipeline** (66/66 PASS, 7-stage seasonal), **GPU Stages 1-3** (WB via `gpu_step`), 138/138 cross-spring benchmarks, NUCLEUS mesh routing, Paper 12 immunological Anderson (Exp 066-069))
+**Updated**: 2026-03-02 (v0.6.8 — 77 experiments, 1237 Python + 846 lib + 61 forge tests, 86 binaries, **local GPU evolution** (6 WGSL shaders, f32 compute dispatch, CPU/GPU parity validated), **NUCLEUS full-pipeline routing** (60/60 PASS, 27 workloads, PCIe P2P bypass), **cross-spring rewire** (68/68 PASS, `BrentGpu` VG inverse + `RichardsGpu` Picard, 5/5 springs), **13,000× Rust-vs-Python atlas-scale speedup** (34/34 CPU parity benchmark), **GPU streaming multi-field** (57/57 PASS, 6.8M field-days/s), **pure GPU end-to-end** (46/46 PASS, 19.7× dispatch reduction), **mixed-hardware pipeline** (66/66 PASS, 7-stage seasonal), **GPU Stages 1-3** (WB via `gpu_step`), 146/146 + 32/32 cross-spring benchmarks (Exp 077), NUCLEUS mesh routing, Paper 12 immunological Anderson (Exp 066-069))
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -1049,11 +1049,11 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026 — Updated: March 1, 2026 (v0.6.3)*
-*69 experiments, 1237/1237 Python, 810 lib + 57 forge tests, 79 binaries, 75/75 cross-validation, 100 Michigan stations, 21/21 CPU parity, 78/78 GPU pipeline, 26/26 GPU rewire, 104/104 mixed-hardware pipeline.*
+*Initialized: February 16, 2026 — Updated: March 2, 2026 (v0.6.8)*
+*77 experiments, 1237/1237 Python, 846 lib + 61 forge tests, 86 binaries, 75/75 cross-validation, 100 Michigan stations, 21/21 CPU parity, 78/78 GPU pipeline, 26/26 GPU rewire, 104/104 mixed-hardware pipeline.*
 *8 ET₀ methods + SCS-CN runoff + Green-Ampt infiltration + coupled runoff-infiltration + VG inverse + full-season WB + Exp 058 Climate Scenario (46/46).*
 *NUCLEUS primal (16 capabilities, 28/28 cross-primal pipeline). Atlas decade 80yr (102/102). NASS real (99/99). NCBI diversity (63/63).*
-*17 Tier A + 7 Tier B GPU orchestrators. Ops 5-8 GPU-first (ToadStool S79). GPU stats (neuralSpring S69).*
-*Seasonal pipeline GPU Stages 1-2. 73/73 atlas PASS (12 stations, 4800 results). 124/124 cross-spring benchmarks. Exp 064-069 immunological Anderson (Paper 12).*
-*metalForge 18 workloads, 29/29 cross-system. AKD1000 NPU live (3 experiments).*
+*25 Tier A + 6 GPU-local modules. Ops 5-8 GPU-first (ToadStool S87). GPU stats (neuralSpring S69).*
+*Seasonal pipeline GPU Stages 1-3. 73/73 atlas PASS (12 stations, 4800 results). 146/146 + 32/32 cross-spring benchmarks (Exp 077). Exp 064-069 immunological Anderson (Paper 12).*
+*metalForge 27 workloads, 29/29 cross-system. AKD1000 NPU live (3 experiments).*
 *Quality: zero .unwrap(), zero unsafe, zero clippy pedantic + nursery warnings. AGPL-3.0-or-later.*

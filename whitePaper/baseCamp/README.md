@@ -2,7 +2,7 @@
 
 **Updated**: March 2, 2026
 **Project**: airSpring — Ecological & Agricultural Sciences (v0.6.8)
-**Status**: 76 experiments, 1237/1237 Python + 846 Rust lib + 61 forge tests + 85 binaries + 138/138 cross-spring (S87) + 68/68 cross-spring rewire (Exp 073, BrentGpu + RichardsGpu) + 57/57 GPU streaming multi-field (Exp 070) + 34/34 CPU parity benchmark (Exp 071, 13,000× Python) + 46/46 pure GPU end-to-end (Exp 072, 19.7× dispatch reduction) + 66/66 metalForge cross-system (7-stage GPU→NPU→CPU) + 25 Tier A + 6 GPU-local modules (ops 0-13 + local ops 0-5 + uncertainty stack) + GPU Stages 1-3 WB via `gpu_step` + Paper 12 immunological Anderson (Exp 066-069) + Exp 075 local GPU parity + Exp 076 NUCLEUS routing (60/60) + deep debt audit (zero clippy pedantic, cargo-deny clean)
+**Status**: 77 experiments, 1237/1237 Python + 846 Rust lib + 61 forge tests + 86 binaries + 146/146 cross-spring evolution (S87) + 32/32 Exp 077 provenance + 68/68 cross-spring rewire (Exp 073, BrentGpu + RichardsGpu) + 57/57 GPU streaming multi-field (Exp 070) + 34/34 CPU parity benchmark (Exp 071, 13,000× Python) + 46/46 pure GPU end-to-end (Exp 072, 19.7× dispatch reduction) + 66/66 metalForge cross-system (7-stage GPU→NPU→CPU) + 25 Tier A + 6 GPU-local modules (ops 0-13 + local ops 0-5 + uncertainty stack) + GPU Stages 1-3 WB via `gpu_step` + Paper 12 immunological Anderson (Exp 066-069) + Exp 075 local GPU parity + Exp 076 NUCLEUS routing (60/60) + Exp 077 cross-spring provenance & CPU↔GPU benchmark + deep debt audit (zero clippy pedantic, cargo-deny clean)
 
 ---
 
@@ -11,7 +11,7 @@
 ```
 Phase 0   Python/R baselines    — reproduce paper results with original tools (1237/1237)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (846 lib + 1498 atlas, 85 binaries + 138/138 cross-spring benchmarks)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (846 lib + 1498 atlas, 86 binaries + 146/146 + 32/32 cross-spring benchmarks)
 Phase 1.5 CPU benchmark         — 14.5× Rust-vs-Python geometric mean (21/21 parity)
 Phase 2   BarraCuda GPU bridge  — 25 Tier A + 6 GPU-local modules wired (cross-spring S87 fully rewired)
 Phase 2.5 Ops 5-8 GPU-first   — Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed
@@ -31,13 +31,14 @@ Phase 4.3 AirSpringBrain        — 3-head Nautilus brain (ET₀/soil/crop), Mon
 Phase 4.4 Paper 12 immuno       — CytokineBrain (IL-31/W/barrier heads), tissue diversity (Pielou→W), dimensional promotion model
 Phase 4.5 Local GPU evolution   — 6 local WGSL shaders (SCS-CN, Stewart, Makkink, Turc, Hamon, Blaney-Criddle), f32 GPU compute via wgpu, ToadStool f64 absorption pending
 Phase 4.6 NUCLEUS full-pipeline — 27 metalForge workloads, NUCLEUS mesh routing validated (Exp 076: 60/60), PCIe P2P bypass
+Phase 4.7 Cross-spring provenance — CPU↔GPU benchmark with 5-spring shader provenance tracking (Exp 077: 32/32)
 ```
 
 ## Faculty Summary
 
 | Faculty | Institution | Track | Papers | Experiments | Checks | Domain |
 |---------|------------|-------|:------:|:-----------:|:------:|--------|
-| Dong | MSU BAE | Irrigation & Soil | 10+ | 76 | 1237+846 | ET₀ (8 methods), soil, IoT, WB, dual Kc, Richards, yield, ensemble, bias correction, GPU parity, GPU math portability, metalForge dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB audit, climate scenario, streaming pipeline, decade analysis, NASS yield, Shannon H' diversity, NUCLEUS primal, cross-primal pipeline, Paper 12 immunological Anderson, local GPU parity (Exp 075), NUCLEUS routing (Exp 076) |
+| Dong | MSU BAE | Irrigation & Soil | 10+ | 77 | 1237+846 | ET₀ (8 methods), soil, IoT, WB, dual Kc, Richards, yield, ensemble, bias correction, GPU parity, GPU math portability, metalForge dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB audit, climate scenario, streaming pipeline, decade analysis, NASS yield, Shannon H' diversity, NUCLEUS primal, cross-primal pipeline, Paper 12 immunological Anderson, local GPU parity (Exp 075), NUCLEUS routing (Exp 076), cross-spring provenance (Exp 077) |
 
 ## Faculty: Younsuk Dong, PhD
 
@@ -112,7 +113,7 @@ Phase 4.6 NUCLEUS full-pipeline — 27 metalForge workloads, NUCLEUS mesh routin
 | 62 | NUCLEUS Integration Validation — Exp 062 | NUCLEUS | 29/29 | JSON-RPC science parity via biomeOS Unix socket |
 | 63 | NUCLEUS Cross-Primal Pipeline — Exp 063 | NUCLEUS | 28/28 | ecology domain, capability.call routing, cross-primal forwarding |
 
-### Rust Validation (Phase 1+3) — 73 binaries + 53/53 cross-spring benchmarks
+### Rust Validation (Phase 1+3) — 81 binaries + 146/146 + 32/32 cross-spring benchmarks
 
 | Binary | Checks | Modules Exercised |
 |--------|:------:|-------------------|
@@ -212,7 +213,7 @@ S79 modernization: `libc`→`rustix`, `async-trait`→AFIT, universal f64 precis
 |----------|---------|
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C breakdown, absorbed vs stays-local, quality gates |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
-| `wateringHole/handoffs/` | V051 active — local GPU evolution + ToadStool absorption handoff |
+| `wateringHole/handoffs/` | V052 current — ToadStool S87 sync + cross-spring provenance (V051 local GPU, V053 absorption) |
 | `specs/CROSS_SPRING_EVOLUTION.md` | 844 WGSL shader provenance across all Springs (S87) |
 
 ### Next Steps (Dong Lab)
@@ -241,8 +242,8 @@ $200 sensor, Open-Meteo weather data, and a $600 GPU running BarraCuda.
 
 ## Extension Explorations
 
-With 76 experiments validated and the full Python → Rust CPU → Titan V GPU live →
-GPU math portability (13 modules, 46/46) → local GPU compute (6 ops, f32 WGSL) → metalForge mixed hardware (27 workloads) → NUCLEUS primal (30 caps, 28/28 cross-primal pipeline + 60/60 NUCLEUS routing) proven,
+With 77 experiments validated and the full Python → Rust CPU → Titan V GPU live →
+GPU math portability (13 modules, 46/46) → local GPU compute (6 ops, f32 WGSL) → metalForge mixed hardware (27 workloads) → NUCLEUS primal (30 caps, 28/28 cross-primal pipeline + 60/60 NUCLEUS routing) → cross-spring provenance (32/32, 5-spring shader tracking) proven,
 airSpring can now extend beyond reproduction into new science. These explorations use the validated stack to answer
 questions the original papers did not.
 

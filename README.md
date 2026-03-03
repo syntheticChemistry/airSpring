@@ -51,7 +51,8 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | `cargo fmt --check` | **Clean** |
 | `cargo doc --no-deps` | **Clean** (both crates) |
 | `cargo-deny check` | **Clean** (AGPL-3.0-or-later) |
-| `bench_cross_spring_evolution` | **138/138 PASS** (release, S87 sync) |
+| `bench_cross_spring_evolution` | **146/146 PASS** (release, S87 sync) |
+| `validate_cross_spring_provenance` | **32/32 PASS** — CPU↔GPU benchmark, 5-spring shader provenance |
 | `validate_dispatch_experiment` | **51/51 PASS** — CPU/GPU/batch/absorption/pipeline |
 | `validate_biome_graph` | **35/35 PASS** — graph topology, capabilities, offline pipeline |
 
@@ -101,8 +102,9 @@ ToadStool contains **844 WGSL shaders** (S79: 2,773+ barracuda tests, pure math 
 | **groundSpring** | — | **MC ET₀ uncertainty propagation shader** | — |
 | **airSpring** | — | Domain consumer + stats absorbed upstream | Richards PDE (S40), stats metrics (S64) |
 
-50+ cross-spring absorptions (S42-S79). All metalForge absorbed. DF64 transcendentals complete (15 functions).
-S79: ops 0-13 (VG θ/K, Thornthwaite, GDD, pedotransfer), jackknife/bootstrap/diversity GPU, `libc`→`rustix`, `async-trait`→AFIT, `pollster`→`test_pool`.
+50+ cross-spring absorptions (S42-S87). All metalForge absorbed. DF64 transcendentals complete (15 functions).
+S87: ops 0-13, GPU uncertainty stack, `BrentGpu`, `RichardsGpu`, `BatchedStatefulF64`, `nautilus`, L-BFGS,
+`gpu_helpers` refactor, `is_device_lost()`, MatMul validation, 844 WGSL shaders (zero f32-only).
 See `specs/CROSS_SPRING_EVOLUTION.md`.
 
 ### BarraCuda Integration (25 Tier A + 6 GPU-local + 3 pipeline)
@@ -237,7 +239,7 @@ airSpring/
 │   └── baseCamp/                # Per-faculty research briefings + baseCamp extensions
 ├── experiments/                 # Experiment protocols and results (77 experiments)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
-│   └── handoffs/                # Versioned + roadmap (V051 active)
+│   └── handoffs/                # Versioned + roadmap (V052 current)
 ├── graphs/                      # biomeOS deployment graphs (TOML)
 ├── CHANGELOG.md                 # Keep-a-Changelog versioned history
 ├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
@@ -269,7 +271,7 @@ airSpring/
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance (S87) |
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (77 experiments) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda/NUCLEUS handoffs (V051 active) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda/NUCLEUS handoffs (V052 current) |
 
 ## License
 
@@ -278,7 +280,7 @@ AGPL-3.0-or-later
 ---
 
 *March 2, 2026 — v0.6.8. 77 experiments, 1237/1237 Python, 846 lib + 61 forge tests,
-86 binaries (80 barracuda + 5 forge), 138/138 cross-spring evolution benchmarks (S87 sync),
+86 binaries (81 barracuda + 5 forge), 146/146 cross-spring evolution benchmarks + 32/32 Exp 077 provenance (S87 sync),
 68/68 cross-spring rewire (BrentGpu VG inverse + RichardsGpu Picard, 5/5 springs),
 13,000× Rust-vs-Python atlas-scale speedup, 15,300 station-days, 1498/1498 atlas checks.
 NUCLEUS primal (30 capabilities), ecology domain in biomeOS registry.

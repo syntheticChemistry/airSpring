@@ -21,8 +21,10 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 - **Exp 076** (`validate_nucleus_routing`): 60/60 PASS — 27 workloads through
   NUCLEUS mesh (Tower/Node/Nest), PCIe P2P bypass, 7-stage mixed-hardware pipeline,
   multi-node cross-hop routing
+- **Exp 077** (`validate_cross_spring_evolution`): 32/32 PASS — CPU↔GPU benchmark
+  with shader provenance (146/146 bench + 32/32 Exp 077)
 - **metalForge workloads**: 21 → 27 (6 new `ShaderOrigin::Local`)
-- 846 lib tests (↑13), 85 binaries (↑1), 76 experiments (↑2)
+- 846 lib tests (↑13), 86 binaries (↑2), 77 experiments (↑3)
 - GPU coverage: 86% of 28 domains (24/28 GPU, 4 CPU-only)
 - metalForge: 61 → 67 forge tests (66 pipeline + 1 doc)
 

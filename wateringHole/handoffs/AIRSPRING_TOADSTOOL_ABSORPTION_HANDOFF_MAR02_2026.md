@@ -1,7 +1,7 @@
 # airSpring → ToadStool/BarraCuda: Absorption & Evolution Handoff
 
 **Date**: March 2, 2026
-**From**: airSpring v0.6.3 (Eastgate)
+**From**: airSpring v0.6.8 (Eastgate)
 **To**: ToadStool / BarraCuda team
 **ToadStool PIN**: S79 (`f97fc2ae`)
 **License**: AGPL-3.0-or-later

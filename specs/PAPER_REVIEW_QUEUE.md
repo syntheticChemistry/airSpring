@@ -2,7 +2,7 @@
 
 **Last Updated**: March 2, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 73 experiments (1237/1237 Python + 815 Rust lib tests + 1498 atlas checks + 25 Tier A modules + 83 binaries + 138/138 cross-spring benchmarks + 68/68 cross-spring rewire). GPU streaming multi-field 57/57. CPU parity benchmark 34/34. Pure GPU end-to-end 46/46. Cross-spring rewire 68/68 (BrentGpu + RichardsGpu, 5/5 springs). ToadStool S87 sync (844 WGSL, `BatchedStatefulF64`, `BrentGpu`, `RichardsGpu`, `nautilus`, `L-BFGS`). Titan V GPU live dispatch (24/24 PASS) + AKD1000 NPU live + metalForge live (66/66) + 13,000× Rust-vs-Python atlas-scale speedup. NUCLEUS primal (30 caps, 28/28 cross-primal pipeline, ecology domain). V049 handoff. All completed papers use open data and systems.
+**Status**: 77 experiments (1237/1237 Python + 846 Rust lib tests + 1498 atlas checks + 25 Tier A modules + 86 binaries + 138/138 cross-spring benchmarks + 68/68 cross-spring rewire). GPU streaming multi-field 57/57. CPU parity benchmark 34/34. Pure GPU end-to-end 46/46. Cross-spring rewire 68/68 (BrentGpu + RichardsGpu, 5/5 springs). ToadStool S87 sync (844 WGSL, `BatchedStatefulF64`, `BrentGpu`, `RichardsGpu`, `nautilus`, `L-BFGS`). Titan V GPU live dispatch (24/24 PASS) + AKD1000 NPU live + metalForge live (66/66) + 13,000× Rust-vs-Python atlas-scale speedup. NUCLEUS primal (30 caps, 28/28 cross-primal pipeline, ecology domain). V052 handoff. All completed papers use open data and systems.
 
 ---
 
@@ -73,7 +73,7 @@
 All 57+ completed papers have:
 - **Digitized benchmarks** in `control/*/benchmark_*.json` (56 benchmark JSONs, 56 control directories)
 - **Python control scripts** that validate against benchmarks (1237/1237 Python checks)
-- **Rust validation binaries** (79 barracuda + 4 forge = 83 binaries) that load the same benchmarks
+- **Rust validation binaries** (81 barracuda + 5 forge = 86 binaries) that load the same benchmarks
 - **Open or published data** (no institutional access required)
 - **Cross-validation** (75/75 Python↔Rust match at 1e-5; 690 crop-station yield pairs within 0.01; PT↔PM cross-validated)
 - **GPU wiring**: 25 Tier A modules (ops 0-13, kriging, reduce, stream, richards, isotherm, mc_et0, jackknife, bootstrap, diversity, stats, correction) + `BrentGpu` (VG inverse) + `RichardsGpu` (Picard)

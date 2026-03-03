@@ -1,7 +1,7 @@
 # airSpring Multi-Primal Integration Roadmap
 
 **Date:** March 2, 2026
-**Author:** airSpring v0.6.1 (post-ToadStool S79 sync)
+**Author:** airSpring v0.6.8 (post-ToadStool S79 sync)
 **Status:** Planning — all prerequisite validation complete
 **Scope:** 7-phase roadmap from local NUCLEUS bootstrap through LAN HPC expansion
 

@@ -7,9 +7,10 @@
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V052** | [AIRSPRING_V052_TOADSTOOL_S87_SYNC_HANDOFF_MAR02_2026.md](handoffs/AIRSPRING_V052_TOADSTOOL_S87_SYNC_HANDOFF_MAR02_2026.md) | 2026-03-02 | **current** — ToadStool S87 sync (`2dc26792`), 846/846 tests pass, 0 clippy, all APIs stable, revalidation complete |
-| V051 | [AIRSPRING_V051_LOCAL_GPU_TOADSTOOL_ABSORPTION_HANDOFF_MAR02_2026.md](handoffs/AIRSPRING_V051_LOCAL_GPU_TOADSTOOL_ABSORPTION_HANDOFF_MAR02_2026.md) | 2026-03-02 | v0.6.8: 6 local WGSL ops, ToadStool f64 absorption guide (proposed ops 14-19), NUCLEUS mesh routing |
-| — | [AIRSPRING_TOADSTOOL_ABSORPTION_HANDOFF_MAR02_2026.md](handoffs/AIRSPRING_TOADSTOOL_ABSORPTION_HANDOFF_MAR02_2026.md) | 2026-03-02 | Absorption recommendations: 25 Tier A modules, patterns, evolution opportunities |
+| **V053** | [AIRSPRING_V053_TOADSTOOL_ABSORPTION_GUIDE_MAR02_2026.md](handoffs/AIRSPRING_V053_TOADSTOOL_ABSORPTION_GUIDE_MAR02_2026.md) | 2026-03-02 | **current** — ToadStool absorption guide: 6 pending ops (14-19), cross-spring evolution intelligence, GPU driver insights, performance data, provenance map |
+| V052 | [AIRSPRING_V052_TOADSTOOL_S87_SYNC_HANDOFF_MAR02_2026.md](handoffs/AIRSPRING_V052_TOADSTOOL_S87_SYNC_HANDOFF_MAR02_2026.md) | 2026-03-02 | ToadStool S87 sync (`2dc26792`), 846/846 tests pass, 0 clippy, revalidation complete |
+| V051 | [AIRSPRING_V051_LOCAL_GPU_TOADSTOOL_ABSORPTION_HANDOFF_MAR02_2026.md](handoffs/AIRSPRING_V051_LOCAL_GPU_TOADSTOOL_ABSORPTION_HANDOFF_MAR02_2026.md) | 2026-03-02 | 6 local WGSL ops, proposed ops 14-19, NUCLEUS mesh routing |
+| — | [AIRSPRING_TOADSTOOL_ABSORPTION_HANDOFF_MAR02_2026.md](handoffs/AIRSPRING_TOADSTOOL_ABSORPTION_HANDOFF_MAR02_2026.md) | 2026-03-02 | Absorption recommendations: 25 Tier A modules, patterns |
 | — | [AIRSPRING_MULTI_PRIMAL_INTEGRATION_ROADMAP_MAR02_2026.md](handoffs/AIRSPRING_MULTI_PRIMAL_INTEGRATION_ROADMAP_MAR02_2026.md) | 2026-03-02 | Multi-primal integration: NUCLEUS, NestGate, Songbird, biomeOS |
 
 ## Cross-Spring Documents
@@ -19,7 +20,7 @@
 | `../specs/CROSS_SPRING_EVOLUTION.md` | 844+ WGSL shader provenance (hotSpring/wetSpring/neuralSpring/airSpring/groundSpring) — ToadStool S87 |
 | `../specs/BIOMEOS_CAPABILITIES.md` | Ecology capability domain for biomeOS Neural API |
 | `../specs/NUCLEUS_INTEGRATION.md` | NUCLEUS deployment: graphs, workloads, Neural API bridge |
-| `../specs/GPU_PROMOTION_MAP.md` | GPU tier status: 21 Tier A + 6 GPU-local + 2 Tier B + 2 Tier C |
+| `../specs/GPU_PROMOTION_MAP.md` | GPU tier status: 25 Tier A + 6 GPU-local + Tier B + Tier C |
 | `../graphs/airspring_eco_pipeline.toml` | biomeOS deployment graph: weather → ET₀ → WB → yield |
 | `../graphs/cross_primal_soil_microbiome.toml` | Cross-Spring pipeline: airSpring θ(t) → wetSpring diversity |
 | `../barracuda/EVOLUTION_READINESS.md` | Tier A/B/C status, absorbed/stays-local, quality gates |
