@@ -2,7 +2,7 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
-## [0.6.8] - 2026-03-03
+## [0.6.8] - 2026-03-04
 
 ### barraCuda 0.3.1 Standalone Rewire + Deep Debt Resolution
 
@@ -20,6 +20,26 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 - 1132 workspace tests (846 lib + 286 integration), 62 forge tests, 86 binaries
 - 94.91% line coverage / 95.81% function coverage
 - Zero clippy pedantic warnings, zero unsafe code
+
+### Deep Debt Audit Round 2 (March 4)
+
+- **Sovereignty hardening**: `ShaderProvenance.airspring_use` → `domain_use` (24 sites),
+  removed `airspring_` prefix from GPU debug labels — primal code has self-knowledge only
+- **Dependency gating**: `ureq` gated behind `standalone-http` feature flag (eliminates
+  `ring` C/asm dependency for consumers using Songbird TLS). `testutil` gated behind
+  `testutil` feature flag (excluded from production builds)
+- **Fallible constructors**: `UsdaNassClient::try_new()` and `OpenMeteoClient::try_new()`
+  return `Result<Self, DataError>` instead of panicking on missing HTTP transport
+- **Large-file refactoring**: `bench_cross_spring_evolution.rs` (951 LOC) → 5-module
+  binary (`main.rs` + `precision.rs` + `domain.rs` + `gpu_ops.rs` + `paper12.rs` +
+  `pipeline.rs`). `seasonal_pipeline.rs` (888 LOC) → `mod.rs` + `multi_field.rs`.
+  `cross_spring_absorption.rs` (921 LOC) → `main.rs` + `s70_cross_spring.rs`
+- **Zero-copy CSV**: Eliminated per-row `Vec<&str>` allocation in `io::csv_ts` field
+  splitting — direct iteration over `split(',').enumerate()`
+- **Error handling**: `eco::crop::kc_from_gdd` now validates empty input explicitly
+  instead of silent `0.0` fallback
+- **Rustdoc fix**: Corrected ambiguous intra-doc link in `gpu::isotherm`
+- All 1132 tests pass, zero clippy pedantic+nursery warnings, zero fmt diffs
 
 ### Local GPU Compute Evolution + NUCLEUS Full-Pipeline Routing (pre-rewire)
 

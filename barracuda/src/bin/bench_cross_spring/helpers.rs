@@ -74,7 +74,7 @@ pub fn print_provenance_report() {
             p.shader,
             p.origin,
             p.primitives.len(),
-            truncate(p.airspring_use, 35)
+            truncate(p.domain_use, 35)
         );
     }
     let total_prims: usize = PROVENANCE.iter().map(|p| p.primitives.len()).sum();

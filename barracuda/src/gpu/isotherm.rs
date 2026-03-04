@@ -9,7 +9,7 @@
 //!
 //! # Evolution: Batch GPU Fitting
 //!
-//! [`barracuda::optimize::batched_nelder_mead_gpu`] (barraCuda 0.3.1) provides
+//! [`barracuda::optimize::batched_nelder_mead_gpu()`] (barraCuda 0.3.1) provides
 //! parallel optimization of many independent problems. Useful when fitting
 //! isotherms across many soil samples simultaneously. For single-sample
 //! 2-parameter fitting, the CPU `multi_start` path remains more cost-effective.

@@ -82,7 +82,7 @@ impl LocalElementwise {
         let wgpu_device = device.device();
 
         let shader_module = wgpu_device.create_shader_module(wgpu::ShaderModuleDescriptor {
-            label: Some("airspring_local_elementwise"),
+            label: Some("local_elementwise"),
             source: wgpu::ShaderSource::Wgsl(SHADER_SOURCE.into()),
         });
 

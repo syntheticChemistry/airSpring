@@ -147,5 +147,5 @@ No institutional access required. No proprietary software. AGPL-3.0 licensed.
 ## Next Phase: GPU Validation & metalForge
 
 See `specs/PAPER_REVIEW_QUEUE.md` for the full paper queue and compute pipeline.
-See `wateringHole/handoffs/` for the latest handoffs (V053 complete rewire benchmark handoff).
+See `wateringHole/handoffs/` for the latest handoffs (V068 deep debt audit + absorption handoff).
 See `CHANGELOG.md` for the full evolution history.

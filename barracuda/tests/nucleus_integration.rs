@@ -9,9 +9,9 @@
 #![allow(clippy::float_cmp, clippy::expect_used, clippy::unwrap_used)]
 
 use airspring_barracuda::biomeos;
-use airspring_barracuda::data::provider::{
-    discover_transport, HttpTransport, SongbirdTransport, UreqTransport,
-};
+#[cfg(feature = "standalone-http")]
+use airspring_barracuda::data::provider::UreqTransport;
+use airspring_barracuda::data::provider::{discover_transport, HttpTransport, SongbirdTransport};
 
 // ── Socket resolution ──────────────────────────────────────────────
 
@@ -58,14 +58,20 @@ fn socket_path_format() {
 // ── Transport tier discovery ───────────────────────────────────────
 
 #[test]
-fn transport_discover_returns_ureq_without_songbird() {
+fn transport_discover_returns_some_without_songbird() {
     std::env::remove_var("SONGBIRD_SOCKET");
     std::env::remove_var("FAMILY_ID");
     let transport = discover_transport();
-    assert_eq!(transport.tier(), "standalone/ureq");
+    // With standalone-http feature (default), falls back to ureq.
+    // Without it, returns None when Songbird is unavailable.
+    #[cfg(feature = "standalone-http")]
+    assert_eq!(transport.unwrap().tier(), "standalone/ureq");
+    #[cfg(not(feature = "standalone-http"))]
+    assert!(transport.is_none());
 }
 
 #[test]
+#[cfg(feature = "standalone-http")]
 fn ureq_transport_tier() {
     assert_eq!(UreqTransport.tier(), "standalone/ureq");
 }

@@ -1,6 +1,6 @@
 # airSpring Experiments
 
-**Updated**: March 2, 2026
+**Updated**: March 4, 2026
 **Status**: 77 experiments, 1237/1237 Python + 846 lib + 62 forge tests + 86 binaries + **146/146 cross-spring evolution benchmark (ToadStool S87)** + **Exp 077 cross-spring provenance (32/32)** + Paper 12 immunological Anderson (Exp 066-069) + 66/66 metalForge cross-system (27 workloads) + GPU streaming multi-field (57/57) + CPU parity (34/34) + pure GPU end-to-end (46/46) + **cross-spring rewire (68/68)** + **paper chain validation (79/79)** + **local GPU parity (Exp 075: 6 ops)** + **NUCLEUS routing (Exp 076: 60/60)** + **Rust 13,000× faster than Python (atlas-scale)** + Tier B→A: `BatchedStatefulF64` (WB), `BatchedNelderMeadGpu` (isotherm)
 
 ---

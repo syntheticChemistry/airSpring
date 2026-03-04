@@ -119,7 +119,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         origin: "hotSpring",
         domain: "Lattice QCD f64 precision",
         evolved_by: &["airSpring (TS-001 pow_f64 fix, TS-003 acos precision)"],
-        airspring_use: "Solar declination, atmospheric pressure, VG retention curves",
+        domain_use: "Solar declination, atmospheric pressure, VG retention curves",
     },
     ShaderProvenance {
         shader: "df64_core.wgsl",
@@ -127,7 +127,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         origin: "hotSpring",
         domain: "Nuclear EOS double-float arithmetic",
         evolved_by: &["hotSpring S60 (FMA optimization)"],
-        airspring_use: "Consumer GPU precision (RTX 4070: Df64 ~48-bit for ET₀)",
+        domain_use: "Consumer GPU precision (RTX 4070: Df64 ~48-bit for ET₀)",
     },
     ShaderProvenance {
         shader: "df64_transcendentals.wgsl",
@@ -135,7 +135,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         origin: "hotSpring",
         domain: "FMA-optimized transcendentals for DF64",
         evolved_by: &["hotSpring S60"],
-        airspring_use: "Df64 precision path for ET₀ on consumer GPUs",
+        domain_use: "Df64 precision path for ET₀ on consumer GPUs",
     },
     ShaderProvenance {
         shader: "batched_elementwise_f64.wgsl",
@@ -161,7 +161,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
             "ToadStool S54→S70+ (ops 0-8 unified absorption)",
             "ToadStool S79 (ops 9-13: VG, Thornthwaite, GDD, pedotransfer)",
         ],
-        airspring_use: "GPU-first dispatch: 14 ops covering all soil physics + crop science",
+        domain_use: "GPU-first dispatch: 14 ops covering all soil physics + crop science",
     },
     ShaderProvenance {
         shader: "kriging_f64.wgsl",
@@ -169,7 +169,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         origin: "wetSpring",
         domain: "Geostatistical spatial interpolation",
         evolved_by: &["wetSpring S28+"],
-        airspring_use: "Soil moisture spatial interpolation from sensor networks",
+        domain_use: "Soil moisture spatial interpolation from sensor networks",
     },
     ShaderProvenance {
         shader: "fused_map_reduce_f64.wgsl",
@@ -180,7 +180,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
             "wetSpring (Shannon/Simpson)",
             "airSpring (TS-004 buffer fix)",
         ],
-        airspring_use: "Seasonal ET₀ aggregation, diversity metrics",
+        domain_use: "Seasonal ET₀ aggregation, diversity metrics",
     },
     ShaderProvenance {
         shader: "moving_window_stats.wgsl",
@@ -188,7 +188,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         origin: "wetSpring",
         domain: "Time series IoT stream smoothing",
         evolved_by: &["wetSpring S28+", "airSpring metalForge S66 (f64 path)"],
-        airspring_use: "IoT sensor stream smoothing for SoilWatch data",
+        domain_use: "IoT sensor stream smoothing for SoilWatch data",
     },
     ShaderProvenance {
         shader: "nelder_mead.wgsl",
@@ -196,7 +196,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         origin: "neuralSpring",
         domain: "Derivative-free optimization",
         evolved_by: &["neuralSpring S52+"],
-        airspring_use: "Isotherm fitting (Langmuir qm/KL, Freundlich Kf/n)",
+        domain_use: "Isotherm fitting (Langmuir qm/KL, Freundlich Kf/n)",
     },
     ShaderProvenance {
         shader: "crank_nicolson_f64.wgsl",
@@ -204,7 +204,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         origin: "hotSpring",
         domain: "Implicit PDE time-stepping (heat, Schrödinger)",
         evolved_by: &["hotSpring S61-63 (sovereign compiler, f64 evolution)"],
-        airspring_use: "Richards PDE linearised diffusion cross-validation",
+        domain_use: "Richards PDE linearised diffusion cross-validation",
     },
     ShaderProvenance {
         shader: "norm_ppf.wgsl (Moro 1995)",
@@ -212,7 +212,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         origin: "hotSpring",
         domain: "Special functions (inverse normal CDF)",
         evolved_by: &["hotSpring special-function library → barracuda S52+"],
-        airspring_use: "MC ET₀ parametric confidence intervals",
+        domain_use: "MC ET₀ parametric confidence intervals",
     },
     ShaderProvenance {
         shader: "hydrology (CPU→GPU kernel)",
@@ -227,7 +227,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
             "airSpring metalForge → ToadStool S66 (absorption)",
             "airSpring v0.5.6 (GPU-first rewire via ops 5-8)",
         ],
-        airspring_use: "Hargreaves GPU ET₀, Kc GPU adjustment, DualKc GPU Ke",
+        domain_use: "Hargreaves GPU ET₀, Kc GPU adjustment, DualKc GPU Ke",
     },
     ShaderProvenance {
         shader: "stats_f64 (GPU statistics)",
@@ -235,7 +235,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         origin: "neuralSpring S69",
         domain: "GPU-accelerated OLS regression and correlation matrices",
         evolved_by: &["neuralSpring S69 → ToadStool absorption"],
-        airspring_use: "Sensor calibration regression, multi-variate soil analysis",
+        domain_use: "Sensor calibration regression, multi-variate soil analysis",
     },
     ShaderProvenance {
         shader: "seasonal_pipeline.wgsl (fused)",
@@ -246,7 +246,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
             "airSpring (domain spec)",
             "ToadStool S70+ (WGSL implementation)",
         ],
-        airspring_use: "Future: fused seasonal pipeline (pending Rust executor)",
+        domain_use: "Future: fused seasonal pipeline (pending Rust executor)",
     },
     ShaderProvenance {
         shader: "brent_f64.wgsl (root-finding)",
@@ -257,7 +257,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
             "airSpring (VG inverse need)",
             "ToadStool S70+ (WGSL, bug on L49)",
         ],
-        airspring_use: "Future: GPU VG inverse (pending barraCuda shader bug fix on L49)",
+        domain_use: "Future: GPU VG inverse (pending barraCuda shader bug fix on L49)",
     },
     ShaderProvenance {
         shader: "diversity (CPU bio kernel)",
@@ -276,7 +276,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
             "ToadStool S64 (absorption)",
             "airSpring (agroecology wrappers)",
         ],
-        airspring_use: "Cover crop biodiversity, soil 16S microbiome, pollinator habitat",
+        domain_use: "Cover crop biodiversity, soil 16S microbiome, pollinator habitat",
     },
     ShaderProvenance {
         shader: "anderson (CPU coupling kernel)",
@@ -287,7 +287,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
             "groundSpring (physics model)",
             "airSpring Exp-048 (θ→QS regime for 16S)",
         ],
-        airspring_use: "Soil moisture regime classification, NCBI 16S coupling",
+        domain_use: "Soil moisture regime classification, NCBI 16S coupling",
     },
     ShaderProvenance {
         shader: "blaney_criddle (CPU ET₀ kernel)",
@@ -299,7 +299,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         origin: "airSpring",
         domain: "Temperature-daylight PET (8th ET₀ method)",
         evolved_by: &["airSpring Exp-049 (USDA-SCS 1950)"],
-        airspring_use: "Blaney-Criddle PET for data-sparse regions",
+        domain_use: "Blaney-Criddle PET for data-sparse regions",
     },
     ShaderProvenance {
         shader: "scs_cn (CPU runoff kernel)",
@@ -312,7 +312,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         origin: "airSpring",
         domain: "SCS Curve Number rainfall-runoff",
         evolved_by: &["airSpring Exp-050 (USDA-SCS TR-55)"],
-        airspring_use: "Runoff estimation for water balance, CN tables, AMC adjustment",
+        domain_use: "Runoff estimation for water balance, CN tables, AMC adjustment",
     },
     ShaderProvenance {
         shader: "green_ampt (CPU infiltration kernel)",
@@ -324,7 +324,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         origin: "airSpring",
         domain: "Green-Ampt (1911) soil infiltration physics",
         evolved_by: &["airSpring Exp-051 (Rawls 1983 parameters)"],
-        airspring_use: "Infiltration modeling, ponding prediction, 7-soil parameter table",
+        domain_use: "Infiltration modeling, ponding prediction, 7-soil parameter table",
     },
     // ── S79 Cross-Spring Evolution ─────────────────────────────────────
     ShaderProvenance {
@@ -337,7 +337,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
             "neuralSpring (GPU dispatch pattern)",
             "ToadStool S71 (WGSL shader)",
         ],
-        airspring_use: "ET₀ and yield estimate uncertainty quantification",
+        domain_use: "ET₀ and yield estimate uncertainty quantification",
     },
     ShaderProvenance {
         shader: "bootstrap_mean_f64.wgsl",
@@ -349,7 +349,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
             "neuralSpring (GPU dispatch)",
             "ToadStool S71 (xoshiro PRNG + WGSL shader)",
         ],
-        airspring_use: "RMSE confidence intervals, yield prediction uncertainty",
+        domain_use: "RMSE confidence intervals, yield prediction uncertainty",
     },
     ShaderProvenance {
         shader: "diversity_fusion_f64.wgsl",
@@ -361,7 +361,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
             "ToadStool S70 (GPU fusion shader)",
             "airSpring (agroecology: cover crop, soil 16S, pollinator)",
         ],
-        airspring_use: "Multi-sample diversity profiling for soil microbiome studies",
+        domain_use: "Multi-sample diversity profiling for soil microbiome studies",
     },
     ShaderProvenance {
         shader: "hargreaves_batch_f64.wgsl (science shader)",
@@ -372,7 +372,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
             "airSpring (Hargreaves domain need)",
             "ToadStool S71 (HargreavesBatchGpu — science shader path)",
         ],
-        airspring_use: "Alternative to op=6 when Ra is not precomputed",
+        domain_use: "Alternative to op=6 when Ra is not precomputed",
     },
     ShaderProvenance {
         shader: "mc_et0_propagate_f64.wgsl",
@@ -384,7 +384,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
             "airSpring (FAO-56 domain equations)",
             "ToadStool S66+ (WGSL shader, Box-Muller transform)",
         ],
-        airspring_use: "GPU Monte Carlo ET₀ uncertainty bands (N=10K+ samples)",
+        domain_use: "GPU Monte Carlo ET₀ uncertainty bands (N=10K+ samples)",
     },
     // ── v0.6.2 primalTools integration ──────────────────────────────────
     ShaderProvenance {
@@ -401,7 +401,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
             "primalTools/bingoCube (domain-agnostic extraction)",
             "airSpring v0.6.2 (AirSpringBrain: ET₀/soil/crop heads, MonitoredAtlasStream)",
         ],
-        airspring_use:
+        domain_use:
             "Agricultural regime prediction, drift detection in 80yr atlas, cross-station transfer",
     },
     // ── Paper 12 — Immunological Anderson ──────────────────────────────
@@ -420,7 +420,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
             "bingocube-nautilus (CytokineBrain inherits AirSpringBrain pattern)",
             "wetSpring (GpuDiversity → Pielou evenness as disorder W)",
         ],
-        airspring_use: "AD flare prediction via CytokineBrain, tissue disorder profiling, Gonzales data pipeline",
+        domain_use: "AD flare prediction via CytokineBrain, tissue disorder profiling, Gonzales data pipeline",
     },
 ];
 
@@ -437,8 +437,8 @@ pub struct ShaderProvenance {
     pub domain: &'static str,
     /// Which Springs evolved it further.
     pub evolved_by: &'static [&'static str],
-    /// How airSpring uses it.
-    pub airspring_use: &'static str,
+    /// How the local primal uses this shader.
+    pub domain_use: &'static str,
 }
 
 #[cfg(test)]

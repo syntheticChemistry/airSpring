@@ -83,6 +83,7 @@ pub mod nautilus;
 pub mod npu;
 pub mod primal_science;
 pub mod rpc;
+#[cfg(any(test, feature = "testutil"))]
 pub mod testutil;
 pub mod tolerances;
 pub mod validation;

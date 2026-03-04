@@ -73,7 +73,7 @@ diffusion follows analogous physics.
 
 ---
 
-## Infrastructure (v0.6.3)
+## Infrastructure (v0.6.8)
 
 | Module | Paper 12 Application | Status |
 |--------|---------------------|--------|

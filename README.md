@@ -1,7 +1,7 @@
 # airSpring — Ecological & Agricultural Sciences
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
-**Date**: March 3, 2026
+**Date**: March 4, 2026
 **Version**: 0.6.8
 **License**: AGPL-3.0-or-later
 
@@ -271,7 +271,7 @@ airSpring/
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance (S87) |
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (77 experiments) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda/NUCLEUS handoffs (V052 current) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda/NUCLEUS handoffs (V068 current) |
 
 ## License
 
@@ -279,7 +279,7 @@ AGPL-3.0-or-later
 
 ---
 
-*March 3, 2026 — v0.6.8. barraCuda 0.3.1 standalone rewire. 77 experiments, 1237/1237 Python, 846 lib + 62 forge tests,
+*March 4, 2026 — v0.6.8. barraCuda 0.3.1 standalone rewire. 77 experiments, 1237/1237 Python, 846 lib + 62 forge tests,
 86 binaries (81 barracuda + 5 forge), 146/146 cross-spring evolution benchmarks + 32/32 Exp 077 provenance (S87 sync),
 68/68 cross-spring rewire (BrentGpu VG inverse + RichardsGpu Picard, 5/5 springs),
 13,000× Rust-vs-Python atlas-scale speedup, 15,300 station-days, 1498/1498 atlas checks.
@@ -288,5 +288,7 @@ ToadStool S93 synced: 845 WGSL shaders, ops 0-13, GPU uncertainty stack (jackkni
 BrentGpu, RichardsGpu, StatefulPipeline, BatchedStatefulF64, nautilus, L-BFGS.
 v0.6.8: 6 local WGSL compute shaders (local\_elementwise.wgsl) — SCS-CN, Stewart yield, Makkink, Turc, Hamon, Blaney-Criddle.
 gpu::local\_dispatch (LocalElementwise wgpu pipeline), 27 metalForge workloads, NUCLEUS mesh routing (Exp 076: 60/60).
-Deep debt audit: zero unsafe, zero clippy pedantic warnings, zero mocks in production, zero `unwrap()` in binaries.
+Deep debt audit round 2: sovereignty hardening (domain\_use rename, label cleanup), dependency gating (ureq/testutil
+feature-flagged), fallible constructors (try\_new for data providers), large-file refactoring (3 files split into modules),
+zero-copy CSV, explicit error handling. Zero unsafe, zero clippy pedantic+nursery warnings, zero mocks in production.
 cargo-deny clean, all SPDX AGPL-3.0-or-later. Pure Rust + BarraCuda.*

@@ -224,8 +224,7 @@ pub fn parse_csv_reader<R: BufRead>(
     let mut timestamps = Vec::new();
     let mut skipped_rows: usize = 0;
 
-    // Stream rows — never buffer entire file.
-    // Per-row parsing avoids allocating a Vec<&str> by using indexed split.
+    // Stream rows — never buffer entire file, zero per-row Vec allocation.
     for (line_idx, line_result) in lines.enumerate() {
         let line = line_result.map_err(AirSpringError::Io)?;
         let line = line.trim();
@@ -234,25 +233,25 @@ pub fn parse_csv_reader<R: BufRead>(
         }
 
         let line_no = line_idx + 2;
-        let fields: Vec<&str> = line.split(',').collect();
-        if fields.len() != num_headers {
+
+        // Count fields without allocating a Vec — iterate split once.
+        let field_count = line.split(',').count();
+        if field_count != num_headers {
             skipped_rows += 1;
             eprintln!(
-                "csv_ts: line {line_no}: skipped malformed row (expected {num_headers} columns, got {})",
-                fields.len()
+                "csv_ts: line {line_no}: skipped malformed row (expected {num_headers} columns, got {field_count})"
             );
             continue;
         }
 
-        timestamps.push(fields[ts_idx].trim().to_string());
-
         let mut col_idx = 0;
-        for (i, field) in fields.iter().enumerate() {
+        for (i, field) in line.split(',').enumerate() {
             if i == ts_idx {
-                continue;
+                timestamps.push(field.trim().to_string());
+            } else {
+                columns[col_idx].push(field.trim().parse::<f64>().unwrap_or(f64::NAN));
+                col_idx += 1;
             }
-            columns[col_idx].push(field.trim().parse::<f64>().unwrap_or(f64::NAN));
-            col_idx += 1;
         }
     }
 

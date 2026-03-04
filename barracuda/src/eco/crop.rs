@@ -349,6 +349,11 @@ pub fn kc_from_gdd(
     stages_gdd: &[f64],
     kc_values: &[f64],
 ) -> crate::error::Result<f64> {
+    if kc_values.is_empty() {
+        return Err(crate::error::AirSpringError::InvalidInput(
+            "kc_values must not be empty".to_string(),
+        ));
+    }
     if stages_gdd.len() != kc_values.len() {
         return Err(crate::error::AirSpringError::InvalidInput(format!(
             "stages_gdd length {} != kc_values length {}",
@@ -366,7 +371,8 @@ pub fn kc_from_gdd(
             return Ok(frac.mul_add(kc_values[i + 1] - kc_values[i], kc_values[i]));
         }
     }
-    Ok(kc_values.last().copied().unwrap_or(0.0))
+    // SAFETY: `kc_values.is_empty()` checked above — `last()` is always `Some`.
+    Ok(kc_values[kc_values.len() - 1])
 }
 
 #[cfg(test)]

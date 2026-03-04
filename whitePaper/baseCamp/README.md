@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
-**Updated**: March 2, 2026
+**Updated**: March 4, 2026
 **Project**: airSpring — Ecological & Agricultural Sciences (v0.6.8)
-**Status**: 77 experiments, 1237/1237 Python + 846 Rust lib + 61 forge tests + 86 binaries + 146/146 cross-spring evolution (S87) + 32/32 Exp 077 provenance + 68/68 cross-spring rewire (Exp 073, BrentGpu + RichardsGpu) + 57/57 GPU streaming multi-field (Exp 070) + 34/34 CPU parity benchmark (Exp 071, 13,000× Python) + 46/46 pure GPU end-to-end (Exp 072, 19.7× dispatch reduction) + 66/66 metalForge cross-system (7-stage GPU→NPU→CPU) + 25 Tier A + 6 GPU-local modules (ops 0-13 + local ops 0-5 + uncertainty stack) + GPU Stages 1-3 WB via `gpu_step` + Paper 12 immunological Anderson (Exp 066-069) + Exp 075 local GPU parity + Exp 076 NUCLEUS routing (60/60) + Exp 077 cross-spring provenance & CPU↔GPU benchmark + deep debt audit (zero clippy pedantic, cargo-deny clean)
+**Status**: 77 experiments, 1237/1237 Python + 846 Rust lib + 62 forge tests + 86 binaries + 146/146 cross-spring evolution (S87) + 32/32 Exp 077 provenance + 68/68 cross-spring rewire (Exp 073, BrentGpu + RichardsGpu) + 57/57 GPU streaming multi-field (Exp 070) + 34/34 CPU parity benchmark (Exp 071, 13,000× Python) + 46/46 pure GPU end-to-end (Exp 072, 19.7× dispatch reduction) + 66/66 metalForge cross-system (7-stage GPU→NPU→CPU) + 25 Tier A + 6 GPU-local modules (ops 0-13 + local ops 0-5 + uncertainty stack) + GPU Stages 1-3 WB via `gpu_step` + Paper 12 immunological Anderson (Exp 066-069) + Exp 075 local GPU parity + Exp 076 NUCLEUS routing (60/60) + Exp 077 cross-spring provenance & CPU↔GPU benchmark + deep debt audit round 2 (sovereignty hardening, dependency gating, fallible constructors, large-file refactoring, zero-copy CSV, zero clippy pedantic+nursery, cargo-deny clean)
 
 ---
 
@@ -213,12 +213,12 @@ S79 modernization: `libc`→`rustix`, `async-trait`→AFIT, universal f64 precis
 |----------|---------|
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C breakdown, absorbed vs stays-local, quality gates |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
-| `wateringHole/handoffs/` | V052 current — ToadStool S87 sync + cross-spring provenance (V051 local GPU, V053 absorption) |
-| `specs/CROSS_SPRING_EVOLUTION.md` | 844 WGSL shader provenance across all Springs (S87) |
+| `wateringHole/handoffs/` | V068 current — deep debt audit, absorption handoff, rewire handoff + cross-spring provenance |
+| `specs/CROSS_SPRING_EVOLUTION.md` | 845+ WGSL shader provenance across all Springs (S93) |
 
 ### Next Steps (Dong Lab)
 
-- **Deep debt audit complete**: Zero clippy pedantic warnings, all `unwrap()` replaced with `.expect("context")`, all benchmark JSONs have provenance and tolerance justification, cargo-deny clean, `ValidationHarness` standardized
+- **Deep debt audit round 2 complete**: Sovereignty hardening (`domain_use` rename, primal-agnostic labels), dependency gating (`ureq`/`testutil` feature-flagged for pure Rust builds), fallible constructors (`try_new` for data providers), large-file refactoring (3 files split into focused modules), zero-copy CSV parser, explicit error handling. Zero clippy pedantic+nursery warnings, zero unsafe, zero mocks in production, cargo-deny clean
 - **Coverage**: target 98%+ (remaining gaps: GPU-dependent code paths)
 - **ToadStool absorption**: 6 local WGSL ops ready for f64 absorption (SCS-CN, Stewart, Makkink, Turc, Hamon, Blaney-Criddle) — see V051 handoff
 - **GPU at scale**: Profile `compute_gpu()` at N=100K+ (multi-year regional grids, crossover point via `AtlasStream`)
