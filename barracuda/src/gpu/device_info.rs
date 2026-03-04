@@ -21,7 +21,7 @@
 //! ~48-bit mantissa precision — still adequate for FAO-56 (which only needs ~6 digits).
 //!
 //! **Note**: Session references (S40, S54, S66, etc.) in shader provenance below
-//! are historical `ToadStool` sessions. Since S89, all math primitives live in the
+//! are historical `BarraCuda` sessions. Since S89, all math primitives live in the
 //! standalone `barraCuda` primal (`ecoPrimals/barraCuda`).
 
 use std::sync::Arc;
@@ -158,8 +158,8 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
             "airSpring (domain equations, ops 0-1, 5-8 → v0.5.6)",
             "hotSpring S54 (acos_f64, sin_f64 for Ra/sunset angle)",
             "neuralSpring (batch orchestrator pattern)",
-            "ToadStool S54→S70+ (ops 0-8 unified absorption)",
-            "ToadStool S79 (ops 9-13: VG, Thornthwaite, GDD, pedotransfer)",
+            "BarraCuda S54→S70+ (ops 0-8 unified absorption)",
+            "BarraCuda S79 (ops 9-13: VG, Thornthwaite, GDD, pedotransfer)",
         ],
         domain_use: "GPU-first dispatch: 14 ops covering all soil physics + crop science",
     },
@@ -224,7 +224,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         origin: "airSpring",
         domain: "FAO-56 hydrology batch primitives (GPU-first since v0.5.6)",
         evolved_by: &[
-            "airSpring metalForge → ToadStool S66 (absorption)",
+            "airSpring metalForge → BarraCuda S66 (absorption)",
             "airSpring v0.5.6 (GPU-first rewire via ops 5-8)",
         ],
         domain_use: "Hargreaves GPU ET₀, Kc GPU adjustment, DualKc GPU Ke",
@@ -234,28 +234,28 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         primitives: &["linear_regression", "matrix_correlation"],
         origin: "neuralSpring S69",
         domain: "GPU-accelerated OLS regression and correlation matrices",
-        evolved_by: &["neuralSpring S69 → ToadStool absorption"],
+        evolved_by: &["neuralSpring S69 → BarraCuda absorption"],
         domain_use: "Sensor calibration regression, multi-variate soil analysis",
     },
     ShaderProvenance {
         shader: "seasonal_pipeline.wgsl (fused)",
         primitives: &["fused_et0_kc_wb_stress"],
-        origin: "airSpring concept → ToadStool S70+",
+        origin: "airSpring concept → BarraCuda S70+",
         domain: "Single-dispatch seasonal pipeline: ET₀ → Kc → WB → Stress",
         evolved_by: &[
             "airSpring (domain spec)",
-            "ToadStool S70+ (WGSL implementation)",
+            "BarraCuda S70+ (WGSL implementation)",
         ],
         domain_use: "Future: fused seasonal pipeline (pending Rust executor)",
     },
     ShaderProvenance {
         shader: "brent_f64.wgsl (root-finding)",
         primitives: &["brent_vg_inverse", "brent_green_ampt"],
-        origin: "airSpring concept → ToadStool S70+",
+        origin: "airSpring concept → BarraCuda S70+",
         domain: "Brent method root-finding for VG inverse and Green-Ampt",
         evolved_by: &[
             "airSpring (VG inverse need)",
-            "ToadStool S70+ (WGSL, bug on L49)",
+            "BarraCuda S70+ (WGSL, bug on L49)",
         ],
         domain_use: "Future: GPU VG inverse (pending barraCuda shader bug fix on L49)",
     },
@@ -273,7 +273,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         domain: "Microbiome alpha/beta diversity",
         evolved_by: &[
             "wetSpring S28 (bio/diversity)",
-            "ToadStool S64 (absorption)",
+            "BarraCuda S64 (absorption)",
             "airSpring (agroecology wrappers)",
         ],
         domain_use: "Cover crop biodiversity, soil 16S microbiome, pollinator habitat",
@@ -335,7 +335,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         evolved_by: &[
             "groundSpring (methodology)",
             "neuralSpring (GPU dispatch pattern)",
-            "ToadStool S71 (WGSL shader)",
+            "BarraCuda S71 (WGSL shader)",
         ],
         domain_use: "ET₀ and yield estimate uncertainty quantification",
     },
@@ -347,7 +347,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         evolved_by: &[
             "groundSpring (bootstrap methodology)",
             "neuralSpring (GPU dispatch)",
-            "ToadStool S71 (xoshiro PRNG + WGSL shader)",
+            "BarraCuda S71 (xoshiro PRNG + WGSL shader)",
         ],
         domain_use: "RMSE confidence intervals, yield prediction uncertainty",
     },
@@ -358,7 +358,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         domain: "GPU-fused alpha diversity (Shannon + Simpson + evenness in one dispatch)",
         evolved_by: &[
             "wetSpring S28 (CPU diversity indices)",
-            "ToadStool S70 (GPU fusion shader)",
+            "BarraCuda S70 (GPU fusion shader)",
             "airSpring (agroecology: cover crop, soil 16S, pollinator)",
         ],
         domain_use: "Multi-sample diversity profiling for soil microbiome studies",
@@ -370,7 +370,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         domain: "Hargreaves-Samani ET₀ with internal Ra computation",
         evolved_by: &[
             "airSpring (Hargreaves domain need)",
-            "ToadStool S71 (HargreavesBatchGpu — science shader path)",
+            "BarraCuda S71 (HargreavesBatchGpu — science shader path)",
         ],
         domain_use: "Alternative to op=6 when Ra is not precomputed",
     },
@@ -382,7 +382,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         evolved_by: &[
             "groundSpring (MC methodology, xoshiro PRNG)",
             "airSpring (FAO-56 domain equations)",
-            "ToadStool S66+ (WGSL shader, Box-Muller transform)",
+            "BarraCuda S66+ (WGSL shader, Box-Muller transform)",
         ],
         domain_use: "GPU Monte Carlo ET₀ uncertainty bands (N=10K+ samples)",
     },
@@ -442,6 +442,7 @@ pub struct ShaderProvenance {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

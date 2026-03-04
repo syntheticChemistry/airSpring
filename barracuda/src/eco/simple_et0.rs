@@ -206,6 +206,7 @@ pub fn blaney_criddle_from_location(tmean_c: f64, latitude_rad: f64, day_of_year
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

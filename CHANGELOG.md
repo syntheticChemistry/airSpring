@@ -2,6 +2,32 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.6.9] - 2026-03-04
+
+### Universal Precision Evolution — "Math is universal, precision is silicon"
+
+- **f64-canonical local shaders**: Promoted 6 local WGSL shaders from fixed f32
+  to f64-canonical via BarraCuda's `compile_shader_universal()`. New source:
+  `local_elementwise_f64.wgsl` (f64 canonical), compiled to F32 on consumer GPUs,
+  F64 on verified pro GPUs.
+- **Precision-aware dispatch**: `LocalElementwise::new()` defaults to F32 (adequate
+  for FAO-56 ~6 digits; f32 gives ~7). `with_precision(Precision::F64)` available
+  for verified pro GPUs. Buffer handling adapts to compiled precision.
+- **Cross-spring evolution benchmark** (Exp 078): `validate_cross_spring_evolution`
+  binary documenting provenance of every shader across all 5 Springs (hotSpring
+  precision, wetSpring bio, groundSpring uncertainty, neuralSpring architecture,
+  airSpring domain science). Benchmarks all 6 ops at batch sizes 100 → 100K.
+- **Discovery: f64 compute shader reliability**: GPU (Titan V via NVK/Mesa)
+  advertises `has_f64_shaders: true` but produces all-zero output from f64 compute
+  shaders. The f32 downcast path works perfectly. This validates the universal
+  precision architecture. Reported upstream for BarraCuda probe cache.
+- **Doc-comment sweep**: ~15 GPU modules updated from "GPU-local (f32 WGSL)" to
+  "GPU-universal (f64 canonical via `compile_shader_universal`)".
+- **Evolution gaps updated**: Tier A entries for 6 local ops now reflect f64
+  canonical status. Exp 078 added to experiment registry.
+- 852 lib tests + 1133 integration tests, 0 clippy pedantic+nursery warnings,
+  0 fmt diffs, docs build clean.
+
 ## [0.6.8] - 2026-03-04
 
 ### barraCuda 0.3.1 Standalone Rewire + Deep Debt Resolution

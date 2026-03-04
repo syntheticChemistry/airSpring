@@ -21,7 +21,18 @@
 //! CPU path: `eco::runoff`, `eco::yield_response`, `eco::simple_et0` (f64).
 //!
 //! Parity tolerance: relative 0.5% + absolute floor (f32 precision).
-//! `ToadStool` absorption upgrades to f64 for exact parity.
+//! `BarraCuda` absorption upgrades to f64 for exact parity.
+//!
+//! # Tolerance Provenance
+//!
+//! GPU/CPU parity tolerances derive from f32→f64 promotion rounding:
+//! - `5e-3` relative + `0.01` absolute: f32 mantissa gives ~7 significant digits;
+//!   for values in the 0.1–10 range, this yields ~1e-3 to 1e-2 absolute error.
+//! - `1e-6` for raw dispatch: same f32 shader, but comparing two GPU paths
+//!   (typed vs raw dispatch) which share identical rounding.
+//!
+//! Validated against CPU baselines: `control/cpu_gpu_parity/cpu_gpu_parity.py`
+//! (commit `dbfb53a`, 2026-03-02).
 
 use airspring_barracuda::gpu::device_info::try_f64_device;
 use airspring_barracuda::gpu::local_dispatch::{LocalElementwise, LocalOp};

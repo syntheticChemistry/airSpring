@@ -104,7 +104,7 @@ pub fn bench_groundspring_uncertainty(v: &mut ValidationHarness) {
 }
 
 pub fn bench_s71_upstream_evolution(v: &mut ValidationHarness) {
-    println!("\n── ToadStool S71 Upstream Evolution ─────────────────────────");
+    println!("\n── BarraCuda S71 Upstream Evolution ─────────────────────────");
 
     let t0 = Instant::now();
 

@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
 **Updated**: March 4, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.6.8)
-**Status**: 77 experiments, 1237/1237 Python + 846 Rust lib + 62 forge tests + 86 binaries + 146/146 cross-spring evolution (S87) + 32/32 Exp 077 provenance + 68/68 cross-spring rewire (Exp 073, BrentGpu + RichardsGpu) + 57/57 GPU streaming multi-field (Exp 070) + 34/34 CPU parity benchmark (Exp 071, 13,000× Python) + 46/46 pure GPU end-to-end (Exp 072, 19.7× dispatch reduction) + 66/66 metalForge cross-system (7-stage GPU→NPU→CPU) + 25 Tier A + 6 GPU-local modules (ops 0-13 + local ops 0-5 + uncertainty stack) + GPU Stages 1-3 WB via `gpu_step` + Paper 12 immunological Anderson (Exp 066-069) + Exp 075 local GPU parity + Exp 076 NUCLEUS routing (60/60) + Exp 077 cross-spring provenance & CPU↔GPU benchmark + deep debt audit round 2 (sovereignty hardening, dependency gating, fallible constructors, large-file refactoring, zero-copy CSV, zero clippy pedantic+nursery, cargo-deny clean)
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.6.9)
+**Status**: 77 experiments, 1237/1237 Python + 852 Rust lib + 1133 integration + 62 forge tests + 80 binaries + 146/146 cross-spring evolution (S87) + 32/32 Exp 077 provenance + 68/68 cross-spring rewire (Exp 073, BrentGpu + RichardsGpu) + 57/57 GPU streaming multi-field (Exp 070) + 34/34 CPU parity benchmark (Exp 071, 13,000× Python) + 46/46 pure GPU end-to-end (Exp 072, 19.7× dispatch reduction) + 66/66 metalForge cross-system (7-stage GPU→NPU→CPU) + 25 Tier A + 6 GPU-universal modules (f64 canonical via compile_shader_universal) + GPU Stages 1-3 WB via `gpu_step` + Paper 12 immunological Anderson (Exp 066-069) + Exp 075+078 universal precision + cross-spring evolution benchmark + Exp 076 NUCLEUS routing (60/60) + Exp 077 cross-spring provenance & CPU↔GPU benchmark + deep debt audit (sovereignty, dependency gating, fallible constructors, zero clippy pedantic+nursery)
 
 ---
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! GPU-accelerated Thornthwaite (1948) monthly ET₀ batch computation.
 //!
-//! Wraps `BatchedElementwiseF64` op 11 (`ThornthwaiteEt0`) from `ToadStool` S79.
+//! Wraps `BatchedElementwiseF64` op 11 (`ThornthwaiteEt0`) from `BarraCuda` S79.
 //! CPU reference: `barracuda::ops::batched_elementwise_f64::cpu_ref::thornthwaite_et0_cpu`.
 
 use std::sync::Arc;
@@ -117,6 +117,7 @@ pub fn compute_thornthwaite_cpu(inputs: &[ThornthwaiteInput]) -> Vec<f64> {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 #[expect(
     clippy::suboptimal_flops,
     reason = "test code matches reference Thornthwaite formula term-by-term"

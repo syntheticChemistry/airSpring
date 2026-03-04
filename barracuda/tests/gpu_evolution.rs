@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! Evolution gap and `ToadStool` issue tracking tests.
+//! Evolution gap and `BarraCuda` issue tracking tests.
 //!
 //! Validates the evolution roadmap metadata: gap catalog completeness,
 //! unique IDs, tier classification, and upstream issue resolution status.
@@ -23,8 +23,8 @@ fn test_evolution_gaps_catalogued() {
 
     for gap in GAPS.iter().filter(|g| g.tier == Tier::A) {
         assert!(
-            gap.toadstool_primitive.is_some(),
-            "Tier A gap '{}' should reference a ToadStool primitive",
+            gap.barracuda_primitive.is_some(),
+            "Tier A gap '{}' should reference a BarraCuda primitive",
             gap.id
         );
     }
@@ -63,7 +63,7 @@ fn test_batched_et0_gap_documented() {
 
     let gap = et0_gap.unwrap();
     assert!(
-        gap.toadstool_primitive
+        gap.barracuda_primitive
             .unwrap()
             .contains("batched_elementwise"),
         "Should reference the batched elementwise shader"
@@ -82,25 +82,25 @@ fn test_kriging_gap_documented() {
 
     let gap = kriging_gap.unwrap();
     assert!(
-        gap.toadstool_primitive.unwrap().contains("kriging"),
+        gap.barracuda_primitive.unwrap().contains("kriging"),
         "Should reference kriging_f64"
     );
 }
 
-// ── ToadStool issue tracking tests ──────────────────────────────────
+// ── BarraCuda issue tracking tests ──────────────────────────────────
 
 #[test]
-fn test_toadstool_issues_all_resolved() {
-    use airspring_barracuda::gpu::evolution_gaps::{IssueStatus, TOADSTOOL_ISSUES};
+fn test_barracuda_issues_all_resolved() {
+    use airspring_barracuda::gpu::evolution_gaps::{IssueStatus, BARRACUDA_ISSUES};
 
     assert_eq!(
-        TOADSTOOL_ISSUES.len(),
+        BARRACUDA_ISSUES.len(),
         4,
-        "Expected 4 ToadStool issues, got {}",
-        TOADSTOOL_ISSUES.len()
+        "Expected 4 BarraCuda issues, got {}",
+        BARRACUDA_ISSUES.len()
     );
 
-    for issue in TOADSTOOL_ISSUES {
+    for issue in BARRACUDA_ISSUES {
         assert_eq!(
             issue.status,
             IssueStatus::Resolved,
@@ -117,23 +117,23 @@ fn test_toadstool_issues_all_resolved() {
 }
 
 #[test]
-fn test_toadstool_issues_by_id() {
-    use airspring_barracuda::gpu::evolution_gaps::TOADSTOOL_ISSUES;
+fn test_barracuda_issues_by_id() {
+    use airspring_barracuda::gpu::evolution_gaps::BARRACUDA_ISSUES;
 
-    let ts001 = TOADSTOOL_ISSUES.iter().find(|i| i.id == "TS-001").unwrap();
+    let ts001 = BARRACUDA_ISSUES.iter().find(|i| i.id == "TS-001").unwrap();
     assert_eq!(ts001.severity, "CRITICAL");
     assert!(ts001.file.contains("batched_elementwise"));
     assert!(ts001.fix.contains("RESOLVED"));
 
-    let ts002 = TOADSTOOL_ISSUES.iter().find(|i| i.id == "TS-002").unwrap();
+    let ts002 = BARRACUDA_ISSUES.iter().find(|i| i.id == "TS-002").unwrap();
     assert_eq!(ts002.severity, "MEDIUM");
     assert!(ts002.fix.contains("RESOLVED"));
 
-    let ts003 = TOADSTOOL_ISSUES.iter().find(|i| i.id == "TS-003").unwrap();
+    let ts003 = BARRACUDA_ISSUES.iter().find(|i| i.id == "TS-003").unwrap();
     assert_eq!(ts003.severity, "LOW");
     assert!(ts003.fix.contains("RESOLVED"));
 
-    let ts004 = TOADSTOOL_ISSUES.iter().find(|i| i.id == "TS-004").unwrap();
+    let ts004 = BARRACUDA_ISSUES.iter().find(|i| i.id == "TS-004").unwrap();
     assert_eq!(ts004.severity, "HIGH");
     assert!(ts004.fix.contains("RESOLVED"));
 }

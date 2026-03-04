@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! S70+: Cross-Spring Evolution — Modern ToadStool Rewiring
+//! S70+: Cross-Spring Evolution — Modern `BarraCuda` Rewiring
 //!
-//! Validates modern ToadStool primitives and documents cross-spring shader
+//! Validates modern `BarraCuda` primitives and documents cross-spring shader
 //! evolution (Richards PDE, optimizers, special functions, Hill/Monod).
 
 #[test]
@@ -212,7 +212,7 @@ fn s70_upstream_richards_pde_consistency() {
     assert!(
         result.h.iter().all(|h| h.is_finite()),
         "S70+: Upstream barracuda::pde::richards produces finite results \
-         (shared ToadStool Thomas solver)"
+         (shared BarraCuda Thomas solver)"
     );
 }
 

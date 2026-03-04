@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! NPU integration via `ToadStool` `akida-driver`
+//! NPU integration via `BarraCuda` `akida-driver`
 //!
 //! Wraps `akida_driver` for airSpring's edge inference pipeline:
 //! runtime device discovery, int8 quantization, and crop/irrigation
@@ -222,6 +222,7 @@ pub fn npu_summary() -> Result<NpuSummary, Error> {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

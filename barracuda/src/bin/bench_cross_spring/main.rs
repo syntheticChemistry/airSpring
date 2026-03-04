@@ -36,7 +36,7 @@ fn main() {
 
     println!("═══════════════════════════════════════════════════════════════");
     println!("  airSpring Cross-Spring Provenance Benchmark (v0.5.6)");
-    println!("  ToadStool S70+ — Ops 5-8 Absorption, GPU-First Dispatch");
+    println!("  BarraCuda S70+ — Ops 5-8 Absorption, GPU-First Dispatch");
     println!("═══════════════════════════════════════════════════════════════\n");
 
     print_provenance_report();
@@ -90,10 +90,10 @@ fn run_et0_benchmarks(device: Option<&Arc<WgpuDevice>>, pass: &mut u32, fail: &m
         bench_suite!(
             pass,
             fail,
-            ("ET₀ GPU (N=365)", "hotSpring→ToadStool→GPU", || {
+            ("ET₀ GPU (N=365)", "hotSpring→BarraCuda→GPU", || {
                 bench_et0_gpu(dev, 365)
             }),
-            ("ET₀ GPU (N=10000)", "hotSpring→ToadStool→GPU", || {
+            ("ET₀ GPU (N=10000)", "hotSpring→BarraCuda→GPU", || {
                 bench_et0_gpu(dev, 10_000)
             }),
             (
@@ -118,7 +118,7 @@ fn run_water_balance_benchmarks(device: Option<&Arc<WgpuDevice>>, pass: &mut u32
             pass,
             fail,
             "Water Balance GPU step (N=500)",
-            "airSpring→ToadStool→GPU",
+            "airSpring→BarraCuda→GPU",
             || bench_wb_gpu_step(dev, 500),
         );
     }
@@ -130,7 +130,7 @@ fn run_reduce_benchmarks(device: Option<&Arc<WgpuDevice>>, pass: &mut u32, fail:
             pass,
             fail,
             "Seasonal Reduce GPU (N=2000)",
-            "wetSpring→ToadStool→GPU",
+            "wetSpring→BarraCuda→GPU",
             || bench_reduce_gpu(dev, 2000),
         );
     }
@@ -149,7 +149,7 @@ fn run_stream_benchmarks(device: Option<&Arc<WgpuDevice>>, pass: &mut u32, fail:
             pass,
             fail,
             "Stream Smoothing GPU (N=500, w=24)",
-            "wetSpring→ToadStool→GPU",
+            "wetSpring→BarraCuda→GPU",
             || bench_stream_gpu(dev, 500, 24),
         );
     }
@@ -161,7 +161,7 @@ fn run_richards_benchmarks(pass: &mut u32, fail: &mut u32) {
         fail,
         (
             "Richards CPU (sand, 0.1d)",
-            "airSpring→ToadStool S40",
+            "airSpring→BarraCuda S40",
             bench_richards_cpu
         ),
         (
@@ -200,12 +200,12 @@ fn run_hargreaves_benchmarks(pass: &mut u32, fail: &mut u32) {
         fail,
         (
             "Hargreaves batch CPU (N=365)",
-            "airSpring→ToadStool S66 hydrology",
+            "airSpring→BarraCuda S66 hydrology",
             || bench_hargreaves_batch(365)
         ),
         (
             "Hargreaves batch CPU (N=10000)",
-            "airSpring→ToadStool S66 hydrology",
+            "airSpring→BarraCuda S66 hydrology",
             || bench_hargreaves_batch(10_000)
         ),
     );
@@ -234,7 +234,7 @@ fn run_ops_5_8_gpu_benchmarks(device: Option<&Arc<WgpuDevice>>, pass: &mut u32, 
         pass,
         fail,
         "SensorCal GPU (op=5, N=2000)",
-        "airSpring→ToadStool S70+",
+        "airSpring→BarraCuda S70+",
         || {
             let data: Vec<f64> = (0..2000)
                 .map(|i| (f64::from(i) / 2000.0).mul_add(20_000.0, 5_000.0))
@@ -387,17 +387,17 @@ fn run_diversity_benchmarks(pass: &mut u32, fail: &mut u32) {
         fail,
         (
             "Diversity alpha (5-species mix)",
-            "wetSpring→ToadStool S64 bio",
+            "wetSpring→BarraCuda S64 bio",
             bench_diversity_alpha
         ),
         (
             "Bray-Curtis matrix (20 samples)",
-            "wetSpring→ToadStool S64 bio",
+            "wetSpring→BarraCuda S64 bio",
             bench_bray_curtis_matrix
         ),
         (
             "Shannon from frequencies (pre-norm)",
-            "wetSpring→ToadStool S66",
+            "wetSpring→BarraCuda S66",
             bench_shannon_frequencies
         ),
     );
@@ -409,7 +409,7 @@ fn run_crop_kc_benchmarks(pass: &mut u32, fail: &mut u32) {
         fail,
         (
             "Crop Kc stage interpolation (180d)",
-            "airSpring→ToadStool S66 hydrology",
+            "airSpring→BarraCuda S66 hydrology",
             bench_crop_kc_stage
         ),
         (

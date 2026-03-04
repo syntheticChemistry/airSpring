@@ -10,8 +10,8 @@
 //! 1. airSpring primal health + 16 registered capabilities
 //! 2. Ecology domain routing (ecology.* methods match science.* parity)
 //! 3. Full pipeline: ET₀ → Water Balance → Yield (single JSON-RPC call)
-//! 4. Cross-primal forwarding: airSpring → ToadStool health
-//! 5. Cross-primal forwarding: airSpring → BearDog health
+//! 4. Cross-primal forwarding: airSpring → `ToadStool` health
+//! 5. Cross-primal forwarding: airSpring → `BearDog` health
 //! 6. Primal discovery: all NUCLEUS primals visible
 //! 7. Neural-api capability.call routing to airSpring
 //!

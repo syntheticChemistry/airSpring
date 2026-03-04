@@ -373,6 +373,7 @@ pub fn irrigation_trigger(fc: f64, wp: f64, current_theta: f64, mad_fraction: f6
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

@@ -167,6 +167,7 @@ pub fn inverse_van_genuchten_h(
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

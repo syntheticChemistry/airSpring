@@ -14,7 +14,7 @@
 //! 2. GPU dispatch (ET₀, Hargreaves, sensor cal, water balance, reduce)
 //!    matches CPU within documented tolerance
 //! 3. Batch scaling: results independent of N
-//! 4. `ToadStool` absorption audit: gap inventory + tier counts
+//! 4. `BarraCuda` absorption audit: gap inventory + tier counts
 //! 5. Mixed-backend seasonal pipeline: GPU stages 1-2, CPU stages 3-4
 //!
 //! metalForge routing validation is separate (104/104 PASS in forge tests).
@@ -335,7 +335,7 @@ fn phase_3_batch_scaling(v: &mut ValidationHarness) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Phase 4: ToadStool Absorption Audit
+// Phase 4: BarraCuda Absorption Audit
 // ═══════════════════════════════════════════════════════════════════
 
 fn phase_4_absorption_audit(v: &mut ValidationHarness) {

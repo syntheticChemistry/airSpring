@@ -8,7 +8,7 @@
 //!
 //! # Cross-Spring Provenance
 //!
-//! The `Tolerance` struct itself comes from `ToadStool` S52 (M-010), inspired by
+//! The `Tolerance` struct itself comes from `BarraCuda` S52 (M-010), inspired by
 //! barracuda validation registry and adopted across all Springs.
 //!
 //! | Domain | Tolerance | Origin |
@@ -19,7 +19,7 @@
 //! | Richards PDE | benchmark-specified | HYDRUS numerical convergence |
 //! | Isotherm fit | 0.01 mg/g | Adsorption experiment precision |
 //! | Kriging interpolation | 1e-6 | Numerical linear algebra (small systems) |
-//! | GPU/CPU cross-validation | 1e-5 | f64 shader rounding (`ToadStool` TS-001 fix) |
+//! | GPU/CPU cross-validation | 1e-5 | f64 shader rounding (`BarraCuda` TS-001 fix) |
 //!
 //! # Baseline Provenance
 //!
@@ -196,14 +196,14 @@ pub const ISOTHERM_PREDICTION: Tolerance = Tolerance {
 
 /// GPU↔CPU cross-validation: f64 shader rounding via DF64 emulation.
 ///
-/// `ToadStool` TS-001 (`pow_f64` fix, S54) and TS-003 (`acos_f64` fix, S54)
+/// `BarraCuda` TS-001 (`pow_f64` fix, S54) and TS-003 (`acos_f64` fix, S54)
 /// established that WGSL f64 shaders achieve ≤1e-5 relative agreement with
 /// CPU f64. This tolerance is used for all GPU/CPU comparison tests.
 pub const GPU_CPU_CROSS: Tolerance = Tolerance {
     name: "gpu_cpu_cross_validation",
     abs_tol: 1e-5,
     rel_tol: 1e-5,
-    justification: "WGSL f64 shader vs CPU f64; ToadStool TS-001/003 S54 validated",
+    justification: "WGSL f64 shader vs CPU f64; BarraCuda TS-001/003 S54 validated",
 };
 
 /// Kriging interpolation: small-system linear algebra tolerance.
@@ -503,12 +503,11 @@ pub const NPU_SIGMA_FLOOR: Tolerance = Tolerance {
 
 /// FAO-56 p-factor: stress onset when Dr > 0.55 × TAW (Allen et al. 1998 Eq 84,
 /// midpoint for field crops).
-pub const NPU_STRESS_DEPLETION: Tolerance = Tolerance {
-    name: "npu_stress_depletion",
-    abs_tol: 0.55,
-    rel_tol: 0.0,
-    justification: "FAO-56 p-factor: stress onset when Dr > 0.55 × TAW (Allen et al. 1998 Eq 84, midpoint for field crops)",
-};
+///
+/// This is a **physical threshold**, not a validation tolerance. It is stored
+/// here alongside tolerances for colocation with NPU constants, but semantically
+/// it is a domain parameter (fraction of TAW at which stress begins).
+pub const NPU_STRESS_DEPLETION_THRESHOLD: f64 = 0.55;
 
 // ═══════════════════════════════════════════════════════════════════
 // Biodiversity indices (Shannon, Simpson, Bray-Curtis)
@@ -541,6 +540,7 @@ pub const BIO_BRAY_CURTIS: Tolerance = Tolerance {
 };
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 
@@ -662,7 +662,6 @@ mod tests {
             &IOT_CSV_ROUNDTRIP,
             // NPU streaming classification
             &NPU_SIGMA_FLOOR,
-            &NPU_STRESS_DEPLETION,
         ];
         for tol in all_tolerances {
             assert!(
@@ -677,11 +676,16 @@ mod tests {
             );
             assert!(tol.abs_tol > 0.0, "{}: abs_tol must be positive", tol.name);
         }
-        // Ensure we cover every defined tolerance (47 total)
+        // 46 Tolerance structs + 1 plain threshold (NPU_STRESS_DEPLETION_THRESHOLD)
         assert_eq!(
             all_tolerances.len(),
-            47,
-            "test must include every tolerance constant defined in this file"
+            46,
+            "test must include every Tolerance constant defined in this file"
+        );
+        let threshold = NPU_STRESS_DEPLETION_THRESHOLD;
+        assert!(
+            threshold > 0.0 && threshold < 1.0,
+            "stress threshold must be a fraction of TAW"
         );
     }
 }

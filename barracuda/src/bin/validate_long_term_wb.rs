@@ -579,8 +579,11 @@ fn main() {
         std::process::exit(0);
     }
 
-    let json_str = std::fs::read_to_string(&cache_path).expect("read weather cache");
-    let cache: serde_json::Value = serde_json::from_str(&json_str).expect("parse weather cache");
+    let cache: serde_json::Value = {
+        let file = std::fs::File::open(&cache_path).expect("open weather cache");
+        let reader = std::io::BufReader::new(file);
+        serde_json::from_reader(reader).expect("parse weather cache")
+    };
 
     let seasons = parse_weather_cache(&cache).expect("parse seasons from cache");
 

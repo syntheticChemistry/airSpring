@@ -12,7 +12,11 @@
       "Carsel RF, Parrish RS (1988) WRR 24:755-769",
       "USDA SCAN: https://www.nrcs.usda.gov/wps/portal/wcc/home/snowClimateMonitoring/"
     ],
-    "data_source": "Carsel & Parrish (1988) VG parameters (open literature), SCAN seasonal theta ranges (published)"
+    "data_source": "Carsel & Parrish (1988) VG parameters (open literature), SCAN seasonal theta ranges (published)",
+    "data_repositories": {
+      "van_genuchten_params": "Carsel RF, Parrish RS (1988) WRR 24:755-769 Table 1 (open literature, no accession)",
+      "scan_network": "USDA NRCS SCAN: https://wcc.sc.egov.usda.gov/nwcc/site?sitenum=XXXX (Michigan sites)"
+    }
   },
   "retention_checks": [
     {"soil": "sand",      "h_cm": -10,   "expected_theta": 0.2143, "tolerance": 0.005},

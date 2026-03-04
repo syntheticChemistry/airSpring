@@ -30,7 +30,7 @@ use crate::substrate::{Capability, SubstrateKind};
 /// Where the compute implementation for a workload lives.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ShaderOrigin {
-    /// Absorbed by `ToadStool` — uses `barracuda::ops::*` primitives.
+    /// Absorbed by `BarraCuda` — uses `barracuda::ops::*` primitives.
     Absorbed,
     /// Local WGSL shader in `barracuda/src/shaders/` — pending absorption.
     Local,
@@ -47,7 +47,7 @@ pub struct EcoWorkload {
     pub workload: Workload,
     /// Where the implementation lives.
     pub origin: ShaderOrigin,
-    /// `ToadStool` primitive name (if absorbed).
+    /// `BarraCuda` primitive name (if absorbed).
     pub primitive: Option<&'static str>,
     /// ODE/PDE system dimensions (if applicable).
     pub system_dims: Option<SystemDims>,
@@ -98,7 +98,7 @@ impl EcoWorkload {
         matches!(self.origin, ShaderOrigin::Local)
     }
 
-    /// Whether this workload has been absorbed by `ToadStool`.
+    /// Whether this workload has been absorbed by `BarraCuda`.
     #[must_use]
     pub const fn is_absorbed(&self) -> bool {
         matches!(self.origin, ShaderOrigin::Absorbed)
@@ -117,7 +117,7 @@ impl EcoWorkload {
     }
 }
 
-// ── GPU batch compute domains (absorbed by ToadStool) ───────────────
+// ── GPU batch compute domains (absorbed by BarraCuda) ────────────────
 
 /// Penman-Monteith `ET₀` batch — station-parallel evapotranspiration.
 #[must_use]
@@ -220,7 +220,7 @@ pub fn forecast_scheduling() -> EcoWorkload {
         .with_primitive("BatchedForecastF64")
 }
 
-// ── GPU orchestrators (absorbed by ToadStool S70+) ──────────────────
+// ── GPU orchestrators (absorbed by BarraCuda S70+) ──────────────────
 
 /// Hargreaves-Samani ET₀ batch — temperature-only ET₀ estimate.
 /// Absorbed via `HargreavesBatchGpu` (S71).
@@ -321,7 +321,7 @@ pub fn sensor_anomaly() -> EcoWorkload {
 /// Tissue diversity profiling — cell-type Pielou evenness → Anderson disorder W.
 ///
 /// Dispatches to `GpuDiversity` (Shannon/Simpson/Pielou) for tissue samples.
-/// GPU path available via `DiversityFusionGpu` (`ToadStool` S70+).
+/// GPU path available via `DiversityFusionGpu` (`BarraCuda` S70+).
 #[must_use]
 pub fn tissue_diversity() -> EcoWorkload {
     EcoWorkload::new_static(ShaderOrigin::Absorbed)
@@ -357,7 +357,7 @@ pub fn ad_flare_classifier() -> EcoWorkload {
     w
 }
 
-// ── Local WGSL shaders (pending ToadStool absorption) ───────────────
+// ── Local WGSL shaders (pending BarraCuda absorption) ────────────────
 
 /// SCS-CN runoff batch — element-wise Q from (P, CN, Ia ratio).
 ///
@@ -482,7 +482,7 @@ pub fn all_workloads() -> Vec<EcoWorkload> {
         tissue_diversity(),
         cytokine_brain(),
         ad_flare_classifier(),
-        // Local WGSL shaders (pending ToadStool absorption)
+        // Local WGSL shaders (pending BarraCuda absorption)
         scs_cn_batch(),
         stewart_yield_batch(),
         makkink_et0_batch(),

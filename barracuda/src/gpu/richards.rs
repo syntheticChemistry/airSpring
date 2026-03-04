@@ -4,7 +4,7 @@
 //! # Cross-Spring Provenance
 //!
 //! The Richards PDE solver was **contributed by airSpring** (absorbed upstream in
-//! S40), making it one of airSpring's direct contributions to `ToadStool`. The
+//! S40), making it one of airSpring's direct contributions to `BarraCuda`. The
 //! `van_genuchten_f64.wgsl` shader uses barracuda f64 precision math (`pow_f64`,
 //! `exp_f64`) for water retention curve evaluation.
 //!
@@ -288,6 +288,7 @@ impl BatchedRichards {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

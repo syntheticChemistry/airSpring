@@ -648,10 +648,6 @@ fn validate_noise_resilience(v: &mut ValidationHarness) {
 // ═══════════════════════════════════════════════════════════════════
 
 #[cfg(feature = "npu")]
-#[expect(
-    clippy::too_many_lines,
-    reason = "live NPU validation covers multiple sensor streams and regime transitions"
-)]
 fn validate_live_npu_funky(v: &mut ValidationHarness) {
     use airspring_barracuda::npu;
 

@@ -595,10 +595,6 @@ fn validate_weight_hotswap(v: &mut ValidationHarness) {
 // ═══════════════════════════════════════════════════════════════════
 
 #[cfg(feature = "npu")]
-#[expect(
-    clippy::too_many_lines,
-    reason = "live high-cadence validation covers AKD1000 hardware streaming"
-)]
 fn validate_live_high_cadence(v: &mut ValidationHarness) {
     use airspring_barracuda::npu;
 

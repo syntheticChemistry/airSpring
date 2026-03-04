@@ -13,12 +13,12 @@
 //! | API | Device? | Backend |
 //! |-----|:-------:|---------|
 //! | [`BatchedHargreaves::compute`] | No | CPU via `eco::evapotranspiration::hargreaves_et0` |
-//! | [`BatchedHargreaves::compute_gpu`] | Yes | **GPU** via `BatchedElementwiseF64` op=6 (`ToadStool` S70+) |
+//! | [`BatchedHargreaves::compute_gpu`] | Yes | **GPU** via `BatchedElementwiseF64` op=6 (`BarraCuda` S70+) |
 //!
 //! # GPU Dispatch
 //!
 //! The CPU path is fully validated against FAO-56 Eq. 52. The GPU path
-//! dispatches to `ToadStool` `BatchedElementwiseF64` op=6 (stride=4:
+//! dispatches to `BarraCuda` `BatchedElementwiseF64` op=6 (stride=4:
 //! `[tmax, tmin, lat_rad, doy]`), absorbed in S70+.
 //!
 //! # Reference
@@ -54,7 +54,7 @@ pub enum Backend {
     /// Validated CPU path (always available).
     #[default]
     Cpu,
-    /// GPU path via `BatchedElementwiseF64` op=6 (`ToadStool` S70+ absorbed).
+    /// GPU path via `BatchedElementwiseF64` op=6 (`BarraCuda` S70+ absorbed).
     Gpu,
 }
 
@@ -70,7 +70,7 @@ pub struct BatchedHargreavesResult {
 /// Batched Hargreaves-Samani ET₀ orchestrator.
 ///
 /// Computes Hargreaves ET₀ for N station-days in a single call.
-/// GPU dispatch via `BatchedElementwiseF64` op=6 (absorbed in `ToadStool` S70+).
+/// GPU dispatch via `BatchedElementwiseF64` op=6 (absorbed in `BarraCuda` S70+).
 /// Falls back to CPU when no GPU device is configured.
 pub struct BatchedHargreaves {
     backend: Backend,
@@ -101,7 +101,7 @@ impl BatchedHargreaves {
     }
 
     /// Returns a reference to the GPU engine, if available.
-    /// Used for `ToadStool` GPU dispatch when the shader is wired.
+    /// Used for `BarraCuda` GPU dispatch when the shader is wired.
     #[must_use]
     pub const fn gpu_engine(&self) -> Option<&BatchedElementwiseF64> {
         self.gpu_engine.as_ref()
@@ -146,7 +146,7 @@ impl BatchedHargreaves {
 
     /// Pack inputs into stride-4 GPU layout: `[tmax, tmin, lat_rad, doy]`.
     ///
-    /// Ready for `ToadStool` op=6 absorption — produces the flat `f64` array
+    /// Ready for `BarraCuda` op=6 absorption — produces the flat `f64` array
     /// that `BatchedElementwiseF64::execute` expects.
     #[must_use]
     pub fn pack_gpu_input(inputs: &[HargreavesDay]) -> Vec<f64> {
@@ -182,13 +182,14 @@ impl BatchedHargreaves {
         let tmax: Vec<f64> = inputs.iter().map(|d| d.tmax).collect();
         let tmin: Vec<f64> = inputs.iter().map(|d| d.tmin).collect();
 
-        // Delegate to ToadStool batch (absorbed from airSpring metalForge, S66 R-S66-002).
+        // Delegate to BarraCuda batch (absorbed from airSpring metalForge, S66 R-S66-002).
         // Upstream uses (ra, tmax, tmin) parameter order; returns None only on length mismatch.
         barracuda::stats::hargreaves_et0_batch(&ra, &tmax, &tmin).unwrap_or_default()
     }
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
     use crate::eco::evapotranspiration as et;

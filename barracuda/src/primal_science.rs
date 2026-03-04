@@ -24,7 +24,7 @@ fn u32_p(params: &serde_json::Value, key: &str) -> Option<u32> {
     params
         .get(key)
         .and_then(serde_json::Value::as_u64)
-        .map(|v| v as u32)
+        .and_then(|v| u32::try_from(v).ok())
 }
 
 /// Dispatch a science method to the appropriate handler.

@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! GPU-accelerated bootstrap mean estimation.
 //!
-//! Wraps `barracuda::stats::bootstrap::BootstrapMeanGpu` from `ToadStool` S71.
+//! Wraps `barracuda::stats::bootstrap::BootstrapMeanGpu` from `BarraCuda` S71.
 //!
 //! # Cross-Spring Provenance
 //!
 //! - **groundSpring**: Bootstrap methodology for uncertainty bands
 //! - **neuralSpring**: GPU dispatch pattern
-//! - **`ToadStool` S71**: `bootstrap_mean_f64.wgsl` shader
+//! - **`BarraCuda` S71**: `bootstrap_mean_f64.wgsl` shader
 
 use std::sync::Arc;
 
@@ -136,6 +136,7 @@ fn bootstrap_mean_cpu(
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

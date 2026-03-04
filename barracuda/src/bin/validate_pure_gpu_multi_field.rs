@@ -11,7 +11,7 @@
 //! Proves that the **full** seasonal pipeline runs on GPU with results
 //! matching the validated CPU path:
 //!
-//! - Stage 1 (ET₀): `BatchedEt0` GPU dispatch (Tier A, absorbed by `ToadStool`)
+//! - Stage 1 (ET₀): `BatchedEt0` GPU dispatch (Tier A, absorbed by `BarraCuda`)
 //! - Stage 2 (Kc): `BatchedKcClimate` GPU dispatch (Tier A, absorbed)
 //! - Stage 3 (WB): `BatchedWaterBalance::gpu_step()` per-day × M fields
 //! - Stage 4 (Yield): CPU arithmetic (single multiplication per field)
@@ -20,7 +20,7 @@
 //! CPU dispatches would be M×N per-field-per-day. GPU reduces total dispatches
 //! from M×N to N+2 — a factor of M (number of fields) reduction.
 //!
-//! `ToadStool` unidirectional streaming: Stages 1-2 fire without CPU readback.
+//! `BarraCuda` unidirectional streaming: Stages 1-2 fire without CPU readback.
 //! Stage 3 reads back per-day (N round-trips), but each reads M fields in one call.
 //!
 //! Provenance: Pure GPU end-to-end multi-field pipeline validation

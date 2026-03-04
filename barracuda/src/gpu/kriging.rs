@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! Soil moisture spatial interpolation via `ToadStool` Kriging.
+//! Soil moisture spatial interpolation via `BarraCuda` Kriging.
 //!
 //! Wraps [`barracuda::ops::kriging_f64::KrigingF64`] with domain-specific types
 //! for precision agriculture soil moisture mapping.
@@ -19,7 +19,7 @@
 //! | [`KrigingInterpolator`] | Yes¹ | `Arc<WgpuDevice>` |
 //!
 //! ¹ `KrigingF64` currently solves on CPU (LU); GPU dispatch planned when
-//!   `ToadStool` ships a kriging compute shader.
+//!   `BarraCuda` ships a kriging compute shader.
 //!
 //! # Usage
 //!
@@ -27,10 +27,10 @@
 //! content (VWC) across a field grid. This feeds the water balance model for
 //! variable-rate irrigation scheduling.
 //!
-//! # `ToadStool` Primitive
+//! # `BarraCuda` Primitive
 //!
 //! Uses [`barracuda::ops::kriging_f64::KrigingF64`] for ordinary kriging with
-//! proper variogram-based covariance and LU solve. When `ToadStool` adds GPU
+//! proper variogram-based covariance and LU solve. When `BarraCuda` adds GPU
 //! dispatch for large kriging systems, the [`KrigingInterpolator`] wrapper will
 //! automatically benefit.
 
@@ -306,6 +306,7 @@ pub fn interpolate_soil_moisture(
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 #[expect(
     clippy::float_cmp,
     reason = "test assertions on deterministic kriging interpolation results"

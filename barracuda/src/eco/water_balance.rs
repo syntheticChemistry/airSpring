@@ -305,6 +305,7 @@ pub fn mass_balance_check(
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

@@ -2,7 +2,7 @@
 #![warn(clippy::pedantic)]
 #![allow(clippy::cast_precision_loss)]
 
-//! Cross-Spring Evolution Benchmark — Modern `ToadStool` + `BarraCUDA` Validation
+//! Cross-Spring Evolution Benchmark — Modern `BarraCuda` Validation
 //!
 //! Validates the complete cross-spring shader evolution by exercising primitives
 //! from each contributing Spring and documenting when and where each capability
@@ -33,8 +33,8 @@ fn main() {
         .init();
 
     println!("═══════════════════════════════════════════════════════════════");
-    println!("  Cross-Spring Evolution Benchmark (v0.6.8)");
-    println!("  ToadStool S87 — Universal Precision, Pure Math Shaders");
+    println!("  Cross-Spring Evolution Benchmark (v0.6.9)");
+    println!("  BarraCuda S87 — Universal Precision, Pure Math Shaders");
     println!("═══════════════════════════════════════════════════════════════\n");
 
     let mut v = ValidationHarness::new("Cross-Spring Evolution");

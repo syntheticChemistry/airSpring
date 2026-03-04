@@ -74,7 +74,7 @@ pub struct RichardsProfile {
 /// | Primitive | Origin | Upstream |
 /// |-----------|--------|----------|
 /// | Thomas algorithm | airSpring (pre-v0.5.8) | Local implementation |
-/// | `tridiagonal_solve` | `barracuda::linalg` (S52+) | Shared `ToadStool` primitive |
+/// | `tridiagonal_solve` | `barracuda::linalg` (S52+) | Shared `BarraCuda` primitive |
 /// | `CyclicReductionF64` | `barracuda::ops` (S62+) | GPU variant for batch PDE |
 ///
 /// The local Thomas solver was replaced by the upstream `barracuda::linalg::tridiagonal_solve`
@@ -243,7 +243,8 @@ pub fn solve_richards_1d_with_config(
     let mut h: Vec<f64> = vec![h_initial.clamp(h_clip_min, h_clip_max); n_nodes];
     let mut profiles = Vec::new();
 
-    let n_steps = usize::try_from((duration_days / dt_days).ceil() as u64).unwrap_or(1);
+    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+    let n_steps = (duration_days / dt_days).ceil().max(1.0) as usize;
     let mut t = 0.0_f64;
 
     let mut a = vec![0.0_f64; n_nodes];
@@ -496,6 +497,7 @@ pub fn mass_balance_check(
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 #[expect(clippy::float_cmp, reason = "test assertions on physical quantities")]
 mod tests {
     use super::*;

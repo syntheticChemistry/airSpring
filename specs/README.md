@@ -1,7 +1,7 @@
 # airSpring Specifications
 
 **Last Updated**: March 2, 2026
-**Status**: Phase 0–4 complete — 1237/1237 Python + 846 lib + 61 forge tests + 86 binaries (81 barracuda + 5 forge) + 146/146 + 32/32 cross-spring (S87) + 68/68 cross-spring rewire (BrentGpu + RichardsGpu) + 25 Tier A + 6 GPU-local modules + seasonal pipeline GPU Stages 1-3 + AKD1000 NPU live + 13,000× CPU speedup + metalForge 27 workloads 66/66 + NUCLEUS primal (30 capabilities) + 77 experiments (v0.6.8)
+**Status**: Phase 0–4 complete — 1237/1237 Python + 846 lib + 61 forge tests + 86 binaries (81 barracuda + 5 forge) + 146/146 + 32/32 cross-spring (S87) + 68/68 cross-spring rewire (BrentGpu + RichardsGpu) + 25 Tier A + 6 GPU-local modules + seasonal pipeline GPU Stages 1-3 + AKD1000 NPU live + 13,000× CPU speedup + metalForge 27 workloads 66/66 + NUCLEUS primal (30 capabilities) + 77 experiments (v0.6.9)
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling, Anderson coupling
 
 ---

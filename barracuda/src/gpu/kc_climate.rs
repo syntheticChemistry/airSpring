@@ -12,12 +12,12 @@
 //! | API | Device? | Backend |
 //! |-----|:-------:|---------|
 //! | [`BatchedKcClimate::compute`] | No | CPU via `eco::crop::adjust_kc_for_climate` |
-//! | [`BatchedKcClimate::compute_gpu`] | Yes | **GPU** via `BatchedElementwiseF64` op=7 (`ToadStool` S70+) |
+//! | [`BatchedKcClimate::compute_gpu`] | Yes | **GPU** via `BatchedElementwiseF64` op=7 (`BarraCuda` S70+) |
 //!
 //! # GPU Dispatch
 //!
 //! The CPU path is fully validated against FAO-56 Eq. 62. The GPU path
-//! dispatches to `ToadStool` `BatchedElementwiseF64` op=7 (stride=4:
+//! dispatches to `BarraCuda` `BatchedElementwiseF64` op=7 (stride=4:
 //! `[kc_table, u2, rh_min, crop_height_m]`), absorbed in S70+.
 //!
 //! # Reference
@@ -52,7 +52,7 @@ pub enum Backend {
     /// Validated CPU path (always available).
     #[default]
     Cpu,
-    /// GPU path via `BatchedElementwiseF64` op=7 (`ToadStool` S70+ absorbed).
+    /// GPU path via `BatchedElementwiseF64` op=7 (`BarraCuda` S70+ absorbed).
     Gpu,
 }
 
@@ -68,7 +68,7 @@ pub struct BatchedKcClimateResult {
 /// Batched Kc climate adjustment orchestrator.
 ///
 /// Computes FAO-56 Eq. 62 for N station-days in a single call.
-/// GPU dispatch via `BatchedElementwiseF64` op=7 (absorbed in `ToadStool` S70+).
+/// GPU dispatch via `BatchedElementwiseF64` op=7 (absorbed in `BarraCuda` S70+).
 /// Falls back to CPU when no GPU device is configured.
 pub struct BatchedKcClimate {
     backend: Backend,
@@ -99,7 +99,7 @@ impl BatchedKcClimate {
     }
 
     /// Returns a reference to the GPU engine, if available.
-    /// Used for `ToadStool` GPU dispatch when the shader is wired.
+    /// Used for `BarraCuda` GPU dispatch when the shader is wired.
     #[must_use]
     pub const fn gpu_engine(&self) -> Option<&BatchedElementwiseF64> {
         self.gpu_engine.as_ref()
@@ -144,7 +144,7 @@ impl BatchedKcClimate {
 
     /// Pack inputs into stride-4 GPU layout: `[kc_table, u2, rh_min, crop_height_m]`.
     ///
-    /// Ready for `ToadStool` op=7 absorption — produces the flat `f64` array
+    /// Ready for `BarraCuda` op=7 absorption — produces the flat `f64` array
     /// that `BatchedElementwiseF64::execute` expects.
     #[must_use]
     pub fn pack_gpu_input(inputs: &[KcClimateDay]) -> Vec<f64> {
@@ -178,6 +178,7 @@ impl BatchedKcClimate {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 
@@ -298,7 +299,7 @@ mod tests {
         let cpu_engine = BatchedKcClimate::cpu();
         let inputs: Vec<KcClimateDay> = (0..50)
             .map(|i| KcClimateDay {
-                rh_min: f64::from(i as u32).mul_add(0.5, 30.0),
+                rh_min: f64::from(i).mul_add(0.5, 30.0),
                 ..sample_day()
             })
             .collect();

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! GPU-accelerated `IoT` stream processing via `ToadStool` `MovingWindowStats`.
+//! GPU-accelerated `IoT` stream processing via `BarraCuda` `MovingWindowStats`.
 //!
 //! Wraps [`barracuda::ops::moving_window_stats::MovingWindowStats`] for sliding
 //! window smoothing of agricultural sensor time series. Handles the f64→f32→f64
@@ -8,7 +8,7 @@
 //! # Provenance
 //!
 //! `moving_window.wgsl` provides sliding-window stream smoothing for environmental
-//! monitoring (S28+), absorbed into `ToadStool` ops, and now wired here for
+//! monitoring (S28+), absorbed into `BarraCuda` ops, and now wired here for
 //! `IoT` sensor stream smoothing — a cross-spring benefit.
 //!
 //! # Usage
@@ -45,7 +45,7 @@ pub struct SmoothedSeries {
 
 /// GPU-backed sliding window smoother for `IoT` sensor streams.
 ///
-/// Wraps `ToadStool`'s `MovingWindowStats` (f32 GPU shader, sliding-window stream smoothing)
+/// Wraps `BarraCuda`'s `MovingWindowStats` (f32 GPU shader, sliding-window stream smoothing)
 /// with f64 conversion for airSpring's precision requirements.
 pub struct StreamSmoother {
     inner: MovingWindowStats,
@@ -118,6 +118,7 @@ pub fn smooth_cpu(data: &[f64], window_size: usize) -> Option<SmoothedSeries> {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! GPU-accelerated Growing Degree Days (GDD) batch computation.
 //!
-//! Wraps `BatchedElementwiseF64` op 12 (Gdd) from `ToadStool` S79.
+//! Wraps `BatchedElementwiseF64` op 12 (Gdd) from `BarraCuda` S79.
 //! Uses `execute_with_aux` for `T_base`. CPU: `(T_mean - T_base).max(0.0)`.
 
 use std::sync::Arc;
@@ -73,6 +73,7 @@ pub fn compute_gdd_cpu(tmean_values: &[f64], tbase: f64) -> Vec<f64> {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

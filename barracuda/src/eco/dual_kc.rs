@@ -467,6 +467,7 @@ pub fn simulate_dual_kc_mulched(
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 #[expect(clippy::float_cmp, reason = "test assertions on ET values")]
 mod tests {
     use super::*;

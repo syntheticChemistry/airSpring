@@ -19,11 +19,11 @@
 //! 1. Every GPU module produces results matching CPU baselines
 //! 2. GPU dispatch provides measurable throughput gains for batch workloads
 //! 3. Cross-spring shader provenance is traceable (which spring evolved what)
-//! 4. ToadStool S87 universal precision architecture works end-to-end
+//! 4. BarraCuda S87 universal precision architecture works end-to-end
 //!
 //! # Cross-Spring Shader Provenance Map
 //!
-//! | GPU Module | ToadStool Shader | Origin Spring | Session | Precision |
+//! | GPU Module | BarraCuda Shader | Origin Spring | Session | Precision |
 //! |------------|-----------------|---------------|---------|-----------|
 //! | `gpu::et0` | `batched_elementwise_f64` op=0 | airSpring | S54 | f64 canonical |
 //! | `gpu::water_balance` | `batched_elementwise_f64` op=1 | airSpring | S54 | f64 canonical |
@@ -47,9 +47,9 @@
 //! | `gpu::isotherm` | `nelder_mead` (CPU) | neuralSpring | S52 | f64 (CPU) |
 //! | `gpu::mc_et0` | CPU → GPU ET₀ batch → CPU | groundSpring | S64 | f64 hybrid |
 //! | `gpu::seasonal_pipeline` | Chained ops 0→7→1→yield | airSpring | S70+ | f64 canonical |
-//! | `gpu::runoff` | `local_elementwise.wgsl` op=0 | airSpring local | v0.6.8 | f32 (pending f64) |
-//! | `gpu::yield_response` | `local_elementwise.wgsl` op=1 | airSpring local | v0.6.8 | f32 (pending f64) |
-//! | `gpu::simple_et0` | `local_elementwise.wgsl` ops 2-5 | airSpring local | v0.6.8 | f32 (pending f64) |
+//! | `gpu::runoff` | `local_elementwise_f64.wgsl` op=0 | airSpring local | v0.6.9 | f64 canonical (compile_shader_universal) |
+//! | `gpu::yield_response` | `local_elementwise_f64.wgsl` op=1 | airSpring local | v0.6.9 | f64 canonical (compile_shader_universal) |
+//! | `gpu::simple_et0` | `local_elementwise_f64.wgsl` ops 2-5 | airSpring local | v0.6.9 | f64 canonical (compile_shader_universal) |
 //!
 //! # Precision Lineage
 //!
@@ -88,7 +88,7 @@ fn main() {
 
     println!("═══════════════════════════════════════════════════════════════");
     println!("  Exp 077: Cross-Spring Provenance & CPU↔GPU Benchmark");
-    println!("  airSpring v0.6.8 — ToadStool S87 (2dc26792)");
+    println!("  airSpring v0.6.9 — BarraCuda S87 (2dc26792)");
     println!("═══════════════════════════════════════════════════════════════\n");
 
     let mut v = ValidationHarness::new("Exp 077 Cross-Spring Provenance");
@@ -127,7 +127,7 @@ fn try_device() -> Option<Arc<WgpuDevice>> {
 
 fn bench_et0_cpu_vs_gpu(v: &mut ValidationHarness, device: Option<&Arc<WgpuDevice>>) {
     const N: usize = 1000;
-    println!("\n── FAO-56 ET₀ (airSpring → ToadStool op=0, hotSpring precision) ──");
+    println!("\n── FAO-56 ET₀ (airSpring → BarraCuda op=0, hotSpring precision) ──");
 
     let days: Vec<DailyEt0Input> = (0..N)
         .map(|i| {
@@ -194,7 +194,7 @@ fn bench_et0_cpu_vs_gpu(v: &mut ValidationHarness, device: Option<&Arc<WgpuDevic
 
 fn bench_water_balance_cpu_vs_gpu(v: &mut ValidationHarness, device: Option<&Arc<WgpuDevice>>) {
     const N: usize = 500;
-    println!("\n── Water Balance (airSpring → ToadStool op=1) ─────────────────");
+    println!("\n── Water Balance (airSpring → BarraCuda op=1) ─────────────────");
 
     let cpu_start = Instant::now();
     let mut state = WaterBalanceState::new(0.30, 0.12, 900.0, 0.55);
@@ -245,7 +245,7 @@ fn bench_water_balance_cpu_vs_gpu(v: &mut ValidationHarness, device: Option<&Arc
 
 fn bench_hargreaves_provenance(v: &mut ValidationHarness, device: Option<&Arc<WgpuDevice>>) {
     const N: usize = 500;
-    println!("\n── Hargreaves ET₀ (airSpring → ToadStool op=6, S70+) ────────");
+    println!("\n── Hargreaves ET₀ (airSpring → BarraCuda op=6, S70+) ────────");
 
     let cpu_start = Instant::now();
     let cpu_vals: Vec<Option<f64>> = (0..N)
@@ -293,7 +293,7 @@ fn bench_hargreaves_provenance(v: &mut ValidationHarness, device: Option<&Arc<Wg
 
 fn bench_kc_climate_provenance(v: &mut ValidationHarness, device: Option<&Arc<WgpuDevice>>) {
     const N: usize = 500;
-    println!("\n── Kc Climate Adj (airSpring → ToadStool op=7, S70+) ────────");
+    println!("\n── Kc Climate Adj (airSpring → BarraCuda op=7, S70+) ────────");
 
     let cpu_start = Instant::now();
     let cpu_vals: Vec<f64> = (0..N)
@@ -331,7 +331,7 @@ fn bench_kc_climate_provenance(v: &mut ValidationHarness, device: Option<&Arc<Wg
 
 fn bench_vg_theta_k_provenance(v: &mut ValidationHarness, device: Option<&Arc<WgpuDevice>>) {
     const N: usize = 500;
-    println!("\n── Van Genuchten θ/K (airSpring → ToadStool ops 9-10, S76) ──");
+    println!("\n── Van Genuchten θ/K (airSpring → BarraCuda ops 9-10, S76) ──");
 
     let h_values: Vec<f64> = (0..N)
         .map(|i| (i as f64 + 1.0).mul_add(-0.5, 0.0))
@@ -369,7 +369,7 @@ fn bench_vg_theta_k_provenance(v: &mut ValidationHarness, device: Option<&Arc<Wg
 
 fn bench_thornthwaite_gdd_provenance(v: &mut ValidationHarness, device: Option<&Arc<WgpuDevice>>) {
     const N: usize = 200;
-    println!("\n── Thornthwaite/GDD (airSpring → ToadStool ops 11-12, S76) ──");
+    println!("\n── Thornthwaite/GDD (airSpring → BarraCuda ops 11-12, S76) ──");
 
     let tvals: Vec<f64> = (0..N)
         .map(|i| (i as f64 * 0.05).sin().mul_add(10.0, 15.0))
@@ -400,7 +400,7 @@ fn bench_thornthwaite_gdd_provenance(v: &mut ValidationHarness, device: Option<&
 
 fn bench_pedotransfer_provenance(v: &mut ValidationHarness, device: Option<&Arc<WgpuDevice>>) {
     const N: usize = 200;
-    println!("\n── Pedotransfer (airSpring → ToadStool op=13, S76) ──────────");
+    println!("\n── Pedotransfer (airSpring → BarraCuda op=13, S76) ──────────");
 
     let inputs: Vec<PedotransferInput> = (0..N)
         .map(|i| {
@@ -437,7 +437,7 @@ fn bench_pedotransfer_provenance(v: &mut ValidationHarness, device: Option<&Arc<
 }
 
 fn bench_uncertainty_provenance(v: &mut ValidationHarness, device: Option<&Arc<WgpuDevice>>) {
-    println!("\n── Uncertainty (groundSpring → ToadStool S64/S71) ────────────");
+    println!("\n── Uncertainty (groundSpring → BarraCuda S64/S71) ────────────");
 
     let input = DailyEt0Input {
         tmin: 12.3,

@@ -157,7 +157,7 @@ pub fn classify_reading(
     let depletion = (fc - reading) / (fc - wp);
     let class = if is_anomaly {
         2
-    } else if depletion > tolerances::NPU_STRESS_DEPLETION.abs_tol {
+    } else if depletion > tolerances::NPU_STRESS_DEPLETION_THRESHOLD {
         1
     } else {
         0
@@ -191,6 +191,7 @@ pub struct StreamSessionResult {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

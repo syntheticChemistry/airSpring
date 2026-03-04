@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! Batched ET₀ GPU orchestrator — GPU-first via `ToadStool` `BatchedElementwiseF64`.
+//! Batched ET₀ GPU orchestrator — GPU-first via `BarraCuda` `BatchedElementwiseF64`.
 //!
 //! Dispatches N station-day ET₀ computations to the GPU via
 //! [`barracuda::ops::batched_elementwise_f64::BatchedElementwiseF64`].
@@ -33,7 +33,7 @@ use barracuda::ops::batched_elementwise_f64::{self as bef64, BatchedElementwiseF
 
 use crate::eco::evapotranspiration::{self as et, DailyEt0Input};
 
-/// Station-day input matching `ToadStool` shader layout.
+/// Station-day input matching `BarraCuda` shader layout.
 ///
 /// `(tmax, tmin, rh_max, rh_min, wind_2m, rs, elevation, latitude, doy)`
 #[derive(Debug, Clone, Copy)]
@@ -201,6 +201,7 @@ impl BatchedEt0 {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

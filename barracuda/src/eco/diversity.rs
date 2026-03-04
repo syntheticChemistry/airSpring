@@ -4,7 +4,7 @@
 //! # Cross-Spring Provenance
 //!
 //! These metrics delegate to `barracuda::stats::diversity`, absorbed from
-//! wetSpring `bio/diversity.rs` in `ToadStool` S64. wetSpring originally
+//! wetSpring `bio/diversity.rs` in `BarraCuda` S64. wetSpring originally
 //! developed them for microbiome alpha/beta diversity (Shannon, Simpson,
 //! Chao1, Bray-Curtis). airSpring reuses them for:
 //!
@@ -17,7 +17,7 @@
 //!
 //! # GPU Acceleration
 //!
-//! For large-scale diversity computation (many samples), `ToadStool` provides
+//! For large-scale diversity computation (many samples), `BarraCuda` provides
 //! `barracuda::ops::bio::DiversityFusionGpu` which fuses Shannon + Simpson +
 //! evenness into a single GPU dispatch. Wire through [`crate::gpu`] when
 //! sample counts justify GPU overhead.
@@ -130,6 +130,7 @@ pub fn rarefaction_curve(counts: &[f64], depths: &[f64]) -> Vec<f64> {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

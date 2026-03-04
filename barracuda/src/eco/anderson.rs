@@ -149,6 +149,7 @@ pub fn coupling_series(theta_series: &[f64], theta_r: f64, theta_s: f64) -> Vec<
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

@@ -178,7 +178,7 @@ pub fn et0_ensemble(input: &EnsembleInput) -> EnsembleResult {
     EnsembleResult {
         consensus,
         spread: max_v - min_v,
-        n_methods: n as u8,
+        n_methods: u8::try_from(n).unwrap_or(u8::MAX),
         pm,
         pt,
         hargreaves: hg,
@@ -189,6 +189,7 @@ pub fn et0_ensemble(input: &EnsembleInput) -> EnsembleResult {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

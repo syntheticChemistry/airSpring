@@ -270,6 +270,7 @@ pub fn parse_csv_reader<R: BufRead>(
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
     use crate::testutil::generate_synthetic_iot_data;

@@ -5,8 +5,10 @@
     "baseline_commit": "af1eb97",
     "baseline_date": "2026-02-26",
     "reproduce": "python control/regional_et0/regional_et0_intercomparison.py",
-    "data_source": "Open-Meteo ERA5 daily, 2023 growing season (May-Sep)",
-    "stations": "6+ Michigan stations discovered from data/open_meteo/"
+    "data_source": "Open-Meteo ERA5 daily (https://open-meteo.com/), 2023 growing season (May-Sep)",
+    "data_api": "https://archive-api.open-meteo.com/v1/era5",
+    "stations": "6+ Michigan stations discovered from data/open_meteo/",
+    "reanalysis_product": "ERA5 (Hersbach et al. 2020, DOI:10.1002/qj.3803)"
   },
   "validation_thresholds": {
     "et0_daily_mean_mm": {

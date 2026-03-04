@@ -131,6 +131,7 @@ pub fn thornthwaite_monthly_et0(monthly_temps: &[f64; 12], latitude_deg: f64) ->
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

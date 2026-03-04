@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! GPU-accelerated van Genuchten hydraulics — θ(h), K(h), and θ→h inverse.
 //!
-//! Forward: `BatchedElementwiseF64` ops 9/10 (`ToadStool` S79).
-//! Inverse: `BrentGpu::solve_vg_inverse` (`ToadStool` S83, `brent_f64.wgsl`).
+//! Forward: `BatchedElementwiseF64` ops 9/10 (`BarraCuda` S79).
+//! Inverse: `BrentGpu::solve_vg_inverse` (`BarraCuda` S83, `brent_f64.wgsl`).
 //!
 //! # Cross-Spring Provenance
 //!
@@ -211,6 +211,7 @@ pub fn compute_k_cpu(
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

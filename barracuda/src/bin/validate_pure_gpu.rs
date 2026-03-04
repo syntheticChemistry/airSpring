@@ -10,7 +10,7 @@
 //! Validates the complete agricultural pipeline through the GPU orchestration
 //! layer: ET₀ → Kc Adjust → Water Balance → Yield Response.
 //!
-//! Currently dispatches via CPU fallback (Tier B). When `ToadStool` absorbs
+//! Currently dispatches via CPU fallback (Tier B). When `BarraCuda` absorbs
 //! all ops (0, 1, 5-8), this binary demonstrates end-to-end GPU execution
 //! without CPU round-trips.
 //!
@@ -37,7 +37,7 @@
 //! | Kc climate adjustment | 7 | `gpu::kc_climate` | Tier B |
 //! | Dual Kc (Ke batch) | 8 | `gpu::dual_kc` | Tier B |
 //!
-//! Provenance: `ToadStool` `BarraCuda` GPU pipeline validation
+//! Provenance: `BarraCuda` GPU pipeline validation
 
 use airspring_barracuda::eco::crop::CropType;
 use airspring_barracuda::gpu::et0::{BatchedEt0, StationDay};

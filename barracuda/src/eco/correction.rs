@@ -11,7 +11,7 @@
 //! Linear and quadratic use analytical normal equations.
 //! Exponential and logarithmic use log-linearized least squares.
 //!
-//! # Upstream equivalence (`ToadStool` S68)
+//! # Upstream equivalence (`BarraCuda` S68)
 //!
 //! `barracuda::stats::regression` provides generic `fit_linear`, `fit_quadratic`,
 //! `fit_exponential`, `fit_logarithmic` with `FitResult` (absorbed from airSpring
@@ -254,6 +254,7 @@ fn goodness_of_fit<F: Fn(f64) -> f64>(x: &[f64], y: &[f64], predict: F) -> (f64,
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

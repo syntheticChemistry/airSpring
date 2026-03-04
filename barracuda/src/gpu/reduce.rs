@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! Seasonal statistics via `ToadStool` fused map-reduce — GPU-accelerated.
+//! Seasonal statistics via `BarraCuda` fused map-reduce — GPU-accelerated.
 //!
 //! Wraps [`barracuda::ops::fused_map_reduce_f64::FusedMapReduceF64`] for
 //! precision agriculture aggregate statistics: seasonal ET₀ totals,
@@ -11,7 +11,7 @@
 //! (wetSpring metagenomics), convergence norms (hotSpring HMC), and
 //! identity/sum/mean (airSpring seasonal aggregation). The `dot()` method
 //! (S51, M-007) enables GPU inner products. The N≥1024 buffer fix (TS-004,
-//! S54 H-013) was discovered by airSpring and fixed by `ToadStool` for all Springs.
+//! S54 H-013) was discovered by airSpring and fixed by `BarraCuda` for all Springs.
 //!
 //! # Two API Levels
 //!
@@ -20,7 +20,7 @@
 //! | Free functions (`seasonal_sum`, etc.) | No | None (CPU iterator) |
 //! | [`SeasonalReducer`] | Yes | `Arc<WgpuDevice>` |
 //!
-//! # `ToadStool` Primitive
+//! # `BarraCuda` Primitive
 //!
 //! [`SeasonalReducer`] wraps `FusedMapReduceF64` which automatically dispatches
 //! to GPU for N ≥ 1024 elements and CPU for smaller arrays. The fused kernel
@@ -191,7 +191,7 @@ pub fn seasonal_min(values: &[f64]) -> f64 {
 
 /// Compute sum of squared deviations from mean (for variance).
 ///
-/// When `ToadStool` `FusedMapReduceF64` is wired, this dispatches to
+/// When `BarraCuda` `FusedMapReduceF64` is wired, this dispatches to
 /// `MapOp::Square` + `ReduceOp::Sum` on centered data.
 #[must_use]
 pub fn sum_of_squares_from_mean(values: &[f64]) -> f64 {
@@ -249,6 +249,7 @@ pub fn compute_seasonal_stats(values: &[f64]) -> SeasonalStats {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

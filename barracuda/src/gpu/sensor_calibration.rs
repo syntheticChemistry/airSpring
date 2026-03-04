@@ -12,7 +12,7 @@
 //! | API | Device? | Backend |
 //! |-----|:-------:|---------|
 //! | [`BatchedSensorCal::compute`] | No | CPU via `eco::sensor_calibration::soilwatch10_vwc` |
-//! | [`BatchedSensorCal::compute_gpu`] | Yes | **GPU** via `BatchedElementwiseF64` op=5 (`ToadStool` S70+) |
+//! | [`BatchedSensorCal::compute_gpu`] | Yes | **GPU** via `BatchedElementwiseF64` op=5 (`BarraCuda` S70+) |
 //!
 //! # Reference
 //!
@@ -41,7 +41,7 @@ pub enum Backend {
     /// Validated CPU path (always available).
     #[default]
     Cpu,
-    /// GPU path via `BatchedElementwiseF64` op=5 (`ToadStool` S70+ absorbed).
+    /// GPU path via `BatchedElementwiseF64` op=5 (`BarraCuda` S70+ absorbed).
     Gpu,
 }
 
@@ -57,7 +57,7 @@ pub struct BatchedSensorCalResult {
 /// Batched `SoilWatch` 10 sensor calibration orchestrator.
 ///
 /// Computes VWC for N sensor readings in a single call.
-/// GPU dispatch via `BatchedElementwiseF64` op=5 (absorbed in `ToadStool` S70+).
+/// GPU dispatch via `BatchedElementwiseF64` op=5 (absorbed in `BarraCuda` S70+).
 /// Falls back to CPU when no GPU device is configured.
 pub struct BatchedSensorCal {
     backend: Backend,
@@ -88,7 +88,7 @@ impl BatchedSensorCal {
     }
 
     /// Returns a reference to the GPU engine, if available.
-    /// Used for `ToadStool` GPU dispatch when the shader is wired.
+    /// Used for `BarraCuda` GPU dispatch when the shader is wired.
     #[must_use]
     pub const fn gpu_engine(&self) -> Option<&BatchedElementwiseF64> {
         self.gpu_engine.as_ref()
@@ -133,7 +133,7 @@ impl BatchedSensorCal {
 
     /// Pack inputs into stride-1 GPU layout: `[raw_count]`.
     ///
-    /// Ready for `ToadStool` op=5 absorption — produces the flat `f64` array
+    /// Ready for `BarraCuda` op=5 absorption — produces the flat `f64` array
     /// that `BatchedElementwiseF64::execute` expects.
     #[must_use]
     pub fn pack_gpu_input(inputs: &[SensorReading]) -> Vec<f64> {
@@ -158,6 +158,7 @@ fn compute_cpu_batch(inputs: &[SensorReading]) -> Vec<f64> {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

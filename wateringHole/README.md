@@ -1,15 +1,17 @@
 # airSpring wateringHole
 
-**Updated**: March 4, 2026
+**Updated**: March 4, 2026 | **Version**: v0.6.9
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.6.8** | [AIRSPRING_V068_DEEP_DEBT_TOADSTOOL_HANDOFF_MAR04_2026.md](handoffs/AIRSPRING_V068_DEEP_DEBT_TOADSTOOL_HANDOFF_MAR04_2026.md) | 2026-03-04 | **current** — deep debt round 2: sovereignty hardening, dependency gating, fallible constructors, large-file refactoring, zero-copy CSV, evolution intelligence |
+| V0.6.8 | [AIRSPRING_V068_DEEP_DEBT_TOADSTOOL_HANDOFF_MAR04_2026.md](handoffs/AIRSPRING_V068_DEEP_DEBT_TOADSTOOL_HANDOFF_MAR04_2026.md) | 2026-03-04 | deep debt round 2: sovereignty hardening, dependency gating, fallible constructors, large-file refactoring, zero-copy CSV, evolution intelligence |
 | V0.6.8 | [AIRSPRING_V068_TOADSTOOL_BARRACUDA_ABSORPTION_HANDOFF_MAR03_2026.md](../../wateringHole/handoffs/AIRSPRING_V068_TOADSTOOL_BARRACUDA_ABSORPTION_HANDOFF_MAR03_2026.md) | 2026-03-03 | barraCuda 0.3.1 standalone rewire, 1132 tests, capability-based discovery, 6 shaders for absorption, learnings |
 | V0.6.8 | [AIRSPRING_V068_BARRACUDA_031_REWIRE_HANDOFF_MAR03_2026.md](../../wateringHole/handoffs/AIRSPRING_V068_BARRACUDA_031_REWIRE_HANDOFF_MAR03_2026.md) | 2026-03-03 | Deep-debt execution: rewire, capability evolution, API modernization, quality gates |
+| **V0.6.9** | [AIRSPRING_V069_UNIVERSAL_PRECISION_EVOLUTION_HANDOFF_MAR04_2026.md](handoffs/AIRSPRING_V069_UNIVERSAL_PRECISION_EVOLUTION_HANDOFF_MAR04_2026.md) | 2026-03-04 | **current** — universal precision evolution |
+| **V0.6.9** | [AIRSPRING_V069_UPSTREAM_BARRACUDA_ABSORPTION_HANDOFF_MAR04_2026.md](handoffs/AIRSPRING_V069_UPSTREAM_BARRACUDA_ABSORPTION_HANDOFF_MAR04_2026.md) | 2026-03-04 | **current** — upstream barraCuda absorption |
 | — | [AIRSPRING_MULTI_PRIMAL_INTEGRATION_ROADMAP_MAR02_2026.md](handoffs/AIRSPRING_MULTI_PRIMAL_INTEGRATION_ROADMAP_MAR02_2026.md) | 2026-03-02 | Multi-primal integration: NUCLEUS, NestGate, Songbird, biomeOS |
 
 ## Cross-Spring Documents
@@ -30,10 +32,10 @@
 
 | File | Scope |
 |------|-------|
-| `handoffs/archive/AIRSPRING_V053_TOADSTOOL_ABSORPTION_GUIDE_MAR02_2026.md` | v0.6.8: Superseded by V068 deep debt handoff (pre-round-2 state) |
-| `handoffs/archive/AIRSPRING_V052_TOADSTOOL_S87_SYNC_HANDOFF_MAR02_2026.md` | v0.6.8: ToadStool S87 sync (superseded by S93 rewire) |
-| `handoffs/archive/AIRSPRING_V051_LOCAL_GPU_TOADSTOOL_ABSORPTION_HANDOFF_MAR02_2026.md` | v0.6.8: 6 local WGSL ops (now in V068 handoff) |
-| `handoffs/archive/AIRSPRING_TOADSTOOL_ABSORPTION_HANDOFF_MAR02_2026.md` | v0.6.8: Absorption recommendations (superseded by V068 handoff) |
+| `handoffs/archive/AIRSPRING_V053_TOADSTOOL_ABSORPTION_GUIDE_MAR02_2026.md` | v0.6.9: Superseded by V068 deep debt handoff (pre-round-2 state) |
+| `handoffs/archive/AIRSPRING_V052_TOADSTOOL_S87_SYNC_HANDOFF_MAR02_2026.md` | v0.6.9: ToadStool S87 sync (superseded by S93 rewire) |
+| `handoffs/archive/AIRSPRING_V051_LOCAL_GPU_TOADSTOOL_ABSORPTION_HANDOFF_MAR02_2026.md` | v0.6.9: 6 local WGSL ops (now in V068 handoff) |
+| `handoffs/archive/AIRSPRING_TOADSTOOL_ABSORPTION_HANDOFF_MAR02_2026.md` | v0.6.9: Absorption recommendations (superseded by V068 handoff) |
 | `handoffs/archive/AIRSPRING_V050_TOADSTOOL_EVOLUTION_HANDOFF_MAR02_2026.md` | v0.6.6: Full evolution handoff (14 contributed, 25 consumed, CPU→GPU→metalForge progression) |
 | `handoffs/archive/AIRSPRING_V049_CROSS_SPRING_REWIRE_HANDOFF_MAR02_2026.md` | v0.6.6: Cross-spring rewire (BrentGpu VG inverse, RichardsGpu Picard, 68/68) |
 | `handoffs/archive/AIRSPRING_V048_TOADSTOOL_S86_SYNC_HANDOFF_MAR02_2026.md` | v0.6.5: ToadStool S86 sync, 138/138 cross-spring, Tier B→A promotions |

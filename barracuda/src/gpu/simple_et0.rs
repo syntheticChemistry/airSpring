@@ -2,18 +2,18 @@
 //! Batched simple ET₀ methods — Makkink, Turc, Hamon, Blaney-Criddle.
 //!
 //! GPU-local batch interface for four data-sparse ET₀ methods via
-//! `local_elementwise.wgsl` (ops 2-5). Complements the full FAO-56 PM
+//! `local_elementwise_f64.wgsl` (ops 2-5). Complements the full FAO-56 PM
 //! (`gpu::et0`) and Hargreaves (`gpu::hargreaves`).
 //!
 //! # Cross-Spring Provenance
 //!
 //! | Method | Origin | Status |
 //! |--------|--------|--------|
-//! | Makkink (1957) | KNMI / de Bruin (1987) | **GPU-local** (f32 WGSL op=2) |
-//! | Turc (1961) | Turc (1961) Eq. 1-2 | **GPU-local** (f32 WGSL op=3) |
-//! | Hamon (1961) | Lu et al. (2005) | **GPU-local** (f32 WGSL op=4) |
-//! | Blaney-Criddle (1950) | FAO-24, USDA-SCS | **GPU-local** (f32 WGSL op=5) |
-//! | GPU dispatch | `local_elementwise.wgsl` ops 2-5 | **Live** (v0.6.8) |
+//! | Makkink (1957) | KNMI / de Bruin (1987) | **GPU-universal** (f64 canonical op=2) |
+//! | Turc (1961) | Turc (1961) Eq. 1-2 | **GPU-universal** (f64 canonical op=3) |
+//! | Hamon (1961) | Lu et al. (2005) | **GPU-universal** (f64 canonical op=4) |
+//! | Blaney-Criddle (1950) | FAO-24, USDA-SCS | **GPU-universal** (f64 canonical op=5) |
+//! | GPU dispatch | `local_elementwise_f64.wgsl` ops 2-5 | **Live** (v0.6.9, f64 canonical) |
 
 use std::sync::Arc;
 
@@ -60,8 +60,7 @@ pub struct BatchedSimpleEt0;
 
 /// GPU-backed simple ET₀ dispatcher for all four methods.
 ///
-/// Uses `local_elementwise.wgsl` ops 2-5 for GPU-parallel computation.
-/// f32 precision on GPU; `ToadStool` absorption upgrades to f64 (ops 14-17).
+/// Uses `local_elementwise_f64.wgsl` ops 2-5 via `compile_shader_universal` (f64 canonical → f32 on consumer GPUs).
 pub struct GpuSimpleEt0 {
     dispatcher: LocalElementwise,
 }
@@ -173,6 +172,7 @@ impl BatchedSimpleEt0 {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

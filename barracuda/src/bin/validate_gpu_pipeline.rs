@@ -11,7 +11,7 @@
 //! Validates the complete agricultural pipeline via GPU orchestrators,
 //! proving that all math is portable from CPU to GPU. Each stage runs
 //! through its GPU orchestrator (Tier A uses real GPU dispatch, Tier B
-//! uses CPU fallback until `ToadStool` absorbs ops 5-8).
+//! uses CPU fallback until `BarraCuda` absorbs ops 5-8).
 //!
 //! Pipeline: Weather → `ET₀`(GPU) → `Kc`(GPU) → `WB`(GPU) → Yield → Validate
 //!
@@ -119,7 +119,7 @@ fn validate_et0_gpu_parity(v: &mut ValidationHarness) {
         .map(|(a, b)| (a - b).abs())
         .fold(0.0, f64::max);
 
-    // GPU↔CPU tolerance: ToadStool TS-001/003 (S54) validated WGSL f64
+    // GPU↔CPU tolerance: BarraCuda TS-001/003 (S54) validated WGSL f64
     // shaders to ≤1e-5 relative. 0.5 mm/day is conservative for full
     // ET₀ pipeline including atmospheric chain rounding.
     v.check_upper("CPU↔GPU max diff < 0.5 mm/d", max_diff, 0.5);

@@ -108,7 +108,7 @@ fn main() {
     check!(
         "absorbed_count",
         absorbed == 14,
-        format!("{absorbed} absorbed by ToadStool")
+        format!("{absorbed} absorbed by BarraCuda")
     );
     check!(
         "local_count",

@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! GPU-accelerated jackknife variance estimation.
 //!
-//! Wraps `barracuda::stats::jackknife::JackknifeMeanGpu` from `ToadStool` S71.
+//! Wraps `barracuda::stats::jackknife::JackknifeMeanGpu` from `BarraCuda` S71.
 //! Computes leave-one-out jackknife mean variance via dedicated WGSL shader.
 //!
 //! # Cross-Spring Provenance
 //!
 //! - **groundSpring**: Uncertainty quantification methodology
 //! - **neuralSpring**: GPU dispatch pattern
-//! - **`ToadStool` S71**: `jackknife_mean_f64.wgsl` shader
+//! - **`BarraCuda` S71**: `jackknife_mean_f64.wgsl` shader
 
 use std::sync::Arc;
 
@@ -104,6 +104,7 @@ fn jackknife_cpu(data: &[f64]) -> crate::error::Result<JackknifeEstimate> {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

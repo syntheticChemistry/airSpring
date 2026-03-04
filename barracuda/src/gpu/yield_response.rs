@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! Batched Stewart yield response — GPU-local via `local_elementwise.wgsl`.
+//! Batched Stewart yield response — GPU universal precision via `local_elementwise_f64.wgsl`.
 //!
 //! Implements the Stewart (1977) yield-water production function
 //! `Ya/Ymax = 1 − Ky × (1 − ETa/ETc)` in batch for many fields simultaneously.
@@ -8,9 +8,9 @@
 //!
 //! | Primitive | Origin | Status |
 //! |-----------|--------|--------|
-//! | Stewart equation | Stewart (1977) + FAO-56 Ch 10 | **GPU-local** (f32 WGSL) |
+//! | Stewart equation | Stewart (1977) + FAO-56 Ch 10 | **GPU-universal** (f64 canonical) |
 //! | Multi-stage product | Doorenbos & Kassam (1979) | CPU fallback |
-//! | GPU dispatch | `local_elementwise.wgsl` op=1 | **Live** (v0.6.8) |
+//! | GPU dispatch | `local_elementwise_f64.wgsl` op=1 | **Live** (v0.6.9, f64 canonical) |
 
 use std::sync::Arc;
 
@@ -33,13 +33,13 @@ pub struct YieldInput {
 /// Batched Stewart yield response orchestrator.
 ///
 /// CPU path uses `eco::yield_response` directly. GPU path dispatches via
-/// `LocalElementwise` (f32 WGSL shader, pending `ToadStool` absorption to f64).
+/// `LocalElementwise` (f64 canonical shader via `compile_shader_universal`).
 #[derive(Debug)]
 pub struct BatchedYieldResponse;
 
 /// GPU-backed Stewart yield response dispatcher.
 ///
-/// Uses `local_elementwise.wgsl` op 1 for GPU-parallel computation.
+/// Uses `local_elementwise_f64.wgsl` op 1 via `compile_shader_universal`.
 pub struct GpuYieldResponse {
     dispatcher: LocalElementwise,
 }
@@ -155,6 +155,7 @@ impl BatchedYieldResponse {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! GPU-accelerated statistics for agricultural data analysis.
 //!
-//! Wraps `barracuda::ops::stats_f64` (neuralSpring S69 → `ToadStool` absorption)
+//! Wraps `barracuda::ops::stats_f64` (neuralSpring S69 → `BarraCuda` absorption)
 //! with domain-specific APIs for:
 //!
 //! - **Sensor calibration regression**: fit raw counts → VWC via OLS on GPU
@@ -61,6 +61,7 @@ pub fn sensor_regression_gpu(
         }
     }
 
+    #[allow(clippy::cast_possible_truncation)]
     let betas = stats_f64::linear_regression(
         device,
         &x,
@@ -92,7 +93,10 @@ pub fn soil_correlation_gpu(
     n_variables: usize,
 ) -> Result<Vec<f64>, barracuda::error::BarracudaError> {
     assert_eq!(data.len(), n_observations * n_variables);
-    stats_f64::matrix_correlation(device, data, n_observations as u32, n_variables as u32)
+    #[allow(clippy::cast_possible_truncation)]
+    let result =
+        stats_f64::matrix_correlation(device, data, n_observations as u32, n_variables as u32);
+    result
 }
 
 /// Apply polynomial coefficients from [`sensor_regression_gpu`] to predict VWC.
@@ -180,7 +184,7 @@ mod tests {
         let p = 3;
         let mut data = Vec::with_capacity(n * p);
         for i in 0..n {
-            let fi = f64::from(i as u16);
+            let fi = i as f64;
             data.push(fi);
             data.push(fi.mul_add(2.0, 1.0));
             data.push((-fi) + 50.0);

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! GPU-accelerated pedotransfer polynomial evaluation (Horner form).
 //!
-//! Wraps `BatchedElementwiseF64` op 13 (`PedotransferPolynomial`) from `ToadStool` S79.
+//! Wraps `BatchedElementwiseF64` op 13 (`PedotransferPolynomial`) from `BarraCuda` S79.
 //! Evaluates 5th-degree polynomials `a0 + x*(a1 + x*(a2 + x*(a3 + x*(a4 + x*a5))))`.
 //!
 //! Used for Saxton-Rawls (2006) pedotransfer functions that predict soil hydraulic
@@ -11,7 +11,7 @@
 //!
 //! - **airSpring**: Domain need (pedotransfer for soil hydraulics)
 //! - **neuralSpring**: Batch orchestrator pattern
-//! - **`ToadStool` S79**: WGSL shader, f64 canonical Horner evaluation
+//! - **`BarraCuda` S79**: WGSL shader, f64 canonical Horner evaluation
 
 use std::sync::Arc;
 
@@ -115,6 +115,7 @@ fn horner_eval(coeffs: &[f64; 6], x: f64) -> f64 {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

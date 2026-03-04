@@ -9,7 +9,7 @@
 //!
 //! | Layer | Origin | Description |
 //! |-------|--------|-------------|
-//! | `mc_et0_propagate_f64.wgsl` | groundSpring metalForge → `ToadStool` S64 | Box-Muller + xoshiro128** GPU kernel |
+//! | `mc_et0_propagate_f64.wgsl` | groundSpring metalForge → `BarraCuda` S64 | Box-Muller + xoshiro128** GPU kernel |
 //! | `math_f64.wgsl` (exp, log, pow) | hotSpring lattice QCD | f64 precision primitives |
 //! | FAO-56 ET₀ chain | airSpring `eco::evapotranspiration` | Penman-Monteith equation |
 //!
@@ -111,7 +111,7 @@ impl McEt0Result {
 /// # Cross-Spring Provenance
 ///
 /// CPU implementation mirrors the `mc_et0_propagate_f64.wgsl` GPU kernel
-/// (groundSpring → `ToadStool` S64). The GPU kernel uses xoshiro128** +
+/// (groundSpring → `BarraCuda` S64). The GPU kernel uses xoshiro128** +
 /// Box-Muller; this CPU version uses a simpler Lehmer LCG + Box-Muller
 /// that produces statistically equivalent distributions.
 #[must_use]
@@ -349,6 +349,7 @@ fn box_muller_next(state: &mut u64) -> f64 {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

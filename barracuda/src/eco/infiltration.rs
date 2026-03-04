@@ -161,6 +161,7 @@ pub fn infiltration_series(params: &GreenAmptParams, times_hr: &[f64]) -> Vec<(f
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

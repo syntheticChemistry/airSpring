@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //
-// local_elementwise.wgsl — airSpring local GPU evolution shaders.
+// local_elementwise.wgsl — LEGACY f32 shader (superseded by local_elementwise_f64.wgsl).
+//
+// Retained for reference. Production code uses local_elementwise_f64.wgsl
+// compiled via compile_shader_universal (f64 canonical → any precision).
 //
 // Six element-wise agricultural operations in f32. Each invocation reads
 // three inputs (a, b, c) and writes one output per element.
@@ -11,9 +14,6 @@
 // Op 3: Turc ET₀            — a=T(°C), b=Rs(MJ), c=RH(%)
 // Op 4: Hamon PET           — a=T(°C), b=lat(rad), c=doy
 // Op 5: Blaney-Criddle ET₀  — a=T(°C), b=lat(rad), c=doy
-//
-// ToadStool absorption: these ops become batched_elementwise_f64 ops 14-19
-// with full f64 precision via compile_shader_universal.
 
 struct Params {
     op: u32,

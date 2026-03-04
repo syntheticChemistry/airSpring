@@ -82,6 +82,7 @@ impl From<barracuda::error::BarracudaError> for AirSpringError {
 pub type Result<T> = std::result::Result<T, AirSpringError>;
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

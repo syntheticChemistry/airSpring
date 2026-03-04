@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! GPU-accelerated diversity metrics (Shannon, Simpson, Pielou evenness).
 //!
-//! Wraps `barracuda::ops::bio::diversity_fusion::DiversityFusionGpu` from `ToadStool` S70.
+//! Wraps `barracuda::ops::bio::diversity_fusion::DiversityFusionGpu` from `BarraCuda` S70.
 //! Computes alpha diversity for multiple samples in a single GPU dispatch.
 //!
 //! # Cross-Spring Provenance
 //!
 //! - **wetSpring S28+**: Shannon, Simpson, Bray-Curtis diversity indices
 //! - **neuralSpring**: GPU fusion pattern
-//! - **`ToadStool` S70**: `diversity_fusion_f64.wgsl` shader
+//! - **`BarraCuda` S70**: `diversity_fusion_f64.wgsl` shader
 //! - **airSpring**: Agroecology — cover crop biodiversity, soil 16S microbiome
 
 use std::sync::Arc;
@@ -121,6 +121,7 @@ fn compute_diversity_cpu(abundances: &[f64], n_species: usize) -> Vec<DiversityM
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

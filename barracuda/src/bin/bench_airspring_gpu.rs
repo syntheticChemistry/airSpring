@@ -13,7 +13,7 @@
 //! # Cross-spring evolution context
 //!
 //! These GPU paths exist because of shader evolution across the `ecoPrimals`
-//! ecosystem (774 WGSL shaders in `ToadStool` S68, 46+ cross-spring absorptions):
+//! ecosystem (774 WGSL shaders in `BarraCuda` S68, 46+ cross-spring absorptions):
 //!
 //! - **ET₀ batch** (`batched_elementwise_f64.wgsl`): hotSpring `pow_f64` fix
 //!   (TS-001) made fractional exponents work; airSpring wired FAO-56 as op=0
@@ -218,7 +218,7 @@ fn bench_ridge() {
 
 fn bench_richards() {
     println!();
-    println!("── Richards PDE (pde::richards, airSpring→ToadStool S40 absorption) ──");
+    println!("── Richards PDE (pde::richards, airSpring→BarraCuda S40 absorption) ──");
     println!("  Solver uses hotSpring df64 precision for VG constitutive relations.");
     println!("  Crank-Nicolson + Picard iteration; Thomas algorithm for tridiagonal.");
     println!("  {:>8}  {:>12}  {:>12}", "Nodes", "CPU (µs)", "sims/sec");
@@ -633,7 +633,7 @@ fn main() {
     println!("    metalForge (S66): regression, hydrology, moving_window_f64");
     println!("    └→ all Springs: unsaturated flow, sensor correction, crop water, stream stats");
     println!();
-    println!("  774 WGSL shaders (ToadStool S68), 46+ cross-spring absorptions,");
+    println!("  774 WGSL shaders (BarraCuda S68), 46+ cross-spring absorptions,");
     println!("  11 Tier A wired modules in airSpring, zero duplication.");
     println!("  S66 explicit BGL resolved P0 GPU dispatch blocker — GPU-first paths stable.");
     println!("═══════════════════════════════════════════════════════════════════════");

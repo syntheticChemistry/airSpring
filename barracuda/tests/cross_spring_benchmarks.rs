@@ -66,7 +66,7 @@ fn benchmark_richards_throughput_reasonable() {
     assert!(
         elapsed.as_millis() < 2000,
         "Richards 20-node solve should complete in <2s; \
-         airSpring contributed this solver upstream (ToadStool S40)"
+         airSpring contributed this solver upstream (BarraCuda S40)"
     );
 }
 
@@ -269,6 +269,6 @@ fn benchmark_s68_richards_pde_cross_spring() {
     assert!(
         elapsed.as_millis() < 10_000,
         "S68: 10× Richards 1D (50 nodes, 0.1d) in <10s (debug build); \
-         airSpring PDE → ToadStool S40 → Crank-Nicolson cross-val; took {elapsed:?}"
+         airSpring PDE → BarraCuda S40 → Crank-Nicolson cross-val; took {elapsed:?}"
     );
 }

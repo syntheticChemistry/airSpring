@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.6.8"
+version = "0.6.9"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
@@ -400,4 +400,10 @@ path = "src/bin/validate_paper_chain.rs"
 name = "validate_local_gpu"
 path = "src/bin/validate_local_gpu.rs"
 
+[[bin]]
+name = "validate_cross_spring_provenance"
+path = "src/bin/validate_cross_spring_provenance.rs"
 
+[[bin]]
+name = "validate_cross_spring_evolution"
+path = "src/bin/validate_cross_spring_evolution.rs"

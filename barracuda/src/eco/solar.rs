@@ -119,6 +119,7 @@ pub fn net_radiation(rns: f64, rnl: f64) -> f64 {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

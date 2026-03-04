@@ -10,7 +10,7 @@
 )]
 //! Exp 057: GPU Ops 5-8 Rewire Validation + Cross-Spring Benchmark
 //!
-//! Validates the `ToadStool` S70+ absorption rewire — all 6 batched elementwise
+//! Validates the `BarraCuda` S70+ absorption rewire — all 6 batched elementwise
 //! GPU ops dispatched and cross-validated against CPU baselines, with timing
 //! benchmarks and cross-spring evolution provenance tracking.
 //!
@@ -28,7 +28,7 @@
 //! | Ops 5-8 WGSL | airSpring → S70+ | `SensorCal`, Hargreaves, Kc, `DualKc` |
 //! | Universal precision | hotSpring S67-68 | f64 canonical → Df64/f32/f16 |
 //!
-//! Provenance: `ToadStool` S68+ cross-spring absorption validation
+//! Provenance: `BarraCuda` S68+ cross-spring absorption validation
 
 use std::sync::Arc;
 use std::time::Instant;
@@ -168,7 +168,7 @@ fn main() {
     validation::init_tracing();
     validation::banner("Exp 057: GPU Ops 5-8 Rewire Validation + Cross-Spring Benchmark");
     println!(
-        "Validates ToadStool S70+ absorption: all 6 batched ops GPU vs CPU,\n\
+        "Validates BarraCuda S70+ absorption: all 6 batched ops GPU vs CPU,\n\
          timing benchmarks, and cross-spring evolution provenance.\n"
     );
 
@@ -245,8 +245,8 @@ fn main() {
     benchmarks.push(BenchRow::new("Water Balance (op=1)", n_wb, t_gpu_wb, 0.0));
 
     // ═══ Section 3: Op 5 — Sensor Calibration ═════════════════════════════
-    validation::section("Op 5: SensorCal (airSpring Dong 2024 → ToadStool S70+)");
-    println!("  Provenance: airSpring soil science → ToadStool cross-spring absorption S70+");
+    validation::section("Op 5: SensorCal (airSpring Dong 2024 → BarraCuda S70+)");
+    println!("  Provenance: airSpring soil science → BarraCuda cross-spring absorption S70+");
 
     let n_sensor = 2000;
     let sensor_data = generate_sensor_data(n_sensor);
@@ -343,7 +343,7 @@ fn main() {
 
     // ═══ Section 5: Op 7 — Kc Climate Adjustment ══════════════════════════
     validation::section("Op 7: Kc Climate (airSpring FAO-56 Eq.62)");
-    println!("  Provenance: airSpring precision agriculture → ToadStool S70+ absorption");
+    println!("  Provenance: airSpring precision agriculture → BarraCuda S70+ absorption");
 
     let n_kc = 2000;
     let kc_data = generate_kc_data(n_kc);
@@ -512,7 +512,7 @@ fn main() {
     println!("  │             → hydrology stats → barracuda::stats::hydrology   │");
     println!("  │  groundSpring → MC ET₀ xoshiro + Box-Muller GPU RNG          │");
     println!("  ├──────────────────────────────────────────────────────────────┤");
-    println!("  │  ToadStool S70+: unified absorption from ALL Springs         │");
+    println!("  │  BarraCuda S70+: unified absorption from ALL Springs         │");
     println!("  └──────────────────────────────────────────────────────────────┘");
     v.check_bool("provenance documented", true);
 

@@ -4,13 +4,13 @@
 //! Dispatches M fields' dual Kc computations (`Ke` + `ETc`) in parallel.
 //!
 //! - **GPU**: Per-timestep `Ke` batch across M independent fields via
-//!   `BatchedElementwiseF64` op=8 (`ToadStool` S70+ absorbed).
+//!   `BatchedElementwiseF64` op=8 (`BarraCuda` S70+ absorbed).
 //! - **CPU**: Sequential multi-day simulation using validated `eco::dual_kc`.
 //!
 //! # GPU dispatch
 //!
 //! The CPU path is fully validated against FAO-56 Ch 7+11. The GPU path
-//! dispatches `Ke` computation to `ToadStool` `BatchedElementwiseF64` op=8
+//! dispatches `Ke` computation to `BarraCuda` `BatchedElementwiseF64` op=8
 //! (stride=9, absorbed in S70+). State updates remain on CPU.
 //!
 //! # Mulch support
@@ -55,7 +55,7 @@ pub struct BatchedDualKcResult {
 /// daily weather (ET₀, precipitation, irrigation). Each field has
 /// its own crop parameters and evaporation layer state.
 ///
-/// # GPU Dispatch (Tier A — op=8 absorbed in `ToadStool` S70+)
+/// # GPU Dispatch (Tier A — op=8 absorbed in `BarraCuda` S70+)
 ///
 /// The GPU path packs per-field state into stride-9 vectors:
 /// `[kcb, kc_max, few, mulch_factor, de_prev, rew, tew, p_eff, et0]`
@@ -77,7 +77,7 @@ impl std::fmt::Debug for BatchedDualKc {
 
 impl BatchedDualKc {
     /// Returns a reference to the GPU engine, if available.
-    /// Used for `ToadStool` GPU dispatch when the shader is wired.
+    /// Used for `BarraCuda` GPU dispatch when the shader is wired.
     #[must_use]
     pub const fn gpu_engine(&self) -> Option<&BatchedElementwiseF64> {
         self.gpu_engine.as_ref()
@@ -199,7 +199,7 @@ impl BatchedDualKc {
     /// Pack per-field state for one timestep into stride-9 GPU layout.
     ///
     /// `[kcb, kc_max, few, mulch_factor, de_prev, rew, tew, p_eff, et0]` per field.
-    /// Ready for `ToadStool` op=8 absorption.
+    /// Ready for `BarraCuda` op=8 absorption.
     #[must_use]
     pub fn pack_gpu_timestep(&self, input: &DualKcInput) -> Vec<f64> {
         let mut data = Vec::with_capacity(self.configs.len() * 9);

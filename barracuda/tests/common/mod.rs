@@ -12,7 +12,7 @@ pub fn try_create_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevic
 /// Catch panics from upstream shader regressions. Returns `None` on panic,
 /// letting the test SKIP rather than FAIL.
 ///
-/// History: `ToadStool` S60-S65 used `layout: None` + `get_bind_group_layout(0)`
+/// History: `BarraCuda` S60-S65 used `layout: None` + `get_bind_group_layout(0)`
 /// which panicked on `BatchedElementwiseF64` dispatch. S66 switched to explicit
 /// `BindGroupLayout` (R-S66-041), resolving the P0 blocker. Retained as a
 /// defensive wrapper for future shader regressions.

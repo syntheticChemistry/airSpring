@@ -272,3 +272,117 @@ fn collect_field_results(
     }
     fields
 }
+
+#[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
+mod tests {
+    use super::*;
+    use crate::eco::crop::CropType;
+
+    fn make_weather_day(precip: f64) -> super::super::WeatherDay {
+        super::super::WeatherDay {
+            tmax: 30.0,
+            tmin: 15.0,
+            rh_max: 80.0,
+            rh_min: 40.0,
+            wind_2m: 2.0,
+            solar_rad: 22.0,
+            precipitation: precip,
+            elevation: 200.0,
+            latitude_deg: 42.5,
+            day_of_year: 180,
+        }
+    }
+
+    #[test]
+    fn build_day_inputs_constructs_matching_pairs() {
+        let configs = [CropConfig::standard(CropType::Corn)];
+        let states = [WaterBalanceState::new(0.30, 0.12, 900.0, 0.55)];
+        let kc = vec![vec![1.15]];
+        let et0 = vec![vec![5.0]];
+        let w = [make_weather_day(2.0)];
+        let weather: &[&[super::super::WeatherDay]] = &[&w];
+        let mut total_irr = vec![0.0];
+
+        let (field_inputs, daily_inputs) =
+            build_day_inputs(1, 0, &states, &configs, &kc, &et0, weather, &mut total_irr);
+
+        assert_eq!(field_inputs.len(), 1);
+        assert_eq!(daily_inputs.len(), 1);
+        assert!((daily_inputs[0].et0 - 5.0).abs() < 1e-10);
+        assert!((daily_inputs[0].kc - 1.15).abs() < 1e-10);
+        assert!((daily_inputs[0].precipitation - 2.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn apply_gpu_wb_outputs_updates_states() {
+        let mut states = vec![WaterBalanceState::new(0.30, 0.12, 900.0, 0.55)];
+        let mut wb_outputs: Vec<Vec<DailyOutput>> = vec![Vec::new()];
+        let kc = vec![vec![1.0]];
+        let et0 = vec![vec![5.0]];
+        let dr_new = [20.0];
+
+        apply_gpu_wb_outputs(0, &dr_new, &mut states, &mut wb_outputs, &kc, &et0);
+
+        assert_eq!(wb_outputs[0].len(), 1);
+        assert!((states[0].depletion - 20.0).abs() < 1e-10);
+        assert!((wb_outputs[0][0].etc - 5.0).abs() < 1e-10);
+    }
+
+    #[test]
+    fn apply_gpu_wb_outputs_stress_reduces_actual_et() {
+        let mut states = vec![WaterBalanceState::new(0.30, 0.12, 900.0, 0.55)];
+        states[0].depletion = states[0].raw + 10.0;
+        let mut wb_outputs: Vec<Vec<DailyOutput>> = vec![Vec::new()];
+        let kc = vec![vec![1.0]];
+        let et0 = vec![vec![5.0]];
+
+        apply_gpu_wb_outputs(
+            0,
+            &[states[0].depletion],
+            &mut states,
+            &mut wb_outputs,
+            &kc,
+            &et0,
+        );
+
+        assert!(wb_outputs[0][0].ks < 1.0, "ks should be < 1 under stress");
+        assert!(wb_outputs[0][0].actual_et < wb_outputs[0][0].etc);
+    }
+
+    #[test]
+    fn multi_field_result_empty_fields() {
+        let pipeline = SeasonalPipeline::cpu();
+        let result = pipeline.run_multi_field(&[], &[]).unwrap();
+        assert!(result.fields.is_empty());
+        assert!(!result.gpu_wb_used);
+    }
+
+    #[test]
+    fn multi_field_mass_balance_conservation() {
+        let pipeline = SeasonalPipeline::cpu();
+        let weather: Vec<super::super::WeatherDay> = (150..=180)
+            .map(|doy| super::super::WeatherDay {
+                tmax: 28.0 + f64::from(doy % 5),
+                tmin: 14.0,
+                rh_max: 80.0,
+                rh_min: 40.0,
+                wind_2m: 2.0,
+                solar_rad: 20.0,
+                precipitation: if doy % 7 == 0 { 8.0 } else { 0.0 },
+                elevation: 200.0,
+                latitude_deg: 42.5,
+                day_of_year: doy,
+            })
+            .collect();
+        let configs = [CropConfig::standard(CropType::Corn)];
+        let result = pipeline.run_multi_field(&[&weather], &configs).unwrap();
+
+        assert_eq!(result.fields.len(), 1);
+        assert!(
+            result.fields[0].mass_balance_error.abs() < 1.0,
+            "mass balance error {} mm exceeds 1 mm",
+            result.fields[0].mass_balance_error
+        );
+    }
+}

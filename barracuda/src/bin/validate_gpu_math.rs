@@ -30,7 +30,7 @@
 //! | `gpu::seasonal_pipeline` | `SeasonalPipeline::cpu()` | End-to-end chain |
 //! | `gpu::atlas_stream` | `AtlasStream` | Multi-station batch |
 //!
-//! Provenance: `ToadStool` TS-001/003/004 S54 GPU precision validation
+//! Provenance: `BarraCuda` TS-001/003/004 S54 GPU precision validation
 
 use airspring_barracuda::eco::crop::CropType;
 use airspring_barracuda::eco::dual_kc::{DualKcInput, EvaporationLayerState};
@@ -402,11 +402,13 @@ fn validate_mc_et0(v: &mut ValidationHarness) {
     let result = mc_et0_cpu(&input, &unc, 5000, 42);
     v.check_lower("MC mean > 0", result.et0_mean, 0.0);
     v.check_lower("MC std > 0 (has spread)", result.et0_std, 0.0);
+    // CLT: for N=5000 with ~10% σ on ~5 mm/day ET₀, SE ≈ σ/√N ≈ 0.5/√5000 ≈ 0.007.
+    // 4σ tolerance = 0.03 mm; use 0.15 mm for conservative Monte Carlo convergence.
     v.check_abs(
-        "MC mean ≈ central (< 0.5 mm)",
+        "MC mean ≈ central (CLT: 0.15 mm for N=5000)",
         result.et0_mean,
         result.et0_central,
-        0.5,
+        0.15,
     );
     let (lo, hi) = result.parametric_ci(0.90);
     v.check_bool(

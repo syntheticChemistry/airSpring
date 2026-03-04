@@ -183,7 +183,7 @@ pub fn adjust_kc_for_climate(kc_table: f64, u2: f64, rh_min: f64, crop_height_m:
 /// # Cross-Spring Provenance
 ///
 /// Originally written in airSpring `metalForge`, absorbed into
-/// `barracuda::stats::hydrology` (`ToadStool` S66).
+/// `barracuda::stats::hydrology` (`BarraCuda` S66).
 #[must_use]
 pub fn crop_coefficient_stage(
     kc_prev: f64,

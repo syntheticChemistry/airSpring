@@ -1,6 +1,6 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: March 3, 2026 (v0.6.8 — 1132 tests, 86 binaries, 77 experiments, 1237 Python, 30 NUCLEUS capabilities, 67/67 metalForge cross-system, 6 local WGSL shaders)
+**Last Updated**: March 4, 2026 (v0.6.9 — 852 lib + 1133 integration tests, 80 binaries, 77 experiments, 1237 Python, 30 NUCLEUS capabilities, 67/67 metalForge cross-system, 6 local WGSL shaders)
 **barraCuda**: v0.3.1 standalone primal (`ecoPrimals/barraCuda` — 767 WGSL shaders, 957 Rust files, extracted from ToadStool S89)
 **ToadStool**: S93 (5,369 tests, 845 WGSL shaders, sovereignty cleanup, DF64 ownership transferred to barraCuda)
 **Handoff**: V0.6.8 (barraCuda 0.3.1 standalone rewire + absorption — capability-based discovery, 6 shaders for upstream, deep debt resolved)
@@ -73,9 +73,9 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 | `gpu::reduce::SeasonalReducer` | `ops::fused_map_reduce_f64` | **GPU N≥1024** |
 | `gpu::stream::StreamSmoother` | `ops::moving_window_stats` | **WIRED** |
 | `gpu::infiltration` | `BrentGpu::solve_green_ampt()` (brent_f64.wgsl GA residual) | **WIRED** (S83) |
-| `gpu::runoff` | Batched SCS-CN (CPU-vectorised, ToadStool op pending) | **CPU batch** |
-| `gpu::yield_response` | Batched Stewart (CPU-vectorised, ToadStool op pending) | **CPU batch** |
-| `gpu::simple_et0` | Batched Makkink/Turc/Hamon/Blaney-Criddle (CPU-vectorised, ToadStool ops pending) | **CPU batch** |
+| `gpu::runoff` | Batched SCS-CN (f64 canonical via compile_shader_universal) | **GPU-universal (f32 downcast)** |
+| `gpu::yield_response` | Batched Stewart (f64 canonical via compile_shader_universal) | **GPU-universal (f32 downcast)** |
+| `gpu::simple_et0` | Batched Makkink/Turc/Hamon/Blaney-Criddle (f64 canonical via compile_shader_universal) | **GPU-universal (f32 downcast)** |
 | `eco::correction::fit_ridge` | `linalg::ridge::ridge_regression` | **WIRED** |
 | `gpu::richards::BatchedRichards` | `pde::richards::solve_richards` | **WIRED** (+ CN f64 cross-val) |
 | `gpu::isotherm::fit_*_nm/global` | `optimize::nelder_mead` + `multi_start` | **WIRED** |
@@ -110,9 +110,9 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 
 ---
 
-## ToadStool S42–S68+ Evolution (180+ commits)
+## BarraCuda (ToadStool S42–S68+) Evolution (180+ commits)
 
-ToadStool underwent massive evolution since S42. Key milestones:
+BarraCuda (while still embedded in ToadStool) underwent massive evolution since S42. Key milestones:
 
 | Session | What Changed | Impact on airSpring |
 |---------|-------------|---------------------|
@@ -152,6 +152,7 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `stats::hydrology::crop_coefficient` | `stats` | v0.5.2 | **WIRED** — `eco::crop::crop_coefficient_stage` delegates to upstream |
 | `stats::normal::norm_ppf` | `stats` | v0.4.4 | **WIRED** — `McEt0Result::parametric_ci()` |
 | `optimize::brent` | `optimize` | v0.4.4 | **WIRED** — `inverse_van_genuchten_h()` θ→h inversion |
+| `compile_shader_universal` | `shaders` | v0.6.9 | **WIRED** — local_elementwise_f64.wgsl (6 ops) |
 
 ### Available (not yet needed)
 
@@ -174,7 +175,6 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `spectral_density` | `stats` | S57 | RMT spectral analysis |
 | `normal::norm_cdf` | `stats` | S52+ | Normal cumulative distribution |
 | `spearman_correlation` | `stats::correlation` | S66 (R-S66-005) | Rank correlation — **now re-exported** from `stats/mod.rs` |
-| `compile_shader_universal` | `shaders` | S68 | One f64 source → F16/F32/F64/Df64 target |
 | `Fp64Strategy::Native/Hybrid` | `device` | S58+ | Auto precision per GPU (ratio ≤2.5 → Native, else Hybrid) |
 | `probe_f64_builtins` | `device` | S58+ | Hardware f64 builtin capability probing |
 | `probe_f64_throughput_ratio` | `device` | S58+ | f64:f32 throughput ratio → F64Tier |
@@ -186,6 +186,34 @@ ToadStool underwent massive evolution since S42. Key milestones:
 
 ---
 
+## V0.6.9 Universal Precision Evolution (March 4, 2026)
+
+### f64-Canonical Local Shaders
+
+Promoted 6 local WGSL shaders from fixed f32 to f64-canonical via
+`compile_shader_universal()`. "Math is universal, precision is silicon."
+
+| Component | Before | After |
+|-----------|--------|-------|
+| Shader | `local_elementwise.wgsl` (f32) | `local_elementwise_f64.wgsl` (f64 canonical) |
+| Compilation | `create_shader_module` (direct) | `compile_shader_universal` (BarraCuda) |
+| Precision | Fixed f32 | F32 default, F64 opt-in for verified pro GPUs |
+
+### Discovery: f64 Compute Shader Reliability
+
+This GPU (Titan V via NVK/Mesa) advertises `has_f64_shaders: true` but produces
+all-zero output from f64 compute shaders. The f32 downcast path works perfectly.
+This validates the universal precision architecture and should be reported upstream
+to BarraCuda's probe cache (similar to groundSpring V37's NVK discovery).
+
+### Exp 078: Cross-Spring Evolution Benchmark
+
+New validation binary documenting cross-spring shader provenance:
+hotSpring (precision), wetSpring (bio), groundSpring (uncertainty),
+neuralSpring (architecture), airSpring (domain science).
+
+---
+
 ## Quality Gates
 
 | Check | Status |
@@ -193,7 +221,7 @@ ToadStool underwent massive evolution since S42. Key milestones:
 | `cargo fmt --check` | **Clean** (both crates) |
 | `cargo clippy --all-targets -W pedantic` | **0 warnings** (both crates) |
 | `cargo doc --no-deps` | **Builds**, 0 warnings |
-| `cargo test --workspace` | **1132 passed** (lib + bin + doc + integration) |
+| `cargo test --workspace` | **1133 integration + 852 lib** (lib + bin + doc + integration) |
 | `cargo llvm-cov --lib --summary-only` | **95.11% line** / **95.81% function** coverage |
 | barraCuda version | **0.3.1** standalone primal (`ecoPrimals/barraCuda`) |
 | `unsafe` code | **Zero** |
@@ -246,7 +274,7 @@ ToadStool underwent massive evolution since S42. Key milestones:
 
 | Handoff | Date | ToadStool Baseline | Key Takeaways for airSpring |
 |---------|------|--------------------|-----------------------------|
-| wetSpring V61 | Feb 27 | S68 (`f0feb226`) | NPU inference bridge proposed (`barracuda::npu`); power-budget-aware dispatch; 79 ToadStool primitives in use |
+| wetSpring V61 | Feb 27 | S68 (`f0feb226`) | NPU inference bridge proposed (`barracuda::npu`); power-budget-aware dispatch; 79 `BarraCuda` primitives in use |
 | neuralSpring V24 | Feb 27 | S68 (`f0feb226`) | `compile_shader_df64_streaming` proposed; `barracuda::nn` (MLP, LSTM, ESN); two-tier df64 precision validated |
 | groundSpring V10 | Feb 25 | S50–S62 | `if let Ok` + CPU fallback pattern (wateringHole standard); `mc_et0_propagate` ready; three-mode CI (local/barracuda/barracuda-gpu) |
 | ToadStool S61-63 | Feb 25 | S61–63 | Sovereign compiler; cyclic reduction for n≥2048; maximin LHS O(n); `erfc_deriv` public |
@@ -295,7 +323,7 @@ Reviewed at `e96576ee`. All airSpring imports verified — **zero breaking chang
 airSpring handoffs V010–V031 are pending upstream absorption. V032 created to acknowledge S68 sync.
 
 **airSpring V033 cross-spring rewiring**:
-- **Rewired `gpu::hargreaves`** — CPU batch now delegates to `barracuda::stats::hargreaves_et0_batch` (ToadStool S66)
+- **Rewired `gpu::hargreaves`** — CPU batch now delegates to `barracuda::stats::hargreaves_et0_batch` (BarraCuda S66)
 - **Wired `eco::diversity::bray_curtis_matrix`** — full M×M distance matrix for ordination (wetSpring S64)
 - **Wired `eco::diversity::shannon_from_frequencies`** — pre-normalised Shannon for streaming 16S (wetSpring S66)
 - **Wired `eco::crop::crop_coefficient_stage`** — delegates to `barracuda::stats::crop_coefficient` (airSpring metalForge → S66)
@@ -389,7 +417,7 @@ simply becomes unused.
 | `cargo fmt --check` | **PASS** (both crates) |
 | `cargo clippy --workspace -- -D warnings -W clippy::pedantic` | **PASS** — 0 warnings (both crates) |
 | `cargo doc --no-deps` | **PASS** (both crates) |
-| `cargo test --workspace` | **1132 PASS** (lib + bin + doc + integration) |
+| `cargo test --workspace` | **1133 integration + 852 lib** (lib + bin + doc + integration) |
 | `cargo llvm-cov --lib --summary-only` | **95.11% line** / **95.81% function** coverage |
 | `cargo deny check` | **PASS** |
 | SPDX headers | **All .rs files**: `AGPL-3.0-or-later` |

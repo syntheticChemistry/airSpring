@@ -13,12 +13,12 @@
 //! Validates the full ecology pipeline as deployed by `airspring_deploy.toml`:
 //!
 //! 1. **Graph topology**: verifies the 4-node sequential graph
-//!    (BearDog → Songbird → ToadStool → airSpring).
+//!    (BearDog → Songbird → BarraCuda → airSpring).
 //! 2. **Capability registry**: all 30 ecology.* + science.* capabilities mapped.
 //! 3. **Offline pipeline**: Exercises the full seasonal ecology pipeline
 //!    (ET₀ → Kc → WB → Yield → Stats) without requiring live primals.
 //! 4. **metalForge coordination**: Validates workload routing through substrate mesh.
-//! 5. **Evolution manifest**: ToadStool absorption readiness report.
+//! 5. **Evolution manifest**: BarraCuda absorption readiness report.
 //!
 //! This experiment runs **standalone** (no live primals needed). It simulates
 //! the biomeOS graph coordination by exercising each pipeline stage locally
@@ -296,7 +296,7 @@ fn phase_4_gpu_pipeline_parity(v: &mut ValidationHarness) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// Phase 5: Evolution Manifest — ToadStool absorption readiness
+// Phase 5: Evolution Manifest — BarraCuda absorption readiness
 // ═══════════════════════════════════════════════════════════════════
 
 fn phase_5_evolution_manifest(v: &mut ValidationHarness) {
@@ -310,7 +310,7 @@ fn phase_5_evolution_manifest(v: &mut ValidationHarness) {
 
     let with_primitive = GAPS
         .iter()
-        .filter(|g| g.toadstool_primitive.is_some())
+        .filter(|g| g.barracuda_primitive.is_some())
         .count();
     v.check_abs(
         "manifest_primitive_coverage",

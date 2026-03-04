@@ -2,7 +2,7 @@
 //! Validation metrics: RMSE, MBE, R², IA, NSE, Pearson/Spearman correlation,
 //! variance, and standard deviation.
 //!
-//! # Upstream absorption (`ToadStool` S64 + S66)
+//! # Upstream absorption (`BarraCuda` S64 + S66)
 //!
 //! `barracuda::stats::metrics` provides `rmse`, `mbe`, `mae`, `nash_sutcliffe`,
 //! `r_squared` (SS-based), `index_of_agreement`, `hit_rate`, `mean`,
@@ -211,7 +211,7 @@ pub fn std_deviation(data: &[f64]) -> crate::error::Result<f64> {
     barracuda::stats::correlation::std_dev(data).map_err(crate::error::AirSpringError::from)
 }
 
-// ── Upstream re-exports (`ToadStool` S64) ────────────────────────────
+// ── Upstream re-exports (`BarraCuda` S64) ────────────────────────────
 
 /// Hit rate: fraction of entries where observed and modeled agree on threshold
 /// exceedance. Delegates to `barracuda::stats::hit_rate`.
@@ -245,6 +245,7 @@ pub fn l2_norm(xs: &[f64]) -> f64 {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

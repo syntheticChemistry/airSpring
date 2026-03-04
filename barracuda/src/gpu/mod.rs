@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! GPU acceleration layer — airSpring ↔ `ToadStool`/`BarraCuda` bridge.
+//! GPU acceleration layer — airSpring ↔ `BarraCuda` bridge.
 //!
-//! This module provides domain-specific wrappers around `ToadStool` GPU primitives
+//! This module provides domain-specific wrappers around `BarraCuda` GPU primitives
 //! for precision agriculture workloads. All functions have CPU fallbacks and
 //! can be used without a GPU device.
 //!
@@ -12,11 +12,11 @@
 //! | [`device_info`] | Precision probing, `Fp64Strategy`, provenance | Device + cross-spring |
 //! | [`et0`] | Batched FAO-56 ET₀ for `N` station-days | **GPU-first** (`BatchedElementwiseF64`) |
 //! | [`hargreaves`] | Batched Hargreaves-Samani ET₀ (temp-only) | **GPU-first** (`BatchedElementwiseF64` op=6, S70+) |
-//! | [`simple_et0`] | Batched Makkink/Turc/Hamon/Blaney-Criddle | **GPU-local** (f32 WGSL, `ToadStool` f64 pending) |
+//! | [`simple_et0`] | Batched Makkink/Turc/Hamon/Blaney-Criddle | **GPU-universal** (f64 canonical via `compile_shader_universal`) |
 //! | [`water_balance`] | Batched season simulation + GPU step | **GPU-step** + CPU season |
 //! | [`infiltration`] | Batched Green-Ampt via `BrentGpu` | **GPU** (`brent_f64.wgsl` GA residual, S83) |
-//! | [`runoff`] | Batched SCS-CN runoff computation | **GPU-local** (f32 WGSL, `ToadStool` f64 pending) |
-//! | [`yield_response`] | Batched Stewart yield-water function | **GPU-local** (f32 WGSL, `ToadStool` f64 pending) |
+//! | [`runoff`] | Batched SCS-CN runoff computation | **GPU-universal** (f64 canonical via `compile_shader_universal`) |
+//! | [`yield_response`] | Batched Stewart yield-water function | **GPU-universal** (f64 canonical via `compile_shader_universal`) |
 //! | [`dual_kc`] | Batched dual Kc (`Ke` + `ETc`) for M fields | **GPU-first** (`BatchedElementwiseF64` op=8, S70+) |
 //! | [`kriging`] | Soil moisture spatial interpolation | **Integrated** (`KrigingF64`) |
 //! | [`reduce`] | Seasonal aggregation statistics | **GPU** for N≥1024 (`FusedMapReduceF64`) |
@@ -37,7 +37,7 @@
 //! | [`mc_et0`] | Monte Carlo ET₀ uncertainty bands | **Wired** (`norm_ppf` + parametric CI, GPU kernel available S66+) |
 //! | [`evolution_gaps`] | Living roadmap of CPU→GPU gaps | Documentation only |
 //!
-//! # `ToadStool` Universal Precision Architecture (S68)
+//! # `BarraCuda` Universal Precision Architecture (S68)
 //!
 //! All WGSL shaders are **f64 canonical** — written in f64, compiled to the
 //! target precision via `compile_shader_universal(source, precision, label)`:
@@ -52,7 +52,7 @@
 //! `Fp64Strategy::Native` vs `Fp64Strategy::Hybrid` is selected per-device
 //! by `GpuDriverProfile::fp64_strategy()` based on f64:f32 throughput ratio.
 //!
-//! # `ToadStool` Issues — All RESOLVED (S54+S66)
+//! # `BarraCuda` Issues — All RESOLVED (S54+S66)
 //!
 //! | ID | Issue | Status |
 //! |----|-------|--------|
@@ -74,7 +74,7 @@
 //! barracuda::ops:: primitives (GPU dispatch + CPU fallback)
 //!        │
 //!        ▼
-//! ToadStool WGSL shaders (f64 canonical, universal precision)
+//! BarraCuda WGSL shaders (f64 canonical, universal precision)
 //!        │
 //!  ┌─────┼─────┬──────┐
 //!  F64   Df64  F32    F16

@@ -1,15 +1,24 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! Local GPU compute dispatch — airSpring-evolved shaders pending `ToadStool` absorption.
+//! Local GPU compute dispatch — f64 canonical, universal precision.
 //!
-//! Provides a minimal wgpu compute pipeline for element-wise agricultural
-//! operations. Each operation takes three f32 inputs per element and produces
-//! one f32 output. Conversions between f64 (CPU domain) and f32 (GPU) are
-//! handled transparently.
+//! Provides a precision-aware wgpu compute pipeline for element-wise
+//! agricultural operations. Shaders are written in f64 (canonical) and
+//! compiled via `BarraCuda`'s `compile_shader_universal()`:
 //!
-//! # Precision
+//! - **`F64`**: native f64 on pro GPUs (Titan V, A100, MI250)
+//! - **`F32`**: downcast to f32 on consumer GPUs (RTX 4070, Arc, RX 7900)
 //!
-//! Local shaders operate in f32 (~7 significant digits). `ToadStool` absorption
-//! upgrades these to f64 via `compile_shader_universal` with `Fp64Strategy`.
+//! "Math is universal, precision is silicon" — `BarraCuda` S67.
+//!
+//! # Cross-Spring Evolution Provenance
+//!
+//! | Component | Origin Spring | Session |
+//! |-----------|---------------|---------|
+//! | `compile_shader_universal` | neuralSpring → `BarraCuda` S68 | Architecture |
+//! | `math_f64.wgsl` precision | hotSpring lattice QCD | S54 (pow, acos, sin) |
+//! | `Fp64Strategy` probing | hotSpring → `BarraCuda` S58 | Device detection |
+//! | SCS-CN, Stewart, ET₀ ops | airSpring domain science | V0.6.9 (local shaders) |
+//! | `downcast_f64_to_f32` | `BarraCuda` S68 | Text compiler |
 //!
 //! # Operations
 //!
@@ -25,28 +34,30 @@
 use std::sync::Arc;
 
 use barracuda::device::WgpuDevice;
+use barracuda::shaders::precision::Precision;
 use wgpu::util::DeviceExt;
 
 use crate::error::{AirSpringError, Result};
 
-const SHADER_SOURCE: &str = include_str!("../shaders/local_elementwise.wgsl");
+const F64_SHADER_SOURCE: &str = include_str!("../shaders/local_elementwise_f64.wgsl");
 const WORKGROUP_SIZE: u32 = 256;
 
-/// Local GPU element-wise compute dispatcher.
+/// Local GPU element-wise compute dispatcher with universal precision.
 ///
-/// Compiles the `local_elementwise.wgsl` shader once and reuses the pipeline
-/// for multiple dispatches. Thread-safe via `Arc<WgpuDevice>`.
+/// Compiles the f64-canonical `local_elementwise_f64.wgsl` shader for the
+/// device's native precision and reuses the pipeline for multiple dispatches.
 pub struct LocalElementwise {
     device: Arc<WgpuDevice>,
     pipeline: wgpu::ComputePipeline,
     bind_group_layout: wgpu::BindGroupLayout,
+    precision: Precision,
 }
 
 impl std::fmt::Debug for LocalElementwise {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("LocalElementwise")
-            .field("device", &"Arc<WgpuDevice>")
-            .finish()
+            .field("precision", &self.precision)
+            .finish_non_exhaustive()
     }
 }
 
@@ -73,18 +84,36 @@ struct GpuParams {
 }
 
 impl LocalElementwise {
-    /// Compile the local WGSL shader and create the compute pipeline.
+    /// Compile the f64-canonical WGSL shader for production use.
+    ///
+    /// "Math is universal, precision is silicon." The canonical f64 source is
+    /// compiled to f32 via `compile_shader_universal` — adequate for agricultural
+    /// science (FAO-56 needs ~6 digits; f32 gives ~7).
+    ///
+    /// Use [`with_precision`](Self::with_precision) to force a specific
+    /// precision for benchmarking or pro-GPU deployments.
     ///
     /// # Errors
     ///
     /// Returns an error if shader compilation fails.
     pub fn new(device: Arc<WgpuDevice>) -> Result<Self> {
-        let wgpu_device = device.device();
+        Self::with_precision(device, Precision::F32)
+    }
 
-        let shader_module = wgpu_device.create_shader_module(wgpu::ShaderModuleDescriptor {
-            label: Some("local_elementwise"),
-            source: wgpu::ShaderSource::Wgsl(SHADER_SOURCE.into()),
-        });
+    /// Compile the f64-canonical WGSL shader for a specific precision target.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if shader compilation fails.
+    pub fn with_precision(device: Arc<WgpuDevice>, precision: Precision) -> Result<Self> {
+        let source_for_compile = F64_SHADER_SOURCE.replace("enable f64;\n", "");
+        let shader_module = device.compile_shader_universal(
+            &source_for_compile,
+            precision,
+            Some("local_elementwise"),
+        );
+
+        let wgpu_device = device.device();
 
         let bind_group_layout =
             wgpu_device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
@@ -117,21 +146,25 @@ impl LocalElementwise {
             device,
             pipeline,
             bind_group_layout,
+            precision,
         })
+    }
+
+    /// The precision this pipeline was compiled for.
+    #[must_use]
+    pub const fn precision(&self) -> Precision {
+        self.precision
     }
 
     /// Dispatch an element-wise operation on GPU.
     ///
-    /// Inputs and output are f64 on the CPU side. The GPU operates in f32;
-    /// conversions are transparent. Unused input slots should be filled with 0.0.
+    /// Inputs and output are f64 on the CPU side. Buffer packing adapts to
+    /// the compiled precision: f64 buffers for `Precision::F64`, f32 for
+    /// `Precision::F32`.
     ///
     /// # Errors
     ///
     /// Returns an error if GPU buffer mapping or submission fails.
-    #[expect(
-        clippy::too_many_lines,
-        reason = "GPU buffer setup, dispatch, and readback are inherently sequential steps"
-    )]
     pub fn dispatch(&self, op: LocalOp, a: &[f64], b: &[f64], c: &[f64]) -> Result<Vec<f64>> {
         let n = a.len();
         if n == 0 {
@@ -143,118 +176,274 @@ impl LocalElementwise {
             ));
         }
 
+        match self.precision {
+            Precision::F64 => self.dispatch_f64(op, a, b, c, n),
+            _ => self.dispatch_f32(op, a, b, c, n),
+        }
+    }
+
+    /// F64 dispatch path — native f64 buffers, no precision loss.
+    fn dispatch_f64(
+        &self,
+        op: LocalOp,
+        a: &[f64],
+        b: &[f64],
+        c: &[f64],
+        n: usize,
+    ) -> Result<Vec<f64>> {
         let wgpu_device = self.device.device();
         let queue = self.device.queue();
 
+        let params = gpu_params(op, n)?;
+        let buf_size = checked_buf_size::<f64>(n)?;
+
+        let params_buf = create_init_buf(
+            wgpu_device,
+            "params",
+            bytemuck::bytes_of(&params),
+            wgpu::BufferUsages::UNIFORM,
+        );
+        let buf_a = create_init_buf(
+            wgpu_device,
+            "in_a",
+            bytemuck::cast_slice(a),
+            wgpu::BufferUsages::STORAGE,
+        );
+        let buf_b = create_init_buf(
+            wgpu_device,
+            "in_b",
+            bytemuck::cast_slice(b),
+            wgpu::BufferUsages::STORAGE,
+        );
+        let buf_c = create_init_buf(
+            wgpu_device,
+            "in_c",
+            bytemuck::cast_slice(c),
+            wgpu::BufferUsages::STORAGE,
+        );
+        let buf_out = create_output_buf(wgpu_device, "out", buf_size);
+        let buf_staging = create_staging_buf(wgpu_device, "staging", buf_size);
+
+        let bind_group =
+            self.create_bind_group(wgpu_device, &params_buf, &buf_a, &buf_b, &buf_c, &buf_out);
+
+        submit_and_copy(
+            wgpu_device,
+            queue,
+            &self.pipeline,
+            &bind_group,
+            n,
+            &buf_out,
+            &buf_staging,
+            buf_size,
+        );
+
+        let data = map_read(wgpu_device, &buf_staging)?;
+        let out: &[f64] = bytemuck::cast_slice(&data);
+        let result = out.to_vec();
+        drop(data);
+        buf_staging.unmap();
+        Ok(result)
+    }
+
+    /// F32 dispatch path — downcast f64→f32, compute, upcast f32→f64.
+    fn dispatch_f32(
+        &self,
+        op: LocalOp,
+        a: &[f64],
+        b: &[f64],
+        c: &[f64],
+        n: usize,
+    ) -> Result<Vec<f64>> {
+        let wgpu_device = self.device.device();
+        let queue = self.device.queue();
+
+        #[allow(clippy::cast_possible_truncation)]
         let a_f32: Vec<f32> = a.iter().map(|&v| v as f32).collect();
+        #[allow(clippy::cast_possible_truncation)]
         let b_f32: Vec<f32> = b.iter().map(|&v| v as f32).collect();
+        #[allow(clippy::cast_possible_truncation)]
         let c_f32: Vec<f32> = c.iter().map(|&v| v as f32).collect();
 
-        let params = GpuParams {
-            op: op as u32,
-            n: n as u32,
-            _pad0: 0,
-            _pad1: 0,
-        };
+        let params = gpu_params(op, n)?;
+        let buf_size = checked_buf_size::<f32>(n)?;
 
-        let buf_size = (n * std::mem::size_of::<f32>()) as u64;
+        let params_buf = create_init_buf(
+            wgpu_device,
+            "params",
+            bytemuck::bytes_of(&params),
+            wgpu::BufferUsages::UNIFORM,
+        );
+        let buf_a = create_init_buf(
+            wgpu_device,
+            "in_a",
+            bytemuck::cast_slice(&a_f32),
+            wgpu::BufferUsages::STORAGE,
+        );
+        let buf_b = create_init_buf(
+            wgpu_device,
+            "in_b",
+            bytemuck::cast_slice(&b_f32),
+            wgpu::BufferUsages::STORAGE,
+        );
+        let buf_c = create_init_buf(
+            wgpu_device,
+            "in_c",
+            bytemuck::cast_slice(&c_f32),
+            wgpu::BufferUsages::STORAGE,
+        );
+        let buf_out = create_output_buf(wgpu_device, "out", buf_size);
+        let buf_staging = create_staging_buf(wgpu_device, "staging", buf_size);
 
-        let params_buf = wgpu_device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("params"),
-            contents: bytemuck::bytes_of(&params),
-            usage: wgpu::BufferUsages::UNIFORM,
-        });
-        let buf_a = wgpu_device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("in_a"),
-            contents: bytemuck::cast_slice(&a_f32),
-            usage: wgpu::BufferUsages::STORAGE,
-        });
-        let buf_b = wgpu_device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("in_b"),
-            contents: bytemuck::cast_slice(&b_f32),
-            usage: wgpu::BufferUsages::STORAGE,
-        });
-        let buf_c = wgpu_device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
-            label: Some("in_c"),
-            contents: bytemuck::cast_slice(&c_f32),
-            usage: wgpu::BufferUsages::STORAGE,
-        });
-        let buf_out = wgpu_device.create_buffer(&wgpu::BufferDescriptor {
-            label: Some("out"),
-            size: buf_size,
-            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC,
-            mapped_at_creation: false,
-        });
-        let buf_staging = wgpu_device.create_buffer(&wgpu::BufferDescriptor {
-            label: Some("staging"),
-            size: buf_size,
-            usage: wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST,
-            mapped_at_creation: false,
-        });
+        let bind_group =
+            self.create_bind_group(wgpu_device, &params_buf, &buf_a, &buf_b, &buf_c, &buf_out);
 
-        let bind_group = wgpu_device.create_bind_group(&wgpu::BindGroupDescriptor {
+        submit_and_copy(
+            wgpu_device,
+            queue,
+            &self.pipeline,
+            &bind_group,
+            n,
+            &buf_out,
+            &buf_staging,
+            buf_size,
+        );
+
+        let data = map_read(wgpu_device, &buf_staging)?;
+        let out_f32: &[f32] = bytemuck::cast_slice(&data);
+        let result: Vec<f64> = out_f32.iter().map(|&v| f64::from(v)).collect();
+        drop(data);
+        buf_staging.unmap();
+        Ok(result)
+    }
+
+    fn create_bind_group(
+        &self,
+        device: &wgpu::Device,
+        params: &wgpu::Buffer,
+        a: &wgpu::Buffer,
+        b: &wgpu::Buffer,
+        c: &wgpu::Buffer,
+        out: &wgpu::Buffer,
+    ) -> wgpu::BindGroup {
+        device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("local_elementwise_bg"),
             layout: &self.bind_group_layout,
             entries: &[
                 wgpu::BindGroupEntry {
                     binding: 0,
-                    resource: params_buf.as_entire_binding(),
+                    resource: params.as_entire_binding(),
                 },
                 wgpu::BindGroupEntry {
                     binding: 1,
-                    resource: buf_a.as_entire_binding(),
+                    resource: a.as_entire_binding(),
                 },
                 wgpu::BindGroupEntry {
                     binding: 2,
-                    resource: buf_b.as_entire_binding(),
+                    resource: b.as_entire_binding(),
                 },
                 wgpu::BindGroupEntry {
                     binding: 3,
-                    resource: buf_c.as_entire_binding(),
+                    resource: c.as_entire_binding(),
                 },
                 wgpu::BindGroupEntry {
                     binding: 4,
-                    resource: buf_out.as_entire_binding(),
+                    resource: out.as_entire_binding(),
                 },
             ],
-        });
-
-        let workgroups = (n as u32).div_ceil(WORKGROUP_SIZE);
-
-        let mut encoder =
-            wgpu_device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
-        {
-            let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
-                label: Some("local_elementwise_pass"),
-                timestamp_writes: None,
-            });
-            pass.set_pipeline(&self.pipeline);
-            pass.set_bind_group(0, &bind_group, &[]);
-            pass.dispatch_workgroups(workgroups, 1, 1);
-        }
-        encoder.copy_buffer_to_buffer(&buf_out, 0, &buf_staging, 0, buf_size);
-        queue.submit(std::iter::once(encoder.finish()));
-
-        let (tx, rx) = std::sync::mpsc::channel();
-        buf_staging
-            .slice(..)
-            .map_async(wgpu::MapMode::Read, move |result| {
-                let _ = tx.send(result);
-            });
-        wgpu_device.poll(wgpu::Maintain::Wait);
-
-        rx.recv()
-            .map_err(|e| AirSpringError::barracuda_msg(format!("buffer map recv: {e}")))?
-            .map_err(|e| AirSpringError::barracuda_msg(format!("buffer map: {e}")))?;
-
-        let data = buf_staging.slice(..).get_mapped_range();
-        let out_f32: &[f32] = bytemuck::cast_slice(&data);
-        let out_f64: Vec<f64> = out_f32.iter().map(|&v| f64::from(v)).collect();
-        drop(data);
-        buf_staging.unmap();
-
-        Ok(out_f64)
+        })
     }
+}
+
+// ── Helper functions ─────────────────────────────────────────────────
+
+fn gpu_params(op: LocalOp, n: usize) -> Result<GpuParams> {
+    Ok(GpuParams {
+        op: op as u32,
+        n: u32::try_from(n)
+            .map_err(|_| AirSpringError::InvalidInput("batch size exceeds u32::MAX".into()))?,
+        _pad0: 0,
+        _pad1: 0,
+    })
+}
+
+fn checked_buf_size<T>(n: usize) -> Result<u64> {
+    u64::try_from(n * std::mem::size_of::<T>())
+        .map_err(|_| AirSpringError::InvalidInput("buffer size exceeds u64::MAX".into()))
+}
+
+fn create_init_buf(
+    device: &wgpu::Device,
+    label: &str,
+    data: &[u8],
+    usage: wgpu::BufferUsages,
+) -> wgpu::Buffer {
+    device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+        label: Some(label),
+        contents: data,
+        usage,
+    })
+}
+
+fn create_output_buf(device: &wgpu::Device, label: &str, size: u64) -> wgpu::Buffer {
+    device.create_buffer(&wgpu::BufferDescriptor {
+        label: Some(label),
+        size,
+        usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC,
+        mapped_at_creation: false,
+    })
+}
+
+fn create_staging_buf(device: &wgpu::Device, label: &str, size: u64) -> wgpu::Buffer {
+    device.create_buffer(&wgpu::BufferDescriptor {
+        label: Some(label),
+        size,
+        usage: wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST,
+        mapped_at_creation: false,
+    })
+}
+
+#[allow(clippy::too_many_arguments)]
+fn submit_and_copy(
+    device: &wgpu::Device,
+    queue: &wgpu::Queue,
+    pipeline: &wgpu::ComputePipeline,
+    bind_group: &wgpu::BindGroup,
+    n: usize,
+    buf_out: &wgpu::Buffer,
+    buf_staging: &wgpu::Buffer,
+    buf_size: u64,
+) {
+    #[allow(clippy::cast_possible_truncation)]
+    let workgroups = (n as u32).div_ceil(WORKGROUP_SIZE);
+
+    let mut encoder =
+        device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+    {
+        let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
+            label: Some("local_elementwise_pass"),
+            timestamp_writes: None,
+        });
+        pass.set_pipeline(pipeline);
+        pass.set_bind_group(0, bind_group, &[]);
+        pass.dispatch_workgroups(workgroups, 1, 1);
+    }
+    encoder.copy_buffer_to_buffer(buf_out, 0, buf_staging, 0, buf_size);
+    queue.submit(std::iter::once(encoder.finish()));
+}
+
+fn map_read<'a>(device: &wgpu::Device, staging: &'a wgpu::Buffer) -> Result<wgpu::BufferView<'a>> {
+    let (tx, rx) = std::sync::mpsc::channel();
+    staging.slice(..).map_async(wgpu::MapMode::Read, move |r| {
+        let _ = tx.send(r);
+    });
+    device.poll(wgpu::Maintain::Wait);
+
+    rx.recv()
+        .map_err(|e| AirSpringError::barracuda_msg(format!("buffer map recv: {e}")))?
+        .map_err(|e| AirSpringError::barracuda_msg(format!("buffer map: {e}")))?;
+
+    Ok(staging.slice(..).get_mapped_range())
 }
 
 const fn bgl_entry(binding: u32, ty: wgpu::BufferBindingType) -> wgpu::BindGroupLayoutEntry {
@@ -271,6 +460,7 @@ const fn bgl_entry(binding: u32, ty: wgpu::BufferBindingType) -> wgpu::BindGroup
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
     use crate::gpu::device_info::try_f64_device;
@@ -278,6 +468,17 @@ mod tests {
     fn try_local() -> Option<LocalElementwise> {
         let device = try_f64_device()?;
         LocalElementwise::new(device).ok()
+    }
+
+    #[test]
+    fn test_precision_detected() {
+        let Some(le) = try_local() else {
+            eprintln!("SKIP: no GPU for LocalElementwise");
+            return;
+        };
+        let p = le.precision();
+        eprintln!("LocalElementwise precision: {p:?}");
+        assert!(matches!(p, Precision::F64 | Precision::F32));
     }
 
     #[test]
@@ -299,9 +500,13 @@ mod tests {
             .map(|((&pp, &cc), &ii)| crate::eco::runoff::scs_cn_runoff(pp, cc, ii))
             .collect();
 
+        let tol = precision_tol(le.precision(), 1e-10, 1e-3);
         for (i, (g, c)) in gpu.iter().zip(&cpu).enumerate() {
-            let tol = c.abs().mul_add(1e-3, 1e-4);
-            assert!((g - c).abs() < tol, "SCS-CN[{i}] GPU={g:.4} CPU={c:.4}");
+            assert!(
+                (g - c).abs() < c.abs().mul_add(tol, 1e-10),
+                "SCS-CN[{i}] GPU={g:.8} CPU={c:.8} prec={:?}",
+                le.precision()
+            );
         }
     }
 
@@ -319,12 +524,12 @@ mod tests {
             .dispatch(LocalOp::StewartYield, &ky, &ratio, &zeros)
             .unwrap();
 
+        let tol = precision_tol(le.precision(), 1e-12, 1e-4);
         for (i, (&k, &r)) in ky.iter().zip(&ratio).enumerate() {
             let cpu = crate::eco::yield_response::yield_ratio_single(k, r);
-            let tol = cpu.abs().mul_add(1e-4, 1e-6);
             assert!(
-                (gpu[i] - cpu).abs() < tol,
-                "Stewart[{i}] GPU={:.6} CPU={cpu:.6}",
+                (gpu[i] - cpu).abs() < cpu.abs().mul_add(tol, 1e-12),
+                "Stewart[{i}] GPU={:.8} CPU={cpu:.8}",
                 gpu[i]
             );
         }
@@ -341,13 +546,12 @@ mod tests {
         let elev = [100.0, 0.0];
 
         let gpu = le.dispatch(LocalOp::MakkinkEt0, &t, &rs, &elev).unwrap();
-
+        let tol = precision_tol(le.precision(), 1e-8, 2e-3);
         for (i, ((&tt, &rr), &ee)) in t.iter().zip(&rs).zip(&elev).enumerate() {
             let cpu = crate::eco::simple_et0::makkink_et0(tt, rr, ee);
-            let tol = cpu.abs().mul_add(2e-3, 0.01);
             assert!(
-                (gpu[i] - cpu).abs() < tol,
-                "Makkink[{i}] GPU={:.4} CPU={cpu:.4}",
+                (gpu[i] - cpu).abs() < cpu.abs().mul_add(tol, 0.01),
+                "Makkink[{i}] GPU={:.6} CPU={cpu:.6}",
                 gpu[i]
             );
         }
@@ -364,13 +568,12 @@ mod tests {
         let rh = [70.0, 40.0];
 
         let gpu = le.dispatch(LocalOp::TurcEt0, &t, &rs, &rh).unwrap();
-
+        let tol = precision_tol(le.precision(), 1e-8, 2e-3);
         for (i, ((&tt, &rr), &hh)) in t.iter().zip(&rs).zip(&rh).enumerate() {
             let cpu = crate::eco::simple_et0::turc_et0(tt, rr, hh);
-            let tol = cpu.abs().mul_add(2e-3, 0.01);
             assert!(
-                (gpu[i] - cpu).abs() < tol,
-                "Turc[{i}] GPU={:.4} CPU={cpu:.4}",
+                (gpu[i] - cpu).abs() < cpu.abs().mul_add(tol, 0.01),
+                "Turc[{i}] GPU={:.6} CPU={cpu:.6}",
                 gpu[i]
             );
         }
@@ -387,13 +590,13 @@ mod tests {
         let doy = [180.0, 90.0];
 
         let gpu = le.dispatch(LocalOp::HamonPet, &t, &lat, &doy).unwrap();
-
+        let tol = precision_tol(le.precision(), 1e-6, 5e-3);
         for (i, ((&tt, &ll), &dd)) in t.iter().zip(&lat).zip(&doy).enumerate() {
+            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
             let cpu = crate::eco::simple_et0::hamon_pet_from_location(tt, ll, dd as u32);
-            let tol = cpu.abs().mul_add(5e-3, 0.02);
             assert!(
-                (gpu[i] - cpu).abs() < tol,
-                "Hamon[{i}] GPU={:.4} CPU={cpu:.4}",
+                (gpu[i] - cpu).abs() < cpu.abs().mul_add(tol, 0.02),
+                "Hamon[{i}] GPU={:.6} CPU={cpu:.6}",
                 gpu[i]
             );
         }
@@ -412,13 +615,13 @@ mod tests {
         let gpu = le
             .dispatch(LocalOp::BlaneyCriddleEt0, &t, &lat, &doy)
             .unwrap();
-
+        let tol = precision_tol(le.precision(), 1e-6, 5e-3);
         for (i, ((&tt, &ll), &dd)) in t.iter().zip(&lat).zip(&doy).enumerate() {
+            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
             let cpu = crate::eco::simple_et0::blaney_criddle_from_location(tt, ll, dd as u32);
-            let tol = cpu.abs().mul_add(5e-3, 0.02);
             assert!(
-                (gpu[i] - cpu).abs() < tol,
-                "BC[{i}] GPU={:.4} CPU={cpu:.4}",
+                (gpu[i] - cpu).abs() < cpu.abs().mul_add(tol, 0.02),
+                "BC[{i}] GPU={:.6} CPU={cpu:.6}",
                 gpu[i]
             );
         }
@@ -432,5 +635,15 @@ mod tests {
         };
         let result = le.dispatch(LocalOp::ScsCnRunoff, &[], &[], &[]).unwrap();
         assert!(result.is_empty());
+    }
+
+    /// Select tolerance based on compiled precision.
+    /// F64 native gives near-exact agreement with CPU f64 baseline.
+    /// F32 gives ~7 significant digits (~1e-3 relative).
+    fn precision_tol(prec: Precision, f64_tol: f64, f32_tol: f64) -> f64 {
+        match prec {
+            Precision::F64 => f64_tol,
+            _ => f32_tol,
+        }
     }
 }

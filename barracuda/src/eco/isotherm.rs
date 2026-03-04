@@ -230,6 +230,7 @@ fn goodness_of_fit<F: Fn(f64) -> f64>(ce: &[f64], qe: &[f64], predict: F) -> (f6
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

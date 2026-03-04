@@ -23,7 +23,7 @@
 //!     ↓ used by
 //! airSpring isotherm fitting, all 16 validation binaries
 //!
-//! airSpring → ToadStool    : TS-001 pow_f64 fix, TS-003 acos fix,
+//! airSpring → BarraCuda    : TS-001 pow_f64 fix, TS-003 acos fix,
 //!                            TS-004 reduce buffer fix, Richards PDE (S40)
 //! ```
 
@@ -250,7 +250,7 @@ fn neuralspring_nelder_mead_enables_isotherm_fitting() {
     let nm_fit = fit_langmuir_nm(&ce, &qe).expect("NM fit");
     assert!(
         nm_fit.r_squared > 0.98,
-        "Nelder-Mead Langmuir R²>0.98; neuralSpring optimizer (ToadStool S62)"
+        "Nelder-Mead Langmuir R²>0.98; neuralSpring optimizer (BarraCuda S62)"
     );
 
     let global_fit = fit_langmuir_global(&ce, &qe, 4).expect("multi-start fit");
@@ -276,7 +276,7 @@ fn neuralspring_validation_harness_drives_all_binaries() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// §4 — airSpring contributions back to ToadStool
+// §4 — airSpring contributions back to BarraCuda
 // ═══════════════════════════════════════════════════════════════════════
 
 #[test]
@@ -338,7 +338,7 @@ fn airspring_richards_pde_contributed_upstream() {
     let result = solve_richards_1d(&sand, 30.0, 20, -20.0, 0.0, true, false, 0.1, 0.01);
     assert!(
         result.is_ok(),
-        "Richards PDE solver must converge (airSpring → ToadStool S40)"
+        "Richards PDE solver must converge (airSpring → BarraCuda S40)"
     );
 
     let profiles = result.unwrap();

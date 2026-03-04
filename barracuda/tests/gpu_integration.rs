@@ -6,7 +6,7 @@
 //! GPU tests gracefully skip when no `f64`-capable device is available.
 //!
 //! Related test modules:
-//! - [`gpu_evolution`]: Evolution gap catalog and `ToadStool` issue tracking
+//! - [`gpu_evolution`]: Evolution gap catalog and `BarraCuda` issue tracking
 //! - [`gpu_determinism`]: Bit-identical rerun validation
 
 mod common;

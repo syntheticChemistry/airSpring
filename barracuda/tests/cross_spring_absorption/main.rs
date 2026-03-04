@@ -12,7 +12,7 @@
 //! S66: Cross-spring absorption (regression, hydrology, `moving_window_f64`)
 //! S68: Universal precision (334+ shaders evolved to f64-canonical)
 
-// ── §7 — ToadStool S64: Cross-Spring Stats Absorption ─────────────────
+// ── §7 — BarraCuda S64: Cross-Spring Stats Absorption ─────────────────
 
 #[test]
 fn s64_stats_rmse_delegates_to_upstream() {
@@ -177,7 +177,7 @@ fn s64_groundspring_mc_et0_deterministic_seed() {
     );
 }
 
-// ── §11 — ToadStool S66: Cross-Spring Absorption Wave ─────────────────
+// ── §11 — BarraCuda S66: Cross-Spring Absorption Wave ─────────────────
 //
 // S66 absorbed all pending airSpring metalForge modules upstream:
 // regression (R-S66-001), hydrology (R-S66-002), moving_window_f64 (R-S66-003),
@@ -326,7 +326,7 @@ fn s66_diversity_shannon_from_frequencies() {
 // ────────────────────────────────────────────────────────────────────────────
 // §13 — S68 universal precision validation
 //
-// ToadStool S68 evolved ALL WGSL shaders to f64 canonical and introduced
+// BarraCuda S68 evolved ALL WGSL shaders to f64 canonical and introduced
 // `downcast_f64_to_f32()` for backward compatibility. The precision chain:
 //
 //   hotSpring → df64_core.wgsl + math_f64.wgsl (S54: nuclear physics needs f64)

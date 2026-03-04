@@ -194,7 +194,7 @@ pub fn soil_heat_flux_monthly(t_month: f64, t_month_prev: f64) -> f64 {
 ///
 /// Ra must be in equivalent mm/day (divide MJ/m²/day by 2.45 = λ).
 ///
-/// # Upstream note (`ToadStool` S66)
+/// # Upstream note (`BarraCuda` S66)
 ///
 /// `barracuda::stats::hydrology::hargreaves_et0(ra, t_max, t_min)` provides
 /// an equivalent (R-S66-002, absorbed from airSpring metalForge). This local
@@ -408,6 +408,7 @@ pub fn daily_et0(input: &DailyEt0Input) -> Et0Result {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 

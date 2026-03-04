@@ -2,7 +2,7 @@
 //! Streaming orchestrator for multi-year regional ET₀.
 //!
 //! Wraps [`SeasonalPipeline`] for processing multiple stations and years.
-//! When `ToadStool`'s `UnidirectionalPipeline` is wired, this becomes fire-and-forget
+//! When `BarraCuda`'s `UnidirectionalPipeline` is wired, this becomes fire-and-forget
 //! streaming without blocking.
 //!
 //! # Streaming Architecture
@@ -61,7 +61,7 @@ pub struct StationSeasonResult {
 /// # Streaming Pattern
 ///
 /// [`AtlasStream::process_streaming`] emits results via callback as they are produced,
-/// preparing for `ToadStool`'s `UnidirectionalPipeline` (fire-and-forget
+/// preparing for `BarraCuda`'s `UnidirectionalPipeline` (fire-and-forget
 /// GPU streaming) without buffering the full result set.
 #[derive(Debug)]
 pub struct AtlasStream {
@@ -80,7 +80,7 @@ impl AtlasStream {
     /// Create an atlas stream with GPU-accelerated ET₀ dispatch.
     ///
     /// Stage 1 (ET₀) of each seasonal simulation dispatches to GPU;
-    /// remaining stages use CPU until `ToadStool` absorbs their ops.
+    /// remaining stages use CPU until `BarraCuda` absorbs their ops.
     ///
     /// # Errors
     ///
@@ -108,7 +108,7 @@ impl AtlasStream {
     /// Process stations in a streaming pattern, emitting each result via callback.
     ///
     /// Unlike [`Self::process_batch`], this avoids buffering the full result set.
-    /// When `ToadStool`'s `UnidirectionalPipeline` is available, this method
+    /// When `BarraCuda`'s `UnidirectionalPipeline` is available, this method
     /// becomes fire-and-forget GPU streaming.
     pub fn process_streaming<F>(
         &self,
@@ -136,7 +136,7 @@ impl AtlasStream {
     /// batch, then distribute per-station results through CPU stages.
     ///
     /// This eliminates N-1 CPU↔GPU round-trips when processing N stations.
-    /// Equivalent to `ToadStool`'s `UnidirectionalPipeline` pattern: all data
+    /// Equivalent to `BarraCuda`'s `UnidirectionalPipeline` pattern: all data
     /// flows GPU→host in one direction for Stage 1, then stages 2-4 proceed
     /// on CPU with the pre-computed ET₀.
     ///
@@ -361,6 +361,7 @@ impl Default for MonitoredAtlasStream {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
     use crate::eco::crop::CropType;

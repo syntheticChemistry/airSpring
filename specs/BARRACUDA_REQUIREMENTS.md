@@ -1,6 +1,6 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: March 2, 2026 (v0.6.8 — 846 lib tests, 81 barracuda + 5 forge binaries, 15 Tier A + 3 pipeline GPU orchestrators + pure GPU pipeline (78/78) + mixed-hardware pipeline (104/104 metalForge) + NUCLEUS atomics + biomeOS graph execution, 22.7× CPU speedup across 18 algorithms)
+**Last Updated**: March 2, 2026 (v0.6.9 — 846 lib tests, 81 barracuda + 5 forge binaries, 15 Tier A + 3 pipeline GPU orchestrators + pure GPU pipeline (78/78) + mixed-hardware pipeline (104/104 metalForge) + NUCLEUS atomics + biomeOS graph execution, 22.7× CPU speedup across 18 algorithms)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
 **ToadStool HEAD**: S93 (5,369 tests, 845 WGSL shaders)
 

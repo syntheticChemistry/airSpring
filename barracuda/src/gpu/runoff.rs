@@ -1,22 +1,21 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! Batched SCS-CN runoff computation — GPU-local via `local_elementwise.wgsl`.
+//! Batched SCS-CN runoff computation — GPU universal precision via `local_elementwise_f64.wgsl`.
 //!
 //! The SCS-CN equation `Q = (P − Ia)² / (P − Ia + S)` is embarrassingly parallel
 //! across fields/events. This module provides a batched orchestrator with both
-//! CPU fallback and GPU dispatch via `LocalElementwise` (f32 WGSL, op=0).
+//! CPU fallback and GPU dispatch via `LocalElementwise` (f64 canonical, universal precision, op=0).
 //!
 //! # Cross-Spring Provenance
 //!
 //! | Primitive | Origin | Status |
 //! |-----------|--------|--------|
-//! | SCS-CN equation | USDA-SCS (1972) NEH-4 | **GPU-local** (f32 WGSL) |
+//! | SCS-CN equation | USDA-SCS (1972) NEH-4 | **GPU-universal** (f64 canonical) |
 //! | AMC adjustment | Chow et al. (1988) | CPU fallback |
-//! | GPU dispatch | `local_elementwise.wgsl` op=0 | **Live** (v0.6.8) |
+//! | GPU dispatch | `local_elementwise_f64.wgsl` op=0 | **Live** (v0.6.9, f64 canonical) |
 //!
 //! # GPU Path
 //!
-//! SCS-CN runs on GPU via `LocalElementwise` (wgpu direct, f32 precision).
-//! `ToadStool` will absorb into canonical f64 shader for full precision.
+//! SCS-CN runs on GPU via `LocalElementwise` (f64 canonical, universal precision).
 
 use std::sync::Arc;
 
@@ -48,14 +47,13 @@ pub struct BatchedRunoffResult {
 /// Batched SCS-CN runoff orchestrator.
 ///
 /// CPU path uses `eco::runoff` directly. GPU path dispatches via
-/// `LocalElementwise` (f32 WGSL shader, pending `ToadStool` absorption to f64).
+/// `LocalElementwise` (f64 canonical shader via `compile_shader_universal`).
 #[derive(Debug)]
 pub struct BatchedRunoff;
 
 /// GPU-backed SCS-CN runoff dispatcher.
 ///
-/// Uses `local_elementwise.wgsl` op 0 for GPU-parallel computation.
-/// f32 precision on GPU; `ToadStool` absorption upgrades to f64.
+/// Uses `local_elementwise_f64.wgsl` op 0 via `compile_shader_universal` (f64 canonical → f32 on consumer GPUs).
 pub struct GpuRunoff {
     dispatcher: LocalElementwise,
 }
@@ -150,6 +148,7 @@ impl BatchedRunoff {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
     use super::*;
 
