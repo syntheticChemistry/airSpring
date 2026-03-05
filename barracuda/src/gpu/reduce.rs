@@ -191,31 +191,26 @@ pub fn seasonal_min(values: &[f64]) -> f64 {
 
 /// Compute sum of squared deviations from mean (for variance).
 ///
-/// When `BarraCuda` `FusedMapReduceF64` is wired, this dispatches to
-/// `MapOp::Square` + `ReduceOp::Sum` on centered data.
+/// Delegates to `barracuda::stats::variance` (Welford-stable) and scales
+/// by N to recover the sum-of-squares.
 #[must_use]
 pub fn sum_of_squares_from_mean(values: &[f64]) -> f64 {
     if values.is_empty() {
         return 0.0;
     }
-    let mean = seasonal_mean(values);
-    values.iter().map(|&v| (v - mean).powi(2)).sum()
+    barracuda::stats::correlation::variance(values).unwrap_or(0.0) * (len_f64(values) - 1.0)
 }
 
-/// Compute sample variance.
+/// Compute sample variance via `barracuda::stats::variance` (Bessel-corrected).
 #[must_use]
 pub fn sample_variance(values: &[f64]) -> f64 {
-    if values.len() < 2 {
-        return 0.0;
-    }
-    // Bessel correction: divide by (n − 1)
-    sum_of_squares_from_mean(values) / (len_f64(values) - 1.0)
+    barracuda::stats::correlation::variance(values).unwrap_or(0.0)
 }
 
-/// Compute sample standard deviation.
+/// Compute sample standard deviation via `barracuda::stats::std_dev`.
 #[must_use]
 pub fn sample_std_dev(values: &[f64]) -> f64 {
-    sample_variance(values).sqrt()
+    barracuda::stats::correlation::std_dev(values).unwrap_or(0.0)
 }
 
 /// Seasonal summary statistics for a time series.

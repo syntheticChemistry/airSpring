@@ -2,7 +2,7 @@
   "_provenance": {
     "experiment": "Exp 047: GPU Math Portability Validation",
     "description": "Validates all 13 GPU orchestrator modules produce identical results to CPU equivalents",
-    "baseline_commit": "current",
+    "baseline_commit": "87df5f6",
     "rust_binary": "validate_gpu_math",
     "date": "2026-02-28",
     "methodology": "Each GPU module tested against its CPU path with known-value or cross-check validation"

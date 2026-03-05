@@ -317,13 +317,20 @@ def main():
 
     print(f"\nResult: {n_pass}/{n_total} checks passed")
 
+    import subprocess
+    repo_root = Path(__file__).resolve().parents[2]
+    commit = subprocess.run(
+        ["git", "rev-parse", "--short", "HEAD"],
+        capture_output=True, text=True, cwd=repo_root,
+    ).stdout.strip() or "unknown"
+
     benchmark = {
-        "provenance": {
+        "_provenance": {
             "paper": "van Genuchten MTh (1980) SSSA J 44:892-898; Carsel RF, Parrish RS (1988) WRR 24:755-769",
             "data_source": "Carsel & Parrish (1988) Table 1 — 12 USDA soil texture classes (open literature)",
             "experiment": "053",
             "baseline_script": "control/vg_inverse/vg_inverse_fitting.py",
-            "baseline_commit": "pending",
+            "baseline_commit": commit,
             "baseline_command": "python control/vg_inverse/vg_inverse_fitting.py",
             "baseline_date": "2026-02-28",
             "baseline_result": f"{n_pass}/{n_total} PASS"

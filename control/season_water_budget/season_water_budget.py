@@ -385,13 +385,20 @@ def main():
 
     print(f"\nResult: {n_pass}/{n_total} checks passed")
 
+    import subprocess
+    repo_root = Path(__file__).resolve().parents[2]
+    commit = subprocess.run(
+        ["git", "rev-parse", "--short", "HEAD"],
+        capture_output=True, text=True, cwd=repo_root,
+    ).stdout.strip() or "unknown"
+
     benchmark = {
-        "provenance": {
+        "_provenance": {
             "paper": "Allen et al. (1998) FAO-56 Chapters 2-8; Stewart JI (1977) FAO I&D Paper 33",
             "data_source": "Deterministic synthetic weather (Michigan lat 42.7°N, elev 256 m)",
             "experiment": "054",
             "baseline_script": "control/season_water_budget/season_water_budget.py",
-            "baseline_commit": "pending",
+            "baseline_commit": commit,
             "baseline_command": "python control/season_water_budget/season_water_budget.py",
             "baseline_date": "2026-02-28",
             "baseline_result": f"{n_pass}/{n_total} PASS"

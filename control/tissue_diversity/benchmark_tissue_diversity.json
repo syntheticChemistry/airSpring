@@ -3,7 +3,7 @@
     "method": "Tissue diversity profiling for immunological Anderson localization (Paper 12)",
     "baseline_script": "control/tissue_diversity/tissue_diversity.py",
     "baseline_command": "python3 control/tissue_diversity/tissue_diversity.py",
-    "baseline_commit": "pending",
+    "baseline_commit": "87df5f6",
     "python_version": "3.10",
     "created": "2026-03-02",
     "_tolerance_justification": "Shannon/Pielou/W use 1e-4 to 1e-3 for entropy; barrier d_eff and compartment dimensions use 1e-10 for exact promotion model.",

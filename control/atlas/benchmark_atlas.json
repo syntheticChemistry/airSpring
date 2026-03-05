@@ -8266,7 +8266,7 @@
       }
     }
   },
-  "provenance": {
+  "_provenance": {
     "method": "FAO-56 crop water budget across Michigan atlas stations",
     "script": "control/atlas/atlas_water_budget.py",
     "baseline_commit": "fad2e1b",

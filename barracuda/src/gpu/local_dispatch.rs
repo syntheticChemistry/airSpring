@@ -227,16 +227,16 @@ impl LocalElementwise {
         let bind_group =
             self.create_bind_group(wgpu_device, &params_buf, &buf_a, &buf_b, &buf_c, &buf_out);
 
-        submit_and_copy(
-            wgpu_device,
+        submit_and_copy(&SubmitParams {
+            device: wgpu_device,
             queue,
-            &self.pipeline,
-            &bind_group,
+            pipeline: &self.pipeline,
+            bind_group: &bind_group,
             n,
-            &buf_out,
-            &buf_staging,
+            buf_out: &buf_out,
+            buf_staging: &buf_staging,
             buf_size,
-        );
+        });
 
         let data = map_read(wgpu_device, &buf_staging)?;
         let out: &[f64] = bytemuck::cast_slice(&data);
@@ -258,11 +258,20 @@ impl LocalElementwise {
         let wgpu_device = self.device.device();
         let queue = self.device.queue();
 
-        #[allow(clippy::cast_possible_truncation)]
+        #[allow(
+            clippy::cast_possible_truncation,
+            reason = "intentional f64→f32 downcast for consumer-GPU dispatch path"
+        )]
         let a_f32: Vec<f32> = a.iter().map(|&v| v as f32).collect();
-        #[allow(clippy::cast_possible_truncation)]
+        #[allow(
+            clippy::cast_possible_truncation,
+            reason = "intentional f64→f32 downcast for consumer-GPU dispatch path"
+        )]
         let b_f32: Vec<f32> = b.iter().map(|&v| v as f32).collect();
-        #[allow(clippy::cast_possible_truncation)]
+        #[allow(
+            clippy::cast_possible_truncation,
+            reason = "intentional f64→f32 downcast for consumer-GPU dispatch path"
+        )]
         let c_f32: Vec<f32> = c.iter().map(|&v| v as f32).collect();
 
         let params = gpu_params(op, n)?;
@@ -298,16 +307,16 @@ impl LocalElementwise {
         let bind_group =
             self.create_bind_group(wgpu_device, &params_buf, &buf_a, &buf_b, &buf_c, &buf_out);
 
-        submit_and_copy(
-            wgpu_device,
+        submit_and_copy(&SubmitParams {
+            device: wgpu_device,
             queue,
-            &self.pipeline,
-            &bind_group,
+            pipeline: &self.pipeline,
+            bind_group: &bind_group,
             n,
-            &buf_out,
-            &buf_staging,
+            buf_out: &buf_out,
+            buf_staging: &buf_staging,
             buf_size,
-        );
+        });
 
         let data = map_read(wgpu_device, &buf_staging)?;
         let out_f32: &[f32] = bytemuck::cast_slice(&data);
@@ -403,33 +412,38 @@ fn create_staging_buf(device: &wgpu::Device, label: &str, size: u64) -> wgpu::Bu
     })
 }
 
-#[allow(clippy::too_many_arguments)]
-fn submit_and_copy(
-    device: &wgpu::Device,
-    queue: &wgpu::Queue,
-    pipeline: &wgpu::ComputePipeline,
-    bind_group: &wgpu::BindGroup,
+struct SubmitParams<'a> {
+    device: &'a wgpu::Device,
+    queue: &'a wgpu::Queue,
+    pipeline: &'a wgpu::ComputePipeline,
+    bind_group: &'a wgpu::BindGroup,
     n: usize,
-    buf_out: &wgpu::Buffer,
-    buf_staging: &wgpu::Buffer,
+    buf_out: &'a wgpu::Buffer,
+    buf_staging: &'a wgpu::Buffer,
     buf_size: u64,
-) {
-    #[allow(clippy::cast_possible_truncation)]
-    let workgroups = (n as u32).div_ceil(WORKGROUP_SIZE);
+}
 
-    let mut encoder =
-        device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
+fn submit_and_copy(p: &SubmitParams<'_>) {
+    #[allow(
+        clippy::cast_possible_truncation,
+        reason = "n is validated to fit in u32 by gpu_params()"
+    )]
+    let workgroups = (p.n as u32).div_ceil(WORKGROUP_SIZE);
+
+    let mut encoder = p
+        .device
+        .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
     {
         let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
             label: Some("local_elementwise_pass"),
             timestamp_writes: None,
         });
-        pass.set_pipeline(pipeline);
-        pass.set_bind_group(0, bind_group, &[]);
+        pass.set_pipeline(p.pipeline);
+        pass.set_bind_group(0, p.bind_group, &[]);
         pass.dispatch_workgroups(workgroups, 1, 1);
     }
-    encoder.copy_buffer_to_buffer(buf_out, 0, buf_staging, 0, buf_size);
-    queue.submit(std::iter::once(encoder.finish()));
+    encoder.copy_buffer_to_buffer(p.buf_out, 0, p.buf_staging, 0, p.buf_size);
+    p.queue.submit(std::iter::once(encoder.finish()));
 }
 
 fn map_read<'a>(device: &wgpu::Device, staging: &'a wgpu::Buffer) -> Result<wgpu::BufferView<'a>> {

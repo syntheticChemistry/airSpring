@@ -1,6 +1,6 @@
 {
   "experiment": "Exp 060: NASS Real Yield Comparison",
-  "provenance": "Synthetic Michigan yields from validated Stewart pipeline + Open-Meteo weather",
+  "_provenance": "Synthetic Michigan yields from validated Stewart pipeline + Open-Meteo weather",
   "note": "When USDA NASS API key is available, replace with download_usda_nass.py output",
   "state": "MI",
   "year_range": "2000-2023",

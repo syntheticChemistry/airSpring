@@ -23,7 +23,9 @@
 
 use airspring_barracuda::eco::water_balance;
 use airspring_barracuda::eco::yield_response::{clamp_yield_ratio, ky_table, yield_ratio_single};
-use airspring_barracuda::validation::{self, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{
+    self, json_f64_required, parse_benchmark_json, ValidationHarness,
+};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/nass_yield/benchmark_nass_yield.json");
 
@@ -193,11 +195,12 @@ fn validate_ky_consistency(v: &mut ValidationHarness, benchmark: &serde_json::Va
     validation::section("Ky Table Consistency (FAO-56 Table 24)");
 
     for crop in CROPS {
-        let expected = benchmark["ky_table"][crop.name]["ky_total"]
-            .as_f64()
-            .unwrap_or_else(|| panic!("missing ky_total for {}", crop.name));
+        let expected = json_f64_required(benchmark, &["ky_table", crop.name, "ky_total"]);
 
-        let ky = ky_table(crop.name).unwrap_or_else(|| panic!("crop not in table: {}", crop.name));
+        let Some(ky) = ky_table(crop.name) else {
+            eprintln!("FATAL: crop not in Ky table: {}", crop.name);
+            std::process::exit(1);
+        };
         v.check_abs(
             &format!("{} Ky total", crop.name),
             ky.ky_total,

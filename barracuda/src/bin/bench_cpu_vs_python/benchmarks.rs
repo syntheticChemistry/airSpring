@@ -1,24 +1,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss,
-    clippy::similar_names,
-    clippy::excessive_precision,
-    clippy::too_many_lines
-)]
-//! CPU vs Python benchmark — proves barracuda's pure Rust math is:
-//! 1. Numerically identical to Python controls (parity at 1e-6)
-//! 2. Significantly faster than interpreted Python
+//! Individual benchmark functions for CPU vs Python parity testing.
 //!
-//! Runs the same algorithms at the same scale as `control/bench_python_timing.py`,
-//! then shells out to Python for timing comparison.
+//! Each function follows the pattern:
+//! 1. Set up inputs (deterministic, matching Python control scripts)
+//! 2. Time N iterations of the Rust implementation
+//! 3. Compare output against `python_ref` (the value produced by the
+//!    corresponding Python control script at the documented commit)
+//! 4. Return `(elapsed_secs, output_value, parity_detail_string)`
 //!
 //! # Reference Value Provenance
-//!
-//! All `python_ref` values were produced by the corresponding Python control
-//! scripts and validated during CI baseline runs.
 //!
 //! | Value | Source script | Commit | Command |
 //! |-------|--------------|--------|---------|
@@ -31,7 +21,6 @@
 
 use std::f64::consts::PI;
 use std::hint::black_box;
-use std::process::Command;
 use std::time::Instant;
 
 use airspring_barracuda::eco::anderson;
@@ -49,21 +38,9 @@ use airspring_barracuda::eco::van_genuchten;
 use airspring_barracuda::eco::water_balance;
 use airspring_barracuda::eco::yield_response;
 
-type BenchFn = Box<dyn Fn(usize) -> (f64, f64, String)>;
+use super::BenchEntry;
 
-type BenchEntry = (&'static str, &'static str, usize, BenchFn);
-
-struct BenchResult {
-    name: &'static str,
-    n: usize,
-    rust_secs: f64,
-    python_secs: f64,
-    speedup: f64,
-    parity_ok: bool,
-    parity_detail: String,
-}
-
-fn bench_fao56_et0(n: usize) -> (f64, f64, String) {
+pub fn bench_fao56_et0(n: usize) -> (f64, f64, String) {
     let e_s_max: f64 = 0.6108 * (17.27_f64 * 34.8 / (34.8 + 237.3)).exp();
     let e_s_min: f64 = 0.6108 * (17.27_f64 * 19.6 / (19.6 + 237.3)).exp();
     let e_s = f64::midpoint(e_s_max, e_s_min);
@@ -96,7 +73,7 @@ fn bench_fao56_et0(n: usize) -> (f64, f64, String) {
     )
 }
 
-fn bench_thornthwaite(n: usize) -> (f64, f64, String) {
+pub fn bench_thornthwaite(n: usize) -> (f64, f64, String) {
     let temps: [f64; 12] = [
         2.0, 4.0, 9.0, 14.0, 19.0, 24.0, 27.0, 26.0, 22.0, 15.0, 8.0, 3.0,
     ];
@@ -123,7 +100,7 @@ fn bench_thornthwaite(n: usize) -> (f64, f64, String) {
     )
 }
 
-fn bench_hargreaves(n: usize) -> (f64, f64, String) {
+pub fn bench_hargreaves(n: usize) -> (f64, f64, String) {
     let t0 = Instant::now();
     let mut result = 0.0_f64;
     for _ in 0..n {
@@ -144,7 +121,7 @@ fn bench_hargreaves(n: usize) -> (f64, f64, String) {
     )
 }
 
-fn bench_van_genuchten(n: usize) -> (f64, f64, String) {
+pub fn bench_van_genuchten(n: usize) -> (f64, f64, String) {
     let t0 = Instant::now();
     let mut result = 0.0_f64;
     for _ in 0..n {
@@ -167,7 +144,7 @@ fn bench_van_genuchten(n: usize) -> (f64, f64, String) {
     )
 }
 
-fn bench_water_balance_step(n: usize) -> (f64, f64, String) {
+pub fn bench_water_balance_step(n: usize) -> (f64, f64, String) {
     let t0 = Instant::now();
     let mut dr = 0.0_f64;
     for _ in 0..n {
@@ -193,7 +170,7 @@ fn bench_water_balance_step(n: usize) -> (f64, f64, String) {
     )
 }
 
-fn bench_anderson_coupling(n: usize) -> (f64, f64, String) {
+pub fn bench_anderson_coupling(n: usize) -> (f64, f64, String) {
     let t0 = Instant::now();
     let mut d_eff = 0.0_f64;
     for _ in 0..n {
@@ -211,7 +188,7 @@ fn bench_anderson_coupling(n: usize) -> (f64, f64, String) {
     )
 }
 
-fn bench_shannon_diversity(n: usize) -> (f64, f64, String) {
+pub fn bench_shannon_diversity(n: usize) -> (f64, f64, String) {
     let abun = [45.0, 30.0, 15.0, 8.0, 2.0];
     let t0 = Instant::now();
     let mut result = 0.0_f64;
@@ -229,7 +206,7 @@ fn bench_shannon_diversity(n: usize) -> (f64, f64, String) {
     )
 }
 
-fn bench_season_simulation(n: usize) -> (f64, f64, String) {
+pub fn bench_season_simulation(n: usize) -> (f64, f64, String) {
     let taw: f64 = 120.0;
     let raw: f64 = 60.0;
     let t0 = Instant::now();
@@ -261,7 +238,7 @@ fn bench_season_simulation(n: usize) -> (f64, f64, String) {
     )
 }
 
-fn bench_scs_cn_runoff(n: usize) -> (f64, f64, String) {
+pub fn bench_scs_cn_runoff(n: usize) -> (f64, f64, String) {
     let t0 = Instant::now();
     let mut result = 0.0_f64;
     for _ in 0..n {
@@ -281,7 +258,7 @@ fn bench_scs_cn_runoff(n: usize) -> (f64, f64, String) {
     )
 }
 
-fn bench_green_ampt(n: usize) -> (f64, f64, String) {
+pub fn bench_green_ampt(n: usize) -> (f64, f64, String) {
     let params = infiltration::GreenAmptParams {
         ks_cm_hr: 1.09,
         psi_cm: 11.01,
@@ -306,7 +283,7 @@ fn bench_green_ampt(n: usize) -> (f64, f64, String) {
     )
 }
 
-fn bench_saxton_rawls(n: usize) -> (f64, f64, String) {
+pub fn bench_saxton_rawls(n: usize) -> (f64, f64, String) {
     let input = soil_moisture::SaxtonRawlsInput {
         sand: 0.40,
         clay: 0.20,
@@ -329,7 +306,7 @@ fn bench_saxton_rawls(n: usize) -> (f64, f64, String) {
     )
 }
 
-fn bench_langmuir_fit(n: usize) -> (f64, f64, String) {
+pub fn bench_langmuir_fit(n: usize) -> (f64, f64, String) {
     let ce = [1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0, 200.0, 300.0];
     let qe = [2.8, 4.9, 8.5, 11.2, 14.0, 16.1, 17.0, 17.6, 17.8];
     let t0 = Instant::now();
@@ -350,7 +327,7 @@ fn bench_langmuir_fit(n: usize) -> (f64, f64, String) {
     )
 }
 
-fn bench_priestley_taylor(n: usize) -> (f64, f64, String) {
+pub fn bench_priestley_taylor(n: usize) -> (f64, f64, String) {
     let t0 = Instant::now();
     let mut result = 0.0_f64;
     for _ in 0..n {
@@ -372,7 +349,7 @@ fn bench_priestley_taylor(n: usize) -> (f64, f64, String) {
     )
 }
 
-fn bench_richards_1d(n: usize) -> (f64, f64, String) {
+pub fn bench_richards_1d(n: usize) -> (f64, f64, String) {
     let params = van_genuchten::VanGenuchtenParams {
         theta_r: 0.045,
         theta_s: 0.43,
@@ -408,7 +385,7 @@ fn bench_richards_1d(n: usize) -> (f64, f64, String) {
     )
 }
 
-fn bench_yield_response(n: usize) -> (f64, f64, String) {
+pub fn bench_yield_response(n: usize) -> (f64, f64, String) {
     let t0 = Instant::now();
     let mut result = 0.0_f64;
     for _ in 0..n {
@@ -428,7 +405,7 @@ fn bench_yield_response(n: usize) -> (f64, f64, String) {
     )
 }
 
-fn bench_dual_kc_step(n: usize) -> (f64, f64, String) {
+pub fn bench_dual_kc_step(n: usize) -> (f64, f64, String) {
     let inputs: Vec<dual_kc::DualKcInput> = (0..7)
         .map(|d| dual_kc::DualKcInput {
             et0: 4.5,
@@ -464,7 +441,7 @@ fn bench_dual_kc_step(n: usize) -> (f64, f64, String) {
     )
 }
 
-fn bench_makkink_et0(n: usize) -> (f64, f64, String) {
+pub fn bench_makkink_et0(n: usize) -> (f64, f64, String) {
     let t0 = Instant::now();
     let mut result = 0.0_f64;
     for _ in 0..n {
@@ -485,7 +462,7 @@ fn bench_makkink_et0(n: usize) -> (f64, f64, String) {
     )
 }
 
-fn bench_blaney_criddle(n: usize) -> (f64, f64, String) {
+pub fn bench_blaney_criddle(n: usize) -> (f64, f64, String) {
     let t0 = Instant::now();
     let mut result = 0.0_f64;
     for _ in 0..n {
@@ -504,7 +481,7 @@ fn bench_blaney_criddle(n: usize) -> (f64, f64, String) {
     )
 }
 
-fn bench_sensor_cal(n: usize) -> (f64, f64, String) {
+pub fn bench_sensor_cal(n: usize) -> (f64, f64, String) {
     use airspring_barracuda::eco::sensor_calibration;
     let t0 = Instant::now();
     let mut result = 0.0_f64;
@@ -524,7 +501,7 @@ fn bench_sensor_cal(n: usize) -> (f64, f64, String) {
     )
 }
 
-fn bench_kc_climate_adjust(n: usize) -> (f64, f64, String) {
+pub fn bench_kc_climate_adjust(n: usize) -> (f64, f64, String) {
     use barracuda::ops::batched_elementwise_f64;
     let t0 = Instant::now();
     let mut result = 0.0_f64;
@@ -547,7 +524,7 @@ fn bench_kc_climate_adjust(n: usize) -> (f64, f64, String) {
     )
 }
 
-fn bench_seasonal_pipeline(n: usize) -> (f64, f64, String) {
+pub fn bench_seasonal_pipeline(n: usize) -> (f64, f64, String) {
     use airspring_barracuda::eco::crop::CropType;
     use airspring_barracuda::gpu::seasonal_pipeline::{CropConfig, SeasonalPipeline, WeatherDay};
 
@@ -591,7 +568,7 @@ fn bench_seasonal_pipeline(n: usize) -> (f64, f64, String) {
     (elapsed, yr, format!("Rust yield_ratio={yr:.6}, ok={ok}"))
 }
 
-fn bench_tissue_w(n_iter: usize) -> (f64, f64, String) {
+pub fn bench_tissue_w(n_iter: usize) -> (f64, f64, String) {
     let abundances = [85.0, 5.0, 8.0, 2.0, 15.0, 18.0, 14.0, 12.0, 10.0];
     let richness = abundances.len() as f64;
     let ln_rich = richness.ln();
@@ -630,7 +607,7 @@ fn bench_tissue_w(n_iter: usize) -> (f64, f64, String) {
     )
 }
 
-fn bench_barrier_d_eff(n_iter: usize) -> (f64, f64, String) {
+pub fn bench_barrier_d_eff(n_iter: usize) -> (f64, f64, String) {
     let head = -100.0_f64;
     let t0 = Instant::now();
     let mut d_eff = 0.0_f64;
@@ -645,7 +622,7 @@ fn bench_barrier_d_eff(n_iter: usize) -> (f64, f64, String) {
     (elapsed, d_eff, format!("Rust d_eff={d_eff:.6}, ok={ok}"))
 }
 
-fn bench_anderson_regime(n_iter: usize) -> (f64, f64, String) {
+pub fn bench_anderson_regime(n_iter: usize) -> (f64, f64, String) {
     let disorder = 5.0_f64;
     let dim = 3.0_f64;
     let t0 = Instant::now();
@@ -665,7 +642,7 @@ fn bench_anderson_regime(n_iter: usize) -> (f64, f64, String) {
     )
 }
 
-fn build_benchmarks() -> Vec<BenchEntry> {
+pub fn build_benchmarks() -> Vec<BenchEntry> {
     vec![
         (
             "fao56_et0",
@@ -812,138 +789,4 @@ fn build_benchmarks() -> Vec<BenchEntry> {
             Box::new(bench_anderson_regime),
         ),
     ]
-}
-
-fn run_python_benchmarks() -> Vec<(String, f64)> {
-    let control_dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-        .parent()
-        .expect("CARGO_MANIFEST_DIR parent")
-        .join("control");
-    let script = control_dir.join("bench_python_timing.py");
-    if !script.exists() {
-        eprintln!(
-            "  [WARN] Python timing script not found at {}",
-            script.display()
-        );
-        return Vec::new();
-    }
-    let output = Command::new("python3")
-        .arg(&script)
-        .output()
-        .expect("Failed to run Python timing script");
-    if !output.status.success() {
-        eprintln!(
-            "  [WARN] Python benchmark failed: {}",
-            String::from_utf8_lossy(&output.stderr)
-        );
-        return Vec::new();
-    }
-    let json_str = String::from_utf8_lossy(&output.stdout);
-    let v: serde_json::Value = serde_json::from_str(&json_str).unwrap_or_default();
-    v["benchmarks"]
-        .as_array()
-        .map(|arr| {
-            arr.iter()
-                .filter_map(|b| Some((b["name"].as_str()?.to_string(), b["secs"].as_f64()?)))
-                .collect()
-        })
-        .unwrap_or_default()
-}
-
-fn run_benchmarks(
-    benchmarks: &[BenchEntry],
-    py_lookup: impl Fn(&str) -> f64,
-) -> (Vec<BenchResult>, bool) {
-    let mut results = Vec::new();
-    let mut all_parity = true;
-    for (py_name, display_name, n, func) in benchmarks {
-        let (rust_secs, _value, detail) = func(*n);
-        let python_secs = py_lookup(py_name);
-        let speedup = if python_secs > 0.0 && rust_secs > 0.0 {
-            python_secs / rust_secs
-        } else {
-            0.0
-        };
-        let parity_ok = detail.contains("ok=true");
-        if !parity_ok {
-            all_parity = false;
-        }
-        results.push(BenchResult {
-            name: display_name,
-            n: *n,
-            rust_secs,
-            python_secs,
-            speedup,
-            parity_ok,
-            parity_detail: detail,
-        });
-    }
-    (results, all_parity)
-}
-
-fn print_results(results: &[BenchResult], all_parity: bool) {
-    eprintln!("┌──────────────────────────────┬────────┬──────────────┬──────────────┬──────────┬────────┐");
-    eprintln!("│ Algorithm                    │      N │     Rust (s) │   Python (s) │  Speedup │ Parity │");
-    eprintln!("├──────────────────────────────┼────────┼──────────────┼──────────────┼──────────┼────────┤");
-    for r in results {
-        let parity_str = if r.parity_ok { "  ✓   " } else { " FAIL " };
-        eprintln!(
-            "│ {:<28} │ {:>6} │ {:>12.6} │ {:>12.6} │ {:>6.1}× │{}│",
-            r.name, r.n, r.rust_secs, r.python_secs, r.speedup, parity_str,
-        );
-    }
-    eprintln!("└──────────────────────────────┴────────┴──────────────┴──────────────┴──────────┴────────┘");
-
-    eprintln!("\n  Parity details:");
-    for r in results {
-        let icon = if r.parity_ok { "✓" } else { "✗" };
-        eprintln!("    {icon} {}: {}", r.name, r.parity_detail);
-    }
-
-    let geo_mean_speedup = {
-        let valid: Vec<f64> = results
-            .iter()
-            .filter(|r| r.speedup > 0.0)
-            .map(|r| r.speedup)
-            .collect();
-        if valid.is_empty() {
-            0.0
-        } else {
-            let log_sum: f64 = valid.iter().map(|s| s.ln()).sum();
-            (log_sum / valid.len() as f64).exp()
-        }
-    };
-
-    eprintln!("\n  Geometric mean speedup: {geo_mean_speedup:.1}×");
-    eprintln!(
-        "  Math parity: {}/{} algorithms match Python",
-        results.iter().filter(|r| r.parity_ok).count(),
-        results.len(),
-    );
-
-    if !all_parity {
-        eprintln!("\n  [FAIL] Not all algorithms match Python — check parity details above");
-        std::process::exit(1);
-    }
-    eprintln!("\n  [PASS] Pure Rust math is correct AND faster than Python");
-}
-
-fn main() {
-    eprintln!("═══════════════════════════════════════════════════════════");
-    eprintln!("  barracuda CPU vs Python — Pure Math Benchmark");
-    eprintln!("═══════════════════════════════════════════════════════════\n");
-
-    eprintln!("  Running Python benchmarks...");
-    let py_timings = run_python_benchmarks();
-    let py_lookup = |name: &str| -> f64 {
-        py_timings
-            .iter()
-            .find(|(n, _)| n == name)
-            .map_or(0.0, |(_, s)| *s)
-    };
-
-    eprintln!("  Running Rust benchmarks...\n");
-    let benchmarks = build_benchmarks();
-    let (results, all_parity) = run_benchmarks(&benchmarks, py_lookup);
-    print_results(&results, all_parity);
 }

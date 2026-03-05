@@ -1,10 +1,10 @@
 {
-  "provenance": {
+  "_provenance": {
     "paper": "van Genuchten MTh (1980) SSSA J 44:892-898; Carsel RF, Parrish RS (1988) WRR 24:755-769",
     "data_source": "Carsel & Parrish (1988) Table 1 \u2014 12 USDA soil texture classes (open literature)",
     "experiment": "053",
     "baseline_script": "control/vg_inverse/vg_inverse_fitting.py",
-    "baseline_commit": "pending",
+    "baseline_commit": "87df5f6",
     "baseline_command": "python control/vg_inverse/vg_inverse_fitting.py",
     "baseline_date": "2026-02-28",
     "baseline_result": "84/84 PASS"

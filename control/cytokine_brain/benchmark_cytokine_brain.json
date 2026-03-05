@@ -3,7 +3,7 @@
     "method": "CytokineBrain evolutionary reservoir for AD flare prediction (Paper 12)",
     "baseline_script": "control/cytokine_brain/cytokine_brain.py",
     "baseline_command": "python3 control/cytokine_brain/cytokine_brain.py",
-    "baseline_commit": "pending",
+    "baseline_commit": "87df5f6",
     "python_version": "3.10",
     "created": "2026-03-02",
     "_tolerance_justification": "Normalization and feature checks use 1e-4 to 1e-6; regime classification and lifecycle checks are categorical.",

@@ -3,7 +3,7 @@
     "method": "Cross-species skin comparison: canine vs human Anderson predictions (Paper 12 §4.1 Exp 274)",
     "baseline_script": "control/cross_species_skin/cross_species_skin.py",
     "baseline_command": "python3 control/cross_species_skin/cross_species_skin.py",
-    "baseline_commit": "pending",
+    "baseline_commit": "87df5f6",
     "python_version": "3.10",
     "created": "2026-03-02",
     "_tolerance_justification": "Exact regime/dimension checks use 1e-10; species-specific diversity and breach thresholds use expected ranges.",

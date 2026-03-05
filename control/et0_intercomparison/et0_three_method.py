@@ -244,7 +244,7 @@ def generate_benchmark():
             "hg_pm_ratio_range": [0.6, 1.8],
             "pm_mean_range_mm_day": [2.0, 6.0],
         },
-        "provenance": {
+        "_provenance": {
             "method": "ET₀ 3-method intercomparison (PM, PT, Hargreaves) on real Michigan data",
             "digitized_by": "Computed from Open-Meteo ERA5 reanalysis (6 stations × 153 days)",
             "created": "2026-02-26",

@@ -208,7 +208,7 @@
       }
     ]
   },
-  "provenance": {
+  "_provenance": {
     "method": "Priestley-Taylor (1972) radiation-based ET\u2080 vs FAO-56 PM",
     "digitized_by": "Computed from Priestley & Taylor (1972) Eq. 1, Allen et al. (1998) FAO-56 intermediates",
     "created": "2026-02-26",

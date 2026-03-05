@@ -194,7 +194,7 @@
       6.0
     ]
   },
-  "provenance": {
+  "_provenance": {
     "method": "ET\u2080 3-method intercomparison (PM, PT, Hargreaves) on real Michigan data",
     "digitized_by": "Computed from Open-Meteo ERA5 reanalysis (6 stations \u00d7 153 days)",
     "created": "2026-02-26",

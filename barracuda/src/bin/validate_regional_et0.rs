@@ -94,21 +94,23 @@ struct StationMeta {
 
 fn load_station_registry(data_dir: &Path) -> Vec<(String, f64, f64)> {
     let registry_path = data_dir.join("stations.json");
-    if let Ok(content) = std::fs::read_to_string(&registry_path) {
-        if let Ok(val) = serde_json::from_str::<serde_json::Value>(&content) {
-            if let Some(obj) = val.as_object() {
-                return obj
-                    .iter()
-                    .filter_map(|(id, meta)| {
-                        let lat = meta.get("latitude")?.as_f64()?;
-                        let elev = meta.get("elevation_m")?.as_f64()?;
-                        Some((id.clone(), lat, elev))
-                    })
-                    .collect();
-            }
-        }
-    }
-    Vec::new()
+    let Ok(file) = std::fs::File::open(&registry_path) else {
+        return Vec::new();
+    };
+    let Ok(val) = serde_json::from_reader::<_, serde_json::Value>(BufReader::new(file)) else {
+        return Vec::new();
+    };
+    val.as_object()
+        .map(|obj| {
+            obj.iter()
+                .filter_map(|(id, meta)| {
+                    let lat = meta.get("latitude")?.as_f64()?;
+                    let elev = meta.get("elevation_m")?.as_f64()?;
+                    Some((id.clone(), lat, elev))
+                })
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
 const DEFAULT_STATION_META: &[(&str, f64, f64)] = &[

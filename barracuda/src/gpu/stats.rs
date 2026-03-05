@@ -61,7 +61,10 @@ pub fn sensor_regression_gpu(
         }
     }
 
-    #[allow(clippy::cast_possible_truncation)]
+    #[allow(
+        clippy::cast_possible_truncation,
+        reason = "n_observations is small enough for f32"
+    )]
     let betas = stats_f64::linear_regression(
         device,
         &x,
@@ -93,7 +96,10 @@ pub fn soil_correlation_gpu(
     n_variables: usize,
 ) -> Result<Vec<f64>, barracuda::error::BarracudaError> {
     assert_eq!(data.len(), n_observations * n_variables);
-    #[allow(clippy::cast_possible_truncation)]
+    #[allow(
+        clippy::cast_possible_truncation,
+        reason = "matrix dimensions fit in u32"
+    )]
     let result =
         stats_f64::matrix_correlation(device, data, n_observations as u32, n_variables as u32);
     result

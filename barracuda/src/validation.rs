@@ -83,6 +83,20 @@ pub fn json_f64(value: &serde_json::Value, path: &[&str]) -> Option<f64> {
     current.as_f64()
 }
 
+/// Extract an f64 from a nested JSON path, or fail the benchmark with a
+/// descriptive message and `exit(1)`.
+///
+/// Use this in validation binaries where a missing benchmark field means the
+/// test infrastructure is broken — not a validation failure.
+#[must_use]
+pub fn json_f64_required(value: &serde_json::Value, path: &[&str]) -> f64 {
+    json_f64(value, path).unwrap_or_else(|| {
+        let path_str = path.join(".");
+        eprintln!("FATAL: benchmark JSON missing required f64 at: {path_str}");
+        std::process::exit(1)
+    })
+}
+
 /// Extract a string from a JSON value with path context for error messages.
 ///
 /// # Errors

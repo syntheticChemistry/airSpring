@@ -150,7 +150,7 @@
 //!   `lbfgs` / `lbfgs_numerical`, `HeadKind` enum (15+ domain variants)
 //! - S84-S86: **`ComputeDispatch` migration** — 144 ops total (+33 from S84-S86), hydrology split
 //!   (`mod.rs` CPU + `gpu.rs` GPU), experimental.rs probes, deep debt elimination
-//! - S87: `TODO(afit)` → `NOTE(async-dyn)`, FHE shader fixes, `gpu_helpers` refactor, unsafe audit
+//! - S87: `TODO(afit)` → `NOTE(async-dyn)` (done), FHE shader fixes, `gpu_helpers` refactor, unsafe audit
 //! - S88: Cross-spring absorption — `anderson_4d`, `wegner_block_4d`, `SeasonalGpuParams::new()`,
 //!   `LbfgsGpu`, new hydrology tolerances (`HYDRO_ET0`, `HYDRO_SOIL_MOISTURE`, etc.)
 //! - **S89: `BarraCuda` extraction** — 956 Rust files, 767 WGSL shaders extracted from `ToadStool`

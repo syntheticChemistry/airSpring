@@ -23,7 +23,9 @@
 
 use airspring_barracuda::eco::water_balance::{self as wb, DailyInput, WaterBalanceState};
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation::{self, json_f64, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{
+    self, json_f64, json_f64_required, parse_benchmark_json, ValidationHarness,
+};
 
 /// Benchmark JSON embedded at compile time for reproducibility.
 const BENCHMARK_JSON: &str =
@@ -40,14 +42,13 @@ struct SoilParams {
 fn parse_soil_params(benchmark: &serde_json::Value, scenario: &str) -> SoilParams {
     let base = ["validation_soil_parameters", scenario];
     SoilParams {
-        theta_fc: json_f64(benchmark, &[base[0], base[1], "theta_fc"])
-            .unwrap_or_else(|| panic!("benchmark must have validation_soil_parameters.{scenario}.theta_fc")),
-        theta_wp: json_f64(benchmark, &[base[0], base[1], "theta_wp"])
-            .unwrap_or_else(|| panic!("benchmark must have validation_soil_parameters.{scenario}.theta_wp")),
-        root_depth_mm: json_f64(benchmark, &[base[0], base[1], "root_depth_mm"])
-            .unwrap_or_else(|| panic!("benchmark must have validation_soil_parameters.{scenario}.root_depth_mm")),
-        depletion_fraction_p: json_f64(benchmark, &[base[0], base[1], "depletion_fraction_p"])
-            .unwrap_or_else(|| panic!("benchmark must have validation_soil_parameters.{scenario}.depletion_fraction_p")),
+        theta_fc: json_f64_required(benchmark, &[base[0], base[1], "theta_fc"]),
+        theta_wp: json_f64_required(benchmark, &[base[0], base[1], "theta_wp"]),
+        root_depth_mm: json_f64_required(benchmark, &[base[0], base[1], "root_depth_mm"]),
+        depletion_fraction_p: json_f64_required(
+            benchmark,
+            &[base[0], base[1], "depletion_fraction_p"],
+        ),
     }
 }
 

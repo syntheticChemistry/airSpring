@@ -198,3 +198,26 @@ Run `cargo run --release --bin bench_cpu_vs_python` for current numbers.
 | TS-004 | `FusedMapReduceF64` buffer conflict for N≥1024 | **RESOLVED** (S54 — H-013) |
 
 See `barracuda/src/gpu/evolution_gaps.rs` for the full 26-gap roadmap (v0.5.2).
+
+---
+
+## Kokkos Validation Gap
+
+**Status**: Not started. No Kokkos baselines or benchmarks exist in this repository.
+
+The wateringHole evolution path defines three validation tiers:
+
+| Tier | Role | Status in airSpring |
+|------|------|---------------------|
+| **Tier 0** (Python) | Correctness reference | **Complete** — 53+ benchmark JSONs, 1237/1237 PASS |
+| **Tier 1** (Kokkos/Cabana) | Performance reference (external) | **Not started** — no Kokkos benchmarks |
+| **Tier 2** (BarraCuda) | Sovereign implementation | **Complete** — 852 lib + 62 forge tests, 86 validation binaries |
+
+GPU validation is currently Rust CPU vs Rust GPU (`validate_cpu_gpu_parity`). Kokkos
+would provide an independent external GPU reference for cross-validation of WGSL shader
+correctness on real hardware. This is an optional validation tier — not a blocker for
+production use, but valuable for confidence in shader promotion.
+
+**Candidate entry point**: ET₀ batch (`BatchedElementwiseF64::fao56_et0_batch()`) is the
+simplest GPU path with well-documented expected values and would serve as a Kokkos/LAMMPS
+comparison target analogous to hotSpring's Sarkas MD reproduction.

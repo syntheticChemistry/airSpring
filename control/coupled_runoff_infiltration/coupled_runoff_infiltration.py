@@ -218,8 +218,15 @@ def main():
     print(f"\nResult: {n_pass}/{n_total} checks passed")
 
     # Build benchmark JSON
+    import subprocess
+    repo_root = Path(__file__).resolve().parents[2]
+    commit = subprocess.run(
+        ["git", "rev-parse", "--short", "HEAD"],
+        capture_output=True, text=True, cwd=repo_root,
+    ).stdout.strip() or "unknown"
+
     benchmark = {
-        "provenance": {
+        "_provenance": {
             "paper": "USDA-SCS (1972) NEH-4; Green WH, Ampt GA (1911) J Agr Sci 4(1):1-24.",
             "supplementary": [
                 "Rawls WJ et al. (1983) J Hydraul Eng 109(1):62-70.",
@@ -228,7 +235,7 @@ def main():
             "data_source": "Published equations and soil parameters (open literature)",
             "experiment": "052",
             "baseline_script": "control/coupled_runoff_infiltration/coupled_runoff_infiltration.py",
-            "baseline_commit": "pending",
+            "baseline_commit": commit,
             "baseline_command": "python control/coupled_runoff_infiltration/coupled_runoff_infiltration.py",
             "baseline_date": "2026-02-28",
             "baseline_result": f"{n_pass}/{n_total} PASS"

@@ -242,7 +242,7 @@ def main():
 
     print(f"  Processing {len(csvs)} station files from {data_dir}")
 
-    benchmark = {"stations": {}, "provenance": {"script": __file__, "date": "2026-02-26"}}
+    benchmark = {"stations": {}, "_provenance": {"script": __file__, "date": "2026-02-26"}}
 
     for csv_path in csvs:
         station_id = csv_path.stem.split("_")[0]

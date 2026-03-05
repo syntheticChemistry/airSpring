@@ -20,7 +20,12 @@ pub const INTERNAL_ERROR: i32 = -32603;
 
 static REQUEST_ID: AtomicU64 = AtomicU64::new(0);
 
-const SOCKET_TIMEOUT_SECS: u64 = 5;
+fn socket_timeout() -> Duration {
+    std::env::var("BIOMEOS_RPC_TIMEOUT_SECS")
+        .ok()
+        .and_then(|v| v.parse::<u64>().ok())
+        .map_or(Duration::from_secs(5), Duration::from_secs)
+}
 
 /// Constructs a JSON-RPC 2.0 success response.
 ///
@@ -90,7 +95,8 @@ pub fn request(method: &str, params: &serde_json::Value) -> serde_json::Value {
 
 /// Sends a JSON-RPC request over a Unix socket and reads the response.
 ///
-/// Uses newline-delimited framing and 5-second read/write timeouts.
+/// Uses newline-delimited framing with configurable timeouts
+/// (`BIOMEOS_RPC_TIMEOUT_SECS`, default 5s).
 /// Returns the full JSON-RPC response (including `result` or `error`).
 ///
 /// # Errors
@@ -121,12 +127,9 @@ pub fn send(
     params: &serde_json::Value,
 ) -> Option<serde_json::Value> {
     let mut stream = UnixStream::connect(socket_path).ok()?;
-    stream
-        .set_read_timeout(Some(Duration::from_secs(SOCKET_TIMEOUT_SECS)))
-        .ok()?;
-    stream
-        .set_write_timeout(Some(Duration::from_secs(SOCKET_TIMEOUT_SECS)))
-        .ok()?;
+    let timeout = Some(socket_timeout());
+    stream.set_read_timeout(timeout).ok()?;
+    stream.set_write_timeout(timeout).ok()?;
 
     let req = request(method, params);
     let mut payload = serde_json::to_vec(&req).ok()?;

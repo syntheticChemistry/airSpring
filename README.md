@@ -1,7 +1,7 @@
 # airSpring — Ecological & Agricultural Sciences
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
-**Date**: March 4, 2026
+**Date**: March 5, 2026
 **Version**: 0.6.9
 **License**: AGPL-3.0-or-later
 
@@ -19,7 +19,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,237/1,237 PASS** | 57 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **846 lib + 1498 atlas** | 86 binaries + 146/146 + 32/32 provenance cross-spring benchmarks |
+| Phase 1: Rust validation | **852 lib + 1498 atlas** | 86 binaries + 146/146 + 32/32 provenance cross-spring benchmarks |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (34/34 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -45,6 +45,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | Check | Status |
 |-------|--------|
 | `cargo test --lib` (barracuda) | **852 passed**, 0 failures |
+| `cargo test --tests` (integration) | **33 passed** (13 GPU pipeline + 20 stats) |
 | `cargo test --lib` (metalForge) | **62 passed**, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **95.66% line coverage** |
 | `cargo clippy (pedantic)` | **0 warnings** (pedantic, both crates) |
@@ -65,7 +66,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | GPU #2 | NVIDIA TITAN V (GV100, NVK/Mesa, f64) | **Live** — 24/24 PASS, `BARRACUDA_GPU_ADAPTER=titan` |
 | NPU | BrainChip AKD1000 (`/dev/akida0`) | **Live** — 95/95 NPU checks |
 | RAM | 64 GB DDR5-4800 | |
-| OS | Pop!_OS 22.04 (kernel 6.17.4) | |
+| OS | Pop!_OS 22.04 (kernel 6.17.9) | |
 
 ## Evolution Architecture: Write → Absorb → Lean
 
@@ -217,7 +218,7 @@ airSpring/
 │   ├── vg_inverse/              # Van Genuchten inverse fitting (84/84)
 │   ├── season_water_budget/     # Full-season irrigation WB (34/34)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (846 lib tests, 86 binaries)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (852 lib tests, 86 binaries)
 │   ├── src/
 │   │   ├── biomeos.rs           # biomeOS socket resolution + primal discovery (shared)
 │   │   ├── eco/                 # Domain modules (19 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine)
@@ -239,7 +240,7 @@ airSpring/
 │   └── baseCamp/                # Per-faculty research briefings + baseCamp extensions
 ├── experiments/                 # Experiment protocols and results (77 experiments)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
-│   └── handoffs/                # Versioned + roadmap (V052 current)
+│   └── handoffs/                # Versioned handoffs (V069 current)
 ├── graphs/                      # biomeOS deployment graphs (TOML)
 ├── CHANGELOG.md                 # Keep-a-Changelog versioned history
 ├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
@@ -271,7 +272,7 @@ airSpring/
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance (S87) |
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (77 experiments) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda/NUCLEUS handoffs (V068 current) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V069 current) |
 
 ## License
 
@@ -279,17 +280,18 @@ AGPL-3.0-or-later
 
 ---
 
-*March 4, 2026 — v0.6.9. barraCuda 0.3.1 standalone rewire. 77 experiments, 1237/1237 Python, 852 lib + 62 forge tests,
+*March 5, 2026 — v0.6.9. barraCuda 0.3.1 standalone rewire. 78 experiments, 1237/1237 Python, 852 lib + 33 integration + 62 forge tests,
 86 binaries (81 barracuda + 5 forge), 146/146 cross-spring evolution benchmarks + 32/32 Exp 077 provenance (S87 sync),
 68/68 cross-spring rewire (BrentGpu VG inverse + RichardsGpu Picard, 5/5 springs),
 13,000× Rust-vs-Python atlas-scale speedup, 15,300 station-days, 1498/1498 atlas checks.
 NUCLEUS primal (30 capabilities), ecology domain in biomeOS registry.
 ToadStool S93 synced: 845 WGSL shaders, ops 0-13, GPU uncertainty stack (jackknife/bootstrap/diversity),
 BrentGpu, RichardsGpu, StatefulPipeline, BatchedStatefulF64, nautilus, L-BFGS.
-v0.6.8: 6 local WGSL compute shaders (local\_elementwise.wgsl) — SCS-CN, Stewart yield, Makkink, Turc, Hamon, Blaney-Criddle.
-gpu::local\_dispatch (LocalElementwise wgpu pipeline), 27 metalForge workloads, NUCLEUS mesh routing (Exp 076: 60/60).
-Deep debt audit round 2: sovereignty hardening (domain\_use rename, label cleanup), dependency gating (ureq/testutil
-feature-flagged), fallible constructors (try\_new for data providers), large-file refactoring (3 files split into modules),
-zero-copy CSV, explicit error handling. Zero unsafe, zero clippy pedantic+nursery warnings, zero mocks in production.
-cargo-deny clean, all SPDX AGPL-3.0-or-later. Pure Rust + BarraCuda.
-v0.6.9: f64 canonical universal precision — local_elementwise_f64.wgsl, compile_shader_universal, cross-spring evolution benchmark (Exp 078).*
+6 f64-canonical local WGSL compute ops (local\_elementwise\_f64.wgsl) — SCS-CN, Stewart yield, Makkink, Turc, Hamon, Blaney-Criddle —
+compiled via compile\_shader\_universal() for per-silicon precision (F64 native on Titan V, F32 downcast on consumer GPU).
+gpu::local\_dispatch (LocalElementwise wgpu pipeline, SubmitParams struct), 27 metalForge workloads, NUCLEUS mesh routing (Exp 076: 60/60).
+Deep debt audit (3 rounds): provenance normalization (47 benchmark JSONs → \_provenance), json\_f64\_required structured failure,
+SubmitParams refactor (gpu/local\_dispatch.rs), env-configurable RPC timeout (BIOMEOS\_RPC\_TIMEOUT\_SECS),
+bench\_cpu\_vs\_python multi-file refactor, BarraCuda variance/std\_dev primitive wiring, streaming JSON I/O.
+All #[allow] annotations with reason strings. Zero unsafe, zero clippy pedantic+nursery warnings, zero mocks in production.
+cargo-deny clean, all SPDX AGPL-3.0-or-later. Pure Rust + BarraCuda.*

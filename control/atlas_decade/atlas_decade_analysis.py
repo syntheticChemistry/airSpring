@@ -206,7 +206,7 @@ def main():
 
     benchmark = {
         "experiment": "Exp 059: Atlas 80yr Decade Analysis",
-        "provenance": "Open-Meteo ERA5 + FAO-56 PM ET₀",
+        "_provenance": "Open-Meteo ERA5 + FAO-56 PM ET₀",
         "season": "May 1 – Sep 30 (DOY 121–273)",
         "n_stations": len(results),
         "stations": results,

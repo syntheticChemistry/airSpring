@@ -373,7 +373,7 @@ def generate_benchmark():
         "climate_gradient": {"cases": gradient_cases},
         "monotonicity_tests": {"increasing_rn": mono_rn},
         "temperature_sensitivity": {"increasing_temp": temp_sens},
-        "provenance": {
+        "_provenance": {
             "method": "Priestley-Taylor (1972) radiation-based ET₀ vs FAO-56 PM",
             "digitized_by": "Computed from Priestley & Taylor (1972) Eq. 1, "
                             "Allen et al. (1998) FAO-56 intermediates",
@@ -381,7 +381,7 @@ def generate_benchmark():
             "validated_by": "priestley_taylor_et0.py (self-consistent generation)",
             "baseline_script": "control/priestley_taylor/priestley_taylor_et0.py",
             "baseline_command": "python control/priestley_taylor/priestley_taylor_et0.py",
-            "baseline_commit": "(current HEAD)",
+            "baseline_commit": "87df5f6",
             "python_version": "3.10.12",
             "_tolerance_justification": (
                 "Analytical tests: 0.001 mm/day (floating-point rounding). "

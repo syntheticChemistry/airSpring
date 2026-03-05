@@ -1,6 +1,6 @@
 {
   "experiment": "Exp 061: Cross-Spring Shannon H' Diversity Gradient",
-  "provenance": "Synthetic 16S OTU tables along soil moisture gradient (validated models)",
+  "_provenance": "Synthetic 16S OTU tables along soil moisture gradient (validated models)",
   "note": "When NestGate NCBI provider is wired, replace with real SRA amplicon data",
   "source_bioproject": "PRJNA481146 (Ein Harod tillage study)",
   "moisture_gradient": {

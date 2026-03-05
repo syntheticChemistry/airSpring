@@ -122,7 +122,7 @@ path = "src/bin/validate_regional_et0.rs"
 
 [[bin]]
 name = "bench_cpu_vs_python"
-path = "src/bin/bench_cpu_vs_python.rs"
+path = "src/bin/bench_cpu_vs_python/main.rs"
 
 [[bin]]
 name = "bench_airspring_gpu"
