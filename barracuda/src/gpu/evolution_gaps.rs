@@ -40,9 +40,9 @@
 //! | `eco::yield_response` | `gpu::yield_response` | `local_elementwise_f64.wgsl` (op=1) | Stewart yield | A (f64 canonical, universal) |
 //! | `eco::evapotranspiration` (Makkink/Turc/Hamon/BC) | `gpu::simple_et0` | `local_elementwise_f64.wgsl` (ops 2-5) | Simple ET₀ batch | A (f64 canonical, universal) |
 //!
-//! # Current Inventory (March 3, 2026 — v0.6.9, `BarraCuda` 0.3.1 standalone)
+//! # Current Inventory (March 5, 2026 — v0.7.0, `barraCuda` 0.3.3 standalone, wgpu 28)
 //!
-//! ## v0.6.9: Local GPU Compute Evolution + NUCLEUS Full-Pipeline
+//! ## v0.7.0: barraCuda 0.3.3 Rewire + Fused Welford/Pearson + 3/6 Ops Absorbed
 //!
 //! | Module | Status | Notes |
 //! |--------|--------|------|

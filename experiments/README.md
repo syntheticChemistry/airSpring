@@ -88,26 +88,24 @@
 | 077 | Cross-Spring Provenance & CPU↔GPU Benchmark | GPU + Cross-Spring | **Complete** | Rust (barracuda) | CPU vs GPU timing for ET₀/WB/Hargreaves/Kc/VG/GDD/pedotransfer, shader provenance tracking (5 springs), precision lineage validation (hotSpring→all), seasonal pipeline parity, uncertainty (jackknife/bootstrap/diversity) | 32 |
 | 078 | Cross-Spring Evolution — Universal Precision | GPU + Cross-Spring | **Complete** | Rust (barracuda) | f64 canonical → compile_shader_universal (6 ops: SCS-CN, Stewart, Makkink, Turc, Hamon, Blaney-Criddle), cross-spring provenance (hotSpring precision, wetSpring bio, groundSpring uncertainty, neuralSpring architecture), f64 compute shader reliability discovery (NVK/Mesa) | — |
 
-**Grand Total**: 1237 Python + **852 lib + 1133 integration + 62 forge tests** + 1498/1498 atlas + 33/33 cross-validation + 25 Tier A + 6 GPU-universal (f64 canonical) + 4 GPU orchestrators (infiltration, runoff, yield_response, simple_et0) + `BrentGpu` + `RichardsGpu` + 3 pipeline GPU orchestrators + seasonal pipeline GPU Stages 1-3 + Titan V GPU live (24/24) + AKD1000 NPU live (95/95) + metalForge (5 substrates, 27 workloads, 66/66 cross-system) + GPU math portability (46/46) + GPU streaming multi-field (57/57) + CPU parity benchmark (34/34) + pure GPU end-to-end (46/46) + cross-spring rewire (68/68, 5 springs) + paper chain validation (79/79, 28 domains) + local GPU parity (Exp 075, 6 ops) + NUCLEUS routing (Exp 076, 60/60) + NCBI 16S coupling (14+29) + coupled runoff-infiltration (292/292) + VG inverse (84/84) + full-season WB audit (34/34) + Exp 058 Climate Scenario (46/46) + NUCLEUS primal (29/29 + 28/28) + atlas decade (102/102) + NASS real (99/99) + NCBI diversity (63/63) + Paper 12 immunological Anderson (Exp 066-069) + 86 binaries + 146/146 cross-spring evolution benchmarks + 32/32 Exp 077 cross-spring provenance (5 Springs) + ToadStool S87 synced + 13,000× Rust-vs-Python speedup
+**Grand Total**: 1237 Python + **827 lib + 186 forge tests** + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 25 Tier A + 6 GPU-local (3/6 absorbed upstream) + fused Welford + fused Pearson wired + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (30 capabilities) + 86 binaries + barraCuda 0.3.3 (wgpu 28, DF64 precision tier) + 20.6× CPU speedup (24/24 parity) + 78 experiments (v0.7.0) + 34 ShaderProvenance entries + 27 GPU tests fail upstream (wgpu 28 NVK/Titan V)
 
 ---
 
-## Test Breakdown (v0.6.8)
+## Test Breakdown (v0.7.0)
 
 | Category | Tests | Source |
 |----------|:-----:|--------|
-| Barracuda lib (unit + doc) | 846 | `cargo test --lib` (incl. nautilus, rpc, biomeos, cytokine, tissue, property tests, all GPU orchestrators, BrentGpu, RichardsGpu, streaming, Anderson, diversity, infiltration, runoff, yield_response, simple_et0, local_dispatch) |
+| Barracuda lib (unit + doc) | 827 | `cargo test --lib` (25 GPU fail upstream wgpu 28 NVK) |
 | Barracuda validation binaries | 86 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
-| Forge | 62 | `metalForge/forge/` (substrate, dispatch, probe, workloads, cross-system routing) |
+| Forge | 186 | `metalForge/forge/` (substrate, dispatch, probe, workloads, cross-system routing) |
 | Forge binaries | 5 | `validate_dispatch`, `validate_live_hardware`, `validate_dispatch_routing`, `validate_mixed_pipeline`, `validate_nucleus_routing` |
-| **Total project tests** | **846 lib + 62 forge** | |
-| Line coverage | 95.66% | `cargo llvm-cov --lib --fail-under-lines 90` |
-| Atlas stream (real data) | 73 | `validate_atlas_stream` (12 stations, 4800 crop-year results) |
-| Atlas checks | 1393 | `validate_atlas` (100 stations × 13 checks each) |
-| GPU live checks | 24 | `validate_gpu_live` (Titan V WGSL dispatch) |
-| Cross-system routing | 29 | `validate_dispatch` (18 workloads × dispatch checks) |
-| Hardware probe checks | 17 | `validate_live_hardware` (5 substrates) |
-| CPU vs Python parity | 21/21 | `bench_cpu_vs_python` (14.5× geometric mean speedup, incl. seasonal_pipeline) |
+| **Total project tests** | **827 lib + 186 forge** | |
+| Validation checks | 381/381 | 10 validation binaries |
+| Cross-spring evolution | 146/146 | `bench_cross_spring` (34 provenance entries, 6 origin Springs) |
+| Cross-validation | 33/33 | Python↔Rust match (tol=1e-5) |
+| CPU vs Python parity | 24/24 | `bench_cpu_vs_python` (20.6× geometric mean speedup) |
+| GPU upstream failures | 27 | wgpu 28 + NVK/Titan V: `VarianceF64`, `CorrelationF64`, `BatchedElementwiseF64` return zeros |
 
 ---
 

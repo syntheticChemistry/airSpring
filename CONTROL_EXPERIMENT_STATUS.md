@@ -1049,8 +1049,8 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026 — Updated: March 4, 2026 (v0.6.9)*
-*77 experiments, 1237/1237 Python, 846 lib + 62 forge tests, 86 binaries, 75/75 cross-validation, 100 Michigan stations, 21/21 CPU parity, 78/78 GPU pipeline, 26/26 GPU rewire, 104/104 mixed-hardware pipeline.*
+*Initialized: February 16, 2026 — Updated: March 5, 2026 (v0.7.0)*
+*78 experiments, 1237/1237 Python, 827 lib + 186 forge tests, 86 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 20.6× CPU speedup (24/24 parity), barraCuda 0.3.3 (wgpu 28), fused Welford + Pearson wired.*
 *8 ET₀ methods + SCS-CN runoff + Green-Ampt infiltration + coupled runoff-infiltration + VG inverse + full-season WB + Exp 058 Climate Scenario (46/46).*
 *NUCLEUS primal (16 capabilities, 28/28 cross-primal pipeline). Atlas decade 80yr (102/102). NASS real (99/99). NCBI diversity (63/63).*
 *25 Tier A + 6 GPU-local modules. Ops 5-8 GPU-first (ToadStool S87). GPU stats (neuralSpring S69).*

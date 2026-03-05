@@ -1,7 +1,7 @@
 # airSpring Specifications
 
-**Last Updated**: March 2, 2026
-**Status**: Phase 0–4 complete — 1237/1237 Python + 846 lib + 61 forge tests + 86 binaries (81 barracuda + 5 forge) + 146/146 + 32/32 cross-spring (S87) + 68/68 cross-spring rewire (BrentGpu + RichardsGpu) + 25 Tier A + 6 GPU-local modules + seasonal pipeline GPU Stages 1-3 + AKD1000 NPU live + 13,000× CPU speedup + metalForge 27 workloads 66/66 + NUCLEUS primal (30 capabilities) + 77 experiments (v0.6.9)
+**Last Updated**: March 5, 2026
+**Status**: Phase 0–4 complete — 1237/1237 Python + 827 lib + 186 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 86 binaries + 25 Tier A + 6 GPU-local + fused Welford + fused Pearson + barraCuda 0.3.3 (wgpu 28) + 20.6× CPU speedup (24/24 parity) + metalForge 66/66 + NUCLEUS primal (30 capabilities) + 78 experiments (v0.7.0)
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling, Anderson coupling
 
 ---
@@ -12,8 +12,8 @@
 |--------|-------|
 | Phase 0 (Python) | 1237/1237 PASS — 57 papers reproduced (FAO-56, soil, IoT, WB, dual Kc, cover crops, regional ET₀, Richards, biochar, 60yr WB, yield, CW2D, scheduling, lysimeter, sensitivity, Priestley-Taylor, 3-method intercomparison, Thornthwaite, GDD, pedotransfer, AmeriFlux, Hargreaves, diversity, multi-crop, NPU eco, forecast, SCAN moisture, NASS yield, Anderson coupling, Blaney-Criddle, SCS-CN, Green-Ampt, coupled runoff-infiltration, VG inverse, full-season WB) |
 | Phase 0+ (Real data) | 15,300 station-days, R²=0.967 across 100 Michigan stations |
-| Phase 1 (Rust) | 846 lib + 61 forge tests — 86 binaries (81 barracuda + 5 forge) |
-| Phase 1.5 (CPU benchmark) | Rust 13,000× faster than Python (atlas-scale), 34/34 parity |
+| Phase 1 (Rust) | 827 lib + 186 forge tests — 86 binaries (81 barracuda + 5 forge) |
+| Phase 1.5 (CPU benchmark) | 20.6× geometric mean speedup (24/24 parity), 13,000× atlas-scale |
 | Phase 2 (Cross-validation) | 75/75 Python↔Rust match within 1e-5; 690 crop-station yield pairs within 0.01 |
 | Phase 2.5 (Tier B→A GPU) | 4 Tier B→A promotions (ops 5-8), `BatchedStatefulF64`, `BatchedNelderMeadGpu` |
 | Phase 2.6 (Seasonal pipeline) | GPU Stages 1-3 (ET₀ + Kc + WB), multi-field `gpu_step()`, streaming |
@@ -26,8 +26,8 @@
 | Phase 3.9 (NUCLEUS primal) | 30 capabilities, ecology domain in biomeOS registry |
 | Phase 4.0 (Cross-primal) | 28/28 PASS — capability.call routing, cross-primal forwarding |
 | Faculty | Dong (BAE, MSU — new lab 2026) |
-| Handoff | V052 in `wateringHole/handoffs/` |
-| ToadStool | S87 HEAD (`2dc26792`) |
+| Handoff | V070 in `wateringHole/handoffs/` |
+| ToadStool | S94b — barraCuda v0.3.3 standalone (wgpu 28) |
 
 ---
 
@@ -106,7 +106,7 @@ Re-run `run_all_baselines.sh` at the respective commits to verify.
 `../whitePaper/STUDY.md` → `../CONTROL_EXPERIMENT_STATUS.md` → BARRACUDA_REQUIREMENTS.md
 
 **Cross-spring evolution** (15 min):
-CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/` (V052 active)
+CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/` (V070 active)
 
 ---
 

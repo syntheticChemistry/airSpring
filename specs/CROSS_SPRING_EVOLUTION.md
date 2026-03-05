@@ -1,6 +1,6 @@
 # Cross-Spring Shader Evolution — airSpring Provenance
 
-**Updated**: March 2, 2026 (v0.6.9, ToadStool S87 synced)
+**Updated**: March 5, 2026 (v0.7.0, barraCuda 0.3.3 / wgpu 28, ToadStool S94b synced)
 
 ## Summary
 
@@ -11,10 +11,10 @@ contributes domain-specific GPU primitives that benefit the entire ecosystem.
 airSpring uses **8 shared shader families** directly (ops 0-13 + uncertainty stack),
 contributed **3 critical fixes** (TS-001, TS-003, TS-004), had its **stats metrics
 absorbed upstream** (S64), and completed the Write→Absorb→Lean cycle with
-**metalForge fully absorbed** (S66). v0.6.9 adds **6 local WGSL compute shaders**
-(`local_elementwise.wgsl`) evolved locally for ToadStool to absorb.
+**metalForge fully absorbed** (S66). v0.7.0 adds **6 local WGSL compute shaders**
+(`local_elementwise_f64.wgsl`) evolved locally, 3/6 absorbed upstream (Makkink, Turc, Hamon).
 
-v0.6.9: **25 Tier A + 6 GPU-local** orchestrators, 846 lib tests,
+v0.7.0: **25 Tier A + 6 GPU-local** orchestrators, 827 lib + 186 forge tests,
 `gpu::local_dispatch::LocalElementwise` for wgpu direct compute (SCS-CN, Stewart,
 Makkink, Turc, Hamon, Blaney-Criddle). 27 metalForge workloads, NUCLEUS mesh
 routing (Exp 076: 60/60). S87: BrentGpu, RichardsGpu, StatefulPipeline.

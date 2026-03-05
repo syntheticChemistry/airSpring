@@ -152,7 +152,7 @@ BarraCuda (while still embedded in ToadStool) underwent massive evolution since 
 | `stats::hydrology::crop_coefficient` | `stats` | v0.5.2 | **WIRED** — `eco::crop::crop_coefficient_stage` delegates to upstream |
 | `stats::normal::norm_ppf` | `stats` | v0.4.4 | **WIRED** — `McEt0Result::parametric_ci()` |
 | `optimize::brent` | `optimize` | v0.4.4 | **WIRED** — `inverse_van_genuchten_h()` θ→h inversion |
-| `compile_shader_universal` | `shaders` | v0.6.9 | **WIRED** — local_elementwise_f64.wgsl (6 ops) |
+| `compile_shader_universal` | `shaders` | v0.7.0 | **WIRED** — local_elementwise_f64.wgsl (6 ops, 3/6 absorbed upstream) |
 | `ops::variance_f64_wgsl::VarianceF64` | `ops` | v0.7.0 | **WIRED** — `SeasonalReducer::mean_variance()` (fused Welford, 3 passes vs 4) |
 | `ops::correlation_f64_wgsl::CorrelationF64` | `ops` | v0.7.0 | **WIRED** — `pairwise_correlation_gpu()` (5-accumulator fused Pearson) |
 | `ops::variance_f64_wgsl::VarianceF64` (stats) | `ops` | v0.7.0 | **WIRED** — `fused_mean_variance_gpu()` in gpu/stats |
@@ -214,30 +214,6 @@ to BarraCuda's probe cache (similar to groundSpring V37's NVK discovery).
 New validation binary documenting cross-spring shader provenance:
 hotSpring (precision), wetSpring (bio), groundSpring (uncertainty),
 neuralSpring (architecture), airSpring (domain science).
-
----
-
-## Quality Gates
-
-| Check | Status |
-|-------|--------|
-| `cargo fmt --check` | **Clean** (both crates) |
-| `cargo clippy --all-targets -W pedantic` | **0 warnings** (both crates) |
-| `cargo doc --no-deps` | **Builds**, 0 warnings |
-| `cargo test --workspace` | **1133 integration + 852 lib** (lib + bin + doc + integration) |
-| `cargo llvm-cov --lib --summary-only` | **95.11% line** / **95.81% function** coverage |
-| barraCuda version | **0.3.1** standalone primal (`ecoPrimals/barraCuda`) |
-| `unsafe` code | **Zero** |
-| `unwrap()` in lib | **Zero** (all in `#[cfg(test)]` or validation-binary JSON helpers) |
-| Files > 1000 lines | **Zero** (max src: 872 `eco/evapotranspiration.rs` after Thornthwaite extraction) |
-| Validation binaries | **63 PASS** (barracuda validate_*) + 3 bench (35/35 benchmarks) + 5/5 PASS (forge) |
-| NUCLEUS pipeline | **28/28 PASS** (ecology domain, capability.call, cross-primal forwarding) |
-| GPU live (Titan V) | **24/24 PASS** (0.04% seasonal parity, `BARRACUDA_GPU_ADAPTER=titan`) |
-| metalForge live | **29/29 PASS** (5 substrates, 18 workloads route) |
-| Atlas stream (real data) | **73/73 PASS** (12 stations, 4800 crop-year results) |
-| GPU dispatch (P0 blocker) | **RESOLVED** — S66 explicit BGL (R-S66-041) |
-| try_gpu catch_unwind debt | **REMOVED** — S66+ resolved sovereign compiler regression |
-| Cross-validation | **75/75 MATCH** (tol=1e-5) |
 
 ---
 
@@ -374,7 +350,7 @@ Revalidation: 1132/1132 tests, 0 clippy warnings (pedantic), 0 fmt diffs, docs b
 
 ---
 
-## Dependency Evolution Analysis (v0.6.8)
+## Dependency Evolution Analysis (v0.7.0)
 
 ### Direct Dependencies
 

@@ -88,7 +88,7 @@ fn main() {
 
     println!("═══════════════════════════════════════════════════════════════");
     println!("  Exp 077: Cross-Spring Provenance & CPU↔GPU Benchmark");
-    println!("  airSpring v0.6.9 — BarraCuda S87 (2dc26792)");
+    println!("  airSpring v0.7.0 — barraCuda v0.3.3 (wgpu 28)");
     println!("═══════════════════════════════════════════════════════════════\n");
 
     let mut v = ValidationHarness::new("Exp 077 Cross-Spring Provenance");

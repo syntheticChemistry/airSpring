@@ -2,7 +2,7 @@
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 
-**Last updated**: 2026-03-04 (v0.6.9, ToadStool S93, f64 canonical universal precision)
+**Last updated**: 2026-03-05 (v0.7.0, barraCuda 0.3.3 / wgpu 28, fused Welford + Pearson, f64 canonical universal precision)
 **Sources**: `EVOLUTION_READINESS.md`, `gpu/evolution_gaps.rs`, `BARRACUDA_REQUIREMENTS.md`
 
 ---

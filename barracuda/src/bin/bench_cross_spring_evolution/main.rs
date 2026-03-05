@@ -33,7 +33,7 @@ fn main() {
         .init();
 
     println!("═══════════════════════════════════════════════════════════════");
-    println!("  Cross-Spring Evolution Benchmark (v0.6.9)");
+    println!("  Cross-Spring Evolution Benchmark (v0.7.0)");
     println!("  BarraCuda S87 — Universal Precision, Pure Math Shaders");
     println!("═══════════════════════════════════════════════════════════════\n");
 

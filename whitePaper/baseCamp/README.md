@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
-**Updated**: March 4, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.6.9)
-**Status**: 77 experiments, 1237/1237 Python + 852 Rust lib + 1133 integration + 62 forge tests + 80 binaries + 146/146 cross-spring evolution (S87) + 32/32 Exp 077 provenance + 68/68 cross-spring rewire (Exp 073, BrentGpu + RichardsGpu) + 57/57 GPU streaming multi-field (Exp 070) + 34/34 CPU parity benchmark (Exp 071, 13,000× Python) + 46/46 pure GPU end-to-end (Exp 072, 19.7× dispatch reduction) + 66/66 metalForge cross-system (7-stage GPU→NPU→CPU) + 25 Tier A + 6 GPU-universal modules (f64 canonical via compile_shader_universal) + GPU Stages 1-3 WB via `gpu_step` + Paper 12 immunological Anderson (Exp 066-069) + Exp 075+078 universal precision + cross-spring evolution benchmark + Exp 076 NUCLEUS routing (60/60) + Exp 077 cross-spring provenance & CPU↔GPU benchmark + deep debt audit (sovereignty, dependency gating, fallible constructors, zero clippy pedantic+nursery)
+**Updated**: March 5, 2026
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.7.0)
+**Status**: 78 experiments, 1237/1237 Python + 827 lib + 186 forge tests + 86 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 20.6× CPU speedup (24/24 parity) + barraCuda 0.3.3 (wgpu 28, DF64 precision tier) + 3/6 local ops absorbed upstream + fused Welford + fused Pearson wired + 34 ShaderProvenance entries + 27 GPU tests fail upstream (wgpu 28 NVK) + 66/66 metalForge cross-system + NUCLEUS primal (30 capabilities) + zero clippy pedantic+nursery
 
 ---
 

@@ -1,6 +1,6 @@
 # airSpring Contributions to Paper 12: Immunological Anderson
 
-**Updated**: March 2, 2026 (v0.6.9)
+**Updated**: March 5, 2026 (v0.7.0)
 **Parent**: `gen3/baseCamp/12_immunological_anderson.md`
 **Status**: All 4 experiments validated (Exp 066-069) — tissue diversity, CytokineBrain, barrier state, cross-species
 
@@ -73,7 +73,7 @@ diffusion follows analogous physics.
 
 ---
 
-## Infrastructure (v0.6.9)
+## Infrastructure (v0.7.0)
 
 | Module | Paper 12 Application | Status |
 |--------|---------------------|--------|

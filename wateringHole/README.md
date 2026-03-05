@@ -8,7 +8,7 @@
 | Version | File | Date | Scope |
 |---------|------|------|-------|
 | **V0.7.0** | [AIRSPRING_V070_BARRACUDA_033_REWIRE_HANDOFF_MAR05_2026.md](handoffs/AIRSPRING_V070_BARRACUDA_033_REWIRE_HANDOFF_MAR05_2026.md) | 2026-03-05 | **current** — barraCuda 0.3.3 rewire (wgpu 28), 3/6 ops absorbed upstream, Df64 precision, upstream GPU issue documented |
-| — | [AIRSPRING_MULTI_PRIMAL_INTEGRATION_ROADMAP_MAR02_2026.md](handoffs/AIRSPRING_MULTI_PRIMAL_INTEGRATION_ROADMAP_MAR02_2026.md) | 2026-03-02 | Multi-primal integration: NUCLEUS, NestGate, Songbird, biomeOS |
+| **V0.7.0** | [AIRSPRING_V070_UPSTREAM_ABSORPTION_HANDOFF_MAR05_2026.md](handoffs/AIRSPRING_V070_UPSTREAM_ABSORPTION_HANDOFF_MAR05_2026.md) | 2026-03-05 | **current** — upstream handoff for barraCuda/ToadStool team: 3 ops ready for absorption, NVK probe discovery, wgpu 28 GPU-returns-zero, 34 provenance entries |
 
 ## Cross-Spring Documents
 
@@ -28,6 +28,7 @@
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_MULTI_PRIMAL_INTEGRATION_ROADMAP_MAR02_2026.md` | v0.6.1/v0.6.8: Multi-primal integration planning (superseded by V070 state) |
 | `handoffs/archive/AIRSPRING_V069_BARRACUDA_ABSORPTION_HANDOFF_MAR05_2026.md` | v0.6.9: Superseded by V070 barraCuda 0.3.3 rewire |
 | `handoffs/archive/AIRSPRING_V068_DEEP_DEBT_TOADSTOOL_HANDOFF_MAR04_2026.md` | v0.6.8: Superseded by V069 absorption handoff |
 | `handoffs/archive/AIRSPRING_V053_TOADSTOOL_ABSORPTION_GUIDE_MAR02_2026.md` | v0.6.9: Superseded by V068 deep debt handoff (pre-round-2 state) |

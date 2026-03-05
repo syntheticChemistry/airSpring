@@ -13,7 +13,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → biomeOS (NUCLEUS atomics, deployment graphs) → Penny Irrigation
 ```
 
-## Current Status (v0.6.9)
+## Current Status (v0.7.0)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
@@ -132,10 +132,10 @@ See `specs/CROSS_SPRING_EVOLUTION.md`.
 | `gpu::bootstrap` | `BootstrapMeanGpu` | dedicated | **Integrated** (S79) |
 | `gpu::diversity` | `DiversityFusionGpu` | dedicated | **Integrated** (S79) |
 | `gpu::stats` | `linear_regression_f64` + `matrix_correlation_f64` | dedicated | **Integrated** |
-| `gpu::runoff` | `local_elementwise_f64.wgsl` (op=0) | f64 canonical | **GPU-universal** (v0.6.9) |
-| `gpu::yield_response` | `local_elementwise_f64.wgsl` (op=1) | f64 canonical | **GPU-universal** (v0.6.9) |
-| `gpu::simple_et0` | `local_elementwise_f64.wgsl` (ops 2-5) | f64 canonical | **GPU-universal** (v0.6.9) |
-| `gpu::local_dispatch` | `LocalElementwise` (compile_shader_universal) | 6 ops f64→f32 | **EVOLVED** (v0.6.9) |
+| `gpu::runoff` | `local_elementwise_f64.wgsl` (op=0) | f64 canonical | **GPU-universal** (v0.7.0) |
+| `gpu::yield_response` | `local_elementwise_f64.wgsl` (op=1) | f64 canonical | **GPU-universal** (v0.7.0) |
+| `gpu::simple_et0` | `local_elementwise_f64.wgsl` (ops 2-5) | f64 canonical | **GPU-universal** (v0.7.0, 3/6 absorbed upstream) |
+| `gpu::local_dispatch` | `LocalElementwise` (compile_shader_universal) | 6 ops f64→f32 | **EVOLVED** (v0.7.0) |
 | `eco::correction::fit_ridge` | `linalg::ridge::ridge_regression` | CPU | **Integrated** |
 | `eco::richards::inverse_vg_h` | `optimize::brent` | CPU | **Integrated** |
 | `eco::diversity` | `stats::diversity` | CPU | **Leaning** |
@@ -228,7 +228,7 @@ airSpring/
 │   │   ├── npu.rs               # BrainChip AKD1000 NPU (feature-gated)
 │   │   └── bin/                 # validate_*, bench_*, airspring_primal (84 declared)
 │   ├── tests/                   # Integration + property tests (9 files + common/)
-│   └── Cargo.toml               # v0.6.9
+│   └── Cargo.toml               # v0.7.0
 ├── metalForge/                  # Mixed hardware dispatch (CPU+GPU+NPU)
 │   ├── deploy/                  # biomeOS deployment graphs (airspring_deploy.toml)
 │   └── forge/                   # airspring-forge (61 tests, 5 binaries, live hardware probe)
