@@ -119,3 +119,26 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 | **A-local** | 6 | GPU-local f32 WGSL → ToadStool f64 absorption |
 | **B** | 2 | Pipeline/streaming GPU evolution |
 | **C** | 2 | Needs new shaders or architectural decision |
+
+---
+
+## Sovereign Compute Evolution Roadmap
+
+The ecoPrimals ecosystem is evolving toward a fully sovereign Rust GPU stack,
+eliminating C dependencies from the shader compilation path:
+
+| Phase | Component | Status | What It Does |
+|-------|-----------|--------|--------------|
+| 1 | **barraCuda DF64** | Complete | Double-float f32-pair workaround for f64 on consumer GPUs |
+| 2 | **coralNAK** | In Progress (183 tests) | Mesa NAK shader compiler fork — fix f64 transcendental emission |
+| 3 | coralNAK SPIR-V frontend | Planned | naga SPIR-V → IR pipeline |
+| 4 | coralNAK f64 lowering | Planned | DFMA-based transcendentals for native f64 |
+| 5 | **coralDriver** | Planned | Userspace GPU driver (pure Rust) |
+| 6 | **coralGpu** | Planned | Unified Rust GPU abstraction |
+
+**coralNAK** (`ecoPrimals/coralNAK/`): Rust NVIDIA shader compiler forked from Mesa's NAK.
+Turns SPIR-V/WGSL input into native GPU binaries (SM70+). 16-pass compilation pipeline.
+Once complete, replaces naga + wgpu's shader path with sovereign Rust compilation that
+correctly emits f64 transcendentals (fixing the root cause that DF64 works around).
+
+Pipeline flow: `WGSL → naga → SPIR-V → coralNAK (optimize, legalize, encode) → Native GPU`

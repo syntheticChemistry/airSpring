@@ -11,6 +11,18 @@
 //!
 //! "Math is universal, precision is silicon" — `BarraCuda` S67.
 //!
+//! # Future: `TensorContext` and `ComputeDispatch::df64()`
+//!
+//! barraCuda HEAD (post-0.3.3) provides `TensorContext` with pooled buffers,
+//! pipeline cache, and batched submits. The current per-dispatch buffer
+//! allocation in `LocalElementwise` could be replaced with
+//! `TensorContext::acquire_pooled_output_f64()` for reduced overhead.
+//!
+//! Additionally, `ComputeDispatch::df64()` enables automatic DF64 shader
+//! selection on `Fp64Strategy::Hybrid` consumer GPUs. This would replace
+//! the current F32 default with ~48-bit precision on RTX 40xx / RDNA3 /
+//! Intel Arc without requiring native f64 support.
+//!
 //! # Cross-Spring Evolution Provenance
 //!
 //! | Component | Origin Spring | Session |

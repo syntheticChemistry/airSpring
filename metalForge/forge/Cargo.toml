@@ -9,8 +9,10 @@ description = "Cross-system compute dispatch for airSpring ecological pipelines 
 [workspace]
 
 [dependencies]
-# wgpu 22 — matches barraCuda's pinned version for type compatibility.
-wgpu = { version = "22", default-features = false, features = ["wgsl", "vulkan-portability"] }
+# wgpu 28 — matches barraCuda v0.3.3+ (wgpu 28, vulkan backend).
+wgpu = { version = "28", default-features = false, features = ["wgsl", "vulkan", "vulkan-portability"] }
+# Block-on for sync contexts (wgpu 28 enumerate_adapters is async).
+pollster = "0.3"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 toml = "0.8"

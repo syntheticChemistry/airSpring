@@ -1,14 +1,15 @@
 # airSpring wateringHole
 
-**Updated**: March 5, 2026 | **Version**: v0.7.0
+**Updated**: March 5, 2026 | **Version**: v0.7.1
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.7.0** | [AIRSPRING_V070_BARRACUDA_033_REWIRE_HANDOFF_MAR05_2026.md](handoffs/AIRSPRING_V070_BARRACUDA_033_REWIRE_HANDOFF_MAR05_2026.md) | 2026-03-05 | **current** — barraCuda 0.3.3 rewire (wgpu 28), 3/6 ops absorbed upstream, Df64 precision, upstream GPU issue documented |
-| **V0.7.0** | [AIRSPRING_V070_UPSTREAM_ABSORPTION_HANDOFF_MAR05_2026.md](handoffs/AIRSPRING_V070_UPSTREAM_ABSORPTION_HANDOFF_MAR05_2026.md) | 2026-03-05 | **current** — upstream handoff for barraCuda/ToadStool team: 3 ops ready for absorption, NVK probe discovery, wgpu 28 GPU-returns-zero, 34 provenance entries |
+| **V0.7.1** | [AIRSPRING_V071_BARRACUDA_HEAD_SYNC_HANDOFF_MAR05_2026.md](handoffs/AIRSPRING_V071_BARRACUDA_HEAD_SYNC_HANDOFF_MAR05_2026.md) | 2026-03-05 | **current** — barraCuda HEAD sync (post-0.3.3), metalForge wgpu 28, subgroup detection, TensorContext/DF64 documented, coralNAK awareness |
+| **V0.7.0** | [AIRSPRING_V070_BARRACUDA_033_REWIRE_HANDOFF_MAR05_2026.md](handoffs/AIRSPRING_V070_BARRACUDA_033_REWIRE_HANDOFF_MAR05_2026.md) | 2026-03-05 | barraCuda 0.3.3 rewire (wgpu 28), 3/6 ops absorbed upstream, Df64 precision, upstream GPU issue documented |
+| **V0.7.0** | [AIRSPRING_V070_UPSTREAM_ABSORPTION_HANDOFF_MAR05_2026.md](handoffs/AIRSPRING_V070_UPSTREAM_ABSORPTION_HANDOFF_MAR05_2026.md) | 2026-03-05 | upstream handoff for barraCuda/ToadStool team: 3 ops ready for absorption, NVK probe discovery, wgpu 28 GPU-returns-zero, 34 provenance entries |
 
 ## Cross-Spring Documents
 

@@ -40,7 +40,25 @@
 //! | `eco::yield_response` | `gpu::yield_response` | `local_elementwise_f64.wgsl` (op=1) | Stewart yield | A (f64 canonical, universal) |
 //! | `eco::evapotranspiration` (Makkink/Turc/Hamon/BC) | `gpu::simple_et0` | `local_elementwise_f64.wgsl` (ops 2-5) | Simple ET₀ batch | A (f64 canonical, universal) |
 //!
-//! # Current Inventory (March 5, 2026 — v0.7.0, `barraCuda` 0.3.3 standalone, wgpu 28)
+//! # Current Inventory (March 5, 2026 — v0.7.1, `barraCuda` HEAD post-0.3.3, wgpu 28)
+//!
+//! ## Upstream Evolution (barraCuda HEAD, unreleased post-0.3.3)
+//!
+//! barraCuda has 6 unreleased commits adding features airSpring can leverage:
+//!
+//! - **`TensorContext`** — Pooled buffers, pipeline cache, batched submits.
+//!   Available for `LocalElementwise` and `SeasonalReducer` as future optimization
+//!   (eliminates per-dispatch buffer allocation).
+//! - **DF64 `ComputeDispatch::df64()`** — DF64 shader path that prepends
+//!   `df64_core` + `df64_transcendentals`. Available for `LocalElementwise` to
+//!   auto-select DF64 on consumer GPUs via `Fp64Strategy::Hybrid`.
+//! - **Subgroup capability detection** — `DeviceCapabilities::subgroup_min_size`,
+//!   `subgroup_max_size`, `has_subgroup_info()`, `preferred_subgroup_size()`.
+//!   Wired into `DevicePrecisionReport` for airSpring device probing.
+//! - **15 ops gain `Fp64Strategy`-based shader selection** — DF64 precision tier
+//!   for stats, correlation, elementwise, and special functions.
+//! - **Naga rewriter fix** — Compound assignments (`+=`, `-=`, `*=`, `/=`) now
+//!   correctly rewritten to DF64 bridge calls.
 //!
 //! ## v0.7.0: barraCuda 0.3.3 Rewire + Fused Welford/Pearson + 3/6 Ops Absorbed
 //!

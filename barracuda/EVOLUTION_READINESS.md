@@ -391,17 +391,31 @@ simply becomes unused.
 - No `openssl`, `reqwest`, or other heavy C dependencies
 - Pure Rust stack except `ring` (via ureq→rustls) and GPU drivers (via wgpu)
 
-### Quality Gates (v0.7.0 — barraCuda 0.3.3 rewire)
+### barraCuda HEAD Sync (post-0.3.3 unreleased, March 5, 2026)
+
+airSpring synced to barraCuda HEAD (`15d3774`, 6 commits past v0.3.3).
+Key upstream features now available:
+
+- **TensorContext** — Pooled buffers, pipeline cache, batched submits (15 ops migrated)
+- **DF64 precision tier** — 15 ops gain `Fp64Strategy`-based f32/DF64/f64 shader selection
+- **`ComputeDispatch::df64()`** — DF64 shader path for Hybrid consumer GPUs
+- **Subgroup capability** — `subgroup_min_size`, `subgroup_max_size` in adapter info;
+  wired into airSpring's `DevicePrecisionReport`
+- **Naga rewriter fix** — Compound assignments correctly rewritten to DF64 bridge calls
+- **`chi_squared` GPU gate** — `WORKGROUP_SIZE_1D` import gated behind `gpu` feature
+
+metalForge forge migrated from wgpu 22 to wgpu 28 (eliminated duplicate wgpu compilation).
+
+### Quality Gates (v0.7.1 — barraCuda HEAD sync)
 
 | Gate | Result |
 |------|--------|
 | `cargo fmt --check` | **PASS** (both crates) |
 | `cargo clippy --all-targets -- -W clippy::pedantic -W clippy::nursery -D warnings` | **PASS** — 0 warnings |
-| `cargo doc --no-deps` | **PASS** — 0 warnings |
 | `cargo test --lib` | **827 pass**, 25 fail (upstream GPU wgpu 28 NVK) |
-| `cargo test --test '*'` | **186 pass**, 2 fail (upstream GPU) |
-| Validation binaries | **381 checks**, all pass (10 binaries) |
-| Cross-spring evolution | **146/146 pass** |
-| CPU vs Python | **24/24 algorithms**, 19.8× geometric mean speedup |
+| `cargo test --test '*'` | **188 pass**, 2 fail (upstream GPU) |
+| Cross-spring evolution | **11/11 pass** |
+| CPU vs Python | **24/24 algorithms**, 21.0× geometric mean speedup |
 | `#![forbid(unsafe_code)]` | **Both crates** |
-| barraCuda source | **`ecoPrimals/barraCuda/crates/barracuda`** v0.3.3 standalone (wgpu 28) |
+| barraCuda source | **`ecoPrimals/barraCuda/crates/barracuda`** HEAD post-0.3.3 (`15d3774`, wgpu 28) |
+| metalForge wgpu | **28** (was 22, eliminated double compilation) |

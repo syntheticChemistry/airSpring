@@ -44,6 +44,10 @@ pub struct DevicePrecisionReport {
     pub has_f64_shaders: bool,
     /// Whether the device supports SPIR-V passthrough.
     pub has_spirv_passthrough: bool,
+    /// Minimum subgroup (warp/wavefront) size. Zero if not reported.
+    pub subgroup_min_size: u32,
+    /// Maximum subgroup (warp/wavefront) size. Zero if not reported.
+    pub subgroup_max_size: u32,
 }
 
 impl std::fmt::Display for DevicePrecisionReport {
@@ -53,7 +57,7 @@ impl std::fmt::Display for DevicePrecisionReport {
         writeln!(f, "  Fp64Rate:     {:?}", self.fp64_rate)?;
         writeln!(f, "  f64 shaders:  {}", self.has_f64_shaders)?;
         writeln!(f, "  SPIR-V pass:  {}", self.has_spirv_passthrough)?;
-        write!(
+        writeln!(
             f,
             "  Builtins:     exp={} log={} sin={} cos={} sqrt={} fma={}",
             self.builtins.exp,
@@ -62,7 +66,16 @@ impl std::fmt::Display for DevicePrecisionReport {
             self.builtins.cos,
             self.builtins.sqrt,
             self.builtins.fma
-        )
+        )?;
+        if self.subgroup_min_size > 0 {
+            write!(
+                f,
+                "  Subgroups:    {}-{} lanes",
+                self.subgroup_min_size, self.subgroup_max_size
+            )
+        } else {
+            write!(f, "  Subgroups:    not reported")
+        }
     }
 }
 
@@ -77,13 +90,16 @@ pub fn probe_device(device: &WgpuDevice) -> DevicePrecisionReport {
         barracuda::device::probe::probe_f64_builtins(device),
     );
 
+    let info = device.adapter_info();
     DevicePrecisionReport {
-        adapter_name: device.adapter_info().name.clone(),
+        adapter_name: info.name.clone(),
         fp64_strategy: profile.fp64_strategy(),
         fp64_rate: profile.fp64_rate,
         builtins,
         has_f64_shaders: device.has_f64_shaders(),
         has_spirv_passthrough: device.has_spirv_passthrough(),
+        subgroup_min_size: info.subgroup_min_size,
+        subgroup_max_size: info.subgroup_max_size,
     }
 }
 
@@ -562,9 +578,12 @@ mod tests {
             },
             has_f64_shaders: true,
             has_spirv_passthrough: false,
+            subgroup_min_size: 32,
+            subgroup_max_size: 32,
         };
         let s = format!("{report}");
         assert!(s.contains("Test GPU"));
         assert!(s.contains("Native"));
+        assert!(s.contains("32-32 lanes"));
     }
 }
