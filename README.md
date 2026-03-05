@@ -2,7 +2,7 @@
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
 **Date**: March 5, 2026
-**Version**: 0.6.9
+**Version**: 0.7.0
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -19,7 +19,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,237/1,237 PASS** | 57 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **852 lib + 1498 atlas** | 86 binaries + 146/146 + 32/32 provenance cross-spring benchmarks |
+| Phase 1: Rust validation | **827 lib + 1498 atlas** | 86 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (25 GPU fail: upstream wgpu 28 driver issue) |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (34/34 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -218,7 +218,7 @@ airSpring/
 │   ├── vg_inverse/              # Van Genuchten inverse fitting (84/84)
 │   ├── season_water_budget/     # Full-season irrigation WB (34/34)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (852 lib tests, 86 binaries)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (827 lib tests, 86 binaries, barraCuda 0.3.3 / wgpu 28)
 │   ├── src/
 │   │   ├── biomeos.rs           # biomeOS socket resolution + primal discovery (shared)
 │   │   ├── eco/                 # Domain modules (19 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine)
@@ -280,18 +280,14 @@ AGPL-3.0-or-later
 
 ---
 
-*March 5, 2026 — v0.6.9. barraCuda 0.3.1 standalone rewire. 78 experiments, 1237/1237 Python, 852 lib + 33 integration + 62 forge tests,
-86 binaries (81 barracuda + 5 forge), 146/146 cross-spring evolution benchmarks + 32/32 Exp 077 provenance (S87 sync),
-68/68 cross-spring rewire (BrentGpu VG inverse + RichardsGpu Picard, 5/5 springs),
-13,000× Rust-vs-Python atlas-scale speedup, 15,300 station-days, 1498/1498 atlas checks.
-NUCLEUS primal (30 capabilities), ecology domain in biomeOS registry.
-ToadStool S93 synced: 845 WGSL shaders, ops 0-13, GPU uncertainty stack (jackknife/bootstrap/diversity),
-BrentGpu, RichardsGpu, StatefulPipeline, BatchedStatefulF64, nautilus, L-BFGS.
-6 f64-canonical local WGSL compute ops (local\_elementwise\_f64.wgsl) — SCS-CN, Stewart yield, Makkink, Turc, Hamon, Blaney-Criddle —
-compiled via compile\_shader\_universal() for per-silicon precision (F64 native on Titan V, F32 downcast on consumer GPU).
-gpu::local\_dispatch (LocalElementwise wgpu pipeline, SubmitParams struct), 27 metalForge workloads, NUCLEUS mesh routing (Exp 076: 60/60).
-Deep debt audit (3 rounds): provenance normalization (47 benchmark JSONs → \_provenance), json\_f64\_required structured failure,
-SubmitParams refactor (gpu/local\_dispatch.rs), env-configurable RPC timeout (BIOMEOS\_RPC\_TIMEOUT\_SECS),
-bench\_cpu\_vs\_python multi-file refactor, BarraCuda variance/std\_dev primitive wiring, streaming JSON I/O.
-All #[allow] annotations with reason strings. Zero unsafe, zero clippy pedantic+nursery warnings, zero mocks in production.
+*March 5, 2026 — v0.7.0. barraCuda 0.3.3 rewire (wgpu 28). 78 experiments, 1237/1237 Python, 827 lib + 62 forge tests
+(25 GPU dispatch fail — upstream wgpu 28 driver issue on NVK/Titan V, confirmed in barraCuda's own tests),
+86 binaries (81 barracuda + 5 forge), 146/146 cross-spring evolution benchmarks + 32/32 Exp 077 provenance.
+ToadStool S94b synced: barraCuda v0.3.3 standalone, wgpu 28, DF64 precision tier, fused Welford mean+variance,
+fused 5-accumulator Pearson correlation, TensorContext fast path, subgroup capability detection.
+3/6 local WGSL ops absorbed upstream (Makkink→Op14, Turc→Op15, Hamon→Op16); 3 remain local (SCS-CN, Stewart, Blaney-Criddle).
+wgpu 22→28 migration: entry\_point→Some, push\_constant\_ranges→immediate\_size, Maintain→PollType, BufferView lifetime removed.
+Df64 precision variant documented and explicitly handled in LocalElementwise dispatch.
+All previous deep debt work preserved: provenance normalization, json\_f64\_required, SubmitParams, streaming JSON I/O.
+Zero unsafe, zero clippy pedantic+nursery warnings, zero mocks in production.
 cargo-deny clean, all SPDX AGPL-3.0-or-later. Pure Rust + BarraCuda.*

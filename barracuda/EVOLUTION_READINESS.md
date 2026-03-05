@@ -1,9 +1,9 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: March 4, 2026 (v0.6.9 — 852 lib + 1133 integration tests, 80 binaries, 77 experiments, 1237 Python, 30 NUCLEUS capabilities, 67/67 metalForge cross-system, 6 local WGSL shaders)
-**barraCuda**: v0.3.1 standalone primal (`ecoPrimals/barraCuda` — 767 WGSL shaders, 957 Rust files, extracted from ToadStool S89)
-**ToadStool**: S93 (5,369 tests, 845 WGSL shaders, sovereignty cleanup, DF64 ownership transferred to barraCuda)
-**Handoff**: V0.6.8 (barraCuda 0.3.1 standalone rewire + absorption — capability-based discovery, 6 shaders for upstream, deep debt resolved)
+**Last Updated**: March 5, 2026 (v0.7.0 — 827 lib tests passing, 86 binaries, 78 experiments, 1237 Python, 30 NUCLEUS capabilities, 67/67 metalForge cross-system, 6 local WGSL shaders)
+**barraCuda**: v0.3.3 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, fused stats shaders)
+**ToadStool**: S94b (5,369 tests, NpuDispatch trait, multi-adapter selection, primal decoupling)
+**Handoff**: V0.7.0 (barraCuda 0.3.3 rewire — wgpu 28, 3/6 local ops absorbed upstream, Df64 precision documented)
 **License**: AGPL-3.0-or-later
 
 ---

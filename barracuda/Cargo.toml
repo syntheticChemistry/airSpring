@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.6.9"
+version = "0.7.0"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
@@ -15,8 +15,9 @@ standalone-http = ["dep:ureq"]
 npu = ["dep:akida-driver"]
 
 [dependencies]
-# BarraCuda: standalone sovereign math engine (ecoPrimals/barraCuda).
+# BarraCuda 0.3.3: standalone sovereign math engine (ecoPrimals/barraCuda).
 # Extracted from ToadStool S89 — universal math, precision per hardware.
+# v0.3.3: wgpu 28, DF64 precision tier, fused Welford stats, 3 airSpring ops absorbed.
 # airSpring validates that Rust baselines can be faithfully ported to
 # BarraCuda shaders. Used for stats, validation, GPU ops, and PDE primitives.
 barracuda = { path = "../../barraCuda/crates/barracuda" }
@@ -47,9 +48,9 @@ bingocube-nautilus = { path = "../../primalTools/bingoCube/nautilus" }
 # Serde: needed for Nautilus brain serialization (observations, shell state).
 serde = { version = "1", features = ["derive"] }
 
-# wgpu 22 — matches barraCuda's pinned version for type compatibility.
+# wgpu 28 — matches barraCuda 0.3.3's pinned version for type compatibility.
 # Used by gpu::local_dispatch for local WGSL shaders pending barraCuda absorption.
-wgpu = { version = "22", default-features = false, features = ["wgsl", "vulkan-portability"] }
+wgpu = { version = "28", default-features = false, features = ["wgsl", "vulkan", "vulkan-portability"] }
 
 # bytemuck: safe transmute for GPU buffer I/O (f32 ↔ bytes).
 bytemuck = { version = "1", features = ["derive"] }

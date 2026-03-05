@@ -6,6 +6,7 @@
 //! compiled via `BarraCuda`'s `compile_shader_universal()`:
 //!
 //! - **`F64`**: native f64 on pro GPUs (Titan V, A100, MI250)
+//! - **`Df64`**: double-float f32-pair (~48-bit) on consumer GPUs
 //! - **`F32`**: downcast to f32 on consumer GPUs (RTX 4070, Arc, RX 7900)
 //!
 //! "Math is universal, precision is silicon" — `BarraCuda` S67.
@@ -22,14 +23,14 @@
 //!
 //! # Operations
 //!
-//! | Op | Domain | Inputs |
-//! |----|--------|--------|
-//! | 0 | SCS-CN runoff | P(mm), CN, Ia ratio |
-//! | 1 | Stewart yield | Ky, `ETa/ETc`, — |
-//! | 2 | Makkink ET₀ | T(°C), Rs(MJ), elev(m) |
-//! | 3 | Turc ET₀ | T(°C), Rs(MJ), RH(%) |
-//! | 4 | Hamon PET | T(°C), lat(rad), DOY |
-//! | 5 | Blaney-Criddle ET₀ | T(°C), lat(rad), DOY |
+//! | Op | Domain | Inputs | Upstream |
+//! |----|--------|--------|----------|
+//! | 0 | SCS-CN runoff | P(mm), CN, Ia ratio | local only |
+//! | 1 | Stewart yield | Ky, `ETa/ETc`, — | local only |
+//! | 2 | Makkink ET₀ | T(°C), Rs(MJ), elev(m) | absorbed: `Op::MakkinkEt0` (14) |
+//! | 3 | Turc ET₀ | T(°C), Rs(MJ), RH(%) | absorbed: `Op::TurcEt0` (15) |
+//! | 4 | Hamon PET | T(°C), lat(rad), DOY | absorbed: `Op::HamonEt0` (16) |
+//! | 5 | Blaney-Criddle ET₀ | T(°C), lat(rad), DOY | local only |
 
 use std::sync::Arc;
 
@@ -130,14 +131,14 @@ impl LocalElementwise {
         let pipeline_layout = wgpu_device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: Some("local_elementwise_pl"),
             bind_group_layouts: &[&bind_group_layout],
-            push_constant_ranges: &[],
+            immediate_size: 0,
         });
 
         let pipeline = wgpu_device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
             label: Some("local_elementwise_pipeline"),
             layout: Some(&pipeline_layout),
             module: &shader_module,
-            entry_point: "main",
+            entry_point: Some("main"),
             compilation_options: wgpu::PipelineCompilationOptions::default(),
             cache: None,
         });
@@ -160,7 +161,7 @@ impl LocalElementwise {
     ///
     /// Inputs and output are f64 on the CPU side. Buffer packing adapts to
     /// the compiled precision: f64 buffers for `Precision::F64`, f32 for
-    /// `Precision::F32`.
+    /// `Precision::F32` and `Precision::Df64` (DF64 uses f32-pair buffers).
     ///
     /// # Errors
     ///
@@ -178,7 +179,7 @@ impl LocalElementwise {
 
         match self.precision {
             Precision::F64 => self.dispatch_f64(op, a, b, c, n),
-            _ => self.dispatch_f32(op, a, b, c, n),
+            Precision::F32 | Precision::Df64 | Precision::F16 => self.dispatch_f32(op, a, b, c, n),
         }
     }
 
@@ -446,12 +447,15 @@ fn submit_and_copy(p: &SubmitParams<'_>) {
     p.queue.submit(std::iter::once(encoder.finish()));
 }
 
-fn map_read<'a>(device: &wgpu::Device, staging: &'a wgpu::Buffer) -> Result<wgpu::BufferView<'a>> {
+fn map_read(device: &wgpu::Device, staging: &wgpu::Buffer) -> Result<wgpu::BufferView> {
     let (tx, rx) = std::sync::mpsc::channel();
     staging.slice(..).map_async(wgpu::MapMode::Read, move |r| {
         let _ = tx.send(r);
     });
-    device.poll(wgpu::Maintain::Wait);
+    let _ = device.poll(wgpu::PollType::Wait {
+        submission_index: None,
+        timeout: None,
+    });
 
     rx.recv()
         .map_err(|e| AirSpringError::barracuda_msg(format!("buffer map recv: {e}")))?
@@ -492,7 +496,10 @@ mod tests {
         };
         let p = le.precision();
         eprintln!("LocalElementwise precision: {p:?}");
-        assert!(matches!(p, Precision::F64 | Precision::F32));
+        assert!(matches!(
+            p,
+            Precision::F64 | Precision::F32 | Precision::Df64
+        ));
     }
 
     #[test]
