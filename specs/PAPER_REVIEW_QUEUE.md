@@ -1,8 +1,8 @@
 # airSpring — Paper Review Queue
 
-**Last Updated**: March 2, 2026
+**Last Updated**: March 5, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 77 experiments (1237/1237 Python + 846 Rust lib tests + 1498 atlas checks + 25 Tier A modules + 86 binaries + 138/138 cross-spring benchmarks + 68/68 cross-spring rewire). GPU streaming multi-field 57/57. CPU parity benchmark 34/34. Pure GPU end-to-end 46/46. Cross-spring rewire 68/68 (BrentGpu + RichardsGpu, 5/5 springs). ToadStool S87 sync (844 WGSL, `BatchedStatefulF64`, `BrentGpu`, `RichardsGpu`, `nautilus`, `L-BFGS`). Titan V GPU live dispatch (24/24 PASS) + AKD1000 NPU live + metalForge live (66/66) + 13,000× Rust-vs-Python atlas-scale speedup. NUCLEUS primal (30 caps, 28/28 cross-primal pipeline, ecology domain). V052 handoff. All completed papers use open data and systems.
+**Status**: 78 experiments (1237/1237 Python + 827 Rust lib tests + 186 forge tests + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.3.3 (wgpu 28), fused Welford + fused Pearson wired. 20.6× Rust-vs-Python geometric mean speedup (24/24 algorithms). Local GPU 6/6 ops parity. 27 GPU dispatch failures (upstream wgpu 28 NVK). metalForge 66/66 mixed pipeline, 62 forge tests. V070 handoff. All completed papers use open data and systems.
 
 ---
 
@@ -75,11 +75,11 @@ All 57+ completed papers have:
 - **Python control scripts** that validate against benchmarks (1237/1237 Python checks)
 - **Rust validation binaries** (81 barracuda + 5 forge = 86 binaries) that load the same benchmarks
 - **Open or published data** (no institutional access required)
-- **Cross-validation** (75/75 Python↔Rust match at 1e-5; 690 crop-station yield pairs within 0.01; PT↔PM cross-validated)
-- **GPU wiring**: 25 Tier A modules (ops 0-13, kriging, reduce, stream, richards, isotherm, mc_et0, jackknife, bootstrap, diversity, stats, correction) + `BrentGpu` (VG inverse) + `RichardsGpu` (Picard)
-- **CPU benchmarks**: 10M ET₀/s, 36.5M VG θ/s, 1.9B Kc/s, 57M Langmuir fits/s, 13,000× Rust-vs-Python (atlas-scale)
-- **GPU pipeline**: Multi-field GPU WB Stage 3 (57/57), CPU↔GPU parity (46/46), 19.7× dispatch reduction, cross-spring rewire (68/68)
-- **Cross-spring provenance**: 138/138 benchmarks across 5 springs (ToadStool S87 sync)
+- **Cross-validation** (33/33 Python↔Rust match at 1e-5; 690 crop-station yield pairs within 0.01; PT↔PM cross-validated)
+- **GPU wiring**: 25 Tier A modules + fused Welford (SeasonalReducer) + fused Pearson (pairwise_correlation_gpu) + `BrentGpu` (VG inverse) + `RichardsGpu` (Picard)
+- **CPU benchmarks**: 20.6× geometric mean speedup vs Python (24/24 algorithms), 13,000× atlas-scale
+- **GPU pipeline**: Local GPU 6/6 ops parity (<0.002 error). 27 GPU dispatch failures (upstream wgpu 28 NVK).
+- **Cross-spring provenance**: 146/146 evolution benchmarks across 5 springs (barraCuda 0.3.3)
 
 ### Compute Pipeline Per Paper
 

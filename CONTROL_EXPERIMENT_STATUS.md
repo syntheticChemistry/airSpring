@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-03-04 (v0.6.9 — 77 experiments, 1237 Python + 846 lib + 62 forge tests, 86 binaries, **deep debt audit round 2** (sovereignty hardening, dependency gating, fallible constructors, large-file refactoring, zero-copy CSV), **local GPU evolution** (6 WGSL shaders, f32 compute dispatch, CPU/GPU parity validated), **NUCLEUS full-pipeline routing** (60/60 PASS, 27 workloads, PCIe P2P bypass), **cross-spring rewire** (68/68 PASS, `BrentGpu` VG inverse + `RichardsGpu` Picard, 5/5 springs), **13,000× Rust-vs-Python atlas-scale speedup** (34/34 CPU parity benchmark), **GPU streaming multi-field** (57/57 PASS, 6.8M field-days/s), **pure GPU end-to-end** (46/46 PASS, 19.7× dispatch reduction), **mixed-hardware pipeline** (66/66 PASS, 7-stage seasonal), **GPU Stages 1-3** (WB via `gpu_step`), 146/146 + 32/32 cross-spring benchmarks (Exp 077), NUCLEUS mesh routing, Paper 12 immunological Anderson (Exp 066-069))
+**Updated**: 2026-03-05 (v0.7.0 — 78 experiments, barraCuda 0.3.3 (wgpu 28), 1237/1237 Python + 827 lib + 186 forge + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **20.6× Rust-vs-Python speedup** (24/24 algorithms). Fused Welford in SeasonalReducer (3 GPU passes vs 4). Fused 5-accumulator Pearson in gpu/stats. Local GPU 6/6 ops parity (<0.002 error). 27 GPU dispatch failures (upstream wgpu 28 NVK). metalForge 66/66 mixed pipeline. Cross-spring shader provenance documented: hotSpring (precision/DF64), wetSpring (bio/diversity), neuralSpring (ML/stats), groundSpring (MC/uncertainty). V070 handoff.)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 

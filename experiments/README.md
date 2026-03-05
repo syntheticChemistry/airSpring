@@ -1,7 +1,7 @@
 # airSpring Experiments
 
-**Updated**: March 4, 2026
-**Status**: 78 experiments, 1237/1237 Python + 852 lib + 1133 integration + 62 forge tests + 80 binaries + **146/146 cross-spring evolution benchmark (ToadStool S87)** + **Exp 077 cross-spring provenance (32/32)** + **Exp 078 universal precision evolution (6 ops f64 canonical)** + Paper 12 immunological Anderson (Exp 066-069) + 66/66 metalForge cross-system (27 workloads) + GPU streaming multi-field (57/57) + CPU parity (34/34) + pure GPU end-to-end (46/46) + **cross-spring rewire (68/68)** + **paper chain validation (79/79)** + **local GPU parity (Exp 075: 6 ops)** + **NUCLEUS routing (Exp 076: 60/60)** + **Rust 13,000× faster than Python (atlas-scale)** + Tier B→A: `BatchedStatefulF64` (WB), `BatchedNelderMeadGpu` (isotherm)
+**Updated**: March 5, 2026
+**Status**: 78 experiments, barraCuda 0.3.3 (wgpu 28). 1237/1237 Python + 827 lib + 186 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. 20.6× Rust-vs-Python speedup (24/24 algorithms). Fused Welford (SeasonalReducer) + fused Pearson (gpu/stats) wired. Local GPU 6/6 ops parity. 27 GPU dispatch failures (upstream wgpu 28 NVK). metalForge 66/66 mixed pipeline. Cross-spring shader provenance: hotSpring (precision), wetSpring (bio), neuralSpring (ML), groundSpring (uncertainty).
 
 ---
 
