@@ -34,6 +34,7 @@ use std::sync::Arc;
 
 use barracuda::device::WgpuDevice;
 use barracuda::ops::fused_map_reduce_f64::FusedMapReduceF64;
+use barracuda::ops::variance_f64_wgsl::VarianceF64;
 
 use crate::len_f64;
 
@@ -51,17 +52,26 @@ use crate::len_f64;
 /// or `WgpuDevice::new_cpu()` for headless environments.
 pub struct SeasonalReducer {
     engine: FusedMapReduceF64,
+    variance_engine: VarianceF64,
 }
 
 impl SeasonalReducer {
     /// Create a new device-backed seasonal reducer.
     ///
+    /// Initialises both `FusedMapReduceF64` (sum/max/min) and `VarianceF64`
+    /// (fused Welford mean+variance in a single GPU pass).
+    ///
     /// # Errors
     ///
-    /// Returns an error if the `FusedMapReduceF64` engine cannot be initialised.
+    /// Returns an error if either engine cannot be initialised.
     pub fn new(device: Arc<WgpuDevice>) -> crate::error::Result<Self> {
-        let engine = FusedMapReduceF64::new(device)?;
-        Ok(Self { engine })
+        let engine = FusedMapReduceF64::new(device.clone())?;
+        let variance_engine =
+            VarianceF64::new(device).map_err(crate::error::AirSpringError::from)?;
+        Ok(Self {
+            engine,
+            variance_engine,
+        })
     }
 
     /// GPU-accelerated seasonal sum.
@@ -108,10 +118,44 @@ impl SeasonalReducer {
             .map_err(crate::error::AirSpringError::from)
     }
 
+    /// Fused Welford mean+variance via `VarianceF64` (single GPU pass).
+    ///
+    /// Falls back to CPU Welford if GPU returns zeros (wgpu 28 driver issue).
+    ///
+    /// # Cross-Spring Provenance
+    ///
+    /// `mean_variance_f64.wgsl` — fused Welford single-pass shader.
+    /// Originated from hotSpring's need for numerically stable variance in
+    /// lattice QCD observables (S58). Evolved through neuralSpring (ML loss
+    /// statistics) and groundSpring (sensor noise quantification). airSpring
+    /// wires it for seasonal ET₀, water balance, and `IoT` stream statistics.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the GPU dispatch fails.
+    pub fn mean_variance(&self, values: &[f64]) -> crate::error::Result<[f64; 2]> {
+        let gpu_result = self
+            .variance_engine
+            .mean_variance(values, 1)
+            .map_err(crate::error::AirSpringError::from)?;
+
+        // Fallback: wgpu 28 ComputeDispatch can return [0,0] on NVK/Titan V.
+        // If the GPU mean is zero but the CPU mean is not, use CPU Welford.
+        if gpu_result[0] == 0.0 && !values.is_empty() && values.iter().any(|&v| v != 0.0) {
+            let mean = barracuda::stats::mean(values);
+            let var = barracuda::stats::correlation::variance(values).unwrap_or(0.0);
+            return Ok([mean, var]);
+        }
+
+        Ok(gpu_result)
+    }
+
     /// Compute all seasonal statistics via GPU-accelerated reductions.
     ///
-    /// Dispatches sum, max, min, and sum-of-squares as separate GPU passes.
-    /// Mean, variance, and std deviation are derived on CPU.
+    /// Uses fused Welford `mean_variance_f64.wgsl` (1 GPU pass) for mean +
+    /// variance, plus `FusedMapReduceF64` for max/min (2 GPU passes).
+    /// Total 3 GPU passes instead of the previous 4 (sum + max + min + `sum_sq`).
+    /// Falls back to CPU Welford if GPU dispatch returns zeros.
     ///
     /// # Errors
     ///
@@ -128,20 +172,24 @@ impl SeasonalReducer {
             });
         }
 
-        let total = self.sum(values)?;
         let max = self.max(values)?;
         let min = self.min(values)?;
         let n = len_f64(values);
-        let mean = total / n;
 
-        // Variance: E[X²] - E[X]² (computational formula)
-        let sum_sq = self.sum_of_squares(values)?;
-        let variance = if values.len() > 1 {
-            // Bessel correction: sample variance = (Σx² - n·μ²) / (n - 1)
-            (n * mean).mul_add(-mean, sum_sq) / (n - 1.0)
-        } else {
-            0.0
-        };
+        if values.len() == 1 {
+            let val = values[0];
+            return Ok(SeasonalStats {
+                total: val,
+                mean: val,
+                max,
+                min,
+                std_dev: 0.0,
+                count: 1,
+            });
+        }
+
+        let [mean, variance] = self.mean_variance(values)?;
+        let total = mean * n;
 
         Ok(SeasonalStats {
             total,

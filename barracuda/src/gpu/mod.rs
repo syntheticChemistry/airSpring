@@ -49,8 +49,10 @@
 //! | `F32` | Downcast to f32 | Inference-only, low precision OK |
 //! | `F16` | Downcast to f16 | Edge inference |
 //!
-//! `Fp64Strategy::Native` vs `Fp64Strategy::Hybrid` is selected per-device
-//! by `GpuDriverProfile::fp64_strategy()` based on f64:f32 throughput ratio.
+//! `Fp64Strategy` is selected per-device by `GpuDriverProfile::fp64_strategy()`:
+//! - **`Native`**: full f64 throughput (compute GPUs)
+//! - **`Hybrid`**: DF64 for bulk math, native f64 for reductions (consumer GPUs)
+//! - **`Concurrent`**: run f64 + DF64 and cross-validate (NVK reliability verification)
 //!
 //! # `BarraCuda` Issues — All RESOLVED (S54+S66)
 //!

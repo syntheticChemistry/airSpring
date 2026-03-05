@@ -19,7 +19,9 @@
 use std::sync::Arc;
 
 use barracuda::device::WgpuDevice;
+use barracuda::ops::correlation_f64_wgsl::{CorrelationF64, CorrelationResult};
 use barracuda::ops::stats_f64;
+use barracuda::ops::variance_f64_wgsl::VarianceF64;
 
 /// Batched OLS sensor calibration: fit raw counts → VWC on GPU.
 ///
@@ -103,6 +105,57 @@ pub fn soil_correlation_gpu(
     let result =
         stats_f64::matrix_correlation(device, data, n_observations as u32, n_variables as u32);
     result
+}
+
+/// Fused Pearson correlation between two sensor streams (single GPU pass).
+///
+/// Uses barraCuda's 5-accumulator Pearson shader (`correlation_full_f64.wgsl`)
+/// which computes `mean_x`, `mean_y`, `var_x`, `var_y`, and `pearson_r` in one pass.
+///
+/// # Cross-Spring Provenance
+///
+/// | Component | Origin | Session |
+/// |-----------|--------|---------|
+/// | `correlation_full_f64.wgsl` | neuralSpring (ML loss correlation) | S69 |
+/// | DF64 variant | hotSpring (lattice QCD) | S93 |
+/// | `Fp64Strategy` routing | hotSpring (f64 throughput probing) | S58 |
+/// | Agricultural application | airSpring (sensor cross-correlation) | V0.7.0 |
+///
+/// # Errors
+///
+/// Returns an error if the GPU dispatch fails or arrays have different lengths.
+pub fn pairwise_correlation_gpu(
+    device: &Arc<WgpuDevice>,
+    x: &[f64],
+    y: &[f64],
+) -> Result<CorrelationResult, barracuda::error::BarracudaError> {
+    let engine = CorrelationF64::new(device.clone())?;
+    engine.correlation_full(x, y)
+}
+
+/// Fused mean + sample variance via Welford (single GPU pass).
+///
+/// Uses barraCuda's `mean_variance_f64.wgsl` for numerically stable
+/// single-pass computation. Returns `[mean, sample_variance]`.
+///
+/// # Cross-Spring Provenance
+///
+/// | Component | Origin | Session |
+/// |-----------|--------|---------|
+/// | `mean_variance_f64.wgsl` | hotSpring (lattice QCD observables) | S58 |
+/// | DF64 variant | hotSpring → barraCuda | S93 |
+/// | `Fp64Strategy` routing | hotSpring (precision probing) | S58 |
+/// | Agricultural application | airSpring (sensor QA, seasonal stats) | V0.7.0 |
+///
+/// # Errors
+///
+/// Returns an error if the GPU dispatch fails.
+pub fn fused_mean_variance_gpu(
+    device: &Arc<WgpuDevice>,
+    data: &[f64],
+) -> Result<[f64; 2], barracuda::error::BarracudaError> {
+    let engine = VarianceF64::new(device.clone())?;
+    engine.mean_variance(data, 1)
 }
 
 /// Apply polynomial coefficients from [`sensor_regression_gpu`] to predict VWC.

@@ -386,6 +386,32 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
         ],
         domain_use: "GPU Monte Carlo ET₀ uncertainty bands (N=10K+ samples)",
     },
+    // ── v0.7.0 barraCuda 0.3.3 Fused Primitives ───────────────────────
+    ShaderProvenance {
+        shader: "mean_variance_f64.wgsl (fused Welford)",
+        primitives: &["mean_variance", "sample_variance", "std_dev"],
+        origin: "hotSpring",
+        domain: "Single-pass Welford mean+variance (numerically stable)",
+        evolved_by: &[
+            "hotSpring S58 (lattice QCD observable statistics)",
+            "neuralSpring (ML loss/gradient variance tracking)",
+            "groundSpring (sensor noise quantification)",
+            "barraCuda 0.3.3 (DF64 variant: mean_variance_df64.wgsl)",
+        ],
+        domain_use: "SeasonalReducer fused stats (3 GPU passes vs previous 4), sensor QA",
+    },
+    ShaderProvenance {
+        shader: "correlation_full_f64.wgsl (5-accumulator Pearson)",
+        primitives: &["correlation_full", "pearson_r", "mean_x", "var_x"],
+        origin: "neuralSpring S69",
+        domain: "Fused Pearson correlation (mean, variance, r in one pass)",
+        evolved_by: &[
+            "neuralSpring S69 (Kokkos parallel_reduce pattern)",
+            "hotSpring (DF64 variant: correlation_full_df64.wgsl, S93)",
+            "barraCuda 0.3.3 (Fp64Strategy-aware routing)",
+        ],
+        domain_use: "Pairwise sensor cross-correlation (VWC↔EC, temp↔ET₀)",
+    },
     // ── v0.6.2 primalTools integration ──────────────────────────────────
     ShaderProvenance {
         shader: "bingocube-nautilus (Rust reservoir, no WGSL)",

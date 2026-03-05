@@ -70,7 +70,7 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 | `gpu::et0::BatchedEt0` | `ops::batched_elementwise_f64` (op=0) | **GPU-FIRST** |
 | `gpu::water_balance::BatchedWaterBalance` | `ops::batched_elementwise_f64` (op=1) | **GPU-STEP** |
 | `gpu::kriging::KrigingInterpolator` | `ops::kriging_f64::KrigingF64` | **INTEGRATED** |
-| `gpu::reduce::SeasonalReducer` | `ops::fused_map_reduce_f64` | **GPU N≥1024** |
+| `gpu::reduce::SeasonalReducer` | `ops::fused_map_reduce_f64` + `ops::variance_f64_wgsl::VarianceF64` (fused Welford) | **GPU N≥1024, 3 passes** |
 | `gpu::stream::StreamSmoother` | `ops::moving_window_stats` | **WIRED** |
 | `gpu::infiltration` | `BrentGpu::solve_green_ampt()` (brent_f64.wgsl GA residual) | **WIRED** (S83) |
 | `gpu::runoff` | Batched SCS-CN (f64 canonical via compile_shader_universal) | **GPU-universal (f32 downcast)** |
@@ -153,6 +153,9 @@ BarraCuda (while still embedded in ToadStool) underwent massive evolution since 
 | `stats::normal::norm_ppf` | `stats` | v0.4.4 | **WIRED** — `McEt0Result::parametric_ci()` |
 | `optimize::brent` | `optimize` | v0.4.4 | **WIRED** — `inverse_van_genuchten_h()` θ→h inversion |
 | `compile_shader_universal` | `shaders` | v0.6.9 | **WIRED** — local_elementwise_f64.wgsl (6 ops) |
+| `ops::variance_f64_wgsl::VarianceF64` | `ops` | v0.7.0 | **WIRED** — `SeasonalReducer::mean_variance()` (fused Welford, 3 passes vs 4) |
+| `ops::correlation_f64_wgsl::CorrelationF64` | `ops` | v0.7.0 | **WIRED** — `pairwise_correlation_gpu()` (5-accumulator fused Pearson) |
+| `ops::variance_f64_wgsl::VarianceF64` (stats) | `ops` | v0.7.0 | **WIRED** — `fused_mean_variance_gpu()` in gpu/stats |
 
 ### Available (not yet needed)
 
@@ -175,7 +178,7 @@ BarraCuda (while still embedded in ToadStool) underwent massive evolution since 
 | `spectral_density` | `stats` | S57 | RMT spectral analysis |
 | `normal::norm_cdf` | `stats` | S52+ | Normal cumulative distribution |
 | `spearman_correlation` | `stats::correlation` | S66 (R-S66-005) | Rank correlation — **now re-exported** from `stats/mod.rs` |
-| `Fp64Strategy::Native/Hybrid` | `device` | S58+ | Auto precision per GPU (ratio ≤2.5 → Native, else Hybrid) |
+| `Fp64Strategy::Native/Hybrid/Concurrent` | `device` | S58+ | Auto precision per GPU (Native, Hybrid DF64, Concurrent cross-validate) |
 | `probe_f64_builtins` | `device` | S58+ | Hardware f64 builtin capability probing |
 | `probe_f64_throughput_ratio` | `device` | S58+ | f64:f32 throughput ratio → F64Tier |
 | `UnidirectionalPipeline` | `staging` | S52+ | Fire-and-forget streaming, eliminates round-trip overhead |
@@ -256,6 +259,8 @@ neuralSpring (architecture), airSpring (domain science).
 | `stats::moving_window_f64` | airSpring metalForge → upstream | f64 stream statistics (absorbed S66) |
 | `stats::diversity::bray_curtis_matrix` | wetSpring → upstream | Full M×M distance matrix for ordination (wired v0.5.2) |
 | `stats::diversity::shannon_from_frequencies` | wetSpring → upstream | Pre-normalised Shannon for streaming pipelines (wired v0.5.2) |
+| `ops::variance_f64_wgsl::mean_variance()` | hotSpring S58 → barraCuda 0.3.3 | Fused Welford for SeasonalReducer (3 GPU passes vs 4) |
+| `ops::correlation_f64_wgsl::correlation_full()` | neuralSpring S69 → barraCuda 0.3.3 | 5-accumulator Pearson for pairwise sensor analysis |
 
 ### airSpring Contributions Back
 
@@ -375,7 +380,7 @@ Revalidation: 1132/1132 tests, 0 clippy warnings (pedantic), 0 fmt diffs, docs b
 
 | Crate | Version | C deps? | Purpose | Evolution Path |
 |-------|---------|---------|---------|----------------|
-| `barracuda` | 0.3.1 (path) | wgpu (vulkan) | GPU primitives, stats, validation | **Core** — standalone primal (`ecoPrimals/barraCuda`) |
+| `barracuda` | 0.3.3 (path) | wgpu 28 (vulkan) | GPU primitives, stats, validation, fused Welford/Pearson | **Core** — standalone primal (`ecoPrimals/barraCuda`) |
 | `bingocube-nautilus` | 0.1.0 (path) | None | Evolutionary reservoir computing | **Core** — stays, pure Rust |
 | `serde` | 1.0 | None | Brain state serialization | **Stays** — pure Rust, ecosystem standard |
 | `serde_json` | 1.0 | None | Benchmark JSON + JSON-RPC | **Stays** — pure Rust, ecosystem standard |
@@ -410,19 +415,17 @@ simply becomes unused.
 - No `openssl`, `reqwest`, or other heavy C dependencies
 - Pure Rust stack except `ring` (via ureq→rustls) and GPU drivers (via wgpu)
 
-### Quality Gates (v0.6.8 — barraCuda 0.3.1 rewire)
+### Quality Gates (v0.7.0 — barraCuda 0.3.3 rewire)
 
 | Gate | Result |
 |------|--------|
 | `cargo fmt --check` | **PASS** (both crates) |
-| `cargo clippy --workspace -- -D warnings -W clippy::pedantic` | **PASS** — 0 warnings (both crates) |
-| `cargo doc --no-deps` | **PASS** (both crates) |
-| `cargo test --workspace` | **1133 integration + 852 lib** (lib + bin + doc + integration) |
-| `cargo llvm-cov --lib --summary-only` | **95.11% line** / **95.81% function** coverage |
-| `cargo deny check` | **PASS** |
-| SPDX headers | **All .rs files**: `AGPL-3.0-or-later` |
-| File size limit | **All files < 1000 lines** (max: 935, bench binary) |
+| `cargo clippy --all-targets -- -W clippy::pedantic -W clippy::nursery -D warnings` | **PASS** — 0 warnings |
+| `cargo doc --no-deps` | **PASS** — 0 warnings |
+| `cargo test --lib` | **827 pass**, 25 fail (upstream GPU wgpu 28 NVK) |
+| `cargo test --test '*'` | **186 pass**, 2 fail (upstream GPU) |
+| Validation binaries | **381 checks**, all pass (10 binaries) |
+| Cross-spring evolution | **146/146 pass** |
+| CPU vs Python | **24/24 algorithms**, 19.8× geometric mean speedup |
 | `#![forbid(unsafe_code)]` | **Both crates** |
-| Validation provenance | **All 79 binaries** have script/commit/date or cross-spring provenance |
-| Tolerance provenance | **47/47 constants** with mathematical justification + baseline table |
-| barraCuda source | **`ecoPrimals/barraCuda/crates/barracuda`** v0.3.1 standalone |
+| barraCuda source | **`ecoPrimals/barraCuda/crates/barracuda`** v0.3.3 standalone (wgpu 28) |

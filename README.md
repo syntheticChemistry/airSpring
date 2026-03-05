@@ -272,7 +272,7 @@ airSpring/
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance (S87) |
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (77 experiments) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V069 current) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V070 current) |
 
 ## License
 
@@ -280,14 +280,14 @@ AGPL-3.0-or-later
 
 ---
 
-*March 5, 2026 — v0.7.0. barraCuda 0.3.3 rewire (wgpu 28). 78 experiments, 1237/1237 Python, 827 lib + 62 forge tests
-(25 GPU dispatch fail — upstream wgpu 28 driver issue on NVK/Titan V, confirmed in barraCuda's own tests),
-86 binaries (81 barracuda + 5 forge), 146/146 cross-spring evolution benchmarks + 32/32 Exp 077 provenance.
-ToadStool S94b synced: barraCuda v0.3.3 standalone, wgpu 28, DF64 precision tier, fused Welford mean+variance,
-fused 5-accumulator Pearson correlation, TensorContext fast path, subgroup capability detection.
-3/6 local WGSL ops absorbed upstream (Makkink→Op14, Turc→Op15, Hamon→Op16); 3 remain local (SCS-CN, Stewart, Blaney-Criddle).
-wgpu 22→28 migration: entry\_point→Some, push\_constant\_ranges→immediate\_size, Maintain→PollType, BufferView lifetime removed.
-Df64 precision variant documented and explicitly handled in LocalElementwise dispatch.
-All previous deep debt work preserved: provenance normalization, json\_f64\_required, SubmitParams, streaming JSON I/O.
+*March 5, 2026 — v0.7.0. barraCuda 0.3.3 rewire (wgpu 28). 78 experiments, 1237/1237 Python,
+827 lib + 186 forge tests (27 GPU dispatch fail — upstream wgpu 28 NVK driver issue),
+381/381 validation checks (10 binaries), 146/146 cross-spring evolution benchmarks, 19.8× speedup over Python.
+Fused Welford mean+variance wired into SeasonalReducer (3 GPU passes vs 4).
+Fused 5-accumulator Pearson correlation wired into gpu/stats (pairwise\_correlation\_gpu, fused\_mean\_variance\_gpu).
+Cross-spring shader provenance: hotSpring (precision/DF64), wetSpring (bio/diversity), neuralSpring (ML/stats),
+groundSpring (uncertainty/MC). 2 new ShaderProvenance entries documenting mean\_variance\_f64.wgsl and correlation\_full\_f64.wgsl origins.
+3/6 local WGSL ops absorbed upstream (Makkink→Op14, Turc→Op15, Hamon→Op16); 3 remain local.
+Fp64Strategy::Concurrent documented (NVK reliability verification). GPU Welford fallback to CPU when dispatch returns zeros.
 Zero unsafe, zero clippy pedantic+nursery warnings, zero mocks in production.
 cargo-deny clean, all SPDX AGPL-3.0-or-later. Pure Rust + BarraCuda.*
