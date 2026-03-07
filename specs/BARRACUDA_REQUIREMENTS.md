@@ -1,6 +1,6 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: March 7, 2026 (v0.7.3 — 848 lib + 186 forge tests, barraCuda 0.3.3 (wgpu 28), ops 0-19 upstream via `BatchedElementwiseF64`, `local_dispatch` retired, `PrecisionRoutingAdvice` wired, upstream provenance registry)
+**Last Updated**: March 7, 2026 (v0.7.4 — 854 lib + 186 forge tests, barraCuda 0.3.3 (wgpu 28), ops 0-19 upstream via `BatchedElementwiseF64`, `local_dispatch` retired, `PrecisionRoutingAdvice` wired, upstream provenance registry)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
 **ToadStool HEAD**: S94b — barraCuda v0.3.3 standalone (wgpu 28, DF64 precision tier)
 
@@ -210,9 +210,9 @@ The wateringHole evolution path defines three validation tiers:
 
 | Tier | Role | Status in airSpring |
 |------|------|---------------------|
-| **Tier 0** (Python) | Correctness reference | **Complete** — 56 benchmark JSONs, 1237/1237 PASS |
+| **Tier 0** (Python) | Correctness reference | **Complete** — 56 benchmark JSONs, 1284/1284 PASS |
 | **Tier 1** (Kokkos/Cabana) | Performance reference (external) | **Not started** — no Kokkos benchmarks |
-| **Tier 2** (BarraCuda) | Sovereign implementation | **Complete** — 850 lib + 61 forge tests, 86 validation binaries |
+| **Tier 2** (BarraCuda) | Sovereign implementation | **Complete** — 854 lib + 186 forge tests, 89 validation binaries |
 
 ### Cross-Spring Kokkos Baselines (groundSpring V74)
 

@@ -1,17 +1,18 @@
 # airSpring wateringHole
 
-**Updated**: March 7, 2026 | **Version**: v0.7.3
+**Updated**: March 7, 2026 | **Version**: v0.7.4
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.7.3** | [AIRSPRING_V073_MODERN_INTEGRATION_HANDOFF_MAR07_2026.md](handoffs/AIRSPRING_V073_MODERN_INTEGRATION_HANDOFF_MAR07_2026.md) | 2026-03-07 | **current** — `PrecisionRoutingAdvice` wired, upstream provenance registry, cross-spring evolution benchmark (20 ops) |
+| **V0.7.4** | [AIRSPRING_V074_STOCHASTIC_DROUGHT_TOADSTOOL_HANDOFF_MAR07_2026.md](handoffs/AIRSPRING_V074_STOCHASTIC_DROUGHT_TOADSTOOL_HANDOFF_MAR07_2026.md) | 2026-03-07 | **current** — MC ET₀ uncertainty (Exp 079), Bootstrap/Jackknife CI (Exp 080), SPI drought index (Exp 081), `eco::drought_index` module, GPU promotion candidates |
+| **V0.7.3** | [AIRSPRING_V073_MODERN_INTEGRATION_HANDOFF_MAR07_2026.md](handoffs/AIRSPRING_V073_MODERN_INTEGRATION_HANDOFF_MAR07_2026.md) | 2026-03-07 | `PrecisionRoutingAdvice` wired, upstream provenance registry, cross-spring evolution benchmark (20 ops) |
 | **V0.7.2** | [AIRSPRING_V072_UPSTREAM_LEAN_HANDOFF_MAR07_2026.md](handoffs/AIRSPRING_V072_UPSTREAM_LEAN_HANDOFF_MAR07_2026.md) | 2026-03-07 | Write→Absorb→Lean complete: 6 local ops absorbed, `local_dispatch` retired, `BatchedElementwiseF64` ops 14-19 |
 | **V0.7.1** | [AIRSPRING_V071_DEEP_DEBT_NVK_TOADSTOOL_HANDOFF_MAR07_2026.md](handoffs/AIRSPRING_V071_DEEP_DEBT_NVK_TOADSTOOL_HANDOFF_MAR07_2026.md) | 2026-03-07 | Deep debt audit, NVK zero-output resilience, provenance reconciliation, Kokkos gap documented, cargo-deny, toadStool/barraCuda evolution handoff |
 | **V0.7.1** | [AIRSPRING_V071_BARRACUDA_HEAD_SYNC_HANDOFF_MAR05_2026.md](handoffs/AIRSPRING_V071_BARRACUDA_HEAD_SYNC_HANDOFF_MAR05_2026.md) | 2026-03-05 | barraCuda HEAD sync (post-0.3.3), metalForge wgpu 28, subgroup detection, TensorContext/DF64 documented, coralReef awareness |
-| **V0.7.0** | *Archived* — see `handoffs/archive/` | 2026-03-05 | Superseded by V071+V072+V073 |
+| **V0.7.0** | *Archived* — see `handoffs/archive/` | 2026-03-05 | Superseded by V071+V072+V073+V074 |
 
 ## Cross-Spring Documents
 

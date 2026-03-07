@@ -1,21 +1,17 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
+#![allow(clippy::unwrap_used)]
 #![allow(clippy::float_cmp)]
-//! Bitwise determinism tests — same inputs must produce identical outputs.
+//! Determinism tests: rerun-identical with fixed seeds.
 //!
-//! These tests run each computation twice and assert exact equality (not
-//! approximate tolerance). Used to detect non-determinism from threading,
+//! These tests run each computation twice with identical inputs and assert
+//! bit-exact equality. Used to detect non-determinism from threading,
 //! floating-point order dependence, or RNG.
 
-use airspring_barracuda::eco::evapotranspiration::{
-    daily_et0, saturation_vapour_pressure, DailyEt0Input, Et0Result,
-};
-use airspring_barracuda::eco::richards::{solve_richards_1d, VanGenuchtenParams};
-use airspring_barracuda::eco::van_genuchten::{
-    inverse_van_genuchten_h, van_genuchten_capacity, van_genuchten_k, van_genuchten_theta,
-};
-use airspring_barracuda::eco::water_balance::{DailyInput, WaterBalanceState};
-use airspring_barracuda::gpu::isotherm::fit_langmuir_nm;
+use airspring_barracuda::eco::diversity::shannon;
+use airspring_barracuda::eco::evapotranspiration::{daily_et0, DailyEt0Input, Et0Result};
+use airspring_barracuda::eco::runoff::scs_cn_runoff_standard;
+use airspring_barracuda::eco::water_balance::{simulate_season, DailyInput, WaterBalanceState};
+use airspring_barracuda::nautilus::{AirSpringBrain, AirSpringBrainConfig, WeatherObservation};
 
 fn assert_et0_result_eq(a: &Et0Result, b: &Et0Result) {
     assert_eq!(a.et0, b.et0, "et0");
@@ -28,8 +24,10 @@ fn assert_et0_result_eq(a: &Et0Result, b: &Et0Result) {
     assert_eq!(a.ra, b.ra, "ra");
 }
 
+/// ET₀ determinism: FAO-56 Penman-Monteith ET₀ computed twice with identical
+/// inputs must produce bit-exact results.
 #[test]
-fn test_et0_pm_deterministic() {
+fn test_et0_determinism() {
     let input = DailyEt0Input {
         tmin: 15.0,
         tmax: 28.0,
@@ -46,103 +44,117 @@ fn test_et0_pm_deterministic() {
     assert_et0_result_eq(&result1, &result2);
 }
 
+/// Water balance determinism: A full season simulation run twice with
+/// identical parameters must produce bit-exact outputs.
 #[test]
-fn test_water_balance_deterministic() {
-    let state1 = WaterBalanceState::new(0.33, 0.13, 600.0, 0.5);
-    let state2 = WaterBalanceState::new(0.33, 0.13, 600.0, 0.5);
-    let input = DailyInput {
-        precipitation: 5.0,
-        irrigation: 0.0,
-        et0: 4.0,
-        kc: 1.0,
-    };
-    let mut s1 = state1;
-    let mut s2 = state2;
-    let out1 = s1.step(&input);
-    let out2 = s2.step(&input);
-    assert_eq!(out1.depletion, out2.depletion);
-    assert_eq!(out1.etc, out2.etc);
-    assert_eq!(out1.deep_percolation, out2.deep_percolation);
-    assert_eq!(out1.runoff, out2.runoff);
-    assert_eq!(out1.ks, out2.ks);
-    assert_eq!(out1.actual_et, out2.actual_et);
-    assert_eq!(out1.needs_irrigation, out2.needs_irrigation);
-}
+fn test_water_balance_determinism() {
+    let state = WaterBalanceState::new(0.33, 0.13, 600.0, 0.5);
+    let inputs: Vec<DailyInput> = (0..60)
+        .map(|day| DailyInput {
+            precipitation: if day % 5 == 0 { 20.0 } else { 0.0 },
+            irrigation: if day % 12 == 0 { 30.0 } else { 0.0 },
+            et0: 4.5,
+            kc: 1.0,
+        })
+        .collect();
 
-#[test]
-fn test_saturation_vapour_pressure_deterministic() {
-    let temp = 25.0;
-    let result1 = saturation_vapour_pressure(temp);
-    let result2 = saturation_vapour_pressure(temp);
-    assert_eq!(result1, result2);
-}
+    let (final1, out1) = simulate_season(&state, &inputs);
+    let (final2, out2) = simulate_season(&state, &inputs);
 
-#[test]
-fn test_van_genuchten_deterministic() {
-    let (theta_r, theta_s, alpha, n_vg, ks) = (0.045, 0.43, 0.145, 2.68, 712.8);
-    let h = -50.0;
-
-    let theta1 = van_genuchten_theta(h, theta_r, theta_s, alpha, n_vg);
-    let theta2 = van_genuchten_theta(h, theta_r, theta_s, alpha, n_vg);
-    assert_eq!(theta1, theta2);
-
-    let k1 = van_genuchten_k(h, ks, theta_r, theta_s, alpha, n_vg);
-    let k2 = van_genuchten_k(h, ks, theta_r, theta_s, alpha, n_vg);
-    assert_eq!(k1, k2);
-
-    let c1 = van_genuchten_capacity(h, theta_r, theta_s, alpha, n_vg);
-    let c2 = van_genuchten_capacity(h, theta_r, theta_s, alpha, n_vg);
-    assert_eq!(c1, c2);
-
-    let theta_mid = theta_r.midpoint(theta_s);
-    let inv1 = inverse_van_genuchten_h(theta_mid, theta_r, theta_s, alpha, n_vg);
-    let inv2 = inverse_van_genuchten_h(theta_mid, theta_r, theta_s, alpha, n_vg);
-    assert_eq!(inv1, inv2);
-}
-
-#[test]
-fn test_isotherm_nelder_mead_deterministic() {
-    let ce = [1.0, 2.5, 5.0, 10.0, 20.0, 40.0, 60.0, 80.0, 100.0];
-    let qe = [0.85, 1.92, 3.45, 5.8, 8.9, 12.1, 13.8, 14.5, 14.9];
-
-    let fit1 = fit_langmuir_nm(&ce, &qe).expect("fit should succeed");
-    let fit2 = fit_langmuir_nm(&ce, &qe).expect("fit should succeed");
-
-    assert_eq!(fit1.model, fit2.model);
-    assert_eq!(fit1.params.len(), fit2.params.len());
-    for (i, (p1, p2)) in fit1.params.iter().zip(fit2.params.iter()).enumerate() {
-        assert_eq!(p1, p2, "params[{i}]");
+    assert_eq!(final1.depletion, final2.depletion);
+    assert_eq!(out1.len(), out2.len());
+    for (a, b) in out1.iter().zip(out2.iter()) {
+        assert_eq!(a.depletion, b.depletion);
+        assert_eq!(a.etc, b.etc);
+        assert_eq!(a.deep_percolation, b.deep_percolation);
+        assert_eq!(a.runoff, b.runoff);
+        assert_eq!(a.ks, b.ks);
+        assert_eq!(a.actual_et, b.actual_et);
+        assert_eq!(a.needs_irrigation, b.needs_irrigation);
     }
-    assert_eq!(fit1.r_squared, fit2.r_squared);
-    assert_eq!(fit1.rmse, fit2.rmse);
 }
 
+/// Diversity index determinism: Shannon H' computed twice from the same
+/// OTU table must produce bit-exact results.
 #[test]
-fn test_richards_deterministic() {
-    let params = VanGenuchtenParams {
-        theta_r: 0.045,
-        theta_s: 0.43,
-        alpha: 0.145,
-        n_vg: 2.68,
-        ks: 712.8,
+fn test_diversity_determinism() {
+    // OTU table: species abundance counts (e.g. cover crop mix or microbiome)
+    let counts: Vec<f64> = vec![120.0, 85.0, 45.0, 30.0, 20.0];
+
+    let h1 = shannon(&counts);
+    let h2 = shannon(&counts);
+
+    assert_eq!(h1, h2);
+}
+
+/// SCS-CN runoff determinism: Runoff computed twice with identical
+/// precipitation and curve number must produce bit-exact results.
+#[test]
+fn test_scs_cn_runoff_determinism() {
+    let precip_mm = 50.0;
+    let cn = 75.0;
+
+    let q1 = scs_cn_runoff_standard(precip_mm, cn);
+    let q2 = scs_cn_runoff_standard(precip_mm, cn);
+
+    assert_eq!(q1, q2);
+}
+
+/// Nautilus brain determinism: Two brains created with the same config
+/// (and thus same seed) trained on identical data must produce bit-exact
+/// predictions.
+#[test]
+fn test_nautilus_brain_determinism() {
+    let config = AirSpringBrainConfig::default();
+
+    let mut brain1 = AirSpringBrain::new(config.clone(), "determinism-test");
+    let mut brain2 = AirSpringBrain::new(config, "determinism-test");
+
+    // Same training data for both
+    let observations: Vec<WeatherObservation> = (1_u16..=10)
+        .map(|doy| {
+            let fd = f64::from(doy);
+            WeatherObservation {
+                doy,
+                tmax: fd.mul_add(0.5, 25.0),
+                tmin: fd.mul_add(0.3, 12.0),
+                rh_mean: 65.0,
+                wind_2m: 2.0,
+                solar_rad: 20.0,
+                precip: if doy % 3 == 0 { 5.0 } else { 0.0 },
+                et0_observed: fd.mul_add(0.1, 4.0),
+                soil_deficit: 0.2,
+                crop_stress: 0.9,
+            }
+        })
+        .collect();
+
+    for obs in &observations {
+        brain1.observe(obs.clone());
+        brain2.observe(obs.clone());
+    }
+
+    let mse1 = brain1.train();
+    let mse2 = brain2.train();
+    assert_eq!(mse1, mse2, "Training MSE must match");
+
+    let test_obs = WeatherObservation {
+        doy: 15,
+        tmax: 28.0,
+        tmin: 14.0,
+        rh_mean: 60.0,
+        wind_2m: 2.5,
+        solar_rad: 22.0,
+        precip: 0.0,
+        et0_observed: 5.0,
+        soil_deficit: 0.25,
+        crop_stress: 0.85,
     };
 
-    let profiles1 = solve_richards_1d(&params, 100.0, 20, -50.0, -50.0, true, true, 0.1, 0.01)
-        .expect("solve should succeed");
-    let profiles2 = solve_richards_1d(&params, 100.0, 20, -50.0, -50.0, true, true, 0.1, 0.01)
-        .expect("solve should succeed");
+    let pred1 = brain1.predict(&test_obs).expect("brain1 should be trained");
+    let pred2 = brain2.predict(&test_obs).expect("brain2 should be trained");
 
-    assert_eq!(profiles1.len(), profiles2.len());
-    for (p1, p2) in profiles1.iter().zip(profiles2.iter()) {
-        assert_eq!(p1.z.len(), p2.z.len());
-        for (z1, z2) in p1.z.iter().zip(p2.z.iter()) {
-            assert_eq!(z1, z2);
-        }
-        for (h1, h2) in p1.h.iter().zip(p2.h.iter()) {
-            assert_eq!(h1, h2);
-        }
-        for (t1, t2) in p1.theta.iter().zip(p2.theta.iter()) {
-            assert_eq!(t1, t2);
-        }
-    }
+    assert_eq!(pred1.et0, pred2.et0);
+    assert_eq!(pred1.soil_deficit, pred2.soil_deficit);
+    assert_eq!(pred1.crop_stress, pred2.crop_stress);
 }

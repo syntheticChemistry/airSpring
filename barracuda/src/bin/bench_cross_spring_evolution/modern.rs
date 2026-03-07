@@ -25,6 +25,10 @@ pub fn bench_modern_upstream(v: &mut ValidationHarness) {
 }
 
 fn bench_upstream_provenance_registry(v: &mut ValidationHarness) {
+    use barracuda::shaders::provenance::SpringDomain::{
+        AirSpring, GroundSpring, HotSpring, NeuralSpring, WetSpring,
+    };
+
     println!("\n── Upstream Provenance Registry (barraCuda shaders::provenance) ─");
     let t0 = Instant::now();
 
@@ -42,12 +46,12 @@ fn bench_upstream_provenance_registry(v: &mut ValidationHarness) {
     let matrix = device_info::upstream_cross_spring_matrix();
     let air_receives: usize = matrix
         .iter()
-        .filter(|((_, to), _)| *to == barracuda::shaders::provenance::SpringDomain::AirSpring)
+        .filter(|((_, to), _)| *to == AirSpring)
         .map(|(_, count)| count)
         .sum();
     let air_gives: usize = matrix
         .iter()
-        .filter(|((from, _), _)| *from == barracuda::shaders::provenance::SpringDomain::AirSpring)
+        .filter(|((from, _), _)| *from == AirSpring)
         .map(|(_, count)| count)
         .sum();
     println!("  Cross-spring flows: airSpring receives {air_receives}, gives {air_gives}");
@@ -74,9 +78,9 @@ fn bench_upstream_provenance_registry(v: &mut ValidationHarness) {
         "  {:-<13}-+-{:-<3}-{:-<3}-{:-<3}-{:-<3}-{:-<3}",
         "", "", "", "", "", ""
     );
-    use barracuda::shaders::provenance::SpringDomain::*;
-    for from in &[HotSpring, WetSpring, NeuralSpring, AirSpring, GroundSpring] {
-        let row: Vec<String> = [HotSpring, WetSpring, NeuralSpring, AirSpring, GroundSpring]
+    let domains = [HotSpring, WetSpring, NeuralSpring, AirSpring, GroundSpring];
+    for from in &domains {
+        let row: Vec<String> = domains
             .iter()
             .map(|to| {
                 if from == to {
@@ -131,11 +135,10 @@ fn bench_precision_routing(v: &mut ValidationHarness) {
         }
     }
 
-    v.check_bool(&format!("precision_routing: {:?}", advice), true);
+    v.check_bool(&format!("precision_routing: {advice:?}"), true);
     println!("  Precision routing: {:.1?}", t0.elapsed());
 }
 
-#[allow(clippy::cast_precision_loss, clippy::suboptimal_flops)]
 fn bench_ops_14_19_gpu(v: &mut ValidationHarness) {
     println!("\n── Ops 14-19: Absorbed airSpring Agri Ops (BatchedElementwiseF64) ─");
 
@@ -180,12 +183,15 @@ fn bench_ops_14_19_gpu(v: &mut ValidationHarness) {
 }
 
 fn bench_op14_makkink(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
-    let n = 1000;
+    let n = 1000_i32;
     let inputs: Vec<MakkinkInput> = (0..n)
-        .map(|i| MakkinkInput {
-            tmean_c: 5.0 + (i as f64) * 0.03,
-            rs_mj: 8.0 + (i as f64) * 0.02,
-            elevation_m: 150.0,
+        .map(|i| {
+            let fi = f64::from(i);
+            MakkinkInput {
+                tmean_c: fi.mul_add(0.03, 5.0),
+                rs_mj: fi.mul_add(0.02, 8.0),
+                elevation_m: 150.0,
+            }
         })
         .collect();
 
@@ -208,12 +214,15 @@ fn bench_op14_makkink(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
 }
 
 fn bench_op15_turc(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
-    let n = 1000;
+    let n = 1000_i32;
     let inputs: Vec<TurcInput> = (0..n)
-        .map(|i| TurcInput {
-            tmean_c: 10.0 + (i as f64) * 0.02,
-            rs_mj: 10.0 + (i as f64) * 0.015,
-            rh_pct: 30.0 + (i as f64) * 0.06,
+        .map(|i| {
+            let fi = f64::from(i);
+            TurcInput {
+                tmean_c: fi.mul_add(0.02, 10.0),
+                rs_mj: fi.mul_add(0.015, 10.0),
+                rh_pct: fi.mul_add(0.06, 30.0),
+            }
         })
         .collect();
 
@@ -234,13 +243,13 @@ fn bench_op15_turc(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
 }
 
 fn bench_op16_hamon(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
-    let n = 365;
+    let n = 365_u32;
     let lat_rad = 42.7_f64.to_radians();
     let inputs: Vec<HamonInput> = (1..=n)
         .map(|d| HamonInput {
             tmean_c: 20.0,
             latitude_rad: lat_rad,
-            doy: d as u32,
+            doy: d,
         })
         .collect();
 
@@ -262,12 +271,15 @@ fn bench_op16_hamon(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
 }
 
 fn bench_op17_scs_cn(v: &mut ValidationHarness, gpu: &GpuRunoff) {
-    let n = 1000;
+    let n = 1000_i32;
     let inputs: Vec<RunoffInput> = (0..n)
-        .map(|i| RunoffInput {
-            precip_mm: 10.0 + (i as f64) * 0.1,
-            cn: 60.0 + (i as f64) * 0.03,
-            ia_ratio: 0.2,
+        .map(|i| {
+            let fi = f64::from(i);
+            RunoffInput {
+                precip_mm: fi.mul_add(0.1, 10.0),
+                cn: fi.mul_add(0.03, 60.0),
+                ia_ratio: 0.2,
+            }
         })
         .collect();
 
@@ -288,12 +300,15 @@ fn bench_op17_scs_cn(v: &mut ValidationHarness, gpu: &GpuRunoff) {
 }
 
 fn bench_op18_stewart(v: &mut ValidationHarness, gpu: &GpuYieldResponse) {
-    let n = 1000;
+    let n = 1000_i32;
     let inputs: Vec<YieldInput> = (0..n)
-        .map(|i| YieldInput {
-            ky: 0.5 + (i as f64) * 0.001,
-            et_actual: (0.3 + (i as f64) * 0.0007) * 600.0,
-            et_crop: 600.0,
+        .map(|i| {
+            let fi = f64::from(i);
+            YieldInput {
+                ky: fi.mul_add(0.001, 0.5),
+                et_actual: fi.mul_add(0.0007, 0.3) * 600.0,
+                et_crop: 600.0,
+            }
         })
         .collect();
 
@@ -322,13 +337,13 @@ fn bench_op18_stewart(v: &mut ValidationHarness, gpu: &GpuYieldResponse) {
 }
 
 fn bench_op19_blaney_criddle(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
-    let n = 365;
+    let n = 365_u32;
     let lat_rad = 35.0_f64.to_radians();
     let inputs: Vec<BlaneyCriddleInput> = (1..=n)
         .map(|d| BlaneyCriddleInput {
             tmean_c: 22.0,
             latitude_rad: lat_rad,
-            doy: d as u32,
+            doy: d,
         })
         .collect();
 
@@ -358,10 +373,14 @@ fn bench_scaling_modern(v: &mut ValidationHarness, gpu: &GpuRunoff) {
     println!("\n  Batch Scaling (modern upstream dispatch):");
     for &n in &[100_usize, 1_000, 10_000, 100_000] {
         let inputs: Vec<RunoffInput> = (0..n)
-            .map(|i| RunoffInput {
-                precip_mm: 20.0 + (i as f64) * 0.001,
-                cn: 75.0,
-                ia_ratio: 0.2,
+            .map(|i| {
+                #[allow(clippy::cast_precision_loss)]
+                let fi = i as f64;
+                RunoffInput {
+                    precip_mm: fi.mul_add(0.001, 20.0),
+                    cn: 75.0,
+                    ia_ratio: 0.2,
+                }
             })
             .collect();
 

@@ -2,7 +2,7 @@
 
 **Last Updated**: March 5, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 78 experiments (1237/1237 Python + 827 Rust lib tests + 186 forge tests + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.3.3 (wgpu 28), fused Welford + fused Pearson wired. 20.6× Rust-vs-Python geometric mean speedup (24/24 algorithms). Local GPU 6/6 ops parity. 27 GPU dispatch failures (upstream wgpu 28 NVK). metalForge 66/66 mixed pipeline, 62 forge tests. V070 handoff. All completed papers use open data and systems.
+**Status**: 81 experiments (1284/1284 Python + 854 Rust lib tests + 186 forge tests + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.3.3 (wgpu 28), fused Welford + fused Pearson wired. 20.6× Rust-vs-Python geometric mean speedup (24/24 algorithms). Local GPU 6/6 ops parity. 27 GPU dispatch failures (upstream wgpu 28 NVK). metalForge 66/66 mixed pipeline, 62 forge tests. V073 handoff. All completed papers use open data and systems. New: MC ET₀ uncertainty (Exp 079), Bootstrap/Jackknife CI (Exp 080), SPI drought index (Exp 081).
 
 ---
 
@@ -67,13 +67,16 @@
 | 55 | GPU Streaming Multi-Field — Exp 070 | 2 | 57 | — | `validate_gpu_streaming_multi_field` | Multi-field CPU parity + atlas-scale (50 stations) |
 | 56 | CPU Parity & Speedup Benchmark — Exp 071 | 1+2 | 34 | Standard | `validate_cpu_parity_benchmark` | 9 domains, 10M ET₀/s, 13K× Python atlas-scale |
 | 57 | Pure GPU End-to-End — Exp 072 | 2+3 | 46 | — | `validate_pure_gpu_multi_field` | 4-stage GPU, CPU↔GPU parity, 19.7× dispatch reduction |
+| 58 | Monte Carlo ET₀ Uncertainty Propagation — Exp 079 | 0+1 | 12+26 | Standard | `benchmark_mc_et0.json` | FAO-56 + groundSpring UQ (open literature) |
+| 59 | Bootstrap & Jackknife CI for Seasonal ET₀ — Exp 080 | 0+1 | 18+20 | Standard | `benchmark_bootstrap_jackknife.json` | Efron (1979) + synthetic ET₀ (open) |
+| 60 | Standardized Precipitation Index (SPI) — Exp 081 | 0+1 | 17+20 | Standard | `benchmark_drought_index.json` | McKee (1993) / WMO-1090 (open literature) |
 
 ### Controls Audit
 
-All 57+ completed papers have:
-- **Digitized benchmarks** in `control/*/benchmark_*.json` (56 benchmark JSONs, 56 control directories)
-- **Python control scripts** that validate against benchmarks (1237/1237 Python checks)
-- **Rust validation binaries** (81 barracuda + 5 forge = 86 binaries) that load the same benchmarks
+All 60 completed papers have:
+- **Digitized benchmarks** in `control/*/benchmark_*.json` (59 benchmark JSONs, 59 control directories)
+- **Python control scripts** that validate against benchmarks (1284/1284 Python checks)
+- **Rust validation binaries** (84 barracuda + 5 forge = 89 binaries) that load the same benchmarks
 - **Open or published data** (no institutional access required)
 - **Cross-validation** (33/33 Python↔Rust match at 1e-5; 690 crop-station yield pairs within 0.01; PT↔PM cross-validated)
 - **GPU wiring**: 25 Tier A modules + fused Welford (SeasonalReducer) + fused Pearson (pairwise_correlation_gpu) + `BrentGpu` (VG inverse) + `RichardsGpu` (Picard)
@@ -142,6 +145,9 @@ All 57+ completed papers have:
 | 55 | — | 57/57 (`validate_gpu_streaming_multi_field`) | Multi-field `gpu_step()` per-day | `seasonal_pipeline` (M fields) |
 | 56 | — | 34/34 (`validate_cpu_parity_benchmark`) | All 9 domains CPU parity | All modules (speedup) |
 | 57 | — | 46/46 (`validate_pure_gpu_multi_field`) | All stages GPU + scaling | `seasonal_pipeline` (GPU) |
+| 58 | 12/12 | 26/26 (`validate_mc_et0`) | `mc_et0_gpu` (CPU perturb → GPU batch ET₀) | `mc_et0` (UQ) |
+| 59 | 18/18 | 20/20 (`validate_bootstrap_jackknife`) | `GpuBootstrap` + `GpuJackknife` (S71 shaders) | `bootstrap` + `jackknife` |
+| 60 | 17/17 | 20/20 (`validate_drought_index`) | `BatchedElementwise` (Tier B, op=SPI) | `drought_index` (new) |
 
 ---
 

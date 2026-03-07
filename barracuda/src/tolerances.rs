@@ -48,6 +48,9 @@
 //! | Anderson coupling | `control/anderson_coupling/anderson_coupling.py` | `0500398` | 2026-02-27 | `python3 control/anderson_coupling/anderson_coupling.py` |
 //! | Diversity | `control/diversity/diversity_indices.py` | `fad2e1b` | 2026-02-26 | `python3 control/diversity/diversity_indices.py` |
 //! | GPU/CPU parity | `control/cpu_gpu_parity/cpu_gpu_parity.py` | `fad2e1b` | 2026-03-02 | `python3 control/cpu_gpu_parity/cpu_gpu_parity.py` |
+//! | Yield response | `control/yield_response/yield_response.py` | `97e7533` | 2026-02-28 | `python3 control/yield_response/yield_response.py` |
+//! | Climate scenario | `control/climate_scenario/climate_scenario_analysis.py` | `1c11763` | 2026-03-01 | `python3 control/climate_scenario/climate_scenario_analysis.py` |
+//! | Atlas decade | `control/atlas_decade/atlas_decade_analysis.py` | `1c11763` | 2026-03-01 | `python3 control/atlas_decade/atlas_decade_analysis.py` |
 
 pub use barracuda::tolerances::{check, Tolerance};
 
@@ -539,6 +542,22 @@ pub const BIO_BRAY_CURTIS: Tolerance = Tolerance {
     justification: "Bray-Curtis is |Σ|aᵢ-bᵢ|| / Σ(aᵢ+bᵢ); f64 matches scipy.spatial.distance.braycurtis to 1e-8",
 };
 
+// ═══════════════════════════════════════════════════════════════════
+// Stochastic / Monte Carlo (O(1/√N) convergence)
+// ═══════════════════════════════════════════════════════════════════
+
+/// Monte Carlo ET₀ propagation: O(1/√N) sampling noise for N=1000 samples.
+///
+/// Central limit theorem: `std_error` ≈ σ/√N. For ET₀ with σ ≈ 1 mm/day and
+/// N = 1000, expected error ≈ 0.03 mm. Tolerance of 0.5 mm provides ~16σ
+/// headroom for worst-case variance amplification through nonlinear chains.
+pub const MC_ET0_PROPAGATION: Tolerance = Tolerance {
+    name: "mc_et0_propagation",
+    abs_tol: 0.5,
+    rel_tol: 0.1,
+    justification: "O(1/√N) CLT convergence: σ/√1000 ≈ 0.03; 0.5 provides 16σ headroom",
+};
+
 #[cfg(test)]
 #[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
@@ -662,6 +681,8 @@ mod tests {
             &IOT_CSV_ROUNDTRIP,
             // NPU streaming classification
             &NPU_SIGMA_FLOOR,
+            // Stochastic / Monte Carlo
+            &MC_ET0_PROPAGATION,
         ];
         for tol in all_tolerances {
             assert!(
@@ -676,10 +697,10 @@ mod tests {
             );
             assert!(tol.abs_tol > 0.0, "{}: abs_tol must be positive", tol.name);
         }
-        // 46 Tolerance structs + 1 plain threshold (NPU_STRESS_DEPLETION_THRESHOLD)
+        // 47 Tolerance structs + 1 plain threshold (NPU_STRESS_DEPLETION_THRESHOLD)
         assert_eq!(
             all_tolerances.len(),
-            46,
+            47,
             "test must include every Tolerance constant defined in this file"
         );
         let threshold = NPU_STRESS_DEPLETION_THRESHOLD;

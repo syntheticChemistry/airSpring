@@ -97,6 +97,24 @@ pub fn json_f64_required(value: &serde_json::Value, path: &[&str]) -> f64 {
     })
 }
 
+/// Extract a u64 from a nested JSON path, or fail the benchmark with `exit(1)`.
+#[must_use]
+pub fn json_u64_required(value: &serde_json::Value, path: &[&str]) -> u64 {
+    let mut current = value;
+    for &key in path {
+        current = current.get(key).unwrap_or_else(|| {
+            let path_str = path.join(".");
+            eprintln!("FATAL: benchmark JSON missing required u64 path: {path_str}");
+            std::process::exit(1);
+        });
+    }
+    current.as_u64().unwrap_or_else(|| {
+        let path_str = path.join(".");
+        eprintln!("FATAL: benchmark JSON value at {path_str} is not u64");
+        std::process::exit(1);
+    })
+}
+
 /// Extract a string from a JSON value with path context for error messages.
 ///
 /// # Errors
@@ -217,6 +235,21 @@ pub fn json_object_opt<'a>(
         current = current.get(key)?;
     }
     current.as_object()
+}
+
+/// Extract a JSON object from a nested path, or fail with `exit(1)`.
+///
+/// Use in validation binaries where a missing benchmark field means broken infrastructure.
+#[must_use]
+pub fn json_object_required<'a>(
+    value: &'a serde_json::Value,
+    path: &[&str],
+) -> &'a serde_json::Map<String, serde_json::Value> {
+    json_object_opt(value, path).unwrap_or_else(|| {
+        let path_str = path.join(".");
+        eprintln!("FATAL: benchmark JSON missing required object at: {path_str}");
+        std::process::exit(1);
+    })
 }
 
 #[cfg(test)]

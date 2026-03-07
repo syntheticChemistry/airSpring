@@ -21,7 +21,7 @@
 //! - Pielou (1966) J Theor Biology 13:131-144
 //! - Bray & Curtis (1957) Ecological Monographs 27(4):325-349
 //!
-//! Provenance: script=`control/diversity/diversity_indices.py`, commit=8c3953b, date=2026-02-27
+//! Provenance: script=`control/diversity/diversity_indices.py`, commit=fad2e1b, date=2026-02-27
 
 use airspring_barracuda::eco::diversity;
 use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};

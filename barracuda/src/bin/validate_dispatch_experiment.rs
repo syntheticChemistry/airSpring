@@ -43,6 +43,7 @@ use airspring_barracuda::gpu::hargreaves::{BatchedHargreaves, HargreavesDay};
 use airspring_barracuda::gpu::reduce::SeasonalReducer;
 use airspring_barracuda::gpu::sensor_calibration::{BatchedSensorCal, SensorReading};
 use airspring_barracuda::gpu::water_balance::{BatchedWaterBalance, FieldDayInput};
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::ValidationHarness;
 
 fn main() {
@@ -273,7 +274,12 @@ fn phase_2_gpu_dispatch(v: &mut ValidationHarness) {
             .compute_gpu(&[reading])
             .expect("gpu sc")
             .vwc_values[0];
-        v.check_abs("gpu_sensor_parity", (sc_gpu - sc_cpu).abs(), 0.0, 1e-10);
+        v.check_abs(
+            "gpu_sensor_parity",
+            (sc_gpu - sc_cpu).abs(),
+            0.0,
+            tolerances::SENSOR_EXACT.abs_tol,
+        );
 
         let field = FieldDayInput {
             dr_prev: 40.0,
@@ -328,7 +334,7 @@ fn phase_3_batch_scaling(v: &mut ValidationHarness) {
         let all_match = result
             .et0_values
             .iter()
-            .all(|&val| (val - ref_val).abs() < 1e-12);
+            .all(|&val| (val - ref_val).abs() < tolerances::SENSOR_EXACT.abs_tol);
         v.check_bool(&format!("batch_n{n}_identical"), all_match);
         v.check_abs(&format!("batch_n{n}_under_5s"), elapsed_ms, 2500.0, 2500.0);
     }

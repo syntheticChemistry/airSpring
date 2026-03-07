@@ -20,7 +20,7 @@
 //!
 //! All thresholds sourced from benchmark JSON.
 //!
-//! Provenance: script=`control/richards/richards_1d.py`, commit=5684b1e, date=2026-02-26
+//! Provenance: script=`control/richards/richards_1d.py`, commit=3afc229, date=2026-02-26
 
 use airspring_barracuda::eco::richards::{
     self as richards, mass_balance_check, solve_richards_1d, van_genuchten_k, van_genuchten_theta,

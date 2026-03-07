@@ -9,7 +9,7 @@
 //! against published values from Dong et al. (2024).
 //!
 //! Benchmark source: `control/iot_irrigation/benchmark_dong2024.json`
-//! Provenance: script=`control/iot_irrigation/calibration_dong2024.py`, commit=502f2ada, date=2026-02-16
+//! Provenance: script=`control/iot_irrigation/calibration_dong2024.py`, commit=94cc51d, date=2026-02-16
 
 use airspring_barracuda::eco::sensor_calibration as sc;
 use airspring_barracuda::tolerances;

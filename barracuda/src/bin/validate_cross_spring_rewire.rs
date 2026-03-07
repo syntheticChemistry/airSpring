@@ -51,6 +51,7 @@ use airspring_barracuda::eco::richards::VanGenuchtenParams;
 use airspring_barracuda::eco::van_genuchten;
 use airspring_barracuda::gpu::richards::{BatchedRichards, RichardsRequest};
 use airspring_barracuda::gpu::van_genuchten::{compute_theta_cpu, BatchedVanGenuchten};
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation;
 use barracuda::validation::ValidationHarness;
 
@@ -274,13 +275,13 @@ fn validate_stateful_pipeline(v: &mut ValidationHarness) {
         "WaterBalanceState soil_moisture = 0.30",
         wbs.soil_moisture,
         0.30,
-        1e-15,
+        tolerances::SENSOR_EXACT.abs_tol,
     );
     v.check_abs(
         "WaterBalanceState snow = 0.0",
         wbs.snow_water_eq,
         0.0,
-        1e-15,
+        tolerances::SENSOR_EXACT.abs_tol,
     );
 
     let mut pipe =
@@ -288,7 +289,7 @@ fn validate_stateful_pipeline(v: &mut ValidationHarness) {
     let out = pipe.run(&[1.0, 2.0, 3.0]);
     v.check_bool(
         "StatefulPipeline passthrough preserves input",
-        out.len() == 3 && (out[0] - 1.0).abs() < 1e-15,
+        out.len() == 3 && (out[0] - 1.0).abs() < tolerances::SENSOR_EXACT.abs_tol,
     );
 
     v.check_bool(

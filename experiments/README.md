@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: March 7, 2026
-**Status**: 78 experiments, barraCuda 0.3.3 (wgpu 28), v0.7.3. 1237/1237 Python + 848 lib + 61 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. 14.5× Rust-vs-Python speedup (21/21 parity). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry integrated (v0.7.3). metalForge 66/66 mixed pipeline.
+**Status**: 81 experiments, barraCuda 0.3.3 (wgpu 28), v0.7.4. 1284/1284 Python + 854 lib + 186 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. 14.5× Rust-vs-Python speedup (21/21 parity). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry integrated (v0.7.3). New (v0.7.4): MC ET₀ uncertainty (Exp 079), Bootstrap/Jackknife CI (Exp 080), SPI drought index (Exp 081). metalForge 66/66 mixed pipeline.
 
 ---
 
@@ -87,20 +87,23 @@
 | 076 | NUCLEUS Mixed-Hardware Routing | metalForge | **Complete** | Rust (forge) | 27 workloads, NUCLEUS mesh routing, PCIe P2P bypass, 7-stage pipeline, Tower/Node/Nest atomics, multi-node cross-hop | 60 |
 | 077 | Cross-Spring Provenance & CPU↔GPU Benchmark | GPU + Cross-Spring | **Complete** | Rust (barracuda) | CPU vs GPU timing for ET₀/WB/Hargreaves/Kc/VG/GDD/pedotransfer, shader provenance tracking (5 springs), precision lineage validation (hotSpring→all), seasonal pipeline parity, uncertainty (jackknife/bootstrap/diversity) | 32 |
 | 078 | Cross-Spring Evolution — Universal Precision | GPU + Cross-Spring | **Complete** | Rust (barracuda) | f64 canonical → compile_shader_universal (6 ops: SCS-CN, Stewart, Makkink, Turc, Hamon, Blaney-Criddle), cross-spring provenance (hotSpring precision, wetSpring bio, groundSpring uncertainty, neuralSpring architecture), f64 compute shader reliability discovery (NVK/Mesa) | — |
+| 079 | Monte Carlo ET₀ Uncertainty Propagation | Stochastic/UQ | **Complete** | Python + Rust CPU | `gpu::mc_et0::mc_et0_cpu` — Lehmer LCG + Box-Muller MC sampling, input uncertainty → ET₀ distribution | 47+26 |
+| 080 | Bootstrap & Jackknife CI for Seasonal ET₀ | Stochastic/UQ | **Complete** | Python + Rust CPU | `gpu::bootstrap::GpuBootstrap::cpu()`, `gpu::jackknife::GpuJackknife::cpu()` — deterministic bootstrap resampling + jackknife LOO variance | 20+20 |
+| 081 | Standardized Precipitation Index (SPI) | Drought/Hydrology | **Complete** | Python + Rust CPU | `eco::drought_index` — gamma MLE, regularized incomplete gamma, normal quantile, multi-scale SPI (1/3/6/12), WMO classification | 20+20 |
 
-**Grand Total**: 1237 Python + **848 lib + 186 forge tests** + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (30 capabilities) + 86 binaries + barraCuda 0.3.3 (wgpu 28, DF64 precision tier) + 14.5× CPU speedup (21/21 parity) + 78 experiments (v0.7.3)
+**Grand Total**: 1284 Python + **854 lib + 186 forge tests** + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (30 capabilities) + 89 binaries + barraCuda 0.3.3 (wgpu 28, DF64 precision tier) + 14.5× CPU speedup (21/21 parity) + 81 experiments (v0.7.4). New: MC ET₀ (26/26), Bootstrap/Jackknife (20/20), SPI drought index (20/20).
 
 ---
 
-## Test Breakdown (v0.7.3)
+## Test Breakdown (v0.7.4)
 
 | Category | Tests | Source |
 |----------|:-----:|--------|
-| Barracuda lib (unit + doc) | 848 | `cargo test --lib` |
-| Barracuda validation binaries | 86 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
+| Barracuda lib (unit + doc) | 854 | `cargo test --lib` |
+| Barracuda validation binaries | 89 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
 | Forge | 186 | `metalForge/forge/` (substrate, dispatch, probe, workloads, cross-system routing) |
 | Forge binaries | 5 | `validate_dispatch`, `validate_live_hardware`, `validate_dispatch_routing`, `validate_mixed_pipeline`, `validate_nucleus_routing` |
-| **Total project tests** | **827 lib + 186 forge** | |
+| **Total project tests** | **854 lib + 186 forge** | |
 | Validation checks | 381/381 | 10 validation binaries |
 | Cross-spring evolution | 146/146 | `bench_cross_spring` (34 provenance entries, 6 origin Springs) |
 | Cross-validation | 33/33 | Python↔Rust match (tol=1e-5) |
@@ -386,6 +389,9 @@ Experiments follow `NNN_name` format:
 - `075`: Local GPU parity validation (6 ops via `local_elementwise.wgsl`)
 - `076`: NUCLEUS mixed-hardware routing (27 workloads, mesh routing, PCIe bypass)
 - `077`: Cross-spring provenance & CPU↔GPU benchmark (5-spring shader provenance, precision lineage)
+- `079`: Monte Carlo ET₀ uncertainty propagation (Lehmer LCG + Box-Muller MC sampling)
+- `080`: Bootstrap & Jackknife CI for seasonal ET₀ (deterministic resampling)
+- `081`: Standardized Precipitation Index (SPI) drought analysis (gamma MLE + normal quantile)
 
 Gap (013) reserved. See `specs/PAPER_REVIEW_QUEUE.md`.
 
@@ -486,6 +492,44 @@ Gap (013) reserved. See `specs/PAPER_REVIEW_QUEUE.md`.
 **Rust**: `barracuda/src/bin/validate_season_wb.rs` — 34/34 checks. Replicates the complete chain end-to-end. Validates mass balance to 0.1 mm, physical bounds, and crop ordering.
 
 **Key Result**: End-to-end pipeline audit confirms all `eco` modules compose correctly for a full growing season simulation.
+
+### Exp 079: Monte Carlo ET₀ Uncertainty Propagation
+
+**Paper**: FAO-56 (Allen 1998) ET₀ under parametric input uncertainty; Beven (2009) uncertainty in environmental modeling.
+
+**Control**: `control/mc_et0/mc_et0_propagation.py` — 47/47 checks. Deterministic Lehmer LCG (m=2³¹-1, a=16807) + Box-Muller transform for reproducible MC sampling. Simplified FAO-56 PM ET₀ with Gaussian perturbation of T, RH, u₂, Rₛ. Tests: default N=2000, zero uncertainty, high uncertainty (10% CV), arid/humid climate gradient, convergence at N=500/1000/2000, determinism (two runs identical), parametric CI consistency.
+
+**Benchmark**: `control/mc_et0/benchmark_mc_et0.json` — with provenance (script, commit, date, Python version).
+
+**Rust**: `barracuda/src/bin/validate_mc_et0.rs` — 26/26 checks. Validates `gpu::mc_et0::mc_et0_cpu` against Python benchmark. Tolerance: `MC_ET0_PROPAGATION` (abs=0.15, rel=0.08).
+
+**Key Result**: MC uncertainty propagation confirms ET₀ std dev ~0.2-0.5 mm/day for typical input uncertainty (3-5% CV), validating the stochastic infrastructure for GPU promotion.
+
+### Exp 080: Bootstrap & Jackknife CI for Seasonal ET₀
+
+**Paper**: Efron (1979) bootstrap method; Quenouille-Tukey jackknife; seasonal ET₀ confidence estimation.
+
+**Control**: `control/bootstrap_jackknife/bootstrap_jackknife_et0.py` — 20/20 checks. Generates deterministic synthetic seasonal ET₀ series, implements Lehmer RNG bootstrap resampling (B=1000), jackknife LOO variance. Tests: full season statistics, known analytical values (mean=5.0, SE=1/√10), small sample (n=5), constant data (CI width=0, variance=0).
+
+**Benchmark**: `control/bootstrap_jackknife/benchmark_bootstrap_jackknife.json` — with provenance.
+
+**Rust**: `barracuda/src/bin/validate_bootstrap_jackknife.rs` — 20/20 checks. Validates `gpu::bootstrap::GpuBootstrap::cpu()` and `gpu::jackknife::GpuJackknife::cpu()`. Checks CI bounds, SE, variance, and monotonicity (larger data → tighter CI).
+
+**Key Result**: Bootstrap CI and jackknife variance agree with analytical expectations. Infrastructure validated for GPU-parallel uncertainty quantification.
+
+### Exp 081: Standardized Precipitation Index (SPI)
+
+**Paper**: McKee et al. (1993) SPI definition; Thom (1958) gamma MLE; Edwards & McKee (1997) WMO drought classification.
+
+**Control**: `control/drought_index/drought_index_spi.py` — 20/20 checks. Implements gamma distribution MLE fitting (`Thom` method), regularized incomplete gamma function (series + continued fraction), inverse normal CDF (`norm_ppf`), and multi-scale SPI computation (SPI-1, SPI-3, SPI-6, SPI-12). WMO drought classification (extremely wet → extremely dry). Tests: gamma fit accuracy, SPI range [-3,3], scale monotonicity, dry/wet month classification.
+
+**Benchmark**: `control/drought_index/benchmark_drought_index.json` — with provenance. NaN sanitized to null for JSON compatibility.
+
+**Rust**: `barracuda/src/eco/drought_index.rs` — `DroughtClass`, `GammaParams`, `gamma_mle_fit`, `regularized_gamma_p` (series + continued fraction), `gamma_cdf`, `compute_spi`. Uses `barracuda::special::gamma::ln_gamma`. `validate_drought_index` binary: 20/20 checks.
+
+**Key Result**: SPI correctly identifies drought periods in synthetic precipitation record. Multi-scale analysis (SPI-1 vs SPI-12) reveals different temporal drought signals. GPU-promotable: each grid cell's SPI is independent.
+
+---
 
 ## Adding a New Experiment
 

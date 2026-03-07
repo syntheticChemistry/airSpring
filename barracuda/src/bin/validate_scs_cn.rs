@@ -15,7 +15,7 @@
 //!
 //! Reference: USDA-SCS (1972) NEH-4; USDA-SCS (1986) TR-55.
 //!
-//! Provenance: script=`control/scs_curve_number/scs_curve_number.py`, commit=6be822f, date=2026-02-28
+//! Provenance: script=`control/scs_curve_number/scs_curve_number.py`, commit=97e7533, date=2026-02-28
 
 use airspring_barracuda::eco::runoff::{
     amc_cn_dry, amc_cn_wet, potential_retention, scs_cn_runoff, scs_cn_runoff_standard, LandUse,

@@ -6,6 +6,7 @@ pub mod correction;
 pub mod crop;
 pub mod cytokine;
 pub mod diversity;
+pub mod drought_index;
 pub mod dual_kc;
 pub mod et0_ensemble;
 pub mod evapotranspiration;

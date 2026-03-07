@@ -8,7 +8,7 @@
 //! Validate soil moisture sensor calibration against published values.
 //!
 //! Benchmark source: `control/soil_sensors/benchmark_dong2020.json`
-//! Provenance: script=`control/soil_sensors/calibration_dong2020.py`, commit=502f2ada, date=2026-02-16
+//! Provenance: script=`control/soil_sensors/calibration_dong2020.py`, commit=94cc51d, date=2026-02-16
 //!
 //! All expected values and tolerances are sourced from the benchmark JSON,
 //! never hardcoded inline.

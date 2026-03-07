@@ -8,8 +8,8 @@
 //! Validate FAO-56 Chapter 7 dual crop coefficient against Python control.
 //!
 //! Benchmark source: `control/dual_kc/benchmark_dual_kc.json`
-//! script=`control/dual_kc/dual_crop_coefficient.py`, commit=374ff74f, date=2026-02-25
-//! Run: `python3 control/dual_kc/dual_crop_coefficient.py`
+//! script=`control/dual_kc/cover_crop_dual_kc.py`, commit=3afc229, date=2026-02-25
+//! Run: `python3 control/dual_kc/cover_crop_dual_kc.py`
 //!
 //! Validates:
 //! 1. Eq. 69 — `ETc` = (`Kcb` × `Ks` + `Ke`) × ET₀
@@ -251,8 +251,8 @@ fn validate_bare_soil_drydown(v: &mut ValidationHarness, bench: &serde_json::Val
     );
 
     // Python baseline provenance:
-    //   Script:  control/dual_kc/dual_crop_coefficient.py
-    //   Commit:  94cc51d
+    //   Script:  control/dual_kc/cover_crop_dual_kc.py
+    //   Commit:  3afc229
     //   Date:    2026-02-25
     //   Command: python control/dual_kc/dual_crop_coefficient.py
     //   Origin:  FAO-56 Eq. 72 bare soil drydown Kr time series (7 days)

@@ -1,7 +1,7 @@
 # airSpring Specifications
 
 **Last Updated**: March 7, 2026
-**Status**: Phase 0–4 complete — 1237/1237 Python + 848 lib + 186 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 86 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.3.3 (wgpu 28) + 14.5× CPU speedup (21/21 parity) + metalForge 66/66 + NUCLEUS primal (30 capabilities) + 78 experiments (v0.7.3)
+**Status**: Phase 0–4 complete — 1284/1284 Python + 854 lib + 186 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 89 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.3.3 (wgpu 28) + 14.5× CPU speedup (21/21 parity) + metalForge 66/66 + NUCLEUS primal (30 capabilities) + 81 experiments (v0.7.4)
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling, Anderson coupling
 
 ---
@@ -10,9 +10,9 @@
 
 | Metric | Value |
 |--------|-------|
-| Phase 0 (Python) | 1237/1237 PASS — 57 papers reproduced (FAO-56, soil, IoT, WB, dual Kc, cover crops, regional ET₀, Richards, biochar, 60yr WB, yield, CW2D, scheduling, lysimeter, sensitivity, Priestley-Taylor, 3-method intercomparison, Thornthwaite, GDD, pedotransfer, AmeriFlux, Hargreaves, diversity, multi-crop, NPU eco, forecast, SCAN moisture, NASS yield, Anderson coupling, Blaney-Criddle, SCS-CN, Green-Ampt, coupled runoff-infiltration, VG inverse, full-season WB) |
+| Phase 0 (Python) | 1284/1284 PASS — 57 papers reproduced (FAO-56, soil, IoT, WB, dual Kc, cover crops, regional ET₀, Richards, biochar, 60yr WB, yield, CW2D, scheduling, lysimeter, sensitivity, Priestley-Taylor, 3-method intercomparison, Thornthwaite, GDD, pedotransfer, AmeriFlux, Hargreaves, diversity, multi-crop, NPU eco, forecast, SCAN moisture, NASS yield, Anderson coupling, Blaney-Criddle, SCS-CN, Green-Ampt, coupled runoff-infiltration, VG inverse, full-season WB) |
 | Phase 0+ (Real data) | 15,300 station-days, R²=0.967 across 100 Michigan stations |
-| Phase 1 (Rust) | 827 lib + 186 forge tests — 86 binaries (81 barracuda + 5 forge) |
+| Phase 1 (Rust) | 854 lib + 186 forge tests — 89 binaries (84 barracuda + 5 forge) |
 | Phase 1.5 (CPU benchmark) | 20.6× geometric mean speedup (24/24 parity), 13,000× atlas-scale |
 | Phase 2 (Cross-validation) | 75/75 Python↔Rust match within 1e-5; 690 crop-station yield pairs within 0.01 |
 | Phase 2.5 (Tier B→A GPU) | 4 Tier B→A promotions (ops 5-8), `BatchedStatefulF64`, `BatchedNelderMeadGpu` |
@@ -50,7 +50,7 @@
 |----------|----------|-------------|
 | CONTROL_EXPERIMENT_STATUS.md | `../` | Detailed experiment logs and check counts |
 | CHANGELOG.md | `../` | Evolution history (Keep a Changelog format) |
-| experiments/README.md | `../experiments/` | Experiment index (77 completed) |
+| experiments/README.md | `../experiments/` | Experiment index (81 completed) |
 | whitePaper/baseCamp/README.md | `../whitePaper/baseCamp/` | Per-faculty research briefings |
 | whitePaper/STUDY.md | `../whitePaper/` | Full study results |
 | whitePaper/METHODOLOGY.md | `../whitePaper/` | Multi-phase validation protocol |

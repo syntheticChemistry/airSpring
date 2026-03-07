@@ -1,6 +1,16 @@
 {
   "experiment": "Exp 059: Atlas 80yr Decade Analysis",
-  "_provenance": "Open-Meteo ERA5 + FAO-56 PM ET\u2080",
+  "_provenance": {
+    "method": "Open-Meteo ERA5 + FAO-56 PM ET\u2080",
+    "baseline_script": "control/atlas_decade/atlas_decade_analysis.py",
+    "baseline_command": "python3 control/atlas_decade/atlas_decade_analysis.py",
+    "baseline_commit": "1c11763",
+    "python_version": "3.10.12",
+    "repository": "ecoPrimals/airSpring",
+    "created": "2026-03-01",
+    "data_source": "Open-Meteo ERA5 reanalysis (1950-2024), 6 Michigan stations",
+    "reproduction_note": "Requires data/open_meteo/ downloads; deterministic FAO-56 pipeline"
+  },
   "season": "May 1 \u2013 Sep 30 (DOY 121\u2013273)",
   "n_stations": 6,
   "stations": [

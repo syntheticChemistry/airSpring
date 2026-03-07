@@ -1,17 +1,17 @@
 # baseCamp: Per-Faculty Research Briefings
 
 **Updated**: March 7, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.7.3)
-**Status**: 78 experiments, 1237/1237 Python + 848 lib + 186 forge tests + 86 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.5× CPU speedup (21/21 parity) + barraCuda 0.3.3 (wgpu 28, DF64 precision tier) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + `PrecisionRoutingAdvice` wired + upstream provenance registry + 66/66 metalForge cross-system + NUCLEUS primal (30 capabilities) + zero clippy pedantic+nursery
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.7.4)
+**Status**: 81 experiments, 1284/1284 Python + 854 lib + 186 forge tests + 89 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.5× CPU speedup (21/21 parity) + barraCuda 0.3.3 (wgpu 28, DF64 precision tier) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + `PrecisionRoutingAdvice` wired + upstream provenance registry + 66/66 metalForge cross-system + NUCLEUS primal (30 capabilities) + zero clippy pedantic+nursery. New: MC ET₀ (Exp 079), Bootstrap/Jackknife CI (Exp 080), SPI drought index (Exp 081)
 
 ---
 
 ## Evolution Path
 
 ```
-Phase 0   Python/R baselines    — reproduce paper results with original tools (1237/1237)
+Phase 0   Python/R baselines    — reproduce paper results with original tools (1284/1284)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (846 lib + 1498 atlas, 86 binaries + 146/146 + 32/32 cross-spring benchmarks)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (854 lib + 1498 atlas, 89 binaries + 146/146 + 32/32 cross-spring benchmarks)
 Phase 1.5 CPU benchmark         — 14.5× Rust-vs-Python geometric mean (21/21 parity)
 Phase 2   BarraCuda GPU bridge  — 25 Tier A + 6 GPU-local modules wired (cross-spring S87 fully rewired)
 Phase 2.5 Ops 5-8 GPU-first   — Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed
@@ -33,13 +33,14 @@ Phase 4.5 Write→Absorb→Lean    — 6 local ops absorbed upstream (ops 14-19)
 Phase 4.6 NUCLEUS full-pipeline — 27 metalForge workloads, NUCLEUS mesh routing validated (Exp 076: 60/60), PCIe P2P bypass
 Phase 4.7 Cross-spring provenance — CPU↔GPU benchmark with 5-spring shader provenance tracking (Exp 077: 32/32)
 Phase 4.8 PrecisionRouting     — `PrecisionRoutingAdvice` wired, upstream provenance registry integrated (v0.7.3)
+Phase 4.9 Stochastic+Drought  — MC ET₀ uncertainty (Exp 079), Bootstrap/Jackknife CI (Exp 080), SPI drought index (Exp 081), `eco::drought_index` module (v0.7.4)
 ```
 
 ## Faculty Summary
 
 | Faculty | Institution | Track | Papers | Experiments | Checks | Domain |
 |---------|------------|-------|:------:|:-----------:|:------:|--------|
-| Dong | MSU BAE | Irrigation & Soil | 10+ | 77 | 1237+846 | ET₀ (8 methods), soil, IoT, WB, dual Kc, Richards, yield, ensemble, bias correction, GPU parity, GPU math portability, metalForge dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB audit, climate scenario, streaming pipeline, decade analysis, NASS yield, Shannon H' diversity, NUCLEUS primal, cross-primal pipeline, Paper 12 immunological Anderson, local GPU parity (Exp 075), NUCLEUS routing (Exp 076), cross-spring provenance (Exp 077) |
+| Dong | MSU BAE | Irrigation & Soil | 10+ | 81 | 1284+854 | ET₀ (8 methods), soil, IoT, WB, dual Kc, Richards, yield, ensemble, bias correction, GPU parity, GPU math portability, metalForge dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB audit, climate scenario, streaming pipeline, decade analysis, NASS yield, Shannon H' diversity, NUCLEUS primal, cross-primal pipeline, Paper 12 immunological Anderson, local GPU parity (Exp 075), NUCLEUS routing (Exp 076), cross-spring provenance (Exp 077), MC ET₀ uncertainty (Exp 079), Bootstrap/Jackknife CI (Exp 080), SPI drought index (Exp 081) |
 
 ## Faculty: Younsuk Dong, PhD
 
@@ -113,8 +114,11 @@ Phase 4.8 PrecisionRouting     — `PrecisionRoutingAdvice` wired, upstream prov
 | 61 | Cross-Spring Shannon H' Diversity — Exp 061 | 0→CPU | 63/63 | Synthetic OTU, Shannon H', Pielou, Bray-Curtis, Anderson |
 | 62 | NUCLEUS Integration Validation — Exp 062 | NUCLEUS | 29/29 | JSON-RPC science parity via biomeOS Unix socket |
 | 63 | NUCLEUS Cross-Primal Pipeline — Exp 063 | NUCLEUS | 28/28 | ecology domain, capability.call routing, cross-primal forwarding |
+| 64 | Monte Carlo ET₀ Uncertainty Propagation — Exp 079 | 0→CPU | 47+26 | Lehmer LCG + Box-Muller MC, input uncertainty → ET₀ distribution |
+| 65 | Bootstrap & Jackknife CI for Seasonal ET₀ — Exp 080 | 0→CPU | 20+20 | Deterministic bootstrap resampling + jackknife LOO variance |
+| 66 | Standardized Precipitation Index (SPI) — Exp 081 | 0→CPU | 20+20 | Gamma MLE + regularized incomplete gamma + normal quantile, multi-scale drought |
 
-### Rust Validation (Phase 1+3) — 81 binaries + 146/146 + 32/32 cross-spring benchmarks
+### Rust Validation (Phase 1+3) — 89 binaries + 146/146 + 32/32 cross-spring benchmarks
 
 | Binary | Checks | Modules Exercised |
 |--------|:------:|-------------------|
@@ -165,6 +169,9 @@ Phase 4.8 PrecisionRouting     — `PrecisionRoutingAdvice` wired, upstream prov
 | `validate_nucleus` | 29 | NUCLEUS JSON-RPC science parity (7 ET₀ + WB + yield) |
 | `validate_nucleus_pipeline` | 28 | NUCLEUS cross-primal pipeline (ecology domain, neural-api routing) |
 | `airspring_primal` | — | biomeOS NUCLEUS primal (16 capabilities, cross-primal forwarding) |
+| `validate_mc_et0` | 26 | MC ET₀ uncertainty propagation, Lehmer LCG, Box-Muller |
+| `validate_bootstrap_jackknife` | 20 | Bootstrap CI + Jackknife variance, seasonal ET₀ |
+| `validate_drought_index` | 20 | SPI-1/3/6/12, gamma MLE, WMO classification |
 | `bench_cpu_vs_python` | 21/21 parity | Full pipeline Rust vs Python (14.5× geometric mean) |
 
 ### GPU Orchestrators (Phase 2+2.5+2.9) — 25 Tier A integrated + 3 pipeline
@@ -243,7 +250,7 @@ $200 sensor, Open-Meteo weather data, and a $600 GPU running BarraCuda.
 
 ## Extension Explorations
 
-With 78 experiments validated and the full Python → Rust CPU → Titan V GPU live →
+With 81 experiments validated and the full Python → Rust CPU → Titan V GPU live →
 GPU math portability (13 modules, 46/46) → upstream lean (20 ops, `BatchedElementwiseF64`) → metalForge mixed hardware (27 workloads) → NUCLEUS primal (30 caps, 28/28 cross-primal pipeline + 60/60 NUCLEUS routing) → cross-spring provenance (32/32, 5-spring shader tracking) → `PrecisionRoutingAdvice` wired (v0.7.3),
 airSpring can now extend beyond reproduction into new science. These explorations use the validated stack to answer
 questions the original papers did not.

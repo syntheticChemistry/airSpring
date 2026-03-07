@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![deny(clippy::unwrap_used)]
 #![warn(clippy::pedantic)]
 #![allow(
     clippy::cast_precision_loss,
@@ -10,26 +11,36 @@
 //! `McMaster` GS, Wilhelm WW (1997) "Growing degree-days: one equation,
 //! two interpretations." Agricultural and Forest Meteorology, 87:291-300.
 //!
-//! Provenance: script=`control/gdd/growing_degree_days.py`, commit=8c3953b, date=2026-02-27
+//! Provenance: script=`control/gdd/growing_degree_days.py`, commit=fad2e1b, date=2026-02-27
 
 use airspring_barracuda::eco::crop::{
     accumulated_gdd_avg, accumulated_gdd_clamp, gdd_avg, gdd_clamp, kc_from_gdd, CropType,
 };
 use airspring_barracuda::tolerances::GDD_EXACT;
-use airspring_barracuda::validation::{self, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{
+    self, json_array, json_f64_required, json_field, json_u64_required, parse_benchmark_json,
+    ValidationHarness,
+};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/gdd/benchmark_gdd.json");
 
 fn generate_season_data(bench: &serde_json::Value) -> (Vec<f64>, Vec<f64>) {
-    let profiles = &bench["east_lansing_season"]["monthly_profiles"];
     let months = ["apr", "may", "jun", "jul", "aug", "sep", "oct"];
     let mut tmax = Vec::new();
     let mut tmin = Vec::new();
     for m in &months {
-        let mp = &profiles[*m];
-        let days = mp["days"].as_u64().unwrap() as usize;
-        let tx = mp["tmax"].as_f64().unwrap();
-        let tn = mp["tmin"].as_f64().unwrap();
+        let days = json_u64_required(
+            bench,
+            &["east_lansing_season", "monthly_profiles", m, "days"],
+        ) as usize;
+        let tx = json_f64_required(
+            bench,
+            &["east_lansing_season", "monthly_profiles", m, "tmax"],
+        );
+        let tn = json_f64_required(
+            bench,
+            &["east_lansing_season", "monthly_profiles", m, "tmin"],
+        );
         for _ in 0..days {
             tmax.push(tx);
             tmin.push(tn);
@@ -40,14 +51,12 @@ fn generate_season_data(bench: &serde_json::Value) -> (Vec<f64>, Vec<f64>) {
 
 fn validate_analytical(v: &mut ValidationHarness, bench: &serde_json::Value) {
     validation::section("Analytical: GDD average method");
-    let cases = bench["analytical"]["gdd_avg"]
-        .as_array()
-        .expect("gdd_avg cases");
+    let cases = json_array(bench, &["analytical", "gdd_avg"]);
     for tc in cases {
-        let tmax = tc["tmax"].as_f64().unwrap();
-        let tmin = tc["tmin"].as_f64().unwrap();
-        let tbase = tc["tbase"].as_f64().unwrap();
-        let expected = tc["expected"].as_f64().unwrap();
+        let tmax = json_field(tc, "tmax");
+        let tmin = json_field(tc, "tmin");
+        let tbase = json_field(tc, "tbase");
+        let expected = json_field(tc, "expected");
         v.check_abs(
             &format!("avg: Tmax={tmax}, Tmin={tmin}, Tbase={tbase}"),
             gdd_avg(tmax, tmin, tbase),
@@ -57,15 +66,13 @@ fn validate_analytical(v: &mut ValidationHarness, bench: &serde_json::Value) {
     }
 
     validation::section("Analytical: GDD clamp method");
-    let cases = bench["analytical"]["gdd_clamp"]
-        .as_array()
-        .expect("gdd_clamp cases");
+    let cases = json_array(bench, &["analytical", "gdd_clamp"]);
     for tc in cases {
-        let tmax = tc["tmax"].as_f64().unwrap();
-        let tmin = tc["tmin"].as_f64().unwrap();
-        let tbase = tc["tbase"].as_f64().unwrap();
-        let tceil = tc["tceil"].as_f64().unwrap();
-        let expected = tc["expected"].as_f64().unwrap();
+        let tmax = json_field(tc, "tmax");
+        let tmin = json_field(tc, "tmin");
+        let tbase = json_field(tc, "tbase");
+        let tceil = json_field(tc, "tceil");
+        let expected = json_field(tc, "expected");
         v.check_abs(
             &format!("clamp: Tmax={tmax}, Tmin={tmin}, Tbase={tbase}, Tceil={tceil}"),
             gdd_clamp(tmax, tmin, tbase, tceil),
@@ -75,33 +82,57 @@ fn validate_analytical(v: &mut ValidationHarness, bench: &serde_json::Value) {
     }
 }
 
+fn last_or_exit(v: &[f64], msg: &str) -> f64 {
+    v.last().copied().unwrap_or_else(|| {
+        eprintln!("FATAL: {msg}");
+        std::process::exit(1);
+    })
+}
+
 fn validate_accumulation(v: &mut ValidationHarness, bench: &serde_json::Value) {
     validation::section("Season accumulation");
     let (tmax, tmin) = generate_season_data(bench);
-    let acc = &bench["accumulation"];
-    let tol = acc["tol"].as_f64().unwrap();
+    let tol = json_f64_required(bench, &["accumulation", "tol"]);
 
-    let cum_avg = accumulated_gdd_avg(&tmax, &tmin, 10.0).expect("matched tmax/tmin");
+    let cum_avg = match accumulated_gdd_avg(&tmax, &tmin, 10.0) {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("FATAL: accumulated_gdd_avg failed: {e}");
+            std::process::exit(1);
+        }
+    };
     v.check_abs(
         "corn avg total GDD",
-        *cum_avg.last().unwrap(),
-        acc["corn_avg_total_gdd"].as_f64().unwrap(),
+        last_or_exit(&cum_avg, "accumulation produced empty"),
+        json_f64_required(bench, &["accumulation", "corn_avg_total_gdd"]),
         tol,
     );
 
-    let cum_clamp = accumulated_gdd_clamp(&tmax, &tmin, 10.0, 30.0).expect("matched tmax/tmin");
+    let cum_clamp = match accumulated_gdd_clamp(&tmax, &tmin, 10.0, 30.0) {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("FATAL: accumulated_gdd_clamp failed: {e}");
+            std::process::exit(1);
+        }
+    };
     v.check_abs(
         "corn clamp total GDD",
-        *cum_clamp.last().unwrap(),
-        acc["corn_clamp_total_gdd"].as_f64().unwrap(),
+        last_or_exit(&cum_clamp, "accumulation produced empty"),
+        json_f64_required(bench, &["accumulation", "corn_clamp_total_gdd"]),
         tol,
     );
 
-    let cum_alfalfa = accumulated_gdd_avg(&tmax, &tmin, 5.0).expect("matched tmax/tmin");
+    let cum_alfalfa = match accumulated_gdd_avg(&tmax, &tmin, 5.0) {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("FATAL: accumulated_gdd_avg failed: {e}");
+            std::process::exit(1);
+        }
+    };
     v.check_abs(
         "alfalfa avg total GDD",
-        *cum_alfalfa.last().unwrap(),
-        acc["alfalfa_avg_total_gdd"].as_f64().unwrap(),
+        last_or_exit(&cum_alfalfa, "accumulation produced empty"),
+        json_f64_required(bench, &["accumulation", "alfalfa_avg_total_gdd"]),
         tol,
     );
 
@@ -115,27 +146,30 @@ fn validate_accumulation(v: &mut ValidationHarness, bench: &serde_json::Value) {
     v.check_bool("accumulation monotonic", true);
 
     // Alfalfa (Tbase=5) > corn (Tbase=10) on same data
+    let alfalfa_last = last_or_exit(&cum_alfalfa, "alfalfa accumulation empty");
+    let corn_last = last_or_exit(&cum_avg, "corn accumulation empty");
     v.check_bool(
-        &format!(
-            "alfalfa GDD ({:.0}) > corn GDD ({:.0})",
-            cum_alfalfa.last().unwrap(),
-            cum_avg.last().unwrap()
-        ),
-        cum_alfalfa.last().unwrap() > cum_avg.last().unwrap(),
+        &format!("alfalfa GDD ({alfalfa_last:.0}) > corn GDD ({corn_last:.0})"),
+        alfalfa_last > corn_last,
     );
 }
 
 fn validate_phenology(v: &mut ValidationHarness, bench: &serde_json::Value) {
     validation::section("Phenological stage (Kc from GDD)");
-    let pheno = &bench["phenology"];
-    let tol = pheno["tol"].as_f64().unwrap();
+    let tol = json_f64_required(bench, &["phenology", "tol"]);
     let corn = CropType::Corn.gdd_params();
 
-    let cases = pheno["corn_kc_at_gdd"].as_array().unwrap();
+    let cases = json_array(bench, &["phenology", "corn_kc_at_gdd"]);
     for tc in cases {
-        let gdd = tc["gdd"].as_f64().unwrap();
-        let expected = tc["expected_kc"].as_f64().unwrap();
-        let kc = kc_from_gdd(gdd, &corn.kc_stages_gdd, &corn.kc_values).expect("matched stages/kc");
+        let gdd = json_field(tc, "gdd");
+        let expected = json_field(tc, "expected_kc");
+        let kc = match kc_from_gdd(gdd, &corn.kc_stages_gdd, &corn.kc_values) {
+            Ok(k) => k,
+            Err(e) => {
+                eprintln!("FATAL: kc_from_gdd failed: {e}");
+                std::process::exit(1);
+            }
+        };
         v.check_abs(&format!("corn Kc at GDD={gdd:.0}"), kc, expected, tol);
     }
 }
@@ -143,12 +177,18 @@ fn validate_phenology(v: &mut ValidationHarness, bench: &serde_json::Value) {
 fn validate_pattern(v: &mut ValidationHarness, bench: &serde_json::Value) {
     validation::section("Seasonal pattern checks");
     let (tmax, tmin) = generate_season_data(bench);
-    let cum = accumulated_gdd_avg(&tmax, &tmin, 10.0).expect("matched tmax/tmin");
-    let total = *cum.last().unwrap();
+    let cum = match accumulated_gdd_avg(&tmax, &tmin, 10.0) {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("FATAL: accumulated_gdd_avg failed: {e}");
+            std::process::exit(1);
+        }
+    };
+    let total = last_or_exit(&cum, "accumulation produced empty");
 
-    let range = &bench["thresholds"]["corn_gdd_range"];
-    let lo = range[0].as_f64().unwrap();
-    let hi = range[1].as_f64().unwrap();
+    let range = json_array(bench, &["thresholds", "corn_gdd_range"]);
+    let lo = json_f64_required(&range[0], &[]);
+    let hi = json_f64_required(&range[1], &[]);
     v.check_bool(
         &format!("corn total GDD {total:.0} in [{lo:.0}, {hi:.0}]"),
         (lo..=hi).contains(&total),
@@ -166,9 +206,16 @@ fn validate_pattern(v: &mut ValidationHarness, bench: &serde_json::Value) {
     );
 
     // Method comparison
-    let cum_clamp = accumulated_gdd_clamp(&tmax, &tmin, 10.0, 30.0).expect("matched tmax/tmin");
-    let diff = (cum.last().unwrap() - cum_clamp.last().unwrap()).abs();
-    let max_diff = bench["thresholds"]["method_diff_max"].as_f64().unwrap();
+    let cum_clamp = match accumulated_gdd_clamp(&tmax, &tmin, 10.0, 30.0) {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("FATAL: accumulated_gdd_clamp failed: {e}");
+            std::process::exit(1);
+        }
+    };
+    let diff =
+        (last_or_exit(&cum, "cum empty") - last_or_exit(&cum_clamp, "cum_clamp empty")).abs();
+    let max_diff = json_f64_required(bench, &["thresholds", "method_diff_max"]);
     v.check_bool(
         &format!("avg-clamp diff {diff:.0} < {max_diff:.0}"),
         diff < max_diff,
@@ -179,7 +226,13 @@ fn main() {
     validation::init_tracing();
     validation::banner("Growing Degree Days Validation");
     let mut v = ValidationHarness::new("Growing Degree Days");
-    let bench = parse_benchmark_json(BENCHMARK_JSON).expect("valid benchmark JSON");
+    let bench = match parse_benchmark_json(BENCHMARK_JSON) {
+        Ok(b) => b,
+        Err(e) => {
+            eprintln!("FATAL: invalid benchmark JSON: {e}");
+            std::process::exit(1);
+        }
+    };
 
     validate_analytical(&mut v, &bench);
     validate_accumulation(&mut v, &bench);

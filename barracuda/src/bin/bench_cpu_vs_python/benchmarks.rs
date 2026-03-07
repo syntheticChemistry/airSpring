@@ -12,12 +12,12 @@
 //!
 //! | Value | Source script | Commit | Command |
 //! |-------|--------------|--------|---------|
-//! | `5.152_603_881_624_521` (ET₀) | `control/fao56/penman_monteith.py` | `502f2ada` | `python3 control/fao56/penman_monteith.py` |
-//! | `98.774_974_121_825_71` (WB Dr) | `control/water_balance/fao56_water_balance.py` | `d3ecdc8` | `python3 control/water_balance/fao56_water_balance.py` |
-//! | `0.1323` (Topp VWC) | `control/soil_sensors/calibration_dong2020.py` | `502f2ada` | Topp(1980) at ε=10000 |
-//! | Richards θ(surface) | `control/richards/richards_1d.py` | `5684b1e` | `python3 control/richards/richards_1d.py` |
-//! | Langmuir qmax/KL | `control/biochar/biochar_isotherms.py` | `5684b1e` | `python3 control/biochar/biochar_isotherms.py` |
-//! | Shannon H' | `control/diversity/diversity_indices.py` | `8c3953b` | `python3 control/diversity/diversity_indices.py` |
+//! | `5.152_603_881_624_521` (ET₀) | `control/fao56/penman_monteith.py` | `94cc51d` | `python3 control/fao56/penman_monteith.py` |
+//! | `98.774_974_121_825_71` (WB Dr) | `control/water_balance/fao56_water_balance.py` | `94cc51d` | `python3 control/water_balance/fao56_water_balance.py` |
+//! | `0.1323` (Topp VWC) | `control/soil_sensors/calibration_dong2020.py` | `94cc51d` | Topp(1980) at ε=10000 |
+//! | Richards θ(surface) | `control/richards/richards_1d.py` | `3afc229` | `python3 control/richards/richards_1d.py` |
+//! | Langmuir qmax/KL | `control/biochar/biochar_isotherms.py` | `3afc229` | `python3 control/biochar/biochar_isotherms.py` |
+//! | Shannon H' | `control/diversity/diversity_indices.py` | `fad2e1b` | `python3 control/diversity/diversity_indices.py` |
 
 use std::f64::consts::PI;
 use std::hint::black_box;

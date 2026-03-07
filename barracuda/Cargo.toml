@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.7.3"
+version = "0.7.4"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
@@ -408,3 +408,15 @@ path = "src/bin/validate_cross_spring_provenance.rs"
 [[bin]]
 name = "validate_cross_spring_evolution"
 path = "src/bin/validate_cross_spring_evolution.rs"
+
+[[bin]]
+name = "validate_mc_et0"
+path = "src/bin/validate_mc_et0.rs"
+
+[[bin]]
+name = "validate_bootstrap_jackknife"
+path = "src/bin/validate_bootstrap_jackknife.rs"
+
+[[bin]]
+name = "validate_drought_index"
+path = "src/bin/validate_drought_index.rs"

@@ -77,6 +77,7 @@ use airspring_barracuda::gpu::pedotransfer::{BatchedPedotransfer, PedotransferIn
 use airspring_barracuda::gpu::seasonal_pipeline::{CropConfig, SeasonalPipeline, WeatherDay};
 use airspring_barracuda::gpu::van_genuchten::BatchedVanGenuchten;
 use airspring_barracuda::gpu::water_balance::BatchedWaterBalance;
+use airspring_barracuda::tolerances;
 use barracuda::device::WgpuDevice;
 use barracuda::validation::ValidationHarness;
 
@@ -555,6 +556,7 @@ fn bench_uncertainty_provenance(v: &mut ValidationHarness, device: Option<&Arc<W
 }
 
 fn bench_seasonal_pipeline_provenance(v: &mut ValidationHarness, device: Option<&Arc<WgpuDevice>>) {
+    const PIPELINE_MB_TOL: f64 = 0.5;
     println!("\n── Seasonal Pipeline (airSpring → all springs contribute) ────");
     let weather: Vec<WeatherDay> = (120..=240)
         .map(|doy| WeatherDay {
@@ -586,9 +588,13 @@ fn bench_seasonal_pipeline_provenance(v: &mut ValidationHarness, device: Option<
         cpu_result.yield_ratio > 0.0 && cpu_result.yield_ratio <= 1.0,
     );
 
-    v.check_bool(
-        "Pipeline: mass balance < 0.5mm",
-        cpu_result.mass_balance_error.abs() < 0.5,
+    // Seasonal pipeline mass balance: 0.5 mm accommodates cumulative rounding over 120+ days
+    // (per-step WATER_BALANCE_MASS is 0.01 mm; season-wide error accumulates).
+    v.check_abs(
+        "Pipeline: mass balance",
+        cpu_result.mass_balance_error.abs(),
+        0.0,
+        PIPELINE_MB_TOL,
     );
 
     if let Some(dev) = device {
@@ -598,12 +604,14 @@ fn bench_seasonal_pipeline_provenance(v: &mut ValidationHarness, device: Option<
             let gpu_elapsed = gpu_start.elapsed();
 
             let yield_diff = (cpu_result.yield_ratio - gpu_result.yield_ratio).abs();
-            v.check_bool(
+            v.check_abs(
                 &format!(
                     "Pipeline GPU: {} days ({gpu_elapsed:.1?}), yield={:.3}, Δ={yield_diff:.4}",
                     gpu_result.n_days, gpu_result.yield_ratio
                 ),
-                yield_diff < 0.01,
+                gpu_result.yield_ratio,
+                cpu_result.yield_ratio,
+                tolerances::DUAL_KC_PRECISION.abs_tol,
             );
         }
     }

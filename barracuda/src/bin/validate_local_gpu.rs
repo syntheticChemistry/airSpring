@@ -41,6 +41,7 @@ use airspring_barracuda::gpu::simple_et0::{
 use airspring_barracuda::gpu::yield_response::{
     BatchedYieldResponse, GpuYieldResponse, YieldInput,
 };
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::ValidationHarness;
 
 fn main() {
@@ -386,7 +387,12 @@ fn validate_edge_cases(
             ia_ratio: 0.2,
         }])
         .expect("zero P");
-    v.check_bool("zero_precip_zero_runoff", zero_p[0].abs() < 0.01);
+    v.check_abs(
+        "zero_precip_zero_runoff",
+        zero_p[0],
+        0.0,
+        tolerances::SCS_CN_ANALYTICAL.abs_tol,
+    );
 
     let full_yield = gpu_yield
         .compute(&[YieldInput {
@@ -395,7 +401,12 @@ fn validate_edge_cases(
             et_crop: 600.0,
         }])
         .expect("full yield");
-    v.check_bool("full_et_full_yield", (full_yield[0] - 1.0).abs() < 0.01);
+    v.check_abs(
+        "full_et_full_yield",
+        full_yield[0],
+        1.0,
+        tolerances::DUAL_KC_PRECISION.abs_tol,
+    );
 
     println!(
         "  empty={}, single={:.4}, zero_p={:.4}, full={:.4}",

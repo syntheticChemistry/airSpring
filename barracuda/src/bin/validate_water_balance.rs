@@ -19,7 +19,7 @@
 //!
 //! All thresholds sourced from benchmark JSON.
 //!
-//! Provenance: script=`control/water_balance/fao56_water_balance.py`, commit=d3ecdc8, date=2026-02-27
+//! Provenance: script=`control/water_balance/fao56_water_balance.py`, commit=94cc51d, date=2026-02-27
 
 use airspring_barracuda::eco::water_balance::{self as wb, DailyInput, WaterBalanceState};
 use airspring_barracuda::tolerances;

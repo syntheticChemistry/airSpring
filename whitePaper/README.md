@@ -2,7 +2,7 @@
 
 **Status**: Working draft — reviewed for PII, suitable for public repository
 **Purpose**: Document the replication of precision agriculture computational methods on consumer hardware using BarraCuda
-**Date**: March 2026 (v0.7.3)
+**Date**: March 2026 (v0.7.4)
 
 ---
 
@@ -80,7 +80,7 @@ The study answers four questions:
 | West Olive (blueberry) | 0.257 | 0.963 | 639.1 mm | 635.2 mm |
 | **Overall** | **0.267** | **0.967** | — | — |
 
-### Phase 1 (Rust BarraCuda): 846 lib + 62 forge tests, 86 binaries
+### Phase 1 (Rust BarraCuda): 854 lib + 62 forge tests, 89 binaries
 
 | Binary | Checks | Key Validation |
 |--------|:------:|----------------|
@@ -147,5 +147,5 @@ No institutional access required. No proprietary software. AGPL-3.0 licensed.
 ## Next Phase: GPU Validation & metalForge
 
 See `specs/PAPER_REVIEW_QUEUE.md` for the full paper queue and compute pipeline.
-See `wateringHole/handoffs/` for the latest handoffs (V073 current).
+See `wateringHole/handoffs/` for the latest handoffs (V074 current).
 See `CHANGELOG.md` for the full evolution history.

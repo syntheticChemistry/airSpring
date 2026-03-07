@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![deny(clippy::unwrap_used)]
 #![warn(clippy::pedantic)]
 #![allow(
     clippy::cast_precision_loss,
@@ -10,21 +11,23 @@
 //! Saxton KE, Rawls WJ (2006) "Soil water characteristic estimates by texture
 //! and organic matter for hydrologic solutions." SSSAJ 70(5):1569-1578.
 //!
-//! Provenance: script=`control/pedotransfer/saxton_rawls.py`, commit=8c3953b, date=2026-02-27
+//! Provenance: script=`control/pedotransfer/saxton_rawls.py`, commit=fad2e1b, date=2026-02-27
 
 use airspring_barracuda::eco::soil_moisture::{saxton_rawls, SaxtonRawlsInput};
 use airspring_barracuda::tolerances::{PEDOTRANSFER_KSAT, PEDOTRANSFER_MOISTURE};
-use airspring_barracuda::validation::{self, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{
+    self, json_array, json_f64_required, json_field, json_object_required, parse_benchmark_json,
+    ValidationHarness,
+};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/pedotransfer/benchmark_pedotransfer.json");
 
 fn validate_loam_intermediates(v: &mut ValidationHarness, bench: &serde_json::Value) {
     validation::section("Loam analytical intermediates");
-    let li = &bench["loam_intermediates"];
-    let s = li["S"].as_f64().unwrap();
-    let c = li["C"].as_f64().unwrap();
-    let om = li["OM"].as_f64().unwrap();
+    let s = json_f64_required(bench, &["loam_intermediates", "S"]);
+    let c = json_f64_required(bench, &["loam_intermediates", "C"]);
+    let om = json_f64_required(bench, &["loam_intermediates", "OM"]);
     let input = SaxtonRawlsInput {
         sand: s,
         clay: c,
@@ -35,71 +38,71 @@ fn validate_loam_intermediates(v: &mut ValidationHarness, bench: &serde_json::Va
     v.check_abs(
         "loam: θ_wp",
         r.theta_wp,
-        li["theta_1500"].as_f64().unwrap(),
+        json_f64_required(bench, &["loam_intermediates", "theta_1500"]),
         PEDOTRANSFER_MOISTURE.abs_tol,
     );
     v.check_abs(
         "loam: θ_fc",
         r.theta_fc,
-        li["theta_33"].as_f64().unwrap(),
+        json_f64_required(bench, &["loam_intermediates", "theta_33"]),
         PEDOTRANSFER_MOISTURE.abs_tol,
     );
     v.check_abs(
         "loam: θ_s",
         r.theta_s,
-        li["theta_s"].as_f64().unwrap(),
+        json_f64_required(bench, &["loam_intermediates", "theta_s"]),
         PEDOTRANSFER_MOISTURE.abs_tol,
     );
     v.check_abs(
         "loam: λ",
         r.lambda,
-        li["lambda"].as_f64().unwrap(),
+        json_f64_required(bench, &["loam_intermediates", "lambda"]),
         PEDOTRANSFER_MOISTURE.abs_tol,
     );
     v.check_abs(
         "loam: Ksat",
         r.ksat_mm_hr,
-        li["ksat_mm_hr"].as_f64().unwrap(),
+        json_f64_required(bench, &["loam_intermediates", "ksat_mm_hr"]),
         PEDOTRANSFER_KSAT.abs_tol,
     );
 }
 
 fn validate_texture_classes(v: &mut ValidationHarness, bench: &serde_json::Value) {
     validation::section("USDA texture classes");
-    let tol_m = bench["tol_moisture"].as_f64().unwrap();
-    let tol_k = bench["tol_ksat"].as_f64().unwrap();
+    let tol_m = json_f64_required(bench, &["tol_moisture"]);
+    let tol_k = json_f64_required(bench, &["tol_ksat"]);
 
-    let textures = bench["texture_classes"].as_object().unwrap();
+    let textures = json_object_required(bench, &["texture_classes"]);
     for (name, data) in textures {
         let input = SaxtonRawlsInput {
-            sand: data["S"].as_f64().unwrap(),
-            clay: data["C"].as_f64().unwrap(),
-            om_pct: data["OM"].as_f64().unwrap(),
+            sand: json_field(data, "S"),
+            clay: json_field(data, "C"),
+            om_pct: json_field(data, "OM"),
         };
         let r = saxton_rawls(&input);
 
         v.check_abs(
             &format!("{name}: θ_wp"),
             r.theta_wp,
-            data["theta_wp"].as_f64().unwrap(),
+            json_field(data, "theta_wp"),
             tol_m,
         );
         v.check_abs(
             &format!("{name}: θ_fc"),
             r.theta_fc,
-            data["theta_fc"].as_f64().unwrap(),
+            json_field(data, "theta_fc"),
             tol_m,
         );
         v.check_abs(
             &format!("{name}: θ_s"),
             r.theta_s,
-            data["theta_s"].as_f64().unwrap(),
+            json_field(data, "theta_s"),
             tol_m,
         );
         v.check_abs(
             &format!("{name}: Ksat"),
             r.ksat_mm_hr,
-            data["ksat_mm_hr"].as_f64().unwrap(),
+            json_field(data, "ksat_mm_hr"),
             tol_k,
         );
 
@@ -111,9 +114,9 @@ fn validate_texture_classes(v: &mut ValidationHarness, bench: &serde_json::Value
 
         // AWC
         let awc = r.theta_fc - r.theta_wp;
-        let awc_range = &bench["thresholds"]["awc_range"];
-        let lo = awc_range[0].as_f64().unwrap();
-        let hi = awc_range[1].as_f64().unwrap();
+        let awc_range = json_array(bench, &["thresholds", "awc_range"]);
+        let lo = json_f64_required(&awc_range[0], &[]);
+        let hi = json_f64_required(&awc_range[1], &[]);
         v.check_bool(
             &format!("{name}: AWC {awc:.3} in [{lo}, {hi}]"),
             (lo..=hi).contains(&awc),
@@ -123,20 +126,20 @@ fn validate_texture_classes(v: &mut ValidationHarness, bench: &serde_json::Value
 
 fn validate_physical_ordering(v: &mut ValidationHarness, bench: &serde_json::Value) {
     validation::section("Physical ordering across textures");
-    let textures = bench["texture_classes"].as_object().unwrap();
+    let textures = json_object_required(bench, &["texture_classes"]);
 
     let sand_data = &textures["sand"];
     let clay_data = &textures["clay"];
 
     let sand = saxton_rawls(&SaxtonRawlsInput {
-        sand: sand_data["S"].as_f64().unwrap(),
-        clay: sand_data["C"].as_f64().unwrap(),
-        om_pct: sand_data["OM"].as_f64().unwrap(),
+        sand: json_field(sand_data, "S"),
+        clay: json_field(sand_data, "C"),
+        om_pct: json_field(sand_data, "OM"),
     });
     let clay = saxton_rawls(&SaxtonRawlsInput {
-        sand: clay_data["S"].as_f64().unwrap(),
-        clay: clay_data["C"].as_f64().unwrap(),
-        om_pct: clay_data["OM"].as_f64().unwrap(),
+        sand: json_field(clay_data, "S"),
+        clay: json_field(clay_data, "C"),
+        om_pct: json_field(clay_data, "OM"),
     });
 
     v.check_bool(
@@ -194,7 +197,13 @@ fn main() {
     validation::init_tracing();
     validation::banner("Pedotransfer (Saxton-Rawls) Validation");
     let mut v = ValidationHarness::new("Pedotransfer Saxton-Rawls");
-    let bench = parse_benchmark_json(BENCHMARK_JSON).expect("valid benchmark JSON");
+    let bench = match parse_benchmark_json(BENCHMARK_JSON) {
+        Ok(b) => b,
+        Err(e) => {
+            eprintln!("FATAL: invalid benchmark JSON: {e}");
+            std::process::exit(1);
+        }
+    };
 
     validate_loam_intermediates(&mut v, &bench);
     validate_texture_classes(&mut v, &bench);

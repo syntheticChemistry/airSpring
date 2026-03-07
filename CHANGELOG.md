@@ -2,6 +2,41 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.7.4] - 2026-03-07
+
+### Stochastic Methods & Drought Index — MC ET₀, Bootstrap/Jackknife CI, SPI
+
+- **Exp 079: Monte Carlo ET₀ Uncertainty Propagation** — Python baseline (47 checks) +
+  Rust validation binary (`validate_mc_et0`, 26/26 PASS). Deterministic Lehmer LCG +
+  Box-Muller for MC sampling of ET₀ input uncertainty. Tests default/zero/high uncertainty,
+  arid/humid climate gradient, convergence, determinism, and parametric CI consistency.
+  Validates `gpu::mc_et0::mc_et0_cpu` against Python benchmark.
+
+- **Exp 080: Bootstrap & Jackknife CI for Seasonal ET₀** — Python baseline (20 checks) +
+  Rust validation binary (`validate_bootstrap_jackknife`, 20/20 PASS). Deterministic
+  bootstrap resampling + jackknife leave-one-out variance estimation for seasonal ET₀
+  series. Validates `gpu::bootstrap::GpuBootstrap::cpu()` and
+  `gpu::jackknife::GpuJackknife::cpu()` against Python benchmark for full season,
+  known analytical, small samples, and constant data.
+
+- **Exp 081: Standardized Precipitation Index (SPI)** — Python baseline (20 checks) +
+  new `eco::drought_index` Rust module + Rust validation binary
+  (`validate_drought_index`, 20/20 PASS). Gamma MLE fitting, regularized incomplete
+  gamma, normal quantile transform for multi-scale drought analysis (SPI-1/3/6/12).
+  WMO drought classification. Uses `barracuda::special::gamma::ln_gamma`.
+
+- **New module**: `eco::drought_index` — `DroughtClass`, `GammaParams`, `gamma_mle_fit`,
+  `regularized_gamma_p`, `gamma_cdf`, `compute_spi`. GPU-promotable (embarrassingly
+  parallel per grid cell).
+
+- **Tolerance**: `MC_ET0_PROPAGATION` added to the 13-tier tolerance architecture.
+
+- **Quality gates**: `cargo fmt` ✓, `cargo clippy --all-targets -- -D warnings` ✓ (0 warnings),
+  `cargo test --lib` ✓ (854/854 pass), `cargo test --test determinism` ✓ (5/5 pass).
+  All 3 new validation binaries pass (26+20+20 = 66/66).
+
+- **Totals**: 81 experiments, 1284/1284 Python, 854 lib tests, 89 binaries.
+
 ## [0.7.3] - 2026-03-07
 
 ### Modern Upstream Integration — PrecisionRouting, Provenance Registry, Cross-Spring Benchmark

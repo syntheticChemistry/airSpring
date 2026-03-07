@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-03-07 (v0.7.3 — 78 experiments, barraCuda 0.3.3 (wgpu 28), 1237/1237 Python + 848 lib + 186 forge + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.5× Rust-vs-Python speedup** (21/21 algorithms). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry (v0.7.3). metalForge 66/66 mixed pipeline. Write→Absorb→Lean cycle complete.)
+**Updated**: 2026-03-07 (v0.7.4 — 81 experiments, barraCuda 0.3.3 (wgpu 28), 1284/1284 Python + 854 lib + 186 forge + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.5× Rust-vs-Python speedup** (21/21 algorithms). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry (v0.7.3). metalForge 66/66 mixed pipeline. Write→Absorb→Lean cycle complete. New: Exp 079 MC ET₀ (26/26), Exp 080 Bootstrap/Jackknife (20/20), Exp 081 SPI Drought Index (20/20).)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -59,7 +59,7 @@ bash run_all_baselines.sh
 #    Cached to: control/long_term_wb/data/wooster_era5_1960_2023.json
 python control/long_term_wb/long_term_water_balance.py
 
-# 7. Run Rust validation binaries (853+1498 checks across 86 binaries)
+# 7. Run Rust validation binaries (854+1498 checks across 89 binaries)
 cd barracuda
 for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   validate_sensor_calibration validate_real_data cross_validate \
@@ -236,7 +236,7 @@ BEFORE evolving to Rust/BarraCuda.
 | `control/water_balance/fao56_water_balance.py` | FAO-56 Chapter 8 | 18/18 | TAW/RAW (3), Ks bounds (5), dry-down mass balance (2), irrigated mass balance (3), MI summer 535mm ET (3), heavy rain DP (2) |
 | `control/iot_irrigation/anova_irrigation.R` | Dong et al. 2024 (R v4.3.1) | — | Written, awaiting R install; one-way ANOVA on blueberry/tomato yield |
 
-**Total Python: 1237/1237 checks PASS, 51/51 baseline experiments PASS**
+**Total Python: 1284/1284 checks PASS, 54/54 baseline experiments PASS**
 **Exp 018 Atlas: 1393/1393 Rust checks PASS (100-station full Michigan, 10 crops, cross-validated vs Python)**
 **R ANOVA: script written, 1 skip (R not installed)**
 
@@ -969,13 +969,81 @@ across ET₀, water balance, and yield response for scenario-based planning.
 
 ---
 
+### Experiment 079: Monte Carlo ET₀ Uncertainty Propagation — PHASE 0+1 COMPLETE
+
+**Goal**: Propagate measurement uncertainties through the FAO-56 Penman-Monteith
+equation via Monte Carlo simulation. Validates the `gpu::mc_et0` CPU and GPU
+paths against Python baselines.
+
+**Phase 0 (Python baseline — 12/12 PASS):**
+- [x] MC propagation through FAO-56 PM (N=2000, seed=42)
+- [x] Zero uncertainty → zero spread
+- [x] High uncertainty → wider CI
+- [x] Arid vs humid climate gradient
+- [x] Convergence analysis (std stabilises with N)
+
+**Phase 1 (Rust — 26/26 PASS):**
+- [x] `gpu::mc_et0::mc_et0_cpu` — deterministic MC propagation
+- [x] `validate_mc_et0` binary: 26/26 checks vs benchmark JSON
+- [x] Cross-climate: arid ET₀ > humid ET₀, plausible ranges
+- [x] Parametric CI consistent with empirical percentiles
+- [x] Determinism: same seed → identical output
+
+**Binary**: `validate_mc_et0`
+
+---
+
+### Experiment 080: Bootstrap & Jackknife CI for Seasonal ET₀ — PHASE 0+1 COMPLETE
+
+**Goal**: Validate GPU-accelerated bootstrap mean CI and leave-one-out
+jackknife variance estimation on seasonal ET₀ data (153-day Michigan
+growing season).
+
+**Phase 0 (Python baseline — 18/18 PASS):**
+- [x] Bootstrap 95% CI for mean ET₀ (B=1000)
+- [x] Jackknife mean variance (leave-one-out)
+- [x] Known analytical: [1..10] mean=5.5, jackknife var≈0.917
+- [x] Small sample wider CI, constant data zero variance
+
+**Phase 1 (Rust — 20/20 PASS):**
+- [x] `gpu::bootstrap::GpuBootstrap` (CPU path) — bootstrap CI
+- [x] `gpu::jackknife::GpuJackknife` (CPU path) — jackknife variance
+- [x] `validate_bootstrap_jackknife` binary: 20/20 checks
+- [x] Bootstrap/Jackknife SE agreement (ratio ≈ 1.0)
+
+**Binary**: `validate_bootstrap_jackknife`
+
+---
+
+### Experiment 081: Standardized Precipitation Index (SPI) — PHASE 0+1 COMPLETE
+
+**Goal**: Implement the McKee et al. (1993) SPI drought classification
+algorithm. New `eco::drought_index` module with gamma MLE fitting and
+standard normal transformation for multi-scale drought analysis.
+
+**Phase 0 (Python baseline — 17/17 PASS):**
+- [x] SPI-1, SPI-3, SPI-6, SPI-12 on 5-year synthetic Michigan precip
+- [x] Gamma MLE fit (Thom 1958 approximation)
+- [x] WMO drought classification (7 categories)
+- [x] Scale ordering: SPI-3 smoother than SPI-1
+
+**Phase 1 (Rust — 20/20 PASS):**
+- [x] `eco::drought_index` — `compute_spi()`, `gamma_mle_fit()`, `DroughtClass`
+- [x] `validate_drought_index` binary: 20/20 checks
+- [x] SPI values ≥90% within 0.1 of Python baseline
+- [x] Mean ≈ 0, std ≈ 1 (standard normal property)
+
+**Binary**: `validate_drought_index`
+
+---
+
 ## Evolution Roadmap
 
 ```
 Track 1 (Precision Agriculture):
-  Phase 0  [COMPLETE]: Python baselines — 1237/1237 PASS (54 experiments)
+  Phase 0  [COMPLETE]: Python baselines — 1284/1284 PASS (57 experiments)
   Phase 0+ [COMPLETE]: Real data pipeline — 15,300 station-days, ET₀ R²=0.97
-  Phase 1  [COMPLETE]: Rust validation — 846 lib + 62 forge tests, 86 binaries
+  Phase 1  [COMPLETE]: Rust validation — 854 lib + 62 forge tests, 89 binaries
   Phase 1.5[COMPLETE]: CPU benchmark — Rust 14.5× faster than Python (21/21 parity)
   Phase 2  [COMPLETE]: Cross-validation — 75/75 MATCH (Python↔Rust, tol=1e-5)
   Phase 2.5[COMPLETE]: Ops 5-8 GPU-first — 4 orchestrators rewired (ToadStool S70+ absorbed)
@@ -1049,8 +1117,8 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026 — Updated: March 5, 2026 (v0.7.0)*
-*78 experiments, 1237/1237 Python, 827 lib + 186 forge tests, 86 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 20.6× CPU speedup (24/24 parity), barraCuda 0.3.3 (wgpu 28), fused Welford + Pearson wired.*
+*Initialized: February 16, 2026 — Updated: March 7, 2026 (v0.7.4)*
+*81 experiments, 1284/1284 Python, 854 lib + 186 forge tests, 89 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 20.6× CPU speedup (24/24 parity), barraCuda 0.3.3 (wgpu 28), fused Welford + Pearson wired.*
 *8 ET₀ methods + SCS-CN runoff + Green-Ampt infiltration + coupled runoff-infiltration + VG inverse + full-season WB + Exp 058 Climate Scenario (46/46).*
 *NUCLEUS primal (16 capabilities, 28/28 cross-primal pipeline). Atlas decade 80yr (102/102). NASS real (99/99). NCBI diversity (63/63).*
 *25 Tier A + 6 GPU-local modules. Ops 5-8 GPU-first (ToadStool S87). GPU stats (neuralSpring S69).*
