@@ -26,6 +26,7 @@
 
 use std::sync::Arc;
 
+use barracuda::device::driver_profile::PrecisionRoutingAdvice;
 use barracuda::device::probe::F64BuiltinCapabilities;
 use barracuda::device::{Fp64Rate, Fp64Strategy, GpuDriverProfile, WgpuDevice};
 
@@ -48,18 +49,22 @@ pub struct DevicePrecisionReport {
     pub subgroup_min_size: u32,
     /// Maximum subgroup (warp/wavefront) size. Zero if not reported.
     pub subgroup_max_size: u32,
+    /// Precision routing advice (toadStool S128) — integrates f64 shared-memory
+    /// reliability for workgroup-based reductions.
+    pub precision_routing: PrecisionRoutingAdvice,
 }
 
 impl std::fmt::Display for DevicePrecisionReport {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "GPU: {}", self.adapter_name)?;
-        writeln!(f, "  Fp64Strategy: {:?}", self.fp64_strategy)?;
-        writeln!(f, "  Fp64Rate:     {:?}", self.fp64_rate)?;
-        writeln!(f, "  f64 shaders:  {}", self.has_f64_shaders)?;
-        writeln!(f, "  SPIR-V pass:  {}", self.has_spirv_passthrough)?;
+        writeln!(f, "  Fp64Strategy:      {:?}", self.fp64_strategy)?;
+        writeln!(f, "  Fp64Rate:          {:?}", self.fp64_rate)?;
+        writeln!(f, "  PrecisionRouting:  {:?}", self.precision_routing)?;
+        writeln!(f, "  f64 shaders:       {}", self.has_f64_shaders)?;
+        writeln!(f, "  SPIR-V pass:       {}", self.has_spirv_passthrough)?;
         writeln!(
             f,
-            "  Builtins:     exp={} log={} sin={} cos={} sqrt={} fma={}",
+            "  Builtins:          exp={} log={} sin={} cos={} sqrt={} fma={}",
             self.builtins.exp,
             self.builtins.log,
             self.builtins.sin,
@@ -70,11 +75,11 @@ impl std::fmt::Display for DevicePrecisionReport {
         if self.subgroup_min_size > 0 {
             write!(
                 f,
-                "  Subgroups:    {}-{} lanes",
+                "  Subgroups:         {}-{} lanes",
                 self.subgroup_min_size, self.subgroup_max_size
             )
         } else {
-            write!(f, "  Subgroups:    not reported")
+            write!(f, "  Subgroups:         not reported")
         }
     }
 }
@@ -95,6 +100,7 @@ pub fn probe_device(device: &WgpuDevice) -> DevicePrecisionReport {
         adapter_name: info.name.clone(),
         fp64_strategy: profile.fp64_strategy(),
         fp64_rate: profile.fp64_rate,
+        precision_routing: profile.precision_routing(),
         builtins,
         has_f64_shaders: device.has_f64_shaders(),
         has_spirv_passthrough: device.has_spirv_passthrough(),
@@ -120,6 +126,36 @@ pub fn try_f64_device() -> Option<Arc<WgpuDevice>> {
         .or_else(|_| barracuda::device::test_pool::tokio_block_on(WgpuDevice::new_f64_capable()))
         .ok()
         .map(Arc::new)
+}
+
+/// Query the upstream `barraCuda` provenance registry for shaders consumed by airSpring.
+///
+/// Returns records from `barracuda::shaders::provenance` where airSpring is a consumer,
+/// bridging the upstream registry with airSpring's local provenance table.
+#[must_use]
+pub fn upstream_airspring_provenance() -> Vec<&'static barracuda::shaders::provenance::ShaderRecord>
+{
+    barracuda::shaders::provenance::shaders_consumed_by(
+        barracuda::shaders::provenance::SpringDomain::AirSpring,
+    )
+}
+
+/// Generate the upstream cross-spring evolution report (markdown).
+#[must_use]
+pub fn upstream_evolution_report() -> String {
+    barracuda::shaders::provenance::evolution_report()
+}
+
+/// Query the cross-spring dependency matrix from the upstream registry.
+#[must_use]
+pub fn upstream_cross_spring_matrix() -> std::collections::HashMap<
+    (
+        barracuda::shaders::provenance::SpringDomain,
+        barracuda::shaders::provenance::SpringDomain,
+    ),
+    usize,
+> {
+    barracuda::shaders::provenance::cross_spring_matrix()
 }
 
 /// Cross-spring shader provenance for airSpring GPU modules.
@@ -167,17 +203,24 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
             "thornthwaite_et0 (op=11)",
             "gdd (op=12)",
             "pedotransfer_poly (op=13)",
+            "makkink_et0 (op=14)",
+            "turc_et0 (op=15)",
+            "hamon_et0 (op=16)",
+            "scs_cn_runoff (op=17)",
+            "stewart_yield_water (op=18)",
+            "blaney_criddle_et0 (op=19)",
         ],
         origin: "multi-spring convergence",
-        domain: "Precision agriculture: FAO-56 ET₀, WB, VG, Thornthwaite, GDD, pedotransfer",
+        domain: "Precision agriculture: FAO-56 ET₀, WB, VG, Thornthwaite, GDD, pedotransfer, simple ET₀, runoff, yield",
         evolved_by: &[
             "airSpring (domain equations, ops 0-1, 5-8 → v0.5.6)",
             "hotSpring S54 (acos_f64, sin_f64 for Ra/sunset angle)",
             "neuralSpring (batch orchestrator pattern)",
             "BarraCuda S54→S70+ (ops 0-8 unified absorption)",
             "BarraCuda S79 (ops 9-13: VG, Thornthwaite, GDD, pedotransfer)",
+            "airSpring v0.7.2 → BarraCuda (ops 14-19: Makkink, Turc, Hamon, SCS-CN, Stewart, Blaney-Criddle)",
         ],
-        domain_use: "GPU-first dispatch: 14 ops covering all soil physics + crop science",
+        domain_use: "GPU-first dispatch: 20 ops covering all soil physics, crop science, and hydrology",
     },
     ShaderProvenance {
         shader: "kriging_f64.wgsl",
@@ -542,6 +585,67 @@ mod tests {
     }
 
     #[test]
+    fn test_upstream_provenance_registry() {
+        let records = upstream_airspring_provenance();
+        assert!(
+            !records.is_empty(),
+            "airSpring should consume upstream shaders"
+        );
+        for r in &records {
+            assert!(
+                r.consumers
+                    .contains(&barracuda::shaders::provenance::SpringDomain::AirSpring),
+                "shader {} should list airSpring as consumer",
+                r.path
+            );
+        }
+    }
+
+    #[test]
+    fn test_upstream_evolution_report() {
+        let report = upstream_evolution_report();
+        assert!(report.contains("Timeline"));
+        assert!(report.contains("Dependency Matrix"));
+        assert!(report.contains("airSpring"));
+    }
+
+    #[test]
+    fn test_upstream_cross_spring_matrix() {
+        let matrix = upstream_cross_spring_matrix();
+        assert!(
+            !matrix.is_empty(),
+            "cross-spring matrix should be non-empty"
+        );
+    }
+
+    #[test]
+    fn test_precision_routing_field() {
+        let report = DevicePrecisionReport {
+            adapter_name: "Test GPU".to_string(),
+            fp64_strategy: Fp64Strategy::Native,
+            fp64_rate: Fp64Rate::Full,
+            precision_routing: PrecisionRoutingAdvice::F64Native,
+            builtins: F64BuiltinCapabilities {
+                basic_f64: true,
+                exp: true,
+                log: true,
+                exp2: true,
+                log2: true,
+                sin: true,
+                cos: true,
+                sqrt: true,
+                fma: true,
+                abs_min_max: true,
+            },
+            has_f64_shaders: true,
+            has_spirv_passthrough: false,
+            subgroup_min_size: 32,
+            subgroup_max_size: 32,
+        };
+        assert_eq!(report.precision_routing, PrecisionRoutingAdvice::F64Native);
+    }
+
+    #[test]
     fn test_try_f64_device() {
         // May return None in CI — just ensure no panic
         let _ = try_f64_device();
@@ -564,6 +668,7 @@ mod tests {
             adapter_name: "Test GPU".to_string(),
             fp64_strategy: Fp64Strategy::Native,
             fp64_rate: Fp64Rate::Full,
+            precision_routing: PrecisionRoutingAdvice::F64Native,
             builtins: F64BuiltinCapabilities {
                 basic_f64: true,
                 exp: true,
@@ -584,6 +689,7 @@ mod tests {
         let s = format!("{report}");
         assert!(s.contains("Test GPU"));
         assert!(s.contains("Native"));
+        assert!(s.contains("PrecisionRouting"));
         assert!(s.contains("32-32 lanes"));
     }
 }

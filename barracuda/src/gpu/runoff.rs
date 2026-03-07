@@ -1,28 +1,29 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! Batched SCS-CN runoff computation — GPU universal precision via `local_elementwise_f64.wgsl`.
+//! Batched SCS-CN runoff computation — GPU-first via `BarraCuda` `BatchedElementwiseF64`.
 //!
 //! The SCS-CN equation `Q = (P − Ia)² / (P − Ia + S)` is embarrassingly parallel
 //! across fields/events. This module provides a batched orchestrator with both
-//! CPU fallback and GPU dispatch via `LocalElementwise` (f64 canonical, universal precision, op=0).
+//! CPU fallback and GPU dispatch via `BatchedElementwiseF64` (Op 17).
 //!
 //! # Cross-Spring Provenance
 //!
 //! | Primitive | Origin | Status |
 //! |-----------|--------|--------|
-//! | SCS-CN equation | USDA-SCS (1972) NEH-4 | **GPU-universal** (f64 canonical) |
+//! | SCS-CN equation | USDA-SCS (1972) NEH-4 | **GPU-first** (`BatchedElementwiseF64` op=17) |
 //! | AMC adjustment | Chow et al. (1988) | CPU fallback |
-//! | GPU dispatch | `local_elementwise_f64.wgsl` op=0 | **Live** (v0.6.9, f64 canonical) |
+//! | GPU dispatch | `batched_elementwise_f64.wgsl` op=17 | **Leaning** (absorbed from local WGSL) |
 //!
 //! # GPU Path
 //!
-//! SCS-CN runs on GPU via `LocalElementwise` (f64 canonical, universal precision).
+//! SCS-CN runs on GPU via `BatchedElementwiseF64::execute()` with `Op::ScsCnRunoff`.
+//! Input layout: `[P, CN, Ia_ratio]` per element (stride=3).
 
 use std::sync::Arc;
 
 use barracuda::device::WgpuDevice;
+use barracuda::ops::batched_elementwise_f64::{BatchedElementwiseF64, Op};
 
 use crate::eco::runoff;
-use crate::gpu::local_dispatch::{LocalElementwise, LocalOp};
 
 /// Single runoff computation request.
 #[derive(Debug, Clone, Copy)]
@@ -47,15 +48,15 @@ pub struct BatchedRunoffResult {
 /// Batched SCS-CN runoff orchestrator.
 ///
 /// CPU path uses `eco::runoff` directly. GPU path dispatches via
-/// `LocalElementwise` (f64 canonical shader via `compile_shader_universal`).
+/// `BatchedElementwiseF64` with `Op::ScsCnRunoff`.
 #[derive(Debug)]
 pub struct BatchedRunoff;
 
 /// GPU-backed SCS-CN runoff dispatcher.
 ///
-/// Uses `local_elementwise_f64.wgsl` op 0 via `compile_shader_universal` (f64 canonical → f32 on consumer GPUs).
+/// Uses `batched_elementwise_f64.wgsl` op 17 via `BatchedElementwiseF64`.
 pub struct GpuRunoff {
-    dispatcher: LocalElementwise,
+    executor: BatchedElementwiseF64,
 }
 
 impl std::fmt::Debug for GpuRunoff {
@@ -69,10 +70,10 @@ impl GpuRunoff {
     ///
     /// # Errors
     ///
-    /// Returns an error if WGSL shader compilation fails.
+    /// Returns an error if GPU device initialization fails.
     pub fn new(device: Arc<WgpuDevice>) -> crate::error::Result<Self> {
         Ok(Self {
-            dispatcher: LocalElementwise::new(device)?,
+            executor: BatchedElementwiseF64::new(device)?,
         })
     }
 
@@ -82,10 +83,18 @@ impl GpuRunoff {
     ///
     /// Returns an error if GPU dispatch fails.
     pub fn compute(&self, inputs: &[RunoffInput]) -> crate::error::Result<Vec<f64>> {
-        let a: Vec<f64> = inputs.iter().map(|i| i.precip_mm).collect();
-        let b: Vec<f64> = inputs.iter().map(|i| i.cn).collect();
-        let c: Vec<f64> = inputs.iter().map(|i| i.ia_ratio).collect();
-        self.dispatcher.dispatch(LocalOp::ScsCnRunoff, &a, &b, &c)
+        if inputs.is_empty() {
+            return Ok(Vec::new());
+        }
+        let mut data = Vec::with_capacity(inputs.len() * 3);
+        for inp in inputs {
+            data.push(inp.precip_mm);
+            data.push(inp.cn);
+            data.push(inp.ia_ratio);
+        }
+        Ok(self
+            .executor
+            .execute(&data, inputs.len(), Op::ScsCnRunoff)?)
     }
 
     /// Batch compute with standard Ia ratio (0.2) and uniform CN.
@@ -94,10 +103,18 @@ impl GpuRunoff {
     ///
     /// Returns an error if GPU dispatch fails.
     pub fn compute_uniform(&self, precip_mm: &[f64], cn: f64) -> crate::error::Result<Vec<f64>> {
-        let b = vec![cn; precip_mm.len()];
-        let c = vec![0.2; precip_mm.len()];
-        self.dispatcher
-            .dispatch(LocalOp::ScsCnRunoff, precip_mm, &b, &c)
+        if precip_mm.is_empty() {
+            return Ok(Vec::new());
+        }
+        let mut data = Vec::with_capacity(precip_mm.len() * 3);
+        for &p in precip_mm {
+            data.push(p);
+            data.push(cn);
+            data.push(0.2);
+        }
+        Ok(self
+            .executor
+            .execute(&data, precip_mm.len(), Op::ScsCnRunoff)?)
     }
 }
 

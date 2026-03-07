@@ -36,21 +36,37 @@
 //! | `eco::sensor_calibration` (OLS) | `gpu::stats` | `linear_regression_f64.wgsl` | Sensor regression | A (GPU, neuralSpring S69) |
 //! | `eco::*` (multi-var) | `gpu::stats` | `matrix_correlation_f64.wgsl` | Soil correlation | A (GPU, neuralSpring S69) |
 //! | `eco::infiltration` | `gpu::infiltration` | `brent_f64.wgsl` (GA residual, S83) | Green-Ampt infiltration | A (`BrentGpu`) |
-//! | `eco::runoff` | `gpu::runoff` | `local_elementwise_f64.wgsl` (op=0) | SCS-CN runoff | A (f64 canonical, universal) |
-//! | `eco::yield_response` | `gpu::yield_response` | `local_elementwise_f64.wgsl` (op=1) | Stewart yield | A (f64 canonical, universal) |
-//! | `eco::evapotranspiration` (Makkink/Turc/Hamon/BC) | `gpu::simple_et0` | `local_elementwise_f64.wgsl` (ops 2-5) | Simple ET₀ batch | A (f64 canonical, universal) |
+//! | `eco::runoff` | `gpu::runoff` | `batched_elementwise_f64.wgsl` (op=17) | SCS-CN runoff | A (GPU-first, absorbed upstream) |
+//! | `eco::yield_response` | `gpu::yield_response` | `batched_elementwise_f64.wgsl` (op=18) | Stewart yield | A (GPU-first, absorbed upstream) |
+//! | `eco::evapotranspiration` (Makkink/Turc/Hamon/BC) | `gpu::simple_et0` | `batched_elementwise_f64.wgsl` (ops 14-16, 19) | Simple ET₀ batch | A (GPU-first, absorbed upstream) |
 //!
-//! # Current Inventory (March 5, 2026 — v0.7.1, `barraCuda` HEAD post-0.3.3, wgpu 28)
+//! # Current Inventory (March 7, 2026 — v0.7.3, `barraCuda` HEAD post-0.3.3, wgpu 28)
+//!
+//! ## v0.7.3: Modern Upstream Integration
+//!
+//! New in v0.7.3:
+//!
+//! - **`PrecisionRoutingAdvice`** — toadStool S128 integration wired into
+//!   `DevicePrecisionReport`. Routes workloads to the correct precision path:
+//!   `F64Native` (Titan V), `F64NativeNoSharedMem` (NVK), `Df64Only` (consumer),
+//!   `F32Only` (edge). This captures the shared-memory reliability axis that
+//!   `Fp64Strategy` alone does not.
+//! - **Upstream provenance registry** — `barracuda::shaders::provenance` wired in via
+//!   `upstream_airspring_provenance()`, `upstream_evolution_report()`, and
+//!   `upstream_cross_spring_matrix()`. 27 shaders, 10 evolution events, all queryable.
+//! - **Cross-spring evolution benchmark** — `bench_cross_spring_evolution/modern.rs`
+//!   exercises all 20 `BatchedElementwiseF64` ops with provenance tracking,
+//!   `PrecisionRoutingAdvice` reporting, and batch scaling validation.
 //!
 //! ## Upstream Evolution (barraCuda HEAD, unreleased post-0.3.3)
 //!
 //! barraCuda has 6 unreleased commits adding features airSpring can leverage:
 //!
 //! - **`TensorContext`** — Pooled buffers, pipeline cache, batched submits.
-//!   Available for `LocalElementwise` and `SeasonalReducer` as future optimization
+//!   Available for `SeasonalReducer` as future optimization
 //!   (eliminates per-dispatch buffer allocation).
 //! - **DF64 `ComputeDispatch::df64()`** — DF64 shader path that prepends
-//!   `df64_core` + `df64_transcendentals`. Available for `LocalElementwise` to
+//!   `df64_core` + `df64_transcendentals`. Available for `BatchedElementwiseF64` to
 //!   auto-select DF64 on consumer GPUs via `Fp64Strategy::Hybrid`.
 //! - **Subgroup capability detection** — `DeviceCapabilities::subgroup_min_size`,
 //!   `subgroup_max_size`, `has_subgroup_info()`, `preferred_subgroup_size()`.
@@ -59,17 +75,28 @@
 //!   for stats, correlation, elementwise, and special functions.
 //! - **Naga rewriter fix** — Compound assignments (`+=`, `-=`, `*=`, `/=`) now
 //!   correctly rewritten to DF64 bridge calls.
+//! - **`PrecisionRoutingAdvice`** — `F64Native`, `F64NativeNoSharedMem`,
+//!   `Df64Only`, `F32Only` (toadStool S128).
+//! - **`mean_variance_to_buffer()`** — GPU-resident fused Welford output for
+//!   zero-readback chained pipelines.
+//! - **Shader provenance registry** — 27 shaders with origin, consumers, categories,
+//!   evolution timeline, and cross-spring dependency matrix.
+//! - **`BatchedOdeRK45F64`** — Adaptive Dormand-Prince integrator on GPU (wetSpring V95).
 //!
-//! ## v0.7.0: barraCuda 0.3.3 Rewire + Fused Welford/Pearson + 3/6 Ops Absorbed
+//! ## v0.7.2: Full Upstream Absorption (Write → Absorb → Lean Complete)
+//!
+//! All 6 local ops absorbed into `BatchedElementwiseF64` (ops 14-19).
+//! `local_dispatch` module and `local_elementwise_f64.wgsl` retired.
 //!
 //! | Module | Status | Notes |
 //! |--------|--------|------|
-//! | `gpu::local_dispatch` | **EVOLVED** | `LocalElementwise` — f64 canonical, `compile_shader_universal`, universal precision |
-//! | `gpu::runoff` | **GPU-universal** | `GpuRunoff` — SCS-CN via `local_elementwise_f64.wgsl` op=0 |
-//! | `gpu::yield_response` | **GPU-universal** | `GpuYieldResponse` — Stewart via `local_elementwise_f64.wgsl` op=1 |
-//! | `gpu::simple_et0` | **GPU-universal** | `GpuSimpleEt0` — 4 methods via `local_elementwise_f64.wgsl` ops 2-5 |
+//! | `gpu::runoff` | **GPU-first** | `GpuRunoff` — SCS-CN via `BatchedElementwiseF64` op=17 |
+//! | `gpu::yield_response` | **GPU-first** | `GpuYieldResponse` — Stewart via `BatchedElementwiseF64` op=18 |
+//! | `gpu::simple_et0` | **GPU-first** | `GpuSimpleEt0` — 4 methods via `BatchedElementwiseF64` ops 14-16, 19 |
 //!
-//! Exp 075 `validate_local_gpu`: ALL PASS — 6 ops, CPU/GPU parity within f32 precision.
+//! ## v0.7.0: barraCuda 0.3.3 Rewire + Fused Welford/Pearson + 3/6 Ops Absorbed
+//!
+//! Exp 075 `validate_local_gpu`: ALL PASS — 6 ops, CPU/GPU parity (upstream f64).
 //! Exp 076 `validate_nucleus_routing`: 60/60 PASS — 27 workloads, NUCLEUS mesh, `PCIe` bypass.
 //! Exp 077 `validate_cross_spring_provenance`: 32/32 PASS — CPU↔GPU benchmark with provenance.
 //! Exp 078 `validate_cross_spring_evolution`: cross-spring provenance + universal precision benchmark.

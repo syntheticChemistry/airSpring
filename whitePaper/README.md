@@ -2,7 +2,7 @@
 
 **Status**: Working draft — reviewed for PII, suitable for public repository
 **Purpose**: Document the replication of precision agriculture computational methods on consumer hardware using BarraCuda
-**Date**: March 2026 (v0.7.0)
+**Date**: March 2026 (v0.7.3)
 
 ---
 
@@ -147,5 +147,5 @@ No institutional access required. No proprietary software. AGPL-3.0 licensed.
 ## Next Phase: GPU Validation & metalForge
 
 See `specs/PAPER_REVIEW_QUEUE.md` for the full paper queue and compute pipeline.
-See `wateringHole/handoffs/` for the latest handoffs (V068 deep debt audit + absorption handoff).
+See `wateringHole/handoffs/` for the latest handoffs (V073 current).
 See `CHANGELOG.md` for the full evolution history.

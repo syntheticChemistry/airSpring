@@ -15,7 +15,7 @@ airSpring synced to barraCuda HEAD (`15d3774`, 6 commits past v0.3.3 release).
 metalForge forge migrated from wgpu 22 to wgpu 28, eliminating duplicate wgpu
 compilation. Subgroup capability detection wired into `DevicePrecisionReport`.
 New upstream features (TensorContext, DF64 ComputeDispatch, naga rewriter fix)
-documented as future evolution paths. coralNAK documented in GPU promotion map.
+documented as future evolution paths. coralReef documented in GPU promotion map.
 
 All tests pass at previous baselines:
 - 827 lib pass (25 GPU fail upstream, unchanged)
@@ -71,16 +71,16 @@ These barraCuda HEAD features are documented in `evolution_gaps.rs` and
 
 ---
 
-## Part 4: coralNAK Awareness
+## Part 4: coralReef Awareness
 
-coralNAK (`ecoPrimals/coralNAK/`) documented in `specs/GPU_PROMOTION_MAP.md`
+coralReef (`ecoPrimals/coralReef/`) documented in `specs/GPU_PROMOTION_MAP.md`
 as part of the sovereign compute evolution roadmap:
 
 ```
-barraCuda DF64 (complete) -> coralNAK (Phase 2, 183 tests) -> coralDriver -> coralGpu
+barraCuda DF64 (complete) -> coralReef (Phase 2, 183 tests) -> coralDriver -> coralGpu
 ```
 
-coralNAK is a Rust NVIDIA shader compiler forked from Mesa's NAK. It will
+coralReef is a Rust NVIDIA shader compiler forked from Mesa's NAK. It will
 fix f64 transcendental emission at the shader compiler level, replacing the
 DF64 workaround with native f64 compilation.
 

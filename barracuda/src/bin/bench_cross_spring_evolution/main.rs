@@ -20,6 +20,7 @@
 
 mod domain;
 mod gpu_ops;
+mod modern;
 mod paper12;
 mod pipeline;
 mod precision;
@@ -33,8 +34,8 @@ fn main() {
         .init();
 
     println!("═══════════════════════════════════════════════════════════════");
-    println!("  Cross-Spring Evolution Benchmark (v0.7.0)");
-    println!("  BarraCuda S87 — Universal Precision, Pure Math Shaders");
+    println!("  Cross-Spring Evolution Benchmark (v0.7.3)");
+    println!("  BarraCuda S87+ — Upstream Lean, PrecisionRouting, 20 Ops");
     println!("═══════════════════════════════════════════════════════════════\n");
 
     let mut v = ValidationHarness::new("Cross-Spring Evolution");
@@ -51,6 +52,7 @@ fn main() {
     paper12::bench_paper12_immunological(&mut v);
     pipeline::bench_s86_pipeline_evolution(&mut v);
     pipeline::bench_s87_deep_evolution(&mut v);
+    modern::bench_modern_upstream(&mut v);
 
     println!();
     v.finish();

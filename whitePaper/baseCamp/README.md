@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
-**Updated**: March 5, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.7.0)
-**Status**: 78 experiments, 1237/1237 Python + 827 lib + 186 forge tests + 86 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 20.6× CPU speedup (24/24 parity) + barraCuda 0.3.3 (wgpu 28, DF64 precision tier) + 3/6 local ops absorbed upstream + fused Welford + fused Pearson wired + 34 ShaderProvenance entries + 27 GPU tests fail upstream (wgpu 28 NVK) + 66/66 metalForge cross-system + NUCLEUS primal (30 capabilities) + zero clippy pedantic+nursery
+**Updated**: March 7, 2026
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.7.3)
+**Status**: 78 experiments, 1237/1237 Python + 848 lib + 186 forge tests + 86 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.5× CPU speedup (21/21 parity) + barraCuda 0.3.3 (wgpu 28, DF64 precision tier) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + `PrecisionRoutingAdvice` wired + upstream provenance registry + 66/66 metalForge cross-system + NUCLEUS primal (30 capabilities) + zero clippy pedantic+nursery
 
 ---
 
@@ -29,9 +29,10 @@ Phase 4.1 Penny Irrigation      — sovereign scheduling on consumer hardware ($
 Phase 4.2 Nautilus reservoir     — bingoCube/nautilus evolutionary ET₀ prediction + drift detect
 Phase 4.3 AirSpringBrain        — 3-head Nautilus brain (ET₀/soil/crop), MonitoredAtlasStream, cross-station shell transfer
 Phase 4.4 Paper 12 immuno       — CytokineBrain (IL-31/W/barrier heads), tissue diversity (Pielou→W), dimensional promotion model
-Phase 4.5 Local GPU evolution   — 6 local WGSL shaders (SCS-CN, Stewart, Makkink, Turc, Hamon, Blaney-Criddle), f32 GPU compute via wgpu, ToadStool f64 absorption pending
+Phase 4.5 Write→Absorb→Lean    — 6 local ops absorbed upstream (ops 14-19), `local_dispatch` retired (v0.7.2)
 Phase 4.6 NUCLEUS full-pipeline — 27 metalForge workloads, NUCLEUS mesh routing validated (Exp 076: 60/60), PCIe P2P bypass
 Phase 4.7 Cross-spring provenance — CPU↔GPU benchmark with 5-spring shader provenance tracking (Exp 077: 32/32)
+Phase 4.8 PrecisionRouting     — `PrecisionRoutingAdvice` wired, upstream provenance registry integrated (v0.7.3)
 ```
 
 ## Faculty Summary
@@ -213,14 +214,14 @@ S79 modernization: `libc`→`rustix`, `async-trait`→AFIT, universal f64 precis
 |----------|---------|
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C breakdown, absorbed vs stays-local, quality gates |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
-| `wateringHole/handoffs/` | V068 current — deep debt audit, absorption handoff, rewire handoff + cross-spring provenance |
+| `wateringHole/handoffs/` | V073 current — modern upstream integration, `PrecisionRoutingAdvice`, provenance registry |
 | `specs/CROSS_SPRING_EVOLUTION.md` | 845+ WGSL shader provenance across all Springs (S93) |
 
 ### Next Steps (Dong Lab)
 
 - **Deep debt audit round 2 complete**: Sovereignty hardening (`domain_use` rename, primal-agnostic labels), dependency gating (`ureq`/`testutil` feature-flagged for pure Rust builds), fallible constructors (`try_new` for data providers), large-file refactoring (3 files split into focused modules), zero-copy CSV parser, explicit error handling. Zero clippy pedantic+nursery warnings, zero unsafe, zero mocks in production, cargo-deny clean
 - **Coverage**: target 98%+ (remaining gaps: GPU-dependent code paths)
-- **ToadStool absorption**: 6 local WGSL ops ready for f64 absorption (SCS-CN, Stewart, Makkink, Turc, Hamon, Blaney-Criddle) — see V051 handoff
+- **ToadStool absorption**: All 6 local ops absorbed upstream into `BatchedElementwiseF64` (ops 14-19), `local_dispatch` retired — Write→Absorb→Lean complete (v0.7.2)
 - **GPU at scale**: Profile `compute_gpu()` at N=100K+ (multi-year regional grids, crossover point via `AtlasStream`)
 - **NestGate data pipeline**: Open-Meteo + NCBI 16S coupling for baseCamp 06 extension (Phase 1-2 of multi-primal roadmap)
 - **NUCLEUS expansion**: Tower + Node stable, next: NestGate Unix socket integration, local NUCLEUS on Eastgate, LAN HPC across gates
@@ -242,8 +243,8 @@ $200 sensor, Open-Meteo weather data, and a $600 GPU running BarraCuda.
 
 ## Extension Explorations
 
-With 77 experiments validated and the full Python → Rust CPU → Titan V GPU live →
-GPU math portability (13 modules, 46/46) → local GPU compute (6 ops, f32 WGSL) → metalForge mixed hardware (27 workloads) → NUCLEUS primal (30 caps, 28/28 cross-primal pipeline + 60/60 NUCLEUS routing) → cross-spring provenance (32/32, 5-spring shader tracking) proven,
+With 78 experiments validated and the full Python → Rust CPU → Titan V GPU live →
+GPU math portability (13 modules, 46/46) → upstream lean (20 ops, `BatchedElementwiseF64`) → metalForge mixed hardware (27 workloads) → NUCLEUS primal (30 caps, 28/28 cross-primal pipeline + 60/60 NUCLEUS routing) → cross-spring provenance (32/32, 5-spring shader tracking) → `PrecisionRoutingAdvice` wired (v0.7.3),
 airSpring can now extend beyond reproduction into new science. These explorations use the validated stack to answer
 questions the original papers did not.
 

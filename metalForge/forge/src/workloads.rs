@@ -357,84 +357,84 @@ pub fn ad_flare_classifier() -> EcoWorkload {
     w
 }
 
-// ── Local WGSL shaders (pending BarraCuda absorption) ────────────────
+// ── BatchedElementwiseF64 ops 14-19 (absorbed from airSpring local → upstream) ─
 
 /// SCS-CN runoff batch — element-wise Q from (P, CN, Ia ratio).
 ///
-/// Local f32 WGSL shader. Becomes `BatchedElementwiseF64` op=14 on absorption.
+/// `BatchedElementwiseF64` op=17 (was local op=0, absorbed v0.7.2).
 #[must_use]
 pub fn scs_cn_batch() -> EcoWorkload {
-    EcoWorkload::new_static(ShaderOrigin::Local)
+    EcoWorkload::new_static(ShaderOrigin::Absorbed)
         .named(
             "scs_cn_batch",
             vec![Capability::F64Compute, Capability::ShaderDispatch],
         )
-        .with_primitive("LocalElementwise_op0")
+        .with_primitive("BatchedElementwiseF64_op17")
 }
 
 /// Stewart yield response batch — element-wise Ya/Ymax from (Ky, `ETa/ETc`).
 ///
-/// Local f32 WGSL shader. Becomes `BatchedElementwiseF64` op=15 on absorption.
+/// `BatchedElementwiseF64` op=18 (was local op=1, absorbed v0.7.2).
 #[must_use]
 pub fn stewart_yield_batch() -> EcoWorkload {
-    EcoWorkload::new_static(ShaderOrigin::Local)
+    EcoWorkload::new_static(ShaderOrigin::Absorbed)
         .named(
             "stewart_yield_batch",
             vec![Capability::F64Compute, Capability::ShaderDispatch],
         )
-        .with_primitive("LocalElementwise_op1")
+        .with_primitive("BatchedElementwiseF64_op18")
 }
 
 /// Makkink ET₀ batch — radiation-based ET₀ from (T, Rs, elev).
 ///
-/// Local f32 WGSL shader. Becomes `BatchedElementwiseF64` op=16 on absorption.
+/// `BatchedElementwiseF64` op=14 (was local op=2, absorbed v0.7.2).
 #[must_use]
 pub fn makkink_et0_batch() -> EcoWorkload {
-    EcoWorkload::new_static(ShaderOrigin::Local)
+    EcoWorkload::new_static(ShaderOrigin::Absorbed)
         .named(
             "makkink_et0_batch",
             vec![Capability::F64Compute, Capability::ShaderDispatch],
         )
-        .with_primitive("LocalElementwise_op2")
+        .with_primitive("BatchedElementwiseF64_op14")
 }
 
 /// Turc ET₀ batch — temp-radiation-humidity from (T, Rs, RH).
 ///
-/// Local f32 WGSL shader. Becomes `BatchedElementwiseF64` op=17 on absorption.
+/// `BatchedElementwiseF64` op=15 (was local op=3, absorbed v0.7.2).
 #[must_use]
 pub fn turc_et0_batch() -> EcoWorkload {
-    EcoWorkload::new_static(ShaderOrigin::Local)
+    EcoWorkload::new_static(ShaderOrigin::Absorbed)
         .named(
             "turc_et0_batch",
             vec![Capability::F64Compute, Capability::ShaderDispatch],
         )
-        .with_primitive("LocalElementwise_op3")
+        .with_primitive("BatchedElementwiseF64_op15")
 }
 
 /// Hamon PET batch — temperature-only PET from (T, lat, DOY).
 ///
-/// Local f32 WGSL shader. Becomes `BatchedElementwiseF64` op=18 on absorption.
+/// `BatchedElementwiseF64` op=16 (was local op=4, absorbed v0.7.2).
 #[must_use]
 pub fn hamon_pet_batch() -> EcoWorkload {
-    EcoWorkload::new_static(ShaderOrigin::Local)
+    EcoWorkload::new_static(ShaderOrigin::Absorbed)
         .named(
             "hamon_pet_batch",
             vec![Capability::F64Compute, Capability::ShaderDispatch],
         )
-        .with_primitive("LocalElementwise_op4")
+        .with_primitive("BatchedElementwiseF64_op16")
 }
 
 /// Blaney-Criddle ET₀ batch — daylight-based ET₀ from (T, lat, DOY).
 ///
-/// Local f32 WGSL shader. Becomes `BatchedElementwiseF64` op=19 on absorption.
+/// `BatchedElementwiseF64` op=19 (was local op=5, absorbed v0.7.2).
 #[must_use]
 pub fn blaney_criddle_et0_batch() -> EcoWorkload {
-    EcoWorkload::new_static(ShaderOrigin::Local)
+    EcoWorkload::new_static(ShaderOrigin::Absorbed)
         .named(
             "blaney_criddle_et0_batch",
             vec![Capability::F64Compute, Capability::ShaderDispatch],
         )
-        .with_primitive("LocalElementwise_op5")
+        .with_primitive("BatchedElementwiseF64_op19")
 }
 
 // ── CPU-only domains ────────────────────────────────────────────────
@@ -514,19 +514,19 @@ mod tests {
     #[test]
     fn all_workloads_has_entries() {
         let all = all_workloads();
-        assert_eq!(all.len(), 27, "27 eco workloads (21 + 6 local WGSL)");
+        assert_eq!(all.len(), 27, "27 eco workloads (all upstream)");
     }
 
     #[test]
     fn origin_counts_match() {
         let (absorbed, local, npu_native, cpu_only) = origin_summary();
         assert_eq!(
-            absorbed, 14,
-            "14 absorbed GPU domains (9 original + 4 S70+ ops + tissue)"
+            absorbed, 20,
+            "20 absorbed GPU domains (14 original + 6 formerly local ops 14-19)"
         );
         assert_eq!(
-            local, 6,
-            "6 local WGSL shaders (SCS-CN, Stewart, Makkink, Turc, Hamon, BC)"
+            local, 0,
+            "0 local WGSL shaders (all 6 absorbed upstream v0.7.2)"
         );
         assert_eq!(npu_native, 4, "4 NPU-native classifiers");
         assert_eq!(cpu_only, 3, "3 CPU-only domains");

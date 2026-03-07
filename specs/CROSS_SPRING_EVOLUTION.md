@@ -1,23 +1,23 @@
 # Cross-Spring Shader Evolution — airSpring Provenance
 
-**Updated**: March 5, 2026 (v0.7.0, barraCuda 0.3.3 / wgpu 28, ToadStool S94b synced)
+**Updated**: March 7, 2026 (v0.7.3, barraCuda 0.3.3 / wgpu 28)
 
 ## Summary
 
-ToadStool's BarraCuda runtime contains **845 WGSL shaders** (pure math, precision per
-silicon), built through **60+ cross-spring absorptions** (sessions S42-S86). Each Spring
-contributes domain-specific GPU primitives that benefit the entire ecosystem.
+BarraCuda contains **767+ WGSL shaders** (pure math, precision per silicon), built
+through **60+ cross-spring absorptions**. Each Spring contributes domain-specific GPU
+primitives that benefit the entire ecosystem.
 
-airSpring uses **8 shared shader families** directly (ops 0-13 + uncertainty stack),
+airSpring uses **8 shared shader families** directly (ops 0-19 + uncertainty stack),
 contributed **3 critical fixes** (TS-001, TS-003, TS-004), had its **stats metrics
-absorbed upstream** (S64), and completed the Write→Absorb→Lean cycle with
-**metalForge fully absorbed** (S66). v0.7.0 adds **6 local WGSL compute shaders**
-(`local_elementwise_f64.wgsl`) evolved locally, 3/6 absorbed upstream (Makkink, Turc, Hamon).
+absorbed upstream** (S64), and completed the full Write→Absorb→Lean cycle: all 6 local
+WGSL ops absorbed upstream into `BatchedElementwiseF64` (ops 14-19), `local_dispatch`
+retired (v0.7.2). `PrecisionRoutingAdvice` wired and upstream provenance registry
+integrated (v0.7.3).
 
-v0.7.0: **25 Tier A + 6 GPU-local** orchestrators, 827 lib + 186 forge tests,
-`gpu::local_dispatch::LocalElementwise` for wgpu direct compute (SCS-CN, Stewart,
-Makkink, Turc, Hamon, Blaney-Criddle). 27 metalForge workloads, NUCLEUS mesh
-routing (Exp 076: 60/60). S87: BrentGpu, RichardsGpu, StatefulPipeline.
+v0.7.3: **25 Tier A** orchestrators (ops 0-19 all upstream), 848 lib + 186 forge tests,
+`PrecisionRoutingAdvice` for per-hardware f64 dispatch routing. 27 metalForge workloads,
+NUCLEUS mesh routing (Exp 076: 60/60). BrentGpu, RichardsGpu, StatefulPipeline.
 
 ### Paper 12 — Immunological Anderson Infrastructure (NEW)
 

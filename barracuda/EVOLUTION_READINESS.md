@@ -1,9 +1,10 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: March 5, 2026 (v0.7.0 — 827 lib tests passing, 86 binaries, 78 experiments, 1237 Python, 30 NUCLEUS capabilities, 67/67 metalForge cross-system, 6 local WGSL shaders)
-**barraCuda**: v0.3.3 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, fused stats shaders)
-**ToadStool**: S94b (5,369 tests, NpuDispatch trait, multi-adapter selection, primal decoupling)
-**Handoff**: V0.7.0 (barraCuda 0.3.3 rewire — wgpu 28, 3/6 local ops absorbed upstream, Df64 precision documented)
+**Last Updated**: March 7, 2026 (v0.7.3 — PrecisionRoutingAdvice wired, upstream provenance registry integrated, cross-spring evolution benchmark)
+**barraCuda**: v0.3.3+ standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry)
+**ToadStool**: S130 (19,109+ tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient)
+**coralReef**: Phase 10 sovereign Rust GPU compiler (NVIDIA + AMD, 904 tests, 14/27 cross-spring shaders)
+**Handoff**: V0.7.3 (modern upstream integration — PrecisionRouting + provenance + cross-spring benchmark)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -73,9 +74,9 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 | `gpu::reduce::SeasonalReducer` | `ops::fused_map_reduce_f64` + `ops::variance_f64_wgsl::VarianceF64` (fused Welford) | **GPU N≥1024, 3 passes** |
 | `gpu::stream::StreamSmoother` | `ops::moving_window_stats` | **WIRED** |
 | `gpu::infiltration` | `BrentGpu::solve_green_ampt()` (brent_f64.wgsl GA residual) | **WIRED** (S83) |
-| `gpu::runoff` | Batched SCS-CN (f64 canonical via compile_shader_universal) | **GPU-universal (f32 downcast)** |
-| `gpu::yield_response` | Batched Stewart (f64 canonical via compile_shader_universal) | **GPU-universal (f32 downcast)** |
-| `gpu::simple_et0` | Batched Makkink/Turc/Hamon/Blaney-Criddle (f64 canonical via compile_shader_universal) | **GPU-universal (f32 downcast)** |
+| `gpu::runoff` | `BatchedElementwiseF64` (op=17, stride=3) | **GPU-FIRST** (absorbed upstream, v0.7.2) |
+| `gpu::yield_response` | `BatchedElementwiseF64` (op=18, stride=2) | **GPU-FIRST** (absorbed upstream, v0.7.2) |
+| `gpu::simple_et0` | `BatchedElementwiseF64` (ops 14-16, 19) | **GPU-FIRST** (absorbed upstream, v0.7.2) |
 | `eco::correction::fit_ridge` | `linalg::ridge::ridge_regression` | **WIRED** |
 | `gpu::richards::BatchedRichards` | `pde::richards::solve_richards` | **WIRED** (+ CN f64 cross-val) |
 | `gpu::isotherm::fit_*_nm/global` | `optimize::nelder_mead` + `multi_start` | **WIRED** |
@@ -152,7 +153,7 @@ BarraCuda (while still embedded in ToadStool) underwent massive evolution since 
 | `stats::hydrology::crop_coefficient` | `stats` | v0.5.2 | **WIRED** — `eco::crop::crop_coefficient_stage` delegates to upstream |
 | `stats::normal::norm_ppf` | `stats` | v0.4.4 | **WIRED** — `McEt0Result::parametric_ci()` |
 | `optimize::brent` | `optimize` | v0.4.4 | **WIRED** — `inverse_van_genuchten_h()` θ→h inversion |
-| `compile_shader_universal` | `shaders` | v0.7.0 | **WIRED** — local_elementwise_f64.wgsl (6 ops, 3/6 absorbed upstream) |
+| `compile_shader_universal` | `shaders` | v0.7.0 | **LEANING** — all 6 local ops now absorbed into upstream `BatchedElementwiseF64` (v0.7.2) |
 | `ops::variance_f64_wgsl::VarianceF64` | `ops` | v0.7.0 | **WIRED** — `SeasonalReducer::mean_variance()` (fused Welford, 3 passes vs 4) |
 | `ops::correlation_f64_wgsl::CorrelationF64` | `ops` | v0.7.0 | **WIRED** — `pairwise_correlation_gpu()` (5-accumulator fused Pearson) |
 | `ops::variance_f64_wgsl::VarianceF64` (stats) | `ops` | v0.7.0 | **WIRED** — `fused_mean_variance_gpu()` in gpu/stats |

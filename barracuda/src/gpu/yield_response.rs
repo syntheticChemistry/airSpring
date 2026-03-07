@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! Batched Stewart yield response — GPU universal precision via `local_elementwise_f64.wgsl`.
+//! Batched Stewart yield response — GPU-first via `BarraCuda` `BatchedElementwiseF64`.
 //!
 //! Implements the Stewart (1977) yield-water production function
 //! `Ya/Ymax = 1 − Ky × (1 − ETa/ETc)` in batch for many fields simultaneously.
@@ -8,16 +8,16 @@
 //!
 //! | Primitive | Origin | Status |
 //! |-----------|--------|--------|
-//! | Stewart equation | Stewart (1977) + FAO-56 Ch 10 | **GPU-universal** (f64 canonical) |
+//! | Stewart equation | Stewart (1977) + FAO-56 Ch 10 | **GPU-first** (`BatchedElementwiseF64` op=18) |
 //! | Multi-stage product | Doorenbos & Kassam (1979) | CPU fallback |
-//! | GPU dispatch | `local_elementwise_f64.wgsl` op=1 | **Live** (v0.6.9, f64 canonical) |
+//! | GPU dispatch | `batched_elementwise_f64.wgsl` op=18 | **Leaning** (absorbed from local WGSL) |
 
 use std::sync::Arc;
 
 use barracuda::device::WgpuDevice;
+use barracuda::ops::batched_elementwise_f64::{BatchedElementwiseF64, Op};
 
 use crate::eco::yield_response;
-use crate::gpu::local_dispatch::{LocalElementwise, LocalOp};
 
 /// Single field yield computation input.
 #[derive(Debug, Clone, Copy)]
@@ -33,15 +33,15 @@ pub struct YieldInput {
 /// Batched Stewart yield response orchestrator.
 ///
 /// CPU path uses `eco::yield_response` directly. GPU path dispatches via
-/// `LocalElementwise` (f64 canonical shader via `compile_shader_universal`).
+/// `BatchedElementwiseF64` with `Op::StewartYieldWater`.
 #[derive(Debug)]
 pub struct BatchedYieldResponse;
 
 /// GPU-backed Stewart yield response dispatcher.
 ///
-/// Uses `local_elementwise_f64.wgsl` op 1 via `compile_shader_universal`.
+/// Uses `batched_elementwise_f64.wgsl` op 18 via `BatchedElementwiseF64`.
 pub struct GpuYieldResponse {
-    dispatcher: LocalElementwise,
+    executor: BatchedElementwiseF64,
 }
 
 impl std::fmt::Debug for GpuYieldResponse {
@@ -55,34 +55,37 @@ impl GpuYieldResponse {
     ///
     /// # Errors
     ///
-    /// Returns an error if WGSL shader compilation fails.
+    /// Returns an error if GPU device initialization fails.
     pub fn new(device: Arc<WgpuDevice>) -> crate::error::Result<Self> {
         Ok(Self {
-            dispatcher: LocalElementwise::new(device)?,
+            executor: BatchedElementwiseF64::new(device)?,
         })
     }
 
     /// Batch compute yield ratios on GPU.
     ///
+    /// Input layout: `[Ky, ETa_ETc_ratio]` per element (stride=2).
+    ///
     /// # Errors
     ///
     /// Returns an error if GPU dispatch fails.
     pub fn compute(&self, inputs: &[YieldInput]) -> crate::error::Result<Vec<f64>> {
-        let ky: Vec<f64> = inputs.iter().map(|i| i.ky).collect();
-        let ratio: Vec<f64> = inputs
-            .iter()
-            .map(|i| {
-                if i.et_crop > 0.0 {
-                    i.et_actual / i.et_crop
-                } else {
-                    1.0
-                }
-            })
-            .collect();
-        let zeros = vec![0.0; inputs.len()];
+        if inputs.is_empty() {
+            return Ok(Vec::new());
+        }
+        let mut data = Vec::with_capacity(inputs.len() * 2);
+        for inp in inputs {
+            let ratio = if inp.et_crop > 0.0 {
+                inp.et_actual / inp.et_crop
+            } else {
+                1.0
+            };
+            data.push(inp.ky);
+            data.push(ratio);
+        }
         let results = self
-            .dispatcher
-            .dispatch(LocalOp::StewartYield, &ky, &ratio, &zeros)?;
+            .executor
+            .execute(&data, inputs.len(), Op::StewartYieldWater)?;
         Ok(results.iter().map(|&v| v.clamp(0.0, 1.0)).collect())
     }
 
@@ -97,16 +100,18 @@ impl GpuYieldResponse {
         et_actual: &[f64],
         et_crop: &[f64],
     ) -> crate::error::Result<Vec<f64>> {
-        let kys = vec![ky; et_actual.len()];
-        let ratios: Vec<f64> = et_actual
-            .iter()
-            .zip(et_crop)
-            .map(|(&a, &c)| if c > 0.0 { a / c } else { 1.0 })
-            .collect();
-        let zeros = vec![0.0; et_actual.len()];
+        if et_actual.is_empty() {
+            return Ok(Vec::new());
+        }
+        let mut data = Vec::with_capacity(et_actual.len() * 2);
+        for (&a, &c) in et_actual.iter().zip(et_crop) {
+            let ratio = if c > 0.0 { a / c } else { 1.0 };
+            data.push(ky);
+            data.push(ratio);
+        }
         let results = self
-            .dispatcher
-            .dispatch(LocalOp::StewartYield, &kys, &ratios, &zeros)?;
+            .executor
+            .execute(&data, et_actual.len(), Op::StewartYieldWater)?;
         Ok(results.iter().map(|&v| v.clamp(0.0, 1.0)).collect())
     }
 }

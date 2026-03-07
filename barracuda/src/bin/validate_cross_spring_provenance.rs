@@ -47,9 +47,9 @@
 //! | `gpu::isotherm` | `nelder_mead` (CPU) | neuralSpring | S52 | f64 (CPU) |
 //! | `gpu::mc_et0` | CPU → GPU ET₀ batch → CPU | groundSpring | S64 | f64 hybrid |
 //! | `gpu::seasonal_pipeline` | Chained ops 0→7→1→yield | airSpring | S70+ | f64 canonical |
-//! | `gpu::runoff` | `local_elementwise_f64.wgsl` op=0 | airSpring local | v0.6.9 | f64 canonical (compile_shader_universal) |
-//! | `gpu::yield_response` | `local_elementwise_f64.wgsl` op=1 | airSpring local | v0.6.9 | f64 canonical (compile_shader_universal) |
-//! | `gpu::simple_et0` | `local_elementwise_f64.wgsl` ops 2-5 | airSpring local | v0.6.9 | f64 canonical (compile_shader_universal) |
+//! | `gpu::runoff` | `batched_elementwise_f64` op=17 | airSpring→upstream | v0.7.2 | f64 canonical (BatchedElementwiseF64) |
+//! | `gpu::yield_response` | `batched_elementwise_f64` op=18 | airSpring→upstream | v0.7.2 | f64 canonical (BatchedElementwiseF64) |
+//! | `gpu::simple_et0` | `batched_elementwise_f64` ops 14-16, 19 | airSpring→upstream | v0.7.2 | f64 canonical (BatchedElementwiseF64) |
 //!
 //! # Precision Lineage
 //!
@@ -88,7 +88,7 @@ fn main() {
 
     println!("═══════════════════════════════════════════════════════════════");
     println!("  Exp 077: Cross-Spring Provenance & CPU↔GPU Benchmark");
-    println!("  airSpring v0.7.0 — barraCuda v0.3.3 (wgpu 28)");
+    println!("  airSpring v0.7.3 — barraCuda v0.3.3+ (wgpu 28)");
     println!("═══════════════════════════════════════════════════════════════\n");
 
     let mut v = ValidationHarness::new("Exp 077 Cross-Spring Provenance");
@@ -103,6 +103,9 @@ fn main() {
             "not available (CPU-only benchmarks)"
         }
     );
+
+    // ── Upstream Provenance Registry ─────────────────────────────────
+    bench_upstream_registry(&mut v);
 
     bench_et0_cpu_vs_gpu(&mut v, device.as_ref());
     bench_water_balance_cpu_vs_gpu(&mut v, device.as_ref());
@@ -123,6 +126,32 @@ fn try_device() -> Option<Arc<WgpuDevice>> {
     barracuda::device::test_pool::tokio_block_on(WgpuDevice::new_f64_capable())
         .ok()
         .map(Arc::new)
+}
+
+fn bench_upstream_registry(v: &mut ValidationHarness) {
+    println!("\n── Upstream Provenance Registry (barraCuda shaders::provenance) ─");
+    let air_shaders = airspring_barracuda::gpu::device_info::upstream_airspring_provenance();
+    println!(
+        "  airSpring consumes {} upstream shaders",
+        air_shaders.len()
+    );
+    v.check_bool(
+        "upstream_registry: airSpring consumes shaders",
+        !air_shaders.is_empty(),
+    );
+
+    let cross = barracuda::shaders::provenance::cross_spring_shaders();
+    println!("  Ecosystem: {} cross-spring shaders total", cross.len());
+    v.check_bool(
+        "upstream_registry: cross-spring shaders exist",
+        cross.len() >= 10,
+    );
+
+    let matrix = barracuda::shaders::provenance::cross_spring_matrix();
+    v.check_bool(
+        "upstream_registry: cross-spring matrix non-empty",
+        !matrix.is_empty(),
+    );
 }
 
 fn bench_et0_cpu_vs_gpu(v: &mut ValidationHarness, device: Option<&Arc<WgpuDevice>>) {

@@ -2,7 +2,7 @@
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
 **Date**: March 7, 2026
-**Version**: 0.7.1
+**Version**: 0.7.3
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -13,13 +13,13 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → biomeOS (NUCLEUS atomics, deployment graphs) → Penny Irrigation
 ```
 
-## Current Status (v0.7.1)
+## Current Status (v0.7.3)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,237/1,237 PASS** | 57 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **850 lib + 1498 atlas** | 86 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
+| Phase 1: Rust validation | **848 lib + 1498 atlas** | 86 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (34/34 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -29,7 +29,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | Phase 3.1: Pure GPU end-to-end | **46/46 PASS** | All 4 stages on GPU, 19.7× dispatch reduction (Exp 072) |
 | Phase 3.2: Cross-spring rewire | **68/68 PASS** | `BrentGpu` VG inverse, `RichardsGpu` Picard, full provenance (Exp 073) |
 | Phase 3.3: Paper chain validation | **79/79 PASS** | Full CPU→GPU→metalForge chain for 28 domains (22 GPU, 6 CPU-only) (Exp 074) |
-| Phase 3.4: Local GPU compute | **6 ops f64 canonical** | SCS-CN, Stewart, Makkink, Turc, Hamon, Blaney-Criddle via `local_elementwise_f64.wgsl` via compile_shader_universal (Exp 075+078) |
+| Phase 3.4: Upstream GPU lean | **20 ops via `BatchedElementwiseF64`** | Ops 0-19 all upstream, `local_dispatch` retired, `PrecisionRoutingAdvice` wired (Exp 075+078) |
 | Phase 3.5: NPU edge | **AKD1000 live** | 3 experiments, 95/95 NPU checks, ~48µs inference |
 | Phase 3.7: metalForge live | **5 substrates discovered** | RTX 4070 + Titan V + AKD1000 + i9-12900K, 27 workloads route |
 | Phase 3.8: Mixed-hardware pipeline | **66/66 PASS** | 7-stage GPU→NPU PCIe bypass, NUCLEUS mesh routing (Exp 076: 60/60) |
@@ -44,7 +44,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` (barracuda) | **850 passed**, 0 failures |
+| `cargo test --lib` (barracuda) | **848 passed**, 0 failures |
 | `cargo test --tests` (integration) | **33 passed** (13 GPU pipeline + 20 stats) |
 | `cargo test --lib` (metalForge) | **61 passed** + 1 doctest, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **95.66% line coverage** |
@@ -93,7 +93,7 @@ airSpring domain code (`eco::`) is validated against papers, then wrapped by GPU
 
 ### Cross-Spring Shader Evolution
 
-BarraCuda contains **767 WGSL shaders** (S93: 5,369 tests, pure math + precision per silicon). airSpring uses 6 shared shader families, contributed **3 upstream fixes**, and had **all metalForge modules absorbed upstream** (S64 + S66):
+BarraCuda contains **767+ WGSL shaders** (pure math + precision per silicon). airSpring uses 6 shared shader families, contributed **3 upstream fixes**, and had **all local GPU ops absorbed upstream** (Write→Absorb→Lean complete):
 
 | Spring | Shaders | What airSpring Gets | What airSpring Gave Back |
 |--------|---------|--------------------|-----------------------|
@@ -101,11 +101,11 @@ BarraCuda contains **767 WGSL shaders** (S93: 5,369 tests, pure math + precision
 | **wetSpring** | 25 | kriging\_f64, fused\_map\_reduce, moving\_window, ridge, **diversity metrics** | TS-004: reduce buffer N≥1024 fix |
 | **neuralSpring** | 20 | nelder\_mead, multi\_start, ValidationHarness | TS-003: acos precision boundary fix |
 | **groundSpring** | — | **MC ET₀ uncertainty propagation shader** | — |
-| **airSpring** | — | Domain consumer + stats absorbed upstream | Richards PDE (S40), stats metrics (S64) |
+| **airSpring** | — | Domain consumer + all 6 local ops absorbed upstream (ops 14-19) | Richards PDE (S40), stats metrics (S64), SCS-CN/Stewart/Makkink/Turc/Hamon/Blaney-Criddle (ops 14-19) |
 
-50+ cross-spring absorptions (S42-S87). All metalForge absorbed. DF64 transcendentals complete (15 functions).
-S87: ops 0-13, GPU uncertainty stack, `BrentGpu`, `RichardsGpu`, `BatchedStatefulF64`, `nautilus`, L-BFGS,
-`gpu_helpers` refactor, `is_device_lost()`, MatMul validation, 845 WGSL shaders (zero f32-only).
+50+ cross-spring absorptions. All metalForge and local GPU ops absorbed. DF64 transcendentals complete (15 functions).
+`PrecisionRoutingAdvice` routes f64 dispatch per-hardware (F64Native, F64NativeNoSharedMem, Df64Only, F32Only).
+Upstream provenance registry (`barracuda::shaders::provenance`) provides cross-spring evolution tracking.
 See `specs/CROSS_SPRING_EVOLUTION.md`.
 
 ### BarraCuda Integration (25 Tier A + 6 GPU-universal + 3 pipeline)
@@ -132,10 +132,9 @@ See `specs/CROSS_SPRING_EVOLUTION.md`.
 | `gpu::bootstrap` | `BootstrapMeanGpu` | dedicated | **Integrated** (S79) |
 | `gpu::diversity` | `DiversityFusionGpu` | dedicated | **Integrated** (S79) |
 | `gpu::stats` | `linear_regression_f64` + `matrix_correlation_f64` | dedicated | **Integrated** |
-| `gpu::runoff` | `local_elementwise_f64.wgsl` (op=0) | f64 canonical | **GPU-universal** (v0.7.0) |
-| `gpu::yield_response` | `local_elementwise_f64.wgsl` (op=1) | f64 canonical | **GPU-universal** (v0.7.0) |
-| `gpu::simple_et0` | `local_elementwise_f64.wgsl` (ops 2-5) | f64 canonical | **GPU-universal** (v0.7.0, 3/6 absorbed upstream) |
-| `gpu::local_dispatch` | `LocalElementwise` (compile_shader_universal) | 6 ops f64→f32 | **EVOLVED** (v0.7.0) |
+| `gpu::runoff` | `batched_elementwise_f64` | op=17 | **GPU-FIRST** (v0.7.2, absorbed upstream) |
+| `gpu::yield_response` | `batched_elementwise_f64` | op=18 | **GPU-FIRST** (v0.7.2, absorbed upstream) |
+| `gpu::simple_et0` | `batched_elementwise_f64` | ops 14-16, 19 | **GPU-FIRST** (v0.7.2, absorbed upstream) |
 | `eco::correction::fit_ridge` | `linalg::ridge::ridge_regression` | CPU | **Integrated** |
 | `eco::richards::inverse_vg_h` | `optimize::brent` | CPU | **Integrated** |
 | `eco::diversity` | `stats::diversity` | CPU | **Leaning** |
@@ -144,7 +143,7 @@ See `specs/CROSS_SPRING_EVOLUTION.md`.
 
 Also wired: `validation::ValidationHarness` (neuralSpring), `stats::pearson`, `spearman`, `bootstrap_ci`, `stats::metrics` re-exports (airSpring→upstream S64).
 
-25 Tier A GPU modules (ops 0-13 + jackknife/bootstrap/diversity uncertainty stack) + 6 GPU-universal (f64 canonical via `compile_shader_universal`). ToadStool S87 synced.
+25 Tier A GPU modules (ops 0-19 all upstream via `BatchedElementwiseF64`) + jackknife/bootstrap/diversity uncertainty stack. `local_dispatch` retired (v0.7.2 Write→Absorb→Lean complete). `PrecisionRoutingAdvice` wired (v0.7.3). Upstream provenance registry integrated.
 See `barracuda/src/gpu/evolution_gaps.rs` and `barracuda/EVOLUTION_READINESS.md` for the full roadmap.
 
 ### CPU Benchmarks: Rust vs Python (14.5× geometric mean speedup, 21/21 parity)
@@ -218,17 +217,17 @@ airSpring/
 │   ├── vg_inverse/              # Van Genuchten inverse fitting (84/84)
 │   ├── season_water_budget/     # Full-season irrigation WB (34/34)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (827 lib tests, 86 binaries, barraCuda 0.3.3 / wgpu 28)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (848 lib tests, 86 binaries, barraCuda 0.3.3 / wgpu 28)
 │   ├── src/
 │   │   ├── biomeos.rs           # biomeOS socket resolution + primal discovery (shared)
 │   │   ├── eco/                 # Domain modules (19 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine)
-│   │   ├── gpu/                 # ToadStool/BarraCuda GPU bridge (25 Tier A + 6 GPU-local + BrentGpu + RichardsGpu)
+│   │   ├── gpu/                 # ToadStool/BarraCuda GPU bridge (25 Tier A, ops 0-19 upstream + BrentGpu + RichardsGpu)
 │   │   ├── nautilus.rs          # bingoCube/nautilus evolutionary reservoir (AirSpringBrain)
 │   │   ├── rpc.rs               # JSON-RPC 2.0 inter-primal communication
 │   │   ├── npu.rs               # BrainChip AKD1000 NPU (feature-gated)
 │   │   └── bin/                 # validate_*, bench_*, airspring_primal (84 declared)
 │   ├── tests/                   # Integration + property tests (9 files + common/)
-│   └── Cargo.toml               # v0.7.0
+│   └── Cargo.toml               # v0.7.3
 ├── metalForge/                  # Mixed hardware dispatch (CPU+GPU+NPU)
 │   ├── deploy/                  # biomeOS deployment graphs (airspring_deploy.toml)
 │   └── forge/                   # airspring-forge (61 tests, 5 binaries, live hardware probe)
@@ -238,7 +237,7 @@ airSpring/
 │   └── CROSS_SPRING_EVOLUTION.md # Cross-spring shader provenance (S87)
 ├── whitePaper/                  # Methodology and study documentation
 │   └── baseCamp/                # Per-faculty research briefings + baseCamp extensions
-├── experiments/                 # Experiment protocols and results (77 experiments)
+├── experiments/                 # Experiment protocols and results (78 experiments)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
 │   └── handoffs/                # Versioned handoffs (V069 current)
 ├── graphs/                      # biomeOS deployment graphs (TOML)
@@ -272,7 +271,7 @@ airSpring/
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance (S87) |
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (77 experiments) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V071 current) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V073 current) |
 
 ## License
 
@@ -280,11 +279,9 @@ AGPL-3.0-or-later
 
 ---
 
-*March 7, 2026 — v0.7.1. Deep debt audit and NVK resilience. barraCuda 0.3.3 (wgpu 28).
-78 experiments, 1237/1237 Python, 850 lib + 61 forge tests (0 failures — NVK zero-output
-detection with CPU fallback in bootstrap/stats/reduce). Provenance reconciled: tolerances.rs
-commits now match embedded benchmark JSONs. Kokkos validation gap documented with groundSpring
-V74 GPU benchmarks (3.5×–2669× dispatch overhead gaps). cargo-deny enforced. 146/146
-cross-spring evolution, 32/32 provenance, 51/51 dispatch. All files < 1000 lines.
-Zero unsafe, zero clippy pedantic+nursery warnings, zero mocks in production.
-All SPDX AGPL-3.0-or-later. Pure Rust + BarraCuda.*
+*March 7, 2026 — v0.7.3. Write→Absorb→Lean complete: all 20 ops upstream via
+`BatchedElementwiseF64`, `local_dispatch` retired, `PrecisionRoutingAdvice` wired,
+upstream provenance registry integrated. 78 experiments, 1237/1237 Python, 848 lib +
+61 forge tests (0 failures). 146/146 cross-spring evolution, 32/32 provenance,
+51/51 dispatch. All files < 1000 lines. Zero unsafe, zero clippy pedantic+nursery
+warnings, zero mocks in production. All SPDX AGPL-3.0-or-later. Pure Rust + BarraCuda.*

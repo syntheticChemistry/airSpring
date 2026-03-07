@@ -1,22 +1,23 @@
 # airSpring wateringHole
 
-**Updated**: March 7, 2026 | **Version**: v0.7.1
+**Updated**: March 7, 2026 | **Version**: v0.7.3
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.7.1** | [AIRSPRING_V071_DEEP_DEBT_NVK_TOADSTOOL_HANDOFF_MAR07_2026.md](handoffs/AIRSPRING_V071_DEEP_DEBT_NVK_TOADSTOOL_HANDOFF_MAR07_2026.md) | 2026-03-07 | **current** — Deep debt audit, NVK zero-output resilience, provenance reconciliation, Kokkos gap documented, cargo-deny, toadStool/barraCuda evolution handoff |
-| **V0.7.1** | [AIRSPRING_V071_BARRACUDA_HEAD_SYNC_HANDOFF_MAR05_2026.md](handoffs/AIRSPRING_V071_BARRACUDA_HEAD_SYNC_HANDOFF_MAR05_2026.md) | 2026-03-05 | barraCuda HEAD sync (post-0.3.3), metalForge wgpu 28, subgroup detection, TensorContext/DF64 documented, coralNAK awareness |
-| **V0.7.0** | [AIRSPRING_V070_BARRACUDA_033_REWIRE_HANDOFF_MAR05_2026.md](handoffs/AIRSPRING_V070_BARRACUDA_033_REWIRE_HANDOFF_MAR05_2026.md) | 2026-03-05 | barraCuda 0.3.3 rewire (wgpu 28), 3/6 ops absorbed upstream, Df64 precision, upstream GPU issue documented |
-| **V0.7.0** | [AIRSPRING_V070_UPSTREAM_ABSORPTION_HANDOFF_MAR05_2026.md](handoffs/AIRSPRING_V070_UPSTREAM_ABSORPTION_HANDOFF_MAR05_2026.md) | 2026-03-05 | upstream handoff for barraCuda/ToadStool team: 3 ops ready for absorption, NVK probe discovery, wgpu 28 GPU-returns-zero, 34 provenance entries |
+| **V0.7.3** | [AIRSPRING_V073_MODERN_INTEGRATION_HANDOFF_MAR07_2026.md](handoffs/AIRSPRING_V073_MODERN_INTEGRATION_HANDOFF_MAR07_2026.md) | 2026-03-07 | **current** — `PrecisionRoutingAdvice` wired, upstream provenance registry, cross-spring evolution benchmark (20 ops) |
+| **V0.7.2** | [AIRSPRING_V072_UPSTREAM_LEAN_HANDOFF_MAR07_2026.md](handoffs/AIRSPRING_V072_UPSTREAM_LEAN_HANDOFF_MAR07_2026.md) | 2026-03-07 | Write→Absorb→Lean complete: 6 local ops absorbed, `local_dispatch` retired, `BatchedElementwiseF64` ops 14-19 |
+| **V0.7.1** | [AIRSPRING_V071_DEEP_DEBT_NVK_TOADSTOOL_HANDOFF_MAR07_2026.md](handoffs/AIRSPRING_V071_DEEP_DEBT_NVK_TOADSTOOL_HANDOFF_MAR07_2026.md) | 2026-03-07 | Deep debt audit, NVK zero-output resilience, provenance reconciliation, Kokkos gap documented, cargo-deny, toadStool/barraCuda evolution handoff |
+| **V0.7.1** | [AIRSPRING_V071_BARRACUDA_HEAD_SYNC_HANDOFF_MAR05_2026.md](handoffs/AIRSPRING_V071_BARRACUDA_HEAD_SYNC_HANDOFF_MAR05_2026.md) | 2026-03-05 | barraCuda HEAD sync (post-0.3.3), metalForge wgpu 28, subgroup detection, TensorContext/DF64 documented, coralReef awareness |
+| **V0.7.0** | *Archived* — see `handoffs/archive/` | 2026-03-05 | Superseded by V071+V072+V073 |
 
 ## Cross-Spring Documents
 
 | File | Purpose |
 |------|---------|
-| `../specs/CROSS_SPRING_EVOLUTION.md` | 845+ WGSL shader provenance (hotSpring/wetSpring/neuralSpring/airSpring/groundSpring) — ToadStool S93 |
+| `../specs/CROSS_SPRING_EVOLUTION.md` | 767+ WGSL shader provenance (hotSpring/wetSpring/neuralSpring/airSpring/groundSpring) |
 | `../specs/BIOMEOS_CAPABILITIES.md` | Ecology capability domain for biomeOS Neural API |
 | `../specs/NUCLEUS_INTEGRATION.md` | NUCLEUS deployment: graphs, workloads, Neural API bridge |
 | `../specs/GPU_PROMOTION_MAP.md` | GPU tier status: 25 Tier A + 6 GPU-local + Tier B + Tier C |

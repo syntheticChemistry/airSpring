@@ -12,11 +12,11 @@
 //! | [`device_info`] | Precision probing, `Fp64Strategy`, provenance | Device + cross-spring |
 //! | [`et0`] | Batched FAO-56 ET₀ for `N` station-days | **GPU-first** (`BatchedElementwiseF64`) |
 //! | [`hargreaves`] | Batched Hargreaves-Samani ET₀ (temp-only) | **GPU-first** (`BatchedElementwiseF64` op=6, S70+) |
-//! | [`simple_et0`] | Batched Makkink/Turc/Hamon/Blaney-Criddle | **GPU-universal** (f64 canonical via `compile_shader_universal`) |
+//! | [`simple_et0`] | Batched Makkink/Turc/Hamon/Blaney-Criddle | **GPU-first** (`BatchedElementwiseF64` ops 14-16, 19) |
 //! | [`water_balance`] | Batched season simulation + GPU step | **GPU-step** + CPU season |
 //! | [`infiltration`] | Batched Green-Ampt via `BrentGpu` | **GPU** (`brent_f64.wgsl` GA residual, S83) |
-//! | [`runoff`] | Batched SCS-CN runoff computation | **GPU-universal** (f64 canonical via `compile_shader_universal`) |
-//! | [`yield_response`] | Batched Stewart yield-water function | **GPU-universal** (f64 canonical via `compile_shader_universal`) |
+//! | [`runoff`] | Batched SCS-CN runoff computation | **GPU-first** (`BatchedElementwiseF64` op=17) |
+//! | [`yield_response`] | Batched Stewart yield-water function | **GPU-first** (`BatchedElementwiseF64` op=18) |
 //! | [`dual_kc`] | Batched dual Kc (`Ke` + `ETc`) for M fields | **GPU-first** (`BatchedElementwiseF64` op=8, S70+) |
 //! | [`kriging`] | Soil moisture spatial interpolation | **Integrated** (`KrigingF64`) |
 //! | [`reduce`] | Seasonal aggregation statistics | **GPU** for N≥1024 (`FusedMapReduceF64`) |
@@ -97,7 +97,6 @@ pub mod isotherm;
 pub mod jackknife;
 pub mod kc_climate;
 pub mod kriging;
-pub mod local_dispatch;
 pub mod mc_et0;
 pub mod pedotransfer;
 pub mod reduce;

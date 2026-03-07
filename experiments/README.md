@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: March 7, 2026
-**Status**: 78 experiments, barraCuda 0.3.3 (wgpu 28). 1237/1237 Python + 850 lib + 61 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. 20.6× Rust-vs-Python speedup (24/24 algorithms). NVK zero-output detection with CPU fallback (bootstrap, stats, reduce). Provenance reconciled across tolerances.rs and benchmark JSONs. Kokkos validation gap documented (groundSpring V74 benchmarks). cargo-deny license enforcement. metalForge 66/66 mixed pipeline.
+**Status**: 78 experiments, barraCuda 0.3.3 (wgpu 28), v0.7.3. 1237/1237 Python + 848 lib + 61 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. 14.5× Rust-vs-Python speedup (21/21 parity). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry integrated (v0.7.3). metalForge 66/66 mixed pipeline.
 
 ---
 
@@ -88,15 +88,15 @@
 | 077 | Cross-Spring Provenance & CPU↔GPU Benchmark | GPU + Cross-Spring | **Complete** | Rust (barracuda) | CPU vs GPU timing for ET₀/WB/Hargreaves/Kc/VG/GDD/pedotransfer, shader provenance tracking (5 springs), precision lineage validation (hotSpring→all), seasonal pipeline parity, uncertainty (jackknife/bootstrap/diversity) | 32 |
 | 078 | Cross-Spring Evolution — Universal Precision | GPU + Cross-Spring | **Complete** | Rust (barracuda) | f64 canonical → compile_shader_universal (6 ops: SCS-CN, Stewart, Makkink, Turc, Hamon, Blaney-Criddle), cross-spring provenance (hotSpring precision, wetSpring bio, groundSpring uncertainty, neuralSpring architecture), f64 compute shader reliability discovery (NVK/Mesa) | — |
 
-**Grand Total**: 1237 Python + **827 lib + 186 forge tests** + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 25 Tier A + 6 GPU-local (3/6 absorbed upstream) + fused Welford + fused Pearson wired + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (30 capabilities) + 86 binaries + barraCuda 0.3.3 (wgpu 28, DF64 precision tier) + 20.6× CPU speedup (24/24 parity) + 78 experiments (v0.7.0) + 34 ShaderProvenance entries + 27 GPU tests fail upstream (wgpu 28 NVK/Titan V)
+**Grand Total**: 1237 Python + **848 lib + 186 forge tests** + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (30 capabilities) + 86 binaries + barraCuda 0.3.3 (wgpu 28, DF64 precision tier) + 14.5× CPU speedup (21/21 parity) + 78 experiments (v0.7.3)
 
 ---
 
-## Test Breakdown (v0.7.0)
+## Test Breakdown (v0.7.3)
 
 | Category | Tests | Source |
 |----------|:-----:|--------|
-| Barracuda lib (unit + doc) | 827 | `cargo test --lib` (25 GPU fail upstream wgpu 28 NVK) |
+| Barracuda lib (unit + doc) | 848 | `cargo test --lib` |
 | Barracuda validation binaries | 86 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
 | Forge | 186 | `metalForge/forge/` (substrate, dispatch, probe, workloads, cross-system routing) |
 | Forge binaries | 5 | `validate_dispatch`, `validate_live_hardware`, `validate_dispatch_routing`, `validate_mixed_pipeline`, `validate_nucleus_routing` |

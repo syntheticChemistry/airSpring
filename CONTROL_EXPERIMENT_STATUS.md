@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-03-05 (v0.7.0 — 78 experiments, barraCuda 0.3.3 (wgpu 28), 1237/1237 Python + 827 lib + 186 forge + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **20.6× Rust-vs-Python speedup** (24/24 algorithms). Fused Welford in SeasonalReducer (3 GPU passes vs 4). Fused 5-accumulator Pearson in gpu/stats. Local GPU 6/6 ops parity (<0.002 error). 27 GPU dispatch failures (upstream wgpu 28 NVK). metalForge 66/66 mixed pipeline. Cross-spring shader provenance documented: hotSpring (precision/DF64), wetSpring (bio/diversity), neuralSpring (ML/stats), groundSpring (MC/uncertainty). V070 handoff.)
+**Updated**: 2026-03-07 (v0.7.3 — 78 experiments, barraCuda 0.3.3 (wgpu 28), 1237/1237 Python + 848 lib + 186 forge + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.5× Rust-vs-Python speedup** (21/21 algorithms). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry (v0.7.3). metalForge 66/66 mixed pipeline. Write→Absorb→Lean cycle complete.)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 

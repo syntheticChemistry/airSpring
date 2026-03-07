@@ -2,6 +2,92 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.7.3] - 2026-03-07
+
+### Modern Upstream Integration — PrecisionRouting, Provenance Registry, Cross-Spring Benchmark
+
+- **`PrecisionRoutingAdvice` wired**: toadStool S128 integration — `DevicePrecisionReport`
+  now includes `precision_routing` field with four-axis routing:
+  `F64Native` (full native f64 everywhere), `F64NativeNoSharedMem` (native compute OK,
+  shared-memory reductions broken — route through DF64 or scalar),
+  `Df64Only` (use DF64 for all f64-class work), `F32Only` (edge only).
+  Captures the shared-memory reliability axis that `Fp64Strategy` alone does not.
+
+- **Upstream provenance registry integrated**: `barracuda::shaders::provenance` wired
+  into `device_info` via three new functions:
+  - `upstream_airspring_provenance()` → shaders consumed by airSpring from upstream
+  - `upstream_evolution_report()` → full markdown cross-spring evolution report
+  - `upstream_cross_spring_matrix()` → `(from, to)` → shader count dependency map
+  27 shaders, 10 evolution events, all programmatically queryable.
+
+- **Cross-spring evolution benchmark extended** (`bench_cross_spring_evolution/modern.rs`):
+  - Prints upstream provenance registry with shader paths, categories, origins, dates
+  - Prints cross-spring dependency matrix (hotSpring, wetSpring, neuralSpring, airSpring, groundSpring)
+  - Reports `PrecisionRoutingAdvice` for the current GPU with dispatch recommendations
+  - Benchmarks all 6 absorbed ops (14-19) with CPU↔GPU parity validation
+  - Batch scaling validation (100, 1K, 10K, 100K elements)
+
+- **Validation binaries updated**:
+  - `validate_cross_spring_evolution`: now prints `PrecisionRoutingAdvice` and upstream
+    registry before provenance/benchmarks
+  - `validate_cross_spring_provenance`: added upstream registry validation
+  - Both reference the upstream registry for cross-spring shader counts
+
+- **Documentation updated**:
+  - `evolution_gaps.rs`: v0.7.3 section with PrecisionRoutingAdvice, provenance registry,
+    `mean_variance_to_buffer()`, `BatchedOdeRK45F64`
+  - `EVOLUTION_READINESS.md`: updated to ToadStool S130, coralReef Phase 10 status
+  - `GPU_PROMOTION_MAP.md`: version bump to v0.7.3
+  - `batched_elementwise_f64.wgsl` provenance entry: now lists all 20 ops (0-19)
+
+- **Quality gates**: `cargo fmt` ✓, `cargo clippy --all-targets` ✓ (0 errors),
+  `cargo doc --no-deps` ✓, `cargo test --lib` ✓ (848/848 pass)
+
+### Cross-Spring Shader Evolution Map
+
+| Spring | Precision Contribution | Used By |
+|--------|----------------------|---------|
+| **hotSpring** | `df64_core`, `math_f64`, `PrecisionRoutingAdvice`, DF64 transcendentals, Verlet, stress virial | ALL springs |
+| **wetSpring** | Shannon/Simpson/Bray-Curtis f64, kriging, HMM forward, bio ODE, moving window | neuralSpring, airSpring, groundSpring |
+| **neuralSpring** | `compile_shader_universal`, Nelder-Mead, `ValidationHarness`, batch IPR, Welford mean variance | airSpring, groundSpring, hotSpring |
+| **airSpring** | FAO-56 PM (ops 0-19), Hargreaves, seasonal pipeline, moving_window_f64 | wetSpring, groundSpring |
+| **groundSpring** | MC propagation, bootstrap, jackknife, Anderson Lyapunov, `batched_multinomial` | airSpring, wetSpring, neuralSpring |
+
+## [0.7.2] - 2026-03-07
+
+### Full Upstream Absorption — Write → Absorb → Lean Complete
+
+- **All 6 local GPU ops absorbed upstream**: SCS-CN runoff (Op 17), Stewart yield
+  (Op 18), Makkink ET₀ (Op 14), Turc ET₀ (Op 15), Hamon PET (Op 16), and
+  Blaney-Criddle ET₀ (Op 19) now dispatch via `BatchedElementwiseF64` instead of
+  the retired `LocalElementwise`.
+- **`local_dispatch` module retired**: `gpu/local_dispatch.rs` and both local WGSL
+  shaders (`local_elementwise_f64.wgsl`, `local_elementwise.wgsl`) deleted. All
+  consumers rewired to upstream `BatchedElementwiseF64`.
+- **GPU wrappers rewired**: `gpu::runoff`, `gpu::yield_response`, `gpu::simple_et0`
+  now construct `BatchedElementwiseF64` and pack inputs in upstream stride format:
+  - SCS-CN: `[P, CN, Ia_ratio]` stride=3
+  - Stewart: `[Ky, ETa_ETc_ratio]` stride=2
+  - Makkink: `[Rs, T_mean, elevation]` stride=3
+  - Turc: `[Rs, T_mean, RH_mean]` stride=3
+  - Hamon: `[T_mean, daylight_hours]` stride=2 (daylight pre-computed on CPU)
+  - Blaney-Criddle: `[T_mean, daylight_hours]` stride=2 (daylight pre-computed on CPU)
+- **Hamon formula divergence documented**: Upstream `BatchedElementwiseF64` uses
+  Hamon (1963) ASCE formulation; airSpring `eco::simple_et0::hamon_pet` uses
+  Lu et al. (2005). GPU parity tests compare against upstream reference.
+- **Validation binaries updated**: `validate_local_gpu` and
+  `validate_cross_spring_evolution` rewritten to use upstream `BatchedElementwiseF64`
+  dispatch. Raw `LocalElementwise` dispatch tests replaced with typed wrapper tests.
+- **coralNAK → coralReef**: All references to the sovereign GPU compiler updated
+  from coralNAK to coralReef (Phase 10 sovereign Rust compiler).
+- **Tier promotions**: `gpu::runoff`, `gpu::yield_response`, `gpu::simple_et0`
+  promoted from A-local to Tier A in `GPU_PROMOTION_MAP.md`. Zero A-local tiers
+  remaining. 24 Tier A modules, 2 Tier B, 2 Tier C.
+- **`PrecisionRoutingAdvice` documented**: New upstream API for per-op precision
+  selection documented in evolution readiness.
+- 844 lib tests, 0 failures. `cargo fmt`, `cargo clippy --pedantic --nursery`,
+  `cargo doc` all clean.
+
 ## [0.7.1] - 2026-03-07
 
 ### Deep Debt Audit & NVK Resilience

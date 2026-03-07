@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.7.0"
+version = "0.7.3"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
@@ -49,7 +49,7 @@ bingocube-nautilus = { path = "../../primalTools/bingoCube/nautilus" }
 serde = { version = "1", features = ["derive"] }
 
 # wgpu 28 — matches barraCuda 0.3.3's pinned version for type compatibility.
-# Used by gpu::local_dispatch for local WGSL shaders pending barraCuda absorption.
+# Used by GPU buffer I/O (bytemuck transmute) and device interaction.
 wgpu = { version = "28", default-features = false, features = ["wgsl", "vulkan", "vulkan-portability"] }
 
 # bytemuck: safe transmute for GPU buffer I/O (f32 ↔ bytes).

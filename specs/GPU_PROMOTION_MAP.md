@@ -2,7 +2,7 @@
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 
-**Last updated**: 2026-03-05 (v0.7.0, barraCuda 0.3.3 / wgpu 28, fused Welford + Pearson, f64 canonical universal precision)
+**Last updated**: 2026-03-07 (v0.7.3, barraCuda 0.3.3+ / wgpu 28, PrecisionRoutingAdvice wired, upstream provenance registry integrated)
 **Sources**: `EVOLUTION_READINESS.md`, `gpu/evolution_gaps.rs`, `BARRACUDA_REQUIREMENTS.md`
 
 ---
@@ -11,9 +11,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 | Tier | Definition |
 |------|------------|
-| **A** | GPU-integrated — ToadStool f64 primitive wired, validated, GPU-first (or GPU N≥1024) |
-| **A-local** | GPU-local — airSpring `local_elementwise.wgsl` (f32), ToadStool f64 absorption pending |
-| **B** | Orchestrator with CPU fallback — ToadStool primitive exists but ops not yet absorbed |
+| **A** | GPU-integrated — `BatchedElementwiseF64` or dedicated shader, validated, GPU-first |
+| **B** | Orchestrator with CPU fallback — upstream primitive exists but ops not yet absorbed |
 | **C** | CPU-only — needs new WGSL shader or is inherently serial/non-GPU |
 
 ---
@@ -43,10 +42,9 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 | `gpu::bootstrap` | **A** | `BootstrapMeanGpu` | Bootstrap CI | — (S79) |
 | `gpu::diversity` | **A** | `DiversityFusionGpu` | Diversity indices | — (S79) |
 | `gpu::stats` | **A** | `linear_regression_f64` + `matrix_correlation_f64` | Sensor regression | — |
-| `gpu::runoff` | **A-local** | `local_elementwise.wgsl` (op=0) | SCS-CN runoff | ToadStool f64 absorption |
-| `gpu::yield_response` | **A-local** | `local_elementwise.wgsl` (op=1) | Stewart yield | ToadStool f64 absorption |
-| `gpu::simple_et0` | **A-local** | `local_elementwise.wgsl` (ops 2-5) | Makkink/Turc/Hamon/BC | ToadStool f64 absorption |
-| `gpu::local_dispatch` | — | `local_elementwise.wgsl` | wgpu dispatch engine | Infrastructure module |
+| `gpu::runoff` | **A** | `batched_elementwise_f64` (op=17) | SCS-CN runoff | — (absorbed v0.7.2) |
+| `gpu::yield_response` | **A** | `batched_elementwise_f64` (op=18) | Stewart yield | — (absorbed v0.7.2) |
+| `gpu::simple_et0` | **A** | `batched_elementwise_f64` (ops 14-16, 19) | Makkink/Turc/Hamon/BC | — (absorbed v0.7.2) |
 | `gpu::seasonal_pipeline` | **B** | Chained ops 0→7→1→yield | End-to-end season | Fused GPU pipeline |
 | `gpu::atlas_stream` | **B** | `UnidirectionalPipeline` (pending) | Regional atlas | GPU streaming primitive |
 | `gpu::device_info` | — | N/A | Precision probing | Documentation module |
@@ -60,7 +58,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 |--------|----------|-------------|---------|
 | `eco::evapotranspiration` (PM) | **A** | `gpu::et0` | — |
 | `eco::evapotranspiration` (HG) | **A** | `gpu::hargreaves` | — |
-| `eco::evapotranspiration` (Makkink/Turc/Hamon/BC) | **A-local** | `gpu::simple_et0` | ToadStool f64 absorption |
+| `eco::evapotranspiration` (Makkink/Turc/Hamon/BC) | **A** | `gpu::simple_et0` | — (absorbed v0.7.2) |
 | `eco::water_balance` | **A** | `gpu::water_balance` | — |
 | `eco::richards` | **A** | `gpu::richards` | — |
 | `eco::van_genuchten` | **A** | `gpu::van_genuchten` | — |
@@ -74,8 +72,8 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 | `eco::crop` (Kc adj) | **A** | `gpu::kc_climate` | — |
 | `eco::thornthwaite` | **A** | `gpu::thornthwaite` | — |
 | `eco::crop` (GDD) | **A** | `gpu::gdd` | — |
-| `eco::runoff` | **A-local** | `gpu::runoff` | ToadStool f64 absorption |
-| `eco::yield_response` | **A-local** | `gpu::yield_response` | ToadStool f64 absorption |
+| `eco::runoff` | **A** | `gpu::runoff` | — (absorbed v0.7.2) |
+| `eco::yield_response` | **A** | `gpu::yield_response` | — (absorbed v0.7.2) |
 | `eco::anderson` | **C** | — | Needs new WGSL shader |
 | `eco::et0_ensemble` | **C** | — | CPU ensemble logic |
 | `eco::solar` | — | Used by ET₀ | Supporting module |
@@ -86,7 +84,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 | Shader | Location | Used By | Status |
 |--------|----------|---------|--------|
-| `batched_elementwise_f64.wgsl` | `shaders/science/` | et0, water_balance, sensor_cal, HG, kc, dual_kc, VG, thornthwaite, gdd, pedotransfer | Ops 0-13 wired |
+| `batched_elementwise_f64.wgsl` | `shaders/science/` | et0, water_balance, sensor_cal, HG, kc, dual_kc, VG, thornthwaite, gdd, pedotransfer, makkink, turc, hamon, scs-cn, stewart, blaney-criddle | Ops 0-19 wired |
 | `kriging_f64.wgsl` | `shaders/interpolation/` | kriging | Wired |
 | `fused_map_reduce_f64.wgsl` | `shaders/reduce/` | reduce | Wired |
 | `moving_window_f64.wgsl` | `shaders/stats/` | stream | Wired |
@@ -96,7 +94,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 | `mc_et0_propagate_f64.wgsl` | `shaders/bio/` | mc_et0 | Wired |
 | `linear_regression_f64.wgsl` | `shaders/stats/` | stats | Wired |
 | `matrix_correlation_f64.wgsl` | `shaders/stats/` | stats | Wired |
-| `local_elementwise.wgsl` | `barracuda/src/shaders/` | runoff, yield, simple_et0 | **Local** (airSpring f32, ToadStool f64 pending) |
+| ~~`local_elementwise.wgsl`~~ | ~~`barracuda/src/shaders/`~~ | ~~runoff, yield, simple_et0~~ | **RETIRED** — absorbed into `batched_elementwise_f64.wgsl` ops 14-19 (v0.7.2) |
 
 ---
 
@@ -104,7 +102,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 | Blocker | Modules | Resolution |
 |---------|---------|------------|
-| ToadStool f64 absorption of local ops | runoff, yield_response, simple_et0 (6 ops) | Absorb `local_elementwise.wgsl` into canonical f64 `batched_elementwise_f64.wgsl` ops 14-19 |
+| ~~Local ops f64 absorption~~ | ~~runoff, yield_response, simple_et0~~ | **RESOLVED** (v0.7.2) — all 6 ops absorbed into `BatchedElementwiseF64` ops 14-19 |
 | Fused GPU seasonal pipeline | seasonal_pipeline | Fuse ops 0→7→1→yield in single dispatch |
 | `UnidirectionalPipeline` | atlas_stream | Implement fire-and-forget GPU streaming |
 | Anderson shader | anderson | New WGSL for θ→S_e→d_eff→QS coupling |
@@ -115,8 +113,7 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 | Tier | Count | Evolution Path |
 |------|-------|----------------|
-| **A** | 21 | GPU-first via ToadStool f64 |
-| **A-local** | 6 | GPU-local f32 WGSL → ToadStool f64 absorption |
+| **A** | 24 | GPU-first via `BatchedElementwiseF64` or dedicated shader |
 | **B** | 2 | Pipeline/streaming GPU evolution |
 | **C** | 2 | Needs new shaders or architectural decision |
 
@@ -130,15 +127,16 @@ eliminating C dependencies from the shader compilation path:
 | Phase | Component | Status | What It Does |
 |-------|-----------|--------|--------------|
 | 1 | **barraCuda DF64** | Complete | Double-float f32-pair workaround for f64 on consumer GPUs |
-| 2 | **coralNAK** | In Progress (183 tests) | Mesa NAK shader compiler fork — fix f64 transcendental emission |
-| 3 | coralNAK SPIR-V frontend | Planned | naga SPIR-V → IR pipeline |
-| 4 | coralNAK f64 lowering | Planned | DFMA-based transcendentals for native f64 |
+| 2 | **coralReef** | Phase 10 (sovereign compiler) | Sovereign Rust GPU compiler — WGSL/SPIR-V → native GPU binary |
+| 3 | coralReef multi-vendor | In Progress | NVIDIA (SM70+), AMD (RDNA), Intel (Xe) backends |
+| 4 | coralReef f64 lowering | In Progress | DFMA-based transcendentals for native f64 |
 | 5 | **coralDriver** | Planned | Userspace GPU driver (pure Rust) |
 | 6 | **coralGpu** | Planned | Unified Rust GPU abstraction |
 
-**coralNAK** (`ecoPrimals/coralNAK/`): Rust NVIDIA shader compiler forked from Mesa's NAK.
-Turns SPIR-V/WGSL input into native GPU binaries (SM70+). 16-pass compilation pipeline.
+**coralReef** (`ecoPrimals/coralReef/`): Sovereign Rust GPU compiler (replaces coralNAK).
+Turns WGSL/SPIR-V input into native GPU binaries with multi-vendor backend support.
+Integrates with barraCuda via `shader.compile.*` JSON-RPC methods through ToadStool proxy.
 Once complete, replaces naga + wgpu's shader path with sovereign Rust compilation that
 correctly emits f64 transcendentals (fixing the root cause that DF64 works around).
 
-Pipeline flow: `WGSL → naga → SPIR-V → coralNAK (optimize, legalize, encode) → Native GPU`
+Pipeline flow: `WGSL → naga → SPIR-V → coralReef (optimize, legalize, encode) → Native GPU`

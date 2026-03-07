@@ -1,6 +1,6 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: March 5, 2026 (v0.7.0 — 827 lib + 186 forge tests, barraCuda 0.3.3 (wgpu 28), 25 Tier A + 6 GPU-local + fused Welford + fused Pearson, 381/381 validation, 20.6× CPU speedup across 24 algorithms)
+**Last Updated**: March 7, 2026 (v0.7.3 — 848 lib + 186 forge tests, barraCuda 0.3.3 (wgpu 28), ops 0-19 upstream via `BatchedElementwiseF64`, `local_dispatch` retired, `PrecisionRoutingAdvice` wired, upstream provenance registry)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
 **ToadStool HEAD**: S94b — barraCuda v0.3.3 standalone (wgpu 28, DF64 precision tier)
 

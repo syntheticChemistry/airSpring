@@ -1,26 +1,27 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! Batched simple ET₀ methods — Makkink, Turc, Hamon, Blaney-Criddle.
 //!
-//! GPU-local batch interface for four data-sparse ET₀ methods via
-//! `local_elementwise_f64.wgsl` (ops 2-5). Complements the full FAO-56 PM
+//! GPU-first batch interface for four data-sparse ET₀ methods via
+//! `BatchedElementwiseF64` (ops 14-16, 19). Complements the full FAO-56 PM
 //! (`gpu::et0`) and Hargreaves (`gpu::hargreaves`).
 //!
 //! # Cross-Spring Provenance
 //!
 //! | Method | Origin | Status |
 //! |--------|--------|--------|
-//! | Makkink (1957) | KNMI / de Bruin (1987) | **GPU-universal** (f64 canonical op=2) |
-//! | Turc (1961) | Turc (1961) Eq. 1-2 | **GPU-universal** (f64 canonical op=3) |
-//! | Hamon (1961) | Lu et al. (2005) | **GPU-universal** (f64 canonical op=4) |
-//! | Blaney-Criddle (1950) | FAO-24, USDA-SCS | **GPU-universal** (f64 canonical op=5) |
-//! | GPU dispatch | `local_elementwise_f64.wgsl` ops 2-5 | **Live** (v0.6.9, f64 canonical) |
+//! | Makkink (1957) | KNMI / de Bruin (1987) | **GPU-first** (`BatchedElementwiseF64` op=14) |
+//! | Turc (1961) | Turc (1961) Eq. 1-2 | **GPU-first** (`BatchedElementwiseF64` op=15) |
+//! | Hamon (1961) | Lu et al. (2005) | **GPU-first** (`BatchedElementwiseF64` op=16) |
+//! | Blaney-Criddle (1950) | FAO-24, USDA-SCS | **GPU-first** (`BatchedElementwiseF64` op=19) |
+//! | GPU dispatch | `batched_elementwise_f64.wgsl` ops 14-16, 19 | **Leaning** (absorbed from local WGSL) |
 
 use std::sync::Arc;
 
 use barracuda::device::WgpuDevice;
+use barracuda::ops::batched_elementwise_f64::{BatchedElementwiseF64, Op};
 
 use crate::eco::simple_et0;
-use crate::gpu::local_dispatch::{LocalElementwise, LocalOp};
+use crate::eco::solar::daylight_hours;
 
 /// Makkink input: (`tmean_c`, `rs_mj`, `elevation_m`).
 #[derive(Debug, Clone, Copy)]
@@ -60,9 +61,10 @@ pub struct BatchedSimpleEt0;
 
 /// GPU-backed simple ET₀ dispatcher for all four methods.
 ///
-/// Uses `local_elementwise_f64.wgsl` ops 2-5 via `compile_shader_universal` (f64 canonical → f32 on consumer GPUs).
+/// Uses `batched_elementwise_f64.wgsl` ops 14-16 and 19 via
+/// `BatchedElementwiseF64`.
 pub struct GpuSimpleEt0 {
-    dispatcher: LocalElementwise,
+    executor: BatchedElementwiseF64,
 }
 
 impl std::fmt::Debug for GpuSimpleEt0 {
@@ -76,60 +78,95 @@ impl GpuSimpleEt0 {
     ///
     /// # Errors
     ///
-    /// Returns an error if WGSL shader compilation fails.
+    /// Returns an error if GPU device initialization fails.
     pub fn new(device: Arc<WgpuDevice>) -> crate::error::Result<Self> {
         Ok(Self {
-            dispatcher: LocalElementwise::new(device)?,
+            executor: BatchedElementwiseF64::new(device)?,
         })
     }
 
     /// Batch Makkink ET₀ on GPU.
     ///
+    /// Upstream layout (Op 14, stride=3): `[Rs, T_mean, elevation]`.
+    ///
     /// # Errors
     ///
     /// Returns an error if GPU dispatch fails.
     pub fn makkink(&self, inputs: &[MakkinkInput]) -> crate::error::Result<Vec<f64>> {
-        let a: Vec<f64> = inputs.iter().map(|i| i.tmean_c).collect();
-        let b: Vec<f64> = inputs.iter().map(|i| i.rs_mj).collect();
-        let c: Vec<f64> = inputs.iter().map(|i| i.elevation_m).collect();
-        self.dispatcher.dispatch(LocalOp::MakkinkEt0, &a, &b, &c)
+        if inputs.is_empty() {
+            return Ok(Vec::new());
+        }
+        let mut data = Vec::with_capacity(inputs.len() * 3);
+        for i in inputs {
+            data.push(i.rs_mj);
+            data.push(i.tmean_c);
+            data.push(i.elevation_m);
+        }
+        Ok(self.executor.execute(&data, inputs.len(), Op::MakkinkEt0)?)
     }
 
     /// Batch Turc ET₀ on GPU.
+    ///
+    /// Upstream layout (Op 15, stride=3): `[Rs, T_mean, RH_mean]`.
     ///
     /// # Errors
     ///
     /// Returns an error if GPU dispatch fails.
     pub fn turc(&self, inputs: &[TurcInput]) -> crate::error::Result<Vec<f64>> {
-        let a: Vec<f64> = inputs.iter().map(|i| i.tmean_c).collect();
-        let b: Vec<f64> = inputs.iter().map(|i| i.rs_mj).collect();
-        let c: Vec<f64> = inputs.iter().map(|i| i.rh_pct).collect();
-        self.dispatcher.dispatch(LocalOp::TurcEt0, &a, &b, &c)
+        if inputs.is_empty() {
+            return Ok(Vec::new());
+        }
+        let mut data = Vec::with_capacity(inputs.len() * 3);
+        for i in inputs {
+            data.push(i.rs_mj);
+            data.push(i.tmean_c);
+            data.push(i.rh_pct);
+        }
+        Ok(self.executor.execute(&data, inputs.len(), Op::TurcEt0)?)
     }
 
     /// Batch Hamon PET on GPU.
+    ///
+    /// Upstream layout (Op 16, stride=2): `[T_mean, daylight_hours]`.
+    /// Daylight hours are pre-computed on CPU from latitude and DOY.
     ///
     /// # Errors
     ///
     /// Returns an error if GPU dispatch fails.
     pub fn hamon(&self, inputs: &[HamonInput]) -> crate::error::Result<Vec<f64>> {
-        let a: Vec<f64> = inputs.iter().map(|i| i.tmean_c).collect();
-        let b: Vec<f64> = inputs.iter().map(|i| i.latitude_rad).collect();
-        let c: Vec<f64> = inputs.iter().map(|i| f64::from(i.doy)).collect();
-        self.dispatcher.dispatch(LocalOp::HamonPet, &a, &b, &c)
+        if inputs.is_empty() {
+            return Ok(Vec::new());
+        }
+        let mut data = Vec::with_capacity(inputs.len() * 2);
+        for i in inputs {
+            let n = daylight_hours(i.latitude_rad, i.doy);
+            data.push(i.tmean_c);
+            data.push(n);
+        }
+        Ok(self.executor.execute(&data, inputs.len(), Op::HamonEt0)?)
     }
 
     /// Batch Blaney-Criddle ET₀ on GPU.
+    ///
+    /// Upstream layout (Op 19, stride=2): `[T_mean, daylight_hours]`.
+    /// Daylight hours are pre-computed on CPU from latitude and DOY.
     ///
     /// # Errors
     ///
     /// Returns an error if GPU dispatch fails.
     pub fn blaney_criddle(&self, inputs: &[BlaneyCriddleInput]) -> crate::error::Result<Vec<f64>> {
-        let a: Vec<f64> = inputs.iter().map(|i| i.tmean_c).collect();
-        let b: Vec<f64> = inputs.iter().map(|i| i.latitude_rad).collect();
-        let c: Vec<f64> = inputs.iter().map(|i| f64::from(i.doy)).collect();
-        self.dispatcher
-            .dispatch(LocalOp::BlaneyCriddleEt0, &a, &b, &c)
+        if inputs.is_empty() {
+            return Ok(Vec::new());
+        }
+        let mut data = Vec::with_capacity(inputs.len() * 2);
+        for i in inputs {
+            let n = daylight_hours(i.latitude_rad, i.doy);
+            data.push(i.tmean_c);
+            data.push(n);
+        }
+        Ok(self
+            .executor
+            .execute(&data, inputs.len(), Op::BlaneyCriddleEt0)?)
     }
 }
 
@@ -230,6 +267,18 @@ mod tests {
         }
     }
 
+    /// Upstream Hamon (1963 ASCE) reference: `PET = 13.97 × D² × Pt`
+    /// where `D = daylight_hours / 12`, `Pt = 4.95 × exp(0.062 × T) / 100`.
+    ///
+    /// Note: airSpring's `eco::simple_et0::hamon_pet` uses the Lu et al. (2005)
+    /// formulation with different coefficients. GPU parity tests compare against
+    /// the upstream formula since that's what the shader computes.
+    fn hamon_upstream_ref(t_mean: f64, daylight_hours: f64) -> f64 {
+        let d_ratio = daylight_hours / 12.0;
+        let pt = 4.95 * (0.062 * t_mean).exp() / 100.0;
+        (13.97 * d_ratio * d_ratio * pt).max(0.0)
+    }
+
     #[test]
     fn test_gpu_hamon_parity() {
         let Some(device) = crate::gpu::device_info::try_f64_device() else {
@@ -251,10 +300,16 @@ mod tests {
             },
         ];
         let gpu = gpu_solver.hamon(&inputs).unwrap();
-        let cpu = BatchedSimpleEt0::hamon(&inputs);
-        for (i, (g, c)) in gpu.iter().zip(&cpu).enumerate() {
+        let upstream_cpu: Vec<f64> = inputs
+            .iter()
+            .map(|i| hamon_upstream_ref(i.tmean_c, daylight_hours(i.latitude_rad, i.doy)))
+            .collect();
+        for (i, (g, c)) in gpu.iter().zip(&upstream_cpu).enumerate() {
             let tol = c.abs().mul_add(5e-3, 0.02);
-            assert!((g - c).abs() < tol, "Hamon[{i}] GPU={g:.4} CPU={c:.4}");
+            assert!(
+                (g - c).abs() < tol,
+                "Hamon[{i}] GPU={g:.4} upstream_CPU={c:.4}"
+            );
         }
     }
 
