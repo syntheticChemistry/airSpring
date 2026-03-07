@@ -203,21 +203,46 @@ See `barracuda/src/gpu/evolution_gaps.rs` for the full 26-gap roadmap (v0.5.2).
 
 ## Kokkos Validation Gap
 
-**Status**: Not started. No Kokkos baselines or benchmarks exist in this repository.
+**Status**: Not started in airSpring. groundSpring has published GPU benchmarks
+(see `wateringHole/handoffs/BARRACUDA_KOKKOS_GPU_BENCHMARK_RESULTS_MAR04_2026.md`).
 
 The wateringHole evolution path defines three validation tiers:
 
 | Tier | Role | Status in airSpring |
 |------|------|---------------------|
-| **Tier 0** (Python) | Correctness reference | **Complete** — 53+ benchmark JSONs, 1237/1237 PASS |
+| **Tier 0** (Python) | Correctness reference | **Complete** — 56 benchmark JSONs, 1237/1237 PASS |
 | **Tier 1** (Kokkos/Cabana) | Performance reference (external) | **Not started** — no Kokkos benchmarks |
-| **Tier 2** (BarraCuda) | Sovereign implementation | **Complete** — 852 lib + 62 forge tests, 86 validation binaries |
+| **Tier 2** (BarraCuda) | Sovereign implementation | **Complete** — 850 lib + 61 forge tests, 86 validation binaries |
 
-GPU validation is currently Rust CPU vs Rust GPU (`validate_cpu_gpu_parity`). Kokkos
-would provide an independent external GPU reference for cross-validation of WGSL shader
-correctness on real hardware. This is an optional validation tier — not a blocker for
-production use, but valuable for confidence in shader promotion.
+### Cross-Spring Kokkos Baselines (groundSpring V74)
 
-**Candidate entry point**: ET₀ batch (`BatchedElementwiseF64::fao56_et0_batch()`) is the
-simplest GPU path with well-documented expected values and would serve as a Kokkos/LAMMPS
-comparison target analogous to hotSpring's Sarkas MD reproduction.
+groundSpring published Kokkos CUDA vs BarraCuda WGSL benchmarks on RTX 4070:
+
+| Kernel | Kokkos CUDA | BarraCuda WGSL | Gap | Root cause |
+|--------|-------------|----------------|-----|------------|
+| Anderson Lyapunov (500×10k) | 36 ms | 126 ms | 3.5× | Shader codegen (WGSL→SPIR-V→PTX) |
+| mean (1M f64) | 58 µs | 8,454 µs | 146× | Dispatch overhead (wgpu round-trip) |
+| variance (1M f64) | 24 µs | 8,515 µs | 355× | Dispatch overhead |
+| Pearson r (1M f64) | 47 µs | 125 ms | 2,669× | Dispatch overhead |
+| Bootstrap mean (10k×5k) | 2.2 ms | 123 ms | 57× | Dispatch overhead |
+
+Gaps are dominated by wgpu dispatch overhead (one GPU round-trip per call),
+not algorithmic differences. The evolution strategy addresses these via:
+
+- **Phase 1**: Persistent device buffers, fused reduction kernels, pipeline pre-compilation
+- **Phase 2**: Loop unrolling, subgroup ops, DF64 fast-path, workgroup tuning
+- **Phase 3**: Absorb Kokkos patterns (parallel_reduce) into Rust/WGSL
+
+### Action Items
+
+1. **Entry point**: Port `BatchedElementwiseF64::fao56_et0_batch()` timing to a Kokkos
+   comparison harness. This is the simplest GPU path with well-documented expected values
+   and would serve as an agricultural Kokkos/LAMMPS comparison target.
+2. **Reference data**: groundSpring benchmarks live in `groundSpring/kokkos_baseline/`;
+   BarraCuda binary is `bench-gpu-vs-kokkos` in `crates/groundspring-validate/`.
+3. **Shader provenance**: `correlation_full_f64.wgsl` already follows the Kokkos
+   `parallel_reduce` pattern (neuralSpring S69); document which other shaders
+   can absorb Kokkos patterns.
+4. **NOT a blocker**: Kokkos parity is a performance validation tier, not a
+   correctness gate. Production correctness is established by Tier 0 (Python) and
+   CPU/GPU parity tests.

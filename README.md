@@ -1,8 +1,8 @@
 # airSpring — Ecological & Agricultural Sciences
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
-**Date**: March 5, 2026
-**Version**: 0.7.0
+**Date**: March 7, 2026
+**Version**: 0.7.1
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -13,13 +13,13 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → biomeOS (NUCLEUS atomics, deployment graphs) → Penny Irrigation
 ```
 
-## Current Status (v0.7.0)
+## Current Status (v0.7.1)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,237/1,237 PASS** | 57 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **827 lib + 1498 atlas** | 86 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (25 GPU fail: upstream wgpu 28 driver issue) |
+| Phase 1: Rust validation | **850 lib + 1498 atlas** | 86 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (34/34 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -44,9 +44,9 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` (barracuda) | **852 passed**, 0 failures |
+| `cargo test --lib` (barracuda) | **850 passed**, 0 failures |
 | `cargo test --tests` (integration) | **33 passed** (13 GPU pipeline + 20 stats) |
-| `cargo test --lib` (metalForge) | **62 passed**, 0 failures |
+| `cargo test --lib` (metalForge) | **61 passed** + 1 doctest, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **95.66% line coverage** |
 | `cargo clippy (pedantic)` | **0 warnings** (pedantic, both crates) |
 | `cargo fmt --check` | **Clean** |
@@ -272,7 +272,7 @@ airSpring/
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance (S87) |
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (77 experiments) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V070 current) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V071 current) |
 
 ## License
 
@@ -280,14 +280,11 @@ AGPL-3.0-or-later
 
 ---
 
-*March 5, 2026 — v0.7.0. barraCuda 0.3.3 rewire (wgpu 28). 78 experiments, 1237/1237 Python,
-827 lib + 186 forge tests (27 GPU dispatch fail — upstream wgpu 28 NVK driver issue),
-381/381 validation checks (10 binaries), 146/146 cross-spring evolution benchmarks, 19.8× speedup over Python.
-Fused Welford mean+variance wired into SeasonalReducer (3 GPU passes vs 4).
-Fused 5-accumulator Pearson correlation wired into gpu/stats (pairwise\_correlation\_gpu, fused\_mean\_variance\_gpu).
-Cross-spring shader provenance: hotSpring (precision/DF64), wetSpring (bio/diversity), neuralSpring (ML/stats),
-groundSpring (uncertainty/MC). 2 new ShaderProvenance entries documenting mean\_variance\_f64.wgsl and correlation\_full\_f64.wgsl origins.
-3/6 local WGSL ops absorbed upstream (Makkink→Op14, Turc→Op15, Hamon→Op16); 3 remain local.
-Fp64Strategy::Concurrent documented (NVK reliability verification). GPU Welford fallback to CPU when dispatch returns zeros.
+*March 7, 2026 — v0.7.1. Deep debt audit and NVK resilience. barraCuda 0.3.3 (wgpu 28).
+78 experiments, 1237/1237 Python, 850 lib + 61 forge tests (0 failures — NVK zero-output
+detection with CPU fallback in bootstrap/stats/reduce). Provenance reconciled: tolerances.rs
+commits now match embedded benchmark JSONs. Kokkos validation gap documented with groundSpring
+V74 GPU benchmarks (3.5×–2669× dispatch overhead gaps). cargo-deny enforced. 146/146
+cross-spring evolution, 32/32 provenance, 51/51 dispatch. All files < 1000 lines.
 Zero unsafe, zero clippy pedantic+nursery warnings, zero mocks in production.
-cargo-deny clean, all SPDX AGPL-3.0-or-later. Pure Rust + BarraCuda.*
+All SPDX AGPL-3.0-or-later. Pure Rust + BarraCuda.*

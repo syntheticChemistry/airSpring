@@ -29,25 +29,25 @@
 //!
 //! | Domain | Control script | Commit | Date | Command |
 //! |--------|---------------|--------|------|---------|
-//! | ET₀ (PM) | `control/fao56/penman_monteith.py` | `502f2ada` | 2026-02-16 | `python3 control/fao56/penman_monteith.py` |
+//! | ET₀ (PM) | `control/fao56/penman_monteith.py` | `94cc51d` | 2026-02-16 | `python3 control/fao56/penman_monteith.py` |
 //! | ET₀ (intercomp.) | `control/et0_intercomparison/et0_three_method.py` | `9a84ae5` | 2026-02-26 | `python3 control/et0_intercomparison/et0_three_method.py` |
 //! | Priestley-Taylor | `control/priestley_taylor/priestley_taylor_et0.py` | `9a84ae5` | 2026-02-26 | `python3 control/priestley_taylor/priestley_taylor_et0.py` |
-//! | Hargreaves | `control/hargreaves/hargreaves_samani.py` | `dbfb53a` | 2026-03-02 | `python3 control/hargreaves/hargreaves_samani.py` |
-//! | Thornthwaite | `control/thornthwaite/thornthwaite_et0.py` | `8c3953b` | 2026-02-27 | `python3 control/thornthwaite/thornthwaite_et0.py` |
-//! | Water balance | `control/water_balance/fao56_water_balance.py` | `d3ecdc8` | 2026-02-27 | `python3 control/water_balance/fao56_water_balance.py` |
-//! | Richards PDE | `control/richards/richards_1d.py` | `5684b1e` | 2026-02-26 | `python3 control/richards/richards_1d.py` |
-//! | Soil sensors | `control/soil_sensors/calibration_dong2020.py` | `502f2ada` | 2026-02-16 | `python3 control/soil_sensors/calibration_dong2020.py` |
-//! | IoT irrigation | `control/iot_irrigation/calibration_dong2024.py` | `502f2ada` | 2026-02-16 | `python3 control/iot_irrigation/calibration_dong2024.py` |
-//! | Dual Kc | `control/dual_kc/cover_crop_dual_kc.py` | `5684b1e` | 2026-02-26 | `python3 control/dual_kc/cover_crop_dual_kc.py` |
-//! | Biochar isotherm | `control/biochar/biochar_isotherms.py` | `5684b1e` | 2026-02-26 | `python3 control/biochar/biochar_isotherms.py` |
-//! | Pedotransfer | `control/pedotransfer/saxton_rawls.py` | `8c3953b` | 2026-02-27 | `python3 control/pedotransfer/saxton_rawls.py` |
-//! | GDD | `control/gdd/growing_degree_days.py` | `8c3953b` | 2026-02-27 | `python3 control/gdd/growing_degree_days.py` |
-//! | SCS-CN | `control/scs_curve_number/scs_curve_number.py` | `6be822f` | 2026-02-28 | `python3 control/scs_curve_number/scs_curve_number.py` |
-//! | Green-Ampt | `control/green_ampt/green_ampt_infiltration.py` | `6be822f` | 2026-02-28 | `python3 control/green_ampt/green_ampt_infiltration.py` |
-//! | Blaney-Criddle | `control/blaney_criddle/blaney_criddle_et0.py` | `6be822f` | 2026-02-28 | `python3 control/blaney_criddle/blaney_criddle_et0.py` |
+//! | Hargreaves | `control/hargreaves/hargreaves_samani.py` | `fad2e1b` | 2026-02-26 | `python3 control/hargreaves/hargreaves_samani.py` |
+//! | Thornthwaite | `control/thornthwaite/thornthwaite_et0.py` | `fad2e1b` | 2026-02-26 | `python3 control/thornthwaite/thornthwaite_et0.py` |
+//! | Water balance | `control/water_balance/fao56_water_balance.py` | `94cc51d` | 2026-02-16 | `python3 control/water_balance/fao56_water_balance.py` |
+//! | Richards PDE | `control/richards/richards_1d.py` | `3afc229` | 2026-02-25 | `python3 control/richards/richards_1d.py` |
+//! | Soil sensors | `control/soil_sensors/calibration_dong2020.py` | `94cc51d` | 2026-02-16 | `python3 control/soil_sensors/calibration_dong2020.py` |
+//! | IoT irrigation | `control/iot_irrigation/calibration_dong2024.py` | `94cc51d` | 2026-02-16 | `python3 control/iot_irrigation/calibration_dong2024.py` |
+//! | Dual Kc | `control/dual_kc/cover_crop_dual_kc.py` | `3afc229` | 2026-02-25 | `python3 control/dual_kc/cover_crop_dual_kc.py` |
+//! | Biochar isotherm | `control/biochar/biochar_isotherms.py` | `3afc229` | 2026-02-25 | `python3 control/biochar/biochar_isotherms.py` |
+//! | Pedotransfer | `control/pedotransfer/saxton_rawls.py` | `fad2e1b` | 2026-02-26 | `python3 control/pedotransfer/saxton_rawls.py` |
+//! | GDD | `control/gdd/growing_degree_days.py` | `fad2e1b` | 2026-02-26 | `python3 control/gdd/growing_degree_days.py` |
+//! | SCS-CN | `control/scs_curve_number/scs_curve_number.py` | `97e7533` | 2026-02-28 | `python3 control/scs_curve_number/scs_curve_number.py` |
+//! | Green-Ampt | `control/green_ampt/green_ampt_infiltration.py` | `97e7533` | 2026-02-28 | `python3 control/green_ampt/green_ampt_infiltration.py` |
+//! | Blaney-Criddle | `control/blaney_criddle/blaney_criddle_et0.py` | `97e7533` | 2026-02-28 | `python3 control/blaney_criddle/blaney_criddle_et0.py` |
 //! | Anderson coupling | `control/anderson_coupling/anderson_coupling.py` | `0500398` | 2026-02-27 | `python3 control/anderson_coupling/anderson_coupling.py` |
-//! | Diversity | `control/diversity/diversity_indices.py` | `8c3953b` | 2026-02-27 | `python3 control/diversity/diversity_indices.py` |
-//! | GPU/CPU parity | `control/cpu_gpu_parity/cpu_gpu_parity.py` | `dbfb53a` | 2026-03-02 | `python3 control/cpu_gpu_parity/cpu_gpu_parity.py` |
+//! | Diversity | `control/diversity/diversity_indices.py` | `fad2e1b` | 2026-02-26 | `python3 control/diversity/diversity_indices.py` |
+//! | GPU/CPU parity | `control/cpu_gpu_parity/cpu_gpu_parity.py` | `fad2e1b` | 2026-03-02 | `python3 control/cpu_gpu_parity/cpu_gpu_parity.py` |
 
 pub use barracuda::tolerances::{check, Tolerance};
 

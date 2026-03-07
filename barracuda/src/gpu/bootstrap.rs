@@ -90,6 +90,14 @@ impl GpuBootstrap {
 
         if let Some(engine) = &self.gpu_engine {
             let distribution = engine.dispatch(data, n_bootstrap, seed)?;
+
+            // NVK/Titan V workaround: wgpu 28 f64 compute can return all zeros.
+            // Detect and fall back to CPU (same pattern as gpu::reduce).
+            let all_zero = distribution.iter().all(|&v| v == 0.0);
+            if all_zero && data.iter().any(|&v| v != 0.0) {
+                return bootstrap_mean_cpu(data, n_bootstrap as usize, u64::from(seed));
+            }
+
             let mean_est = mean(data);
             let mut sorted = distribution.clone();
             sorted.sort_by(f64::total_cmp);

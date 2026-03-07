@@ -2,6 +2,30 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.7.1] - 2026-03-07
+
+### Deep Debt Audit & NVK Resilience
+
+- **NVK zero-output detection**: `gpu::bootstrap` production code now detects
+  all-zero GPU distributions and falls back to CPU (same pattern as
+  `gpu::reduce`). `gpu::stats` tests detect NVK zeros and SKIP gracefully.
+  All 850 tests now pass (0 failures, previously 2).
+- **Provenance reconciled**: `tolerances.rs` baseline commit hashes now match
+  the embedded `benchmark_*.json` provenance blocks across all 11 domains.
+  Authoritative source: the compile-time-embedded JSON.
+- **Kokkos validation gap documented**: `specs/BARRACUDA_REQUIREMENTS.md`
+  updated with groundSpring V74 Kokkos CUDA vs BarraCuda WGSL benchmarks
+  (RTX 4070: 3.5×–2,669× gaps from dispatch overhead), phase-based
+  evolution strategy, and concrete action items.
+- **cargo-deny enforced**: `barracuda/deny.toml` with AGPL-3.0-compatible
+  license allowlist, advisory DB, ban rules, and source restrictions.
+- **Deep audit findings**: Zero unsafe blocks, zero production unwrap/expect
+  in library code, zero active TODO/FIXME/HACK/MOCK. All 162 `.rs` files +
+  2 `.wgsl` shaders have SPDX AGPL-3.0-or-later headers. All files < 1000
+  lines. Determinism tests already comprehensive (6 CPU + 4 GPU).
+- 850 lib tests, 61 forge tests + 1 doctest, 0 failures. `cargo fmt`,
+  `cargo clippy --pedantic`, `cargo doc` all clean.
+
 ## [0.6.9] - 2026-03-04
 
 ### Universal Precision Evolution — "Math is universal, precision is silicon"

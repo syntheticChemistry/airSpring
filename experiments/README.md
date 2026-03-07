@@ -1,7 +1,7 @@
 # airSpring Experiments
 
-**Updated**: March 5, 2026
-**Status**: 78 experiments, barraCuda 0.3.3 (wgpu 28). 1237/1237 Python + 827 lib + 186 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. 20.6× Rust-vs-Python speedup (24/24 algorithms). Fused Welford (SeasonalReducer) + fused Pearson (gpu/stats) wired. Local GPU 6/6 ops parity. 27 GPU dispatch failures (upstream wgpu 28 NVK). metalForge 66/66 mixed pipeline. Cross-spring shader provenance: hotSpring (precision), wetSpring (bio), neuralSpring (ML), groundSpring (uncertainty).
+**Updated**: March 7, 2026
+**Status**: 78 experiments, barraCuda 0.3.3 (wgpu 28). 1237/1237 Python + 850 lib + 61 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. 20.6× Rust-vs-Python speedup (24/24 algorithms). NVK zero-output detection with CPU fallback (bootstrap, stats, reduce). Provenance reconciled across tolerances.rs and benchmark JSONs. Kokkos validation gap documented (groundSpring V74 benchmarks). cargo-deny license enforcement. metalForge 66/66 mixed pipeline.
 
 ---
 
