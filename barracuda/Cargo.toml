@@ -420,3 +420,7 @@ path = "src/bin/validate_bootstrap_jackknife.rs"
 [[bin]]
 name = "validate_drought_index"
 path = "src/bin/validate_drought_index.rs"
+
+[[bin]]
+name = "validate_cross_spring_modern"
+path = "src/bin/validate_cross_spring_modern.rs"

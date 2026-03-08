@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: March 7, 2026
-**Status**: 81 experiments, barraCuda 0.3.3 (wgpu 28), v0.7.4. 1284/1284 Python + 854 lib + 186 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. 14.5× Rust-vs-Python speedup (21/21 parity). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry integrated (v0.7.3). New (v0.7.4): MC ET₀ uncertainty (Exp 079), Bootstrap/Jackknife CI (Exp 080), SPI drought index (Exp 081). metalForge 66/66 mixed pipeline.
+**Status**: 82 experiments, barraCuda 0.3.3 (wgpu 28), v0.7.5. 1284/1284 Python + 859 lib + 186 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. 14.5× Rust-vs-Python speedup (21/21 parity). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry integrated (v0.7.3). New (v0.7.5): MC ET₀ uncertainty (Exp 079), Bootstrap/Jackknife CI (Exp 080), SPI drought index (Exp 081), Cross-Spring Modern (Exp 082). metalForge 66/66 mixed pipeline.
 
 ---
 
@@ -90,20 +90,21 @@
 | 079 | Monte Carlo ET₀ Uncertainty Propagation | Stochastic/UQ | **Complete** | Python + Rust CPU | `gpu::mc_et0::mc_et0_cpu` — Lehmer LCG + Box-Muller MC sampling, input uncertainty → ET₀ distribution | 47+26 |
 | 080 | Bootstrap & Jackknife CI for Seasonal ET₀ | Stochastic/UQ | **Complete** | Python + Rust CPU | `gpu::bootstrap::GpuBootstrap::cpu()`, `gpu::jackknife::GpuJackknife::cpu()` — deterministic bootstrap resampling + jackknife LOO variance | 20+20 |
 | 081 | Standardized Precipitation Index (SPI) | Drought/Hydrology | **Complete** | Python + Rust CPU | `eco::drought_index` — gamma MLE, regularized incomplete gamma, normal quantile, multi-scale SPI (1/3/6/12), WMO classification | 20+20 |
+| 082 | Cross-Spring Modern Systems Validation | Integration | **Complete** | Rust | `gpu::autocorrelation`, provenance registry, PrecisionRoutingAdvice, special functions, cross-spring shader flows | 36/36 |
 
-**Grand Total**: 1284 Python + **854 lib + 186 forge tests** + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (30 capabilities) + 89 binaries + barraCuda 0.3.3 (wgpu 28, DF64 precision tier) + 14.5× CPU speedup (21/21 parity) + 81 experiments (v0.7.4). New: MC ET₀ (26/26), Bootstrap/Jackknife (20/20), SPI drought index (20/20).
+**Grand Total**: 1284 Python + **859 lib + 186 forge tests** + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (30 capabilities) + 90 binaries + barraCuda 0.3.3 (wgpu 28, DF64 precision tier) + 14.5× CPU speedup (21/21 parity) + 82 experiments (v0.7.5). New: MC ET₀ (26/26), Bootstrap/Jackknife (20/20), SPI drought index (20/20), Cross-Spring Modern (36/36).
 
 ---
 
-## Test Breakdown (v0.7.4)
+## Test Breakdown (v0.7.5)
 
 | Category | Tests | Source |
 |----------|:-----:|--------|
-| Barracuda lib (unit + doc) | 854 | `cargo test --lib` |
-| Barracuda validation binaries | 89 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
+| Barracuda lib (unit + doc) | 859 | `cargo test --lib` |
+| Barracuda validation binaries | 90 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
 | Forge | 186 | `metalForge/forge/` (substrate, dispatch, probe, workloads, cross-system routing) |
 | Forge binaries | 5 | `validate_dispatch`, `validate_live_hardware`, `validate_dispatch_routing`, `validate_mixed_pipeline`, `validate_nucleus_routing` |
-| **Total project tests** | **854 lib + 186 forge** | |
+| **Total project tests** | **859 lib + 186 forge** | |
 | Validation checks | 381/381 | 10 validation binaries |
 | Cross-spring evolution | 146/146 | `bench_cross_spring` (34 provenance entries, 6 origin Springs) |
 | Cross-validation | 33/33 | Python↔Rust match (tol=1e-5) |
@@ -392,6 +393,7 @@ Experiments follow `NNN_name` format:
 - `079`: Monte Carlo ET₀ uncertainty propagation (Lehmer LCG + Box-Muller MC sampling)
 - `080`: Bootstrap & Jackknife CI for seasonal ET₀ (deterministic resampling)
 - `081`: Standardized Precipitation Index (SPI) drought analysis (gamma MLE + normal quantile)
+- `082`: Cross-Spring Modern Systems Validation (provenance, autocorrelation, PrecisionRoutingAdvice)
 
 Gap (013) reserved. See `specs/PAPER_REVIEW_QUEUE.md`.
 
@@ -528,6 +530,27 @@ Gap (013) reserved. See `specs/PAPER_REVIEW_QUEUE.md`.
 **Rust**: `barracuda/src/eco/drought_index.rs` — `DroughtClass`, `GammaParams`, `gamma_mle_fit`, `regularized_gamma_p` (series + continued fraction), `gamma_cdf`, `compute_spi`. Uses `barracuda::special::gamma::ln_gamma`. `validate_drought_index` binary: 20/20 checks.
 
 **Key Result**: SPI correctly identifies drought periods in synthetic precipitation record. Multi-scale analysis (SPI-1 vs SPI-12) reveals different temporal drought signals. GPU-promotable: each grid cell's SPI is independent.
+
+### Exp 082: Cross-Spring Modern Systems Validation
+
+**Goal**: Validate the complete modern upstream integration — barraCuda HEAD,
+toadStool S130+, coralReef Phase 10. Exercises provenance registry, cross-spring
+matrix, `PrecisionRoutingAdvice`, `regularized_gamma_p` lean, `gpu::autocorrelation`,
+special functions, and cross-spring shader flows.
+
+**Phase 1 (Rust — 36/36 PASS):**
+- [x] Provenance registry: 28 shaders, 10 evolution events, all 5 springs
+- [x] Cross-spring matrix: every spring contributes AND consumes
+- [x] `regularized_gamma_p` delegation (v0.7.5 lean from `eco::drought_index`)
+- [x] `gpu::autocorrelation` — wraps upstream `AutocorrelationF64`, NVK zero-output CPU fallback
+- [x] Special functions: upstream `digamma`, `beta`, `ln_beta`, `norm_ppf`
+- [x] `PrecisionRoutingAdvice` from `DevicePrecisionReport`
+- [x] airSpring provenance integration (≥5 upstream shaders, evolution report)
+
+**Binary**: `validate_cross_spring_modern`
+
+**Key Result**: Full modern upstream integration validated. `gpu::autocorrelation`
+enables cross-spring time-series analysis with NVK-safe CPU fallback.
 
 ---
 

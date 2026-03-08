@@ -2,7 +2,7 @@
 
 **Last Updated**: March 5, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 81 experiments (1284/1284 Python + 854 Rust lib tests + 186 forge tests + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.3.3 (wgpu 28), fused Welford + fused Pearson wired. 20.6× Rust-vs-Python geometric mean speedup (24/24 algorithms). Local GPU 6/6 ops parity. 27 GPU dispatch failures (upstream wgpu 28 NVK). metalForge 66/66 mixed pipeline, 62 forge tests. V073 handoff. All completed papers use open data and systems. New: MC ET₀ uncertainty (Exp 079), Bootstrap/Jackknife CI (Exp 080), SPI drought index (Exp 081).
+**Status**: 82 experiments (1284/1284 Python + 859 Rust lib tests + 186 forge tests + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.3.3 (wgpu 28), fused Welford + fused Pearson wired. 20.6× Rust-vs-Python geometric mean speedup (24/24 algorithms). Local GPU 6/6 ops parity. 27 GPU dispatch failures (upstream wgpu 28 NVK). metalForge 66/66 mixed pipeline, 62 forge tests. V073 handoff. All completed papers use open data and systems. New: MC ET₀ uncertainty (Exp 079), Bootstrap/Jackknife CI (Exp 080), SPI drought index (Exp 081), Cross-Spring Modern (Exp 082).
 
 ---
 
@@ -70,13 +70,14 @@
 | 58 | Monte Carlo ET₀ Uncertainty Propagation — Exp 079 | 0+1 | 12+26 | Standard | `benchmark_mc_et0.json` | FAO-56 + groundSpring UQ (open literature) |
 | 59 | Bootstrap & Jackknife CI for Seasonal ET₀ — Exp 080 | 0+1 | 18+20 | Standard | `benchmark_bootstrap_jackknife.json` | Efron (1979) + synthetic ET₀ (open) |
 | 60 | Standardized Precipitation Index (SPI) — Exp 081 | 0+1 | 17+20 | Standard | `benchmark_drought_index.json` | McKee (1993) / WMO-1090 (open literature) |
+| 61 | Cross-Spring Modern Systems Validation — Exp 082 | 1 | 36 | — | `validate_cross_spring_modern` | Provenance registry, autocorrelation, PrecisionRoutingAdvice |
 
 ### Controls Audit
 
-All 60 completed papers have:
+All 61 completed papers have:
 - **Digitized benchmarks** in `control/*/benchmark_*.json` (59 benchmark JSONs, 59 control directories)
 - **Python control scripts** that validate against benchmarks (1284/1284 Python checks)
-- **Rust validation binaries** (84 barracuda + 5 forge = 89 binaries) that load the same benchmarks
+- **Rust validation binaries** (85 barracuda + 5 forge = 90 binaries) that load the same benchmarks
 - **Open or published data** (no institutional access required)
 - **Cross-validation** (33/33 Python↔Rust match at 1e-5; 690 crop-station yield pairs within 0.01; PT↔PM cross-validated)
 - **GPU wiring**: 25 Tier A modules + fused Welford (SeasonalReducer) + fused Pearson (pairwise_correlation_gpu) + `BrentGpu` (VG inverse) + `RichardsGpu` (Picard)
@@ -148,6 +149,7 @@ All 60 completed papers have:
 | 58 | 12/12 | 26/26 (`validate_mc_et0`) | `mc_et0_gpu` (CPU perturb → GPU batch ET₀) | `mc_et0` (UQ) |
 | 59 | 18/18 | 20/20 (`validate_bootstrap_jackknife`) | `GpuBootstrap` + `GpuJackknife` (S71 shaders) | `bootstrap` + `jackknife` |
 | 60 | 17/17 | 20/20 (`validate_drought_index`) | `BatchedElementwise` (Tier B, op=SPI) | `drought_index` (new) |
+| 61 | — | 36/36 (`validate_cross_spring_modern`) | Provenance + autocorrelation + PrecisionRoutingAdvice | `gpu::autocorrelation` (new) |
 
 ---
 

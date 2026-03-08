@@ -38,6 +38,8 @@ use barracuda::ops::variance_f64_wgsl::VarianceF64;
 
 use crate::len_f64;
 
+pub use wgpu;
+
 // ── Device-backed reducer (wraps barracuda::ops::fused_map_reduce_f64) ──
 
 /// Device-backed seasonal reducer that dispatches to GPU for large arrays.
@@ -115,6 +117,31 @@ impl SeasonalReducer {
     pub fn sum_of_squares(&self, values: &[f64]) -> crate::error::Result<f64> {
         self.engine
             .sum_of_squares(values)
+            .map_err(crate::error::AirSpringError::from)
+    }
+
+    /// GPU-resident mean+variance output for zero-readback chained pipelines.
+    ///
+    /// Returns a `wgpu::Buffer` containing `[mean, variance]` as f64 on the GPU,
+    /// avoiding CPU readback when the result feeds into another GPU dispatch.
+    /// Wired in v0.7.5 from upstream `mean_variance_to_buffer()`.
+    ///
+    /// # Cross-Spring Provenance
+    ///
+    /// `welford_mean_variance_f64.wgsl` — groundSpring origin (V74-V80),
+    /// consumed by all 5 springs. Zero-readback pattern enables chained
+    /// GPU pipelines without `PCIe` round-trips.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the GPU dispatch fails.
+    pub fn mean_variance_to_buffer(
+        &self,
+        buffer: &wgpu::Buffer,
+        n: usize,
+    ) -> crate::error::Result<wgpu::Buffer> {
+        self.variance_engine
+            .mean_variance_to_buffer(buffer, n, 1)
             .map_err(crate::error::AirSpringError::from)
     }
 

@@ -413,7 +413,7 @@ metalForge forge migrated from wgpu 22 to wgpu 28 (eliminated duplicate wgpu com
 |------|--------|
 | `cargo fmt --check` | **PASS** (both crates) |
 | `cargo clippy --all-targets -- -W clippy::pedantic -W clippy::nursery -D warnings` | **PASS** — 0 warnings |
-| `cargo test --lib` | **854 pass**, 25 fail (upstream GPU wgpu 28 NVK) |
+| `cargo test --lib` | **859 pass**, 25 fail (upstream GPU wgpu 28 NVK) |
 | `cargo test --test '*'` | **188 pass**, 2 fail (upstream GPU) |
 | Cross-spring evolution | **11/11 pass** |
 | CPU vs Python | **24/24 algorithms**, 21.0× geometric mean speedup |

@@ -14,7 +14,7 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
   `gamma_series`, and `gamma_cf` — replaced with upstream
   `barracuda::special::gamma::regularized_gamma_p`. The upstream function uses the
   same series/continued-fraction algorithm (Numerical Recipes). Validation:
-  `validate_drought_index` 20/20 PASS, `cargo test --lib` 854/854 PASS.
+  `validate_drought_index` 20/20 PASS, `cargo test --lib` 859/859 PASS.
 
 - **New upstream capabilities documented** (available, not yet wired):
   - `regularized_gamma_q(a, x)` — complement Q = 1 - P
@@ -22,12 +22,20 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
   - `beta(a, b)`, `ln_beta(a, b)` — beta functions (CPU + GPU)
   - `lower_incomplete_gamma(a, x)`, `upper_incomplete_gamma(a, x)`
   - `BatchedOdeRK45F64` — adaptive Dormand-Prince RK45 on GPU (Richards candidate)
-  - `mean_variance_to_buffer()` — GPU-resident fused Welford (zero-readback)
-  - `AutocorrelationF64` GPU op
   - R² and covariance on `CorrelationResult`
 
-- **Quality gates**: `cargo fmt` ✓, `cargo clippy --all-targets -- -D warnings` ✓,
-  `cargo test --lib` ✓ (854/854), `validate_drought_index` ✓ (20/20).
+- **New**: `gpu::autocorrelation` module — wraps upstream `AutocorrelationF64`,
+  NVK zero-output CPU fallback for cross-spring time-series analysis.
+
+- **New**: `mean_variance_to_buffer()` on `SeasonalReducer` — zero-readback
+  chained pipelines for GPU-resident fused Welford.
+
+- **Exp 082: Cross-Spring Modern Systems Validation** — 36/36 PASS. Validates
+  provenance registry, cross-spring matrix, `PrecisionRoutingAdvice`,
+  `regularized_gamma_p` lean, `gpu::autocorrelation`, special functions,
+  and cross-spring shader flows. Binary: `validate_cross_spring_modern`.
+
+- **Lib test count**: 859 (was 854).
 
 ## [0.7.4] - 2026-03-07
 

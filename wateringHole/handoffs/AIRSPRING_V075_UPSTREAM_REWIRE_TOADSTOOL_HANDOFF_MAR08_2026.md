@@ -99,8 +99,9 @@ shader was retired in airSpring v0.7.2 when all 6 ops were absorbed into upstrea
 |-------|--------|
 | `cargo fmt --check` | PASS |
 | `cargo clippy --all-targets -- -D warnings` | PASS (0 warnings) |
-| `cargo test --lib` | **854/854 PASS** |
+| `cargo test --lib` | **859/859 PASS** |
 | `validate_drought_index` | **20/20 PASS** (with upstream `regularized_gamma_p`) |
+| `validate_cross_spring_modern` | **36/36 PASS** (provenance, ACF, precision routing) |
 
 ---
 
@@ -115,8 +116,41 @@ cargo check    # builds against barraCuda HEAD a898dee
 # Quality gates
 cargo fmt --check
 cargo clippy --all-targets -- -D warnings
-cargo test --lib    # 854 tests
+cargo test --lib    # 859 tests
 
 # Drought index (exercises upstream special::gamma)
 cargo run --release --bin validate_drought_index
+
+# Cross-spring modern systems (exercises provenance, autocorrelation, precision routing)
+cargo run --release --bin validate_cross_spring_modern    # 36/36 PASS
 ```
+
+---
+
+## §6 New Modules (v0.7.5 addendum)
+
+### `gpu::autocorrelation`
+
+Wraps upstream `barracuda::ops::autocorrelation_f64_wgsl::AutocorrelationF64` for
+ET₀ temporal persistence and seasonal ACF analysis. Cross-spring provenance:
+hotSpring MD (VACF) → neuralSpring (spectral) → airSpring (hydrology).
+
+Includes NVK zero-output CPU fallback for consumer GPUs with `Df64Only` precision
+routing (RTX 4070: f64 workgroup reductions return zeros).
+
+### `SeasonalReducer::mean_variance_to_buffer()`
+
+Zero-readback fused Welford output for chained GPU pipelines. Returns a
+`wgpu::Buffer` containing `[mean, variance]` on the GPU, avoiding PCIe readback
+when feeding into subsequent GPU dispatches.
+
+### Exp 082: Cross-Spring Modern Systems Validation
+
+Validates: provenance registry (28 shaders, 10 events), cross-spring matrix (all 5
+springs produce AND consume), specific shader flows (hotSpring df64_core → all,
+wetSpring bio → neuralSpring, neuralSpring stats → airSpring, airSpring hydrology →
+wetSpring, groundSpring chi_squared/Welford → all), upstream special functions
+(`regularized_gamma_p/q`, `digamma`, `beta`, `ln_beta`, `norm_ppf`), autocorrelation
+(constant, sinusoidal, white noise ACF), `PrecisionRoutingAdvice` probe.
+
+**36/36 PASS** on RTX 4070 (Df64Only).

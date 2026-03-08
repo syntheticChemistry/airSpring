@@ -9,6 +9,7 @@
 //!
 //! | Module | Purpose | Backend |
 //! |--------|---------|---------|
+//! | [`autocorrelation`] | ET₀ temporal persistence, seasonal ACF | **GPU** (`AutocorrelationF64`, hotSpring MD→v0.7.5) |
 //! | [`device_info`] | Precision probing, `Fp64Strategy`, provenance | Device + cross-spring |
 //! | [`et0`] | Batched FAO-56 ET₀ for `N` station-days | **GPU-first** (`BatchedElementwiseF64`) |
 //! | [`hargreaves`] | Batched Hargreaves-Samani ET₀ (temp-only) | **GPU-first** (`BatchedElementwiseF64` op=6, S70+) |
@@ -84,6 +85,7 @@
 //! ```
 
 pub mod atlas_stream;
+pub mod autocorrelation;
 pub mod bootstrap;
 pub mod device_info;
 pub mod diversity;
