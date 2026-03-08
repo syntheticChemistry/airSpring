@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-03-08 (v0.7.5 — 83 experiments, barraCuda 0.3.3 (wgpu 28), 1284/1284 Python + 865 lib + 186 forge + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.5× Rust-vs-Python speedup** (21/21 algorithms). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry (v0.7.3). metalForge 66/66 mixed pipeline. Write→Absorb→Lean cycle complete. New: Exp 082 Cross-Spring Modern (36/36), Exp 083 NUCLEUS Modern Deployment (43/43). biomeOS NUCLEUS integration: Tower/Node Atomic live, 35 JSON-RPC capabilities.)
+**Updated**: 2026-03-08 (v0.7.5 — 87 experiments, barraCuda 0.3.3 (wgpu 28), 1284/1284 Python + 865 lib + 186 forge + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.5× Rust-vs-Python speedup** (21/21 algorithms). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry (v0.7.3). metalForge 66/66 mixed pipeline. Write→Absorb→Lean cycle complete. Exp 084 CPU/GPU Parity (21/21), Exp 085 toadStool Dispatch (19/19), Exp 086 metalForge Live NUCLEUS (17/17), Exp 087 Graph Coordination (22/22). Full NUCLEUS mesh validated: Tower+Node atomic live, 7 primals, 2 deployment graphs.)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -283,8 +283,9 @@ Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2, Stewart 1977, CW2D media params)
 | validate_gdd | T1 | 26/26 | GDD accumulation, kc_from_gdd, phenology |
 | validate_pedotransfer | T1 | 58/58 | Saxton-Rawls 2006, θs/θr/Ks from texture |
 
-**Total Rust: 651 tests + 1393 atlas checks PASS, 527 lib tests + 20 integration PASS**
+**Total Rust: 651 tests + 1393 atlas checks PASS, 865 lib tests + 186 forge + 20 integration PASS**
 **Phase 2 cross-validation: 75/75 MATCH (Python↔Rust, tol=1e-5)**
+**Phase 3 NUCLEUS integration: Exp 084 (21/21), Exp 085 (19/19), Exp 086 (17/17), Exp 087 (22/22) — 79/79 ALL PASS**
 **Phase 3 GPU-first: 11 orchestrators wired, 4/4 ToadStool issues RESOLVED**
 **Phase 3.5 NPU edge: AKD1000 live, 3 experiments, 95/95 NPU checks, ~48µs inference**
 **Phase 3.7 metalForge mixed: CPU+GPU+NPU substrate routing, 14 eco workloads, 26 forge tests**

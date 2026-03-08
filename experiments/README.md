@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: March 8, 2026
-**Status**: 83 experiments, barraCuda 0.3.3 (wgpu 28), v0.7.5. 1284/1284 Python + 865 lib + 186 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. 14.5× Rust-vs-Python speedup (21/21 parity). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry integrated (v0.7.3). New (v0.7.5): Cross-Spring Modern (Exp 082), NUCLEUS Modern Deployment (Exp 083, 43/43), biomeOS integration (Tower/Node live, 35 JSON-RPC capabilities). metalForge 66/66 mixed pipeline.
+**Status**: 87 experiments, barraCuda 0.3.3 (wgpu 28), v0.7.5. 1284/1284 Python + 865 lib + 186 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. 14.5× Rust-vs-Python speedup (21/21 parity). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry integrated (v0.7.3). New: Exp 084 CPU/GPU Parity (21/21), Exp 085 toadStool Dispatch (19/19), Exp 086 metalForge Live NUCLEUS (17/17), Exp 087 Graph Coordination (22/22). Full NUCLEUS mesh validated: Tower+Node atomic live, 7 primals, 2 deployment graphs.
 
 ---
 
@@ -92,8 +92,12 @@
 | 081 | Standardized Precipitation Index (SPI) | Drought/Hydrology | **Complete** | Python + Rust CPU | `eco::drought_index` — gamma MLE, regularized incomplete gamma, normal quantile, multi-scale SPI (1/3/6/12), WMO classification | 20+20 |
 | 082 | Cross-Spring Modern Systems Validation | Integration | **Complete** | Rust | `gpu::autocorrelation`, provenance registry, PrecisionRoutingAdvice, special functions, cross-spring shader flows | 36/36 |
 | 083 | NUCLEUS Modern Deployment Validation | Integration | **Complete** | Rust | biomeOS NUCLEUS (Tower/Node), primal JSON-RPC (SPI, ACF, gamma_cdf), full pipeline, cross-primal discovery, GPU precision routing | 43/43 |
+| 084 | CPU vs GPU Comprehensive Parity | GPU | **Complete** | Rust | All 18 GPU modules: FAO-56, Hargreaves, SCS-CN, Yield, Makkink, Turc, Hamon, Blaney-Criddle, VG θ/K, Thornthwaite, GDD, Pedotransfer, Infiltration, Autocorrelation, Bootstrap, Jackknife, Diversity, Reduce | 21/21 |
+| 085 | toadStool Compute Dispatch | Integration | **Complete** | Rust | In-process science dispatch (14 methods), compute.offload flow, cross-primal discovery (7 primals), precision routing, provenance chains | 19/19 |
+| 086 | metalForge Mixed Hardware Live NUCLEUS | Hardware | **Complete** | Rust | Live probe (RTX 4070 + Titan V + i9-12900K), NUCLEUS mesh (Tower+Node), 23/27 workload routing, ecology pipeline (3 stages GPU), PCIe bypass, transfer matrix | 17/17 |
+| 087 | NUCLEUS Graph Coordination | Integration | **Complete** | Rust | biomeOS TOML graph parsing, DAG validation, capability refs, dependency ordering, prerequisite checks, Tower/Node atomic detection, 7 primals | 22/22 |
 
-**Grand Total**: 1284 Python + **865 lib + 186 forge tests** + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (35 capabilities) + 91 binaries + barraCuda 0.3.3 (wgpu 28, DF64 precision tier) + 14.5× CPU speedup (21/21 parity) + 83 experiments (v0.7.5). biomeOS NUCLEUS: Tower/Node live, Exp 083 43/43.
+**Grand Total**: 1284 Python + **865 lib + 186 forge tests** + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (35 capabilities) + 95 binaries + barraCuda 0.3.3 (wgpu 28, DF64 precision tier) + 14.5× CPU speedup (21/21 parity) + 87 experiments (v0.7.5). Exp 084 CPU/GPU 21/21, Exp 085 toadStool 19/19, Exp 086 metalForge NUCLEUS 17/17, Exp 087 Graphs 22/22. Full NUCLEUS mesh: Tower+Node+Nest live.
 
 ---
 
@@ -396,6 +400,10 @@ Experiments follow `NNN_name` format:
 - `081`: Standardized Precipitation Index (SPI) drought analysis (gamma MLE + normal quantile)
 - `082`: Cross-Spring Modern Systems Validation (provenance, autocorrelation, PrecisionRoutingAdvice)
 - `083`: NUCLEUS Modern Deployment Validation (biomeOS, Tower/Node, 35 JSON-RPC, SPI/ACF/gamma_cdf)
+- `084`: CPU vs GPU Comprehensive Parity (18 modules, all GPU ops, tolerance-aware)
+- `085`: toadStool Compute Dispatch (14 methods, compute.offload, 7 primals discovered)
+- `086`: metalForge Mixed Hardware Live NUCLEUS (live probe, NUCLEUS mesh, ecology pipeline)
+- `087`: NUCLEUS Graph Coordination (TOML graphs, DAG validation, capability refs, Tower+Node)
 
 Gap (013) reserved. See `specs/PAPER_REVIEW_QUEUE.md`.
 
@@ -578,6 +586,118 @@ pipeline, cross-primal discovery, and GPU precision routing.
 **Key Result**: biomeOS NUCLEUS integration fully operational. airSpring primal
 serves 35 JSON-RPC capabilities with live Tower/Node Atomic. New v0.7.5
 endpoints (SPI, autocorrelation, gamma_cdf) all pass parity with direct Rust calls.
+
+### Exp 084: CPU vs GPU Comprehensive Parity
+
+**Goal**: Exhaustive validation of numerical parity between CPU and GPU
+implementations across all 18 barraCuda ecological science modules.
+
+**Phase 1 (Rust — 21/21 PASS):**
+- [x] FAO-56 Penman-Monteith ET₀: CPU vs GPU (tolerance 2.0 mm/day, schema mismatch path)
+- [x] Hargreaves-Samani: CPU vs GPU (tolerance 0.05)
+- [x] SCS Curve Number runoff: CPU vs GPU
+- [x] Yield response (Ky model): CPU vs GPU
+- [x] Simple ET₀ — Makkink: CPU vs GPU
+- [x] Simple ET₀ — Turc: CPU vs GPU
+- [x] Simple ET₀ — Hamon: CPU vs GPU (tolerance 2.0, daylight formula divergence)
+- [x] Simple ET₀ — Blaney-Criddle: CPU vs GPU
+- [x] Van Genuchten θ(h): CPU vs GPU
+- [x] Van Genuchten K(h): CPU vs GPU
+- [x] Thornthwaite PET: CPU vs GPU
+- [x] Growing Degree Days: CPU vs GPU
+- [x] Pedotransfer (Saxton-Rawls): CPU vs GPU
+- [x] Infiltration (Green-Ampt): CPU vs GPU
+- [x] Autocorrelation: CPU vs GPU
+- [x] Bootstrap CI: CPU vs GPU
+- [x] Jackknife CI: CPU vs GPU
+- [x] Shannon Diversity: CPU vs GPU
+- [x] Fused map-reduce mean: CPU vs GPU
+- [x] Fused map-reduce variance: CPU vs GPU
+- [x] All modules compile with single binary
+
+**Binary**: `validate_cpu_gpu_comprehensive`
+
+**Key Result**: All 18 GPU modules validated for CPU↔GPU parity. Known
+schema-level divergences (FAO-56 vapor pressure path, Hamon daylight formula)
+documented with appropriate tolerances. Pure Rust math confirmed consistent
+across execution substrates.
+
+### Exp 085: toadStool Compute Dispatch
+
+**Goal**: Validate airSpring in-process science dispatch via JSON-RPC and
+toadStool compute offload flow. Tests 14 exposed science methods, cross-primal
+discovery, precision routing, and graceful degradation when toadStool is absent.
+
+**Phase 1 (Rust — 19/19 PASS):**
+- [x] In-process dispatch: 14 JSON-RPC science methods validated
+- [x] ecology.et0_fao56, ecology.water_balance, ecology.yield_response
+- [x] science.thornthwaite, science.gdd, science.pedotransfer
+- [x] science.spi_drought_index, science.autocorrelation, science.gamma_cdf
+- [x] ecology.runoff_scs_cn, ecology.van_genuchten_theta, ecology.van_genuchten_k
+- [x] science.bootstrap_ci, science.jackknife_ci
+- [x] compute.offload structure validated (toadStool socket detection)
+- [x] Cross-primal discovery: 7 primals found (airSpring, barraCuda, toadStool, wetSpring, hotSpring, neuralSpring, groundSpring)
+- [x] PrecisionRoutingAdvice: Df64Only/Hybrid routing from DevicePrecisionReport
+- [x] Graceful degradation: toadStool absent/stale handled without failure
+
+**Binary**: `validate_toadstool_dispatch`
+
+**Key Result**: airSpring science layer fully accessible via JSON-RPC. All 14
+exposed methods return valid results. toadStool compute offload architecture
+validated (socket detection, health check, provenance IPC). Graceful fallback
+when Node Atomic not running.
+
+### Exp 086: metalForge Mixed Hardware — Live NUCLEUS Mesh
+
+**Goal**: Live hardware probe and NUCLEUS mesh pipeline validation. Tests GPU/CPU/NPU
+substrate discovery, NUCLEUS atomic construction (Tower+Node+Nest), capability-based
+workload routing, and ecology pipeline dispatch through live hardware.
+
+**Phase 1 (Rust — 17/17 PASS):**
+- [x] Live GPU probe: RTX 4070 (F64Native) + Titan V (Df64Only) detected
+- [x] Live CPU probe: i9-12900K, 24 cores, x86_64
+- [x] NPU probe: graceful absent (no NPU hardware)
+- [x] NUCLEUS Mesh construction: Tower (GPU+CPU), Node (Titan V), Nest (CPU)
+- [x] Workload routing: 23/27 routed (4 NPU-only unroutable — graceful)
+- [x] Ecology pipeline: et0_batch → water_balance_batch → yield_response_surface (3 GPU stages)
+- [x] PCIe bypass check: same-node GPU→GPU transfer path confirmed
+- [x] CPU roundtrip validation: cross-node transfer matrix computed
+- [x] Transfer matrix symmetric and ≥ 0
+- [x] CpuCompute capability dispatches to GPU (capability superset)
+- [x] Mesh pipeline cross-node hops reported
+
+**Binary**: `validate_mixed_nucleus_live` (metalForge/forge)
+
+**Key Result**: Live hardware inventory feeds NUCLEUS mesh construction. All three
+atomic types (Tower, Node, Nest) instantiated from probed substrates. Ecology
+pipeline routes through GPU stages with PCIe bypass. Mixed hardware validated for
+production dispatch.
+
+### Exp 087: NUCLEUS Graph Coordination via biomeOS
+
+**Goal**: Structural validation of biomeOS deployment graphs (TOML). Parses
+graph definitions, validates DAG properties, capability references, dependency
+ordering, prerequisite checks, and alignment with discovered NUCLEUS atomics.
+
+**Phase 1 (Rust — 22/22 PASS):**
+- [x] airspring_eco_pipeline.toml: parsed, 7 nodes, valid DAG
+- [x] cross_primal_soil_microbiome.toml: parsed, 5 nodes, valid DAG
+- [x] Graph section metadata present (ID, description)
+- [x] DAG acyclicity via topological sort (custom Kahn's algorithm)
+- [x] Dependency ordering: fetch_weather before compute_et0 before water_balance
+- [x] Prerequisite nodes: check_nestgate and check_toadstool validated
+- [x] Capability references match known ecology.* / science.* set
+- [x] Cross-primal soil graph: airSpring + wetSpring capabilities
+- [x] biomeOS primal discovery: ≥5 primals found
+- [x] Tower Atomic detection: live
+- [x] Node Atomic detection: live
+- [x] Both graphs structurally sound for deployment
+
+**Binary**: `validate_nucleus_graphs`
+
+**Key Result**: biomeOS deployment graphs are well-formed DAGs with correct
+capability references and dependency ordering. Topological sort confirms no
+cycles. Both ecology and cross-primal pipelines ready for live NUCLEUS dispatch.
 
 ---
 

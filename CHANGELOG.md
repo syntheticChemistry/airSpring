@@ -40,6 +40,29 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
   capabilities now exposed via JSON-RPC in the `airspring_primal` binary.
   35 capabilities registered (was 30).
 
+- **Exp 084: Comprehensive CPU vs GPU Parity** — 21/21 PASS. Validates all 18
+  GPU-accelerated modules (FAO-56, Hargreaves, SCS-CN, Yield, Makkink, Turc,
+  Hamon, Blaney-Criddle, VG θ/K, Thornthwaite, GDD, Pedotransfer, Infiltration,
+  Autocorrelation, Bootstrap, Jackknife, Diversity, Fused Reduce) CPU vs GPU.
+  Documents input-schema divergences (ET₀ e_a path, Hamon daylight formula).
+
+- **Exp 085: toadStool Compute Dispatch** — 19/19 PASS. Validates in-process
+  science dispatch (14 JSON-RPC methods + ecology aliases), compute.offload
+  flow (graceful absent), cross-primal discovery (7 primals), precision routing,
+  and provenance chain validation (hotSpring→neuralSpring→airSpring ACF).
+
+- **Exp 086: metalForge Mixed Hardware Live NUCLEUS** — 17/17 PASS. Live
+  hardware probe (RTX 4070 + Titan V + i9-12900K), NUCLEUS mesh construction
+  (Tower+Node), 23/27 workload routing (4 NPU-only skipped), ecology pipeline
+  (3 stages fully GPU, 0 CPU roundtrips), PCIe bypass detection, transfer
+  path matrix, capability-based dispatch validation.
+
+- **Exp 087: NUCLEUS Graph Coordination** — 22/22 PASS. Validates biomeOS
+  deployment graphs (airspring_eco_pipeline.toml + cross_primal_soil_microbiome.toml):
+  TOML parsing, DAG acyclicity, capability references (4 ecology caps), dependency
+  ordering (weather→ET₀→WB→yield), prerequisite checks (toadStool, nestgate),
+  Tower+Node atomic detection, and graph-primal alignment.
+
 - **Exp 083: NUCLEUS Modern Deployment Validation** — 43/43 PASS. Validates
   biomeOS NUCLEUS atomic detection (Tower/Node live), primal socket discovery,
   v0.7.5 capability enumeration (35 caps), SPI drought index via JSON-RPC

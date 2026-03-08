@@ -73,6 +73,7 @@ version = "0.3.3"
 dependencies = [
  "blake3",
  "bytemuck",
+ "bytes",
  "half",
  "naga",
  "num-traits",

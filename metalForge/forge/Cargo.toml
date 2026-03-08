@@ -47,3 +47,7 @@ path = "src/bin/validate_mixed_pipeline.rs"
 [[bin]]
 name = "validate_nucleus_routing"
 path = "src/bin/validate_nucleus_routing.rs"
+
+[[bin]]
+name = "validate_mixed_nucleus_live"
+path = "src/bin/validate_mixed_nucleus_live.rs"
