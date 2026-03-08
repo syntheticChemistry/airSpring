@@ -424,3 +424,7 @@ path = "src/bin/validate_drought_index.rs"
 [[bin]]
 name = "validate_cross_spring_modern"
 path = "src/bin/validate_cross_spring_modern.rs"
+
+[[bin]]
+name = "validate_nucleus_modern"
+path = "src/bin/validate_nucleus_modern.rs"

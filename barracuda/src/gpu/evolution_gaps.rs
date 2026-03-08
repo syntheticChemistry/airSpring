@@ -42,7 +42,7 @@
 //!
 //! # Current Inventory (March 7, 2026 — v0.7.5, `barraCuda` HEAD `a898dee`, wgpu 28)
 //!
-//! ## v0.7.5: Upstream Rewire — `regularized_gamma_p` Lean
+//! ## v0.7.5: Upstream Rewire + biomeOS NUCLEUS Integration
 //!
 //! Synced to barraCuda HEAD (`a898dee`), toadStool S130+, coralReef Phase 10.
 //!
@@ -50,16 +50,19 @@
 //!   `gamma_cf` (55 lines of duplicated numerical math) replaced with upstream
 //!   `barracuda::special::gamma::regularized_gamma_p`. The upstream function uses
 //!   the same series/continued-fraction algorithm. 20/20 validation checks pass.
-//! - **`barracuda::stats::normal::norm_ppf`**: Already wired (v0.7.4).
-//! - **`barracuda::special::gamma::ln_gamma`**: Already wired (v0.7.4).
+//! - **`gpu::autocorrelation`**: Wraps upstream `AutocorrelationF64`, NVK zero-output
+//!   CPU fallback for cross-spring time-series analysis.
+//! - **`mean_variance_to_buffer()`**: Zero-readback fused Welford on `SeasonalReducer`.
+//! - **`primal_science` expanded**: 3 new JSON-RPC handlers — `science.spi_drought_index`,
+//!   `science.autocorrelation`, `science.gamma_cdf` + ecology aliases. 35 capabilities.
+//! - **biomeOS NUCLEUS integration**: Tower/Node Atomic LIVE, 35 JSON-RPC capabilities,
+//!   Exp 083 43/43 PASS (NUCLEUS modern deployment validation).
 //! - **New upstream capabilities available** (not yet wired):
 //!   - `regularized_gamma_q(a, x)` — Q = 1-P complement
 //!   - `lower_incomplete_gamma(a, x)`, `upper_incomplete_gamma(a, x)`
 //!   - `digamma(x)` — psi function (CPU + GPU shader)
 //!   - `beta(a, b)`, `ln_beta(a, b)` — beta functions
 //!   - `BatchedOdeRK45F64` — adaptive Dormand-Prince for Richards GPU
-//!   - `mean_variance_to_buffer()` — GPU-resident fused Welford
-//!   - `AutocorrelationF64` GPU op
 //!   - `R²` and covariance on `CorrelationResult`
 //!
 //! ## v0.7.4: Stochastic Methods & Drought Index

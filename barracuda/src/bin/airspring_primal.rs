@@ -82,12 +82,18 @@ const ALL_CAPABILITIES: &[&str] = &[
     "science.anderson_coupling",
     // ── Monthly ET ──
     "science.thornthwaite",
+    // ── Drought & Stochastic (v0.7.4+) ──
+    "science.spi_drought_index",
+    "science.autocorrelation",
+    "science.gamma_cdf",
     // ── Ecology aliases ──
     "ecology.et0_fao56",
     "ecology.et0_hargreaves",
     "ecology.water_balance",
     "ecology.yield_response",
     "ecology.full_pipeline",
+    "ecology.spi_drought_index",
+    "ecology.autocorrelation",
     // ── Cross-primal ──
     "primal.forward",
     "primal.discover",
@@ -373,6 +379,9 @@ fn register_via_socket(target: &Path, our_socket: &Path) {
         "anderson_coupling":      "science.anderson_coupling",
         "thornthwaite":           "science.thornthwaite",
         "full_pipeline":          "ecology.full_pipeline",
+        "spi_drought_index":      "science.spi_drought_index",
+        "autocorrelation":        "science.autocorrelation",
+        "gamma_cdf":              "science.gamma_cdf",
     });
 
     let _ = rpc::send(

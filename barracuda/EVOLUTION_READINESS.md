@@ -1,6 +1,6 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: March 7, 2026 (v0.7.5 — PrecisionRoutingAdvice wired, upstream provenance registry integrated, cross-spring evolution benchmark)
+**Last Updated**: March 8, 2026 (v0.7.5 — biomeOS NUCLEUS integration, 35 JSON-RPC capabilities, Exp 083 43/43)
 **barraCuda**: v0.3.3+ standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry)
 **ToadStool**: S130 (19,109+ tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient)
 **coralReef**: Phase 10 sovereign Rust GPU compiler (NVIDIA + AMD, 904 tests, 14/27 cross-spring shaders)
@@ -413,7 +413,7 @@ metalForge forge migrated from wgpu 22 to wgpu 28 (eliminated duplicate wgpu com
 |------|--------|
 | `cargo fmt --check` | **PASS** (both crates) |
 | `cargo clippy --all-targets -- -W clippy::pedantic -W clippy::nursery -D warnings` | **PASS** — 0 warnings |
-| `cargo test --lib` | **859 pass**, 25 fail (upstream GPU wgpu 28 NVK) |
+| `cargo test --lib` | **865 pass**, 25 fail (upstream GPU wgpu 28 NVK) |
 | `cargo test --test '*'` | **188 pass**, 2 fail (upstream GPU) |
 | Cross-spring evolution | **11/11 pass** |
 | CPU vs Python | **24/24 algorithms**, 21.0× geometric mean speedup |

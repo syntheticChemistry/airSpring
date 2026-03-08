@@ -35,7 +35,20 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
   `regularized_gamma_p` lean, `gpu::autocorrelation`, special functions,
   and cross-spring shader flows. Binary: `validate_cross_spring_modern`.
 
-- **Lib test count**: 859 (was 854).
+- **New**: `primal_science` handlers for `science.spi_drought_index`,
+  `science.autocorrelation`, `science.gamma_cdf` + ecology aliases — v0.7.5
+  capabilities now exposed via JSON-RPC in the `airspring_primal` binary.
+  35 capabilities registered (was 30).
+
+- **Exp 083: NUCLEUS Modern Deployment Validation** — 43/43 PASS. Validates
+  biomeOS NUCLEUS atomic detection (Tower/Node live), primal socket discovery,
+  v0.7.5 capability enumeration (35 caps), SPI drought index via JSON-RPC
+  (parity: direct vs RPC), autocorrelation via JSON-RPC (cross-spring provenance),
+  gamma CDF upstream lean, full ecology pipeline, cross-primal discovery,
+  toadStool socket detection, and GPU precision routing (`Df64Only`/Hybrid).
+  Binary: `validate_nucleus_modern`.
+
+- **Lib test count**: 865 (was 854).
 
 ## [0.7.4] - 2026-03-07
 

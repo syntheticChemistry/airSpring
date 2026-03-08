@@ -1,7 +1,7 @@
 # airSpring Experiments
 
-**Updated**: March 7, 2026
-**Status**: 82 experiments, barraCuda 0.3.3 (wgpu 28), v0.7.5. 1284/1284 Python + 859 lib + 186 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. 14.5× Rust-vs-Python speedup (21/21 parity). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry integrated (v0.7.3). New (v0.7.5): MC ET₀ uncertainty (Exp 079), Bootstrap/Jackknife CI (Exp 080), SPI drought index (Exp 081), Cross-Spring Modern (Exp 082). metalForge 66/66 mixed pipeline.
+**Updated**: March 8, 2026
+**Status**: 83 experiments, barraCuda 0.3.3 (wgpu 28), v0.7.5. 1284/1284 Python + 865 lib + 186 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. 14.5× Rust-vs-Python speedup (21/21 parity). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry integrated (v0.7.3). New (v0.7.5): Cross-Spring Modern (Exp 082), NUCLEUS Modern Deployment (Exp 083, 43/43), biomeOS integration (Tower/Node live, 35 JSON-RPC capabilities). metalForge 66/66 mixed pipeline.
 
 ---
 
@@ -91,8 +91,9 @@
 | 080 | Bootstrap & Jackknife CI for Seasonal ET₀ | Stochastic/UQ | **Complete** | Python + Rust CPU | `gpu::bootstrap::GpuBootstrap::cpu()`, `gpu::jackknife::GpuJackknife::cpu()` — deterministic bootstrap resampling + jackknife LOO variance | 20+20 |
 | 081 | Standardized Precipitation Index (SPI) | Drought/Hydrology | **Complete** | Python + Rust CPU | `eco::drought_index` — gamma MLE, regularized incomplete gamma, normal quantile, multi-scale SPI (1/3/6/12), WMO classification | 20+20 |
 | 082 | Cross-Spring Modern Systems Validation | Integration | **Complete** | Rust | `gpu::autocorrelation`, provenance registry, PrecisionRoutingAdvice, special functions, cross-spring shader flows | 36/36 |
+| 083 | NUCLEUS Modern Deployment Validation | Integration | **Complete** | Rust | biomeOS NUCLEUS (Tower/Node), primal JSON-RPC (SPI, ACF, gamma_cdf), full pipeline, cross-primal discovery, GPU precision routing | 43/43 |
 
-**Grand Total**: 1284 Python + **859 lib + 186 forge tests** + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (30 capabilities) + 90 binaries + barraCuda 0.3.3 (wgpu 28, DF64 precision tier) + 14.5× CPU speedup (21/21 parity) + 82 experiments (v0.7.5). New: MC ET₀ (26/26), Bootstrap/Jackknife (20/20), SPI drought index (20/20), Cross-Spring Modern (36/36).
+**Grand Total**: 1284 Python + **865 lib + 186 forge tests** + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (35 capabilities) + 91 binaries + barraCuda 0.3.3 (wgpu 28, DF64 precision tier) + 14.5× CPU speedup (21/21 parity) + 83 experiments (v0.7.5). biomeOS NUCLEUS: Tower/Node live, Exp 083 43/43.
 
 ---
 
@@ -394,6 +395,7 @@ Experiments follow `NNN_name` format:
 - `080`: Bootstrap & Jackknife CI for seasonal ET₀ (deterministic resampling)
 - `081`: Standardized Precipitation Index (SPI) drought analysis (gamma MLE + normal quantile)
 - `082`: Cross-Spring Modern Systems Validation (provenance, autocorrelation, PrecisionRoutingAdvice)
+- `083`: NUCLEUS Modern Deployment Validation (biomeOS, Tower/Node, 35 JSON-RPC, SPI/ACF/gamma_cdf)
 
 Gap (013) reserved. See `specs/PAPER_REVIEW_QUEUE.md`.
 
@@ -551,6 +553,31 @@ special functions, and cross-spring shader flows.
 
 **Key Result**: Full modern upstream integration validated. `gpu::autocorrelation`
 enables cross-spring time-series analysis with NVK-safe CPU fallback.
+
+### Exp 083: NUCLEUS Modern Deployment Validation
+
+**Goal**: End-to-end validation of biomeOS/NUCLEUS integration with v0.7.5
+capabilities. Exercises NUCLEUS atomic detection (Tower/Node), primal socket
+discovery, JSON-RPC capability enumeration, new science endpoints, full ecology
+pipeline, cross-primal discovery, and GPU precision routing.
+
+**Phase 1 (Rust — 43/43 PASS):**
+- [x] NUCLEUS atomic detection: Tower (BearDog+Songbird) LIVE, Node (+ToadStool) LIVE
+- [x] Primal socket discovery and health check (v0.7.5)
+- [x] v0.7.5 capability enumeration: 35 capabilities (SPI, ACF, gamma_cdf + ecology aliases)
+- [x] SPI drought index via JSON-RPC: parity direct-Rust vs RPC, upstream provenance
+- [x] Autocorrelation via JSON-RPC: cross-spring provenance (hotSpring→neuralSpring→airSpring)
+- [x] Gamma CDF via JSON-RPC: upstream `regularized_gamma_p` lean confirmed
+- [x] Full ecology pipeline via JSON-RPC: ET₀→water_balance→yield (3 stages)
+- [x] Cross-primal discovery: 7 primals in ecosystem
+- [x] ToadStool socket detected, provenance IPC graceful fallback
+- [x] GPU precision routing: `Df64Only`, `Hybrid` Fp64 strategy
+
+**Binary**: `validate_nucleus_modern`
+
+**Key Result**: biomeOS NUCLEUS integration fully operational. airSpring primal
+serves 35 JSON-RPC capabilities with live Tower/Node Atomic. New v0.7.5
+endpoints (SPI, autocorrelation, gamma_cdf) all pass parity with direct Rust calls.
 
 ---
 

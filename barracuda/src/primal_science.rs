@@ -6,6 +6,7 @@
 
 use crate::eco::anderson;
 use crate::eco::diversity;
+use crate::eco::drought_index;
 use crate::eco::dual_kc;
 use crate::eco::evapotranspiration as et;
 use crate::eco::infiltration;
@@ -15,6 +16,7 @@ use crate::eco::sensor_calibration;
 use crate::eco::simple_et0;
 use crate::eco::soil_moisture;
 use crate::eco::thornthwaite;
+use crate::gpu::autocorrelation;
 
 fn f64_p(params: &serde_json::Value, key: &str) -> Option<f64> {
     params.get(key).and_then(serde_json::Value::as_f64)
@@ -58,6 +60,9 @@ pub fn dispatch_science(method: &str, params: &serde_json::Value) -> Option<serd
         "science.bray_curtis" => bray_curtis(params),
         "science.anderson_coupling" => anderson_coupling(params),
         "science.thornthwaite" => thornthwaite_handler(params),
+        "science.spi_drought_index" | "ecology.spi_drought_index" => spi_drought(params),
+        "science.autocorrelation" | "ecology.autocorrelation" => autocorrelation_handler(params),
+        "science.gamma_cdf" => gamma_cdf_handler(params),
         _ => return None,
     };
     Some(result)
@@ -363,6 +368,88 @@ fn thornthwaite_handler(params: &serde_json::Value) -> serde_json::Value {
     serde_json::json!({"monthly_et0_mm": m.to_vec(), "annual_et0_mm": m.iter().sum::<f64>(), "method": "thornthwaite_1948"})
 }
 
+// ── Drought Index (SPI) — v0.7.4+ ───────────────────────────────────
+
+fn spi_drought(params: &serde_json::Value) -> serde_json::Value {
+    let monthly_precip: Vec<f64> = params
+        .get("monthly_precip_mm")
+        .and_then(|v| v.as_array())
+        .map(|a| a.iter().filter_map(serde_json::Value::as_f64).collect())
+        .unwrap_or_default();
+    if monthly_precip.len() < 3 {
+        return serde_json::json!({"error": "monthly_precip_mm must have ≥3 values"});
+    }
+    let scale = params
+        .get("scale")
+        .and_then(serde_json::Value::as_u64)
+        .unwrap_or(3) as usize;
+    let spi = drought_index::compute_spi(&monthly_precip, scale);
+    let n_valid = spi.iter().filter(|v| v.is_finite()).count();
+    let classifications: Vec<&str> = spi
+        .iter()
+        .map(|&v| {
+            if v.is_nan() {
+                "insufficient_data"
+            } else {
+                drought_index::DroughtClass::from_spi(v).label()
+            }
+        })
+        .collect();
+    serde_json::json!({
+        "spi": spi.iter().map(|v| if v.is_nan() { serde_json::Value::Null } else { serde_json::json!(v) }).collect::<Vec<_>>(),
+        "scale_months": scale,
+        "n_months": monthly_precip.len(),
+        "n_valid": n_valid,
+        "classifications": classifications,
+        "method": "mckee_1993_spi",
+        "upstream": "barracuda::special::gamma::regularized_gamma_p"
+    })
+}
+
+// ── Autocorrelation — v0.7.5 ────────────────────────────────────────
+
+fn autocorrelation_handler(params: &serde_json::Value) -> serde_json::Value {
+    let data: Vec<f64> = params
+        .get("data")
+        .and_then(|v| v.as_array())
+        .map(|a| a.iter().filter_map(serde_json::Value::as_f64).collect())
+        .unwrap_or_default();
+    if data.is_empty() {
+        return serde_json::json!({"error": "data must be non-empty"});
+    }
+    let max_lag = params
+        .get("max_lag")
+        .and_then(serde_json::Value::as_u64)
+        .unwrap_or(20) as usize;
+    let max_lag = max_lag.min(data.len());
+    let acf = autocorrelation::autocorrelation_cpu(&data, max_lag);
+    let nacf = autocorrelation::normalised_acf_cpu(&data, max_lag);
+    serde_json::json!({
+        "acf": acf,
+        "normalised_acf": nacf,
+        "max_lag": max_lag,
+        "n_samples": data.len(),
+        "provenance": "hotSpring_md_vacf → neuralSpring_spectral → airSpring_hydrology"
+    })
+}
+
+// ── Gamma CDF — v0.7.5 upstream lean ────────────────────────────────
+
+fn gamma_cdf_handler(params: &serde_json::Value) -> serde_json::Value {
+    let x = f64_p(params, "x").unwrap_or(1.0);
+    let alpha = f64_p(params, "alpha").unwrap_or(2.0);
+    let beta = f64_p(params, "beta").unwrap_or(1.0);
+    let params_g = drought_index::GammaParams { alpha, beta };
+    let cdf = drought_index::gamma_cdf(x, &params_g);
+    serde_json::json!({
+        "gamma_cdf": cdf,
+        "x": x,
+        "alpha": alpha,
+        "beta": beta,
+        "upstream": "barracuda::special::gamma::regularized_gamma_p"
+    })
+}
+
 #[cfg(test)]
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
@@ -397,6 +484,9 @@ mod tests {
             "science.bray_curtis",
             "science.anderson_coupling",
             "science.thornthwaite",
+            "science.spi_drought_index",
+            "science.autocorrelation",
+            "science.gamma_cdf",
         ];
         for method in science_methods {
             let params_for_method = if method == "science.shannon_diversity" {
@@ -618,6 +708,64 @@ mod tests {
     fn test_dispatch_thornthwaite_wrong_months_returns_error() {
         let params = serde_json::json!({"monthly_temps_c": [5.0, 6.0, 8.0]});
         let r = dispatch_science("science.thornthwaite", &params).unwrap();
+        assert!(r.get("error").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_spi_drought_index() {
+        let params = serde_json::json!({
+            "monthly_precip_mm": [50.0, 60.0, 45.0, 70.0, 80.0, 55.0, 40.0, 65.0, 50.0, 75.0, 60.0, 45.0],
+            "scale": 3
+        });
+        let r = dispatch_science("science.spi_drought_index", &params).unwrap();
+        assert!(r.get("spi").is_some());
+        assert_eq!(r["n_months"], 12);
+        assert!(r["n_valid"].as_u64().unwrap() > 0);
+        assert!(r.get("classifications").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_spi_drought_index_ecology_alias() {
+        let precip: Vec<f64> = vec![50.0; 24];
+        let params = serde_json::json!({
+            "monthly_precip_mm": precip
+        });
+        let r = dispatch_science("ecology.spi_drought_index", &params).unwrap();
+        assert!(r.get("spi").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_autocorrelation() {
+        let params = serde_json::json!({
+            "data": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0],
+            "max_lag": 5
+        });
+        let r = dispatch_science("science.autocorrelation", &params).unwrap();
+        let acf = r["acf"].as_array().unwrap();
+        assert_eq!(acf.len(), 5);
+        assert!(r.get("normalised_acf").is_some());
+        assert!(r.get("provenance").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_gamma_cdf() {
+        let params = serde_json::json!({"x": 1.0, "alpha": 2.0, "beta": 1.0});
+        let r = dispatch_science("science.gamma_cdf", &params).unwrap();
+        let cdf = r["gamma_cdf"].as_f64().unwrap();
+        assert!(cdf > 0.0 && cdf < 1.0);
+    }
+
+    #[test]
+    fn test_dispatch_spi_insufficient_data() {
+        let params = serde_json::json!({"monthly_precip_mm": [10.0, 20.0]});
+        let r = dispatch_science("science.spi_drought_index", &params).unwrap();
+        assert!(r.get("error").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_autocorrelation_empty() {
+        let params = serde_json::json!({"data": []});
+        let r = dispatch_science("science.autocorrelation", &params).unwrap();
         assert!(r.get("error").is_some());
     }
 }

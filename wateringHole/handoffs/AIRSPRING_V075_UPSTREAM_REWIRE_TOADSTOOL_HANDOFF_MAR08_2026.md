@@ -154,3 +154,37 @@ wetSpring, groundSpring chi_squared/Welford → all), upstream special functions
 (constant, sinusoidal, white noise ACF), `PrecisionRoutingAdvice` probe.
 
 **36/36 PASS** on RTX 4070 (Df64Only).
+
+### `primal_science` expansion (v0.7.5 addendum)
+
+3 new JSON-RPC handlers added to `airspring_primal`:
+
+- `science.spi_drought_index` / `ecology.spi_drought_index` — McKee 1993 SPI via
+  upstream `regularized_gamma_p`. Returns SPI array, classifications, scale info.
+- `science.autocorrelation` / `ecology.autocorrelation` — CPU autocorrelation with
+  cross-spring provenance (hotSpring→neuralSpring→airSpring).
+- `science.gamma_cdf` — Direct gamma CDF access via upstream lean.
+
+Total: 35 capabilities (was 30). Semantic mappings registered with biomeOS.
+
+### Exp 083: NUCLEUS Modern Deployment Validation
+
+End-to-end biomeOS/NUCLEUS integration validation:
+- NUCLEUS atomic detection: Tower (BearDog+Songbird) LIVE, Node (+ToadStool) LIVE
+- 35 capability enumeration via JSON-RPC health check
+- SPI, autocorrelation, gamma_cdf parity (direct Rust vs JSON-RPC)
+- Full ecology pipeline (ET₀→water_balance→yield, 3 stages)
+- Cross-primal discovery: 7 primals in ecosystem
+- GPU precision routing: Df64Only, Hybrid
+
+**43/43 PASS** on RTX 4070 (Df64Only), Tower+Node Atomic live.
+
+### Quality Gates (updated)
+
+| Gate | Result |
+|------|--------|
+| `cargo fmt --check` | PASS |
+| `cargo clippy --all-targets -- -D warnings` | PASS (0 warnings) |
+| `cargo test --lib` | **865/865 PASS** |
+| `validate_cross_spring_modern` | **36/36 PASS** |
+| `validate_nucleus_modern` (Exp 083) | **43/43 PASS** |

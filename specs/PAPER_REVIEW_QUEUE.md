@@ -2,7 +2,7 @@
 
 **Last Updated**: March 5, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 82 experiments (1284/1284 Python + 859 Rust lib tests + 186 forge tests + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.3.3 (wgpu 28), fused Welford + fused Pearson wired. 20.6× Rust-vs-Python geometric mean speedup (24/24 algorithms). Local GPU 6/6 ops parity. 27 GPU dispatch failures (upstream wgpu 28 NVK). metalForge 66/66 mixed pipeline, 62 forge tests. V073 handoff. All completed papers use open data and systems. New: MC ET₀ uncertainty (Exp 079), Bootstrap/Jackknife CI (Exp 080), SPI drought index (Exp 081), Cross-Spring Modern (Exp 082).
+**Status**: 83 experiments (1284/1284 Python + 865 Rust lib tests + 186 forge tests + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.3.3 (wgpu 28), fused Welford + fused Pearson wired. 20.6× Rust-vs-Python geometric mean speedup (24/24 algorithms). Local GPU 6/6 ops parity. 27 GPU dispatch failures (upstream wgpu 28 NVK). metalForge 66/66 mixed pipeline, 62 forge tests. V075 handoff. biomeOS NUCLEUS Tower/Node LIVE, 35 JSON-RPC capabilities. New: Cross-Spring Modern (Exp 082), NUCLEUS Modern Deployment (Exp 083, 43/43).
 
 ---
 
@@ -71,6 +71,7 @@
 | 59 | Bootstrap & Jackknife CI for Seasonal ET₀ — Exp 080 | 0+1 | 18+20 | Standard | `benchmark_bootstrap_jackknife.json` | Efron (1979) + synthetic ET₀ (open) |
 | 60 | Standardized Precipitation Index (SPI) — Exp 081 | 0+1 | 17+20 | Standard | `benchmark_drought_index.json` | McKee (1993) / WMO-1090 (open literature) |
 | 61 | Cross-Spring Modern Systems Validation — Exp 082 | 1 | 36 | — | `validate_cross_spring_modern` | Provenance registry, autocorrelation, PrecisionRoutingAdvice |
+| 62 | NUCLEUS Modern Deployment — Exp 083 | 1 | 43 | — | `validate_nucleus_modern` | biomeOS NUCLEUS, Tower/Node, 35 JSON-RPC, SPI/ACF/gamma_cdf parity |
 
 ### Controls Audit
 
