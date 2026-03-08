@@ -1,7 +1,7 @@
 # airSpring Specifications
 
 **Last Updated**: March 7, 2026
-**Status**: Phase 0–4 complete — 1284/1284 Python + 854 lib + 186 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 89 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.3.3 (wgpu 28) + 14.5× CPU speedup (21/21 parity) + metalForge 66/66 + NUCLEUS primal (30 capabilities) + 81 experiments (v0.7.4)
+**Status**: Phase 0–4 complete — 1284/1284 Python + 854 lib + 186 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 89 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.3.3 (wgpu 28) + 14.5× CPU speedup (21/21 parity) + metalForge 66/66 + NUCLEUS primal (30 capabilities) + 81 experiments (v0.7.5)
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling, Anderson coupling
 
 ---

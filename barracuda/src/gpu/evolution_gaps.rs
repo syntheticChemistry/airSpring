@@ -40,7 +40,33 @@
 //! | `eco::yield_response` | `gpu::yield_response` | `batched_elementwise_f64.wgsl` (op=18) | Stewart yield | A (GPU-first, absorbed upstream) |
 //! | `eco::evapotranspiration` (Makkink/Turc/Hamon/BC) | `gpu::simple_et0` | `batched_elementwise_f64.wgsl` (ops 14-16, 19) | Simple ET₀ batch | A (GPU-first, absorbed upstream) |
 //!
-//! # Current Inventory (March 7, 2026 — v0.7.3, `barraCuda` HEAD post-0.3.3, wgpu 28)
+//! # Current Inventory (March 7, 2026 — v0.7.5, `barraCuda` HEAD `a898dee`, wgpu 28)
+//!
+//! ## v0.7.5: Upstream Rewire — `regularized_gamma_p` Lean
+//!
+//! Synced to barraCuda HEAD (`a898dee`), toadStool S130+, coralReef Phase 10.
+//!
+//! - **`eco::drought_index` leaned**: Local `regularized_gamma_p`, `gamma_series`,
+//!   `gamma_cf` (55 lines of duplicated numerical math) replaced with upstream
+//!   `barracuda::special::gamma::regularized_gamma_p`. The upstream function uses
+//!   the same series/continued-fraction algorithm. 20/20 validation checks pass.
+//! - **`barracuda::stats::normal::norm_ppf`**: Already wired (v0.7.4).
+//! - **`barracuda::special::gamma::ln_gamma`**: Already wired (v0.7.4).
+//! - **New upstream capabilities available** (not yet wired):
+//!   - `regularized_gamma_q(a, x)` — Q = 1-P complement
+//!   - `lower_incomplete_gamma(a, x)`, `upper_incomplete_gamma(a, x)`
+//!   - `digamma(x)` — psi function (CPU + GPU shader)
+//!   - `beta(a, b)`, `ln_beta(a, b)` — beta functions
+//!   - `BatchedOdeRK45F64` — adaptive Dormand-Prince for Richards GPU
+//!   - `mean_variance_to_buffer()` — GPU-resident fused Welford
+//!   - `AutocorrelationF64` GPU op
+//!   - `R²` and covariance on `CorrelationResult`
+//!
+//! ## v0.7.4: Stochastic Methods & Drought Index
+//!
+//! New experiments: MC ET₀ uncertainty (Exp 079, 26/26), Bootstrap/Jackknife CI
+//! (Exp 080, 20/20), SPI drought index (Exp 081, 20/20). `eco::drought_index`
+//! module added. Tolerance: `MC_ET0_PROPAGATION`.
 //!
 //! ## v0.7.3: Modern Upstream Integration
 //!

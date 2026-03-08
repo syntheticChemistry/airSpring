@@ -2,6 +2,33 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.7.5] - 2026-03-07
+
+### Upstream Rewire — barraCuda HEAD sync, regularized_gamma_p lean
+
+- **Synced to barraCuda HEAD** (`a898dee`), toadStool S130+, coralReef Phase 10.
+  airSpring now builds against the latest upstream with all deep-debt audit
+  improvements (typed errors, named constants, test resilience, lint compliance).
+
+- **`eco::drought_index` leaned**: Removed 55 lines of local `regularized_gamma_p`,
+  `gamma_series`, and `gamma_cf` — replaced with upstream
+  `barracuda::special::gamma::regularized_gamma_p`. The upstream function uses the
+  same series/continued-fraction algorithm (Numerical Recipes). Validation:
+  `validate_drought_index` 20/20 PASS, `cargo test --lib` 854/854 PASS.
+
+- **New upstream capabilities documented** (available, not yet wired):
+  - `regularized_gamma_q(a, x)` — complement Q = 1 - P
+  - `digamma(x)` — psi function (CPU + GPU WGSL shader)
+  - `beta(a, b)`, `ln_beta(a, b)` — beta functions (CPU + GPU)
+  - `lower_incomplete_gamma(a, x)`, `upper_incomplete_gamma(a, x)`
+  - `BatchedOdeRK45F64` — adaptive Dormand-Prince RK45 on GPU (Richards candidate)
+  - `mean_variance_to_buffer()` — GPU-resident fused Welford (zero-readback)
+  - `AutocorrelationF64` GPU op
+  - R² and covariance on `CorrelationResult`
+
+- **Quality gates**: `cargo fmt` ✓, `cargo clippy --all-targets -- -D warnings` ✓,
+  `cargo test --lib` ✓ (854/854), `validate_drought_index` ✓ (20/20).
+
 ## [0.7.4] - 2026-03-07
 
 ### Stochastic Methods & Drought Index — MC ET₀, Bootstrap/Jackknife CI, SPI

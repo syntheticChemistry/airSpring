@@ -19,6 +19,7 @@
 //! - WMO (2012) SPI User Guide. WMO-No. 1090.
 //! - Thom HCS (1958) A note on the gamma distribution. Monthly Weather Rev 86(4).
 
+use barracuda::special::gamma::regularized_gamma_p as upstream_gamma_p;
 use barracuda::stats::normal::norm_ppf;
 
 /// WMO drought classification category.
@@ -105,72 +106,16 @@ pub fn gamma_mle_fit(data: &[f64]) -> Option<GammaParams> {
     Some(GammaParams { alpha, beta })
 }
 
-/// Regularized lower incomplete gamma function P(a, x).
-fn regularized_gamma_p(shape: f64, x: f64) -> f64 {
-    if x <= 0.0 {
-        return 0.0;
-    }
-    if x < shape + 1.0 {
-        gamma_series(shape, x)
-    } else {
-        1.0 - gamma_cf(shape, x)
-    }
-}
-
-/// Series expansion for P(shape, x).
-fn gamma_series(shape: f64, x: f64) -> f64 {
-    let mut ap = shape;
-    let mut total = 1.0 / shape;
-    let mut delta = total;
-    for _ in 0..200 {
-        ap += 1.0;
-        delta *= x / ap;
-        total += delta;
-        if delta.abs() < total.abs() * 1e-14 {
-            break;
-        }
-    }
-    let ln_gamma_a = barracuda::special::gamma::ln_gamma(shape).unwrap_or(0.0);
-    total * shape.mul_add(x.ln(), -x - ln_gamma_a).exp()
-}
-
-/// Continued fraction for Q(shape, x) = 1 - P(shape, x).
-#[allow(clippy::many_single_char_names)]
-fn gamma_cf(shape: f64, x: f64) -> f64 {
-    let mut b = x + 1.0 - shape;
-    let mut c = 1e30_f64;
-    let mut d = 1.0 / b;
-    let mut h = d;
-    for i in 1_i32..200 {
-        let fi = f64::from(i);
-        let an = -fi * (fi - shape);
-        b += 2.0;
-        d = an.mul_add(d, b);
-        if d.abs() < 1e-30 {
-            d = 1e-30;
-        }
-        c = b + an / c;
-        if c.abs() < 1e-30 {
-            c = 1e-30;
-        }
-        d = 1.0 / d;
-        let delta = d * c;
-        h *= delta;
-        if (delta - 1.0).abs() < 1e-14 {
-            break;
-        }
-    }
-    let ln_gamma_a = barracuda::special::gamma::ln_gamma(shape).unwrap_or(0.0);
-    shape.mul_add(x.ln(), -x - ln_gamma_a).exp() * h
-}
-
 /// Gamma CDF: P(X ≤ x) for X ~ Gamma(α, β).
+///
+/// Delegates to `barracuda::special::gamma::regularized_gamma_p` (upstream).
+/// Local `gamma_series`/`gamma_cf` removed in v0.7.5 (Write→Absorb→Lean).
 #[must_use]
 pub fn gamma_cdf(x: f64, params: &GammaParams) -> f64 {
     if x <= 0.0 {
         return 0.0;
     }
-    regularized_gamma_p(params.alpha, x / params.beta)
+    upstream_gamma_p(params.alpha, x / params.beta).unwrap_or(0.0)
 }
 
 /// Compute SPI at a given time scale.

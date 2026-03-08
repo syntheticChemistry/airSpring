@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-03-07 (v0.7.4 — 81 experiments, barraCuda 0.3.3 (wgpu 28), 1284/1284 Python + 854 lib + 186 forge + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.5× Rust-vs-Python speedup** (21/21 algorithms). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry (v0.7.3). metalForge 66/66 mixed pipeline. Write→Absorb→Lean cycle complete. New: Exp 079 MC ET₀ (26/26), Exp 080 Bootstrap/Jackknife (20/20), Exp 081 SPI Drought Index (20/20).)
+**Updated**: 2026-03-07 (v0.7.5 — 81 experiments, barraCuda 0.3.3 (wgpu 28), 1284/1284 Python + 854 lib + 186 forge + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.5× Rust-vs-Python speedup** (21/21 algorithms). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry (v0.7.3). metalForge 66/66 mixed pipeline. Write→Absorb→Lean cycle complete. New: Exp 079 MC ET₀ (26/26), Exp 080 Bootstrap/Jackknife (20/20), Exp 081 SPI Drought Index (20/20).)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -1117,7 +1117,7 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026 — Updated: March 7, 2026 (v0.7.4)*
+*Initialized: February 16, 2026 — Updated: March 7, 2026 (v0.7.5)*
 *81 experiments, 1284/1284 Python, 854 lib + 186 forge tests, 89 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 20.6× CPU speedup (24/24 parity), barraCuda 0.3.3 (wgpu 28), fused Welford + Pearson wired.*
 *8 ET₀ methods + SCS-CN runoff + Green-Ampt infiltration + coupled runoff-infiltration + VG inverse + full-season WB + Exp 058 Climate Scenario (46/46).*
 *NUCLEUS primal (16 capabilities, 28/28 cross-primal pipeline). Atlas decade 80yr (102/102). NASS real (99/99). NCBI diversity (63/63).*

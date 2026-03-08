@@ -265,4 +265,4 @@ The same BarraCuda/ToadStool infrastructure supports both domains. The key share
 
 *March 7, 2026 — 1284 Python + 854 lib + 62 forge tests + 1498 atlas checks, 89 binaries all pass,
 15,300 station-days (100 stations) real data, 75/75 cross-validation match, 14.5× Rust-vs-Python speedup (21/21 parity), zero synthetic.
-New (v0.7.4): MC ET₀ uncertainty (26/26), Bootstrap/Jackknife CI (20/20), SPI drought index (20/20).*
+New (v0.7.5): MC ET₀ uncertainty (26/26), Bootstrap/Jackknife CI (20/20), SPI drought index (20/20).*
