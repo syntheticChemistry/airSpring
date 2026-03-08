@@ -19,7 +19,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,284/1,284 PASS** | 60 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB, MC ET₀ uncertainty, bootstrap/jackknife CI, SPI drought index |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **865 lib + 1498 atlas** | 91 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
+| Phase 1: Rust validation | **865 lib + 1498 atlas** | 95 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (34/34 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -44,9 +44,9 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` (barracuda) | **859 passed**, 0 failures |
+| `cargo test --lib` (barracuda) | **865 passed**, 0 failures |
 | `cargo test --tests` (integration) | **33 passed** (13 GPU pipeline + 20 stats) |
-| `cargo test --lib` (metalForge) | **61 passed** + 1 doctest, 0 failures |
+| `cargo test --lib` (metalForge) | **186 passed** + 1 doctest, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **95.66% line coverage** |
 | `cargo clippy (pedantic)` | **0 warnings** (pedantic, both crates) |
 | `cargo fmt --check` | **Clean** |
@@ -219,7 +219,7 @@ airSpring/
 │   ├── bootstrap_jackknife/     # Bootstrap & Jackknife CI (20/20)
 │   ├── drought_index/           # SPI drought index (20/20)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (859 lib tests, 90 binaries, barraCuda 0.3.3 / wgpu 28)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (865 lib tests, 95 binaries, barraCuda 0.3.3 / wgpu 28)
 │   ├── src/
 │   │   ├── biomeos.rs           # biomeOS socket resolution + primal discovery (shared)
 │   │   ├── eco/                 # Domain modules (22 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine + drought_index)
@@ -227,21 +227,21 @@ airSpring/
 │   │   ├── nautilus.rs          # bingoCube/nautilus evolutionary reservoir (AirSpringBrain)
 │   │   ├── rpc.rs               # JSON-RPC 2.0 inter-primal communication
 │   │   ├── npu.rs               # BrainChip AKD1000 NPU (feature-gated)
-│   │   └── bin/                 # validate_*, bench_*, airspring_primal (89 declared)
+│   │   └── bin/                 # validate_*, bench_*, airspring_primal (95 declared)
 │   ├── tests/                   # Integration + property tests (9 files + common/)
-│   └── Cargo.toml               # v0.7.3
+│   └── Cargo.toml               # v0.7.5
 ├── metalForge/                  # Mixed hardware dispatch (CPU+GPU+NPU)
 │   ├── deploy/                  # biomeOS deployment graphs (airspring_deploy.toml)
-│   └── forge/                   # airspring-forge (61 tests, 5 binaries, live hardware probe)
+│   └── forge/                   # airspring-forge (186 tests, 6 binaries, live hardware probe)
 ├── specs/                       # Specifications and requirements
-│   ├── PAPER_REVIEW_QUEUE.md    # Paper reproduction queue (81 experiments)
+│   ├── PAPER_REVIEW_QUEUE.md    # Paper reproduction queue (87 experiments)
 │   ├── BARRACUDA_REQUIREMENTS.md# GPU + NPU kernel requirements
 │   └── CROSS_SPRING_EVOLUTION.md # Cross-spring shader provenance (S87)
 ├── whitePaper/                  # Methodology and study documentation
 │   └── baseCamp/                # Per-faculty research briefings + baseCamp extensions
-├── experiments/                 # Experiment protocols and results (81 experiments)
+├── experiments/                 # Experiment protocols and results (87 experiments)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
-│   └── handoffs/                # Versioned handoffs (V074 current)
+│   └── handoffs/                # Versioned handoffs (V075 current)
 ├── graphs/                      # biomeOS deployment graphs (TOML)
 ├── CHANGELOG.md                 # Keep-a-Changelog versioned history
 ├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
@@ -266,14 +266,14 @@ airSpring/
 | Document | Purpose |
 |----------|---------|
 | `CHANGELOG.md` | Versioned change history |
-| `CONTROL_EXPERIMENT_STATUS.md` | Detailed experiment results (82 experiments) |
+| `CONTROL_EXPERIMENT_STATUS.md` | Detailed experiment results (87 experiments) |
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C GPU evolution, absorbed/stays-local |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66), 27 workloads |
 | `metalForge/forge/` | Mixed hardware dispatch: live probe + capability routing |
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance (S87) |
-| `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (82 experiments) |
+| `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (87 experiments) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V074 current) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V075 current) |
 
 ## License
 
@@ -281,12 +281,12 @@ AGPL-3.0-or-later
 
 ---
 
-*March 7, 2026 — v0.7.5. Write→Absorb→Lean complete: all 20 ops upstream via
+*March 8, 2026 — v0.7.5. Write→Absorb→Lean complete: all 20 ops upstream via
 `BatchedElementwiseF64`, `local_dispatch` retired, `PrecisionRoutingAdvice` wired,
-upstream provenance registry integrated. 82 experiments, 1284/1284 Python, 859 lib +
-61 forge tests (0 failures). 146/146 cross-spring evolution, 32/32 provenance,
-51/51 dispatch. New: MC ET₀ uncertainty (26/26), Bootstrap/Jackknife CI (20/20),
-SPI drought index (20/20), Cross-Spring Modern (36/36), `gpu::autocorrelation`,
-`mean_variance_to_buffer()` on SeasonalReducer. All files < 1000 lines.
-Zero unsafe, zero clippy pedantic+nursery warnings, zero mocks in production.
-All SPDX AGPL-3.0-or-later. Pure Rust + BarraCuda.*
+upstream provenance registry integrated. 87 experiments, 1284/1284 Python, 865 lib +
+186 forge tests (0 failures). 146/146 cross-spring evolution, 32/32 provenance,
+51/51 dispatch. New: Exp 084 CPU/GPU parity (21/21), Exp 085 toadStool dispatch (19/19),
+Exp 086 metalForge NUCLEUS mesh (17/17), Exp 087 graph coordination (22/22).
+Full NUCLEUS integration: Tower+Node+Nest atomic live, 7 primals, 2 deployment graphs.
+All files < 1000 lines. Zero unsafe, zero clippy pedantic+nursery warnings,
+zero mocks in production. All SPDX AGPL-3.0-or-later. Pure Rust + BarraCuda.*

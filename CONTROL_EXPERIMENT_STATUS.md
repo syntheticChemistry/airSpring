@@ -59,7 +59,7 @@ bash run_all_baselines.sh
 #    Cached to: control/long_term_wb/data/wooster_era5_1960_2023.json
 python control/long_term_wb/long_term_water_balance.py
 
-# 7. Run Rust validation binaries (859+1498 checks across 90 binaries)
+# 7. Run Rust validation binaries (865+1498 checks across 95 binaries)
 cd barracuda
 for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   validate_sensor_calibration validate_real_data cross_validate \
@@ -1086,7 +1086,7 @@ routing.
 Track 1 (Precision Agriculture):
   Phase 0  [COMPLETE]: Python baselines — 1284/1284 PASS (57 experiments)
   Phase 0+ [COMPLETE]: Real data pipeline — 15,300 station-days, ET₀ R²=0.97
-  Phase 1  [COMPLETE]: Rust validation — 865 lib + 62 forge tests, 91 binaries
+  Phase 1  [COMPLETE]: Rust validation — 865 lib + 186 forge tests, 95 binaries
   Phase 1.5[COMPLETE]: CPU benchmark — Rust 14.5× faster than Python (21/21 parity)
   Phase 2  [COMPLETE]: Cross-validation — 75/75 MATCH (Python↔Rust, tol=1e-5)
   Phase 2.5[COMPLETE]: Ops 5-8 GPU-first — 4 orchestrators rewired (ToadStool S70+ absorbed)
@@ -1161,7 +1161,7 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 ---
 
 *Initialized: February 16, 2026 — Updated: March 7, 2026 (v0.7.5)*
-*83 experiments, 1284/1284 Python, 865 lib + 186 forge tests, 91 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 20.6× CPU speedup (24/24 parity), barraCuda 0.3.3 (wgpu 28), fused Welford + Pearson wired. biomeOS NUCLEUS: Tower/Node live, 35 JSON-RPC capabilities, Exp 083 43/43.*
+*87 experiments, 1284/1284 Python, 865 lib + 186 forge tests, 95 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 14.5× CPU speedup (21/21 parity), barraCuda 0.3.3 (wgpu 28). biomeOS NUCLEUS: Tower/Node+Nest live, 35 JSON-RPC capabilities. Exp 084 CPU/GPU 21/21, Exp 085 toadStool 19/19, Exp 086 metalForge 17/17, Exp 087 graphs 22/22.*
 *8 ET₀ methods + SCS-CN runoff + Green-Ampt infiltration + coupled runoff-infiltration + VG inverse + full-season WB + Exp 058 Climate Scenario (46/46).*
 *NUCLEUS primal (16 capabilities, 28/28 cross-primal pipeline). Atlas decade 80yr (102/102). NASS real (99/99). NCBI diversity (63/63).*
 *25 Tier A + 6 GPU-local modules. Ops 5-8 GPU-first (ToadStool S87). GPU stats (neuralSpring S69).*

@@ -1,10 +1,10 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: March 8, 2026 (v0.7.5 — biomeOS NUCLEUS integration, 35 JSON-RPC capabilities, Exp 083 43/43)
+**Last Updated**: March 8, 2026 (v0.7.5 — 87 experiments, 865 lib + 186 forge tests, 95 binaries. Exp 084 CPU/GPU parity 21/21, Exp 085 toadStool dispatch 19/19, Exp 086 metalForge NUCLEUS 17/17, Exp 087 graph coordination 22/22)
 **barraCuda**: v0.3.3+ standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry)
-**ToadStool**: S130 (19,109+ tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient)
+**ToadStool**: S130+ (19,109+ tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient)
 **coralReef**: Phase 10 sovereign Rust GPU compiler (NVIDIA + AMD, 904 tests, 14/27 cross-spring shaders)
-**Handoff**: V0.7.5 (modern upstream integration — PrecisionRouting + provenance + cross-spring benchmark)
+**Handoff**: V0.7.5 (NUCLEUS experiments + barraCuda/toadStool evolution handoff)
 **License**: AGPL-3.0-or-later
 
 ---

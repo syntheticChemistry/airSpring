@@ -159,6 +159,20 @@ run_rust validate_gpu_math
 run_rust validate_ncbi_16s_coupling
 
 echo ""
+echo "━━━ Phase 5: NUCLEUS Integration (Exp 084-087) ━━━"
+echo ""
+run_rust validate_cpu_gpu_comprehensive
+run_rust validate_toadstool_dispatch
+run_rust validate_nucleus_graphs
+echo "── Rust:   validate_mixed_nucleus_live (metalForge — Exp 086)"
+if cargo run --release --bin validate_mixed_nucleus_live --manifest-path metalForge/forge/Cargo.toml 2>/dev/null; then
+    echo "  PASS"
+else
+    echo "  FAIL"
+    FAIL=1
+fi
+
+echo ""
 echo "━━━ Phase 3: GPU Live Dispatch (Titan V) ━━━"
 echo ""
 echo "── Rust:   validate_gpu_live (barracuda — Titan V GPU)"

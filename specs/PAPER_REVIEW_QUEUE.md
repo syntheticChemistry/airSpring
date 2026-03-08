@@ -1,8 +1,8 @@
 # airSpring — Paper Review Queue
 
-**Last Updated**: March 5, 2026
+**Last Updated**: March 8, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 83 experiments (1284/1284 Python + 865 Rust lib tests + 186 forge tests + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.3.3 (wgpu 28), fused Welford + fused Pearson wired. 20.6× Rust-vs-Python geometric mean speedup (24/24 algorithms). Local GPU 6/6 ops parity. 27 GPU dispatch failures (upstream wgpu 28 NVK). metalForge 66/66 mixed pipeline, 62 forge tests. V075 handoff. biomeOS NUCLEUS Tower/Node LIVE, 35 JSON-RPC capabilities. New: Cross-Spring Modern (Exp 082), NUCLEUS Modern Deployment (Exp 083, 43/43).
+**Status**: 87 experiments (1284/1284 Python + 865 Rust lib tests + 186 forge tests + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.3.3 (wgpu 28), 95 binaries. 14.5× Rust-vs-Python geometric mean speedup (21/21 algorithms). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired. metalForge 66/66 mixed pipeline, 186 forge tests. V075 handoff. biomeOS NUCLEUS Tower/Node+Nest LIVE, 35 JSON-RPC capabilities. Exp 084 CPU/GPU parity (21/21), Exp 085 toadStool dispatch (19/19), Exp 086 metalForge NUCLEUS (17/17), Exp 087 graph coordination (22/22).
 
 ---
 
