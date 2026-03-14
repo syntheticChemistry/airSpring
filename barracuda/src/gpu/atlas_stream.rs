@@ -16,7 +16,6 @@ use std::ops::Range;
 use std::sync::Arc;
 
 use barracuda::device::WgpuDevice;
-use bingocube_nautilus::DriftMonitor;
 
 use crate::gpu::seasonal_pipeline::{CropConfig, SeasonResult, SeasonalPipeline, WeatherDay};
 
@@ -200,7 +199,76 @@ impl Default for AtlasStream {
     }
 }
 
-/// Regime change snapshot from `DriftMonitor` during multi-year atlas processing.
+/// Lightweight fitness-based drift detector for atlas stream processing.
+///
+/// Tracks mean and best fitness across generations. Drift is flagged when
+/// mean fitness drops below 50% of the historical best for 3 or more
+/// consecutive generations — indicating drought onset or regime shift.
+///
+/// Replaces the upstream `bingocube_nautilus::DriftMonitor` with a focused
+/// implementation for agricultural yield-ratio monitoring.
+#[derive(Debug)]
+pub struct FitnessDriftMonitor {
+    best_historical_mean: f64,
+    consecutive_drops: usize,
+    latest_ne_s: f64,
+    drifting: bool,
+}
+
+impl Default for FitnessDriftMonitor {
+    fn default() -> Self {
+        Self {
+            best_historical_mean: 0.0,
+            consecutive_drops: 0,
+            latest_ne_s: 1.0,
+            drifting: false,
+        }
+    }
+}
+
+impl FitnessDriftMonitor {
+    const DRIFT_THRESHOLD: f64 = 0.5;
+    const CONSECUTIVE_REQUIRED: usize = 3;
+
+    /// Record a generation's fitness statistics.
+    pub fn record(&mut self, _generation: usize, pop_size: usize, mean_fit: f64, _best_fit: f64) {
+        if mean_fit > self.best_historical_mean {
+            self.best_historical_mean = mean_fit;
+        }
+
+        #[allow(clippy::cast_precision_loss)]
+        let ne_s = if self.best_historical_mean > 0.0 {
+            (mean_fit / self.best_historical_mean) * pop_size as f64
+        } else {
+            pop_size as f64
+        };
+        self.latest_ne_s = ne_s;
+
+        if self.best_historical_mean > 0.0
+            && mean_fit < self.best_historical_mean * Self::DRIFT_THRESHOLD
+        {
+            self.consecutive_drops += 1;
+        } else {
+            self.consecutive_drops = 0;
+        }
+
+        self.drifting = self.consecutive_drops >= Self::CONSECUTIVE_REQUIRED;
+    }
+
+    /// Whether the monitor is in a drifting state.
+    #[must_use]
+    pub const fn is_drifting(&self) -> bool {
+        self.drifting
+    }
+
+    /// Latest `N_e * s` value.
+    #[must_use]
+    pub const fn latest_ne_s(&self) -> f64 {
+        self.latest_ne_s
+    }
+}
+
+/// Regime change snapshot from drift detection during multi-year atlas processing.
 ///
 /// Emitted by [`MonitoredAtlasStream`] when the monitor detects a shift in
 /// agricultural conditions (drought onset, irrigation regime change, etc.).
@@ -216,11 +284,11 @@ pub struct RegimeChange {
     pub ne_s: f64,
 }
 
-/// Atlas stream with integrated `DriftMonitor` for regime change detection.
+/// Atlas stream with integrated [`FitnessDriftMonitor`] for regime change detection.
 ///
-/// Wraps [`AtlasStream`] and feeds year-over-year yield/ET₀ into a
-/// `bingocube_nautilus::DriftMonitor`, flagging stations and years where
-/// `N_e * s` drops below the drift threshold for ≥3 consecutive seasons.
+/// Wraps [`AtlasStream`] and feeds year-over-year yield/ET₀ into the
+/// drift monitor, flagging stations and years where `N_e * s` drops below
+/// the drift threshold for ≥3 consecutive seasons.
 ///
 /// The "population" analogy: each station's yearly yield ratio is an
 /// "organism" fitness; drought or regime shifts cause fitness collapse,
@@ -228,7 +296,7 @@ pub struct RegimeChange {
 #[derive(Debug)]
 pub struct MonitoredAtlasStream {
     inner: AtlasStream,
-    monitor: DriftMonitor,
+    monitor: FitnessDriftMonitor,
     regime_changes: Vec<RegimeChange>,
     generation: usize,
 }
@@ -239,7 +307,7 @@ impl MonitoredAtlasStream {
     pub fn new() -> Self {
         Self {
             inner: AtlasStream::new(),
-            monitor: DriftMonitor::default(),
+            monitor: FitnessDriftMonitor::default(),
             regime_changes: Vec::new(),
             generation: 0,
         }
@@ -253,7 +321,7 @@ impl MonitoredAtlasStream {
     pub fn with_gpu(device: Arc<WgpuDevice>) -> crate::error::Result<Self> {
         Ok(Self {
             inner: AtlasStream::with_gpu(device)?,
-            monitor: DriftMonitor::default(),
+            monitor: FitnessDriftMonitor::default(),
             regime_changes: Vec::new(),
             generation: 0,
         })
@@ -336,19 +404,19 @@ impl MonitoredAtlasStream {
 
     /// Reference to the underlying drift monitor.
     #[must_use]
-    pub const fn drift_monitor(&self) -> &DriftMonitor {
+    pub const fn drift_monitor(&self) -> &FitnessDriftMonitor {
         &self.monitor
     }
 
     /// Whether the monitor is currently in a drifting state.
     #[must_use]
-    pub fn is_drifting(&self) -> bool {
+    pub const fn is_drifting(&self) -> bool {
         self.monitor.is_drifting()
     }
 
     /// Reset the monitor for a new multi-year run.
     pub fn reset(&mut self) {
-        self.monitor = DriftMonitor::default();
+        self.monitor = FitnessDriftMonitor::default();
         self.regime_changes.clear();
         self.generation = 0;
     }

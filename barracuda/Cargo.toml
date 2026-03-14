@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.7.5"
+version = "0.7.6"
 edition = "2021"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
@@ -15,9 +15,9 @@ standalone-http = ["dep:ureq"]
 npu = ["dep:akida-driver"]
 
 [dependencies]
-# BarraCuda 0.3.3: standalone sovereign math engine (ecoPrimals/barraCuda).
+# BarraCuda 0.3.5: standalone sovereign math engine (ecoPrimals/barraCuda).
 # Extracted from ToadStool S89 — universal math, precision per hardware.
-# v0.3.3: wgpu 28, DF64 precision tier, fused Welford stats, 3 airSpring ops absorbed.
+# v0.3.5: wgpu 28, DF64 precision tier, SpringDomain newtype, F64BuiltinCapabilities DF64 fields.
 # airSpring validates that Rust baselines can be faithfully ported to
 # BarraCuda shaders. Used for stats, validation, GPU ops, and PDE primitives.
 barracuda = { path = "../../barraCuda/crates/barracuda" }
@@ -36,7 +36,7 @@ tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
 # Synchronous HTTP client for standalone data providers (pre-biomeOS).
 # NOTE: ureq's default TLS (rustls) pulls in `ring` (C/asm). When Tower
 # Atomic is running, HTTPS should route through Songbird (Pure Rust TLS 1.3
-# via BearDog crypto delegation) — see `data::provider::HttpTransport`.
+# via BearDog crypto delegation) — see `data::provider::HttpProvider`.
 # Evolution: ureq (standalone) → Songbird capability.call (sovereign).
 # Gated behind `standalone-http` feature — disable for pure-Rust sovereignty.
 ureq = { version = "3", optional = true }
@@ -44,12 +44,12 @@ ureq = { version = "3", optional = true }
 # Nautilus Shell: evolutionary reservoir computing via BingoCube board populations.
 # Domain-agnostic feed-forward reservoir — no temporal recurrence needed.
 # Provides DriftMonitor, EdgeSeeder, NautilusShell, and NautilusBrain APIs.
-bingocube-nautilus = { path = "../../primalTools/bingoCube/nautilus" }
+bingocube-nautilus = { path = "../../primalTools/bingoCube/nautilus", features = ["json"] }
 
 # Serde: needed for Nautilus brain serialization (observations, shell state).
 serde = { version = "1", features = ["derive"] }
 
-# wgpu 28 — matches barraCuda 0.3.3's pinned version for type compatibility.
+# wgpu 28 — matches barraCuda 0.3.5's pinned version for type compatibility.
 # Used by GPU buffer I/O (bytemuck transmute) and device interaction.
 wgpu = { version = "28", default-features = false, features = ["wgsl", "vulkan", "vulkan-portability"] }
 

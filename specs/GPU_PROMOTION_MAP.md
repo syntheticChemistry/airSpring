@@ -2,7 +2,7 @@
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 
-**Last updated**: 2026-03-07 (v0.7.5, barraCuda 0.3.3+ / wgpu 28, PrecisionRoutingAdvice wired, upstream provenance registry integrated)
+**Last updated**: 2026-03-14 (v0.7.6, barraCuda 0.3.5+ / wgpu 28, PrecisionRoutingAdvice wired, upstream provenance registry integrated)
 **Sources**: `EVOLUTION_READINESS.md`, `gpu/evolution_gaps.rs`, `BARRACUDA_REQUIREMENTS.md`
 
 ---

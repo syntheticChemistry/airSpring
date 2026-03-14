@@ -1,8 +1,8 @@
 # airSpring — Ecological & Agricultural Sciences
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
-**Date**: March 8, 2026
-**Version**: 0.7.5
+**Date**: March 14, 2026
+**Version**: 0.7.6
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -44,7 +44,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` (barracuda) | **865 passed**, 0 failures |
+| `cargo test --lib` (barracuda) | **833 passed**, 1 pre-existing GPU driver issue |
 | `cargo test --tests` (integration) | **33 passed** (13 GPU pipeline + 20 stats) |
 | `cargo test --lib` (metalForge) | **186 passed** + 1 doctest, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **95.66% line coverage** |
@@ -219,12 +219,13 @@ airSpring/
 │   ├── bootstrap_jackknife/     # Bootstrap & Jackknife CI (20/20)
 │   ├── drought_index/           # SPI drought index (20/20)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (865 lib tests, 95 binaries, barraCuda 0.3.3 / wgpu 28)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (833 lib tests, 95 binaries, barraCuda 0.3.5 / wgpu 28)
 │   ├── src/
 │   │   ├── biomeos.rs           # biomeOS socket resolution + primal discovery (shared)
 │   │   ├── eco/                 # Domain modules (22 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine + drought_index)
 │   │   ├── gpu/                 # ToadStool/BarraCuda GPU bridge (25 Tier A, ops 0-19 upstream + BrentGpu + RichardsGpu)
-│   │   ├── nautilus.rs          # bingoCube/nautilus evolutionary reservoir (AirSpringBrain)
+│   │   ├── data/                # Data provider abstraction (HttpProvider, BiomeosProvider)
+│   │   ├── nautilus.rs          # bingoCube/nautilus evolutionary reservoir (NautilusBrain v0.1.0)
 │   │   ├── rpc.rs               # JSON-RPC 2.0 inter-primal communication
 │   │   ├── npu.rs               # BrainChip AKD1000 NPU (feature-gated)
 │   │   └── bin/                 # validate_*, bench_*, airspring_primal (95 declared)
@@ -281,12 +282,14 @@ AGPL-3.0-or-later
 
 ---
 
-*March 8, 2026 — v0.7.5. Write→Absorb→Lean complete: all 20 ops upstream via
-`BatchedElementwiseF64`, `local_dispatch` retired, `PrecisionRoutingAdvice` wired,
-upstream provenance registry integrated. 87 experiments, 1284/1284 Python, 865 lib +
-186 forge tests (0 failures). 146/146 cross-spring evolution, 32/32 provenance,
-51/51 dispatch. New: Exp 084 CPU/GPU parity (21/21), Exp 085 toadStool dispatch (19/19),
-Exp 086 metalForge NUCLEUS mesh (17/17), Exp 087 graph coordination (22/22).
-Full NUCLEUS integration: Tower+Node+Nest atomic live, 7 primals, 2 deployment graphs.
-All files < 1000 lines. Zero unsafe, zero clippy pedantic+nursery warnings,
-zero mocks in production. All SPDX AGPL-3.0-or-later. Pure Rust + BarraCuda.*
+*March 14, 2026 — v0.7.6. Deep debt resolution + upstream evolution sync.
+barraCuda 0.3.5 sync: `SpringDomain` newtype, `F64BuiltinCapabilities` DF64 fields.
+`bingocube-nautilus` 0.1.0 API migration: `NautilusBrain` replaces `NautilusShell`,
+agricultural observation → `BetaObservation` mapping, local `FitnessDriftMonitor` for
+atlas stream (upstream `DriftMonitor` internalized). New `data` module: `Provider` trait,
+`HttpProvider` (ureq, standalone-http), `BiomeosProvider` (capability-based discovery).
+Hardcoded paths → `CARGO_MANIFEST_DIR` + env var. RPC defaults documented as
+Michigan-centric constants. Tolerance provenance table complete (11 new rows).
+CI: `RUSTDOCFLAGS="-D warnings"` on both crates, metalForge coverage gate (90%).
+87 experiments, 1284/1284 Python, 833 lib + 186 forge tests. Zero unsafe, zero
+clippy pedantic+nursery warnings. All files < 815 lines. AGPL-3.0-or-later.*

@@ -279,13 +279,15 @@ fn main() {
 }
 
 fn find_graph(name: &str) -> Option<std::path::PathBuf> {
-    let candidates = [
+    let mut candidates = vec![
         std::path::PathBuf::from(format!("graphs/{name}")),
         std::path::PathBuf::from(format!("../graphs/{name}")),
-        std::path::PathBuf::from(format!(
-            "/home/eastgate/Development/ecoPrimals/airSpring/graphs/{name}"
-        )),
+        std::path::PathBuf::from(format!("{}/graphs/{name}", env!("CARGO_MANIFEST_DIR"))),
+        std::path::PathBuf::from(format!("{}/../graphs/{name}", env!("CARGO_MANIFEST_DIR"))),
     ];
+    if let Ok(dir) = std::env::var("AIRSPRING_GRAPHS_DIR") {
+        candidates.insert(0, std::path::PathBuf::from(format!("{dir}/{name}")));
+    }
     candidates.into_iter().find(|p| p.exists())
 }
 

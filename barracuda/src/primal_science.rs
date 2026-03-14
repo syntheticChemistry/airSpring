@@ -3,6 +3,35 @@
 //!
 //! Separates domain-science dispatch from the primal server infrastructure.
 //! Each handler accepts JSON-RPC `params` and returns a JSON result value.
+//!
+//! # Default Parameter Strategy
+//!
+//! When optional JSON-RPC parameters are omitted, handlers use sensible
+//! defaults centred on the MSU Biosystems & Agricultural Engineering
+//! research context (East Lansing, MI):
+//!
+//! | Parameter | Default | Rationale |
+//! |-----------|---------|-----------|
+//! | `latitude_deg` | 42.7 | MSU campus, East Lansing MI |
+//! | `elevation_m` | 250.0 | Southern Michigan average elevation |
+//! | `day_of_year` | 180 | Late June (peak growing season) |
+//! | `tmax` / `tmin` | 30.0 / 15.0 | Typical Michigan summer day |
+//! | `solar_radiation` | 20.0 MJ/m²/day | Michigan summer average |
+//! | `wind_speed_2m` | 2.0 m/s | Typical continental interior |
+//!
+//! These defaults ensure the primal returns physically meaningful results
+//! even when called with minimal parameters. They are **not** hardcoded
+//! validation targets — all validation uses explicit benchmark JSON with
+//! full provenance (see [`crate::tolerances`]).
+
+/// Default latitude for Michigan-centric research (MSU East Lansing).
+const DEFAULT_LATITUDE_DEG: f64 = 42.7;
+
+/// Default elevation for southern Michigan (metres above sea level).
+const DEFAULT_ELEVATION_M: f64 = 250.0;
+
+/// Default day-of-year: late June, peak growing season.
+const DEFAULT_DOY: u32 = 180;
 
 use crate::eco::anderson;
 use crate::eco::diversity;
@@ -78,9 +107,9 @@ fn et0_fao56(params: &serde_json::Value) -> serde_json::Value {
         solar_radiation: f64_p(params, "solar_radiation").unwrap_or(20.0),
         wind_speed_2m: f64_p(params, "wind_speed_2m").unwrap_or(2.0),
         actual_vapour_pressure: f64_p(params, "actual_vapour_pressure").unwrap_or(1.5),
-        day_of_year: u32_p(params, "day_of_year").unwrap_or(180),
-        latitude_deg: f64_p(params, "latitude_deg").unwrap_or(42.7),
-        elevation_m: f64_p(params, "elevation_m").unwrap_or(250.0),
+        day_of_year: u32_p(params, "day_of_year").unwrap_or(DEFAULT_DOY),
+        latitude_deg: f64_p(params, "latitude_deg").unwrap_or(DEFAULT_LATITUDE_DEG),
+        elevation_m: f64_p(params, "elevation_m").unwrap_or(DEFAULT_ELEVATION_M),
     };
     let result = et::daily_et0(&input);
     serde_json::json!({"et0_mm": result.et0, "rn_mj": result.rn, "method": "fao56_penman_monteith"})
@@ -89,8 +118,10 @@ fn et0_fao56(params: &serde_json::Value) -> serde_json::Value {
 fn et0_hargreaves(params: &serde_json::Value) -> serde_json::Value {
     let tmin = f64_p(params, "tmin").unwrap_or(15.0);
     let tmax = f64_p(params, "tmax").unwrap_or(30.0);
-    let lat_rad = f64_p(params, "latitude_deg").unwrap_or(42.7).to_radians();
-    let doy = u32_p(params, "day_of_year").unwrap_or(180);
+    let lat_rad = f64_p(params, "latitude_deg")
+        .unwrap_or(DEFAULT_LATITUDE_DEG)
+        .to_radians();
+    let doy = u32_p(params, "day_of_year").unwrap_or(DEFAULT_DOY);
     let ra_mm = crate::eco::solar::extraterrestrial_radiation(lat_rad, doy) / 2.45;
     let et0 = et::hargreaves_et0(tmin, tmax, ra_mm);
     serde_json::json!({"et0_mm": et0, "ra_mm_day": ra_mm, "method": "hargreaves"})
@@ -101,7 +132,7 @@ fn et0_priestley_taylor(params: &serde_json::Value) -> serde_json::Value {
         f64_p(params, "rn").unwrap_or(10.0),
         f64_p(params, "g").unwrap_or(0.0),
         f64_p(params, "tmean").unwrap_or(22.5),
-        f64_p(params, "elevation_m").unwrap_or(250.0),
+        f64_p(params, "elevation_m").unwrap_or(DEFAULT_ELEVATION_M),
     );
     serde_json::json!({"et0_mm": et0, "method": "priestley_taylor"})
 }
@@ -110,7 +141,7 @@ fn et0_makkink(params: &serde_json::Value) -> serde_json::Value {
     let et0 = simple_et0::makkink_et0(
         f64_p(params, "tmean").unwrap_or(22.5),
         f64_p(params, "solar_radiation").unwrap_or(20.0),
-        f64_p(params, "elevation_m").unwrap_or(250.0),
+        f64_p(params, "elevation_m").unwrap_or(DEFAULT_ELEVATION_M),
     );
     serde_json::json!({"et0_mm": et0, "method": "makkink"})
 }
@@ -125,21 +156,25 @@ fn et0_turc(params: &serde_json::Value) -> serde_json::Value {
 }
 
 fn et0_hamon(params: &serde_json::Value) -> serde_json::Value {
-    let lat_rad = f64_p(params, "latitude_deg").unwrap_or(42.7).to_radians();
+    let lat_rad = f64_p(params, "latitude_deg")
+        .unwrap_or(DEFAULT_LATITUDE_DEG)
+        .to_radians();
     let et0 = simple_et0::hamon_pet_from_location(
         f64_p(params, "tmean").unwrap_or(22.5),
         lat_rad,
-        u32_p(params, "day_of_year").unwrap_or(180),
+        u32_p(params, "day_of_year").unwrap_or(DEFAULT_DOY),
     );
     serde_json::json!({"pet_mm": et0, "method": "hamon"})
 }
 
 fn et0_blaney_criddle(params: &serde_json::Value) -> serde_json::Value {
-    let lat_rad = f64_p(params, "latitude_deg").unwrap_or(42.7).to_radians();
+    let lat_rad = f64_p(params, "latitude_deg")
+        .unwrap_or(DEFAULT_LATITUDE_DEG)
+        .to_radians();
     let et0 = simple_et0::blaney_criddle_from_location(
         f64_p(params, "tmean").unwrap_or(22.5),
         lat_rad,
-        u32_p(params, "day_of_year").unwrap_or(180),
+        u32_p(params, "day_of_year").unwrap_or(DEFAULT_DOY),
     );
     serde_json::json!({"et0_mm": et0, "method": "blaney_criddle"})
 }
@@ -180,9 +215,9 @@ fn full_pipeline(params: &serde_json::Value) -> serde_json::Value {
         solar_radiation: f64_p(params, "solar_radiation").unwrap_or(22.5),
         wind_speed_2m: f64_p(params, "wind_speed_2m").unwrap_or(2.0),
         actual_vapour_pressure: f64_p(params, "actual_vapour_pressure").unwrap_or(1.5),
-        day_of_year: u32_p(params, "day_of_year").unwrap_or(180),
-        latitude_deg: f64_p(params, "latitude_deg").unwrap_or(42.7),
-        elevation_m: f64_p(params, "elevation_m").unwrap_or(250.0),
+        day_of_year: u32_p(params, "day_of_year").unwrap_or(DEFAULT_DOY),
+        latitude_deg: f64_p(params, "latitude_deg").unwrap_or(DEFAULT_LATITUDE_DEG),
+        elevation_m: f64_p(params, "elevation_m").unwrap_or(DEFAULT_ELEVATION_M),
     };
     let et0_result = et::daily_et0(&input);
     let et0 = et0_result.et0.max(0.0);
@@ -363,8 +398,10 @@ fn thornthwaite_handler(params: &serde_json::Value) -> serde_json::Value {
     }
     let mut arr = [0.0; 12];
     arr.copy_from_slice(&temps);
-    let m =
-        thornthwaite::thornthwaite_monthly_et0(&arr, f64_p(params, "latitude_deg").unwrap_or(42.7));
+    let m = thornthwaite::thornthwaite_monthly_et0(
+        &arr,
+        f64_p(params, "latitude_deg").unwrap_or(DEFAULT_LATITUDE_DEG),
+    );
     serde_json::json!({"monthly_et0_mm": m.to_vec(), "annual_et0_mm": m.iter().sum::<f64>(), "method": "thornthwaite_1948"})
 }
 

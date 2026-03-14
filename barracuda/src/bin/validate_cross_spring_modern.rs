@@ -57,11 +57,11 @@ fn main() {
         registry.iter().map(|r| r.origin).collect();
     check!(
         "all 5 springs are shader origins",
-        origins.contains(&SpringDomain::HotSpring)
-            && origins.contains(&SpringDomain::WetSpring)
-            && origins.contains(&SpringDomain::NeuralSpring)
-            && origins.contains(&SpringDomain::AirSpring)
-            && origins.contains(&SpringDomain::GroundSpring)
+        origins.contains(&SpringDomain::HOT_SPRING)
+            && origins.contains(&SpringDomain::WET_SPRING)
+            && origins.contains(&SpringDomain::NEURAL_SPRING)
+            && origins.contains(&SpringDomain::AIR_SPRING)
+            && origins.contains(&SpringDomain::GROUND_SPRING)
     );
 
     // §2 Cross-Spring Matrix
@@ -97,12 +97,12 @@ fn main() {
     // wetSpring bio shaders consumed by neuralSpring
     let bio_shaders: Vec<&ShaderRecord> = registry
         .iter()
-        .filter(|r| r.origin == SpringDomain::WetSpring && r.path.contains("bio/"))
+        .filter(|r| r.origin == SpringDomain::WET_SPRING && r.path.contains("bio/"))
         .collect();
     check!("wetSpring has ≥3 bio shaders", bio_shaders.len() >= 3);
     let bio_to_neural = bio_shaders
         .iter()
-        .any(|r| r.consumers.contains(&SpringDomain::NeuralSpring));
+        .any(|r| r.consumers.contains(&SpringDomain::NEURAL_SPRING));
     check!(
         "wetSpring bio shaders consumed by neuralSpring",
         bio_to_neural
@@ -110,7 +110,7 @@ fn main() {
 
     // neuralSpring stats shaders consumed by airSpring
     let neural_to_air = registry.iter().any(|r| {
-        r.origin == SpringDomain::NeuralSpring && r.consumers.contains(&SpringDomain::AirSpring)
+        r.origin == SpringDomain::NEURAL_SPRING && r.consumers.contains(&SpringDomain::AIR_SPRING)
     });
     check!(
         "neuralSpring stats shaders consumed by airSpring",
@@ -119,7 +119,7 @@ fn main() {
 
     // airSpring hydrology consumed by wetSpring
     let air_to_wet = registry.iter().any(|r| {
-        r.origin == SpringDomain::AirSpring && r.consumers.contains(&SpringDomain::WetSpring)
+        r.origin == SpringDomain::AIR_SPRING && r.consumers.contains(&SpringDomain::WET_SPRING)
     });
     check!(
         "airSpring hydrology shaders consumed by wetSpring",
@@ -129,7 +129,7 @@ fn main() {
     // groundSpring chi_squared (not fused variant) consumed by all 5
     let chi_sq = registry
         .iter()
-        .find(|r| r.origin == SpringDomain::GroundSpring && r.path.contains("chi_squared_f64"));
+        .find(|r| r.origin == SpringDomain::GROUND_SPRING && r.path.contains("chi_squared_f64"));
     if let Some(shader) = chi_sq {
         check!(
             "groundSpring chi_squared reaches ≥4 springs",

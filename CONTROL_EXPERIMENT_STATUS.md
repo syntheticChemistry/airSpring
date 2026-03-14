@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-03-08 (v0.7.5 — 87 experiments, barraCuda 0.3.3 (wgpu 28), 1284/1284 Python + 865 lib + 186 forge + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.5× Rust-vs-Python speedup** (21/21 algorithms). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry (v0.7.3). metalForge 66/66 mixed pipeline. Write→Absorb→Lean cycle complete. Exp 084 CPU/GPU Parity (21/21), Exp 085 toadStool Dispatch (19/19), Exp 086 metalForge Live NUCLEUS (17/17), Exp 087 Graph Coordination (22/22). Full NUCLEUS mesh validated: Tower+Node atomic live, 7 primals, 2 deployment graphs.)
+**Updated**: 2026-03-14 (v0.7.6 — 87 experiments, barraCuda 0.3.5 (wgpu 28), 1284/1284 Python + 833 lib + 186 forge + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.5× Rust-vs-Python speedup** (21/21 algorithms). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry (v0.7.3). metalForge 66/66 mixed pipeline. Write→Absorb→Lean cycle complete. Deep debt resolution: barraCuda 0.3.5 sync, bingocube-nautilus 0.1.0 API migration (NautilusBrain), new `data` module (Provider trait), hardcoded path elimination, tolerance provenance complete, CI doc lints + coverage gate.)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 

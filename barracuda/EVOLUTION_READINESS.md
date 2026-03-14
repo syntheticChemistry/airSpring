@@ -1,10 +1,10 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: March 8, 2026 (v0.7.5 — 87 experiments, 865 lib + 186 forge tests, 95 binaries. Exp 084 CPU/GPU parity 21/21, Exp 085 toadStool dispatch 19/19, Exp 086 metalForge NUCLEUS 17/17, Exp 087 graph coordination 22/22)
-**barraCuda**: v0.3.3+ standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry)
-**ToadStool**: S130+ (19,109+ tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient)
-**coralReef**: Phase 10 sovereign Rust GPU compiler (NVIDIA + AMD, 904 tests, 14/27 cross-spring shaders)
-**Handoff**: V0.7.5 (NUCLEUS experiments + barraCuda/toadStool evolution handoff)
+**Last Updated**: March 14, 2026 (v0.7.6 — 87 experiments, 833 lib + 186 forge tests, 95 binaries. Deep debt: barraCuda 0.3.5 sync, bingocube-nautilus 0.1.0 (NautilusBrain), data::Provider trait, hardcoded path elimination, tolerance provenance complete, CI doc lints + coverage gate)
+**barraCuda**: v0.3.5 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry, SpringDomain newtype, F64BuiltinCapabilities DF64 fields)
+**ToadStool**: S147+ (20,015 tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient, hw-learn, spirv_codegen_safety)
+**coralReef**: Phase 10 Iteration 44 sovereign Rust GPU compiler (NVIDIA + AMD, 1669+48 tests, VFIO dispatch)
+**Handoff**: V0.7.6 (deep debt + upstream sync + toadStool/barraCuda evolution)
 **License**: AGPL-3.0-or-later
 
 ---

@@ -1,7 +1,7 @@
 # airSpring Experiments
 
-**Updated**: March 8, 2026
-**Status**: 87 experiments, barraCuda 0.3.3 (wgpu 28), v0.7.5. 1284/1284 Python + 865 lib + 186 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. 14.5× Rust-vs-Python speedup (21/21 parity). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry integrated (v0.7.3). New: Exp 084 CPU/GPU Parity (21/21), Exp 085 toadStool Dispatch (19/19), Exp 086 metalForge Live NUCLEUS (17/17), Exp 087 Graph Coordination (22/22). Full NUCLEUS mesh validated: Tower+Node atomic live, 7 primals, 2 deployment graphs.
+**Updated**: March 14, 2026
+**Status**: 87 experiments, barraCuda 0.3.5 (wgpu 28), v0.7.6. 1284/1284 Python + 833 lib + 186 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. 14.5× Rust-vs-Python speedup (21/21 parity). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry integrated (v0.7.3). Deep debt resolution: barraCuda 0.3.5 sync (SpringDomain newtype, F64BuiltinCapabilities DF64 fields), bingocube-nautilus 0.1.0 API migration (NautilusBrain replaces NautilusShell), new `data` module (Provider trait, HttpProvider, BiomeosProvider), hardcoded path elimination, tolerance provenance complete, CI doc lints + coverage gate.
 
 ---
 

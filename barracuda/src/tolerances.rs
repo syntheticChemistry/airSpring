@@ -51,6 +51,16 @@
 //! | Yield response | `control/yield_response/yield_response.py` | `97e7533` | 2026-02-28 | `python3 control/yield_response/yield_response.py` |
 //! | Climate scenario | `control/climate_scenario/climate_scenario_analysis.py` | `1c11763` | 2026-03-01 | `python3 control/climate_scenario/climate_scenario_analysis.py` |
 //! | Atlas decade | `control/atlas_decade/atlas_decade_analysis.py` | `1c11763` | 2026-03-01 | `python3 control/atlas_decade/atlas_decade_analysis.py` |
+//! | Makkink ET₀ | `control/makkink/makkink_et0.py` | `8c3953b` | 2026-02-27 | `python3 control/makkink/makkink_et0.py` |
+//! | Turc ET₀ | `control/turc/turc_et0.py` | `8c3953b` | 2026-02-27 | `python3 control/turc/turc_et0.py` |
+//! | Hamon PET | `control/hamon/hamon_pet.py` | `8c3953b` | 2026-02-27 | `python3 control/hamon/hamon_pet.py` |
+//! | MC ET₀ (stochastic) | `control/mc_et0/mc_et0_propagation.py` | `e1754cf` | 2026-03-07 | `python3 control/mc_et0/mc_et0_propagation.py` |
+//! | Bootstrap/Jackknife | `control/bootstrap_jackknife/bootstrap_jackknife_et0.py` | `e1754cf` | 2026-03-07 | `python3 control/bootstrap_jackknife/bootstrap_jackknife_et0.py` |
+//! | SPI drought index | `control/drought_index/drought_index_spi.py` | `e1754cf` | 2026-03-07 | `python3 control/drought_index/drought_index_spi.py` |
+//! | Barrier skin (Paper 12) | `control/barrier_skin/barrier_skin.py` | `dbfb53a` | 2026-03-02 | `python3 control/barrier_skin/barrier_skin.py` |
+//! | Cross-species skin (Paper 12) | `control/cross_species_skin/cross_species_skin.py` | `dbfb53a` | 2026-03-02 | `python3 control/cross_species_skin/cross_species_skin.py` |
+//! | Cytokine brain (Paper 12) | `control/cytokine_brain/cytokine_brain.py` | `dbfb53a` | 2026-03-02 | `python3 control/cytokine_brain/cytokine_brain.py` |
+//! | Tissue diversity (Paper 12) | `control/tissue_diversity/tissue_diversity.py` | `dbfb53a` | 2026-03-02 | `python3 control/tissue_diversity/tissue_diversity.py` |
 
 pub use barracuda::tolerances::{check, Tolerance};
 

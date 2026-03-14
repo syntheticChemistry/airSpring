@@ -25,9 +25,12 @@ pub fn bench_modern_upstream(v: &mut ValidationHarness) {
 }
 
 fn bench_upstream_provenance_registry(v: &mut ValidationHarness) {
-    use barracuda::shaders::provenance::SpringDomain::{
-        AirSpring, GroundSpring, HotSpring, NeuralSpring, WetSpring,
-    };
+    use barracuda::shaders::provenance::SpringDomain;
+    let AirSpring = SpringDomain::AIR_SPRING;
+    let GroundSpring = SpringDomain::GROUND_SPRING;
+    let HotSpring = SpringDomain::HOT_SPRING;
+    let NeuralSpring = SpringDomain::NEURAL_SPRING;
+    let WetSpring = SpringDomain::WET_SPRING;
 
     println!("\n── Upstream Provenance Registry (barraCuda shaders::provenance) ─");
     let t0 = Instant::now();

@@ -1,13 +1,14 @@
 # airSpring wateringHole
 
-**Updated**: March 8, 2026 | **Version**: v0.7.5
+**Updated**: March 14, 2026 | **Version**: v0.7.6
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.7.5** | [AIRSPRING_V075_BARRACUDA_TOADSTOOL_EVOLUTION_HANDOFF_MAR08_2026.md](handoffs/AIRSPRING_V075_BARRACUDA_TOADSTOOL_EVOLUTION_HANDOFF_MAR08_2026.md) | 2026-03-08 | **current** — Comprehensive evolution handoff: CPU/GPU parity (18 modules), 14 JSON-RPC methods for compute.offload, NUCLEUS mesh, deployment graphs, 9 absorption candidates, cross-spring intelligence |
+| **V0.7.6** | [AIRSPRING_V076_DEEP_DEBT_UPSTREAM_SYNC_HANDOFF_MAR14_2026.md](handoffs/AIRSPRING_V076_DEEP_DEBT_UPSTREAM_SYNC_HANDOFF_MAR14_2026.md) | 2026-03-14 | **current** — Deep debt resolution: barraCuda 0.3.5 sync, bingocube-nautilus 0.1.0 migration (NautilusBrain), new `data` module (Provider trait), hardcoded path elimination, tolerance provenance complete, CI improvements, toadStool/barraCuda evolution learnings |
+| **V0.7.5** | [AIRSPRING_V075_BARRACUDA_TOADSTOOL_EVOLUTION_HANDOFF_MAR08_2026.md](handoffs/AIRSPRING_V075_BARRACUDA_TOADSTOOL_EVOLUTION_HANDOFF_MAR08_2026.md) | 2026-03-08 | Comprehensive evolution handoff: CPU/GPU parity (18 modules), 14 JSON-RPC methods for compute.offload, NUCLEUS mesh, deployment graphs, 9 absorption candidates, cross-spring intelligence |
 | **V0.7.5** | [AIRSPRING_V075_NUCLEUS_EXPERIMENTS_HANDOFF_MAR08_2026.md](handoffs/AIRSPRING_V075_NUCLEUS_EXPERIMENTS_HANDOFF_MAR08_2026.md) | 2026-03-08 | Exp 084-087 (79/79): CPU/GPU parity, toadStool dispatch, metalForge NUCLEUS mesh, graph coordination |
 | **V0.7.5** | [AIRSPRING_V075_UPSTREAM_REWIRE_TOADSTOOL_HANDOFF_MAR08_2026.md](handoffs/AIRSPRING_V075_UPSTREAM_REWIRE_TOADSTOOL_HANDOFF_MAR08_2026.md) | 2026-03-08 | **superseded** — barraCuda HEAD sync (`a898dee`), `regularized_gamma_p` lean, 9 new upstream capabilities documented, toadStool S130+ / coralReef Phase 10 alignment |
 | **V0.7.4** | [AIRSPRING_V074_STOCHASTIC_DROUGHT_TOADSTOOL_HANDOFF_MAR07_2026.md](handoffs/AIRSPRING_V074_STOCHASTIC_DROUGHT_TOADSTOOL_HANDOFF_MAR07_2026.md) | 2026-03-07 | MC ET₀ uncertainty (Exp 079), Bootstrap/Jackknife CI (Exp 080), SPI drought index (Exp 081), `eco::drought_index` module, GPU promotion candidates |

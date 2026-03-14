@@ -2,6 +2,51 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.7.6] - 2026-03-14
+
+### Deep Debt Resolution + Upstream Evolution Sync
+
+- **barraCuda 0.3.5 sync**: `SpringDomain` migrated from enum variants to
+  newtype struct constants (`SpringDomain::AIR_SPRING`). `F64BuiltinCapabilities`
+  gains `shared_mem_f64`, `df64_arith`, `df64_transcendentals_safe` fields.
+  All binaries and tests updated.
+
+- **bingocube-nautilus 0.1.0 API migration**: `NautilusShell` → `NautilusBrain`
+  across `nautilus.rs` and `eco/cytokine.rs`. `ShellConfig` → `NautilusBrainConfig`.
+  Agricultural observations mapped to `BetaObservation` (documented). `json`
+  feature enabled for serialization. Shell roundtrip tests replaced with
+  brain-native equivalents.
+
+- **New `data` module**: `Provider` trait abstracts data fetching.
+  `HttpProvider` (ureq, feature-gated `standalone-http`) for standalone mode.
+  `BiomeosProvider` (JSON-RPC capability-based discovery) for NUCLEUS mode.
+  `WeatherResponse` struct with `serde` support. 11 unit tests.
+
+- **Local `FitnessDriftMonitor`**: Replaces upstream `DriftMonitor` (internalized
+  in bingocube-nautilus 0.1.0). Tracks mean/best fitness, `N_e * s`, consecutive
+  drops for regime change detection in `gpu::atlas_stream`.
+
+- **Hardcoded path elimination**: `validate_nucleus_graphs` no longer uses
+  `/home/eastgate/...`; uses `AIRSPRING_GRAPHS_DIR` env var → `CARGO_MANIFEST_DIR`
+  relative path fallback.
+
+- **RPC defaults documented**: Michigan-centric constants extracted in
+  `primal_science.rs` (`DEFAULT_LATITUDE_DEG=42.7`, `DEFAULT_ELEVATION_M=250.0`,
+  `DEFAULT_DOY=180`) with module-level documentation table.
+
+- **Tolerance provenance complete**: 11 new entries in `tolerances.rs` provenance
+  table (Makkink, Turc, Hamon, MC ET₀, Bootstrap, Jackknife, SPI, Barrier,
+  Cross-species skin, Cytokine brain, Tissue diversity) with commit hashes and dates.
+
+- **CI improvements**: `RUSTDOCFLAGS="-D warnings"` enforced on both barracuda
+  and metalForge `cargo doc` jobs. New `metalforge-coverage` job with
+  `cargo llvm-cov --lib --fail-under-lines 90`.
+
+- **Quality**: `cargo fmt --check` PASS, `cargo clippy --lib` 0 warnings,
+  `cargo test --lib` 833/834 (1 pre-existing GPU driver issue in
+  `gpu::stream::tests::test_stream_smoother_new_and_smooth`). All files < 815 lines.
+  Zero unsafe, zero mocks in production. AGPL-3.0-or-later.
+
 ## [0.7.5] - 2026-03-07
 
 ### Upstream Rewire — barraCuda HEAD sync, regularized_gamma_p lean

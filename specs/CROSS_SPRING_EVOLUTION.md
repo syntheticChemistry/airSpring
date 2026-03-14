@@ -1,6 +1,6 @@
 # Cross-Spring Shader Evolution — airSpring Provenance
 
-**Updated**: March 8, 2026 (v0.7.5, barraCuda 0.3.3 / wgpu 28, 87 experiments)
+**Updated**: March 14, 2026 (v0.7.6, barraCuda 0.3.5 / wgpu 28, 87 experiments)
 
 ## Summary
 
@@ -15,7 +15,7 @@ WGSL ops absorbed upstream into `BatchedElementwiseF64` (ops 14-19), `local_disp
 retired (v0.7.2). `PrecisionRoutingAdvice` wired and upstream provenance registry
 integrated (v0.7.3).
 
-v0.7.5: **25 Tier A** orchestrators (ops 0-19 all upstream), 865 lib + 186 forge tests,
+v0.7.6: **25 Tier A** orchestrators (ops 0-19 all upstream), 833 lib + 186 forge tests,
 `PrecisionRoutingAdvice` for per-hardware f64 dispatch routing. 27 metalForge workloads,
 NUCLEUS mesh routing (Exp 076: 60/60). BrentGpu, RichardsGpu, StatefulPipeline.
 Exp 084: CPU/GPU parity (18 modules, 21/21). Exp 085: toadStool dispatch (14 methods, 19/19).

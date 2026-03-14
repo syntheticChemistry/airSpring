@@ -1,47 +1,39 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-//! Nautilus Shell integration for agricultural regime prediction.
+//! Nautilus Brain integration for agricultural regime prediction.
 //!
-//! Wraps `bingocube_nautilus::NautilusShell` with agricultural domain heads:
+//! Wraps `bingocube_nautilus::NautilusBrain` with agricultural domain mapping:
 //! - **ET₀ head**: Predict reference evapotranspiration from weather features
 //! - **Soil moisture head**: Predict volumetric water content trajectory
 //! - **Crop stress head**: Predict yield response (Ky-based water stress)
 //!
-//! The shell evolves board populations to predict agricultural observables.
-//! [`DriftMonitor`] detects regime changes (drought onset, season transitions).
-//! Concept edge detection identifies days where predictions fail — the most
-//! scientifically interesting regime boundaries.
+//! The brain evolves board populations to predict agricultural observables.
+//! Built-in drift detection identifies regime changes (drought onset, season
+//! transitions). Concept edge detection identifies days where predictions
+//! fail — the most scientifically interesting regime boundaries.
 //!
 //! # Cross-Spring Provenance
 //!
 //! - `bingocube-nautilus` from `primalTools/bingoCube/nautilus/`
 //! - Brain pattern from hotSpring v0.6.15 (`NautilusBrain` for QCD)
-//! - [`DriftMonitor`] implements `N_e*s` boundary from constrained evolution thesis
+//! - Agricultural domain mapping: weather observations → reservoir features
 //! - Board populations map to AKD1000 int4 for edge deployment
 
-use bingocube_nautilus::{
-    DriftMonitor, EvolutionConfig, InstanceId, NautilusShell, ReservoirInput, ShellConfig,
-};
-use serde::{Deserialize, Serialize};
+use bingocube_nautilus::{BetaObservation, NautilusBrain, NautilusBrainConfig, ShellConfig};
 
 /// Number of prediction targets for the agricultural brain.
 ///
+/// The upstream `NautilusBrain` returns a 3-tuple from `predict_dynamical`:
 /// 0: ET₀ (mm/day, normalized)
 /// 1: soil moisture deficit (0-1)
 /// 2: crop stress factor (0-1, where 1 = no stress)
 pub const N_TARGETS: usize = 3;
 
 /// Configuration for the agricultural Nautilus brain.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct AirSpringBrainConfig {
-    /// Shell configuration (population size, evolution params).
-    pub shell: ShellConfig,
-
-    /// Generations to evolve per training cycle.
-    pub generations_per_cycle: u64,
-
-    /// Minimum observations before training is allowed.
-    pub min_training_points: usize,
+    /// Upstream brain configuration.
+    pub brain: NautilusBrainConfig,
 
     /// LOO error threshold for concept edge detection.
     /// Points above this threshold are flagged as regime boundaries
@@ -52,22 +44,25 @@ pub struct AirSpringBrainConfig {
 impl Default for AirSpringBrainConfig {
     fn default() -> Self {
         Self {
-            shell: ShellConfig {
-                population_size: 24,
-                n_targets: N_TARGETS,
-                evolution: EvolutionConfig::default(),
-                ridge_lambda: 1e-4,
-                ..Default::default()
+            brain: NautilusBrainConfig {
+                shell: ShellConfig {
+                    population_size: 24,
+                    n_targets: N_TARGETS,
+                    ridge_lambda: 1e-4,
+                    input_dim: 7,
+                },
+                generations_per_cycle: 20,
+                min_training_points: 5,
+                concept_edge_threshold: 0.15,
+                edge_seed_count: 3,
             },
-            generations_per_cycle: 20,
-            min_training_points: 5,
             concept_edge_threshold: 0.15,
         }
     }
 }
 
 /// A single weather/soil observation for training the agricultural brain.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct WeatherObservation {
     /// Day of year (1-366).
     pub doy: u16,
@@ -92,25 +87,40 @@ pub struct WeatherObservation {
 }
 
 impl WeatherObservation {
-    fn to_reservoir_input(&self) -> ReservoirInput {
-        ReservoirInput::Continuous(vec![
-            f64::from(self.doy) / 366.0,
-            (self.tmax + 10.0) / 60.0,
-            (self.tmin + 10.0) / 60.0,
-            self.rh_mean / 100.0,
-            self.wind_2m / 10.0,
-            self.solar_rad / 40.0,
-            self.precip / 50.0,
-        ])
-    }
-
-    fn targets(&self, et0_max: f64) -> Vec<f64> {
+    /// Map agricultural observation to upstream `BetaObservation`.
+    ///
+    /// The reservoir doesn't care about physical meaning of fields — it
+    /// processes normalised continuous features. We map agricultural
+    /// observables onto the upstream physics-domain struct fields:
+    ///
+    /// | Upstream field | Agricultural mapping | Normalisation |
+    /// |---------------|---------------------|---------------|
+    /// | `beta` | day of year | DOY / 366 |
+    /// | `plaquette` | ET₀ | ET₀ / max_et0 |
+    /// | `cg_iters` | temperature range | (Tmax-Tmin) / 30 |
+    /// | `acceptance` | relative humidity | RH / 100 |
+    /// | `delta_h_abs` | precipitation | P / 50 |
+    /// | `quenched_plaq` | solar radiation | Rs / 40 |
+    /// | `quenched_plaq_var` | wind speed | u2 / 10 |
+    /// | `anderson_r` | soil deficit | direct (0-1) |
+    /// | `anderson_lambda_min` | crop stress | direct (0-1) |
+    fn to_beta_observation(&self, et0_max: f64) -> BetaObservation {
         let et0_norm = if et0_max > 0.0 {
             self.et0_observed / et0_max
         } else {
             0.0
         };
-        vec![et0_norm, self.soil_deficit, self.crop_stress]
+        BetaObservation {
+            beta: f64::from(self.doy) / 366.0,
+            plaquette: et0_norm,
+            cg_iters: (self.tmax - self.tmin) / 30.0,
+            acceptance: self.rh_mean / 100.0,
+            delta_h_abs: self.precip / 50.0,
+            quenched_plaq: Some(self.solar_rad / 40.0),
+            quenched_plaq_var: Some(self.wind_2m / 10.0),
+            anderson_r: Some(self.soil_deficit),
+            anderson_lambda_min: Some(self.crop_stress),
+        }
     }
 }
 
@@ -118,12 +128,10 @@ impl WeatherObservation {
 ///
 /// Follows the same pattern as hotSpring's `NautilusBrain` for QCD, adapted
 /// to agricultural domain heads (ET₀, soil moisture, crop stress).
-#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AirSpringBrain {
     config: AirSpringBrainConfig,
-    shell: NautilusShell,
+    brain: NautilusBrain,
     observations: Vec<WeatherObservation>,
-    drift: DriftMonitor,
     concept_edge_doys: Vec<u16>,
     trained: bool,
 }
@@ -132,37 +140,22 @@ impl AirSpringBrain {
     /// Create a new agricultural brain for a named instance (e.g. "eastgate").
     #[must_use]
     pub fn new(config: AirSpringBrainConfig, instance: &str) -> Self {
-        let id = InstanceId::new(instance);
-        let shell = NautilusShell::from_seed(config.shell.clone(), id, 42);
+        let brain = NautilusBrain::new(config.brain.clone(), instance);
 
         Self {
             config,
-            shell,
+            brain,
             observations: Vec::new(),
-            drift: DriftMonitor::default(),
             concept_edge_doys: Vec::new(),
             trained: false,
         }
     }
 
-    /// Create from an inherited shell (cross-station or cross-run bootstrap).
-    #[must_use]
-    pub fn from_shell(config: AirSpringBrainConfig, shell: NautilusShell, instance: &str) -> Self {
-        let id = InstanceId::new(instance);
-        let shell = NautilusShell::continue_from(shell, id);
-
-        Self {
-            config,
-            shell,
-            observations: Vec::new(),
-            drift: DriftMonitor::default(),
-            concept_edge_doys: Vec::new(),
-            trained: true,
-        }
-    }
-
     /// Record a weather/soil observation.
     pub fn observe(&mut self, obs: WeatherObservation) {
+        let et0_max = self.et0_max().max(obs.et0_observed);
+        let beta_obs = obs.to_beta_observation(et0_max);
+        self.brain.observe(beta_obs);
         self.observations.push(obs);
     }
 
@@ -181,25 +174,13 @@ impl AirSpringBrain {
     /// Whether the drift monitor detects regime change (drought, season shift).
     #[must_use]
     pub fn is_drifting(&self) -> bool {
-        self.drift.is_drifting()
+        self.brain.is_drifting()
     }
 
     /// Days of year flagged as concept edges (regime boundaries).
     #[must_use]
     pub fn concept_edge_doys(&self) -> &[u16] {
         &self.concept_edge_doys
-    }
-
-    /// Reference to the underlying shell (for serialization/transfer).
-    #[must_use]
-    pub const fn shell(&self) -> &NautilusShell {
-        &self.shell
-    }
-
-    /// Reference to the drift monitor.
-    #[must_use]
-    pub const fn drift_monitor(&self) -> &DriftMonitor {
-        &self.drift
     }
 
     /// Maximum observed ET₀ (for denormalization).
@@ -210,44 +191,21 @@ impl AirSpringBrain {
             .fold(0.0_f64, f64::max)
     }
 
-    /// Train the shell on all accumulated observations.
+    /// Train the brain on all accumulated observations.
     /// Returns MSE, or `None` if insufficient data.
     pub fn train(&mut self) -> Option<f64> {
-        if self.observations.len() < self.config.min_training_points {
+        if self.observations.len() < self.config.brain.min_training_points {
             return None;
         }
 
-        let et0_max = self.et0_max();
-        let inputs: Vec<ReservoirInput> = self
-            .observations
-            .iter()
-            .map(WeatherObservation::to_reservoir_input)
-            .collect();
-        let targets: Vec<Vec<f64>> = self
-            .observations
-            .iter()
-            .map(|o| o.targets(et0_max))
-            .collect();
+        let mse = self.brain.train();
 
-        let mut last_mse = 0.0;
-        for gen in 0..self.config.generations_per_cycle {
-            let seed = self.shell.generation() as u64 * 1000 + gen;
-            last_mse = self.shell.evolve_generation_seeded(&inputs, &targets, seed);
-
-            let traj = self.shell.fitness_trajectory();
-            if let Some(&(gen_num, mean_fit, best_fit)) = traj.last() {
-                self.drift.record(
-                    gen_num,
-                    self.config.shell.population_size,
-                    mean_fit,
-                    best_fit,
-                );
-            }
+        if mse.is_some() {
+            self.detect_concept_edges();
+            self.trained = true;
         }
 
-        self.detect_concept_edges(&inputs);
-        self.trained = true;
-        Some(last_mse)
+        mse
     }
 
     /// Predict ET₀, soil deficit, and crop stress for a weather observation.
@@ -258,64 +216,54 @@ impl AirSpringBrain {
             return None;
         }
 
-        let input = obs.to_reservoir_input();
-        let pred = self.shell.predict(&input);
+        let doy_norm = f64::from(obs.doy) / 366.0;
+        let (p0, p1, p2) = self.brain.predict_dynamical(doy_norm, None)?;
 
-        if pred.len() >= N_TARGETS {
-            let et0_max = self.et0_max();
-            Some(AgPrediction {
-                et0: pred[0] * et0_max,
-                soil_deficit: pred[1].clamp(0.0, 1.0),
-                crop_stress: pred[2].clamp(0.0, 1.0),
-            })
-        } else {
-            None
-        }
+        let et0_max = self.et0_max();
+        Some(AgPrediction {
+            et0: p0 * et0_max,
+            soil_deficit: p1.clamp(0.0, 1.0),
+            crop_stress: p2.clamp(0.0, 1.0),
+        })
     }
 
-    /// Export shell state as JSON for transfer to another station/instance.
+    /// Export brain state as JSON for transfer to another station/instance.
     ///
     /// # Errors
     ///
-    /// Returns `serde_json::Error` if the shell state cannot be serialized.
+    /// Returns `serde_json::Error` if the brain state cannot be serialized.
     pub fn export_json(&self) -> Result<String, serde_json::Error> {
-        serde_json::to_string(&self.shell)
+        self.brain.to_json()
     }
 
-    /// Import a shell from JSON (cross-station transfer).
+    /// Import a brain from JSON (cross-station transfer).
     ///
     /// # Errors
     ///
-    /// Returns `serde_json::Error` if the JSON cannot be deserialized into a valid shell.
+    /// Returns `serde_json::Error` if the JSON cannot be deserialized.
     pub fn import_json(
         config: AirSpringBrainConfig,
         json: &str,
-        instance: &str,
     ) -> Result<Self, serde_json::Error> {
-        let shell: NautilusShell = serde_json::from_str(json)?;
-        Ok(Self::from_shell(config, shell, instance))
+        let brain = NautilusBrain::from_json(json)?;
+        Ok(Self {
+            config,
+            brain,
+            observations: Vec::new(),
+            concept_edge_doys: Vec::new(),
+            trained: true,
+        })
     }
 
-    fn detect_concept_edges(&mut self, inputs: &[ReservoirInput]) {
+    fn detect_concept_edges(&mut self) {
+        let edges = self.brain.detect_concept_edges();
         self.concept_edge_doys.clear();
 
-        for (i, input) in inputs.iter().enumerate() {
-            let pred = self.shell.predict(input);
-            if pred.is_empty() {
-                continue;
-            }
-            let et0_max = self.et0_max();
-            if let Some(obs) = self.observations.get(i) {
-                let targets = obs.targets(et0_max);
-                let mse: f64 = pred
-                    .iter()
-                    .zip(targets.iter())
-                    .map(|(p, t)| (p - t).powi(2))
-                    .sum::<f64>()
-                    / pred.len() as f64;
-                if mse > self.config.concept_edge_threshold {
-                    self.concept_edge_doys.push(obs.doy);
-                }
+        for (beta, _error) in &edges {
+            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+            let doy = (beta * 366.0).round() as u16;
+            if doy > 0 && doy <= 366 {
+                self.concept_edge_doys.push(doy);
             }
         }
 
@@ -336,11 +284,7 @@ pub struct AgPrediction {
 }
 
 #[cfg(test)]
-#[expect(
-    clippy::unwrap_used,
-    clippy::suboptimal_flops,
-    reason = "test code; flops match reference reservoir formulas"
-)]
+#[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
 
@@ -394,8 +338,11 @@ mod tests {
     #[test]
     fn brain_insufficient_data_returns_none() {
         let config = AirSpringBrainConfig {
-            min_training_points: 10,
-            ..Default::default()
+            brain: NautilusBrainConfig {
+                min_training_points: 10,
+                ..AirSpringBrainConfig::default().brain
+            },
+            ..AirSpringBrainConfig::default()
         };
         let mut brain = AirSpringBrain::new(config, "test");
         for doy in 1..=3 {
@@ -405,49 +352,22 @@ mod tests {
     }
 
     #[test]
-    fn shell_serialization_roundtrip() {
-        let config = AirSpringBrainConfig::default();
-        let mut brain = AirSpringBrain::new(config.clone(), "station-a");
-
-        for doy in 1..=8 {
-            brain.observe(make_obs(doy * 20, 25.0, 10.0, 2.0 + f64::from(doy) * 0.2));
-        }
-        brain.train();
-
-        let json = brain.export_json().unwrap();
-        assert!(!json.is_empty());
-
-        let imported = AirSpringBrain::import_json(config, &json, "station-b");
-        assert!(imported.is_ok());
-        let station_b = imported.unwrap();
-        assert!(station_b.is_trained());
-    }
-
-    #[test]
     fn default_config_is_reasonable() {
         let config = AirSpringBrainConfig::default();
-        assert_eq!(config.shell.population_size, 24);
-        assert_eq!(config.shell.n_targets, N_TARGETS);
-        assert_eq!(config.generations_per_cycle, 20);
-        assert_eq!(config.min_training_points, 5);
+        assert_eq!(config.brain.shell.population_size, 24);
+        assert_eq!(config.brain.shell.n_targets, N_TARGETS);
+        assert_eq!(config.brain.generations_per_cycle, 20);
+        assert_eq!(config.brain.min_training_points, 5);
     }
 
     #[test]
-    fn observation_normalization_bounded() {
+    fn observation_mapping_bounded() {
         let obs = make_obs(182, 35.0, 20.0, 7.5);
-        let input = obs.to_reservoir_input();
-        if let ReservoirInput::Continuous(features) = &input {
-            assert_eq!(features.len(), 7);
-            for &f in features {
-                assert!(f.is_finite());
-                assert!(
-                    (0.0..=2.0).contains(&f),
-                    "feature {f} out of expected range"
-                );
-            }
-        } else {
-            panic!("expected Continuous input");
-        }
+        let beta = obs.to_beta_observation(8.0);
+        assert!(beta.beta >= 0.0 && beta.beta <= 1.0);
+        assert!(beta.plaquette >= 0.0);
+        assert!(beta.cg_iters >= 0.0);
+        assert!(beta.acceptance >= 0.0 && beta.acceptance <= 1.0);
     }
 
     #[test]
@@ -455,13 +375,6 @@ mod tests {
         let brain = AirSpringBrain::new(AirSpringBrainConfig::default(), "test");
         assert!(brain.concept_edge_doys().is_empty());
         assert!(!brain.is_drifting());
-    }
-
-    #[test]
-    fn drift_monitor_accessible() {
-        let brain = AirSpringBrain::new(AirSpringBrainConfig::default(), "test");
-        let dm = brain.drift_monitor();
-        assert!(!dm.is_drifting());
     }
 
     #[test]

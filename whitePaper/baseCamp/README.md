@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
-**Updated**: March 8, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.7.5)
-**Status**: 87 experiments, 1284/1284 Python + 865 lib + 186 forge tests + 95 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.5× CPU speedup (21/21 parity) + barraCuda 0.3.3 (wgpu 28, DF64 precision tier) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + `PrecisionRoutingAdvice` wired + upstream provenance registry + 66/66 metalForge cross-system + NUCLEUS primal (35 capabilities) + zero clippy pedantic+nursery. Exp 084 CPU/GPU parity (21/21), Exp 085 toadStool dispatch (19/19), Exp 086 metalForge NUCLEUS (17/17), Exp 087 graph coordination (22/22). Full NUCLEUS mesh: Tower+Node+Nest live
+**Updated**: March 14, 2026
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.7.6)
+**Status**: 87 experiments, 1284/1284 Python + 833 lib + 186 forge tests + 95 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.5× CPU speedup (21/21 parity) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + `PrecisionRoutingAdvice` wired + upstream provenance registry + 66/66 metalForge cross-system + NUCLEUS primal (35 capabilities) + zero clippy pedantic+nursery. Deep debt: barraCuda 0.3.5 sync (SpringDomain newtype, F64BuiltinCapabilities DF64), bingocube-nautilus 0.1.0 (NautilusBrain), new `data` module (Provider trait), hardcoded path elimination, tolerance provenance complete, CI doc lints + coverage gate
 
 ---
 
@@ -11,7 +11,7 @@
 ```
 Phase 0   Python/R baselines    — reproduce paper results with original tools (1284/1284)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (865 lib + 1498 atlas, 95 binaries + 146/146 + 32/32 cross-spring benchmarks)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (833 lib + 1498 atlas, 95 binaries + 146/146 + 32/32 cross-spring benchmarks)
 Phase 1.5 CPU benchmark         — 14.5× Rust-vs-Python geometric mean (21/21 parity)
 Phase 2   BarraCuda GPU bridge  — 25 Tier A + 6 GPU-local modules wired (cross-spring S87 fully rewired)
 Phase 2.5 Ops 5-8 GPU-first   — Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed
@@ -231,7 +231,7 @@ S79 modernization: `libc`→`rustix`, `async-trait`→AFIT, universal f64 precis
 |----------|---------|
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C breakdown, absorbed vs stays-local, quality gates |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
-| `wateringHole/handoffs/` | V075 current — NUCLEUS experiments, CPU/GPU parity, toadStool dispatch, metalForge mesh |
+| `wateringHole/handoffs/` | V076 current — deep debt resolution, upstream sync, toadStool/barraCuda evolution |
 | `specs/CROSS_SPRING_EVOLUTION.md` | 845+ WGSL shader provenance across all Springs (S93) |
 
 ### Next Steps (Dong Lab)

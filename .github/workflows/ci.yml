@@ -38,8 +38,10 @@ jobs:
         working-directory: airSpring/barracuda
         run: cargo clippy --all-targets -- -D warnings -W clippy::pedantic -W clippy::nursery
 
-      - name: cargo doc
+      - name: cargo doc (warnings = errors)
         working-directory: airSpring/barracuda
+        env:
+          RUSTDOCFLAGS: "-D warnings"
         run: cargo doc --no-deps
 
   test:
@@ -88,13 +90,40 @@ jobs:
         working-directory: airSpring/metalForge/forge
         run: cargo clippy --all-targets -- -D warnings -W clippy::pedantic -W clippy::nursery
 
-      - name: cargo doc
+      - name: cargo doc (warnings = errors)
         working-directory: airSpring/metalForge/forge
+        env:
+          RUSTDOCFLAGS: "-D warnings"
         run: cargo doc --no-deps
 
       - name: cargo test
         working-directory: airSpring/metalForge/forge
         run: cargo test
+
+  metalforge-coverage:
+    name: metalForge Coverage (llvm-cov)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: airSpring
+
+      - uses: actions/checkout@v4
+        with:
+          repository: syntheticChemistry/ecoPrimals
+          path: phase1
+          sparse-checkout: toadstool/crates/barracuda
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: llvm-tools-preview
+
+      - name: Install cargo-llvm-cov
+        run: cargo install cargo-llvm-cov
+
+      - name: Generate coverage report
+        working-directory: airSpring/metalForge/forge
+        run: cargo llvm-cov --lib --summary-only --fail-under-lines 90
 
   python-baselines:
     name: Python Baselines

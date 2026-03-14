@@ -136,7 +136,7 @@ pub fn try_f64_device() -> Option<Arc<WgpuDevice>> {
 pub fn upstream_airspring_provenance() -> Vec<&'static barracuda::shaders::provenance::ShaderRecord>
 {
     barracuda::shaders::provenance::shaders_consumed_by(
-        barracuda::shaders::provenance::SpringDomain::AirSpring,
+        barracuda::shaders::provenance::SpringDomain::AIR_SPRING,
     )
 }
 
@@ -475,8 +475,8 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
     ShaderProvenance {
         shader: "bingocube-nautilus (Rust reservoir, no WGSL)",
         primitives: &[
-            "NautilusShell::evolve_generation",
-            "DriftMonitor::is_drifting",
+            "NautilusBrain::train",
+            "NautilusBrain::is_drifting",
             "EdgeSeeder::seed_boards",
         ],
         origin: "hotSpring (v0.6.15)",
@@ -594,7 +594,7 @@ mod tests {
         for r in &records {
             assert!(
                 r.consumers
-                    .contains(&barracuda::shaders::provenance::SpringDomain::AirSpring),
+                    .contains(&barracuda::shaders::provenance::SpringDomain::AIR_SPRING),
                 "shader {} should list airSpring as consumer",
                 r.path
             );
@@ -636,6 +636,9 @@ mod tests {
                 sqrt: true,
                 fma: true,
                 abs_min_max: true,
+                shared_mem_f64: true,
+                df64_arith: true,
+                df64_transcendentals_safe: true,
             },
             has_f64_shaders: true,
             has_spirv_passthrough: false,
@@ -647,7 +650,6 @@ mod tests {
 
     #[test]
     fn test_try_f64_device() {
-        // May return None in CI — just ensure no panic
         let _ = try_f64_device();
     }
 
@@ -680,6 +682,9 @@ mod tests {
                 sqrt: true,
                 fma: true,
                 abs_min_max: true,
+                shared_mem_f64: true,
+                df64_arith: true,
+                df64_transcendentals_safe: true,
             },
             has_f64_shaders: true,
             has_spirv_passthrough: false,
