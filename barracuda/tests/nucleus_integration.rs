@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! NUCLEUS integration tests — exercises the airSpring primal's JSON-RPC
-//! protocol, cross-primal discovery, and transport tier selection.
+//! protocol, cross-primal discovery, and capability-based provider selection.
 //!
 //! These tests run without requiring Tower Atomic (`BearDog` + Songbird).
 //! They validate the JSON-RPC dispatch, capability registration payloads,
-//! socket resolution, and transport discovery logic.
+//! socket resolution, and provider discovery logic.
 
 #![allow(clippy::float_cmp, clippy::expect_used, clippy::unwrap_used)]
 
 use airspring_barracuda::biomeos;
-#[cfg(feature = "standalone-http")]
-use airspring_barracuda::data::provider::UreqTransport;
-use airspring_barracuda::data::provider::{discover_transport, HttpTransport, SongbirdTransport};
+use airspring_barracuda::data::provider::{BiomeosProvider, Provider, WeatherResponse};
 
 // ── Socket resolution ──────────────────────────────────────────────
 
@@ -55,39 +53,37 @@ fn socket_path_format() {
     assert!(name.ends_with(".sock"), "socket path should end with .sock");
 }
 
-// ── Transport tier discovery ───────────────────────────────────────
+// ── Provider tier selection ────────────────────────────────────────
 
 #[test]
-fn transport_discover_returns_some_without_songbird() {
+fn biomeos_provider_default_capability() {
+    let provider = BiomeosProvider::default();
+    assert_eq!(provider.capability(), "data.fetch_daily_weather");
+}
+
+#[test]
+fn biomeos_provider_custom_capability() {
+    let provider = BiomeosProvider::with_capability("data.custom_source");
+    assert_eq!(provider.capability(), "data.custom_source");
+}
+
+#[test]
+fn biomeos_provider_fails_gracefully_without_tower() {
     std::env::remove_var("SONGBIRD_SOCKET");
     std::env::remove_var("FAMILY_ID");
-    let transport = discover_transport();
-    // With standalone-http feature (default), falls back to ureq.
-    // Without it, returns None when Songbird is unavailable.
-    #[cfg(feature = "standalone-http")]
-    assert_eq!(transport.unwrap().tier(), "standalone/ureq");
-    #[cfg(not(feature = "standalone-http"))]
-    assert!(transport.is_none());
+    let provider = BiomeosProvider::default();
+    let result = provider.fetch_daily_weather(42.7, -84.5, "2023-06-01", "2023-06-30");
+    assert!(
+        result.is_err(),
+        "BiomeosProvider should fail without Tower Atomic"
+    );
 }
 
-#[test]
 #[cfg(feature = "standalone-http")]
-fn ureq_transport_tier() {
-    assert_eq!(UreqTransport.tier(), "standalone/ureq");
-}
-
 #[test]
-fn songbird_transport_tier() {
-    let t = SongbirdTransport::discover();
-    if let Some(t) = t {
-        assert_eq!(t.tier(), "sovereign/songbird");
-    }
-}
-
-#[test]
-fn songbird_discover_none_when_no_socket() {
-    std::env::remove_var("SONGBIRD_SOCKET");
-    assert!(SongbirdTransport::discover().is_none());
+fn http_provider_has_open_meteo_url() {
+    use airspring_barracuda::data::provider::HttpProvider;
+    let _ = HttpProvider::open_meteo();
 }
 
 // ── Primal discovery ───────────────────────────────────────────────
@@ -275,4 +271,22 @@ fn data_weather_payload_format() {
 
     assert_eq!(weather["method"], "data.weather");
     assert!(weather["params"]["latitude"].as_f64().is_some());
+}
+
+// ── WeatherResponse contract ───────────────────────────────────────
+
+#[test]
+fn weather_response_empty_is_consistent() {
+    let r = WeatherResponse {
+        tmax: vec![],
+        tmin: vec![],
+        tmean: vec![],
+        precipitation: vec![],
+        solar_radiation: vec![],
+        wind_speed_2m: vec![],
+        relative_humidity: vec![],
+        dates: vec![],
+    };
+    assert!(r.is_empty());
+    assert_eq!(r.len(), 0);
 }

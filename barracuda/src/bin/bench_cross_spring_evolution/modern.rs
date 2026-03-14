@@ -26,11 +26,11 @@ pub fn bench_modern_upstream(v: &mut ValidationHarness) {
 
 fn bench_upstream_provenance_registry(v: &mut ValidationHarness) {
     use barracuda::shaders::provenance::SpringDomain;
-    let AirSpring = SpringDomain::AIR_SPRING;
-    let GroundSpring = SpringDomain::GROUND_SPRING;
-    let HotSpring = SpringDomain::HOT_SPRING;
-    let NeuralSpring = SpringDomain::NEURAL_SPRING;
-    let WetSpring = SpringDomain::WET_SPRING;
+    let air_spring = SpringDomain::AIR_SPRING;
+    let ground_spring = SpringDomain::GROUND_SPRING;
+    let hot_spring = SpringDomain::HOT_SPRING;
+    let neural_spring = SpringDomain::NEURAL_SPRING;
+    let wet_spring = SpringDomain::WET_SPRING;
 
     println!("\n── Upstream Provenance Registry (barraCuda shaders::provenance) ─");
     let t0 = Instant::now();
@@ -49,12 +49,12 @@ fn bench_upstream_provenance_registry(v: &mut ValidationHarness) {
     let matrix = device_info::upstream_cross_spring_matrix();
     let air_receives: usize = matrix
         .iter()
-        .filter(|((_, to), _)| *to == AirSpring)
+        .filter(|((_, to), _)| *to == air_spring)
         .map(|(_, count)| count)
         .sum();
     let air_gives: usize = matrix
         .iter()
-        .filter(|((from, _), _)| *from == AirSpring)
+        .filter(|((from, _), _)| *from == air_spring)
         .map(|(_, count)| count)
         .sum();
     println!("  Cross-spring flows: airSpring receives {air_receives}, gives {air_gives}");
@@ -81,7 +81,13 @@ fn bench_upstream_provenance_registry(v: &mut ValidationHarness) {
         "  {:-<13}-+-{:-<3}-{:-<3}-{:-<3}-{:-<3}-{:-<3}",
         "", "", "", "", "", ""
     );
-    let domains = [HotSpring, WetSpring, NeuralSpring, AirSpring, GroundSpring];
+    let domains = [
+        hot_spring,
+        wet_spring,
+        neural_spring,
+        air_spring,
+        ground_spring,
+    ];
     for from in &domains {
         let row: Vec<String> = domains
             .iter()

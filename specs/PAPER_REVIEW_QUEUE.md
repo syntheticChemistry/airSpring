@@ -2,7 +2,7 @@
 
 **Last Updated**: March 14, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 87 experiments (1284/1284 Python + 833 Rust lib tests + 186 forge tests + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.3.5 (wgpu 28), 95 binaries. 14.5× Rust-vs-Python geometric mean speedup (21/21 algorithms). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired. metalForge 66/66 mixed pipeline, 186 forge tests. V075 handoff. biomeOS NUCLEUS Tower/Node+Nest LIVE, 35 JSON-RPC capabilities. Exp 084 CPU/GPU parity (21/21), Exp 085 toadStool dispatch (19/19), Exp 086 metalForge NUCLEUS (17/17), Exp 087 graph coordination (22/22).
+**Status**: 87 experiments (1284/1284 Python + 834 Rust lib + 41 integration + 186 forge tests + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.3.5 (wgpu 28), 95 binaries. 14.5× Rust-vs-Python geometric mean speedup (21/21 algorithms). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired. metalForge 66/66 mixed pipeline, 186 forge tests. V076 handoff. biomeOS NUCLEUS Tower/Node+Nest LIVE, 35 JSON-RPC capabilities. Deep debt execution complete. Exp 084 CPU/GPU parity (21/21), Exp 085 toadStool dispatch (19/19), Exp 086 metalForge NUCLEUS (17/17), Exp 087 graph coordination (22/22).
 
 ---
 

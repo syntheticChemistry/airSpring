@@ -39,7 +39,7 @@
 //! | Soil sensors | `control/soil_sensors/calibration_dong2020.py` | `94cc51d` | 2026-02-16 | `python3 control/soil_sensors/calibration_dong2020.py` |
 //! | IoT irrigation | `control/iot_irrigation/calibration_dong2024.py` | `94cc51d` | 2026-02-16 | `python3 control/iot_irrigation/calibration_dong2024.py` |
 //! | Dual Kc | `control/dual_kc/cover_crop_dual_kc.py` | `3afc229` | 2026-02-25 | `python3 control/dual_kc/cover_crop_dual_kc.py` |
-//! | Biochar isotherm | `control/biochar/biochar_isotherms.py` | `3afc229` | 2026-02-25 | `python3 control/biochar/biochar_isotherms.py` |
+//! | Biochar isotherm | `control/biochar/biochar_isotherms.py` | `5684b1e` | 2026-02-26 | `python3 control/biochar/biochar_isotherms.py` |
 //! | Pedotransfer | `control/pedotransfer/saxton_rawls.py` | `fad2e1b` | 2026-02-26 | `python3 control/pedotransfer/saxton_rawls.py` |
 //! | GDD | `control/gdd/growing_degree_days.py` | `fad2e1b` | 2026-02-26 | `python3 control/gdd/growing_degree_days.py` |
 //! | SCS-CN | `control/scs_curve_number/scs_curve_number.py` | `97e7533` | 2026-02-28 | `python3 control/scs_curve_number/scs_curve_number.py` |
@@ -61,6 +61,15 @@
 //! | Cross-species skin (Paper 12) | `control/cross_species_skin/cross_species_skin.py` | `dbfb53a` | 2026-03-02 | `python3 control/cross_species_skin/cross_species_skin.py` |
 //! | Cytokine brain (Paper 12) | `control/cytokine_brain/cytokine_brain.py` | `dbfb53a` | 2026-03-02 | `python3 control/cytokine_brain/cytokine_brain.py` |
 //! | Tissue diversity (Paper 12) | `control/tissue_diversity/tissue_diversity.py` | `dbfb53a` | 2026-03-02 | `python3 control/tissue_diversity/tissue_diversity.py` |
+//! | Biodiversity (Shannon/Simpson/Bray-Curtis) | `control/diversity/diversity_indices.py` | `fad2e1b` | 2026-02-26 | `python3 control/diversity/diversity_indices.py` |
+//! | NPU sigma floor | (analytical) | — | — | EMA variance floor; no Python baseline (machine-precision guard) |
+//! | IoT sensor validation | `control/iot_irrigation/calibration_dong2024.py` | `94cc51d` | 2026-02-16 | Synthetic generator; physical plausibility checks only |
+//! | IoT CSV round-trip | (analytical) | — | — | `{:.2}` format truncation; verified via `io::csv_ts` unit tests |
+//! | Analytical computation | (analytical) | — | — | Generic digitization precision; FAO/USDA published table interpolation |
+//! | R² minimum | (literature) | — | — | FAO-56 PM R² > 0.90; threshold allows ERA5 reanalysis noise |
+//! | RMSE maximum | (literature) | — | — | Doorenbos & Pruitt (1977) measurement uncertainty ±1.5 mm/day |
+//! | ET₀ cross-method % | (literature) | — | — | Hargreaves vs PM 10–30% divergence; Great Lakes 25% |
+//! | P significance | (convention) | — | — | Standard two-tailed α = 0.05; no Python baseline needed |
 
 pub use barracuda::tolerances::{check, Tolerance};
 

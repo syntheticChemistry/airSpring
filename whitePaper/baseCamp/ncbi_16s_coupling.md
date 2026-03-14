@@ -178,6 +178,6 @@ Strandgate (dual EPYC + RTX 3090) available for bioinformatics scale-up.
 
 - **wetSpring 16S pipeline**: FASTQ → OTU. Currently sovereign Rust (Exp184-185).
 - **NestGate SRA download**: `ncbi_live_provider.rs` is architecturally ready but
-  HTTP client is stubbed. Use Python `real_ncbi_fetch.py` + SRA toolkit as interim.
+  HTTP client is stubbed. Use Python `scripts/ncbi_16s_fetch_sample.py` + SRA toolkit as interim.
 - **SILVA reference database**: Downloaded once via NestGate, content-addressed.
 - **No institutional access required**: All NCBI data is open via E-utilities.

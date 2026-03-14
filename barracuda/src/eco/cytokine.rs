@@ -308,11 +308,12 @@ mod tests {
         assert_eq!(brain.observation_count(), 0);
 
         for i in 0..10 {
-            let t = f64::from(i) * 6.0;
-            let il31 = 100.0 + f64::from(i) * 20.0;
-            let pruritus = 3.0 + f64::from(i) * 0.5;
-            let signal = 0.3 + f64::from(i) * 0.05;
-            let barrier = 0.8 - f64::from(i) * 0.03;
+            let fi = f64::from(i);
+            let t = fi * 6.0;
+            let il31 = fi.mul_add(20.0, 100.0);
+            let pruritus = fi.mul_add(0.5, 3.0);
+            let signal = fi.mul_add(0.05, 0.3);
+            let barrier = fi.mul_add(-0.03, 0.8);
             brain.observe(make_obs(t, il31, pruritus, signal, barrier));
         }
         assert_eq!(brain.observation_count(), 10);
@@ -400,12 +401,13 @@ mod tests {
         let mut brain = CytokineBrain::new(config, "test");
 
         for i in 0..10 {
+            let fi = f64::from(i);
             brain.observe(make_obs(
-                f64::from(i) * 6.0,
-                100.0 + f64::from(i) * 10.0,
-                3.0 + f64::from(i) * 0.2,
-                0.3 + f64::from(i) * 0.04,
-                0.8 - f64::from(i) * 0.02,
+                fi * 6.0,
+                fi.mul_add(10.0, 100.0),
+                fi.mul_add(0.2, 3.0),
+                fi.mul_add(0.04, 0.3),
+                fi.mul_add(-0.02, 0.8),
             ));
         }
         brain.train();

@@ -2,7 +2,7 @@
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 **Date**: March 14, 2026
-**From**: airSpring (v0.7.6, 87 experiments, 833 lib + 186 forge tests)
+**From**: airSpring (v0.7.6, 87 experiments, 834 lib + 41 integration + 186 forge tests)
 **To**: barraCuda + toadStool + biomeOS teams
 **Supersedes**: V075 upstream rewire handoff (consolidated)
 **barraCuda Pin**: v0.3.5 (wgpu 28)
@@ -12,17 +12,22 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 ## Executive Summary
 
-airSpring v0.7.6 resolves deep technical debt from upstream API evolution
-and introduces the `data` module for capability-based data discovery. This
-handoff documents what changed, what the barraCuda/toadStool teams need to
-know, and what airSpring learned during the migration.
+airSpring v0.7.6 completes two deep debt sessions. Session 1 synced to
+barraCuda 0.3.5 / bingocube-nautilus 0.1.0 and introduced the `data`
+module. Session 2 executed all audit findings: 4 compilation blockers
+resolved, 4 validation integrity fixes, provenance documentation complete,
+and code quality polish. All features now compile (`--all-features`),
+all tests pass, zero clippy warnings.
 
 1. **barraCuda 0.3.5 sync** — `SpringDomain` newtype, `F64BuiltinCapabilities` DF64 fields.
 2. **bingocube-nautilus 0.1.0** — `NautilusBrain` replaces `NautilusShell`, observation mapping.
 3. **New `data` module** — `Provider` trait, standalone vs NUCLEUS data fetching.
 4. **Hardcoded path elimination** — env var + `CARGO_MANIFEST_DIR` fallback.
-5. **Tolerance provenance complete** — all 11 remaining entries documented.
+5. **Tolerance provenance complete** — all 20 remaining entries documented with justification.
 6. **CI hardened** — doc lints enforced, metalForge coverage gate.
+7. **GPU stream smoother fixed** — upstream WGSL shader f64→f32 type mismatch corrected.
+8. **akida-driver evolved** — stub→complete Rust facade (14 types, pure Rust, no C FFI).
+9. **All --all-features compile** — NPU, standalone-http, all targets pass.
 
 ---
 
@@ -192,14 +197,62 @@ date, exact command).
 
 ---
 
-## §7 Quality Gates
+## §7 Deep Debt Execution (Session 2)
+
+### P0 — Compilation Blockers Resolved
+
+| Issue | Fix |
+|-------|-----|
+| `validate_cytokine.rs` API drift | `CytokineBrainConfig` restructured: `min_training_points` nested in `brain: NautilusBrainConfig`. `import_json` arity corrected (3→2 args). |
+| `nucleus_integration.rs` stale imports | Removed `UreqTransport`, `HttpTransport`, `SongbirdTransport`, `discover_transport`. Evolved to `BiomeosProvider`/`HttpProvider` with `capability()` accessor. |
+| `akida-driver` stub | Evolved 1-line stub to 14-type Rust facade (`AkidaDevice`, `DeviceManager`, `Capabilities`, `InferenceConfig`, `ModelProgram`, etc.). `--all-features` compiles. |
+| `non_snake_case` warnings | 5 variables in `bench_cross_spring_evolution/modern.rs` renamed to snake_case. |
+
+### P1 — Validation Integrity
+
+| Issue | Fix |
+|-------|-----|
+| `validate_drought_index` hardcoded precip | `validate_classification` and `validate_scale_ordering` now load data from benchmark JSON via `load_precip`. |
+| GPU stream smoother bug | Upstream WGSL shader `moving_window_f64.wgsl` declared `f64` but host sent `f32` buffers. All shader types corrected to `f32`. GPU integration test tolerances updated from `1e-10` to `1e-5`/`1e-4` for f32 precision. |
+| Biochar provenance | `tolerances.rs` biochar entry corrected to commit `5684b1e`, date `2026-02-26`. |
+| `anderson_coupling.py` output path | Changed from CWD-relative to script-relative using `pathlib.Path(__file__).parent`. |
+
+### P2 — Provenance & Quality
+
+| Issue | Fix |
+|-------|-----|
+| 9 missing tolerance entries | `BIO_DIVERSITY_SHANNON`, `NPU_SIGMA_FLOOR`, `IOT_TEMPERATURE_MEAN`, `IOT_CSV_ROUNDTRIP`, `ANALYTICAL_COMPUTATION`, `R2_MINIMUM`, `RMSE_MAXIMUM`, `ET0_CROSS_METHOD_PCT`, `P_SIGNIFICANCE` added. |
+| `eprintln!` in production | `io/csv_ts.rs` switched to `tracing::warn!` with structured fields. `tracing = "0.1"` added. |
+| `suboptimal_flops` | 12 `A + B * C` → `B.mul_add(C, A)` in `eco/cytokine.rs` and `nautilus.rs`. |
+| `cast_precision_loss` | `validate_cross_spring_modern.rs` refactored; `primal_science.rs` annotated for 32-bit targets. |
+
+### For barraCuda/toadStool
+
+The **GPU stream smoother fix** is in the upstream `barraCuda` WGSL shader
+at `crates/barracuda/src/shaders/stats/moving_window_f64.wgsl`. The `_f64`
+filename is a misnomer — the shader operates on `f32` buffers because
+`wgpu`/`naga` does not support `f64` storage buffers. The Rust host in
+airSpring sends `f32` data via `MovingWindowStats`. Other springs using
+this shader should verify their buffer types match.
+
+The **akida-driver facade** is at `phase1/toadstool/crates/neuromorphic/
+akida-driver/src/lib.rs`. It provides a pure Rust abstraction (no C FFI)
+for the BrainChip AKD1000 NPU. Springs using the `npu` feature should
+verify against these types.
+
+---
+
+## §8 Quality Gates (Post-Execution)
 
 | Gate | Result |
 |------|--------|
 | `cargo fmt --check` | PASS |
-| `cargo clippy --lib` (pedantic+nursery) | PASS (0 warnings) |
-| `cargo test --lib` (barracuda) | **833/834** (1 pre-existing GPU driver issue) |
-| `cargo test --lib` (forge) | **186/186 PASS** |
+| `cargo clippy --all-features --all-targets -W pedantic -W nursery -D warnings` | **PASS (0 warnings)** |
+| `cargo test --no-fail-fast` (barracuda lib) | **834/834 PASS** |
+| `cargo test --no-fail-fast` (barracuda integration) | **41/41 PASS** |
+| `cargo test --no-fail-fast` (forge) | **186/186 PASS** |
+| `cargo doc --no-deps` | PASS |
+| `cargo check --features npu` | PASS |
 | All files < 1000 lines | PASS (max 815) |
 | Zero unsafe | PASS |
 | Zero mocks in production | PASS |

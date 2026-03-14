@@ -13,7 +13,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → biomeOS (NUCLEUS atomics, deployment graphs) → Penny Irrigation
 ```
 
-## Current Status (v0.7.5)
+## Current Status (v0.7.6)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
@@ -44,8 +44,8 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` (barracuda) | **833 passed**, 1 pre-existing GPU driver issue |
-| `cargo test --tests` (integration) | **33 passed** (13 GPU pipeline + 20 stats) |
+| `cargo test --lib` (barracuda) | **834 passed**, 0 failures |
+| `cargo test --tests` (integration) | **41 passed** (21 GPU pipeline + 20 stats) |
 | `cargo test --lib` (metalForge) | **186 passed** + 1 doctest, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **95.66% line coverage** |
 | `cargo clippy (pedantic)` | **0 warnings** (pedantic, both crates) |
@@ -230,7 +230,7 @@ airSpring/
 │   │   ├── npu.rs               # BrainChip AKD1000 NPU (feature-gated)
 │   │   └── bin/                 # validate_*, bench_*, airspring_primal (95 declared)
 │   ├── tests/                   # Integration + property tests (9 files + common/)
-│   └── Cargo.toml               # v0.7.5
+│   └── Cargo.toml               # v0.7.6
 ├── metalForge/                  # Mixed hardware dispatch (CPU+GPU+NPU)
 │   ├── deploy/                  # biomeOS deployment graphs (airspring_deploy.toml)
 │   └── forge/                   # airspring-forge (186 tests, 6 binaries, live hardware probe)
@@ -242,7 +242,7 @@ airSpring/
 │   └── baseCamp/                # Per-faculty research briefings + baseCamp extensions
 ├── experiments/                 # Experiment protocols and results (87 experiments)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
-│   └── handoffs/                # Versioned handoffs (V075 current)
+│   └── handoffs/                # Versioned handoffs (V076 current)
 ├── graphs/                      # biomeOS deployment graphs (TOML)
 ├── CHANGELOG.md                 # Keep-a-Changelog versioned history
 ├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
@@ -274,7 +274,7 @@ airSpring/
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance (S87) |
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (87 experiments) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V075 current) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V076 current) |
 
 ## License
 
@@ -282,14 +282,13 @@ AGPL-3.0-or-later
 
 ---
 
-*March 14, 2026 — v0.7.6. Deep debt resolution + upstream evolution sync.
-barraCuda 0.3.5 sync: `SpringDomain` newtype, `F64BuiltinCapabilities` DF64 fields.
-`bingocube-nautilus` 0.1.0 API migration: `NautilusBrain` replaces `NautilusShell`,
-agricultural observation → `BetaObservation` mapping, local `FitnessDriftMonitor` for
-atlas stream (upstream `DriftMonitor` internalized). New `data` module: `Provider` trait,
-`HttpProvider` (ureq, standalone-http), `BiomeosProvider` (capability-based discovery).
-Hardcoded paths → `CARGO_MANIFEST_DIR` + env var. RPC defaults documented as
-Michigan-centric constants. Tolerance provenance table complete (11 new rows).
-CI: `RUSTDOCFLAGS="-D warnings"` on both crates, metalForge coverage gate (90%).
-87 experiments, 1284/1284 Python, 833 lib + 186 forge tests. Zero unsafe, zero
-clippy pedantic+nursery warnings. All files < 815 lines. AGPL-3.0-or-later.*
+*March 14, 2026 — v0.7.6. Deep debt execution: compilation blockers resolved (4),
+validation integrity fixes (4), provenance documentation complete, code quality polish.
+GPU stream smoother bug fixed (f64→f32 WGSL shader mismatch in barracuda
+`moving_window_f64.wgsl`). akida-driver evolved from stub to proper Rust facade.
+nucleus\_integration tests evolved from stale mock transport types to real capability-based
+Provider API. validate\_cytokine API drift fixed (NautilusBrainConfig nesting, import\_json
+arity). validate\_drought\_index hardcoded precip replaced with benchmark JSON. Biochar
+provenance reconciled. anderson\_coupling.py output path fixed. eprintln→tracing::warn.
+GPU integration test tolerances aligned with f32 shader precision. 834 lib + 186 forge
+tests, 0 clippy pedantic+nursery warnings, all features compile. AGPL-3.0-or-later.*

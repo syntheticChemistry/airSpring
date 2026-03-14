@@ -17,6 +17,8 @@
 //!
 //! Hardcoded expected values. Explicit PASS/FAIL. Exit code 0 = all pass.
 
+#![allow(clippy::cast_precision_loss)]
+
 use barracuda::shaders::provenance::{
     self, EvolutionEvent, ShaderRecord, SpringDomain, EVOLUTION_TIMELINE, REGISTRY,
 };
@@ -245,8 +247,9 @@ fn main() {
         (nacf_noise[0] - 1.0).abs() < 1e-10
     );
     // Iterated LCG: ACF at lag>0 should be near zero
+    let acf_tail_count = nacf_noise.len() - 1;
     let mean_abs_acf: f64 =
-        nacf_noise[1..].iter().map(|v| v.abs()).sum::<f64>() / (nacf_noise.len() - 1) as f64;
+        nacf_noise[1..].iter().map(|v| v.abs()).sum::<f64>() / acf_tail_count as f64;
     check!(
         "white noise mean |ACF(lag>0)| < 0.3 (decorrelation)",
         mean_abs_acf < 0.3

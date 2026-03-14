@@ -26,6 +26,7 @@ use airspring_barracuda::eco::cytokine::{
 };
 use airspring_barracuda::eco::tissue::AndersonRegime;
 use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
+use bingocube_nautilus::NautilusBrainConfig;
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/cytokine_brain/benchmark_cytokine_brain.json");
@@ -118,9 +119,13 @@ fn validate_brain_lifecycle(v: &mut ValidationHarness, benchmark: &serde_json::V
         let n_obs = tc["n_observations"].as_u64().unwrap_or(0) as usize;
         let min_pts = tc["min_training_points"].as_u64().unwrap_or(5) as usize;
 
+        let default = CytokineBrainConfig::default();
         let config = CytokineBrainConfig {
-            min_training_points: min_pts,
-            ..Default::default()
+            brain: NautilusBrainConfig {
+                min_training_points: min_pts,
+                ..default.brain
+            },
+            ..default
         };
         let mut brain = CytokineBrain::new(config.clone(), "exp067-test");
 
@@ -178,7 +183,7 @@ fn validate_brain_lifecycle(v: &mut ValidationHarness, benchmark: &serde_json::V
                 let json = brain.export_json().expect("export should succeed");
                 v.check_bool(&format!("export nonempty {label}"), !json.is_empty());
 
-                let imported = CytokineBrain::import_json(config, &json, "exp067-imported");
+                let imported = CytokineBrain::import_json(config, &json);
                 v.check_bool(&format!("import ok {label}"), imported.is_ok());
                 if let Ok(imported_brain) = imported {
                     let expected_import_trained = tc

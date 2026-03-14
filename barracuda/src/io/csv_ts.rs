@@ -15,6 +15,7 @@ use crate::error::{AirSpringError, Result};
 use std::collections::HashMap;
 use std::io::{self, BufRead};
 use std::path::Path;
+use tracing::warn;
 
 /// Columnar time series dataset.
 ///
@@ -238,8 +239,11 @@ pub fn parse_csv_reader<R: BufRead>(
         let field_count = line.split(',').count();
         if field_count != num_headers {
             skipped_rows += 1;
-            eprintln!(
-                "csv_ts: line {line_no}: skipped malformed row (expected {num_headers} columns, got {field_count})"
+            warn!(
+                line = line_no,
+                expected = num_headers,
+                got = field_count,
+                "skipped malformed row"
             );
             continue;
         }
@@ -256,7 +260,7 @@ pub fn parse_csv_reader<R: BufRead>(
     }
 
     if skipped_rows > 0 {
-        eprintln!("csv_ts: skipped {skipped_rows} malformed rows");
+        warn!(skipped = skipped_rows, "csv_ts: skipped malformed rows");
     }
 
     Ok(TimeseriesData {

@@ -229,16 +229,10 @@ fn validate_spi6_12(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     println!("  Rust: SPI-6 n={n6}, SPI-12 n={n12}");
 }
 
-fn validate_classification(v: &mut ValidationHarness) {
+fn validate_classification(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("WMO drought classification");
 
-    let precip = vec![
-        57.0, 23.6, 42.6, 54.2, 105.1, 94.1, 104.4, 47.0, 78.4, 37.1, 46.7, 55.3, 35.0, 35.9, 81.7,
-        58.5, 60.0, 75.2, 58.3, 57.9, 124.1, 69.9, 73.9, 48.4, 27.3, 31.9, 43.1, 42.1, 120.3,
-        119.8, 89.1, 65.5, 62.2, 73.9, 47.5, 43.2, 66.5, 43.2, 76.1, 100.1, 70.6, 76.1, 100.2,
-        79.8, 82.5, 64.6, 81.2, 45.4, 74.4, 38.3, 74.6, 69.9, 72.3, 70.2, 42.4, 68.0, 61.1, 100.3,
-        82.1, 79.1,
-    ];
+    let precip = load_precip(benchmark);
     let spi1 = compute_spi(&precip, 1);
     let valid: Vec<f64> = spi1.iter().copied().filter(|x| x.is_finite()).collect();
 
@@ -277,16 +271,10 @@ fn validate_classification(v: &mut ValidationHarness) {
     );
 }
 
-fn validate_scale_ordering(v: &mut ValidationHarness) {
+fn validate_scale_ordering(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Scale ordering (SPI-3 smoother than SPI-1)");
 
-    let precip = vec![
-        57.0, 23.6, 42.6, 54.2, 105.1, 94.1, 104.4, 47.0, 78.4, 37.1, 46.7, 55.3, 35.0, 35.9, 81.7,
-        58.5, 60.0, 75.2, 58.3, 57.9, 124.1, 69.9, 73.9, 48.4, 27.3, 31.9, 43.1, 42.1, 120.3,
-        119.8, 89.1, 65.5, 62.2, 73.9, 47.5, 43.2, 66.5, 43.2, 76.1, 100.1, 70.6, 76.1, 100.2,
-        79.8, 82.5, 64.6, 81.2, 45.4, 74.4, 38.3, 74.6, 69.9, 72.3, 70.2, 42.4, 68.0, 61.1, 100.3,
-        82.1, 79.1,
-    ];
+    let precip = load_precip(benchmark);
 
     let spi1 = compute_spi(&precip, 1);
     let spi3 = compute_spi(&precip, 3);
@@ -325,8 +313,8 @@ fn main() {
     validate_spi1(&mut v, &benchmark);
     validate_spi3(&mut v, &benchmark);
     validate_spi6_12(&mut v, &benchmark);
-    validate_classification(&mut v);
-    validate_scale_ordering(&mut v);
+    validate_classification(&mut v, &benchmark);
+    validate_scale_ordering(&mut v, &benchmark);
 
     v.finish();
 }

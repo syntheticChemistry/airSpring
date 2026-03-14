@@ -312,7 +312,7 @@ mod tests {
         assert_eq!(brain.observation_count(), 0);
 
         for doy in 1..=10 {
-            let et0 = 2.0 + f64::from(doy) * 0.3;
+            let et0 = f64::from(doy).mul_add(0.3, 2.0);
             brain.observe(make_obs(doy * 15, 25.0 + f64::from(doy), 10.0, et0));
         }
         assert_eq!(brain.observation_count(), 10);
@@ -383,7 +383,12 @@ mod tests {
         let mut brain = AirSpringBrain::new(config, "test");
 
         for doy in 1..=10 {
-            brain.observe(make_obs(doy * 15, 25.0, 10.0, 3.0 + f64::from(doy) * 0.1));
+            brain.observe(make_obs(
+                doy * 15,
+                25.0,
+                10.0,
+                f64::from(doy).mul_add(0.1, 3.0),
+            ));
         }
         brain.train();
 

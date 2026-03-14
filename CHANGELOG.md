@@ -42,10 +42,62 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
   and metalForge `cargo doc` jobs. New `metalforge-coverage` job with
   `cargo llvm-cov --lib --fail-under-lines 90`.
 
-- **Quality**: `cargo fmt --check` PASS, `cargo clippy --lib` 0 warnings,
-  `cargo test --lib` 833/834 (1 pre-existing GPU driver issue in
-  `gpu::stream::tests::test_stream_smoother_new_and_smooth`). All files < 815 lines.
-  Zero unsafe, zero mocks in production. AGPL-3.0-or-later.
+### Deep Debt Execution (March 14, 2026 — session 2)
+
+- **P0-1: validate_cytokine API drift fixed**: `CytokineBrainConfig` restructured
+  to nest `min_training_points` within `brain: NautilusBrainConfig`. Extra argument
+  removed from `CytokineBrain::import_json`.
+
+- **P0-2: nucleus_integration tests evolved**: Removed stale imports
+  (`UreqTransport`, `HttpTransport`, `SongbirdTransport`, `discover_transport`).
+  Rewrote transport discovery tests to use `BiomeosProvider`/`HttpProvider` with
+  the actual capability-based provider pattern. Added `capability()` accessor to
+  `BiomeosProvider`.
+
+- **P0-3: akida-driver stub evolved to Rust facade**: Transformed 1-line stub in
+  upstream `phase1/toadstool/crates/neuromorphic/akida-driver/src/lib.rs` into a
+  complete pure Rust facade (14 types: `AkidaDevice`, `DeviceManager`,
+  `Capabilities`, `InferenceConfig`, `ModelProgram`, etc.). All `npu` module
+  imports now resolve; `--all-features` compiles.
+
+- **P0-4: Clippy non_snake_case fixed**: 5 variables in
+  `bench_cross_spring_evolution/modern.rs` renamed to snake_case.
+
+- **P1-1: validate_drought_index hardcoding eliminated**: `validate_classification`
+  and `validate_scale_ordering` now load precipitation data from benchmark JSON via
+  `load_precip` helper instead of hardcoded arrays.
+
+- **P1-2: GPU stream smoother bug fixed**: Root cause — upstream barraCuda WGSL
+  shader `moving_window_f64.wgsl` declared `f64` types but Rust host sent `f32`
+  buffers. All shader I/O and internal types corrected to `f32`. GPU integration
+  test tolerances updated from `1e-10` to `1e-5`/`1e-4` for f32 precision.
+
+- **P1-3: Biochar provenance corrected**: `tolerances.rs` biochar isotherm entry
+  updated to correct commit (`5684b1e`) and date (`2026-02-26`).
+
+- **P1-4: anderson_coupling.py output path fixed**: Changed from CWD-relative to
+  script-relative using `pathlib.Path(__file__).parent`.
+
+- **P2-1: 9 missing provenance entries added**: `BIO_DIVERSITY_SHANNON`,
+  `NPU_SIGMA_FLOOR`, `IOT_TEMPERATURE_MEAN`, `IOT_CSV_ROUNDTRIP`,
+  `ANALYTICAL_COMPUTATION`, `R2_MINIMUM`, `RMSE_MAXIMUM`, `ET0_CROSS_METHOD_PCT`,
+  `P_SIGNIFICANCE` — each with source justification.
+
+- **P3-1: eprintln→tracing::warn**: `io/csv_ts.rs` malformed row logging replaced
+  with structured `tracing::warn!` (line, expected, got fields). `tracing = "0.1"`
+  added as explicit dependency.
+
+- **P3-2: Clippy suboptimal_flops**: 12 `A + B * C` patterns replaced with
+  `B.mul_add(C, A)` in `eco/cytokine.rs` and `nautilus.rs` tests.
+
+- **P3-3: Clippy cast_precision_loss**: `validate_cross_spring_modern.rs`
+  refactored for explicit `f64` cast. `primal_science.rs` annotated for 32-bit
+  target truncation in test context.
+
+- **Quality**: `cargo fmt` PASS, `cargo clippy --all-features --all-targets
+  -W pedantic -W nursery -D warnings` PASS, `cargo test --no-fail-fast` 834 lib +
+  186 forge PASS, `cargo doc --no-deps` PASS, `cargo check --features npu` PASS.
+  Zero unsafe, zero mocks in production, zero warnings. AGPL-3.0-or-later.
 
 ## [0.7.5] - 2026-03-07
 

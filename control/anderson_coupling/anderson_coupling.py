@@ -32,6 +32,7 @@ References:
 import json
 import math
 import sys
+from pathlib import Path
 
 # VG parameters: Carsel & Parrish (1988) — matching barracuda
 SOIL_TYPES = {
@@ -326,7 +327,8 @@ def main():
 
     print(f"\n=== Anderson Coupling: {n_pass}/{n_total} PASS, {n_total - n_pass} FAIL ===")
 
-    with open("benchmark_anderson_coupling.json", "w") as f:
+    out_path = Path(__file__).parent / "benchmark_anderson_coupling.json"
+    with open(out_path, "w") as f:
         json.dump(results, f, indent=2)
 
     sys.exit(0 if n_pass == n_total else 1)

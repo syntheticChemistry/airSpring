@@ -29,6 +29,9 @@ barracuda = { path = "../../barraCuda/crates/barracuda" }
 serde_json = "1"
 toml = "0.8"
 
+# Structured logging for library diagnostics (CSV parse warnings, etc.).
+tracing = "0.1"
+
 # Tracing subscriber: ValidationHarness (upstream S68+) uses tracing::info!.
 # We init a simple fmt subscriber so harness output is visible.
 tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }

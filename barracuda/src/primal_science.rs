@@ -416,6 +416,7 @@ fn spi_drought(params: &serde_json::Value) -> serde_json::Value {
     if monthly_precip.len() < 3 {
         return serde_json::json!({"error": "monthly_precip_mm must have ≥3 values"});
     }
+    #[allow(clippy::cast_possible_truncation)]
     let scale = params
         .get("scale")
         .and_then(serde_json::Value::as_u64)
@@ -454,6 +455,7 @@ fn autocorrelation_handler(params: &serde_json::Value) -> serde_json::Value {
     if data.is_empty() {
         return serde_json::json!({"error": "data must be non-empty"});
     }
+    #[allow(clippy::cast_possible_truncation)]
     let max_lag = params
         .get("max_lag")
         .and_then(serde_json::Value::as_u64)
