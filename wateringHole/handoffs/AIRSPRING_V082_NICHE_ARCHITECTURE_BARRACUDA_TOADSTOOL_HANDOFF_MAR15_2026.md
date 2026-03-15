@@ -18,7 +18,7 @@ airSpring v0.8.2 completes two major evolutions:
    orchestration. Niche self-knowledge centralized in `src/niche.rs`.
 
 2. **Deep code quality**: Edition 2024 migration (rust-version 1.87), zero `#[allow()]`
-   in production code (redundant lints removed from 95 binaries), `#![deny(unsafe_code)]`
+   in production code (redundant lints removed from 94 binaries), `#![deny(unsafe_code)]`
    with unsafe isolated to test `set_var`/`remove_var`, zero clippy pedantic+nursery
    warnings, metalForge forge Edition 2024 migrated.
 
@@ -31,7 +31,12 @@ airSpring v0.8.2 completes two major evolutions:
    discovery, ecoBin-clean default build (`standalone-http` opt-in), UniBin subcommands
    (`server`/`status`/`version`/`capabilities`).
 
-**Quality: 851 lib + 280 integration + 61 forge tests, 0 failures, 0 clippy warnings.**
+4. **Full validation pipeline green** (2026-03-15): 1284/1284 Python control checks,
+   851 + 280 + 62 Rust tests, 54+ validation binaries exit 0, 24/24 CPU algorithms
+   match Python at 14.3× geometric mean speedup, 21/21 CPU-GPU parity modules validated,
+   metalForge 32/32 dispatch + 21/21 routing + 17/17 mixed hardware.
+
+**Quality: 851 lib + 280 integration + 62 forge tests, 0 failures, 0 clippy warnings.**
 
 ---
 
@@ -271,9 +276,14 @@ constants from `tolerances.rs` with scientific justification.
 
 | Check | Result |
 |-------|--------|
+| Python control baselines | **1284/1284** checks, 54 scripts |
 | `cargo test --lib` (barracuda) | **851 passed**, 0 failures |
 | `cargo test --tests` (integration) | **280 passed**, 0 failures |
-| `cargo test --lib` (metalForge forge) | **61 passed**, 0 failures |
+| `cargo test --lib` (metalForge forge) | **62 passed**, 0 failures |
+| Validation binaries (hotSpring exit 0/1) | **54+ binaries** exit 0 |
+| CPU benchmark (Rust vs Python) | **24/24 parity**, 14.3× geometric mean |
+| CPU-GPU parity | **21/21 modules** validated |
+| metalForge dispatch | **32/32** routing, **17/17** mixed hardware |
 | `cargo clippy --lib` (both crates) | **0 warnings** (pedantic+nursery) |
 | `cargo fmt --check` | **Clean** |
 | Edition | **2024** (rust-version 1.87) |

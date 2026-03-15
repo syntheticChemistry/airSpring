@@ -1,7 +1,7 @@
 # airSpring Specifications
 
 **Last Updated**: March 15, 2026
-**Status**: Phase 0–5 complete — 1284/1284 Python + 851 lib + 280 integration + 61 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 94 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.3.5 (wgpu 28) + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + metalForge 66/66 + niche adapter (41 capabilities) + 87 experiments (v0.8.2). Edition 2024, deep code quality complete. Exp 084-087: 79/79 PASS (CPU/GPU parity, toadStool dispatch, metalForge NUCLEUS, graph coordination)
+**Status**: Phase 0–5 complete — 1284/1284 Python + 851 lib + 280 integration + 62 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 94 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.3.5 (wgpu 28) + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + metalForge 66/66 + niche adapter (41 capabilities) + 87 experiments (v0.8.2). Edition 2024, deep code quality complete. Exp 084-087: 79/79 PASS (CPU/GPU parity, toadStool dispatch, metalForge NUCLEUS, graph coordination)
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling, Anderson coupling
 
 ---
@@ -12,7 +12,7 @@
 |--------|-------|
 | Phase 0 (Python) | 1284/1284 PASS — 57 papers reproduced (FAO-56, soil, IoT, WB, dual Kc, cover crops, regional ET₀, Richards, biochar, 60yr WB, yield, CW2D, scheduling, lysimeter, sensitivity, Priestley-Taylor, 3-method intercomparison, Thornthwaite, GDD, pedotransfer, AmeriFlux, Hargreaves, diversity, multi-crop, NPU eco, forecast, SCAN moisture, NASS yield, Anderson coupling, Blaney-Criddle, SCS-CN, Green-Ampt, coupled runoff-infiltration, VG inverse, full-season WB) |
 | Phase 0+ (Real data) | 15,300 station-days, R²=0.967 across 100 Michigan stations |
-| Phase 1 (Rust) | 851 lib + 280 integration + 61 forge tests — 94 binaries (88 barracuda + 6 forge) |
+| Phase 1 (Rust) | 851 lib + 280 integration + 62 forge tests — 94 binaries (88 barracuda + 6 forge) |
 | Phase 1.5 (CPU benchmark) | 14.3× geometric mean speedup (24/24 algorithms, 21/21 CPU-GPU parity), 13,000× atlas-scale |
 | Phase 2 (Cross-validation) | 75/75 Python↔Rust match within 1e-5; 690 crop-station yield pairs within 0.01 |
 | Phase 2.5 (Tier B→A GPU) | 4 Tier B→A promotions (ops 5-8), `BatchedStatefulF64`, `BatchedNelderMeadGpu` |

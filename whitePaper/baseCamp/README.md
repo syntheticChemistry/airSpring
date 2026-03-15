@@ -2,7 +2,7 @@
 
 **Updated**: March 15, 2026
 **Project**: airSpring — Ecological & Agricultural Sciences (v0.8.2)
-**Status**: 87 experiments, 1284/1284 Python + 851 lib + 280 integration + 61 forge tests + 95 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-version 1.87) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, transitional adapter → biomeOS graph deployment) + zero `#[allow()]` in production + zero clippy pedantic+nursery + zero unsafe in production. Deep code quality complete
+**Status**: 87 experiments, 1284/1284 Python + 851 lib + 280 integration + 62 forge tests + 94 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-version 1.87) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, transitional adapter → biomeOS graph deployment) + zero `#[allow()]` in production + zero clippy pedantic+nursery + zero unsafe in production. Full validation pipeline green (2026-03-15)
 
 ---
 
@@ -11,7 +11,7 @@
 ```
 Phase 0   Python/R baselines    — reproduce paper results with original tools (1284/1284)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (851 lib + 1498 atlas, 95 binaries + 146/146 + 32/32 cross-spring benchmarks)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (851 lib + 1498 atlas, 94 binaries + 146/146 + 32/32 cross-spring benchmarks)
 Phase 1.5 CPU benchmark         — 14.3× Rust-vs-Python geometric mean (24/24 algorithms, 21/21 CPU-GPU parity modules)
 Phase 2   BarraCuda GPU bridge  — 25 Tier A + 6 GPU-local modules wired (cross-spring S87 fully rewired)
 Phase 2.5 Ops 5-8 GPU-first   — Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed
@@ -39,7 +39,7 @@ Phase 5.1 toadStool dispatch  — Exp 085: 14 JSON-RPC science methods, compute.
 Phase 5.2 NUCLEUS mesh        — Exp 086: live hardware → NUCLEUS mesh → ecology pipeline, PCIe bypass (17/17)
 Phase 5.3 Graph coordination  — Exp 087: biomeOS TOML graphs, DAG validation, capability refs (22/22)
 Phase 5.4 neuralAPI Pathway Learner — Pathway Learner integration, 4 deploy graphs
-Phase 5.5 Niche architecture    — Edition 2024, niche self-knowledge module, transitional adapter (635 LOC), deep code quality (zero #[allow()], zero unsafe in production, 95 binaries cleaned), V071-V076 archived
+Phase 5.5 Niche architecture    — Edition 2024, niche self-knowledge module, transitional adapter (635 LOC), deep code quality (zero #[allow()], zero unsafe in production, 94 binaries cleaned), V071-V076 archived
 ```
 
 ## Faculty Summary
@@ -124,7 +124,7 @@ Phase 5.5 Niche architecture    — Edition 2024, niche self-knowledge module, t
 | 65 | Bootstrap & Jackknife CI for Seasonal ET₀ — Exp 080 | 0→CPU | 20+20 | Deterministic bootstrap resampling + jackknife LOO variance |
 | 66 | Standardized Precipitation Index (SPI) — Exp 081 | 0→CPU | 20+20 | Gamma MLE + regularized incomplete gamma + normal quantile, multi-scale drought |
 
-### Rust Validation (Phase 1+3+5) — 95 binaries + 146/146 + 32/32 cross-spring benchmarks
+### Rust Validation (Phase 1+3+5) — 94 binaries + 146/146 + 32/32 cross-spring benchmarks
 
 | Binary | Checks | Modules Exercised |
 |--------|:------:|-------------------|
@@ -238,7 +238,7 @@ S79 modernization: `libc`→`rustix`, `async-trait`→AFIT, universal f64 precis
 
 ### Next Steps (Dong Lab)
 
-- **Niche architecture complete (v0.8.2)**: airSpring is a niche deployment of primals via biomeOS graphs, not a standalone primal. `airspring_primal` binary refactored to transitional niche adapter (635 LOC), niche self-knowledge centralized in `src/niche.rs`. Edition 2024 migrated (rust-version 1.87), zero `#[allow()]` in production (redundant lints removed from 95 binaries), `#![deny(unsafe_code)]` with unsafe isolated to test `set_var`/`remove_var`, metalForge forge Edition 2024 migrated. V071-V076 handoffs archived. Zero clippy pedantic+nursery warnings, zero unsafe in production, zero mocks in production, cargo-deny clean
+- **Niche architecture complete (v0.8.2)**: airSpring is a niche deployment of primals via biomeOS graphs, not a standalone primal. `airspring_primal` binary refactored to transitional niche adapter (635 LOC), niche self-knowledge centralized in `src/niche.rs`. Edition 2024 migrated (rust-version 1.87), zero `#[allow()]` in production (redundant lints removed from 94 binaries), `#![deny(unsafe_code)]` with unsafe isolated to test `set_var`/`remove_var`, metalForge forge Edition 2024 migrated. V071-V076 handoffs archived. Zero clippy pedantic+nursery warnings, zero unsafe in production, zero mocks in production, cargo-deny clean
 - **Coverage**: target 98%+ (remaining gaps: GPU-dependent code paths)
 - **ToadStool absorption**: All 6 local ops absorbed upstream into `BatchedElementwiseF64` (ops 14-19), `local_dispatch` retired — Write→Absorb→Lean complete (v0.7.2)
 - **GPU at scale**: Profile `compute_gpu()` at N=100K+ (multi-year regional grids, crossover point via `AtlasStream`)

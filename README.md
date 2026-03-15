@@ -19,7 +19,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,284/1,284 PASS** | 60 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB, MC ET₀ uncertainty, bootstrap/jackknife CI, SPI drought index |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **851 lib + 280 integration** | 95 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
+| Phase 1: Rust validation | **851 lib + 280 integration** | 94 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (34/34 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -221,7 +221,7 @@ airSpring/
 │   ├── bootstrap_jackknife/     # Bootstrap & Jackknife CI (20/20)
 │   ├── drought_index/           # SPI drought index (20/20)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (851 lib tests, 95 binaries, barraCuda 0.3.5 / wgpu 28, Edition 2024)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (851 lib tests, 94 binaries, barraCuda 0.3.5 / wgpu 28, Edition 2024)
 │   ├── src/
 │   │   ├── biomeos.rs           # biomeOS socket resolution + primal discovery (shared)
 │   │   ├── eco/                 # Domain modules (22 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine + drought_index)
@@ -231,12 +231,12 @@ airSpring/
 │   │   ├── nautilus.rs          # bingoCube/nautilus evolutionary reservoir (NautilusBrain v0.1.0)
 │   │   ├── rpc.rs               # JSON-RPC 2.0 inter-primal communication
 │   │   ├── npu.rs               # BrainChip AKD1000 NPU (feature-gated)
-│   │   └── bin/                 # validate_*, bench_*, airspring_primal (95 declared)
-│   ├── tests/                   # Integration + property tests (9 files + common/)
-│   └── Cargo.toml               # v0.8.1
+│   │   └── bin/                 # validate_*, bench_*, airspring_primal (94 declared)
+│   ├── tests/                   # Integration + property tests (15 files + common/)
+│   └── Cargo.toml               # v0.8.2
 ├── metalForge/                  # Mixed hardware dispatch (CPU+GPU+NPU)
 │   ├── deploy/                  # biomeOS deployment graphs (airspring_deploy.toml)
-│   └── forge/                   # airspring-forge (186 tests, 6 binaries, live hardware probe)
+│   └── forge/                   # airspring-forge (62 tests, 6 binaries, live hardware probe)
 ├── specs/                       # Specifications and requirements
 │   ├── PAPER_REVIEW_QUEUE.md    # Paper reproduction queue (87 experiments)
 │   ├── BARRACUDA_REQUIREMENTS.md# GPU + NPU kernel requirements
@@ -290,8 +290,8 @@ clarified: airSpring is a niche deployment of primals via biomeOS graphs, not a
 standalone primal. `airspring_primal` is a transitional niche adapter (635 LOC);
 niche self-knowledge centralized in `src/niche.rs` (41 capabilities, operation
 dependencies, cost estimates, semantic mappings). Deep code quality: zero
-`#[allow()]` in production (redundant lints removed from 95 binaries), zero
+`#[allow()]` in production (redundant lints removed from 94 binaries), zero
 clippy pedantic+nursery warnings, `#![deny(unsafe_code)]` with unsafe isolated
 to test `set_var`/`remove_var` (Edition 2024 requirement). metalForge forge
 Edition 2024 migrated. V071-V076 handoffs archived. 851 lib + 280 integration +
-61 forge tests, 0 failures. AGPL-3.0-or-later.*
+62 forge tests, 0 failures. AGPL-3.0-or-later.*

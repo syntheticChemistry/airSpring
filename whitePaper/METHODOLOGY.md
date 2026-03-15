@@ -40,7 +40,7 @@ Re-implement the same computations in pure Rust using BarraCuda. Compare:
 - **Reproducibility**: Deterministic results
 - **GPU readiness**: Architecture suitable for ToadStool GPU acceleration
 - **Code quality**: Zero clippy pedantic and nursery warnings, proper error types, idiomatic Rust
-- **Binaries**: 95 binaries
+- **Binaries**: 94 binaries
 
 ### Phase 2: Cross-Validation (Python↔Rust)
 
@@ -174,8 +174,8 @@ All experiments run on a single consumer workstation:
 | Phase | Checks | Description |
 |-------|:------:|-------------|
 | Phase 0 (Python control) | 1284 | 87 experiments: FAO-56, soil, IoT, water balance, dual Kc, cover crops, regional ET₀, Richards, biochar, 60yr WB, yield, CW2D, scheduling, lysimeter, sensitivity, PT ET₀, ET₀ intercomparison, Thornthwaite, GDD, pedotransfer, AmeriFlux, Hargreaves, diversity, Anderson coupling |
-| Phase 1 (Rust validation) | 95 binaries | All pass: same benchmarks validated in Rust |
-| Phase 1 (Rust tests) | 851 lib + 61 forge | lib + forge |
+| Phase 1 (Rust validation) | 94 binaries | All pass: same benchmarks validated in Rust |
+| Phase 1 (Rust tests) | 851 lib + 62 forge | lib + forge |
 | Phase 1 (Atlas validation) | 1498 | 100 Michigan stations |
 | Phase 1.5 (CPU benchmark) | 24/24 | Rust 14.3× faster than Python (geometric mean, 24/24 algorithms, 21/21 CPU-GPU parity modules) |
 | Phase 2 (Cross-validation) | 75 + 690 | Python↔Rust identical (tol=1e-5); 690 crop-station yield pairs within 0.01 |

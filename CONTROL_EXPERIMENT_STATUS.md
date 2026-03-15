@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-03-15 (v0.8.2 — 87 experiments, barraCuda 0.3.5 (wgpu 28), 1284/1284 Python + 851 lib + 280 integration + 61 forge + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 algorithms, 21/21 CPU-GPU parity modules). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry (v0.7.3). metalForge 61/61 mixed pipeline. Write→Absorb→Lean cycle complete. Deep debt resolved: zero panic!() in library, zero #[allow()] in library, zero unsafe in production, ecoBin-clean default build, UniBin subcommands, primal_science refactored to 7 modules, 57 centralized tolerances, hardcoded primal discovery evolved, validation binaries use structured exit(1).)
+**Updated**: 2026-03-15 (v0.8.2 — 87 experiments, barraCuda 0.3.5 (wgpu 28), 1284/1284 Python + 851 lib + 280 integration + 62 forge + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 algorithms, 21/21 CPU-GPU parity modules). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry (v0.7.3). metalForge 61/61 mixed pipeline. Write→Absorb→Lean cycle complete. Deep debt resolved: zero panic!() in library, zero #[allow()] in library, zero unsafe in production, ecoBin-clean default build, UniBin subcommands, primal_science refactored to 7 modules, 57 centralized tolerances, hardcoded primal discovery evolved, validation binaries use structured exit(1).)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -59,7 +59,7 @@ bash run_all_baselines.sh
 #    Cached to: control/long_term_wb/data/wooster_era5_1960_2023.json
 python control/long_term_wb/long_term_water_balance.py
 
-# 7. Run Rust validation binaries (847+1498 checks across 95 binaries)
+# 7. Run Rust validation binaries (851+1498 checks across 94 binaries)
 cd barracuda
 for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   validate_sensor_calibration validate_real_data cross_validate \
@@ -320,7 +320,7 @@ Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2, Stewart 1977, CW2D media params)
 | validate_gdd | T1 | 26/26 | GDD accumulation, kc_from_gdd, phenology |
 | validate_pedotransfer | T1 | 58/58 | Saxton-Rawls 2006, θs/θr/Ks from texture |
 
-**Total Rust: 651 tests + 1393 atlas checks PASS, 851 lib + 280 integration + 61 forge PASS**
+**Total Rust: 651 tests + 1393 atlas checks PASS, 851 lib + 280 integration + 62 forge PASS**
 **Phase 2 cross-validation: 75/75 MATCH (Python↔Rust, tol=1e-5)**
 **Phase 3 NUCLEUS integration: Exp 084 (21/21), Exp 085 (19/19), Exp 086 (17/17), Exp 087 (22/22) — 79/79 ALL PASS**
 **Phase 3 GPU-first: 11 orchestrators wired, 4/4 ToadStool issues RESOLVED**
@@ -1123,7 +1123,7 @@ routing.
 Track 1 (Precision Agriculture):
   Phase 0  [COMPLETE]: Python baselines — 1284/1284 PASS (57 experiments)
   Phase 0+ [COMPLETE]: Real data pipeline — 15,300 station-days, ET₀ R²=0.97
-  Phase 1  [COMPLETE]: Rust validation — 851 lib + 61 forge tests, 94 binaries
+  Phase 1  [COMPLETE]: Rust validation — 851 lib + 62 forge tests, 94 binaries
   Phase 1.5[COMPLETE]: CPU benchmark — Rust 14.3× faster than Python (24/24 parity)
   Phase 2  [COMPLETE]: Cross-validation — 75/75 MATCH (Python↔Rust, tol=1e-5)
   Phase 2.5[COMPLETE]: Ops 5-8 GPU-first — 4 orchestrators rewired (ToadStool S70+ absorbed)
@@ -1198,7 +1198,7 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 ---
 
 *Initialized: February 16, 2026 — Updated: March 15, 2026 (v0.8.2)*
-*87 experiments, 1284/1284 Python, 851 lib + 280 integration + 61 forge tests, 95 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules), barraCuda 0.3.5 (wgpu 28), Rust Edition 2024. biomeOS niche: 41 capabilities, 4 deploy graphs. Exp 084 CPU/GPU 21/21, Exp 085 toadStool 19/19, Exp 086 metalForge 17/17, Exp 087 graphs 22/22.*
+*87 experiments, 1284/1284 Python, 851 lib + 280 integration + 62 forge tests, 94 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules), barraCuda 0.3.5 (wgpu 28), Rust Edition 2024. biomeOS niche: 41 capabilities, 4 deploy graphs. Exp 084 CPU/GPU 21/21, Exp 085 toadStool 19/19, Exp 086 metalForge 17/17, Exp 087 graphs 22/22.*
 *8 ET₀ methods + SCS-CN runoff + Green-Ampt infiltration + coupled runoff-infiltration + VG inverse + full-season WB + Exp 058 Climate Scenario (46/46).*
 *Niche adapter (41 capabilities, transitional binary → biomeOS graph deployment). Atlas decade 80yr (102/102). NASS real (99/99). NCBI diversity (63/63).*
 *25 Tier A + 6 GPU-local modules. Ops 5-8 GPU-first (ToadStool S87). GPU stats (neuralSpring S69).*
