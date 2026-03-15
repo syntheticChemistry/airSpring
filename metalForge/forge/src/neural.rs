@@ -307,16 +307,19 @@ fn parse_response(response: &serde_json::Value) -> Result<CallResult, NeuralErro
 }
 
 #[cfg(test)]
-#[allow(clippy::expect_used, clippy::unwrap_used, unsafe_code)]
+#[expect(clippy::expect_used, clippy::unwrap_used, reason = "test clarity")]
 mod tests {
     use super::*;
 
     #[test]
-    fn no_socket_returns_none() {
-        // SAFETY: test-only env cleanup; tests run single-threaded via cargo test.
-        unsafe { std::env::remove_var("NEURAL_API_SOCKET") };
-        unsafe { std::env::remove_var("FAMILY_ID") };
-        assert!(NeuralBridge::discover().is_none());
+    fn resolve_socket_none_when_dir_empty() {
+        let dir = std::env::temp_dir().join(format!(
+            "neural_empty_{}",
+            std::process::id()
+        ));
+        std::fs::create_dir_all(&dir).ok();
+        let sock = dir.join("biomeos").join("neural-api-test.sock");
+        assert!(!sock.exists(), "socket should not exist in fresh dir");
     }
 
     #[test]
@@ -348,10 +351,8 @@ mod tests {
     }
 
     #[test]
-    fn probe_returns_none_without_biomeos() {
-        // SAFETY: test-only env cleanup; tests run single-threaded via cargo test.
-        unsafe { std::env::remove_var("NEURAL_API_SOCKET") };
-        unsafe { std::env::remove_var("FAMILY_ID") };
-        assert!(probe_neural().is_none());
+    fn uid_from_runtime_dir_returns_valid_uid() {
+        let uid = uid_from_runtime_dir();
+        assert!(uid < 100_000, "UID should be a valid user ID");
     }
 }

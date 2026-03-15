@@ -13,7 +13,7 @@
 //! airSpring experiment
 //!   → capability.call("dag", "create_session", ...)    → rhizoCrypt
 //!   → capability.call("dag", "append_event", ...)      → rhizoCrypt
-//!   → capability.call("dag", "dehydrate", ...)         → rhizoCrypt
+//!   → capability.call("dag", "dehydration.trigger", ...) → rhizoCrypt
 //!   → capability.call("commit", "session", ...)        → loamSpine
 //!   → capability.call("provenance", "create_braid", ...) → sweetGrass
 //! ```
@@ -176,9 +176,9 @@ pub fn begin_experiment_session(experiment_name: &str) -> ProvenanceResult {
         "metadata": {
             "type": "experiment",
             "name": experiment_name,
-            "spring": "airspring",
+            "spring": crate::niche::NICHE_NAME,
         },
-        "session_type": { "Experiment": { "spring_id": "airspring" } },
+        "session_type": { "Experiment": { "spring_id": crate::niche::NICHE_NAME } },
         "description": experiment_name,
     });
 
@@ -268,7 +268,7 @@ pub fn complete_experiment(session_id: &str) -> ProvenanceCompletion {
     let Ok(dehydration) = capability_call(
         &socket,
         "dag",
-        "dehydrate",
+        "dehydration.trigger",
         &serde_json::json!({ "session_id": session_id }),
     ) else {
         return ProvenanceCompletion {

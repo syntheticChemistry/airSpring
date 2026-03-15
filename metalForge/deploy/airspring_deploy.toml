@@ -54,7 +54,7 @@ by_capability = "dag"
 capabilities = [
     "dag.create_session",
     "dag.append_event",
-    "dag.dehydrate",
+    "dag.dehydration.trigger",
 ]
 
 # ── Node 4: loamSpine (immutable ledger — provenance) ─────────────

@@ -21,7 +21,7 @@
 [graph]
 name = "airspring_ecology_niche"
 description = "Full airSpring ecology niche with neuralAPI capability routing"
-version = "0.8.1"
+version = "0.8.2"
 coordination = "Sequential"
 
 # ── Node 1: BearDog (crypto + key management) ─────────────────────
@@ -67,9 +67,9 @@ by_capability = "dag"
 capabilities = [
     "dag.create_session",
     "dag.append_event",
-    "dag.dehydrate",
+    "dag.dehydration.trigger",
     "dag.merkle_root",
-    "dag.health",
+    "health.check",
 ]
 
 # ── Node 4: loamSpine (immutable linear ledger) ───────────────────

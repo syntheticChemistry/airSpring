@@ -1,0 +1,185 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# airSpring Ecology & Agriculture Niche
+#
+# BYOB niche definition for biomeOS deployment.
+# Deploy: biomeos niche deploy airspring-ecology
+# Graph:  graphs/airspring_niche_deploy.toml
+
+niche:
+  id: "airspring-ecology"
+  name: "Ecology & Precision Agriculture"
+  version: "0.8.2"
+  description: |
+    Ecological and agricultural science niche proving Python baselines can be
+    faithfully ported to sovereign Rust+GPU compute. 24 algorithms validated
+    against FAO-56, HYDRUS, and published field data at 14.3× speedup. GPU
+    parity for 21 modules. Covers ET₀ (8 methods), soil physics (Richards,
+    SCS-CN, Green-Ampt, pedotransfer), crop science (dual Kc, GDD, yield
+    response), biodiversity (Shannon, Bray-Curtis), stochastic drought (SPI,
+    MC ET₀, bootstrap/jackknife), and immunological Anderson coupling.
+  category: "science"
+  difficulty: "intermediate"
+  author: "ecoPrimals / airSpring Team"
+  deploy_graph: "graphs/airspring_niche_deploy.toml"
+
+  features:
+    - "FAO-56 Penman-Monteith and 7 alternative ET₀ methods"
+    - "Richards 1D PDE solver (transient + steady-state)"
+    - "SCS-CN runoff and Green-Ampt infiltration"
+    - "Dual crop coefficient with cover crops and no-till mulch"
+    - "Van Genuchten inverse fitting (Brent + Nelder-Mead)"
+    - "Monte Carlo ET₀ uncertainty propagation"
+    - "Bootstrap and jackknife confidence intervals"
+    - "SPI drought index (12-month)"
+    - "Shannon and Bray-Curtis biodiversity indices"
+    - "Anderson coupling (immunological extension)"
+    - "GPU-accelerated compute via ToadStool (21 parity modules)"
+    - "Real open data from Open-Meteo, NOAA, USDA"
+    - "Provenance Trio lineage tracking"
+
+organisms:
+
+  primals:
+    airspring:
+      type: "airspring"
+      required: true
+      role: "science"
+      capabilities:
+        - "science.et0_fao56"
+        - "science.et0_hargreaves"
+        - "science.et0_priestley_taylor"
+        - "science.et0_makkink"
+        - "science.et0_turc"
+        - "science.et0_hamon"
+        - "science.et0_blaney_criddle"
+        - "science.water_balance"
+        - "science.yield_response"
+        - "science.richards_1d"
+        - "science.scs_cn_runoff"
+        - "science.green_ampt_infiltration"
+        - "science.soil_moisture_topp"
+        - "science.pedotransfer_saxton_rawls"
+        - "science.dual_kc"
+        - "science.sensor_calibration"
+        - "science.gdd"
+        - "science.shannon_diversity"
+        - "science.bray_curtis"
+        - "science.anderson_coupling"
+        - "science.thornthwaite"
+        - "science.spi_drought_index"
+        - "science.autocorrelation"
+        - "science.gamma_cdf"
+        - "ecology.experiment"
+        - "provenance.begin"
+        - "provenance.record"
+        - "provenance.complete"
+        - "provenance.status"
+        - "capability.list"
+        - "data.cross_spring_weather"
+        - "compute.offload"
+        - "data.weather"
+      config:
+        mode: "server"
+
+    beardog:
+      type: "beardog"
+      required: true
+      role: "security"
+      capabilities:
+        - "crypto.sign"
+        - "crypto.verify"
+        - "crypto.encrypt"
+        - "crypto.keygen"
+
+    songbird:
+      type: "songbird"
+      required: true
+      role: "discovery"
+      capabilities:
+        - "network.tls_connect"
+        - "network.http_fetch"
+        - "network.dns_resolve"
+
+    toadstool:
+      type: "toadstool"
+      required: false
+      role: "compute"
+      capabilities:
+        - "compute.health"
+        - "compute.execute"
+        - "compute.batch"
+        - "compute.precision_probe"
+      config:
+        features: ["gpu", "f64"]
+        precision_strategy: "f64_capable_with_fallback"
+
+    nestgate:
+      type: "nestgate"
+      required: false
+      role: "data"
+      capabilities:
+        - "storage.store"
+        - "storage.get"
+        - "storage.store_blob"
+        - "storage.health"
+      config:
+        providers: ["open_meteo", "noaa_cdo", "usda_wss"]
+        storage_backend: "local_fs"
+
+  chimeras: {}
+
+interactions:
+  - from: "airspring"
+    to: "songbird"
+    type: "capability_call"
+    config:
+      capabilities: ["network.tls_connect", "network.http_fetch"]
+
+  - from: "airspring"
+    to: "toadstool"
+    type: "capability_call"
+    config:
+      capabilities: ["compute.execute", "compute.batch"]
+
+  - from: "airspring"
+    to: "nestgate"
+    type: "capability_call"
+    config:
+      capabilities: ["storage.store", "storage.get"]
+
+customization:
+
+  - id: "gpu_enabled"
+    name: "GPU Compute"
+    description: "Enable ToadStool GPU acceleration for 21 parity modules"
+    type: "boolean"
+    default: true
+
+  - id: "live_data_providers"
+    name: "Live Data Providers"
+    description: "Which weather data providers to enable"
+    type: "multi_select"
+    options: ["open_meteo", "noaa_cdo", "usda_wss"]
+    default: ["open_meteo", "noaa_cdo"]
+
+  - id: "provenance_trio"
+    name: "Provenance Tracking"
+    description: "Enable Provenance Trio (rhizoCrypt + LoamSpine + sweetGrass)"
+    type: "boolean"
+    default: false
+
+  - id: "storage_backend"
+    name: "Storage Backend"
+    description: "NestGate storage backend"
+    type: "select"
+    options: ["local_fs", "sqlite"]
+    default: "local_fs"
+
+resources:
+  base:
+    cpu_cores: 4
+    memory_gb: 8
+    storage_gb: 10
+  gpu:
+    required: false
+    recommended_vram_gb: 4
