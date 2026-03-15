@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::similar_names)]
 //! Exp 054: Full-Season Irrigation Water Budget Audit.
 //!
 //! Runs the complete FAO-56 pipeline for 4 crops over a synthetic growing

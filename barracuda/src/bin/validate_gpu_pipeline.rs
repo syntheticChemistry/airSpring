@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::similar_names)]
 //! Exp 055: Barracuda PURE GPU Workload Validation.
 //!
 //! Validates the complete agricultural pipeline via GPU orchestrators,

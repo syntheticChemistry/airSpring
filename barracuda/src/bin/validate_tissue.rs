@@ -51,7 +51,10 @@ fn parse_compartment(s: &str) -> SkinCompartment {
         "Epidermis" => SkinCompartment::Epidermis,
         "PapillaryDermis" => SkinCompartment::PapillaryDermis,
         "ReticularDermis" => SkinCompartment::ReticularDermis,
-        _ => panic!("unknown compartment: {s}"),
+        _ => {
+            eprintln!("FATAL: unknown compartment: {s}");
+            std::process::exit(1);
+        }
     }
 }
 
@@ -127,7 +130,10 @@ fn validate_regime(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
             "Extended" => AndersonRegime::Extended,
             "Localized" => AndersonRegime::Localized,
             "Critical" => AndersonRegime::Critical,
-            _ => panic!("unknown regime: {expected_str}"),
+            _ => {
+                eprintln!("FATAL: unknown regime: {expected_str}");
+                std::process::exit(1);
+            }
         };
 
         let w = json_field(tc, "w_effective");

@@ -205,7 +205,7 @@ fn cache_experiment_result(
     results: &[serde_json::Value],
     completion: &airspring_barracuda::ipc::provenance::ProvenanceCompletion,
 ) {
-    if let Some(socket) = biomeos::discover_primal_socket("nestgate") {
+    if let Some(socket) = discover_data_primal() {
         let _ = rpc::send(
             &socket,
             "storage.store",
@@ -626,9 +626,76 @@ fn run() -> Result<(), String> {
     Ok(())
 }
 
+fn print_version() {
+    println!(
+        "{} {} (ecoPrimals/airSpring — ecological & agricultural science niche)",
+        niche::NICHE_NAME,
+        env!("CARGO_PKG_VERSION"),
+    );
+}
+
+fn print_status() {
+    let family_id = biomeos::get_family_id();
+    let socket_path = biomeos::resolve_socket_path(niche::NICHE_NAME, &family_id);
+    let running = socket_path.exists();
+    println!("niche:        {}", niche::NICHE_NAME);
+    println!("version:      {}", env!("CARGO_PKG_VERSION"));
+    println!("family_id:    {family_id}");
+    println!("socket:       {}", socket_path.display());
+    println!("running:      {running}");
+    println!("capabilities: {}", niche::CAPABILITIES.len());
+
+    let primals = biomeos::discover_all_primals();
+    println!("primals:      {} discovered", primals.len());
+    for p in primals {
+        println!("  - {p}");
+    }
+
+    let trio_available = airspring_barracuda::ipc::provenance::is_available();
+    println!(
+        "provenance:   {}",
+        if trio_available {
+            "available"
+        } else {
+            "unavailable"
+        }
+    );
+}
+
 fn main() {
-    if let Err(e) = run() {
-        eprintln!("[fatal] {e}");
-        std::process::exit(1);
+    let args: Vec<String> = std::env::args().collect();
+    let subcommand = args.get(1).map(String::as_str).unwrap_or("server");
+
+    match subcommand {
+        "server" | "serve" => {
+            if let Err(e) = run() {
+                eprintln!("[fatal] {e}");
+                std::process::exit(1);
+            }
+        }
+        "version" | "--version" | "-V" => print_version(),
+        "status" => print_status(),
+        "capabilities" | "caps" => {
+            for cap in niche::CAPABILITIES {
+                println!("{cap}");
+            }
+        }
+        "help" | "--help" | "-h" => {
+            print_version();
+            println!();
+            println!("Usage: airspring_primal [SUBCOMMAND]");
+            println!();
+            println!("Subcommands:");
+            println!("  server        Start JSON-RPC 2.0 niche server (default)");
+            println!("  status        Show niche status and discovered primals");
+            println!("  version       Print version information");
+            println!("  capabilities  List all registered capabilities");
+            println!("  help          Show this help message");
+        }
+        other => {
+            eprintln!("Unknown subcommand: {other}");
+            eprintln!("Run 'airspring_primal help' for usage.");
+            std::process::exit(1);
+        }
     }
 }

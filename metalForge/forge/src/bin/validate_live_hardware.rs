@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #![warn(clippy::pedantic)]
-#![allow(clippy::too_many_lines)]
 //! Exp 044: metalForge Live Hardware Probe + Dispatch.
 //!
 //! Probes actual hardware on this machine and validates dispatch routing
@@ -14,6 +13,10 @@ use airspring_forge::substrate::{Capability, SubstrateKind};
 use airspring_forge::workloads;
 use barracuda::validation::ValidationHarness;
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "validation binary sequentially checks many baseline comparisons"
+)]
 fn main() {
     tracing_subscriber::fmt()
         .with_max_level(tracing::Level::INFO)

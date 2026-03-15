@@ -1,9 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(
-    clippy::similar_names,
-    clippy::too_many_lines,
-    clippy::option_if_let_else
-)]
 //! Exp 057: GPU Ops 5-8 Rewire Validation + Cross-Spring Benchmark
 //!
 //! Validates the `BarraCuda` S70+ absorption rewire — all 6 batched elementwise
@@ -160,6 +155,18 @@ const WEATHER_PRECIP_MM: f64 = 8.0;
 
 const GPU_SCALE_SIZES: [usize; 4] = [100, 1_000, 10_000, 50_000];
 
+#[expect(
+    clippy::similar_names,
+    reason = "SPI validation uses py_* and rs_* prefixed variable names for Python vs Rust comparison"
+)]
+#[expect(
+    clippy::too_many_lines,
+    reason = "validation binary sequentially checks many baseline comparisons"
+)]
+#[expect(
+    clippy::option_if_let_else,
+    reason = "validation uses if-let-else for clarity in benchmark parsing"
+)]
 fn main() {
     validation::init_tracing();
     validation::banner("Exp 057: GPU Ops 5-8 Rewire Validation + Cross-Spring Benchmark");

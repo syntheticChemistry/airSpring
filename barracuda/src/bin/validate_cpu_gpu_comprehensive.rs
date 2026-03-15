@@ -8,14 +8,7 @@
 //!
 //! This is the "pure Rust math" validation — proving GPU kernels match CPU.
 
-#![allow(
-    clippy::pedantic,
-    clippy::nursery,
-    clippy::unwrap_used,
-    clippy::expect_used,
-    clippy::too_many_lines,
-    clippy::similar_names
-)]
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use std::sync::Arc;
 
@@ -24,6 +17,12 @@ use airspring_barracuda::gpu;
 
 use barracuda::validation::ValidationHarness;
 
+#[expect(
+    clippy::too_many_lines,
+    clippy::similar_names,
+    clippy::many_single_char_names,
+    reason = "validation binary sequentially checks many baseline comparisons"
+)]
 fn main() {
     tracing_subscriber::fmt().with_env_filter("info").init();
 

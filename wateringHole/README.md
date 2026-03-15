@@ -7,10 +7,8 @@
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.8.2** | [AIRSPRING_V082_NICHE_ARCHITECTURE_BARRACUDA_TOADSTOOL_HANDOFF_MAR15_2026.md](handoffs/AIRSPRING_V082_NICHE_ARCHITECTURE_BARRACUDA_TOADSTOOL_HANDOFF_MAR15_2026.md) | 2026-03-15 | **current** — niche architecture, Edition 2024, deep code quality, barraCuda absorption & evolution handoff |
-| **V0.8.1** | [AIRSPRING_V081_NEURALAPI_BARRACUDA_TOADSTOOL_HANDOFF_MAR15_2026.md](handoffs/AIRSPRING_V081_NEURALAPI_BARRACUDA_TOADSTOOL_HANDOFF_MAR15_2026.md) | 2026-03-15 | neuralAPI integration (3 enhancements), barracuda usage analysis (34 primitives), evolution opportunities for barraCuda/ToadStool, reusable patterns for all Springs |
-| **V0.8.0** | [AIRSPRING_V080_BIOMEOS_COMPOSITION_HANDOFF_MAR15_2026.md](handoffs/AIRSPRING_V080_BIOMEOS_COMPOSITION_HANDOFF_MAR15_2026.md) | 2026-03-15 | biomeOS composition: Provenance Trio, `NestGateProvider` three-tier routing, Cross-Spring Time Series v1, GPU compute provenance, 41 capabilities, 4 deploy graphs |
-| **≤V0.7.6** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
+| **V0.8.2** | [AIRSPRING_V082_NICHE_ARCHITECTURE_BARRACUDA_TOADSTOOL_HANDOFF_MAR15_2026.md](handoffs/AIRSPRING_V082_NICHE_ARCHITECTURE_BARRACUDA_TOADSTOOL_HANDOFF_MAR15_2026.md) | 2026-03-15 | **primary** — niche architecture, Edition 2024, deep code quality + deep debt resolution, barraCuda absorption & evolution handoff |
+| **≤V0.8.1** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 
 ## Cross-Spring Documents
 
@@ -32,6 +30,8 @@
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_V081_NEURALAPI_BARRACUDA_TOADSTOOL_HANDOFF_MAR15_2026.md` | v0.8.1: neuralAPI integration, barracuda usage analysis, evolution opportunities (superseded by V082) |
+| `handoffs/archive/AIRSPRING_V080_BIOMEOS_COMPOSITION_HANDOFF_MAR15_2026.md` | v0.8.0: biomeOS composition, Provenance Trio, NestGateProvider, Cross-Spring Time Series (superseded by V082) |
 | `handoffs/archive/AIRSPRING_V076_DEEP_DEBT_UPSTREAM_SYNC_HANDOFF_MAR14_2026.md` | v0.7.6: Deep debt resolution, barraCuda 0.3.5 sync (superseded by V082) |
 | `handoffs/archive/AIRSPRING_V075_BARRACUDA_TOADSTOOL_EVOLUTION_HANDOFF_MAR08_2026.md` | v0.7.5: CPU/GPU parity, 14 JSON-RPC, NUCLEUS mesh (superseded by V081) |
 | `handoffs/archive/AIRSPRING_V074_STOCHASTIC_DROUGHT_TOADSTOOL_HANDOFF_MAR07_2026.md` | v0.7.4: MC ET₀, Bootstrap/Jackknife, SPI drought (superseded by V075) |

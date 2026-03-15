@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::cast_possible_wrap)]
 //! Experiment 029b: High-Cadence NPU Streaming Pipeline
 //!
 //! Validates the cadence revolution: since NPU inference costs 0.0009% of

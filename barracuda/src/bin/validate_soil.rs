@@ -89,7 +89,10 @@ fn validate_hydraulic(v: &mut ValidationHarness, benchmark: &serde_json::Value) 
             "SandyClay" => SoilTexture::SandyClay,
             "SiltyClay" => SoilTexture::SiltyClay,
             "Clay" => SoilTexture::Clay,
-            _ => panic!("benchmark soil_textures: unknown texture name '{name}'"),
+            _ => {
+                eprintln!("FATAL: benchmark soil_textures: unknown texture name '{name}'");
+                std::process::exit(1);
+            }
         };
         let props = texture.hydraulic_properties();
         v.check_abs(

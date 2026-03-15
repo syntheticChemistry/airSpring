@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::similar_names)]
 //! Exp 081: Standardized Precipitation Index (SPI) Validation.
 //!
 //! Validates the SPI drought classification algorithm (`McKee` et al. 1993)

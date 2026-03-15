@@ -118,11 +118,9 @@ pub fn transfer_path(from: &Substrate, to: &Substrate) -> TransferPath {
         return TransferPath::None;
     }
 
-    #[allow(clippy::match_same_arms)]
     match (from.kind, to.kind) {
         (a, b) if a == b => TransferPath::None,
         (SubstrateKind::Neural, _) | (_, SubstrateKind::Neural) => TransferPath::NeuralApi,
-        (SubstrateKind::Cpu, _) | (_, SubstrateKind::Cpu) => TransferPath::CpuMemcpy,
         (SubstrateKind::Gpu, SubstrateKind::Npu) | (SubstrateKind::Npu, SubstrateKind::Gpu) => {
             if pcie_p2p_capable(from, to) {
                 TransferPath::PciePeerToPeer

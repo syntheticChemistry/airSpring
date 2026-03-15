@@ -40,8 +40,6 @@
 //!  V     4070  A770
 //! ```
 
-#![allow(clippy::suboptimal_flops, clippy::cast_lossless)]
-
 use std::time::Instant;
 
 use airspring_barracuda::eco;

@@ -5,25 +5,23 @@
 //! Validates the TOML deployment graphs that coordinate NUCLEUS atomics:
 //! 1. Graph parsing — TOML structure is valid and all fields present.
 //! 2. DAG correctness — dependency edges form an acyclic graph.
-//! 3. Capability references — ecology capabilities match airspring_primal.
+//! 3. Capability references — ecology capabilities match `airspring_primal`.
 //! 4. Prerequisite checks — toadStool and nestgate health nodes present.
 //! 5. Cross-primal graph — soil microbiome graph crosses spring boundaries.
 //! 6. Pipeline ordering — topological sort produces valid execution order.
 //! 7. biomeOS socket discovery — integration with live NUCLEUS mesh.
 
-#![allow(
-    clippy::pedantic,
-    clippy::nursery,
-    clippy::unwrap_used,
-    clippy::expect_used,
-    clippy::too_many_lines
-)]
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use std::collections::{HashMap, HashSet};
 
 use airspring_barracuda::biomeos;
 use barracuda::validation::ValidationHarness;
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "validation binary sequentially checks many baseline comparisons"
+)]
 fn main() {
     tracing_subscriber::fmt().with_env_filter("info").init();
 

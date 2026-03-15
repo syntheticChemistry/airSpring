@@ -16,13 +16,7 @@
 //!
 //! Provenance: biomeOS NUCLEUS v0.7.5 modern deployment validation
 
-#![allow(
-    clippy::pedantic,
-    clippy::nursery,
-    clippy::unwrap_used,
-    clippy::expect_used,
-    clippy::too_many_lines
-)]
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use airspring_barracuda::biomeos;
 use airspring_barracuda::eco::drought_index;
@@ -31,6 +25,10 @@ use airspring_barracuda::rpc;
 
 use barracuda::validation::ValidationHarness;
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "validation binary sequentially checks many baseline comparisons"
+)]
 fn main() {
     tracing_subscriber::fmt().with_env_filter("info").init();
 
@@ -161,7 +159,7 @@ fn main() {
         let rpc_vals: Vec<Option<f64>> = r
             .get("spi")
             .and_then(|s| s.as_array())
-            .unwrap()
+            .expect("spi array from RPC response")
             .iter()
             .map(|v| v.as_f64())
             .collect();
@@ -242,7 +240,7 @@ fn main() {
         let rpc_acf_vals: Vec<f64> = r
             .get("acf")
             .and_then(|a| a.as_array())
-            .unwrap()
+            .expect("acf array from RPC response")
             .iter()
             .filter_map(|v| v.as_f64())
             .collect();

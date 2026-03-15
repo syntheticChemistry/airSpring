@@ -21,9 +21,10 @@ const BENCHMARK_JSON: &str =
     include_str!("../../../control/yield_response/benchmark_yield_response.json");
 
 fn f64_field(v: &serde_json::Value, key: &str) -> f64 {
-    v[key]
-        .as_f64()
-        .unwrap_or_else(|| panic!("missing f64 key '{key}'"))
+    v[key].as_f64().unwrap_or_else(|| {
+        eprintln!("FATAL: missing f64 key '{key}'");
+        std::process::exit(1)
+    })
 }
 
 fn validate_ky_table(v: &mut ValidationHarness, benchmark: &serde_json::Value) {

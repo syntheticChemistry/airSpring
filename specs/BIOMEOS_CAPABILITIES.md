@@ -1,7 +1,7 @@
 # airSpring — biomeOS Capability Registration
 
 **Updated**: March 15, 2026
-**Status**: Active — ecology domain registered, 41 capabilities implemented (v0.8.1). NUCLEUS Tower/Node LIVE, Exp 083 43/43 PASS.
+**Status**: Active — ecology domain registered, 41 capabilities implemented (v0.8.2). NUCLEUS Tower/Node LIVE, Exp 083 43/43 PASS.
 **Requires**: biomeOS Tower Node (stable), ToadStool (compute), NestGate (storage)
 
 ---

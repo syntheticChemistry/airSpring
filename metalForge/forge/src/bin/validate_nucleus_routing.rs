@@ -1,11 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::too_many_lines,
-    clippy::similar_names,
-    clippy::or_fun_call
-)]
 //! Exp 076: NUCLEUS Mixed-Hardware Pipeline Routing.
 //!
 //! Validates that all 27 eco workloads route correctly through the NUCLEUS
@@ -28,6 +22,18 @@ use airspring_forge::pipeline::{self, TransferPath};
 use airspring_forge::substrate::{Capability, Identity, Properties, Substrate, SubstrateKind};
 use airspring_forge::workloads;
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "validation binary sequentially checks many baseline comparisons"
+)]
+#[expect(
+    clippy::similar_names,
+    reason = "SPI validation uses py_* and rs_* prefixed variable names for Python vs Rust comparison"
+)]
+#[expect(
+    clippy::or_fun_call,
+    reason = "validation uses Option::or for default fallbacks"
+)]
 fn main() {
     println!("═══ Exp 076: NUCLEUS Mixed-Hardware Pipeline Routing ═══\n");
 

@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::similar_names)]
 //! Exp 079: Monte Carlo ET₀ Uncertainty Propagation.
 //!
 //! Validates CPU Monte Carlo propagation of measurement uncertainties through

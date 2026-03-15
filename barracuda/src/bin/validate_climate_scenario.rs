@@ -1,9 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(
-    clippy::too_many_lines,
-    clippy::similar_names,
-    clippy::option_if_let_else
-)]
 //! Exp 058: Climate Scenario Water Demand Analysis.
 //!
 //! Assesses how Michigan crop water demand changes under warming scenarios.

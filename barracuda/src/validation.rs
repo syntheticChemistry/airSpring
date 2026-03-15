@@ -128,16 +128,17 @@ pub fn json_str_checked<'a>(tc: &'a serde_json::Value, key: &str) -> crate::erro
     })
 }
 
-/// Extract a string from a JSON value with path context for error messages.
+/// Extract a string from a JSON value, or exit with a structured error.
 ///
-/// Intended for compile-time embedded benchmark JSON where the schema is known.
-///
-/// # Panics
-///
-/// Panics if `key` is missing from `tc` or if the value at `key` is not a string.
+/// Intended for compile-time embedded benchmark JSON where a missing field
+/// means broken test infrastructure. Calls `exit(1)` instead of panicking
+/// to produce clean diagnostics in validation binary output.
 #[must_use]
 pub fn json_str<'a>(tc: &'a serde_json::Value, key: &str) -> &'a str {
-    json_str_checked(tc, key).unwrap_or_else(|e| panic!("{e}"))
+    json_str_checked(tc, key).unwrap_or_else(|e| {
+        eprintln!("FATAL: {e}");
+        std::process::exit(1)
+    })
 }
 
 /// Extract an f64 from a JSON test case.
@@ -155,16 +156,16 @@ pub fn json_field_checked(tc: &serde_json::Value, key: &str) -> crate::error::Re
         })
 }
 
-/// Extract an f64 from a JSON test case with descriptive panic.
+/// Extract an f64 from a JSON test case, or exit with a structured error.
 ///
-/// Intended for compile-time embedded benchmark JSON.
-///
-/// # Panics
-///
-/// Panics if `key` is missing from `tc` or if the value at `key` is not an f64.
+/// Intended for compile-time embedded benchmark JSON where a missing field
+/// means broken test infrastructure.
 #[must_use]
 pub fn json_field(tc: &serde_json::Value, key: &str) -> f64 {
-    json_field_checked(tc, key).unwrap_or_else(|e| panic!("{e}"))
+    json_field_checked(tc, key).unwrap_or_else(|e| {
+        eprintln!("FATAL: {e}");
+        std::process::exit(1)
+    })
 }
 
 /// Extract a JSON array from a nested path.
@@ -191,14 +192,16 @@ pub fn json_array_checked<'a>(
     })
 }
 
-/// Extract a JSON array with descriptive panic.
+/// Extract a JSON array, or exit with a structured error.
 ///
-/// # Panics
-///
-/// Panics if any key in `path` is missing, or if the value at the final path is not an array.
+/// Intended for compile-time embedded benchmark JSON where a missing field
+/// means broken test infrastructure.
 #[must_use]
 pub fn json_array<'a>(value: &'a serde_json::Value, path: &[&str]) -> &'a Vec<serde_json::Value> {
-    json_array_checked(value, path).unwrap_or_else(|e| panic!("{e}"))
+    json_array_checked(value, path).unwrap_or_else(|e| {
+        eprintln!("FATAL: {e}");
+        std::process::exit(1)
+    })
 }
 
 /// Extract a string from a nested JSON path; returns `None` if missing or not a string.
@@ -339,17 +342,17 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "benchmark JSON missing string key 'missing'")]
     fn test_json_str_missing_key() {
         let json: serde_json::Value = serde_json::from_str(r#"{"other": "x"}"#).unwrap();
-        let _ = json_str(&json, "missing");
+        let err = json_str_checked(&json, "missing").unwrap_err();
+        assert!(format!("{err}").contains("missing string key"));
     }
 
     #[test]
-    #[should_panic(expected = "benchmark JSON missing string key 'num'")]
     fn test_json_str_non_string_value() {
         let json: serde_json::Value = serde_json::from_str(r#"{"num": 42}"#).unwrap();
-        let _ = json_str(&json, "num");
+        let err = json_str_checked(&json, "num").unwrap_err();
+        assert!(format!("{err}").contains("missing string key"));
     }
 
     #[test]
@@ -377,17 +380,17 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "benchmark JSON missing f64 key 'missing'")]
     fn test_json_field_missing_key() {
         let json: serde_json::Value = serde_json::from_str(r#"{"other": 1.0}"#).unwrap();
-        let _ = json_field(&json, "missing");
+        let err = json_field_checked(&json, "missing").unwrap_err();
+        assert!(format!("{err}").contains("missing f64 key"));
     }
 
     #[test]
-    #[should_panic(expected = "benchmark JSON missing f64 key 'str'")]
     fn test_json_field_non_number_value() {
         let json: serde_json::Value = serde_json::from_str(r#"{"str": "hello"}"#).unwrap();
-        let _ = json_field(&json, "str");
+        let err = json_field_checked(&json, "str").unwrap_err();
+        assert!(format!("{err}").contains("missing f64 key"));
     }
 
     #[test]
@@ -431,24 +434,24 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "benchmark JSON missing key 'missing'")]
     fn test_json_array_missing_key() {
         let json: serde_json::Value = serde_json::from_str(r#"{"other": []}"#).unwrap();
-        let _ = json_array(&json, &["missing"]);
+        let err = json_array_checked(&json, &["missing"]).unwrap_err();
+        assert!(format!("{err}").contains("missing key"));
     }
 
     #[test]
-    #[should_panic(expected = "benchmark JSON: expected array at")]
     fn test_json_array_non_array_value() {
         let json: serde_json::Value = serde_json::from_str(r#"{"data": 42}"#).unwrap();
-        let _ = json_array(&json, &["data"]);
+        let err = json_array_checked(&json, &["data"]).unwrap_err();
+        assert!(format!("{err}").contains("expected array"));
     }
 
     #[test]
-    #[should_panic(expected = "benchmark JSON: expected array at")]
     fn test_json_array_object_not_array() {
         let json: serde_json::Value = serde_json::from_str(r#"{"data": {"nested": 1}}"#).unwrap();
-        let _ = json_array(&json, &["data"]);
+        let err = json_array_checked(&json, &["data"]).unwrap_err();
+        assert!(format!("{err}").contains("expected array"));
     }
 
     // ── json_f64 extended ───────────────────────────────────────────────────

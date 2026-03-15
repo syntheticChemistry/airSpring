@@ -23,12 +23,7 @@
 //!
 //! Provenance: `biomeOS` NUCLEUS mixed-hardware pipeline validation
 
-#![allow(
-    clippy::pedantic,
-    clippy::nursery,
-    clippy::unwrap_used,
-    clippy::expect_used
-)]
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use std::path::PathBuf;
 
@@ -42,6 +37,10 @@ fn find_socket(prefix: &str) -> Option<PathBuf> {
     biomeos::find_socket(prefix)
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "validation binary sequentially checks many baseline comparisons"
+)]
 fn main() {
     tracing_subscriber::fmt().with_env_filter("info").init();
 
@@ -53,7 +52,7 @@ fn main() {
         eprintln!("ERROR: airspring_primal not running");
         v.finish();
     }
-    let sock = airspring.unwrap();
+    let sock = airspring.expect("airspring socket required after socket_found check");
 
     // ── Phase 1: Health + Capabilities ─────────────────────────────
     let health =

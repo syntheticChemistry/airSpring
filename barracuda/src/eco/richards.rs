@@ -243,11 +243,6 @@ pub fn solve_richards_1d_with_config(
     let mut h: Vec<f64> = vec![h_initial.clamp(h_clip_min, h_clip_max); n_nodes];
     let mut profiles = Vec::new();
 
-    #[allow(
-        clippy::cast_possible_truncation,
-        clippy::cast_sign_loss,
-        reason = "n_steps is a small positive integer; duration_days / dt_days fits in usize"
-    )]
     let n_steps = (duration_days / dt_days).ceil().max(1.0) as usize;
     let mut t = 0.0_f64;
 

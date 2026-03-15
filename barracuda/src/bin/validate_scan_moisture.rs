@@ -113,7 +113,10 @@ fn validate_retention(harness: &mut ValidationHarness, benchmark: &serde_json::V
         let soil = SOILS
             .iter()
             .find(|s| s.name == soil_name)
-            .unwrap_or_else(|| panic!("unknown soil: {soil_name}"));
+            .unwrap_or_else(|| {
+                eprintln!("FATAL: unknown soil: {soil_name}");
+                std::process::exit(1)
+            });
         let p = &soil.params;
         let theta = van_genuchten_theta(h_cm, p.theta_r, p.theta_s, p.alpha, p.n_vg);
         harness.check_abs(&format!("{soil_name} h={h_cm}cm"), theta, expected, tol);
@@ -133,7 +136,10 @@ fn validate_conductivity(harness: &mut ValidationHarness, benchmark: &serde_json
         let soil = SOILS
             .iter()
             .find(|s| s.name == soil_name)
-            .unwrap_or_else(|| panic!("unknown soil: {soil_name}"));
+            .unwrap_or_else(|| {
+                eprintln!("FATAL: unknown soil: {soil_name}");
+                std::process::exit(1)
+            });
         let p = &soil.params;
         let k = van_genuchten_k(h_cm, p.ks, p.theta_r, p.theta_s, p.alpha, p.n_vg);
         let ratio = k / p.ks;
@@ -220,8 +226,10 @@ fn validate_seasonal_theta(harness: &mut ValidationHarness) {
 
     for soil in SOILS {
         let p = &soil.params;
-        let profile = seasonal_profile(soil.name)
-            .unwrap_or_else(|| panic!("no seasonal profile for soil: {}", soil.name));
+        let profile = seasonal_profile(soil.name).unwrap_or_else(|| {
+            eprintln!("FATAL: no seasonal profile for soil: {}", soil.name);
+            std::process::exit(1)
+        });
 
         let theta_spring =
             van_genuchten_theta(profile.spring_head, p.theta_r, p.theta_s, p.alpha, p.n_vg);

@@ -19,7 +19,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,284/1,284 PASS** | 60 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB, MC ET₀ uncertainty, bootstrap/jackknife CI, SPI drought index |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **853 lib + 281 integration** | 95 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
+| Phase 1: Rust validation | **851 lib + 280 integration** | 95 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (34/34 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -46,8 +46,8 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` (barracuda) | **853 passed**, 0 failures |
-| `cargo test --test '*'` (integration) | **281 passed** (16 test files) |
+| `cargo test --lib` (barracuda) | **851 passed**, 0 failures |
+| `cargo test --test '*'` (integration) | **280 passed** (15 test files) |
 | `cargo test --lib` (metalForge) | **61 passed**, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **95.66% line coverage** |
 | `cargo clippy (pedantic)` | **0 warnings** (pedantic, both crates) |
@@ -221,7 +221,7 @@ airSpring/
 │   ├── bootstrap_jackknife/     # Bootstrap & Jackknife CI (20/20)
 │   ├── drought_index/           # SPI drought index (20/20)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (853 lib tests, 95 binaries, barraCuda 0.3.5 / wgpu 28, Edition 2024)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (851 lib tests, 95 binaries, barraCuda 0.3.5 / wgpu 28, Edition 2024)
 │   ├── src/
 │   │   ├── biomeos.rs           # biomeOS socket resolution + primal discovery (shared)
 │   │   ├── eco/                 # Domain modules (22 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine + drought_index)
@@ -293,5 +293,5 @@ dependencies, cost estimates, semantic mappings). Deep code quality: zero
 `#[allow()]` in production (redundant lints removed from 95 binaries), zero
 clippy pedantic+nursery warnings, `#![deny(unsafe_code)]` with unsafe isolated
 to test `set_var`/`remove_var` (Edition 2024 requirement). metalForge forge
-Edition 2024 migrated. V071-V076 handoffs archived. 853 lib + 281 integration +
+Edition 2024 migrated. V071-V076 handoffs archived. 851 lib + 280 integration +
 61 forge tests, 0 failures. AGPL-3.0-or-later.*

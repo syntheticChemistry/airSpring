@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::too_many_lines)]
 //! Exp 061: Cross-Spring Shannon H' Diversity Gradient.
 //!
 //! Validates the coupling between soil moisture (θ), Anderson QS regime,

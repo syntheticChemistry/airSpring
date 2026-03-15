@@ -1,9 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(
-    clippy::similar_names,
-    clippy::excessive_precision,
-    clippy::too_many_lines
-)]
 //! CPU vs Python benchmark — proves barracuda's pure Rust math is:
 //! 1. Numerically identical to Python controls (parity at 1e-6)
 //! 2. Significantly faster than interpreted Python

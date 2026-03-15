@@ -573,6 +573,62 @@ pub const MC_ET0_PROPAGATION: Tolerance = Tolerance {
     justification: "O(1/√N) CLT convergence: σ/√1000 ≈ 0.03; 0.5 provides 16σ headroom",
 };
 
+// ═══════════════════════════════════════════════════════════════════
+// Cross-spring analytical validation
+// ═══════════════════════════════════════════════════════════════════
+
+/// Analytical functions from upstream barraCuda (erf, gamma, bessel, etc.):
+/// f64-exact to machine precision against known mathematical identities.
+///
+/// Provenance: analytical — erf(1), Γ(5)=24, J₀(0)=1 are mathematical
+/// identities with no Python baseline dependency.
+pub const CROSS_SPRING_ANALYTICAL: Tolerance = Tolerance {
+    name: "cross_spring_analytical",
+    abs_tol: 1e-10,
+    rel_tol: 1e-10,
+    justification: "Mathematical identities: erf(1), Γ(5)=24, J₀(0)=1 — f64-exact",
+};
+
+/// Cross-spring GPU↔CPU parity for absorbed shader ops: DF64 emulation
+/// introduces rounding at ~1e-6 for compound operations.
+pub const CROSS_SPRING_GPU_CPU: Tolerance = Tolerance {
+    name: "cross_spring_gpu_cpu",
+    abs_tol: 1e-4,
+    rel_tol: 1e-4,
+    justification: "DF64 compound ops (exp, pow, log): ~1e-6 per op, chained to 1e-4",
+};
+
+/// Cross-spring evolution validation: moderately tight for rewired ops
+/// that chain multiple barraCuda primitives.
+pub const CROSS_SPRING_EVOLUTION: Tolerance = Tolerance {
+    name: "cross_spring_evolution",
+    abs_tol: 1e-3,
+    rel_tol: 1e-3,
+    justification: "Chained rewire (CPU→GPU): accumulates DF64 rounding across 3-5 ops",
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// NUCLEUS / IPC validation
+// ═══════════════════════════════════════════════════════════════════
+
+/// NUCLEUS round-trip: JSON-RPC serialization introduces no numerical error
+/// for f64 values that survive IEEE-754 → JSON → IEEE-754 round-trip.
+pub const NUCLEUS_ROUNDTRIP: Tolerance = Tolerance {
+    name: "nucleus_roundtrip",
+    abs_tol: 1e-10,
+    rel_tol: 1e-10,
+    justification: "JSON f64 round-trip: IEEE-754 double → serde_json → double is exact to 1e-15",
+};
+
+/// NUCLEUS pipeline end-to-end: weather → ET₀ → water balance → yield
+/// through JSON-RPC; tolerance accumulates per stage.
+pub const NUCLEUS_PIPELINE: Tolerance = Tolerance {
+    name: "nucleus_pipeline",
+    abs_tol: 1e-6,
+    rel_tol: 1e-6,
+    justification: "Multi-stage JSON-RPC pipeline: f64 arithmetic per stage, 4 stages max",
+};
+
 #[cfg(test)]
 #[allow(clippy::unwrap_used, clippy::expect_used)]
 mod tests {
@@ -698,6 +754,13 @@ mod tests {
             &NPU_SIGMA_FLOOR,
             // Stochastic / Monte Carlo
             &MC_ET0_PROPAGATION,
+            // Cross-spring analytical
+            &CROSS_SPRING_ANALYTICAL,
+            &CROSS_SPRING_GPU_CPU,
+            &CROSS_SPRING_EVOLUTION,
+            // NUCLEUS / IPC
+            &NUCLEUS_ROUNDTRIP,
+            &NUCLEUS_PIPELINE,
         ];
         for tol in all_tolerances {
             assert!(
@@ -712,10 +775,10 @@ mod tests {
             );
             assert!(tol.abs_tol > 0.0, "{}: abs_tol must be positive", tol.name);
         }
-        // 47 Tolerance structs + 1 plain threshold (NPU_STRESS_DEPLETION_THRESHOLD)
+        // 52 Tolerance structs + 1 plain threshold (NPU_STRESS_DEPLETION_THRESHOLD)
         assert_eq!(
             all_tolerances.len(),
-            47,
+            52,
             "test must include every Tolerance constant defined in this file"
         );
         let threshold = NPU_STRESS_DEPLETION_THRESHOLD;

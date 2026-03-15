@@ -61,7 +61,8 @@ fn normalize_field(tc: &serde_json::Value) -> f64 {
             return val / divisor;
         }
     }
-    panic!("no known field in normalization test case");
+    eprintln!("FATAL: no known field in normalization test case");
+    std::process::exit(1);
 }
 
 fn validate_normalization(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
@@ -90,7 +91,10 @@ fn validate_regime_classification(v: &mut ValidationHarness, benchmark: &serde_j
             "Extended" => AndersonRegime::Extended,
             "Localized" => AndersonRegime::Localized,
             "Critical" => AndersonRegime::Critical,
-            _ => panic!("unknown regime: {expected_str}"),
+            _ => {
+                eprintln!("FATAL: unknown regime: {expected_str}");
+                std::process::exit(1);
+            }
         };
 
         let pred = CytokinePrediction {

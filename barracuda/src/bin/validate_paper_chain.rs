@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::similar_names, clippy::too_many_lines)]
 //! Exp 074: Paper Chain Validation — CPU → GPU → `metalForge` progression.
 //!
 //! For each paper domain in the `specs/PAPER_REVIEW_QUEUE`, validates:
@@ -240,6 +239,10 @@ fn validate_scs_cn_cpu_gpu(v: &mut ValidationHarness) {
     );
 }
 
+#[expect(
+    clippy::similar_names,
+    reason = "Green-Ampt validation uses t_cpu/t_gpu for CPU vs GPU timing"
+)]
 fn validate_green_ampt_cpu_gpu(
     v: &mut ValidationHarness,
     device: Option<Arc<barracuda::device::WgpuDevice>>,

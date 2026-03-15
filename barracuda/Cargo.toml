@@ -10,7 +10,7 @@ description = "Ecological & agricultural science pipelines — Rust + GPU + NPU 
 [workspace]
 
 [features]
-default = ["testutil", "standalone-http"]
+default = ["testutil"]
 testutil = []
 standalone-http = ["dep:ureq"]
 npu = ["dep:akida-driver"]

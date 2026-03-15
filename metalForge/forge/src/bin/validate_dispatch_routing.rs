@@ -110,12 +110,21 @@ fn make_test_cpu() -> Substrate {
     }
 }
 
-#[allow(clippy::too_many_lines)]
 fn validate_synthetic_dispatch(v: &mut ValidationHarness) {
     println!("\n── Synthetic Dispatch Tests ────────────────────────────────");
 
     let full_inv = [make_test_cpu(), make_test_gpu(), make_test_npu()];
+    let cpu_inv = [make_test_cpu()];
 
+    check_gpu_workloads(v, &full_inv);
+    check_npu_workloads(v, &full_inv);
+    check_npu_preference(v, &full_inv);
+    check_cpu_fallback(v, &cpu_inv);
+    check_quant_unroutable(v, &cpu_inv);
+    check_cpu_preference(v, &full_inv);
+}
+
+fn check_gpu_workloads(v: &mut ValidationHarness, inv: &[Substrate]) {
     let gpu_workloads = [
         (
             "ET₀ batch",
@@ -134,10 +143,9 @@ fn validate_synthetic_dispatch(v: &mut ValidationHarness) {
             vec![Capability::F64Compute, Capability::ScalarReduce],
         ),
     ];
-
     for (name, caps) in &gpu_workloads {
         let work = Workload::new(*name, caps.clone());
-        let decision = dispatch::route(&work, &full_inv);
+        let decision = dispatch::route(&work, inv);
         v.check_bool(
             &format!("{name} → GPU"),
             decision
@@ -145,16 +153,17 @@ fn validate_synthetic_dispatch(v: &mut ValidationHarness) {
                 .is_some_and(|d| d.substrate.kind == SubstrateKind::Gpu),
         );
     }
+}
 
+fn check_npu_workloads(v: &mut ValidationHarness, inv: &[Substrate]) {
     let npu_workloads = [
         "crop stress classifier",
         "irrigation decision",
         "sensor anomaly",
     ];
-
     for name in &npu_workloads {
         let work = Workload::new(*name, vec![Capability::QuantizedInference { bits: 8 }]);
-        let decision = dispatch::route(&work, &full_inv);
+        let decision = dispatch::route(&work, inv);
         v.check_bool(
             &format!("{name} → NPU"),
             decision
@@ -162,40 +171,47 @@ fn validate_synthetic_dispatch(v: &mut ValidationHarness) {
                 .is_some_and(|d| d.substrate.kind == SubstrateKind::Npu),
         );
     }
+}
 
+fn check_npu_preference(v: &mut ValidationHarness, inv: &[Substrate]) {
     let prefer_work = Workload::new(
         "crop stress (preferred NPU)",
         vec![Capability::QuantizedInference { bits: 8 }],
     )
     .prefer(SubstrateKind::Npu);
-    let decision = dispatch::route(&prefer_work, &full_inv);
+    let decision = dispatch::route(&prefer_work, inv);
     v.check_bool(
         "NPU preference honored",
         decision.as_ref().is_some_and(|d| {
             d.substrate.kind == SubstrateKind::Npu && d.reason == Reason::Preferred
         }),
     );
+}
 
-    let cpu_inv = [make_test_cpu()];
+fn check_cpu_fallback(v: &mut ValidationHarness, inv: &[Substrate]) {
     let f64_work = Workload::new("f64 fallback", vec![Capability::F64Compute]);
-    let decision = dispatch::route(&f64_work, &cpu_inv);
+    let decision = dispatch::route(&f64_work, inv);
     v.check_bool(
         "f64 work falls to CPU when no GPU",
         decision
             .as_ref()
             .is_some_and(|d| d.substrate.kind == SubstrateKind::Cpu),
     );
+}
 
+fn check_quant_unroutable(v: &mut ValidationHarness, inv: &[Substrate]) {
     let quant_work = Workload::new(
         "int4 inference",
         vec![Capability::QuantizedInference { bits: 4 }],
     );
-    let decision = dispatch::route(&quant_work, &cpu_inv);
+    let decision = dispatch::route(&quant_work, inv);
     v.check_bool("quant(4) unroutable on CPU-only", decision.is_none());
+}
 
+fn check_cpu_preference(v: &mut ValidationHarness, inv: &[Substrate]) {
     let cpu_pref_work =
         Workload::new("validation", vec![Capability::F64Compute]).prefer(SubstrateKind::Cpu);
-    let decision = dispatch::route(&cpu_pref_work, &full_inv);
+    let decision = dispatch::route(&cpu_pref_work, inv);
     v.check_bool(
         "CPU preference honored over GPU",
         decision.as_ref().is_some_and(|d| {

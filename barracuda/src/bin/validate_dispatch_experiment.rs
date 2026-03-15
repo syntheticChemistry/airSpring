@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::too_many_lines, clippy::similar_names)]
 //! Exp 064: Full Dispatch Experiment — CPU vs GPU parity across all domains.
 //!
 //! Comprehensive validation bridging:
@@ -65,6 +64,10 @@ fn main() {
 // Phase 1: CPU Science Baseline
 // ═══════════════════════════════════════════════════════════════════
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "validation binary sequentially checks many baseline comparisons"
+)]
 fn phase_1_cpu_science(v: &mut ValidationHarness) {
     let et0 = et::daily_et0(&DailyEt0Input {
         tmin: 18.0,
@@ -215,6 +218,10 @@ fn phase_1_cpu_science(v: &mut ValidationHarness) {
 // Phase 2: GPU Dispatch Parity
 // ═══════════════════════════════════════════════════════════════════
 
+#[expect(
+    clippy::similar_names,
+    reason = "GPU dispatch validation uses hg_cpu/hg_gpu, sc_cpu/sc_gpu for CPU vs GPU parity"
+)]
 fn phase_2_gpu_dispatch(v: &mut ValidationHarness) {
     let station = StationDay {
         tmax: 32.0,

@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #![warn(clippy::pedantic)]
-#![allow(clippy::too_many_lines, clippy::similar_names)]
 //! Exp 056: metalForge Mixed-Hardware Pipeline + NUCLEUS Atomics.
 //!
 //! Validates:
@@ -131,6 +130,10 @@ fn main() {
     v.finish();
 }
 
+#[expect(
+    clippy::similar_names,
+    reason = "transfer path validation uses gpu_npu/gpu_cpu/gpu_gpu for GPU→substrate paths"
+)]
 fn validate_transfer_paths(v: &mut ValidationHarness) {
     println!("── Transfer Path Selection ──");
 
@@ -286,6 +289,10 @@ fn validate_nucleus_mesh(v: &mut ValidationHarness) {
     );
 }
 
+#[expect(
+    clippy::similar_names,
+    reason = "mesh routing validation uses capable_gpu/capable_npu/capable_cpu for substrate lookup"
+)]
 fn validate_mesh_routing(v: &mut ValidationHarness) {
     println!("\n── Mesh-Aware Routing ──");
 

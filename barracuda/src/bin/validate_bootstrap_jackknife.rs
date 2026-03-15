@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::similar_names)]
 //! Exp 080: Bootstrap & Jackknife Confidence Intervals for Seasonal ET₀.
 //!
 //! Validates the `gpu::bootstrap` and `gpu::jackknife` CPU paths against

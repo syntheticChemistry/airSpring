@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::similar_names)]
 //! Exp 072: Pure GPU End-to-End Multi-Field Workload.
 //!
 //! Proves that the **full** seasonal pipeline runs on GPU with results

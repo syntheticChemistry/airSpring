@@ -244,12 +244,9 @@ fn validate_bare_soil_drydown(v: &mut ValidationHarness, bench: &serde_json::Val
         final_state.de <= tew,
     );
 
-    // Python baseline provenance:
-    //   Script:  control/dual_kc/cover_crop_dual_kc.py
-    //   Commit:  3afc229
-    //   Date:    2026-02-25
-    //   Command: python control/dual_kc/dual_crop_coefficient.py
-    //   Origin:  FAO-56 Eq. 72 bare soil drydown Kr time series (7 days)
+    // Python baseline expected Kr values (7 days). Not in benchmark_dual_kc.json;
+    // benchmark only has inputs (et0_daily, precip_daily, tew, rew, etc.), not expected Kr.
+    // Provenance: control/dual_kc/cover_crop_dual_kc.py, commit=3afc229, date=2026-02-25.
     let py_kr = [1.0, 1.0, 0.6975, 0.3313, 0.1643, 0.0746, 0.0394];
     for (i, (&py, out)) in py_kr.iter().zip(outputs.iter()).enumerate() {
         v.check_abs(

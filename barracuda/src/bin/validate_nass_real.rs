@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::too_many_lines)]
 //! Exp 060: NASS Real Yield Comparison.
 //!
 //! Validates Stewart (1977) yield response model predictions against observed
@@ -20,6 +19,10 @@ use airspring_barracuda::validation::ValidationHarness;
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/nass_real/benchmark_nass_real.json");
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "validation binary sequentially checks many baseline comparisons"
+)]
 fn main() {
     tracing_subscriber::fmt().with_env_filter("info").init();
 

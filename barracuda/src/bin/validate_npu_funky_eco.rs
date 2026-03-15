@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::cast_possible_wrap)]
 //! Experiment 029: Funky NPU for Agricultural `IoT`
 //!
 //! Demonstrates advanced AKD1000 capabilities for field-deployed systems —

@@ -16,8 +16,6 @@
 //! - [`inference`] — Eco-domain batch classifiers (crop stress, irrigation, anomaly)
 //! - [`streaming`] — High-cadence real-time classification with rolling statistics
 
-#![allow(clippy::cast_possible_wrap)]
-
 pub mod inference;
 pub mod streaming;
 

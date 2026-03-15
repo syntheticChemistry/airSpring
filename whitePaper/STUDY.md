@@ -8,7 +8,7 @@
 
 ## Abstract
 
-We independently replicate 87 precision agriculture and environmental systems computational methods — FAO-56 Penman-Monteith ET₀, soil moisture calibration, IoT irrigation, daily water balance, dual crop coefficient, cover crops, regional ET₀, Richards equation, biochar isotherms, yield response, CW2D, 60-year WB, scheduling, lysimeter ET, sensitivity, Priestley-Taylor, 3-method intercomparison, Thornthwaite, GDD, pedotransfer, AmeriFlux eddy covariance, Hargreaves-Samani, ecological diversity, multi-crop budget, NPU edge inference, forecast scheduling, SCAN soil moisture, NASS yield, Anderson soil-moisture coupling, Blaney-Criddle PET, SCS Curve Number runoff, Green-Ampt infiltration, coupled runoff-infiltration, Van Genuchten inverse estimation, full-season water budget audit, Monte Carlo ET₀ uncertainty propagation, bootstrap/jackknife confidence intervals, and Standardized Precipitation Index (SPI) drought analysis — using only open-source tools and publicly available data. Python baselines (1284/1284 checks) validate against digitized paper benchmarks. A real data pipeline using Open-Meteo historical weather (15,300 station-days, 100 Michigan stations, 2023 growing season) produces ET₀ with R²=0.967 against independent computation. Water balance simulations show 53-72% water savings with smart scheduling. A Rust implementation via BarraCuda passes 833 lib + 186 forge tests across 95 binaries, with 75/75 Python-Rust cross-validation matches within 1e-5 tolerance. CPU benchmarks show Rust is 20.6× faster than Python (geometric mean, 24/24 parity). 21 Tier A + 6 GPU-universal + 2 Tier B GPU orchestrators wired, seasonal pipeline chained (73/73 real data, 12 stations, 4800 crop-year results), metalForge 27 workloads with cross-system routing (66/66 PASS). NVK zero-output detection with CPU fallback for Titan V/Mesa f64 compute shaders. Kokkos validation gap documented (groundSpring V74: 3.5×-2669× dispatch overhead gaps vs Kokkos CUDA). Phase 4: NUCLEUS primal (35 capabilities, ecology domain), biomeOS capability routing, Paper 12 immunological Anderson (Exp 066-069), stochastic uncertainty (MC ET₀, bootstrap/jackknife CI), drought index (SPI) — establishing the foundation for GPU-accelerated precision irrigation on consumer hardware.
+We independently replicate 87 precision agriculture and environmental systems computational methods — FAO-56 Penman-Monteith ET₀, soil moisture calibration, IoT irrigation, daily water balance, dual crop coefficient, cover crops, regional ET₀, Richards equation, biochar isotherms, yield response, CW2D, 60-year WB, scheduling, lysimeter ET, sensitivity, Priestley-Taylor, 3-method intercomparison, Thornthwaite, GDD, pedotransfer, AmeriFlux eddy covariance, Hargreaves-Samani, ecological diversity, multi-crop budget, NPU edge inference, forecast scheduling, SCAN soil moisture, NASS yield, Anderson soil-moisture coupling, Blaney-Criddle PET, SCS Curve Number runoff, Green-Ampt infiltration, coupled runoff-infiltration, Van Genuchten inverse estimation, full-season water budget audit, Monte Carlo ET₀ uncertainty propagation, bootstrap/jackknife confidence intervals, and Standardized Precipitation Index (SPI) drought analysis — using only open-source tools and publicly available data. Python baselines (1284/1284 checks) validate against digitized paper benchmarks. A real data pipeline using Open-Meteo historical weather (15,300 station-days, 100 Michigan stations, 2023 growing season) produces ET₀ with R²=0.967 against independent computation. Water balance simulations show 53-72% water savings with smart scheduling. A Rust implementation via BarraCuda passes 851 lib + 61 forge tests across 95 binaries, with 75/75 Python-Rust cross-validation matches within 1e-5 tolerance. CPU benchmarks show Rust is 20.6× faster than Python (geometric mean, 24/24 parity). 21 Tier A + 6 GPU-universal + 2 Tier B GPU orchestrators wired, seasonal pipeline chained (73/73 real data, 12 stations, 4800 crop-year results), metalForge 27 workloads with cross-system routing (66/66 PASS). NVK zero-output detection with CPU fallback for Titan V/Mesa f64 compute shaders. Kokkos validation gap documented (groundSpring V74: 3.5×-2669× dispatch overhead gaps vs Kokkos CUDA). Phase 4: NUCLEUS primal (35 capabilities, ecology domain), biomeOS capability routing, Paper 12 immunological Anderson (Exp 066-069), stochastic uncertainty (MC ET₀, bootstrap/jackknife CI), drought index (SPI) — establishing the foundation for GPU-accelerated precision irrigation on consumer hardware.
 
 ---
 
@@ -140,7 +140,7 @@ All mass balances close to 0.0000 mm. Water savings of 53-72% are consistent wit
 
 ---
 
-## 4. Phase 1: Rust BarraCuda (853 lib + 281 integration + 61 forge tests, 95 binaries)
+## 4. Phase 1: Rust BarraCuda (851 lib + 280 integration + 61 forge tests, 95 binaries)
 
 ### 4.1 Module Structure
 
@@ -154,7 +154,7 @@ All mass balances close to 0.0000 mm. Water savings of 53-72% are consistent wit
 | `io::csv_ts` | TimeseriesData columnar parser, streaming BufReader | 11 | 6 |
 | `error` | AirSpringError enum (Io, CsvParse, JsonParse, InvalidInput, Barracuda) | — | — |
 | `testutil` | RMSE, MBE, R², IA, NSE, synthetic data generators | — | 6 |
-| **Integration tests** | Cross-module pipelines, determinism, error paths, crop↔balance | — | 134 |
+| **Integration tests** | Cross-module pipelines, determinism, error paths, crop↔balance | — | 280 |
 | **Forge** | metalForge absorbed upstream (6/6 modules) | — | — |
 | **Doc-tests** | Inline documentation examples | — | 10 |
 | **Total** | 499 tests | — | 499 |
@@ -263,6 +263,6 @@ The same BarraCuda/ToadStool infrastructure supports both domains. The key share
 
 ---
 
-*March 15, 2026 — 1284 Python + 853 lib + 281 integration + 61 forge tests, 95 binaries all pass,
+*March 15, 2026 — 1284 Python + 851 lib + 280 integration + 61 forge tests, 95 binaries all pass,
 15,300 station-days (100 stations) real data, 75/75 cross-validation match, 14.5× Rust-vs-Python speedup (21/21 parity), zero synthetic.
 v0.8.2: niche architecture, Edition 2024, 41 capabilities, deep code quality. AGPL-3.0-or-later.*

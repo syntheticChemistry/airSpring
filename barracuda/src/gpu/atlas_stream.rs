@@ -236,7 +236,6 @@ impl FitnessDriftMonitor {
             self.best_historical_mean = mean_fit;
         }
 
-        #[allow(clippy::cast_precision_loss)]
         let ne_s = if self.best_historical_mean > 0.0 {
             (mean_fit / self.best_historical_mean) * pop_size as f64
         } else {

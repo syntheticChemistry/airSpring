@@ -1,10 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(
-    clippy::pedantic,
-    clippy::nursery,
-    clippy::too_many_lines,
-    clippy::similar_names
-)]
+#![allow(clippy::pedantic, clippy::nursery)]
 //! Exp 065: biomeOS Graph Experiment — ecology pipeline via NUCLEUS coordination.
 //!
 //! Validates the full ecology pipeline as deployed by `airspring_deploy.toml`:

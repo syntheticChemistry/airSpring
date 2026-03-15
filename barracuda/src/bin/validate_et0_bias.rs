@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::similar_names)]
 //! Exp 039: Cross-Method ET₀ Bias Correction.
 //!
 //! Quantifies systematic bias of simplified ET₀ methods relative to
@@ -86,6 +85,10 @@ fn validate_bias_quantification(v: &mut ValidationHarness, benchmark: &serde_jso
     }
 }
 
+#[expect(
+    clippy::similar_names,
+    reason = "ET₀ bias validation uses f_hg/f_hm for Hargreaves vs Hamon correction factors"
+)]
 fn validate_correction_factors(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Correction Factor Validation");
     let scenarios = benchmark["validation_checks"]["bias_quantification"]["climate_scenarios"]
@@ -126,6 +129,10 @@ fn validate_correction_factors(v: &mut ValidationHarness, benchmark: &serde_json
     }
 }
 
+#[expect(
+    clippy::similar_names,
+    reason = "ET₀ bias validation uses f_hg/f_hm for Hargreaves vs Hamon correction factors"
+)]
 fn validate_structural(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Structural Checks");
     let scenarios = benchmark["validation_checks"]["bias_quantification"]["climate_scenarios"]

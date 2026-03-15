@@ -13,13 +13,7 @@
 //! Does NOT require `airspring_primal` to be running — exercises the dispatch
 //! functions directly.
 
-#![allow(
-    clippy::pedantic,
-    clippy::nursery,
-    clippy::unwrap_used,
-    clippy::expect_used,
-    clippy::too_many_lines
-)]
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use airspring_barracuda::biomeos;
 use airspring_barracuda::primal_science;
@@ -27,6 +21,10 @@ use airspring_barracuda::rpc;
 
 use barracuda::validation::ValidationHarness;
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "validation binary sequentially checks many baseline comparisons"
+)]
 fn main() {
     tracing_subscriber::fmt().with_env_filter("info").init();
 
@@ -114,7 +112,9 @@ fn main() {
     eprintln!("  toadStool socket found:    {has_toadstool}");
 
     if has_toadstool {
-        let ts = ts_socket.as_ref().unwrap();
+        let ts = ts_socket
+            .as_ref()
+            .expect("toadStool socket required when has_toadstool");
         eprintln!("  toadStool socket: {}", ts.display());
 
         let health = rpc::send(ts, "toadstool.health", &serde_json::json!({}));
@@ -137,7 +137,9 @@ fn main() {
     }
 
     if has_compute {
-        let socket = compute_socket.as_ref().unwrap();
+        let socket = compute_socket
+            .as_ref()
+            .expect("compute socket required when has_compute");
         let offload_test = rpc::send(
             socket,
             "compute.et0",

@@ -90,7 +90,6 @@ pub fn gamma_mle_fit(data: &[f64]) -> Option<GammaParams> {
         return None;
     }
 
-    #[allow(clippy::cast_precision_loss)]
     let nf = n as f64;
     let mean_val: f64 = positive.iter().sum::<f64>() / nf;
     let log_mean: f64 = positive.iter().map(|x| x.ln()).sum::<f64>() / nf;
@@ -149,7 +148,6 @@ pub fn compute_spi(monthly_precip: &[f64], scale: usize) -> Vec<f64> {
         return spi;
     };
 
-    #[allow(clippy::cast_precision_loss)]
     let q = valid.iter().filter(|&&x| x == 0.0).count() as f64 / valid.len() as f64;
 
     for i in 0..n {

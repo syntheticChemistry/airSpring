@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(
-    clippy::cast_lossless,
-    clippy::doc_markdown,
-    clippy::similar_names,
-    clippy::too_many_lines
-)]
 //! Exp 077: Cross-Spring Provenance & CPU↔GPU Benchmark
 //!
 //! Validates all GPU modules, benchmarks CPU vs GPU throughput, and

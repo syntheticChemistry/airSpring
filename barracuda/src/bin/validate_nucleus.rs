@@ -21,12 +21,7 @@
 //!
 //! Provenance: `biomeOS` NUCLEUS cross-primal integration validation
 
-#![allow(
-    clippy::pedantic,
-    clippy::nursery,
-    clippy::unwrap_used,
-    clippy::expect_used
-)]
+#![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use std::path::PathBuf;
 
@@ -45,6 +40,10 @@ fn find_airspring_socket() -> Option<PathBuf> {
     biomeos::find_socket("airspring")
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "validation binary sequentially checks many baseline comparisons"
+)]
 fn main() {
     tracing_subscriber::fmt().with_env_filter("info").init();
 

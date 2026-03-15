@@ -99,7 +99,6 @@ pub fn autocorrelation_cpu(data: &[f64], max_lag: usize) -> Vec<f64> {
             if pairs == 0 {
                 return 0.0;
             }
-            #[allow(clippy::cast_precision_loss)]
             let sum: f64 = (0..pairs).map(|t| data[t] * data[t + lag]).sum();
             sum / pairs as f64
         })

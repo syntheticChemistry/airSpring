@@ -62,7 +62,10 @@ impl MeteoParams {
             "rh_max_pct" => self.rh_max_pct,
             "wind_2m_m_s" => self.wind_2m_m_s,
             "solar_rad_mj_m2_day" => self.solar_rad_mj_m2_day,
-            _ => panic!("unknown variable: {name}"),
+            _ => {
+                eprintln!("FATAL: unknown variable: {name}");
+                std::process::exit(1);
+            }
         }
     }
 
@@ -74,7 +77,10 @@ impl MeteoParams {
             "rh_max_pct" => self.rh_max_pct = val,
             "wind_2m_m_s" => self.wind_2m_m_s = val,
             "solar_rad_mj_m2_day" => self.solar_rad_mj_m2_day = val,
-            _ => panic!("unknown variable: {name}"),
+            _ => {
+                eprintln!("FATAL: unknown variable: {name}");
+                std::process::exit(1);
+            }
         }
     }
 }

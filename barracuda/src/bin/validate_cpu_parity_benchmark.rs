@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::similar_names)]
 //! Exp 071: Comprehensive CPU Parity & Speedup Benchmark.
 //!
 //! Proves `BarraCuda` CPU is **pure math** and **faster than Python** across

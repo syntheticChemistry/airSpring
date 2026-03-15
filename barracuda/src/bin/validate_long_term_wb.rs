@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::doc_markdown)] // paths in doc comments
 //! Experiment 015: 60-year water balance validation.
 //!
 //! Validates that the Rust water balance (Exp 004) runs at multi-decade scale

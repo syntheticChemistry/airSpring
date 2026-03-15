@@ -238,6 +238,10 @@ pub fn bench_season_simulation(n: usize) -> (f64, f64, String) {
     )
 }
 
+#[expect(
+    clippy::excessive_precision,
+    reason = "benchmark stores Python reference value for parity comparison"
+)]
 pub fn bench_scs_cn_runoff(n: usize) -> (f64, f64, String) {
     let t0 = Instant::now();
     let mut result = 0.0_f64;
@@ -642,6 +646,10 @@ pub fn bench_anderson_regime(n_iter: usize) -> (f64, f64, String) {
     )
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "validation binary sequentially checks many baseline comparisons"
+)]
 pub fn build_benchmarks() -> Vec<BenchEntry> {
     vec![
         (

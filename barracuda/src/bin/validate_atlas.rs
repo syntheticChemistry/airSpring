@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::doc_markdown)]
 //! Experiment 018: Michigan Crop Water Atlas.
 //!
 //! Runs the validated ET₀ + water balance + yield response pipeline across

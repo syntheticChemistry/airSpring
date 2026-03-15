@@ -260,7 +260,6 @@ impl AirSpringBrain {
         self.concept_edge_doys.clear();
 
         for (beta, _error) in &edges {
-            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
             let doy = (beta * 366.0).round() as u16;
             if doy > 0 && doy <= 366 {
                 self.concept_edge_doys.push(doy);

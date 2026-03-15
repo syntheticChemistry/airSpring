@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::similar_names)]
 //! Exp 038: Pedotransfer → Richards Coupled Simulation.
 //!
 //! Validates the full pipeline: Saxton-Rawls soil texture → Van Genuchten

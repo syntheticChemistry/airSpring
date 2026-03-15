@@ -1,5 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::similar_names)]
 //! Exp 070: GPU Streaming Multi-Field Pipeline Validation.
 //!
 //! Validates the multi-field seasonal pipeline with GPU-parallel
