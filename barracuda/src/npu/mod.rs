@@ -16,21 +16,17 @@
 //! - [`inference`] — Eco-domain batch classifiers (crop stress, irrigation, anomaly)
 //! - [`streaming`] — High-cadence real-time classification with rolling statistics
 
-#![allow(
-    clippy::cast_possible_truncation,
-    clippy::cast_possible_wrap,
-    clippy::cast_precision_loss
-)]
+#![allow(clippy::cast_possible_wrap)]
 
 pub mod inference;
 pub mod streaming;
 
 pub use inference::{
-    load_readout_weights, npu_batch_infer, npu_infer_i8, CropStressInput, IrrigationInput,
-    NpuBatchResult, NpuInferResult, SensorAnomalyInput,
+    CropStressInput, IrrigationInput, NpuBatchResult, NpuInferResult, SensorAnomalyInput,
+    load_readout_weights, npu_batch_infer, npu_infer_i8,
 };
 pub use streaming::{
-    classify_reading, MultiSensorInput, RollingStats, StreamClassification, StreamSessionResult,
+    MultiSensorInput, RollingStats, StreamClassification, StreamSessionResult, classify_reading,
 };
 
 pub use akida_driver::{

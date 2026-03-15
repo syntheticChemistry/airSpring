@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Validate `IoT` time series parser and statistics.
 //!
 //! Uses deterministic synthetic agricultural sensor data to validate:

@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Validate lysimeter ET measurement pipeline (Exp 016).
 //!
 //! Benchmark: `control/lysimeter/benchmark_lysimeter.json`
@@ -23,7 +17,7 @@
 //! Run: `python3 control/lysimeter/lysimeter_et.py`
 
 use airspring_barracuda::validation::{
-    self, json_field, json_str, parse_benchmark_json, ValidationHarness,
+    self, ValidationHarness, json_field, json_str, parse_benchmark_json,
 };
 use barracuda::stats::{pearson_correlation, regression::fit_linear, rmse};
 

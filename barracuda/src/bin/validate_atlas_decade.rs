@@ -1,12 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss,
-    clippy::too_many_lines,
-    clippy::option_if_let_else
-)]
+#![allow(clippy::too_many_lines, clippy::option_if_let_else)]
 //! Experiment 059: Atlas 80-Year Decade Analysis.
 //!
 //! Validates decade-aggregated ET₀ trends across Michigan stations against
@@ -163,27 +156,15 @@ fn load_station_csv(station_id: &str) -> Option<Vec<DayRow>> {
             },
             wind_2m_m_s: {
                 let w = get_f64("wind_2m_m_s");
-                if w.is_nan() {
-                    2.0
-                } else {
-                    w.max(0.5)
-                }
+                if w.is_nan() { 2.0 } else { w.max(0.5) }
             },
             solar_rad_mj_m2: {
                 let s = get_f64("solar_rad_mj_m2");
-                if s.is_nan() {
-                    15.0
-                } else {
-                    s.max(0.1)
-                }
+                if s.is_nan() { 15.0 } else { s.max(0.1) }
             },
             precip_mm: {
                 let p = get_f64("precip_mm");
-                if p.is_nan() {
-                    0.0
-                } else {
-                    p
-                }
+                if p.is_nan() { 0.0 } else { p }
             },
         });
     }

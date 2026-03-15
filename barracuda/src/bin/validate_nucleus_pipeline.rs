@@ -27,9 +27,7 @@
     clippy::pedantic,
     clippy::nursery,
     clippy::unwrap_used,
-    clippy::expect_used,
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation
+    clippy::expect_used
 )]
 
 use std::path::PathBuf;
@@ -92,7 +90,7 @@ fn main() {
     v.check_bool("science_et0_response", science_et0.is_some());
     v.check_bool("ecology_et0_response", ecology_et0.is_some());
 
-    if let (Some(ref s), Some(ref e)) = (&science_et0, &ecology_et0) {
+    if let (Some(s), Some(e)) = (&science_et0, &ecology_et0) {
         let s_val = s.get("et0_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
         let e_val = e.get("et0_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
         v.check_abs("ecology_science_et0_parity", s_val, e_val, 1e-15);

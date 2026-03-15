@@ -1,11 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss,
-    clippy::similar_names
-)]
+#![allow(clippy::similar_names)]
 //! Exp 081: Standardized Precipitation Index (SPI) Validation.
 //!
 //! Validates the SPI drought classification algorithm (`McKee` et al. 1993)
@@ -23,10 +17,10 @@
 //!
 //! Provenance: script=`control/drought_index/drought_index_spi.py`, commit=1c11763, date=2026-03-07
 
-use airspring_barracuda::eco::drought_index::{compute_spi, gamma_mle_fit, DroughtClass};
+use airspring_barracuda::eco::drought_index::{DroughtClass, compute_spi, gamma_mle_fit};
 use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{
-    self, json_f64_required, parse_benchmark_json, ValidationHarness,
+    self, ValidationHarness, json_f64_required, parse_benchmark_json,
 };
 
 const BENCHMARK_JSON: &str =
@@ -255,11 +249,7 @@ fn validate_classification(v: &mut ValidationHarness, benchmark: &serde_json::Va
             .iter()
             .map(|&s| DroughtClass::from_spi(s).label())
             .collect();
-        if classes.len() >= 2 {
-            1.0
-        } else {
-            0.0
-        }
+        if classes.len() >= 2 { 1.0 } else { 0.0 }
     } else {
         0.0
     };

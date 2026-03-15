@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Validate 1D Richards equation solver against van Genuchten-Mualem baseline.
 //!
 //! Benchmark source: `control/richards/benchmark_richards.json`
@@ -23,12 +17,12 @@
 //! Provenance: script=`control/richards/richards_1d.py`, commit=3afc229, date=2026-02-26
 
 use airspring_barracuda::eco::richards::{
-    self as richards, mass_balance_check, solve_richards_1d, van_genuchten_k, van_genuchten_theta,
-    VanGenuchtenParams,
+    self as richards, VanGenuchtenParams, mass_balance_check, solve_richards_1d, van_genuchten_k,
+    van_genuchten_theta,
 };
 use airspring_barracuda::validation::{
-    self, json_array_opt, json_f64, json_object_opt, json_str_opt, parse_benchmark_json,
-    ValidationHarness,
+    self, ValidationHarness, json_array_opt, json_f64, json_object_opt, json_str_opt,
+    parse_benchmark_json,
 };
 
 /// Benchmark JSON embedded at compile time for reproducibility.

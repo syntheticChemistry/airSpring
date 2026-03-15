@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Validate water balance model against analytical solutions and mass conservation.
 //!
 //! Benchmark source: `control/water_balance/benchmark_water_balance.json`
@@ -24,7 +18,7 @@
 use airspring_barracuda::eco::water_balance::{self as wb, DailyInput, WaterBalanceState};
 use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{
-    self, json_f64, json_f64_required, parse_benchmark_json, ValidationHarness,
+    self, ValidationHarness, json_f64, json_f64_required, parse_benchmark_json,
 };
 
 /// Benchmark JSON embedded at compile time for reproducibility.

@@ -21,8 +21,6 @@
     clippy::nursery,
     clippy::unwrap_used,
     clippy::expect_used,
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
     clippy::too_many_lines
 )]
 

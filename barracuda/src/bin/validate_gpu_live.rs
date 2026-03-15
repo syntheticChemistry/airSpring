@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Exp 043: Titan V GPU Live Dispatch Validation.
 //!
 //! Runs actual GPU shader dispatch on the NVIDIA TITAN V (GV100) via wgpu/Vulkan.
@@ -28,10 +22,10 @@ use std::time::Instant;
 use barracuda::device::WgpuDevice;
 
 use airspring_barracuda::eco::evapotranspiration::{
-    self as et, actual_vapour_pressure_rh, DailyEt0Input,
+    self as et, DailyEt0Input, actual_vapour_pressure_rh,
 };
 use airspring_barracuda::gpu::et0::{Backend, BatchedEt0, BatchedEt0Result, StationDay};
-use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
 
 const PARITY_JSON: &str =
     include_str!("../../../control/cpu_gpu_parity/benchmark_cpu_gpu_parity.json");

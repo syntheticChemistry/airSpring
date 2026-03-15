@@ -1,12 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss,
-    clippy::similar_names,
-    clippy::too_many_lines
-)]
+#![allow(clippy::similar_names, clippy::too_many_lines)]
 //! Exp 074: Paper Chain Validation — CPU → GPU → `metalForge` progression.
 //!
 //! For each paper domain in the `specs/PAPER_REVIEW_QUEUE`, validates:

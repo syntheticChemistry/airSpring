@@ -1,7 +1,7 @@
 # airSpring Study: Precision Agriculture on Consumer Hardware
 
 **Status**: Working draft
-**Date**: March 14, 2026
+**Date**: March 15, 2026
 **See also**: [METHODOLOGY.md](METHODOLOGY.md) for validation protocol
 
 ---
@@ -140,7 +140,7 @@ All mass balances close to 0.0000 mm. Water savings of 53-72% are consistent wit
 
 ---
 
-## 4. Phase 1: Rust BarraCuda (865 lib + 186 forge tests + 1498 atlas checks, 95 binaries)
+## 4. Phase 1: Rust BarraCuda (853 lib + 281 integration + 61 forge tests, 95 binaries)
 
 ### 4.1 Module Structure
 
@@ -263,6 +263,6 @@ The same BarraCuda/ToadStool infrastructure supports both domains. The key share
 
 ---
 
-*March 7, 2026 — 1284 Python + 865 lib + 186 forge tests + 1498 atlas checks, 95 binaries all pass,
+*March 15, 2026 — 1284 Python + 853 lib + 281 integration + 61 forge tests, 95 binaries all pass,
 15,300 station-days (100 stations) real data, 75/75 cross-validation match, 14.5× Rust-vs-Python speedup (21/21 parity), zero synthetic.
-New (v0.7.5): MC ET₀ uncertainty (26/26), Bootstrap/Jackknife CI (20/20), SPI drought index (20/20).*
+v0.8.2: niche architecture, Edition 2024, 41 capabilities, deep code quality. AGPL-3.0-or-later.*

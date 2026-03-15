@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(clippy::cast_precision_loss)]
 //! Exp 048: NCBI 16S + Soil Moisture Anderson Coupling Validation.
 //!
 //! Validates the coupling chain from soil moisture θ through the Anderson

@@ -1,11 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss,
-    clippy::similar_names
-)]
+#![allow(clippy::similar_names)]
 //! Exp 039: Cross-Method ET₀ Bias Correction.
 //!
 //! Quantifies systematic bias of simplified ET₀ methods relative to
@@ -17,8 +11,8 @@
 //! script=`control/et0_bias_correction/et0_bias_correction.py`, commit=97e7533, date=2026-02-28
 //! Run: `python3 control/et0_bias_correction/et0_bias_correction.py`
 
-use airspring_barracuda::eco::evapotranspiration::{et0_ensemble, EnsembleInput};
-use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::eco::evapotranspiration::{EnsembleInput, et0_ensemble};
+use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/et0_bias_correction/benchmark_et0_bias.json");

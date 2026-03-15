@@ -1,11 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_possible_wrap,
-    clippy::cast_sign_loss
-)]
+#![allow(clippy::cast_possible_wrap)]
 //! Experiment 029b: High-Cadence NPU Streaming Pipeline
 //!
 //! Validates the cadence revolution: since NPU inference costs 0.0009% of
@@ -27,7 +21,9 @@ use airspring_barracuda::validation::{self, ValidationHarness};
 
 fn main() {
     validation::init_tracing();
-    validation::banner("Exp 029b: High-Cadence NPU Streaming Pipeline — more sensors, more readings, negligible energy");
+    validation::banner(
+        "Exp 029b: High-Cadence NPU Streaming Pipeline — more sensors, more readings, negligible energy",
+    );
 
     let mut v = ValidationHarness::new("NPU High Cadence Validation");
 

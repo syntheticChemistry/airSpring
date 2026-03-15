@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Validate Richards equation on constructed wetland media (HYDRUS CW2D parameters).
 //!
 //! Benchmark source: `control/cw2d/benchmark_cw2d.json`
@@ -22,11 +16,11 @@
 //! Run: `python3 control/cw2d/cw2d_richards.py`
 
 use airspring_barracuda::eco::richards::{
-    self as richards, mass_balance_check, solve_richards_1d, van_genuchten_k, van_genuchten_theta,
-    VanGenuchtenParams,
+    self as richards, VanGenuchtenParams, mass_balance_check, solve_richards_1d, van_genuchten_k,
+    van_genuchten_theta,
 };
 use airspring_barracuda::validation::{
-    self, json_array_opt, json_f64, json_str_opt, parse_benchmark_json, ValidationHarness,
+    self, ValidationHarness, json_array_opt, json_f64, json_str_opt, parse_benchmark_json,
 };
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/cw2d/benchmark_cw2d.json");

@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Validate biochar adsorption isotherms against Python baseline.
 //!
 //! Benchmark source: `control/biochar/benchmark_biochar.json`
@@ -16,7 +10,7 @@
 use airspring_barracuda::eco::isotherm::{self, langmuir_rl};
 use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{
-    self, json_array_opt, json_object_opt, parse_benchmark_json, ValidationHarness,
+    self, ValidationHarness, json_array_opt, json_object_opt, parse_benchmark_json,
 };
 
 /// Benchmark JSON embedded at compile time for reproducibility.

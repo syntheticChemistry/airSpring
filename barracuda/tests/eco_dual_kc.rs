@@ -3,9 +3,9 @@
 
 use airspring_barracuda::eco::crop::CropType;
 use airspring_barracuda::eco::dual_kc::{
-    etc_dual, evaporation_reduction, kc_max, mulched_ke, simulate_dual_kc,
-    simulate_dual_kc_mulched, soil_evaporation_ke, total_evaporable_water, CoverCropType,
-    DualKcInput, EvaporationLayerState, ResidueLevel,
+    CoverCropType, DualKcInput, EvaporationLayerState, ResidueLevel, etc_dual,
+    evaporation_reduction, kc_max, mulched_ke, simulate_dual_kc, simulate_dual_kc_mulched,
+    soil_evaporation_ke, total_evaporable_water,
 };
 use airspring_barracuda::eco::soil_moisture::SoilTexture;
 

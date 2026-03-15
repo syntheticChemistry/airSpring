@@ -5,7 +5,7 @@
 //! and Hamon into an equal-weight mean when data availability permits.
 
 use super::evapotranspiration::{
-    daily_et0, daily_et0_pt_and_pm, hamon_pet, hargreaves_et0, makkink_et0, turc_et0, DailyEt0Input,
+    DailyEt0Input, daily_et0, daily_et0_pt_and_pm, hamon_pet, hargreaves_et0, makkink_et0, turc_et0,
 };
 use super::solar::{daylight_hours, extraterrestrial_radiation};
 

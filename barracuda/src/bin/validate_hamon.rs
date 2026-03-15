@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Exp 035: Hamon (1961) Temperature-Based PET Validation.
 //!
 //! Validates the minimal-data Hamon PET method against analytical benchmarks
@@ -20,7 +14,7 @@
 //! Provenance: script=`control/hamon/hamon_pet.py`, commit=d3ecdc8, date=2026-02-27
 
 use airspring_barracuda::eco::evapotranspiration::{daylight_hours, hamon_pet};
-use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/hamon/benchmark_hamon.json");
 

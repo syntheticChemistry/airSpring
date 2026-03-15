@@ -2,6 +2,50 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.8.2] - 2026-03-15
+
+### Niche Architecture + Deep Code Quality
+
+**Niche Architecture Clarification**:
+- airSpring is a niche deployment of primals via biomeOS graphs, not a standalone primal
+- `airspring_primal` refactored to transitional niche adapter (1034→635 LOC)
+- New `src/niche.rs` module centralizes niche self-knowledge: 41 capabilities, operation dependencies, cost estimates, semantic mappings, registration logic
+- `PrimalState` → `NicheState`, constants and functions delegated to `niche::`
+
+**Rust Edition 2024 Migration**:
+- `barracuda/Cargo.toml`: edition 2021→2024, rust-version = "1.87"
+- `metalForge/forge/Cargo.toml`: edition 2021→2024, rust-version = "1.87"
+- `.rustfmt.toml`: edition 2021→2024
+- Fixed Edition 2024 pattern matching in `eco::isotherm`, `forge::graph`, and 3 binaries
+- `std::env::set_var`/`remove_var` wrapped in `unsafe` blocks in test code (Edition 2024 requirement)
+
+**Deep Code Quality**:
+- `#![forbid(unsafe_code)]` → `#![deny(unsafe_code)]` in `lib.rs` and forge `lib.rs` — zero unsafe in production, allows test `set_var`
+- Removed redundant crate-level `#![warn(clippy::pedantic)]` and `#![allow(clippy::cast_*)]` from 95 binaries — centralized in `Cargo.toml`
+- Removed redundant `#![allow(clippy::cast_precision_loss)]` from `lib.rs`
+- Added `#[must_use]` to 4 public functions in `ipc::provenance`
+- Fixed `clippy::redundant_clone` in heartbeat thread
+- Zero `#[allow()]` in production code
+- Zero clippy pedantic+nursery warnings across both crates
+
+**Documentation Cleanup**:
+- Root README.md: corrected test counts (853 lib + 281 integration + 61 forge), version to v0.8.2
+- whitePaper/README.md: corrected Python checks (1284), test counts, handoff version V082
+- whitePaper/STUDY.md: corrected test counts, updated date
+- whitePaper/baseCamp/README.md: corrected status line, added Phase 5.5, niche architecture
+- experiments/README.md: corrected status line
+- specs/README.md: corrected test counts, version V082
+- specs/PAPER_REVIEW_QUEUE.md: corrected test counts, version V082
+- CONTROL_EXPERIMENT_STATUS.md: corrected barraCuda 0.3.3→0.3.5, capabilities 16→41
+
+**Handoff Management**:
+- Archived V071-V076 handoffs to `wateringHole/handoffs/archive/`
+- New V082 handoff: niche architecture, Edition 2024 learnings, barraCuda/ToadStool evolution
+- Updated wateringHole/README.md with V082 as current
+- Updated ecoPrimals/whitePaper/gen3/baseCamp/README.md with v0.8.2 status
+
+**Quality**: 853 lib + 281 integration + 61 forge tests, 0 failures, 0 clippy warnings, 0 fmt diff, 0 doc warnings.
+
 ## [0.8.1] - 2026-03-15
 
 ### neuralAPI Integration — airSpring as a proper graph citizen

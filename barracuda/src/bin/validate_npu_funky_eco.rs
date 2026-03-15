@@ -1,11 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_possible_wrap,
-    clippy::cast_sign_loss
-)]
+#![allow(clippy::cast_possible_wrap)]
 //! Experiment 029: Funky NPU for Agricultural `IoT`
 //!
 //! Demonstrates advanced AKD1000 capabilities for field-deployed systems —
@@ -556,7 +550,9 @@ fn validate_locomos_power_budget(v: &mut ValidationHarness) {
     let cloud_monthly_usd = 5.0; // minimal cloud compute
     let cloud_annual_usd = cloud_monthly_usd * 12.0;
     let breakeven_months = npu_cost_usd / cloud_monthly_usd;
-    println!("  Cost breakeven: {breakeven_months:.0} months ({npu_cost_usd:.0} NPU vs ${cloud_annual_usd:.0}/yr cloud)");
+    println!(
+        "  Cost breakeven: {breakeven_months:.0} months ({npu_cost_usd:.0} NPU vs ${cloud_annual_usd:.0}/yr cloud)"
+    );
     v.check_bool(
         "NPU pays for itself in < 24 months",
         breakeven_months < 24.0,

@@ -1,11 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss,
-    clippy::similar_names
-)]
+#![allow(clippy::similar_names)]
 //! Exp 080: Bootstrap & Jackknife Confidence Intervals for Seasonal ET₀.
 //!
 //! Validates the `gpu::bootstrap` and `gpu::jackknife` CPU paths against
@@ -27,7 +21,7 @@ use airspring_barracuda::gpu::bootstrap::GpuBootstrap;
 use airspring_barracuda::gpu::jackknife::GpuJackknife;
 use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{
-    self, json_f64_required, parse_benchmark_json, ValidationHarness,
+    self, ValidationHarness, json_f64_required, parse_benchmark_json,
 };
 
 const BENCHMARK_JSON: &str =

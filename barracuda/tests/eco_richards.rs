@@ -2,9 +2,9 @@
 //! Integration tests for `eco::richards` — 1D Richards equation solver.
 
 use airspring_barracuda::eco::richards::{
-    cumulative_drainage, inverse_van_genuchten_h, mass_balance_check, solve_richards_1d,
-    van_genuchten_capacity, van_genuchten_k, van_genuchten_theta, RichardsProfile,
-    VanGenuchtenParams,
+    RichardsProfile, VanGenuchtenParams, cumulative_drainage, inverse_van_genuchten_h,
+    mass_balance_check, solve_richards_1d, van_genuchten_capacity, van_genuchten_k,
+    van_genuchten_theta,
 };
 use airspring_barracuda::error::AirSpringError;
 

@@ -13,7 +13,7 @@
 use std::sync::Arc;
 
 use barracuda::device::WgpuDevice;
-use barracuda::stats::jackknife::{jackknife_mean_variance, JackknifeMeanGpu};
+use barracuda::stats::jackknife::{JackknifeMeanGpu, jackknife_mean_variance};
 
 #[cfg(test)]
 use super::device_info::try_f64_device;

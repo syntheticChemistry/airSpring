@@ -15,7 +15,7 @@ use airspring_barracuda::gpu::device_info;
 use airspring_barracuda::gpu::et0::{BatchedEt0, StationDay};
 use airspring_barracuda::gpu::hargreaves::{BatchedHargreaves, HargreavesDay};
 use airspring_barracuda::gpu::isotherm as gpu_iso;
-use airspring_barracuda::gpu::mc_et0::{mc_et0_cpu, Et0Uncertainties};
+use airspring_barracuda::gpu::mc_et0::{Et0Uncertainties, mc_et0_cpu};
 use airspring_barracuda::gpu::reduce::SeasonalReducer;
 use airspring_barracuda::gpu::richards::BatchedRichards;
 use airspring_barracuda::gpu::stream::{self, StreamSmoother};

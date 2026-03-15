@@ -40,13 +40,7 @@
 //!  V     4070  A770
 //! ```
 
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::suboptimal_flops,
-    clippy::cast_lossless,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
+#![allow(clippy::suboptimal_flops, clippy::cast_lossless)]
 
 use std::time::Instant;
 

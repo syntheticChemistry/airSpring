@@ -1,11 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss,
-    clippy::similar_names
-)]
+#![allow(clippy::similar_names)]
 //! Exp 038: Pedotransfer → Richards Coupled Simulation.
 //!
 //! Validates the full pipeline: Saxton-Rawls soil texture → Van Genuchten
@@ -20,12 +14,12 @@
 //! Run: `python3 control/pedotransfer_richards/pedotransfer_richards.py`
 
 use airspring_barracuda::eco::richards::{
-    cumulative_drainage, solve_richards_1d, VanGenuchtenParams,
+    VanGenuchtenParams, cumulative_drainage, solve_richards_1d,
 };
-use airspring_barracuda::eco::soil_moisture::{saxton_rawls, SaxtonRawlsInput};
+use airspring_barracuda::eco::soil_moisture::{SaxtonRawlsInput, saxton_rawls};
 use airspring_barracuda::eco::van_genuchten::{van_genuchten_k, van_genuchten_theta};
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/pedotransfer_richards/benchmark_pedotransfer_richards.json");

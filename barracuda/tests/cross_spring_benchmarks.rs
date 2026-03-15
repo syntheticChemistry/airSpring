@@ -12,7 +12,7 @@ use std::time::Instant;
 
 #[test]
 fn benchmark_et0_throughput_reasonable() {
-    use airspring_barracuda::eco::evapotranspiration::{daily_et0, DailyEt0Input};
+    use airspring_barracuda::eco::evapotranspiration::{DailyEt0Input, daily_et0};
 
     let inputs: Vec<DailyEt0Input> = (0..1000)
         .map(|i| {
@@ -48,7 +48,7 @@ fn benchmark_et0_throughput_reasonable() {
 
 #[test]
 fn benchmark_richards_throughput_reasonable() {
-    use airspring_barracuda::eco::richards::{solve_richards_1d, VanGenuchtenParams};
+    use airspring_barracuda::eco::richards::{VanGenuchtenParams, solve_richards_1d};
 
     let sand = VanGenuchtenParams {
         theta_r: 0.045,
@@ -114,7 +114,7 @@ fn benchmark_diversity_throughput() {
 #[test]
 fn benchmark_mc_et0_throughput() {
     use airspring_barracuda::eco::evapotranspiration::DailyEt0Input;
-    use airspring_barracuda::gpu::mc_et0::{mc_et0_cpu, Et0Uncertainties};
+    use airspring_barracuda::gpu::mc_et0::{Et0Uncertainties, mc_et0_cpu};
 
     let input = DailyEt0Input {
         tmin: 12.3,
@@ -246,7 +246,7 @@ fn benchmark_s68_atlas_pipeline_composition() {
 
 #[test]
 fn benchmark_s68_richards_pde_cross_spring() {
-    use airspring_barracuda::eco::richards::{solve_richards_1d, VanGenuchtenParams};
+    use airspring_barracuda::eco::richards::{VanGenuchtenParams, solve_richards_1d};
 
     let soil = VanGenuchtenParams {
         theta_r: 0.065,

@@ -16,7 +16,7 @@ use std::sync::Arc;
 
 use barracuda::device::WgpuDevice;
 use barracuda::ops::batched_elementwise_f64::{
-    van_genuchten_k_cpu, van_genuchten_theta_cpu, BatchedElementwiseF64, Op,
+    BatchedElementwiseF64, Op, van_genuchten_k_cpu, van_genuchten_theta_cpu,
 };
 use barracuda::optimize::brent_gpu::BrentGpu;
 

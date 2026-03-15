@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Exp 024: NASS Yield Validation — Stewart (1977) pipeline consistency.
 //!
 //! Validates:
@@ -24,7 +18,7 @@
 use airspring_barracuda::eco::water_balance;
 use airspring_barracuda::eco::yield_response::{clamp_yield_ratio, ky_table, yield_ratio_single};
 use airspring_barracuda::validation::{
-    self, json_f64_required, parse_benchmark_json, ValidationHarness,
+    self, ValidationHarness, json_f64_required, parse_benchmark_json,
 };
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/nass_yield/benchmark_nass_yield.json");

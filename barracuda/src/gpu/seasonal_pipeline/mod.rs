@@ -41,7 +41,7 @@ use std::sync::Arc;
 
 use barracuda::device::WgpuDevice;
 
-use crate::eco::crop::{adjust_kc_for_climate, CropCoefficients, CropType};
+use crate::eco::crop::{CropCoefficients, CropType, adjust_kc_for_climate};
 use crate::eco::evapotranspiration::{self as et, DailyEt0Input};
 use crate::eco::water_balance::{self as wb, DailyInput, WaterBalanceState};
 use crate::eco::yield_response;

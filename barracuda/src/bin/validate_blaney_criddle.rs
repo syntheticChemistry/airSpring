@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Exp 049: Blaney-Criddle (1950) PET Validation.
 //!
 //! Validates the 8th ET₀ method against analytical benchmarks from USDA-SCS
@@ -21,7 +15,7 @@ use airspring_barracuda::eco::evapotranspiration::{
     blaney_criddle_et0, blaney_criddle_from_location, blaney_criddle_p,
 };
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/blaney_criddle/benchmark_blaney_criddle.json");

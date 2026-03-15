@@ -1,12 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss,
-    clippy::too_many_lines,
-    clippy::similar_names
-)]
+#![allow(clippy::too_many_lines, clippy::similar_names)]
 //! Exp 064: Full Dispatch Experiment — CPU vs GPU parity across all domains.
 //!
 //! Comprehensive validation bridging:
@@ -345,7 +338,7 @@ fn phase_3_batch_scaling(v: &mut ValidationHarness) {
 // ═══════════════════════════════════════════════════════════════════
 
 fn phase_4_absorption_audit(v: &mut ValidationHarness) {
-    use airspring_barracuda::gpu::evolution_gaps::{Tier, GAPS};
+    use airspring_barracuda::gpu::evolution_gaps::{GAPS, Tier};
 
     let total = GAPS.len();
     let tier_a = GAPS.iter().filter(|g| g.tier == Tier::A).count();

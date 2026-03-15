@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Exp 033: Makkink (1957) Radiation-Based ET₀ Validation.
 //!
 //! Validates the Makkink method with de Bruin (1987) coefficients
@@ -20,7 +14,7 @@
 //! Provenance: script=`control/makkink/makkink_et0.py`, commit=d3ecdc8, date=2026-02-27
 
 use airspring_barracuda::eco::evapotranspiration::makkink_et0;
-use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/makkink/benchmark_makkink.json");
 

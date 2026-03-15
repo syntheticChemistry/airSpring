@@ -3,8 +3,8 @@
 
 use airspring_barracuda::eco::cytokine::{CytokineBrain, CytokineBrainConfig, CytokineObservation};
 use airspring_barracuda::eco::tissue::{
-    analyze_tissue_disorder, barrier_disruption_d_eff, AndersonRegime, CellTypeAbundance,
-    SkinCompartment,
+    AndersonRegime, CellTypeAbundance, SkinCompartment, analyze_tissue_disorder,
+    barrier_disruption_d_eff,
 };
 use airspring_barracuda::gpu::diversity::GpuDiversity;
 use barracuda::validation::ValidationHarness;

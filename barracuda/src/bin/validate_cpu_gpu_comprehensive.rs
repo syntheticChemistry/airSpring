@@ -13,8 +13,6 @@
     clippy::nursery,
     clippy::unwrap_used,
     clippy::expect_used,
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
     clippy::too_many_lines,
     clippy::similar_names
 )]
@@ -85,7 +83,7 @@ fn main() {
         })
         .collect();
     match batched_et0.compute_gpu(&gpu_inputs) {
-        Ok(ref g) => {
+        Ok(g) => {
             let md = mdiff(&cpu_et0.et0_values, &g.et0_values);
             // CPU uses actual_vapour_pressure; GPU uses rh_max/rh_min → different e_a path.
             // Tolerance widened to 2.0 mm/day for schema mismatch; exact parity
@@ -115,7 +113,7 @@ fn main() {
     let cpu_hg = hg_cpu.compute(&hg_inputs);
     let hg_gpu = gpu::hargreaves::BatchedHargreaves::gpu(Arc::clone(&device)).expect("HG GPU");
     match hg_gpu.compute_gpu(&hg_inputs) {
-        Ok(ref g) => {
+        Ok(g) => {
             let md = mdiff(&cpu_hg.et0_values, &g.et0_values);
             // CPU uses eco::hargreaves; GPU uses df64 fma chains → small float divergence.
             v.check_bool("hargreaves_parity", md < 0.05 || zout(&g.et0_values));
@@ -231,9 +229,9 @@ fn main() {
         // daylight formula. Both are valid — we check both dispatch and reasonableness.
         let cpu_h = gpu::simple_et0::BatchedSimpleEt0::hamon(&ham_in);
         match gs.hamon(&ham_in) {
-            Ok(ref g) => {
-                let md = mdiff(&cpu_h, g);
-                v.check_bool("hamon_parity", md < 2.0 || zout(g));
+            Ok(g) => {
+                let md = mdiff(&cpu_h, &g);
+                v.check_bool("hamon_parity", md < 2.0 || zout(&g));
                 eprintln!("  hamon: max_diff={md:.2e} (daylight formula divergence)");
             }
             Err(e) => {
@@ -267,9 +265,9 @@ fn main() {
     let (tr, ts, a, n_vg) = (0.078, 0.43, 0.036, 1.56);
     let cpu_theta = gpu::van_genuchten::compute_theta_cpu(tr, ts, a, n_vg, &h_vals);
     match vg.compute_theta_gpu(tr, ts, a, n_vg, &h_vals) {
-        Ok(ref g) => {
-            let md = mdiff(&cpu_theta, g);
-            v.check_bool("vg_theta_parity", md < tol || zout(g));
+        Ok(g) => {
+            let md = mdiff(&cpu_theta, &g);
+            v.check_bool("vg_theta_parity", md < tol || zout(&g));
             eprintln!("  VG θ(h): max_diff={md:.2e}");
         }
         Err(e) => {
@@ -280,9 +278,9 @@ fn main() {
     let (ks, l) = (24.96, 0.5);
     let cpu_k = gpu::van_genuchten::compute_k_cpu(ks, tr, ts, a, n_vg, l, &h_vals);
     match vg.compute_k_gpu(ks, tr, ts, a, n_vg, l, &h_vals) {
-        Ok(ref g) => {
-            let md = mdiff(&cpu_k, g);
-            v.check_bool("vg_k_parity", md < tol || zout(g));
+        Ok(g) => {
+            let md = mdiff(&cpu_k, &g);
+            v.check_bool("vg_k_parity", md < tol || zout(&g));
             eprintln!("  VG K(h): max_diff={md:.2e}");
         }
         Err(e) => {
@@ -310,9 +308,9 @@ fn main() {
         .collect();
     let cpu_th = gpu::thornthwaite::compute_thornthwaite_cpu(&th_inputs);
     match th.compute_gpu(&th_inputs) {
-        Ok(ref g) => {
-            let md = mdiff(&cpu_th, g);
-            v.check_bool("thornthwaite_parity", md < tol || zout(g));
+        Ok(g) => {
+            let md = mdiff(&cpu_th, &g);
+            v.check_bool("thornthwaite_parity", md < tol || zout(&g));
             eprintln!("  Thornthwaite: max_diff={md:.2e}");
         }
         Err(e) => {
@@ -329,9 +327,9 @@ fn main() {
     let tmeans: Vec<f64> = (0..50).map(|i| 17.5 + f64::from(i % 10) * 0.5).collect();
     let cpu_gdd = gpu::gdd::compute_gdd_cpu(&tmeans, 10.0);
     match gdd_eng.compute_gpu(&tmeans, 10.0) {
-        Ok(ref g) => {
-            let md = mdiff(&cpu_gdd, g);
-            v.check_bool("gdd_parity", md < tol || zout(g));
+        Ok(g) => {
+            let md = mdiff(&cpu_gdd, &g);
+            v.check_bool("gdd_parity", md < tol || zout(&g));
             eprintln!("  GDD: max_diff={md:.2e}");
         }
         Err(e) => {
@@ -356,9 +354,9 @@ fn main() {
         .collect();
     let cpu_pt = gpu::pedotransfer::compute_pedotransfer_cpu(&pt_in);
     match pt_eng.compute(&pt_in) {
-        Ok(ref g) => {
-            let md = mdiff(&cpu_pt, g);
-            v.check_bool("pedotransfer_parity", md < tol || zout(g));
+        Ok(g) => {
+            let md = mdiff(&cpu_pt, &g);
+            v.check_bool("pedotransfer_parity", md < tol || zout(&g));
             eprintln!("  Pedotransfer: max_diff={md:.2e}");
         }
         Err(e) => {
@@ -380,9 +378,9 @@ fn main() {
     let times: Vec<f64> = (1..51).map(|i| f64::from(i) * 0.1).collect();
     let cpu_inf = gpu::infiltration::cumulative_cpu(&inf_p, &times);
     match inf_eng.cumulative_gpu(&inf_p, &times) {
-        Ok(ref g) => {
-            let md = mdiff(&cpu_inf, g);
-            v.check_bool("infiltration_parity", md < 0.01 || zout(g));
+        Ok(g) => {
+            let md = mdiff(&cpu_inf, &g);
+            v.check_bool("infiltration_parity", md < 0.01 || zout(&g));
             eprintln!("  Infiltration: max_diff={md:.2e}");
         }
         Err(e) => {
@@ -407,8 +405,8 @@ fn main() {
         .collect();
     let cpu_acf = gpu::autocorrelation::autocorrelation_cpu(&acf_data, 30);
     match acf_eng.autocorrelation(&acf_data, 30) {
-        Ok(ref g) => {
-            let md = mdiff(&cpu_acf, g);
+        Ok(g) => {
+            let md = mdiff(&cpu_acf, &g);
             v.check_bool("autocorrelation_parity", md < tol);
             eprintln!("  Autocorrelation: max_diff={md:.2e}");
         }
@@ -532,7 +530,7 @@ fn chk(
     tol: f64,
 ) {
     match gpu_result {
-        Ok(ref g) => {
+        Ok(g) => {
             let md = mdiff(cpu, g);
             v.check_bool(&format!("{name}_parity"), md < tol || zout(g));
             eprintln!("  {name}: max_diff={md:.2e}");

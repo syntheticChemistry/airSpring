@@ -153,6 +153,8 @@ pub fn discover_all_primals() -> Vec<String> {
 #[cfg(test)]
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
+    #![allow(unsafe_code)]
+
     use super::*;
     use serial_test::serial;
 
@@ -192,49 +194,74 @@ mod tests {
     #[test]
     #[serial]
     fn resolve_socket_dir_uses_biomeos_socket_dir_when_set() {
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
         let unique_dir = std::env::temp_dir().join(format!("biomeos_test_{}", std::process::id()));
-        std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+        unsafe {
+            std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+        }
         let result = resolve_socket_dir();
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        unsafe {
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
         assert_eq!(result, unique_dir);
     }
 
     #[test]
     #[serial]
     fn resolve_socket_dir_uses_xdg_runtime_dir_when_set() {
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
+        unsafe {
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
         let xdg_dir = std::env::temp_dir().join(format!("xdg_test_{}", std::process::id()));
-        std::env::set_var("XDG_RUNTIME_DIR", xdg_dir.as_os_str());
+        unsafe {
+            std::env::set_var("XDG_RUNTIME_DIR", xdg_dir.as_os_str());
+        }
         let result = resolve_socket_dir();
-        std::env::remove_var("XDG_RUNTIME_DIR");
+        unsafe {
+            std::env::remove_var("XDG_RUNTIME_DIR");
+        }
         assert_eq!(result, xdg_dir.join("biomeos"));
     }
 
     #[test]
     #[serial]
     fn get_family_id_uses_family_id_when_set() {
-        std::env::set_var("FAMILY_ID", "custom-family-123");
-        std::env::remove_var("BIOMEOS_FAMILY_ID");
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
+        unsafe {
+            std::env::set_var("FAMILY_ID", "custom-family-123");
+            std::env::remove_var("BIOMEOS_FAMILY_ID");
+        }
         let id = get_family_id();
-        std::env::remove_var("FAMILY_ID");
+        unsafe {
+            std::env::remove_var("FAMILY_ID");
+        }
         assert_eq!(id, "custom-family-123");
     }
 
     #[test]
     #[serial]
     fn get_family_id_uses_biomeos_family_id_when_only_it_set() {
-        std::env::remove_var("FAMILY_ID");
-        std::env::set_var("BIOMEOS_FAMILY_ID", "biomeos-family-456");
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
+        unsafe {
+            std::env::remove_var("FAMILY_ID");
+            std::env::set_var("BIOMEOS_FAMILY_ID", "biomeos-family-456");
+        }
         let id = get_family_id();
-        std::env::remove_var("BIOMEOS_FAMILY_ID");
+        unsafe {
+            std::env::remove_var("BIOMEOS_FAMILY_ID");
+        }
         assert_eq!(id, "biomeos-family-456");
     }
 
     #[test]
     #[serial]
     fn get_family_id_returns_default_when_neither_set() {
-        std::env::remove_var("FAMILY_ID");
-        std::env::remove_var("BIOMEOS_FAMILY_ID");
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
+        unsafe {
+            std::env::remove_var("FAMILY_ID");
+            std::env::remove_var("BIOMEOS_FAMILY_ID");
+        }
         let id = get_family_id();
         assert_eq!(id, "default");
     }
@@ -242,9 +269,14 @@ mod tests {
     #[test]
     #[serial]
     fn resolve_socket_path_format_verification() {
-        std::env::set_var("BIOMEOS_SOCKET_DIR", "/tmp/sockdir");
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
+        unsafe {
+            std::env::set_var("BIOMEOS_SOCKET_DIR", "/tmp/sockdir");
+        }
         let path = resolve_socket_path("primal1", "fam1");
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        unsafe {
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
         let s = path.to_string_lossy();
         assert!(s.contains("primal1"));
         assert!(s.contains("fam1"));
@@ -255,39 +287,57 @@ mod tests {
     #[test]
     #[serial]
     fn discover_primal_socket_none_when_no_matching_socket() {
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
         let unique_dir = std::env::temp_dir().join(format!("biomeos_empty_{}", std::process::id()));
         std::fs::create_dir_all(&unique_dir).unwrap();
-        std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+        unsafe {
+            std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+        }
         let result = discover_primal_socket("nonexistent_primal_xyz123");
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        unsafe {
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
         assert_eq!(result, None);
     }
 
     #[test]
     #[serial]
     fn find_socket_none_when_no_matching_socket() {
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
         let unique_dir =
             std::env::temp_dir().join(format!("biomeos_empty2_{}", std::process::id()));
         std::fs::create_dir_all(&unique_dir).unwrap();
-        std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+        unsafe {
+            std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+        }
         let result = find_socket("nonexistent_prefix_xyz789");
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        unsafe {
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
         assert_eq!(result, None);
     }
 
     #[test]
     #[serial]
     fn fallback_registration_primal_some_when_env_set() {
-        std::env::set_var("BIOMEOS_FALLBACK_PRIMAL", "fallback-primal-name");
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
+        unsafe {
+            std::env::set_var("BIOMEOS_FALLBACK_PRIMAL", "fallback-primal-name");
+        }
         let result = fallback_registration_primal();
-        std::env::remove_var("BIOMEOS_FALLBACK_PRIMAL");
+        unsafe {
+            std::env::remove_var("BIOMEOS_FALLBACK_PRIMAL");
+        }
         assert_eq!(result.as_deref(), Some("fallback-primal-name"));
     }
 
     #[test]
     #[serial]
     fn fallback_registration_primal_none_when_env_unset() {
-        std::env::remove_var("BIOMEOS_FALLBACK_PRIMAL");
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
+        unsafe {
+            std::env::remove_var("BIOMEOS_FALLBACK_PRIMAL");
+        }
         let result = fallback_registration_primal();
         assert_eq!(result, None);
     }
@@ -295,12 +345,17 @@ mod tests {
     #[test]
     #[serial]
     fn discover_all_primals_sorted_and_deduplicated() {
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
         let unique_dir =
             std::env::temp_dir().join(format!("biomeos_primals_{}", std::process::id()));
         std::fs::create_dir_all(&unique_dir).unwrap();
-        std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+        unsafe {
+            std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+        }
         let primals = discover_all_primals();
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        unsafe {
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
         assert!(primals.windows(2).all(|w| w[0] <= w[1]));
         let unique_count = primals
             .iter()
@@ -316,17 +371,22 @@ mod tests {
     #[test]
     #[serial]
     fn discover_primal_socket_finds_socket_with_family() {
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
         let unique_dir =
             std::env::temp_dir().join(format!("biomeos_discover_{}", std::process::id()));
         std::fs::create_dir_all(&unique_dir).unwrap();
         let socket_path = unique_dir.join("testprimal-myfamily.sock");
         std::fs::File::create(&socket_path).unwrap();
-        std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
-        std::env::set_var("FAMILY_ID", "myfamily");
-        std::env::remove_var("BIOMEOS_FAMILY_ID");
+        unsafe {
+            std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+            std::env::set_var("FAMILY_ID", "myfamily");
+            std::env::remove_var("BIOMEOS_FAMILY_ID");
+        }
         let result = discover_primal_socket("testprimal");
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
-        std::env::remove_var("FAMILY_ID");
+        unsafe {
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+            std::env::remove_var("FAMILY_ID");
+        }
         std::fs::remove_file(&socket_path).ok();
         assert_eq!(result, Some(socket_path));
     }
@@ -334,13 +394,18 @@ mod tests {
     #[test]
     #[serial]
     fn find_socket_finds_socket_by_prefix() {
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
         let unique_dir = std::env::temp_dir().join(format!("biomeos_find_{}", std::process::id()));
         std::fs::create_dir_all(&unique_dir).unwrap();
         let socket_path = unique_dir.join("airspring-default.sock");
         std::fs::File::create(&socket_path).unwrap();
-        std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+        unsafe {
+            std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+        }
         let result = find_socket("airspring");
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        unsafe {
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
         std::fs::remove_file(&socket_path).ok();
         assert_eq!(result, Some(socket_path));
     }
@@ -348,9 +413,14 @@ mod tests {
     #[test]
     #[serial]
     fn resolve_socket_path_joins_correctly() {
-        std::env::set_var("BIOMEOS_SOCKET_DIR", "/tmp/sockets");
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
+        unsafe {
+            std::env::set_var("BIOMEOS_SOCKET_DIR", "/tmp/sockets");
+        }
         let path = resolve_socket_path("primal", "fam");
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        unsafe {
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
         let s = path.to_string_lossy();
         assert!(s.ends_with("primal-fam.sock"));
     }
@@ -358,16 +428,21 @@ mod tests {
     #[test]
     #[serial]
     fn discover_primal_socket_finds_socket_without_family() {
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
         let unique_dir = std::env::temp_dir().join(format!("biomeos_nofam_{}", std::process::id()));
         std::fs::create_dir_all(&unique_dir).unwrap();
         let socket_path = unique_dir.join("bareprimal.sock");
         std::fs::File::create(&socket_path).unwrap();
-        std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
-        std::env::set_var("FAMILY_ID", "otherfamily");
-        std::env::remove_var("BIOMEOS_FAMILY_ID");
+        unsafe {
+            std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+            std::env::set_var("FAMILY_ID", "otherfamily");
+            std::env::remove_var("BIOMEOS_FAMILY_ID");
+        }
         let result = discover_primal_socket("bareprimal");
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
-        std::env::remove_var("FAMILY_ID");
+        unsafe {
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+            std::env::remove_var("FAMILY_ID");
+        }
         std::fs::remove_file(&socket_path).ok();
         assert_eq!(result, Some(socket_path));
     }
@@ -375,17 +450,22 @@ mod tests {
     #[test]
     #[serial]
     fn discover_primal_socket_finds_socket_via_prefix_scan() {
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
         let unique_dir =
             std::env::temp_dir().join(format!("biomeos_prefix_{}", std::process::id()));
         std::fs::create_dir_all(&unique_dir).unwrap();
         let socket_path = unique_dir.join("prefixprimal-otherfamily.sock");
         std::fs::File::create(&socket_path).unwrap();
-        std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
-        std::env::set_var("FAMILY_ID", "wrongfamily");
-        std::env::remove_var("BIOMEOS_FAMILY_ID");
+        unsafe {
+            std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+            std::env::set_var("FAMILY_ID", "wrongfamily");
+            std::env::remove_var("BIOMEOS_FAMILY_ID");
+        }
         let result = discover_primal_socket("prefixprimal");
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
-        std::env::remove_var("FAMILY_ID");
+        unsafe {
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+            std::env::remove_var("FAMILY_ID");
+        }
         std::fs::remove_file(&socket_path).ok();
         assert_eq!(result, Some(socket_path));
     }
@@ -393,50 +473,70 @@ mod tests {
     #[test]
     #[serial]
     fn discover_primal_socket_none_when_socket_dir_does_not_exist() {
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
         let nonexistent =
             std::env::temp_dir().join(format!("biomeos_nonexistent_{}", std::process::id()));
         std::fs::remove_dir_all(&nonexistent).ok();
-        std::env::set_var("BIOMEOS_SOCKET_DIR", nonexistent.as_os_str());
+        unsafe {
+            std::env::set_var("BIOMEOS_SOCKET_DIR", nonexistent.as_os_str());
+        }
         let result = discover_primal_socket("anyprimal");
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        unsafe {
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
         assert_eq!(result, None);
     }
 
     #[test]
     #[serial]
     fn find_socket_none_when_socket_dir_does_not_exist() {
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
         let nonexistent =
             std::env::temp_dir().join(format!("biomeos_nonexistent2_{}", std::process::id()));
         std::fs::remove_dir_all(&nonexistent).ok();
-        std::env::set_var("BIOMEOS_SOCKET_DIR", nonexistent.as_os_str());
+        unsafe {
+            std::env::set_var("BIOMEOS_SOCKET_DIR", nonexistent.as_os_str());
+        }
         let result = find_socket("anyprefix");
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        unsafe {
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
         assert_eq!(result, None);
     }
 
     #[test]
     #[serial]
     fn discover_all_primals_empty_when_socket_dir_does_not_exist() {
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
         let nonexistent =
             std::env::temp_dir().join(format!("biomeos_nonexistent3_{}", std::process::id()));
         std::fs::remove_dir_all(&nonexistent).ok();
-        std::env::set_var("BIOMEOS_SOCKET_DIR", nonexistent.as_os_str());
+        unsafe {
+            std::env::set_var("BIOMEOS_SOCKET_DIR", nonexistent.as_os_str());
+        }
         let primals = discover_all_primals();
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        unsafe {
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
         assert!(primals.is_empty());
     }
 
     #[test]
     #[serial]
     fn discover_all_primals_extracts_names_from_socket_files() {
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
         let unique_dir =
             std::env::temp_dir().join(format!("biomeos_extract_{}", std::process::id()));
         std::fs::create_dir_all(&unique_dir).unwrap();
         std::fs::File::create(unique_dir.join("alpha-default.sock")).unwrap();
         std::fs::File::create(unique_dir.join("beta-other.sock")).unwrap();
-        std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+        unsafe {
+            std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+        }
         let primals = discover_all_primals();
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        unsafe {
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
         std::fs::remove_file(unique_dir.join("alpha-default.sock")).ok();
         std::fs::remove_file(unique_dir.join("beta-other.sock")).ok();
         assert!(primals.contains(&"alpha".to_string()));
@@ -447,13 +547,18 @@ mod tests {
     #[test]
     #[serial]
     fn discover_all_primals_deduplicates_same_primal_multiple_sockets() {
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
         let unique_dir = std::env::temp_dir().join(format!("biomeos_dedup_{}", std::process::id()));
         std::fs::create_dir_all(&unique_dir).unwrap();
         std::fs::File::create(unique_dir.join("airspring-a.sock")).unwrap();
         std::fs::File::create(unique_dir.join("airspring-b.sock")).unwrap();
-        std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+        unsafe {
+            std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+        }
         let primals = discover_all_primals();
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        unsafe {
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
         std::fs::remove_file(unique_dir.join("airspring-a.sock")).ok();
         std::fs::remove_file(unique_dir.join("airspring-b.sock")).ok();
         assert_eq!(primals.iter().filter(|p| *p == "airspring").count(), 1);
@@ -462,12 +567,17 @@ mod tests {
     #[test]
     #[serial]
     fn discover_all_primals_accepts_uppercase_sock_extension() {
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
         let unique_dir = std::env::temp_dir().join(format!("biomeos_upper_{}", std::process::id()));
         std::fs::create_dir_all(&unique_dir).unwrap();
         std::fs::File::create(unique_dir.join("uppercase.SOCK")).unwrap();
-        std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+        unsafe {
+            std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+        }
         let primals = discover_all_primals();
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        unsafe {
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
         std::fs::remove_file(unique_dir.join("uppercase.SOCK")).ok();
         assert_eq!(primals.len(), 1);
         assert!(
@@ -479,14 +589,19 @@ mod tests {
     #[test]
     #[serial]
     fn discover_all_primals_ignores_non_sock_files() {
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
         let unique_dir =
             std::env::temp_dir().join(format!("biomeos_ignore_{}", std::process::id()));
         std::fs::create_dir_all(&unique_dir).unwrap();
         std::fs::File::create(unique_dir.join("real.sock")).unwrap();
         std::fs::File::create(unique_dir.join("notsock.txt")).unwrap();
-        std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+        unsafe {
+            std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+        }
         let primals = discover_all_primals();
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        unsafe {
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
         std::fs::remove_file(unique_dir.join("real.sock")).ok();
         std::fs::remove_file(unique_dir.join("notsock.txt")).ok();
         assert_eq!(primals.len(), 1);
@@ -496,13 +611,18 @@ mod tests {
     #[test]
     #[serial]
     fn discover_all_primals_handles_hyphenated_primal_name() {
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
         let unique_dir =
             std::env::temp_dir().join(format!("biomeos_hyphen_{}", std::process::id()));
         std::fs::create_dir_all(&unique_dir).unwrap();
         std::fs::File::create(unique_dir.join("my-primal-default.sock")).unwrap();
-        std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+        unsafe {
+            std::env::set_var("BIOMEOS_SOCKET_DIR", unique_dir.as_os_str());
+        }
         let primals = discover_all_primals();
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        unsafe {
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
         std::fs::remove_file(unique_dir.join("my-primal-default.sock")).ok();
         assert!(primals.contains(&"my".to_string()));
     }

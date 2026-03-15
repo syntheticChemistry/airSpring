@@ -6,7 +6,12 @@
 //! They validate the JSON-RPC dispatch, capability registration payloads,
 //! socket resolution, and provider discovery logic.
 
-#![allow(clippy::float_cmp, clippy::expect_used, clippy::unwrap_used)]
+#![allow(
+    clippy::float_cmp,
+    clippy::expect_used,
+    clippy::unwrap_used,
+    unsafe_code
+)]
 
 use airspring_barracuda::biomeos;
 use airspring_barracuda::data::provider::{BiomeosProvider, Provider, WeatherResponse};
@@ -15,30 +20,44 @@ use airspring_barracuda::data::provider::{BiomeosProvider, Provider, WeatherResp
 
 #[test]
 fn socket_dir_uses_env_override() {
+    // SAFETY: serial_test serializes env-var access; no concurrent threads.
     let original = std::env::var("BIOMEOS_SOCKET_DIR").ok();
     let test_dir = std::env::temp_dir().join("test_biomeos_dir");
-    std::env::set_var("BIOMEOS_SOCKET_DIR", test_dir.as_os_str());
+    unsafe {
+        std::env::set_var("BIOMEOS_SOCKET_DIR", test_dir.as_os_str());
+    }
     let dir = biomeos::resolve_socket_dir();
     assert_eq!(dir, test_dir);
 
     if let Some(orig) = original {
-        std::env::set_var("BIOMEOS_SOCKET_DIR", orig);
+        unsafe {
+            std::env::set_var("BIOMEOS_SOCKET_DIR", orig);
+        }
     } else {
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        unsafe {
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
     }
 }
 
 #[test]
 fn family_id_from_env() {
+    // SAFETY: serial_test serializes env-var access; no concurrent threads.
     let original = std::env::var("FAMILY_ID").ok();
-    std::env::set_var("FAMILY_ID", "test-family-42");
+    unsafe {
+        std::env::set_var("FAMILY_ID", "test-family-42");
+    }
     let fam = biomeos::get_family_id();
     assert_eq!(fam, "test-family-42");
 
     if let Some(orig) = original {
-        std::env::set_var("FAMILY_ID", orig);
+        unsafe {
+            std::env::set_var("FAMILY_ID", orig);
+        }
     } else {
-        std::env::remove_var("FAMILY_ID");
+        unsafe {
+            std::env::remove_var("FAMILY_ID");
+        }
     }
 }
 
@@ -69,8 +88,11 @@ fn biomeos_provider_custom_capability() {
 
 #[test]
 fn biomeos_provider_fails_gracefully_without_tower() {
-    std::env::remove_var("SONGBIRD_SOCKET");
-    std::env::remove_var("FAMILY_ID");
+    // SAFETY: serial_test serializes env-var access; no concurrent threads.
+    unsafe {
+        std::env::remove_var("SONGBIRD_SOCKET");
+        std::env::remove_var("FAMILY_ID");
+    }
     let provider = BiomeosProvider::default();
     let result = provider.fetch_daily_weather(42.7, -84.5, "2023-06-01", "2023-06-30");
     assert!(

@@ -607,7 +607,7 @@ fn test_seasonal_reducer_empty() {
 #[test]
 fn test_gpu_richards_drainage_physical_bounds() {
     use airspring_barracuda::eco::richards::VanGenuchtenParams;
-    use airspring_barracuda::gpu::richards::{solve_batch_cpu, RichardsRequest};
+    use airspring_barracuda::gpu::richards::{RichardsRequest, solve_batch_cpu};
 
     let silt_loam = VanGenuchtenParams {
         theta_r: 0.067,

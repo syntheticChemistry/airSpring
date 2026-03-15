@@ -1,4 +1,4 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # airSpring formatting — consistent across all crates.
-edition = "2021"
+edition = "2024"
 max_width = 100

@@ -15,7 +15,7 @@ use std::sync::Arc;
 
 use barracuda::device::WgpuDevice;
 use barracuda::ops::bio::diversity_fusion::{
-    diversity_fusion_cpu, DiversityFusionGpu, DiversityResult,
+    DiversityFusionGpu, DiversityResult, diversity_fusion_cpu,
 };
 
 #[cfg(test)]

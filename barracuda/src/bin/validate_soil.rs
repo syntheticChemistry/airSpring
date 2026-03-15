@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Validate soil moisture sensor calibration against published values.
 //!
 //! Benchmark source: `control/soil_sensors/benchmark_dong2020.json`
@@ -16,7 +10,7 @@
 use airspring_barracuda::eco::soil_moisture::{self as sm, SoilTexture};
 use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{
-    self, json_array, json_f64, json_field, json_str, parse_benchmark_json, ValidationHarness,
+    self, ValidationHarness, json_array, json_f64, json_field, json_str, parse_benchmark_json,
 };
 
 /// Benchmark JSON embedded at compile time for reproducibility.

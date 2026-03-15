@@ -5,7 +5,7 @@ use std::time::Instant;
 
 use airspring_barracuda::eco::correction;
 use airspring_barracuda::eco::evapotranspiration::{self as et, DailyEt0Input};
-use airspring_barracuda::gpu::mc_et0::{mc_et0_cpu, Et0Uncertainties};
+use airspring_barracuda::gpu::mc_et0::{Et0Uncertainties, mc_et0_cpu};
 use barracuda::validation::ValidationHarness;
 
 /// Shared FAO-56 Example 18 input — Uccle, Belgium, 6 July.

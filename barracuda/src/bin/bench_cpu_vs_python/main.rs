@@ -1,9 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
 #![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss,
     clippy::similar_names,
     clippy::excessive_precision,
     clippy::too_many_lines
@@ -101,9 +97,15 @@ fn run_benchmarks(
 }
 
 fn print_results(results: &[BenchResult], all_parity: bool) {
-    eprintln!("┌──────────────────────────────┬────────┬──────────────┬──────────────┬──────────┬────────┐");
-    eprintln!("│ Algorithm                    │      N │     Rust (s) │   Python (s) │  Speedup │ Parity │");
-    eprintln!("├──────────────────────────────┼────────┼──────────────┼──────────────┼──────────┼────────┤");
+    eprintln!(
+        "┌──────────────────────────────┬────────┬──────────────┬──────────────┬──────────┬────────┐"
+    );
+    eprintln!(
+        "│ Algorithm                    │      N │     Rust (s) │   Python (s) │  Speedup │ Parity │"
+    );
+    eprintln!(
+        "├──────────────────────────────┼────────┼──────────────┼──────────────┼──────────┼────────┤"
+    );
     for r in results {
         let parity_str = if r.parity_ok { "  ✓   " } else { " FAIL " };
         eprintln!(
@@ -111,7 +113,9 @@ fn print_results(results: &[BenchResult], all_parity: bool) {
             r.name, r.n, r.rust_secs, r.python_secs, r.speedup, parity_str,
         );
     }
-    eprintln!("└──────────────────────────────┴────────┴──────────────┴──────────────┴──────────┴────────┘");
+    eprintln!(
+        "└──────────────────────────────┴────────┴──────────────┴──────────────┴──────────┴────────┘"
+    );
 
     eprintln!("\n  Parity details:");
     for r in results {

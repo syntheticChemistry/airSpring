@@ -9,7 +9,7 @@
 
 #[test]
 fn test_evolution_gaps_catalogued() {
-    use airspring_barracuda::gpu::evolution_gaps::{Tier, GAPS};
+    use airspring_barracuda::gpu::evolution_gaps::{GAPS, Tier};
 
     assert!(GAPS.len() >= 8, "Expected 8+ gaps, got {}", GAPS.len());
 
@@ -91,7 +91,7 @@ fn test_kriging_gap_documented() {
 
 #[test]
 fn test_barracuda_issues_all_resolved() {
-    use airspring_barracuda::gpu::evolution_gaps::{IssueStatus, BARRACUDA_ISSUES};
+    use airspring_barracuda::gpu::evolution_gaps::{BARRACUDA_ISSUES, IssueStatus};
 
     assert_eq!(
         BARRACUDA_ISSUES.len(),

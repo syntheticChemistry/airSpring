@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Exp 026: USDA SCAN Soil Moisture Validation — Rust parity binary.
 //!
 //! Validates:
@@ -22,9 +16,9 @@
 //! Run: `python3 control/scan_moisture/scan_moisture_validation.py`
 
 use airspring_barracuda::eco::richards::{
-    solve_richards_1d, van_genuchten_k, van_genuchten_theta, VanGenuchtenParams,
+    VanGenuchtenParams, solve_richards_1d, van_genuchten_k, van_genuchten_theta,
 };
-use airspring_barracuda::validation::{self, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/scan_moisture/benchmark_scan_moisture.json");

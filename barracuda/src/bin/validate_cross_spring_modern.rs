@@ -17,10 +17,8 @@
 //!
 //! Hardcoded expected values. Explicit PASS/FAIL. Exit code 0 = all pass.
 
-#![allow(clippy::cast_precision_loss)]
-
 use barracuda::shaders::provenance::{
-    self, EvolutionEvent, ShaderRecord, SpringDomain, EVOLUTION_TIMELINE, REGISTRY,
+    self, EVOLUTION_TIMELINE, EvolutionEvent, REGISTRY, ShaderRecord, SpringDomain,
 };
 use barracuda::special::gamma;
 use barracuda::stats::normal;

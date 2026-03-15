@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Exp 031: Hargreaves-Samani (1985) Temperature-Only ET₀ Validation.
 //!
 //! Standalone validation of the temperature-only ET₀ method — the fallback
@@ -20,7 +14,7 @@
 //! Provenance: script=`control/hargreaves/hargreaves_samani.py`, commit=fad2e1b, date=2026-03-02
 
 use airspring_barracuda::eco::evapotranspiration::{extraterrestrial_radiation, hargreaves_et0};
-use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/hargreaves/benchmark_hargreaves.json");
 

@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Exp 040: CPU vs GPU Parity Validation.
 //!
 //! Validates that barracuda GPU dispatch paths produce identical results
@@ -27,17 +21,17 @@
 //! Run: `python3 control/cpu_gpu_parity/cpu_gpu_parity.py`
 
 use airspring_barracuda::eco::evapotranspiration::{
-    self as et, actual_vapour_pressure_rh, DailyEt0Input,
+    self as et, DailyEt0Input, actual_vapour_pressure_rh,
 };
 use airspring_barracuda::eco::tissue::{
-    analyze_tissue_disorder, barrier_disruption_d_eff, CellTypeAbundance, SkinCompartment,
+    CellTypeAbundance, SkinCompartment, analyze_tissue_disorder, barrier_disruption_d_eff,
 };
 use airspring_barracuda::eco::water_balance::{daily_water_balance_step, stress_coefficient};
 use airspring_barracuda::gpu::diversity::GpuDiversity;
 use airspring_barracuda::gpu::et0::{Backend, BatchedEt0, StationDay};
 use airspring_barracuda::gpu::water_balance::{BatchedWaterBalance, FieldDayInput};
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/cpu_gpu_parity/benchmark_cpu_gpu_parity.json");

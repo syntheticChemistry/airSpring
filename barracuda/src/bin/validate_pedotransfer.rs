@@ -1,11 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #![deny(clippy::unwrap_used)]
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Validate Saxton & Rawls (2006) pedotransfer functions against Python baseline (Exp 023).
 //!
 //! Saxton KE, Rawls WJ (2006) "Soil water characteristic estimates by texture
@@ -13,11 +7,11 @@
 //!
 //! Provenance: script=`control/pedotransfer/saxton_rawls.py`, commit=fad2e1b, date=2026-02-27
 
-use airspring_barracuda::eco::soil_moisture::{saxton_rawls, SaxtonRawlsInput};
+use airspring_barracuda::eco::soil_moisture::{SaxtonRawlsInput, saxton_rawls};
 use airspring_barracuda::tolerances::{PEDOTRANSFER_KSAT, PEDOTRANSFER_MOISTURE};
 use airspring_barracuda::validation::{
-    self, json_array, json_f64_required, json_field, json_object_required, parse_benchmark_json,
-    ValidationHarness,
+    self, ValidationHarness, json_array, json_f64_required, json_field, json_object_required,
+    parse_benchmark_json,
 };
 
 const BENCHMARK_JSON: &str =

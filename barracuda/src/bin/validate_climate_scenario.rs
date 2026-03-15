@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::too_many_lines)]
-#![warn(clippy::pedantic)]
 #![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss,
+    clippy::too_many_lines,
     clippy::similar_names,
     clippy::option_if_let_else
 )]
@@ -28,7 +24,7 @@ use std::f64::consts::PI;
 
 use airspring_barracuda::eco::crop::CropType;
 use airspring_barracuda::gpu::seasonal_pipeline::{CropConfig, SeasonalPipeline, WeatherDay};
-use airspring_barracuda::validation::{self, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/climate_scenario/benchmark_climate_scenario.json");

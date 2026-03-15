@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Exp 066: Tissue Diversity Profiling Validation.
 //!
 //! Validates cell-type diversity → Anderson disorder W mapping for
@@ -24,11 +18,11 @@
 //! Run: `python3 control/tissue_diversity/tissue_diversity.py`
 
 use airspring_barracuda::eco::tissue::{
-    analyze_tissue_disorder, barrier_disruption_d_eff, multi_compartment_analysis, AndersonRegime,
-    CellTypeAbundance, SkinCompartment,
+    AndersonRegime, CellTypeAbundance, SkinCompartment, analyze_tissue_disorder,
+    barrier_disruption_d_eff, multi_compartment_analysis,
 };
 use airspring_barracuda::gpu::diversity::GpuDiversity;
-use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/tissue_diversity/benchmark_tissue_diversity.json");

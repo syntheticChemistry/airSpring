@@ -52,8 +52,8 @@ impl Default for RichardsConfig {
 
 // Re-export VG types and functions for backward compatibility.
 pub use super::van_genuchten::{
-    inverse_van_genuchten_h, van_genuchten_capacity, van_genuchten_k, van_genuchten_theta,
-    VanGenuchtenParams,
+    VanGenuchtenParams, inverse_van_genuchten_h, van_genuchten_capacity, van_genuchten_k,
+    van_genuchten_theta,
 };
 
 /// 1D Richards equation solution at a single time step.

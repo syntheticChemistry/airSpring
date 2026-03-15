@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(clippy::cast_precision_loss)]
 
 //! Cross-Spring Evolution Benchmark — Modern `BarraCuda` Validation
 //!

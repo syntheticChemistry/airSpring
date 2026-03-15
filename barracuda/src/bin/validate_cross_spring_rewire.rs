@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(clippy::cast_precision_loss)]
 
 //! Exp 073: Cross-Spring Evolution Rewire Validation
 //!
@@ -50,7 +48,7 @@ use airspring_barracuda::eco::evapotranspiration::{self as et, DailyEt0Input, Et
 use airspring_barracuda::eco::richards::VanGenuchtenParams;
 use airspring_barracuda::eco::van_genuchten;
 use airspring_barracuda::gpu::richards::{BatchedRichards, RichardsRequest};
-use airspring_barracuda::gpu::van_genuchten::{compute_theta_cpu, BatchedVanGenuchten};
+use airspring_barracuda::gpu::van_genuchten::{BatchedVanGenuchten, compute_theta_cpu};
 use airspring_barracuda::tolerances;
 use airspring_barracuda::validation;
 use barracuda::validation::ValidationHarness;

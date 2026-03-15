@@ -358,18 +358,22 @@ mod tests {
     fn node_has_compute() {
         assert!(AtomicKind::Node.has_compute());
         assert_eq!(AtomicKind::Node.capabilities().len(), 3);
-        assert!(AtomicKind::Node
-            .capabilities()
-            .contains(&"compute.dispatch"));
+        assert!(
+            AtomicKind::Node
+                .capabilities()
+                .contains(&"compute.dispatch")
+        );
     }
 
     #[test]
     fn nest_has_storage() {
         assert!(AtomicKind::Nest.has_storage());
         assert_eq!(AtomicKind::Nest.capabilities().len(), 3);
-        assert!(AtomicKind::Nest
-            .capabilities()
-            .contains(&"storage.provenance"));
+        assert!(
+            AtomicKind::Nest
+                .capabilities()
+                .contains(&"storage.provenance")
+        );
     }
 
     #[test]

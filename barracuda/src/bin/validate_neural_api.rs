@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Exp 036: biomeOS Neural API Round-Trip Parity Validation.
 //!
 //! Validates that ecological compute dispatched through JSON-RPC
@@ -27,9 +21,9 @@
 //! Run: `python3 control/neural_api/neural_api_parity.py`
 
 use airspring_barracuda::eco::evapotranspiration::{
-    self, hamon_pet, hargreaves_et0, makkink_et0, turc_et0, DailyEt0Input,
+    self, DailyEt0Input, hamon_pet, hargreaves_et0, makkink_et0, turc_et0,
 };
-use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/neural_api/benchmark_neural_api.json");
 

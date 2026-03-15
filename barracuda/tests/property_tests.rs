@@ -5,15 +5,15 @@
 
 use airspring_barracuda::eco::crop::gdd_avg;
 use airspring_barracuda::eco::diversity::{bray_curtis, shannon};
-use airspring_barracuda::eco::evapotranspiration::{daily_et0, hargreaves_et0, DailyEt0Input};
-use airspring_barracuda::eco::infiltration::{cumulative_infiltration, GreenAmptParams};
+use airspring_barracuda::eco::evapotranspiration::{DailyEt0Input, daily_et0, hargreaves_et0};
+use airspring_barracuda::eco::infiltration::{GreenAmptParams, cumulative_infiltration};
 use airspring_barracuda::eco::runoff::scs_cn_runoff_standard;
 use airspring_barracuda::eco::soil_moisture::{
-    inverse_topp, saxton_rawls, topp_equation, SaxtonRawlsInput,
+    SaxtonRawlsInput, inverse_topp, saxton_rawls, topp_equation,
 };
 use airspring_barracuda::eco::van_genuchten::van_genuchten_theta;
 use airspring_barracuda::eco::water_balance::{
-    mass_balance_check, simulate_season, DailyInput, WaterBalanceState,
+    DailyInput, WaterBalanceState, mass_balance_check, simulate_season,
 };
 use airspring_barracuda::eco::yield_response::{clamp_yield_ratio, yield_ratio_single};
 use proptest::prelude::*;

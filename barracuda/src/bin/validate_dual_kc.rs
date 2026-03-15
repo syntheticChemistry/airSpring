@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Validate FAO-56 Chapter 7 dual crop coefficient against Python control.
 //!
 //! Benchmark source: `control/dual_kc/benchmark_dual_kc.json`
@@ -26,7 +20,7 @@ use airspring_barracuda::eco::dual_kc::{self, DualKcInput, EvaporationLayerState
 use airspring_barracuda::eco::soil_moisture::SoilTexture;
 use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{
-    self, json_array, json_field, json_str, parse_benchmark_json, ValidationHarness,
+    self, ValidationHarness, json_array, json_field, json_str, parse_benchmark_json,
 };
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/dual_kc/benchmark_dual_kc.json");

@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
 **Updated**: March 15, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.8.1)
-**Status**: 87 experiments, 1284/1284 Python + 847 lib + 41 integration + 186 forge tests + 95 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.5× CPU speedup (21/21 parity) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + `PrecisionRoutingAdvice` wired + upstream provenance registry + 66/66 metalForge cross-system + NUCLEUS primal (35 capabilities) + zero clippy pedantic+nursery. Deep debt execution complete: all compilation blockers resolved, GPU stream smoother f64→f32 shader bug fixed, akida-driver evolved from stub to Rust facade, validation integrity verified, tolerance provenance complete, all features compile
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.8.2)
+**Status**: 87 experiments, 1284/1284 Python + 853 lib + 281 integration + 61 forge tests + 95 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.5× CPU speedup (21/21 parity) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-version 1.87) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, transitional adapter → biomeOS graph deployment) + zero `#[allow()]` in production + zero clippy pedantic+nursery + zero unsafe in production. Deep code quality complete
 
 ---
 
@@ -39,6 +39,7 @@ Phase 5.1 toadStool dispatch  — Exp 085: 14 JSON-RPC science methods, compute.
 Phase 5.2 NUCLEUS mesh        — Exp 086: live hardware → NUCLEUS mesh → ecology pipeline, PCIe bypass (17/17)
 Phase 5.3 Graph coordination  — Exp 087: biomeOS TOML graphs, DAG validation, capability refs (22/22)
 Phase 5.4 neuralAPI Pathway Learner — Pathway Learner integration, 4 deploy graphs
+Phase 5.5 Niche architecture    — Edition 2024, niche self-knowledge module, transitional adapter (635 LOC), deep code quality (zero #[allow()], zero unsafe in production, 95 binaries cleaned), V071-V076 archived
 ```
 
 ## Faculty Summary
@@ -232,12 +233,12 @@ S79 modernization: `libc`→`rustix`, `async-trait`→AFIT, universal f64 precis
 |----------|---------|
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C breakdown, absorbed vs stays-local, quality gates |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
-| `wateringHole/handoffs/` | V081 current — deep debt resolution, upstream sync, toadStool/barraCuda evolution |
+| `wateringHole/handoffs/` | V082 current — niche architecture, Edition 2024, deep code quality, toadStool/barraCuda absorption handoff |
 | `specs/CROSS_SPRING_EVOLUTION.md` | 845+ WGSL shader provenance across all Springs (S93) |
 
 ### Next Steps (Dong Lab)
 
-- **Deep debt audit round 2 complete**: Sovereignty hardening (`domain_use` rename, primal-agnostic labels), dependency gating (`ureq`/`testutil` feature-flagged for pure Rust builds), fallible constructors (`try_new` for data providers), large-file refactoring (3 files split into focused modules), zero-copy CSV parser, explicit error handling. Zero clippy pedantic+nursery warnings, zero unsafe, zero mocks in production, cargo-deny clean
+- **Niche architecture complete (v0.8.2)**: airSpring is a niche deployment of primals via biomeOS graphs, not a standalone primal. `airspring_primal` binary refactored to transitional niche adapter (635 LOC), niche self-knowledge centralized in `src/niche.rs`. Edition 2024 migrated (rust-version 1.87), zero `#[allow()]` in production (redundant lints removed from 95 binaries), `#![deny(unsafe_code)]` with unsafe isolated to test `set_var`/`remove_var`, metalForge forge Edition 2024 migrated. V071-V076 handoffs archived. Zero clippy pedantic+nursery warnings, zero unsafe in production, zero mocks in production, cargo-deny clean
 - **Coverage**: target 98%+ (remaining gaps: GPU-dependent code paths)
 - **ToadStool absorption**: All 6 local ops absorbed upstream into `BatchedElementwiseF64` (ops 14-19), `local_dispatch` retired — Write→Absorb→Lean complete (v0.7.2)
 - **GPU at scale**: Profile `compute_gpu()` at N=100K+ (multi-year regional grids, crossover point via `AtlasStream`)

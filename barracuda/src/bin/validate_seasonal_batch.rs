@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Exp 042: Seasonal Batch ET₀ at GPU Scale.
 //!
 //! Generates synthetic 365-day weather for 4 US climate stations, computes
@@ -20,7 +14,7 @@
 //! Run: `python3 control/seasonal_batch_et0/seasonal_batch_et0.py`
 
 use airspring_barracuda::gpu::et0::{Backend, BatchedEt0, StationDay};
-use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/seasonal_batch_et0/benchmark_seasonal_batch.json");

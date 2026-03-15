@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(clippy::cast_precision_loss)]
 //! Exp 053: Van Genuchten Inverse Parameter Estimation.
 //!
 //! Validates forward VG retention θ(h), hydraulic conductivity K(h), θ→h
@@ -18,10 +16,10 @@
 //! Run: `python3 control/vg_inverse/vg_inverse_fitting.py`
 
 use airspring_barracuda::eco::van_genuchten::{
-    inverse_van_genuchten_h, van_genuchten_k, van_genuchten_theta, VanGenuchtenParams,
+    VanGenuchtenParams, inverse_van_genuchten_h, van_genuchten_k, van_genuchten_theta,
 };
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation::{self, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/vg_inverse/benchmark_vg_inverse.json");
 

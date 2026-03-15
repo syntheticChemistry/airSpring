@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Validate cover crop dual Kc + no-till mulch effects against Python control.
 //!
 //! Benchmark: `control/dual_kc/benchmark_cover_crop_kc.json`
@@ -24,7 +18,7 @@ use airspring_barracuda::eco::dual_kc::{
 };
 use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{
-    self, json_array, json_f64, json_field, json_str, parse_benchmark_json, ValidationHarness,
+    self, ValidationHarness, json_array, json_f64, json_field, json_str, parse_benchmark_json,
 };
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/dual_kc/benchmark_cover_crop_kc.json");

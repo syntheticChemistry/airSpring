@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Exp 047: Comprehensive GPU Math Portability Validation.
 //!
 //! Validates that EVERY GPU orchestrator produces identical results to its
@@ -42,9 +36,9 @@ use airspring_barracuda::gpu::hargreaves::{BatchedHargreaves, HargreavesDay};
 use airspring_barracuda::gpu::isotherm;
 use airspring_barracuda::gpu::kc_climate::{BatchedKcClimate, KcClimateDay};
 use airspring_barracuda::gpu::kriging::{
-    interpolate_soil_moisture, SensorReading, SoilVariogram, TargetPoint,
+    SensorReading, SoilVariogram, TargetPoint, interpolate_soil_moisture,
 };
-use airspring_barracuda::gpu::mc_et0::{mc_et0_cpu, Et0Uncertainties};
+use airspring_barracuda::gpu::mc_et0::{Et0Uncertainties, mc_et0_cpu};
 use airspring_barracuda::gpu::reduce;
 use airspring_barracuda::gpu::richards::{self as gpu_richards, RichardsRequest};
 use airspring_barracuda::gpu::seasonal_pipeline::{CropConfig, SeasonalPipeline, WeatherDay};

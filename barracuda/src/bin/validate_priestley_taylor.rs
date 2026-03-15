@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Validate Priestley-Taylor ET₀ against Python baseline (Exp 019).
 //!
 //! Priestley CHB, Taylor RJ (1972) "On the assessment of surface heat flux
@@ -14,7 +8,7 @@
 //! Provenance: script=`control/priestley_taylor/priestley_taylor_et0.py`, commit=9a84ae5, date=2026-02-26
 
 use airspring_barracuda::eco::evapotranspiration::{self as et, DailyEt0Input};
-use airspring_barracuda::validation::{self, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/priestley_taylor/benchmark_priestley_taylor.json");

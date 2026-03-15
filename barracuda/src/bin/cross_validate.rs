@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Phase 2 cross-validation: Rust side.
 //!
 //! Computes the same values as `scripts/cross_validate.py` using identical
@@ -26,7 +20,7 @@ use airspring_barracuda::eco::{
 };
 use airspring_barracuda::testutil;
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation::{self, json_f64, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, json_f64};
 use serde_json::json;
 
 const BENCHMARK_FAO56: &str = include_str!("../../../control/fao56/benchmark_fao56.json");

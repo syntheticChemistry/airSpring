@@ -3,10 +3,7 @@
     clippy::pedantic,
     clippy::nursery,
     clippy::too_many_lines,
-    clippy::similar_names,
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
+    clippy::similar_names
 )]
 //! Exp 065: biomeOS Graph Experiment — ecology pipeline via NUCLEUS coordination.
 //!
@@ -30,7 +27,7 @@ use std::time::Instant;
 
 use airspring_barracuda::eco::crop::CropType;
 use airspring_barracuda::eco::evapotranspiration::{self as et, DailyEt0Input};
-use airspring_barracuda::gpu::evolution_gaps::{Tier, GAPS};
+use airspring_barracuda::gpu::evolution_gaps::{GAPS, Tier};
 use airspring_barracuda::gpu::seasonal_pipeline::{CropConfig, SeasonalPipeline, WeatherDay};
 use airspring_barracuda::validation::ValidationHarness;
 

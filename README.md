@@ -2,7 +2,7 @@
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
 **Date**: March 15, 2026
-**Version**: 0.8.1
+**Version**: 0.8.2
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -13,13 +13,13 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → biomeOS (NUCLEUS atomics, deployment graphs) → Penny Irrigation
 ```
 
-## Current Status (v0.8.1)
+## Current Status (v0.8.2)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,284/1,284 PASS** | 60 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB, MC ET₀ uncertainty, bootstrap/jackknife CI, SPI drought index |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **865 lib + 1498 atlas** | 95 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
+| Phase 1: Rust validation | **853 lib + 281 integration** | 95 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (34/34 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -46,9 +46,9 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` (barracuda) | **847 passed**, 0 failures |
-| `cargo test --tests` (integration) | **41 passed** (21 GPU pipeline + 20 stats) |
-| `cargo test --lib` (metalForge) | **186 passed** + 1 doctest, 0 failures |
+| `cargo test --lib` (barracuda) | **853 passed**, 0 failures |
+| `cargo test --test '*'` (integration) | **281 passed** (16 test files) |
+| `cargo test --lib` (metalForge) | **61 passed**, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **95.66% line coverage** |
 | `cargo clippy (pedantic)` | **0 warnings** (pedantic, both crates) |
 | `cargo fmt --check` | **Clean** |
@@ -221,7 +221,7 @@ airSpring/
 │   ├── bootstrap_jackknife/     # Bootstrap & Jackknife CI (20/20)
 │   ├── drought_index/           # SPI drought index (20/20)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (847 lib tests, 95 binaries, barraCuda 0.3.5 / wgpu 28)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (853 lib tests, 95 binaries, barraCuda 0.3.5 / wgpu 28, Edition 2024)
 │   ├── src/
 │   │   ├── biomeos.rs           # biomeOS socket resolution + primal discovery (shared)
 │   │   ├── eco/                 # Domain modules (22 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine + drought_index)
@@ -245,7 +245,7 @@ airSpring/
 │   └── baseCamp/                # Per-faculty research briefings + baseCamp extensions
 ├── experiments/                 # Experiment protocols and results (87 experiments)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
-│   └── handoffs/                # Versioned handoffs (V076 current)
+│   └── handoffs/                # Versioned handoffs (V082 current)
 ├── graphs/                      # biomeOS deployment graphs (eco pipeline, provenance pipeline, niche deploy, cross-primal)
 ├── CHANGELOG.md                 # Keep-a-Changelog versioned history
 ├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
@@ -277,7 +277,7 @@ airSpring/
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance (S87) |
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (87 experiments) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V081 current) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V082 current) |
 
 ## License
 
@@ -285,13 +285,13 @@ AGPL-3.0-or-later
 
 ---
 
-*March 15, 2026 — v0.8.1. neuralAPI integration: structured metrics on every dispatch
-(Pathway Learner ready), operation dependencies for biomeOS parallelization, cost
-estimates for scheduling optimization. 4 domain registrations (ecology, provenance,
-data, capability). Heartbeat reports composition status for dynamic graph rewiring.
-Deploy graphs evolved to ConditionalDag with budget\_ms and Pathway Learner hints.
-biomeOS composition: Provenance Trio via `ipc/provenance.rs` with graceful degradation,
-`NestGateProvider` three-tier routing, Cross-Spring Time Series v1, GPU compute
-provenance, `ecology.experiment` high-level orchestration, `auto\_record\_provenance`
-in dispatch. 41 capabilities, 4 deploy graphs. 847 lib + 41 integration tests, 0
-clippy pedantic+nursery warnings, all features compile. AGPL-3.0-or-later.*
+*March 15, 2026 — v0.8.2. Rust Edition 2024 (rust-version 1.87). Niche architecture
+clarified: airSpring is a niche deployment of primals via biomeOS graphs, not a
+standalone primal. `airspring_primal` is a transitional niche adapter (635 LOC);
+niche self-knowledge centralized in `src/niche.rs` (41 capabilities, operation
+dependencies, cost estimates, semantic mappings). Deep code quality: zero
+`#[allow()]` in production (redundant lints removed from 95 binaries), zero
+clippy pedantic+nursery warnings, `#![deny(unsafe_code)]` with unsafe isolated
+to test `set_var`/`remove_var` (Edition 2024 requirement). metalForge forge
+Edition 2024 migrated. V071-V076 handoffs archived. 853 lib + 281 integration +
+61 forge tests, 0 failures. AGPL-3.0-or-later.*

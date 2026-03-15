@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Real data validation: compute ET₀ on Open-Meteo Michigan weather.
 //!
 //! Replaces `control/fao56/compute_et0_real_data.py` + `simulate_real_data.py`.

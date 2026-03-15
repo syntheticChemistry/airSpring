@@ -1,13 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
 #![allow(
     clippy::cast_lossless,
-    clippy::cast_precision_loss,
     clippy::doc_markdown,
     clippy::similar_names,
     clippy::too_many_lines
 )]
-
 //! Exp 077: Cross-Spring Provenance & CPU↔GPU Benchmark
 //!
 //! Validates all GPU modules, benchmarks CPU vs GPU throughput, and
@@ -72,7 +69,7 @@ use airspring_barracuda::gpu::et0::{BatchedEt0, StationDay};
 use airspring_barracuda::gpu::hargreaves::{BatchedHargreaves, HargreavesDay};
 use airspring_barracuda::gpu::jackknife::GpuJackknife;
 use airspring_barracuda::gpu::kc_climate::{BatchedKcClimate, KcClimateDay};
-use airspring_barracuda::gpu::mc_et0::{mc_et0_cpu, Et0Uncertainties};
+use airspring_barracuda::gpu::mc_et0::{Et0Uncertainties, mc_et0_cpu};
 use airspring_barracuda::gpu::pedotransfer::{BatchedPedotransfer, PedotransferInput};
 use airspring_barracuda::gpu::seasonal_pipeline::{CropConfig, SeasonalPipeline, WeatherDay};
 use airspring_barracuda::gpu::van_genuchten::BatchedVanGenuchten;

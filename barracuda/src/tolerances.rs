@@ -71,7 +71,7 @@
 //! | ET₀ cross-method % | (literature) | — | — | Hargreaves vs PM 10–30% divergence; Great Lakes 25% |
 //! | P significance | (convention) | — | — | Standard two-tailed α = 0.05; no Python baseline needed |
 
-pub use barracuda::tolerances::{check, Tolerance};
+pub use barracuda::tolerances::{Tolerance, check};
 
 // ═══════════════════════════════════════════════════════════════════
 // ET₀ and atmospheric tolerances (FAO-56)
@@ -381,8 +381,7 @@ pub const ISOTHERM_MEAN_RESIDUAL: Tolerance = Tolerance {
     name: "isotherm_mean_residual",
     abs_tol: 0.5,
     rel_tol: 0.05,
-    justification:
-        "Kumari et al. (2025): mean(|qe_obs - qe_pred|) < 0.5 mg/g for no systematic bias",
+    justification: "Kumari et al. (2025): mean(|qe_obs - qe_pred|) < 0.5 mg/g for no systematic bias",
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -430,8 +429,7 @@ pub const ET0_CROSS_METHOD_PCT: Tolerance = Tolerance {
     name: "et0_cross_method_pct",
     abs_tol: 25.0,
     rel_tol: 0.0,
-    justification:
-        "Literature: Hargreaves vs PM 10-30% divergence; 25% accommodates Great Lakes climate",
+    justification: "Literature: Hargreaves vs PM 10-30% divergence; 25% accommodates Great Lakes climate",
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -459,8 +457,7 @@ pub const GREEN_AMPT_ANALYTICAL: Tolerance = Tolerance {
     name: "green_ampt_analytical",
     abs_tol: 0.001,
     rel_tol: 1e-4,
-    justification:
-        "Green-Ampt Newton iteration converges to 1e-12; 0.001 cm covers soil param uncertainty",
+    justification: "Green-Ampt Newton iteration converges to 1e-12; 0.001 cm covers soil param uncertainty",
 };
 
 /// FAO-56 Kc precision: Eq. 72 `Kc_max` and dual Kc component precision.
@@ -549,8 +546,7 @@ pub const BIO_DIVERSITY_SIMPSON: Tolerance = Tolerance {
     name: "bio_diversity_simpson",
     abs_tol: 1e-10,
     rel_tol: 1e-10,
-    justification:
-        "Simpson 1-D is a summation of p²; pure f64 arithmetic matches Python exactly to 1e-10",
+    justification: "Simpson 1-D is a summation of p²; pure f64 arithmetic matches Python exactly to 1e-10",
 };
 
 /// Bray-Curtis dissimilarity: pairwise distance matrix, f64 summation.

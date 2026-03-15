@@ -1160,11 +1160,11 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026 — Updated: March 15, 2026 (v0.8.1)*
-*87 experiments, 1284/1284 Python, 847 lib + 186 forge tests, 95 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 14.5× CPU speedup (21/21 parity), barraCuda 0.3.3 (wgpu 28). biomeOS NUCLEUS: Tower/Node+Nest live, 35 JSON-RPC capabilities. Exp 084 CPU/GPU 21/21, Exp 085 toadStool 19/19, Exp 086 metalForge 17/17, Exp 087 graphs 22/22.*
+*Initialized: February 16, 2026 — Updated: March 15, 2026 (v0.8.2)*
+*87 experiments, 1284/1284 Python, 853 lib + 281 integration + 61 forge tests, 95 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 14.5× CPU speedup (21/21 parity), barraCuda 0.3.5 (wgpu 28), Rust Edition 2024. biomeOS niche: 41 capabilities, 4 deploy graphs. Exp 084 CPU/GPU 21/21, Exp 085 toadStool 19/19, Exp 086 metalForge 17/17, Exp 087 graphs 22/22.*
 *8 ET₀ methods + SCS-CN runoff + Green-Ampt infiltration + coupled runoff-infiltration + VG inverse + full-season WB + Exp 058 Climate Scenario (46/46).*
-*NUCLEUS primal (16 capabilities, 28/28 cross-primal pipeline). Atlas decade 80yr (102/102). NASS real (99/99). NCBI diversity (63/63).*
+*Niche adapter (41 capabilities, transitional binary → biomeOS graph deployment). Atlas decade 80yr (102/102). NASS real (99/99). NCBI diversity (63/63).*
 *25 Tier A + 6 GPU-local modules. Ops 5-8 GPU-first (ToadStool S87). GPU stats (neuralSpring S69).*
 *Seasonal pipeline GPU Stages 1-3. 73/73 atlas PASS (12 stations, 4800 results). 146/146 + 32/32 cross-spring benchmarks (Exp 077). Exp 064-069 immunological Anderson (Paper 12).*
 *metalForge 27 workloads, 29/29 cross-system. AKD1000 NPU live (3 experiments).*
-*Quality: zero .unwrap(), zero unsafe, zero clippy pedantic + nursery warnings. AGPL-3.0-or-later.*
+*Quality: zero .unwrap(), zero unsafe in production, zero clippy pedantic + nursery warnings, zero #[allow()] in production. AGPL-3.0-or-later.*

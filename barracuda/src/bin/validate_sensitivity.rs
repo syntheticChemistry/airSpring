@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Validate FAO-56 Penman-Monteith sensitivity analysis (Exp 017).
 //!
 //! Benchmark: `control/sensitivity/benchmark_sensitivity.json`
@@ -20,7 +14,7 @@
 
 use airspring_barracuda::eco::evapotranspiration as et;
 use airspring_barracuda::validation::{
-    self, json_field, json_str, parse_benchmark_json, ValidationHarness,
+    self, ValidationHarness, json_field, json_str, parse_benchmark_json,
 };
 
 const BENCHMARK_JSON: &str =

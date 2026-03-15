@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Validate ET₀ three-method intercomparison (Exp 020).
 //!
 //! Computes PM, PT, and Hargreaves ET₀ on real Michigan Open-Meteo data
@@ -17,7 +11,7 @@
 //!
 //! Provenance: script=`control/et0_intercomparison/et0_three_method.py`, commit=9a84ae5, date=2026-02-26
 
-use airspring_barracuda::validation::{self, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/et0_intercomparison/benchmark_et0_intercomparison.json");

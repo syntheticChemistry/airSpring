@@ -4,7 +4,7 @@
 mod common;
 
 use airspring_barracuda::gpu::kriging::{
-    interpolate_soil_moisture, KrigingInterpolator, SensorReading, SoilVariogram, TargetPoint,
+    KrigingInterpolator, SensorReading, SoilVariogram, TargetPoint, interpolate_soil_moisture,
 };
 
 use common::try_create_device;

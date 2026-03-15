@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Exp 068: Barrier State Model Validation.
 //!
 //! Applies van Genuchten θ(h)/K(h) to skin barrier permeability modeling.
@@ -22,7 +16,7 @@
 
 use airspring_barracuda::eco::tissue::barrier_disruption_d_eff;
 use airspring_barracuda::eco::van_genuchten::{van_genuchten_k, van_genuchten_theta};
-use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/barrier_skin/benchmark_barrier_skin.json");

@@ -7,7 +7,7 @@
 //! 2. **Irrigation decision** — 3-class int8, 6 features → 3 classes
 //! 3. **Sensor anomaly** — binary int8, 3 features → 2 classes
 
-use super::{quantize_i8, Error, NpuHandle};
+use super::{Error, NpuHandle, quantize_i8};
 
 /// Result of a single NPU int8 inference via DMA.
 #[derive(Debug, Clone)]

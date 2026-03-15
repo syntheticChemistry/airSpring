@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 #![allow(clippy::doc_markdown)] // paths in doc comments
 //! Experiment 015: 60-year water balance validation.
 //!
@@ -25,7 +19,7 @@ use airspring_barracuda::eco::{
     water_balance::{self as wb, DailyInput, WaterBalanceState},
 };
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation::{self, json_f64, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, json_f64, parse_benchmark_json};
 use std::path::Path;
 
 const BENCHMARK_JSON: &str =

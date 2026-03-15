@@ -1,11 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss,
-    clippy::similar_names
-)]
+#![allow(clippy::similar_names)]
 //! Exp 071: Comprehensive CPU Parity & Speedup Benchmark.
 //!
 //! Proves `BarraCuda` CPU is **pure math** and **faster than Python** across
@@ -33,7 +27,7 @@
 
 use std::time::Instant;
 
-use airspring_barracuda::eco::crop::{adjust_kc_for_climate, CropType};
+use airspring_barracuda::eco::crop::{CropType, adjust_kc_for_climate};
 use airspring_barracuda::eco::evapotranspiration::{self as et, DailyEt0Input};
 use airspring_barracuda::eco::water_balance::WaterBalanceState;
 use airspring_barracuda::eco::yield_response;

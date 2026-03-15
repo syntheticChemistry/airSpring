@@ -307,14 +307,15 @@ fn parse_response(response: &serde_json::Value) -> Result<CallResult, NeuralErro
 }
 
 #[cfg(test)]
-#[allow(clippy::expect_used, clippy::unwrap_used)]
+#[allow(clippy::expect_used, clippy::unwrap_used, unsafe_code)]
 mod tests {
     use super::*;
 
     #[test]
     fn no_socket_returns_none() {
-        std::env::remove_var("NEURAL_API_SOCKET");
-        std::env::remove_var("FAMILY_ID");
+        // SAFETY: test-only env cleanup; tests run single-threaded via cargo test.
+        unsafe { std::env::remove_var("NEURAL_API_SOCKET") };
+        unsafe { std::env::remove_var("FAMILY_ID") };
         assert!(NeuralBridge::discover().is_none());
     }
 
@@ -348,8 +349,9 @@ mod tests {
 
     #[test]
     fn probe_returns_none_without_biomeos() {
-        std::env::remove_var("NEURAL_API_SOCKET");
-        std::env::remove_var("FAMILY_ID");
+        // SAFETY: test-only env cleanup; tests run single-threaded via cargo test.
+        unsafe { std::env::remove_var("NEURAL_API_SOCKET") };
+        unsafe { std::env::remove_var("FAMILY_ID") };
         assert!(probe_neural().is_none());
     }
 }

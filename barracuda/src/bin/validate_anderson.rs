@@ -1,6 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(clippy::cast_precision_loss)]
 //! Anderson soil-moisture coupling — Rust CPU validation for Experiment 045.
 //!
 //! Cross-validates the θ → `d_eff` coupling chain against the Python control
@@ -193,7 +191,9 @@ fn check_seasonal(v: &mut ValidationHarness, soils: &[SoilParams]) {
             };
 
             v.check_bool(
-                &format!("seasonal({soil_key}, {tillage}): spring d_eff={spring_d:.2} > {D_EFF_CRITICAL}"),
+                &format!(
+                    "seasonal({soil_key}, {tillage}): spring d_eff={spring_d:.2} > {D_EFF_CRITICAL}"
+                ),
                 spring_d > D_EFF_CRITICAL,
             );
             v.check_bool(

@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Exp 030: `AmeriFlux` Eddy Covariance ET Validation.
 //!
 //! Validates FAO-56 ET₀ × Kc predictions against eddy covariance (EC)
@@ -21,7 +15,7 @@
 //! script=`control/ameriflux_et/ameriflux_et_validation.py`, commit=8c3953b, date=2026-02-27
 //! Run: `python3 control/ameriflux_et/ameriflux_et_validation.py`
 
-use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/ameriflux_et/benchmark_ameriflux_et.json");

@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(clippy::cast_precision_loss, clippy::similar_names)]
+#![allow(clippy::similar_names)]
 //! Exp 054: Full-Season Irrigation Water Budget Audit.
 //!
 //! Runs the complete FAO-56 pipeline for 4 crops over a synthetic growing
@@ -15,11 +14,11 @@
 //! script=`control/season_water_budget/season_water_budget.py`, commit=6be822f, date=2026-02-28
 //! Run: `python3 control/season_water_budget/season_water_budget.py`
 
-use airspring_barracuda::eco::evapotranspiration::{self as et, daily_et0, DailyEt0Input};
+use airspring_barracuda::eco::evapotranspiration::{self as et, DailyEt0Input, daily_et0};
 use airspring_barracuda::eco::water_balance::{
     daily_water_balance_step, readily_available_water, stress_coefficient, total_available_water,
 };
-use airspring_barracuda::validation::{self, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/season_water_budget/benchmark_season_wb.json");

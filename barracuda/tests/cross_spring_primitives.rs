@@ -106,7 +106,7 @@ fn hotspring_trig_enables_solar_calculations() {
 #[test]
 fn wetspring_kriging_enables_soil_moisture_mapping() {
     use airspring_barracuda::gpu::kriging::{
-        interpolate_soil_moisture, SensorReading, SoilVariogram, TargetPoint,
+        SensorReading, SoilVariogram, TargetPoint, interpolate_soil_moisture,
     };
 
     let sensors = vec![
@@ -325,7 +325,7 @@ fn airspring_ts004_reduce_buffer_large_n() {
 
 #[test]
 fn airspring_richards_pde_contributed_upstream() {
-    use airspring_barracuda::eco::richards::{solve_richards_1d, VanGenuchtenParams};
+    use airspring_barracuda::eco::richards::{VanGenuchtenParams, solve_richards_1d};
 
     let sand = VanGenuchtenParams {
         theta_r: 0.045,

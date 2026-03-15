@@ -4,9 +4,6 @@
 //! Exercises all airSpring GPU paths, benchmarks them against CPU baselines,
 //! and reports the cross-spring shader lineage for each primitive.
 
-#![warn(clippy::pedantic)]
-#![allow(clippy::cast_precision_loss)]
-
 mod data;
 mod helpers;
 mod impls;

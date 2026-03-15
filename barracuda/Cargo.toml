@@ -1,7 +1,8 @@
 [package]
 name = "airspring-barracuda"
-version = "0.8.1"
-edition = "2021"
+version = "0.8.2"
+edition = "2024"
+rust-version = "1.87"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
 description = "Ecological & agricultural science pipelines — Rust + GPU + NPU via BarraCuda"
@@ -37,11 +38,13 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
 
 # Synchronous HTTP client for standalone data providers (pre-biomeOS).
-# NOTE: ureq's default TLS (rustls) pulls in `ring` (C/asm). When Tower
-# Atomic is running, HTTPS should route through Songbird (Pure Rust TLS 1.3
-# via BearDog crypto delegation) — see `data::provider::HttpProvider`.
+# C DEPENDENCY: ureq 3 → rustls 0.23 → ring 0.17 (C/asm crypto).
+# This is the ONLY non-Pure-Rust dependency chain in airSpring.
+# When Tower Atomic is running, HTTPS routes through Songbird
+# (Pure Rust TLS 1.3 via BearDog crypto delegation).
 # Evolution: ureq (standalone) → Songbird capability.call (sovereign).
-# Gated behind `standalone-http` feature — disable for pure-Rust sovereignty.
+# ecoBin compliance: build with `--no-default-features --features testutil`
+# to eliminate ring and achieve zero C dependencies.
 ureq = { version = "3", optional = true }
 
 # Nautilus Shell: evolutionary reservoir computing via BingoCube board populations.

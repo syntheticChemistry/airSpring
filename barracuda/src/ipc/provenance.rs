@@ -162,6 +162,7 @@ fn local_session_id() -> String {
 /// Creates a DAG session in rhizoCrypt via biomeOS capability routing.
 /// If the trio is unavailable, returns a local session ID and
 /// `available: false` — the experiment proceeds without provenance.
+#[must_use]
 pub fn begin_experiment_session(experiment_name: &str) -> ProvenanceResult {
     let Some(socket) = neural_api_socket_path() else {
         return ProvenanceResult {
@@ -207,6 +208,7 @@ pub fn begin_experiment_session(experiment_name: &str) -> ProvenanceResult {
 /// Appends a vertex to the rhizoCrypt DAG for this session. The step
 /// payload should include domain-specific data (method name, parameters,
 /// result summary, tolerances).
+#[must_use]
 pub fn record_experiment_step(session_id: &str, step: &serde_json::Value) -> ProvenanceResult {
     let Some(socket) = neural_api_socket_path() else {
         return ProvenanceResult {
@@ -252,6 +254,7 @@ pub fn record_experiment_step(session_id: &str, step: &serde_json::Value) -> Pro
 ///
 /// Returns a [`ProvenanceCompletion`] with status indicating how far
 /// the pipeline progressed. Domain logic always succeeds regardless.
+#[must_use]
 pub fn complete_experiment(session_id: &str) -> ProvenanceCompletion {
     let Some(socket) = neural_api_socket_path() else {
         return ProvenanceCompletion {
@@ -340,6 +343,7 @@ pub fn complete_experiment(session_id: &str) -> ProvenanceCompletion {
 ///
 /// Tracks the full pipeline: input data → shader invocation → output,
 /// including precision tier (`f32`/`f64`), device info, and tolerances.
+#[must_use]
 pub fn record_gpu_step(
     session_id: &str,
     shader_name: &str,
@@ -383,12 +387,17 @@ impl ProvenanceCompletion {
 #[cfg(test)]
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
+    #![allow(unsafe_code)]
+
     use super::*;
 
     #[test]
     fn begin_session_degrades_gracefully_without_biomeos() {
-        std::env::remove_var("NEURAL_API_SOCKET");
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
+        unsafe {
+            std::env::remove_var("NEURAL_API_SOCKET");
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
         let result = begin_experiment_session("test_et0_validation");
         assert!(!result.available);
         assert!(result.id.starts_with("local-airspring-"));
@@ -397,8 +406,11 @@ mod tests {
 
     #[test]
     fn record_step_degrades_gracefully_without_biomeos() {
-        std::env::remove_var("NEURAL_API_SOCKET");
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
+        unsafe {
+            std::env::remove_var("NEURAL_API_SOCKET");
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
         let step = serde_json::json!({
             "method": "science.et0_fao56",
             "result_mm": 5.2,
@@ -409,8 +421,11 @@ mod tests {
 
     #[test]
     fn complete_experiment_degrades_gracefully_without_biomeos() {
-        std::env::remove_var("NEURAL_API_SOCKET");
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
+        unsafe {
+            std::env::remove_var("NEURAL_API_SOCKET");
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
         let completion = complete_experiment("local-session-1");
         assert_eq!(completion.status, "unavailable");
         assert!(completion.merkle_root.is_empty());
@@ -418,8 +433,11 @@ mod tests {
 
     #[test]
     fn record_gpu_step_degrades_gracefully() {
-        std::env::remove_var("NEURAL_API_SOCKET");
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
+        unsafe {
+            std::env::remove_var("NEURAL_API_SOCKET");
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
         let result = record_gpu_step(
             "local-session-1",
             "fao56_et0_batch",
@@ -432,8 +450,11 @@ mod tests {
 
     #[test]
     fn provenance_availability_false_without_biomeos() {
-        std::env::remove_var("NEURAL_API_SOCKET");
-        std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        // SAFETY: serial_test serializes env-var access; no concurrent threads.
+        unsafe {
+            std::env::remove_var("NEURAL_API_SOCKET");
+            std::env::remove_var("BIOMEOS_SOCKET_DIR");
+        }
         assert!(!is_available());
     }
 

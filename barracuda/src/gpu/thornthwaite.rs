@@ -7,7 +7,7 @@
 use std::sync::Arc;
 
 use barracuda::device::WgpuDevice;
-use barracuda::ops::batched_elementwise_f64::{thornthwaite_et0_cpu, BatchedElementwiseF64, Op};
+use barracuda::ops::batched_elementwise_f64::{BatchedElementwiseF64, Op, thornthwaite_et0_cpu};
 
 #[cfg(test)]
 use super::device_info::try_f64_device;

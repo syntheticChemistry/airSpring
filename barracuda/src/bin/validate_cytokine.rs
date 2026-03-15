@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Exp 067: `CytokineBrain` Regime Prediction Validation.
 //!
 //! Validates the full `CytokineBrain` lifecycle: observe → train → predict →
@@ -25,7 +19,7 @@ use airspring_barracuda::eco::cytokine::{
     CytokineBrain, CytokineBrainConfig, CytokineObservation, CytokinePrediction,
 };
 use airspring_barracuda::eco::tissue::AndersonRegime;
-use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
 use bingocube_nautilus::NautilusBrainConfig;
 
 const BENCHMARK_JSON: &str =

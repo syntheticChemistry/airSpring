@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Exp 050: SCS Curve Number Runoff Validation.
 //!
 //! Validates the USDA SCS-CN runoff method against analytical benchmarks,
@@ -18,11 +12,11 @@
 //! Provenance: script=`control/scs_curve_number/scs_curve_number.py`, commit=97e7533, date=2026-02-28
 
 use airspring_barracuda::eco::runoff::{
-    amc_cn_dry, amc_cn_wet, potential_retention, scs_cn_runoff, scs_cn_runoff_standard, LandUse,
-    SoilGroup,
+    LandUse, SoilGroup, amc_cn_dry, amc_cn_wet, potential_retention, scs_cn_runoff,
+    scs_cn_runoff_standard,
 };
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/scs_curve_number/benchmark_scs_cn.json");

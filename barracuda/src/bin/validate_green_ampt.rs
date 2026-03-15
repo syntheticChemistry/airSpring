@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Exp 051: Green-Ampt (1911) Infiltration Validation.
 //!
 //! Validates the Green-Ampt infiltration model against analytical benchmarks,
@@ -18,10 +12,10 @@
 //! Provenance: script=`control/green_ampt/green_ampt_infiltration.py`, commit=97e7533, date=2026-02-28
 
 use airspring_barracuda::eco::infiltration::{
-    cumulative_infiltration, infiltration_rate, ponding_time, GreenAmptParams,
+    GreenAmptParams, cumulative_infiltration, infiltration_rate, ponding_time,
 };
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/green_ampt/benchmark_green_ampt.json");
 

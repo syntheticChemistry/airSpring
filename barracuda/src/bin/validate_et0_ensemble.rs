@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Exp 037: ET₀ Ensemble Consensus (6-Method Weighted) Validation.
 //!
 //! Validates the multi-method ensemble that combines 6 daily ET₀ methods
@@ -21,8 +15,8 @@
 //! script=`control/et0_ensemble/et0_ensemble.py`, commit=97e7533, date=2026-02-28
 //! Run: `python3 control/et0_ensemble/et0_ensemble.py`
 
-use airspring_barracuda::eco::evapotranspiration::{et0_ensemble, EnsembleInput};
-use airspring_barracuda::validation::{self, json_field, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::eco::evapotranspiration::{EnsembleInput, et0_ensemble};
+use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/et0_ensemble/benchmark_et0_ensemble.json");

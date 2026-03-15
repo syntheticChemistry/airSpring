@@ -302,7 +302,7 @@ fn topo_sort(nodes: &HashSet<String>, deps: &HashMap<String, Vec<String>>) -> Op
 
     let mut queue: Vec<String> = deg
         .iter()
-        .filter(|(_, &d)| d == 0)
+        .filter(|&(_, &d)| d == 0)
         .map(|(n, _)| n.clone())
         .collect();
     queue.sort();

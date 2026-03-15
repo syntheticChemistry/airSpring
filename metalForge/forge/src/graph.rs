@@ -210,7 +210,7 @@ impl GraphDef {
         let mut queue: VecDeque<usize> = in_degree
             .iter()
             .enumerate()
-            .filter(|(_, &deg)| deg == 0)
+            .filter(|&(_, &deg)| deg == 0)
             .map(|(i, _)| i)
             .collect();
 

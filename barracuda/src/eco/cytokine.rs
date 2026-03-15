@@ -334,9 +334,11 @@ mod tests {
     #[test]
     fn untrained_returns_none() {
         let brain = CytokineBrain::new(CytokineBrainConfig::default(), "test");
-        assert!(brain
-            .predict(&make_obs(0.0, 100.0, 3.0, 0.5, 0.8))
-            .is_none());
+        assert!(
+            brain
+                .predict(&make_obs(0.0, 100.0, 3.0, 0.5, 0.8))
+                .is_none()
+        );
     }
 
     #[test]

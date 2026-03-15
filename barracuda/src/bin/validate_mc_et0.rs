@@ -1,11 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss,
-    clippy::similar_names
-)]
+#![allow(clippy::similar_names)]
 //! Exp 079: Monte Carlo ET₀ Uncertainty Propagation.
 //!
 //! Validates CPU Monte Carlo propagation of measurement uncertainties through
@@ -24,10 +18,10 @@
 //! Provenance: script=`control/mc_et0/mc_et0_propagation.py`, commit=1c11763, date=2026-03-07
 
 use airspring_barracuda::eco::evapotranspiration::DailyEt0Input;
-use airspring_barracuda::gpu::mc_et0::{mc_et0_cpu, Et0Uncertainties};
+use airspring_barracuda::gpu::mc_et0::{Et0Uncertainties, mc_et0_cpu};
 use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{
-    self, json_f64_required, parse_benchmark_json, ValidationHarness,
+    self, ValidationHarness, json_f64_required, parse_benchmark_json,
 };
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/mc_et0/benchmark_mc_et0.json");

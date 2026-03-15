@@ -6,7 +6,7 @@
 
 #[test]
 fn s70_richards_uses_upstream_tridiagonal_solve() {
-    use airspring_barracuda::eco::richards::{solve_richards_1d, VanGenuchtenParams};
+    use airspring_barracuda::eco::richards::{VanGenuchtenParams, solve_richards_1d};
 
     let params = VanGenuchtenParams {
         theta_r: 0.078,
@@ -57,7 +57,7 @@ fn s70_nelder_mead_optimizer_cross_spring() {
 
 #[test]
 fn s70_bfgs_optimizer_for_calibration() {
-    use barracuda::optimize::bfgs::{bfgs_numerical, BfgsConfig};
+    use barracuda::optimize::bfgs::{BfgsConfig, bfgs_numerical};
 
     let quadratic = |x: &[f64]| {
         let dx = x[0] - 3.0;
@@ -189,7 +189,7 @@ fn s70_pde_crank_nicolson_heat_equation() {
 
 #[test]
 fn s70_upstream_richards_pde_consistency() {
-    use barracuda::pde::richards::{solve_richards, RichardsBc, RichardsConfig, SoilParams};
+    use barracuda::pde::richards::{RichardsBc, RichardsConfig, SoilParams, solve_richards};
 
     let config = RichardsConfig {
         soil: SoilParams::LOAM,
@@ -303,7 +303,7 @@ fn s70_wetspring_hill_monod_crop_response() {
 
 #[test]
 fn s70_convergence_diagnostics_for_picard() {
-    use barracuda::optimize::diagnostics::{convergence_diagnostics, ConvergenceState};
+    use barracuda::optimize::diagnostics::{ConvergenceState, convergence_diagnostics};
 
     let residuals = [1e-1, 5e-2, 1e-2, 5e-3, 1e-3, 5e-4, 1e-4];
     let diag = convergence_diagnostics(&residuals, 3, 0.01, 3).expect("diagnostics");

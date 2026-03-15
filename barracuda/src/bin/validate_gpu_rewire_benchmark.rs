@@ -1,9 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
 #![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss,
     clippy::similar_names,
     clippy::too_many_lines,
     clippy::option_if_let_else
@@ -615,7 +611,7 @@ fn max_abs_err(a: &[f64], b: &[f64]) -> f64 {
 
 fn compute_et0_cpu(s: &bef64::StationDayInput) -> f64 {
     use airspring_barracuda::eco::evapotranspiration::{
-        self as et, actual_vapour_pressure_rh, DailyEt0Input,
+        self as et, DailyEt0Input, actual_vapour_pressure_rh,
     };
     let ea = actual_vapour_pressure_rh(s.1, s.0, s.3, s.2);
     let input = DailyEt0Input {

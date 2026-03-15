@@ -17,7 +17,7 @@
 //! FAO Irrigation and Drainage Paper 56, Rome.
 
 // Re-export solar geometry and radiation for backward compatibility.
-pub use super::et0_ensemble::{et0_ensemble, EnsembleInput, EnsembleResult};
+pub use super::et0_ensemble::{EnsembleInput, EnsembleResult, et0_ensemble};
 pub use super::solar::{
     clear_sky_radiation, daylight_hours, extraterrestrial_radiation, inverse_rel_distance,
     net_longwave_radiation, net_radiation, net_shortwave_radiation, solar_declination,

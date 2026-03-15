@@ -3,7 +3,7 @@
 
 use std::time::Instant;
 
-use airspring_barracuda::eco::richards::{solve_richards_1d, VanGenuchtenParams};
+use airspring_barracuda::eco::richards::{VanGenuchtenParams, solve_richards_1d};
 use barracuda::validation::ValidationHarness;
 
 pub fn bench_hotspring_precision(v: &mut ValidationHarness) {

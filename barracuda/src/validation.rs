@@ -20,7 +20,7 @@
 //! // v.finish() exits the process — call only in validation binaries
 //! ```
 
-pub use barracuda::validation::{exit_no_gpu, gpu_required, ValidationHarness};
+pub use barracuda::validation::{ValidationHarness, exit_no_gpu, gpu_required};
 
 /// Initialise tracing so that `ValidationHarness::finish()` output is visible.
 ///

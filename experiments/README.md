@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: March 15, 2026
-**Status**: 87 experiments, barraCuda 0.3.5 (wgpu 28), v0.8.1. 1284/1284 Python + 847 lib + 186 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. 14.5× Rust-vs-Python speedup (21/21 parity). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry integrated (v0.7.3). Deep debt execution: all compilation blockers resolved (validate_cytokine API drift, nucleus_integration stale imports, akida-driver stub→facade, non_snake_case), validation integrity fixes (drought_index hardcoding eliminated, GPU stream smoother f64→f32 shader bug fixed, biochar provenance corrected, anderson_coupling.py path fixed), 9 tolerance provenance entries added, eprintln→tracing::warn, GPU test tolerances aligned with f32 precision. Zero clippy pedantic+nursery warnings, all features compile.
+**Status**: 87 experiments, barraCuda 0.3.5 (wgpu 28), v0.8.2, Edition 2024 (rust-version 1.87). 1284/1284 Python + 853 lib + 281 integration + 61 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. 14.5× Rust-vs-Python speedup (21/21 parity). Niche architecture: 41 capabilities, 4 deploy graphs, transitional adapter → biomeOS graph deployment. All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired. Deep code quality: zero `#[allow()]` in production (95 binaries cleaned), zero clippy pedantic+nursery warnings, zero unsafe in production.
 
 ---
 

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![forbid(unsafe_code)]
+#![deny(unsafe_code)]
 #![deny(clippy::unwrap_used, clippy::expect_used)]
-#![allow(clippy::cast_precision_loss)]
 
 //! airSpring `BarraCuda` — Ecological & Agricultural Science Pipelines
 //!
@@ -81,6 +80,7 @@ pub mod gpu;
 pub mod io;
 pub mod ipc;
 pub mod nautilus;
+pub mod niche;
 #[cfg(feature = "npu")]
 pub mod npu;
 pub mod primal_science;

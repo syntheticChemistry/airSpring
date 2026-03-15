@@ -530,7 +530,7 @@ mod tests {
         let mad = 0.5;
         let mad_depletion = mad * paw; // 0.10
         let theta_at_mad = fc - mad_depletion; // 0.20
-                                               // At MAD boundary, depletion == MAD×PAW → not triggered (<=)
+        // At MAD boundary, depletion == MAD×PAW → not triggered (<=)
         assert!(!irrigation_trigger(fc, wp, theta_at_mad, mad));
         // Slightly below triggers
         assert!(irrigation_trigger(fc, wp, theta_at_mad - 0.001, mad));

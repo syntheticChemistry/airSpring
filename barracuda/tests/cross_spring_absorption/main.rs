@@ -120,7 +120,7 @@ fn s64_wetspring_alpha_diversity_comprehensive() {
 #[test]
 fn s64_groundspring_mc_et0_uncertainty_bands() {
     use airspring_barracuda::eco::evapotranspiration::DailyEt0Input;
-    use airspring_barracuda::gpu::mc_et0::{mc_et0_cpu, Et0Uncertainties};
+    use airspring_barracuda::gpu::mc_et0::{Et0Uncertainties, mc_et0_cpu};
 
     let input = DailyEt0Input {
         tmin: 12.3,
@@ -154,7 +154,7 @@ fn s64_groundspring_mc_et0_uncertainty_bands() {
 #[test]
 fn s64_groundspring_mc_et0_deterministic_seed() {
     use airspring_barracuda::eco::evapotranspiration::DailyEt0Input;
-    use airspring_barracuda::gpu::mc_et0::{mc_et0_cpu, Et0Uncertainties};
+    use airspring_barracuda::gpu::mc_et0::{Et0Uncertainties, mc_et0_cpu};
 
     let input = DailyEt0Input {
         tmin: 15.0,
@@ -503,7 +503,7 @@ mod s70_cross_spring;
 
 #[test]
 fn cross_spring_shader_evolution_documented() {
-    use airspring_barracuda::gpu::evolution_gaps::{Tier, GAPS};
+    use airspring_barracuda::gpu::evolution_gaps::{GAPS, Tier};
 
     let tier_a = GAPS.iter().filter(|g| g.tier == Tier::A).count();
     let tier_b = GAPS.iter().filter(|g| g.tier == Tier::B).count();
@@ -536,7 +536,7 @@ fn cross_spring_shader_evolution_documented() {
 
 #[test]
 fn regression_richards_tridiag_rewire_matches_baseline() {
-    use airspring_barracuda::eco::richards::{solve_richards_1d, VanGenuchtenParams};
+    use airspring_barracuda::eco::richards::{VanGenuchtenParams, solve_richards_1d};
 
     let params = VanGenuchtenParams {
         theta_r: 0.078,

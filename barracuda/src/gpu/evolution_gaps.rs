@@ -390,8 +390,7 @@ pub const GAPS: &[EvolutionGap] = &[
         description: "Batched water balance depletion update on GPU",
         tier: Tier::A,
         barracuda_primitive: Some("ops::batched_elementwise_f64::BatchedElementwiseF64 (op=1)"),
-        action:
-            "GPU-STEP — BatchedWaterBalance::gpu_step() → water_balance_batch() (TS-002 resolved)",
+        action: "GPU-STEP — BatchedWaterBalance::gpu_step() → water_balance_batch() (TS-002 resolved)",
     },
     EvolutionGap {
         id: "kriging_soil_moisture",
@@ -405,8 +404,7 @@ pub const GAPS: &[EvolutionGap] = &[
         description: "GPU-accelerated batch reductions (sum, max, min) for ET₀ totals",
         tier: Tier::A,
         barracuda_primitive: Some("ops::fused_map_reduce_f64::FusedMapReduceF64"),
-        action:
-            "INTEGRATED — SeasonalReducer wraps FusedMapReduceF64 (GPU for N≥1024, TS-004 resolved)",
+        action: "INTEGRATED — SeasonalReducer wraps FusedMapReduceF64 (GPU for N≥1024, TS-004 resolved)",
     },
     EvolutionGap {
         id: "bootstrap_uncertainty",
@@ -464,8 +462,7 @@ pub const GAPS: &[EvolutionGap] = &[
         description: "Batch sensor calibration (SoilWatch 10) via custom op",
         tier: Tier::A,
         barracuda_primitive: Some("batched_elementwise_f64.wgsl (op=5, stride=1)"),
-        action:
-            "GPU-FIRST (v0.5.6): gpu::sensor_calibration → Op::SensorCalibration (S70+ absorbed)",
+        action: "GPU-FIRST (v0.5.6): gpu::sensor_calibration → Op::SensorCalibration (S70+ absorbed)",
     },
     EvolutionGap {
         id: "hargreaves_batch",

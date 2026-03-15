@@ -74,7 +74,7 @@ pub fn fit_langmuir(ce: &[f64], qe: &[f64]) -> Option<IsothermFit> {
     let valid: Vec<(f64, f64)> = ce
         .iter()
         .zip(qe)
-        .filter(|(_, &qi)| qi > LOG_DOMAIN_GUARD)
+        .filter(|&(_, &qi)| qi > LOG_DOMAIN_GUARD)
         .map(|(&ci, &qi)| (ci, qi))
         .collect();
 
@@ -129,7 +129,7 @@ pub fn fit_freundlich(ce: &[f64], qe: &[f64]) -> Option<IsothermFit> {
     let valid: Vec<(f64, f64)> = ce
         .iter()
         .zip(qe)
-        .filter(|(&ci, &qi)| ci > LOG_DOMAIN_GUARD && qi > LOG_DOMAIN_GUARD)
+        .filter(|&(&ci, &qi)| ci > LOG_DOMAIN_GUARD && qi > LOG_DOMAIN_GUARD)
         .map(|(&ci, &qi)| (ci, qi))
         .collect();
 

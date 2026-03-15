@@ -1,11 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #![deny(clippy::unwrap_used)]
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Validate Growing Degree Days (GDD) against Python baseline (Exp 022).
 //!
 //! `McMaster` GS, Wilhelm WW (1997) "Growing degree-days: one equation,
@@ -14,12 +8,12 @@
 //! Provenance: script=`control/gdd/growing_degree_days.py`, commit=fad2e1b, date=2026-02-27
 
 use airspring_barracuda::eco::crop::{
-    accumulated_gdd_avg, accumulated_gdd_clamp, gdd_avg, gdd_clamp, kc_from_gdd, CropType,
+    CropType, accumulated_gdd_avg, accumulated_gdd_clamp, gdd_avg, gdd_clamp, kc_from_gdd,
 };
 use airspring_barracuda::tolerances::GDD_EXACT;
 use airspring_barracuda::validation::{
-    self, json_array, json_f64_required, json_field, json_u64_required, parse_benchmark_json,
-    ValidationHarness,
+    self, ValidationHarness, json_array, json_f64_required, json_field, json_u64_required,
+    parse_benchmark_json,
 };
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/gdd/benchmark_gdd.json");

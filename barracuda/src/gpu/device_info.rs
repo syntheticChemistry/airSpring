@@ -486,8 +486,7 @@ pub const PROVENANCE: &[ShaderProvenance] = &[
             "primalTools/bingoCube (domain-agnostic extraction)",
             "airSpring v0.6.2 (AirSpringBrain: ET₀/soil/crop heads, MonitoredAtlasStream)",
         ],
-        domain_use:
-            "Agricultural regime prediction, drift detection in 80yr atlas, cross-station transfer",
+        domain_use: "Agricultural regime prediction, drift detection in 80yr atlas, cross-station transfer",
     },
     // ── Paper 12 — Immunological Anderson ──────────────────────────────
     ShaderProvenance {

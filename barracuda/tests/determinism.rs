@@ -8,9 +8,9 @@
 //! floating-point order dependence, or RNG.
 
 use airspring_barracuda::eco::diversity::shannon;
-use airspring_barracuda::eco::evapotranspiration::{daily_et0, DailyEt0Input, Et0Result};
+use airspring_barracuda::eco::evapotranspiration::{DailyEt0Input, Et0Result, daily_et0};
 use airspring_barracuda::eco::runoff::scs_cn_runoff_standard;
-use airspring_barracuda::eco::water_balance::{simulate_season, DailyInput, WaterBalanceState};
+use airspring_barracuda::eco::water_balance::{DailyInput, WaterBalanceState, simulate_season};
 use airspring_barracuda::nautilus::{AirSpringBrain, AirSpringBrainConfig, WeatherObservation};
 
 fn assert_et0_result_eq(a: &Et0Result, b: &Et0Result) {

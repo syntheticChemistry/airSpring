@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Exp 052: Coupled SCS-CN + Green-Ampt Rainfall Partitioning.
 //!
 //! Validates the coupling of SCS Curve Number runoff (USDA-SCS 1972) with
@@ -22,10 +16,10 @@
 //! script=`control/coupled_runoff_infiltration/coupled_runoff_infiltration.py`, commit=6be822f, date=2026-02-28
 //! Run: `python3 control/coupled_runoff_infiltration/coupled_runoff_infiltration.py`
 
-use airspring_barracuda::eco::infiltration::{cumulative_infiltration, GreenAmptParams};
+use airspring_barracuda::eco::infiltration::{GreenAmptParams, cumulative_infiltration};
 use airspring_barracuda::eco::runoff::scs_cn_runoff_standard;
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation::{self, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/coupled_runoff_infiltration/benchmark_coupled_runoff.json");

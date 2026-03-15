@@ -25,9 +25,7 @@
     clippy::pedantic,
     clippy::nursery,
     clippy::unwrap_used,
-    clippy::expect_used,
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation
+    clippy::expect_used
 )]
 
 use std::path::PathBuf;

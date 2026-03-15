@@ -1,10 +1,4 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![warn(clippy::pedantic)]
-#![allow(
-    clippy::cast_precision_loss,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
 //! Validate Thornthwaite (1948) monthly ET₀ against Python baseline (Exp 021).
 //!
 //! Thornthwaite C.W. (1948) "An approach toward a rational classification
@@ -14,7 +8,7 @@
 
 use airspring_barracuda::eco::evapotranspiration as et;
 use airspring_barracuda::tolerances::THORNTHWAITE_ANALYTICAL;
-use airspring_barracuda::validation::{self, parse_benchmark_json, ValidationHarness};
+use airspring_barracuda::validation::{self, ValidationHarness, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/thornthwaite/benchmark_thornthwaite.json");
