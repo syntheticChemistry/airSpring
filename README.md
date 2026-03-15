@@ -1,8 +1,8 @@
 # airSpring — Ecological & Agricultural Sciences
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
-**Date**: March 14, 2026
-**Version**: 0.8.0
+**Date**: March 15, 2026
+**Version**: 0.8.1
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -13,7 +13,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → biomeOS (NUCLEUS atomics, deployment graphs) → Penny Irrigation
 ```
 
-## Current Status (v0.7.6)
+## Current Status (v0.8.1)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
@@ -39,7 +39,8 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | Phase 4.2: biomeOS graph experiment | **35/35 PASS** | Offline ecology pipeline, deployment graph validated (Exp 065) |
 | Phase 4.3: Paper 12 immunological Anderson | **4 experiments** | Tissue diversity, CytokineBrain, barrier state, cross-species (Exp 066-069) |
 | Phase 4.5: biomeOS composition | **4 graphs** | Provenance trio, NestGate routing, niche deploy, cross-spring data exchange |
-| Phase 4.6: Penny Irrigation | Vision | Sovereign, consumer hardware |
+| Phase 4.6: neuralAPI integration | **3 enhancements** | Structured metrics, operation dependencies, cost estimates — Pathway Learner ready |
+| Phase 4.7: Penny Irrigation | Vision | Sovereign, consumer hardware |
 
 ### Code Quality
 
@@ -220,7 +221,7 @@ airSpring/
 │   ├── bootstrap_jackknife/     # Bootstrap & Jackknife CI (20/20)
 │   ├── drought_index/           # SPI drought index (20/20)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (833 lib tests, 95 binaries, barraCuda 0.3.5 / wgpu 28)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (847 lib tests, 95 binaries, barraCuda 0.3.5 / wgpu 28)
 │   ├── src/
 │   │   ├── biomeos.rs           # biomeOS socket resolution + primal discovery (shared)
 │   │   ├── eco/                 # Domain modules (22 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine + drought_index)
@@ -232,7 +233,7 @@ airSpring/
 │   │   ├── npu.rs               # BrainChip AKD1000 NPU (feature-gated)
 │   │   └── bin/                 # validate_*, bench_*, airspring_primal (95 declared)
 │   ├── tests/                   # Integration + property tests (9 files + common/)
-│   └── Cargo.toml               # v0.7.6
+│   └── Cargo.toml               # v0.8.1
 ├── metalForge/                  # Mixed hardware dispatch (CPU+GPU+NPU)
 │   ├── deploy/                  # biomeOS deployment graphs (airspring_deploy.toml)
 │   └── forge/                   # airspring-forge (186 tests, 6 binaries, live hardware probe)
@@ -276,7 +277,7 @@ airSpring/
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance (S87) |
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (87 experiments) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V076 current) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V081 current) |
 
 ## License
 
@@ -284,12 +285,13 @@ AGPL-3.0-or-later
 
 ---
 
-*March 14, 2026 — v0.8.0. biomeOS composition integration: Provenance Trio
-(rhizoCrypt + loamSpine + sweetGrass) via `ipc/provenance.rs` with graceful degradation.
-`NestGateProvider` three-tier routing (biomeOS → NestGate cache → direct). Cross-Spring
-Time Series v1 format (`ecoPrimals/time-series/v1`) on `WeatherResponse`. GPU compute
-provenance DAG tracking. Primal binary expanded to 41 capabilities (+provenance.begin,
-provenance.record, provenance.complete, provenance.status, capability.list,
-data.cross\_spring\_weather). 4 biomeOS deploy graphs (eco pipeline, provenance pipeline,
-niche deploy with full trio, cross-primal soil microbiome). 847 lib + 41 integration
-tests, 0 clippy pedantic+nursery warnings, all features compile. AGPL-3.0-or-later.*
+*March 15, 2026 — v0.8.1. neuralAPI integration: structured metrics on every dispatch
+(Pathway Learner ready), operation dependencies for biomeOS parallelization, cost
+estimates for scheduling optimization. 4 domain registrations (ecology, provenance,
+data, capability). Heartbeat reports composition status for dynamic graph rewiring.
+Deploy graphs evolved to ConditionalDag with budget\_ms and Pathway Learner hints.
+biomeOS composition: Provenance Trio via `ipc/provenance.rs` with graceful degradation,
+`NestGateProvider` three-tier routing, Cross-Spring Time Series v1, GPU compute
+provenance, `ecology.experiment` high-level orchestration, `auto\_record\_provenance`
+in dispatch. 41 capabilities, 4 deploy graphs. 847 lib + 41 integration tests, 0
+clippy pedantic+nursery warnings, all features compile. AGPL-3.0-or-later.*

@@ -1,7 +1,7 @@
 # airSpring Experiments
 
-**Updated**: March 14, 2026
-**Status**: 87 experiments, barraCuda 0.3.5 (wgpu 28), v0.8.0. 1284/1284 Python + 847 lib + 186 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. 14.5× Rust-vs-Python speedup (21/21 parity). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry integrated (v0.7.3). Deep debt execution: all compilation blockers resolved (validate_cytokine API drift, nucleus_integration stale imports, akida-driver stub→facade, non_snake_case), validation integrity fixes (drought_index hardcoding eliminated, GPU stream smoother f64→f32 shader bug fixed, biochar provenance corrected, anderson_coupling.py path fixed), 9 tolerance provenance entries added, eprintln→tracing::warn, GPU test tolerances aligned with f32 precision. Zero clippy pedantic+nursery warnings, all features compile.
+**Updated**: March 15, 2026
+**Status**: 87 experiments, barraCuda 0.3.5 (wgpu 28), v0.8.1. 1284/1284 Python + 847 lib + 186 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. 14.5× Rust-vs-Python speedup (21/21 parity). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry integrated (v0.7.3). Deep debt execution: all compilation blockers resolved (validate_cytokine API drift, nucleus_integration stale imports, akida-driver stub→facade, non_snake_case), validation integrity fixes (drought_index hardcoding eliminated, GPU stream smoother f64→f32 shader bug fixed, biochar provenance corrected, anderson_coupling.py path fixed), 9 tolerance provenance entries added, eprintln→tracing::warn, GPU test tolerances aligned with f32 precision. Zero clippy pedantic+nursery warnings, all features compile.
 
 ---
 
@@ -97,11 +97,11 @@
 | 086 | metalForge Mixed Hardware Live NUCLEUS | Hardware | **Complete** | Rust | Live probe (RTX 4070 + Titan V + i9-12900K), NUCLEUS mesh (Tower+Node), 23/27 workload routing, ecology pipeline (3 stages GPU), PCIe bypass, transfer matrix | 17/17 |
 | 087 | NUCLEUS Graph Coordination | Integration | **Complete** | Rust | biomeOS TOML graph parsing, DAG validation, capability refs, dependency ordering, prerequisite checks, Tower/Node atomic detection, 7 primals | 22/22 |
 
-**Grand Total**: 1284 Python + **847 lib + 186 forge tests** + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (35 capabilities) + 95 binaries + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + 14.5× CPU speedup (21/21 parity) + 87 experiments (v0.8.0). Exp 084 CPU/GPU 21/21, Exp 085 toadStool 19/19, Exp 086 metalForge NUCLEUS 17/17, Exp 087 Graphs 22/22. Full NUCLEUS mesh: Tower+Node+Nest live.
+**Grand Total**: 1284 Python + **847 lib + 186 forge tests** + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (41 capabilities) + 95 binaries + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + 14.5× CPU speedup (21/21 parity) + 87 experiments (v0.8.1). Exp 084 CPU/GPU 21/21, Exp 085 toadStool 19/19, Exp 086 metalForge NUCLEUS 17/17, Exp 087 Graphs 22/22. Full NUCLEUS mesh: Tower+Node+Nest live.
 
 ---
 
-## Test Breakdown (v0.8.0)
+## Test Breakdown (v0.8.1)
 
 | Category | Tests | Source |
 |----------|:-----:|--------|

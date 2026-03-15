@@ -2,7 +2,7 @@
 
 **Status**: Working draft — reviewed for PII, suitable for public repository
 **Purpose**: Document the replication of precision agriculture computational methods on consumer hardware using BarraCuda
-**Date**: March 14, 2026 (v0.7.6)
+**Date**: March 15, 2026 (v0.8.1)
 
 ---
 

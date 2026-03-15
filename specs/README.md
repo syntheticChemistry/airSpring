@@ -1,7 +1,7 @@
 # airSpring Specifications
 
-**Last Updated**: March 14, 2026
-**Status**: Phase 0–5 complete — 1284/1284 Python + 847 lib + 41 integration + 186 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 95 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.3.5 (wgpu 28) + 14.5× CPU speedup (21/21 parity) + metalForge 66/66 + NUCLEUS primal (35 capabilities) + 87 experiments (v0.8.0). Deep debt execution complete. Exp 084-087: 79/79 PASS (CPU/GPU parity, toadStool dispatch, metalForge NUCLEUS, graph coordination)
+**Last Updated**: March 15, 2026
+**Status**: Phase 0–5 complete — 1284/1284 Python + 847 lib + 41 integration + 186 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 95 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.3.5 (wgpu 28) + 14.5× CPU speedup (21/21 parity) + metalForge 66/66 + NUCLEUS primal (35 capabilities) + 87 experiments (v0.8.1). Deep debt execution complete. Exp 084-087: 79/79 PASS (CPU/GPU parity, toadStool dispatch, metalForge NUCLEUS, graph coordination)
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling, Anderson coupling
 
 ---
@@ -26,7 +26,7 @@
 | Phase 3.9 (NUCLEUS primal) | 35 capabilities, ecology domain in biomeOS registry |
 | Phase 4.0 (Cross-primal) | 28/28 PASS — capability.call routing, cross-primal forwarding |
 | Faculty | Dong (BAE, MSU — new lab 2026) |
-| Handoff | V080 in `wateringHole/handoffs/` |
+| Handoff | V081 in `wateringHole/handoffs/` |
 | ToadStool | S147+ — barraCuda v0.3.5 standalone (wgpu 28) |
 
 ---
@@ -106,7 +106,7 @@ Re-run `run_all_baselines.sh` at the respective commits to verify.
 `../whitePaper/STUDY.md` → `../CONTROL_EXPERIMENT_STATUS.md` → BARRACUDA_REQUIREMENTS.md
 
 **Cross-spring evolution** (15 min):
-CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/` (V080 active)
+CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/` (V081 active)
 
 ---
 

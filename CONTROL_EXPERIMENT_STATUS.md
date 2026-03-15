@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-03-14 (v0.7.6 — 87 experiments, barraCuda 0.3.5 (wgpu 28), 1284/1284 Python + 833 lib + 186 forge + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.5× Rust-vs-Python speedup** (21/21 algorithms). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry (v0.7.3). metalForge 66/66 mixed pipeline. Write→Absorb→Lean cycle complete. Deep debt resolution: barraCuda 0.3.5 sync, bingocube-nautilus 0.1.0 API migration (NautilusBrain), new `data` module (Provider trait), hardcoded path elimination, tolerance provenance complete, CI doc lints + coverage gate.)
+**Updated**: 2026-03-15 (v0.8.1 — 87 experiments, barraCuda 0.3.5 (wgpu 28), 1284/1284 Python + 847 lib + 186 forge + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.5× Rust-vs-Python speedup** (21/21 algorithms). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry (v0.7.3). metalForge 66/66 mixed pipeline. Write→Absorb→Lean cycle complete. Deep debt resolution: barraCuda 0.3.5 sync, bingocube-nautilus 0.1.0 API migration (NautilusBrain), new `data` module (Provider trait), hardcoded path elimination, tolerance provenance complete, CI doc lints + coverage gate.)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -59,7 +59,7 @@ bash run_all_baselines.sh
 #    Cached to: control/long_term_wb/data/wooster_era5_1960_2023.json
 python control/long_term_wb/long_term_water_balance.py
 
-# 7. Run Rust validation binaries (865+1498 checks across 95 binaries)
+# 7. Run Rust validation binaries (847+1498 checks across 95 binaries)
 cd barracuda
 for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   validate_sensor_calibration validate_real_data cross_validate \
@@ -283,7 +283,7 @@ Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2, Stewart 1977, CW2D media params)
 | validate_gdd | T1 | 26/26 | GDD accumulation, kc_from_gdd, phenology |
 | validate_pedotransfer | T1 | 58/58 | Saxton-Rawls 2006, θs/θr/Ks from texture |
 
-**Total Rust: 651 tests + 1393 atlas checks PASS, 865 lib tests + 186 forge + 20 integration PASS**
+**Total Rust: 651 tests + 1393 atlas checks PASS, 847 lib tests + 186 forge + 20 integration PASS**
 **Phase 2 cross-validation: 75/75 MATCH (Python↔Rust, tol=1e-5)**
 **Phase 3 NUCLEUS integration: Exp 084 (21/21), Exp 085 (19/19), Exp 086 (17/17), Exp 087 (22/22) — 79/79 ALL PASS**
 **Phase 3 GPU-first: 11 orchestrators wired, 4/4 ToadStool issues RESOLVED**
@@ -1086,7 +1086,7 @@ routing.
 Track 1 (Precision Agriculture):
   Phase 0  [COMPLETE]: Python baselines — 1284/1284 PASS (57 experiments)
   Phase 0+ [COMPLETE]: Real data pipeline — 15,300 station-days, ET₀ R²=0.97
-  Phase 1  [COMPLETE]: Rust validation — 865 lib + 186 forge tests, 95 binaries
+  Phase 1  [COMPLETE]: Rust validation — 847 lib + 186 forge tests, 95 binaries
   Phase 1.5[COMPLETE]: CPU benchmark — Rust 14.5× faster than Python (21/21 parity)
   Phase 2  [COMPLETE]: Cross-validation — 75/75 MATCH (Python↔Rust, tol=1e-5)
   Phase 2.5[COMPLETE]: Ops 5-8 GPU-first — 4 orchestrators rewired (ToadStool S70+ absorbed)
@@ -1160,8 +1160,8 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026 — Updated: March 7, 2026 (v0.7.5)*
-*87 experiments, 1284/1284 Python, 865 lib + 186 forge tests, 95 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 14.5× CPU speedup (21/21 parity), barraCuda 0.3.3 (wgpu 28). biomeOS NUCLEUS: Tower/Node+Nest live, 35 JSON-RPC capabilities. Exp 084 CPU/GPU 21/21, Exp 085 toadStool 19/19, Exp 086 metalForge 17/17, Exp 087 graphs 22/22.*
+*Initialized: February 16, 2026 — Updated: March 15, 2026 (v0.8.1)*
+*87 experiments, 1284/1284 Python, 847 lib + 186 forge tests, 95 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 14.5× CPU speedup (21/21 parity), barraCuda 0.3.3 (wgpu 28). biomeOS NUCLEUS: Tower/Node+Nest live, 35 JSON-RPC capabilities. Exp 084 CPU/GPU 21/21, Exp 085 toadStool 19/19, Exp 086 metalForge 17/17, Exp 087 graphs 22/22.*
 *8 ET₀ methods + SCS-CN runoff + Green-Ampt infiltration + coupled runoff-infiltration + VG inverse + full-season WB + Exp 058 Climate Scenario (46/46).*
 *NUCLEUS primal (16 capabilities, 28/28 cross-primal pipeline). Atlas decade 80yr (102/102). NASS real (99/99). NCBI diversity (63/63).*
 *25 Tier A + 6 GPU-local modules. Ops 5-8 GPU-first (ToadStool S87). GPU stats (neuralSpring S69).*

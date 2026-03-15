@@ -1,10 +1,10 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: March 14, 2026 (v0.7.6 — 87 experiments, 833 lib + 186 forge tests, 95 binaries. Deep debt: barraCuda 0.3.5 sync, bingocube-nautilus 0.1.0 (NautilusBrain), data::Provider trait, hardcoded path elimination, tolerance provenance complete, CI doc lints + coverage gate)
+**Last Updated**: March 15, 2026 (v0.8.1 — 87 experiments, 847 lib + 186 forge tests, 95 binaries. Deep debt: barraCuda 0.3.5 sync, bingocube-nautilus 0.1.0 (NautilusBrain), data::Provider trait, hardcoded path elimination, tolerance provenance complete, CI doc lints + coverage gate)
 **barraCuda**: v0.3.5 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry, SpringDomain newtype, F64BuiltinCapabilities DF64 fields)
 **ToadStool**: S147+ (20,015 tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient, hw-learn, spirv_codegen_safety)
 **coralReef**: Phase 10 Iteration 44 sovereign Rust GPU compiler (NVIDIA + AMD, 1669+48 tests, VFIO dispatch)
-**Handoff**: V0.7.6 (deep debt + upstream sync + toadStool/barraCuda evolution)
+**Handoff**: V0.8.1 (deep debt + upstream sync + toadStool/barraCuda evolution)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -413,7 +413,7 @@ metalForge forge migrated from wgpu 22 to wgpu 28 (eliminated duplicate wgpu com
 |------|--------|
 | `cargo fmt --check` | **PASS** (both crates) |
 | `cargo clippy --all-targets -- -W clippy::pedantic -W clippy::nursery -D warnings` | **PASS** — 0 warnings |
-| `cargo test --lib` | **865 pass**, 25 fail (upstream GPU wgpu 28 NVK) |
+| `cargo test --lib` | **847 lib pass**, 0 fail |
 | `cargo test --test '*'` | **188 pass**, 2 fail (upstream GPU) |
 | Cross-spring evolution | **11/11 pass** |
 | CPU vs Python | **24/24 algorithms**, 21.0× geometric mean speedup |
