@@ -29,7 +29,7 @@ The study answers four questions:
    Answer: yes — Open-Meteo (free, no key, 80+ years) provides real historical Michigan weather at 10km resolution. Our FAO-56 ET₀ matches Open-Meteo's independent computation with R²=0.967 across 15,300 station-days. NOAA CDO and OpenWeatherMap supplement with GHCND daily records and real-time forecasts.
 
 3. **Can Rust + WebGPU replace Python/Excel for precision agriculture?**
-   Answer: yes (validation complete) — Rust BarraCuda passes 851 lib + 280 integration + 62 forge tests across 94 binaries (pedantic + nursery 0 warnings). A cross-validation harness confirms 75/75 Python-Rust value matches within 1e-5 tolerance; 690 crop-station yield pairs within 0.01. 25 Tier A + 6 GPU-local + 5 Tier B GPU orchestrators wired to ToadStool/BarraCuda primitives including Richards PDE, isotherm fitting, MC ET₀ uncertainty, seasonal pipeline (ET₀→Kc→WB→Yield, 73/73 real data), atlas streaming (12 stations, 4800 crop-year results), Anderson soil-moisture coupling, coupled runoff-infiltration (292/292), VG inverse (84/84), and full-season water budget audit (34/34). S93 synced with universal f64 precision. CPU benchmarks: 14.3× geometric mean speedup vs Python (24/24 algorithms, 21/21 CPU-GPU parity modules). NUCLEUS primal integration: 41 capabilities, ecology domain, 28/28 cross-primal pipeline. Paper 12 immunological Anderson (Exp 066-069).
+   Answer: yes (validation complete) — Rust BarraCuda passes 848 lib + 280 integration + 61 forge tests across 91 binaries (pedantic + nursery 0 warnings). A cross-validation harness confirms 75/75 Python-Rust value matches within 1e-5 tolerance; 690 crop-station yield pairs within 0.01. 25 Tier A + 6 GPU-local + 5 Tier B GPU orchestrators wired to ToadStool/BarraCuda primitives including Richards PDE, isotherm fitting, MC ET₀ uncertainty, seasonal pipeline (ET₀→Kc→WB→Yield, 73/73 real data), atlas streaming (12 stations, 4800 crop-year results), Anderson soil-moisture coupling, coupled runoff-infiltration (292/292), VG inverse (84/84), and full-season water budget audit (34/34). S93 synced with universal f64 precision. CPU benchmarks: 14.3× geometric mean speedup vs Python (24/24 algorithms, 21/21 CPU-GPU parity modules). NUCLEUS primal integration: 41 capabilities, ecology domain, 28/28 cross-primal pipeline. Paper 12 immunological Anderson (Exp 066-069).
 
 4. **Can the math be truly portable across hardware?**
    Complete — all 6 metalForge modules absorbed upstream into barracuda (S64: metrics; S66: regression, hydrology, moving_window_f64; S40: van_genuchten; S64: isotherm). airSpring now leans on upstream primitives following the Write → Absorb → Lean cycle. GPU wiring proves the compute is hardware-portable; metalForge demonstrates the cross-system absorption pattern.
@@ -80,7 +80,7 @@ The study answers four questions:
 | West Olive (blueberry) | 0.257 | 0.963 | 639.1 mm | 635.2 mm |
 | **Overall** | **0.267** | **0.967** | — | — |
 
-### Phase 1 (Rust BarraCuda): 851 lib + 280 integration + 62 forge tests, 94 binaries
+### Phase 1 (Rust BarraCuda): 848 lib + 280 integration + 61 forge tests, 91 binaries
 
 | Binary | Checks | Key Validation |
 |--------|:------:|----------------|

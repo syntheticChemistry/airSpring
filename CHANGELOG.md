@@ -4,6 +4,37 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [0.8.2] - 2026-03-15
 
+### Cross-Spring Evolution + Zero Unsafe
+
+**BYOB Niche Deployment**:
+- New `niches/airspring-ecology.yaml`: BYOB niche definition for biomeOS deployment
+- `biomeos niche deploy airspring-ecology` deploys the full ecology stack
+- Matches groundSpring and wetSpring niche YAML conventions
+
+**Dependency Injection — Zero Unsafe in Tests**:
+- `biomeos.rs`: new `SocketConfig` struct + `_with`/`_in` variants for all socket/env functions
+- Rewrote 24 `biomeos` tests, 5 `neural.rs` tests, 15 `nucleus_integration` tests
+- Eliminated all `unsafe` blocks, `#[allow(unsafe_code)]`, `#[serial]`, `std::env::set_var`/`remove_var`
+- Adopts biomeOS V239 `_with` dependency injection pattern across the codebase
+- Zero unsafe in production AND tests
+
+**Tolerance Hierarchy**:
+- Refactored 790 LOC monolithic `tolerances.rs` → `tolerances/` directory module
+- 4 domain submodules: `atmospheric.rs` (15), `soil.rs` (19), `gpu.rs` (9), `instrument.rs` (14)
+- `mod.rs` re-exports all 57 constants, preserving public API
+- Fixed `clippy::doc_markdown` in `instrument.rs`
+
+**rhizoCrypt Semantic RPC Alignment**:
+- `dag.dehydrate` → `dag.dehydration.trigger` in deploy graphs, IPC code, and provenance module
+- `system.health` → `health.check` in `airspring_niche_deploy.toml`
+- Aligns with rhizoCrypt v0.13 semantic method naming
+
+**Hardcoded String Evolution**:
+- `barracuda/src/ipc/provenance.rs`: literal `"airspring"` → `crate::niche::NICHE_NAME`
+- Capability-based spring identification throughout IPC layer
+
+**Quality**: 848 lib + 280 integration + 61 forge tests, 0 failures, 0 clippy warnings, zero unsafe everywhere.
+
 ### Niche Architecture + Deep Code Quality
 
 **Niche Architecture Clarification**:
@@ -21,7 +52,7 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 **Deep Code Quality**:
 - `#![forbid(unsafe_code)]` → `#![deny(unsafe_code)]` in `lib.rs` and forge `lib.rs` — zero unsafe in production, allows test `set_var`
-- Removed redundant crate-level `#![warn(clippy::pedantic)]` and `#![allow(clippy::cast_*)]` from 95 binaries — centralized in `Cargo.toml`
+- Removed redundant crate-level `#![warn(clippy::pedantic)]` and `#![allow(clippy::cast_*)]` from 91 binaries — centralized in `Cargo.toml`
 - Removed redundant `#![allow(clippy::cast_precision_loss)]` from `lib.rs`
 - Added `#[must_use]` to 4 public functions in `ipc::provenance`
 - Fixed `clippy::redundant_clone` in heartbeat thread
@@ -29,7 +60,7 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 - Zero clippy pedantic+nursery warnings across both crates
 
 **Documentation Cleanup**:
-- Root README.md: corrected test counts (853 lib + 281 integration + 61 forge), version to v0.8.2
+- Root README.md: corrected test counts (848 lib + 280 integration + 61 forge), version to v0.8.2
 - whitePaper/README.md: corrected Python checks (1284), test counts, handoff version V082
 - whitePaper/STUDY.md: corrected test counts, updated date
 - whitePaper/baseCamp/README.md: corrected status line, added Phase 5.5, niche architecture
@@ -44,7 +75,7 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 - Updated wateringHole/README.md with V082 as current
 - Updated ecoPrimals/whitePaper/gen3/baseCamp/README.md with v0.8.2 status
 
-**Quality**: 853 lib + 281 integration + 61 forge tests, 0 failures, 0 clippy warnings, 0 fmt diff, 0 doc warnings.
+**Quality**: 848 lib + 280 integration + 61 forge tests, 0 failures, 0 clippy warnings, 0 fmt diff, 0 doc warnings.
 
 ## [0.8.1] - 2026-03-15
 

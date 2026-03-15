@@ -10,33 +10,40 @@
 
 ## Executive Summary
 
-airSpring v0.8.2 completes two major evolutions:
+airSpring v0.8.2 completes four major evolutions:
 
 1. **Niche architecture clarification**: airSpring is a *niche deployment of primals*
    via biomeOS graphs — not a standalone primal. The `airspring_primal` binary is a
    transitional niche adapter (635 LOC) that will be replaced by pure biomeOS graph
-   orchestration. Niche self-knowledge centralized in `src/niche.rs`.
+   orchestration. Niche self-knowledge centralized in `src/niche.rs`. **BYOB niche
+   deployment** via `niches/airspring-ecology.yaml` (matches groundSpring/wetSpring).
 
 2. **Deep code quality**: Edition 2024 migration (rust-version 1.87), zero `#[allow()]`
-   in production code (redundant lints removed from 94 binaries), `#![deny(unsafe_code)]`
-   with unsafe isolated to test `set_var`/`remove_var`, zero clippy pedantic+nursery
-   warnings, metalForge forge Edition 2024 migrated.
+   in production code (redundant lints removed from 91 binaries), `#![deny(unsafe_code)]`
+   — **zero unsafe in production AND tests** (DI `_with`/`_in` pattern eliminates
+   `set_var`/`remove_var`), zero clippy pedantic+nursery warnings, metalForge forge
+   Edition 2024 migrated.
 
 3. **Deep debt resolution**: Zero `panic!()` in library code (14 eliminated — all validation
    binaries use structured `exit(1)`), zero `#[allow()]` in library code (redundant cast
    allows removed, blanket binary allows evolved to targeted `#[expect()]` with reasons),
    `primal_science` refactored from 810 LOC monolith to 7 thematic sub-modules,
-   57 centralized named tolerances (5 new: cross-spring analytical/GPU/evolution,
-   NUCLEUS roundtrip/pipeline), hardcoded primal names evolved to capability-based
-   discovery, ecoBin-clean default build (`standalone-http` opt-in), UniBin subcommands
-   (`server`/`status`/`version`/`capabilities`).
+   57 centralized named tolerances in 4 domain submodules (`atmospheric`, `soil`, `gpu`,
+   `instrument`), hardcoded primal names evolved to capability-based discovery
+   (`crate::niche::NICHE_NAME`), ecoBin-clean default build (`standalone-http` opt-in),
+   UniBin subcommands (`server`/`status`/`version`/`capabilities`).
 
 4. **Full validation pipeline green** (2026-03-15): 1284/1284 Python control checks,
-   851 + 280 + 62 Rust tests, 54+ validation binaries exit 0, 24/24 CPU algorithms
+   848 + 280 + 61 Rust tests, 54+ validation binaries exit 0, 24/24 CPU algorithms
    match Python at 14.3× geometric mean speedup, 21/21 CPU-GPU parity modules validated,
    metalForge 32/32 dispatch + 21/21 routing + 17/17 mixed hardware.
 
-**Quality: 851 lib + 280 integration + 62 forge tests, 0 failures, 0 clippy warnings.**
+5. **Cross-spring evolution**: Dependency injection pattern (`SocketConfig` + `_with`/`_in`
+   variants) adopted from biomeOS V239, eliminating all `unsafe` and `#[serial]` from tests.
+   rhizoCrypt semantic RPC alignment (`dag.dehydrate` → `dag.dehydration.trigger`).
+   Tolerance hierarchy refactored from flat file to 4-submodule domain structure.
+
+**Quality: 848 lib + 280 integration + 61 forge tests, 0 failures, 0 clippy warnings.**
 
 ---
 
@@ -72,7 +79,7 @@ graphs. Each Spring is its own niche that can be redeployed and evolved independ
 | `linalg` | `ridge::ridge_regression` | `eco::correction` | Stable |
 | `device` | `WgpuDevice`, `PrecisionRoutingAdvice`, `Fp64Strategy`, `GpuDriverProfile` | All GPU modules | Stable |
 | `validation` | `ValidationHarness`, `exit_no_gpu`, `gpu_required` | All `validate_*` bins | Stable |
-| `tolerances` | `check`, `Tolerance` | `tolerances.rs` | Stable |
+| `tolerances` | `check`, `Tolerance` | `tolerances/` (4 submodules) | Stable |
 | `shaders::provenance` | `SpringDomain` | Cross-spring benchmarks | Stable |
 
 **Zero local WGSL shaders.** Write→Absorb→Lean complete since v0.7.2.
@@ -120,20 +127,41 @@ Edition 2024 introduces stricter pattern matching. Closures that previously used
 and fix all "cannot explicitly dereference within an implicitly-borrowing pattern"
 errors. They are mechanical fixes.
 
-### `std::env::set_var` / `remove_var` Now Unsafe
+### `std::env::set_var` / `remove_var` — Eliminated via DI
 
 Edition 2024 makes `std::env::set_var()` and `remove_var()` unsafe because they are
-not thread-safe. This affects every crate that uses env vars in tests.
+not thread-safe. airSpring initially wrapped these in `unsafe` blocks, then **evolved
+past the need entirely** using dependency injection.
 
-**Strategy used by airSpring**:
+**Strategy used by airSpring** (final, recommended):
 
-1. Changed `#![forbid(unsafe_code)]` → `#![deny(unsafe_code)]` in `lib.rs`
-2. Added `#![allow(unsafe_code)]` to `#[cfg(test)] mod tests` blocks
-3. Wrapped `set_var`/`remove_var` calls in `unsafe { ... }` with safety comments
-4. Production code remains zero-unsafe
+1. Introduce a config struct (e.g. `SocketConfig`) that captures env-dependent values
+2. Create `_with`/`_in` function variants that accept the config struct explicitly
+3. Public wrappers call `Config::from_env()` → `_with(config)` for production use
+4. Tests construct `Config` directly — **no env mutation, no unsafe, no `#[serial]`**
 
-**Recommendation for barraCuda**: Apply the same strategy. This maintains zero unsafe
-in production while allowing the necessary test patterns.
+Example from `biomeos.rs`:
+
+```rust
+pub struct SocketConfig {
+    pub socket_dir: Option<PathBuf>,
+    pub xdg_runtime_dir: Option<PathBuf>,
+    pub family_id: Option<String>,
+    // ...
+}
+
+pub fn resolve_socket_dir_with(config: &SocketConfig) -> PathBuf { /* ... */ }
+pub fn resolve_socket_dir() -> PathBuf { resolve_socket_dir_with(&SocketConfig::from_env()) }
+```
+
+This pattern (from biomeOS V239) provides:
+- **Zero unsafe** in production AND tests
+- **No `#[serial]`** — tests run in parallel
+- **Deterministic** — no ambient state leakage between tests
+- **Composable** — easy to test edge cases by constructing specific configs
+
+**Recommendation for barraCuda**: Adopt this DI pattern for any function that reads
+env vars. This is superior to wrapping `set_var` in `unsafe`.
 
 ### `ureq` → `ring` C Dependency
 
@@ -221,7 +249,7 @@ Springs should plan the same evolution.
 
 ### 3. Redundant Lint Cleanup
 
-airSpring had `#![warn(clippy::pedantic)]` and `#![allow(clippy::cast_*)]` in 95
+airSpring had `#![warn(clippy::pedantic)]` and `#![allow(clippy::cast_*)]` in 91
 binary files — all redundant with the workspace-level `Cargo.toml` lint configuration.
 Removing these reduced boilerplate and ensured lint consistency.
 
@@ -245,7 +273,7 @@ structured `exit(1)` in binaries, `Result` propagation in library code.
 
 ### `#[allow()]` → `#[expect()]` Evolution
 
-Blanket `#![allow(clippy::pedantic, clippy::nursery)]` in 95 binary files were all
+Blanket `#![allow(clippy::pedantic, clippy::nursery)]` in 91 binary files were all
 redundant with `Cargo.toml` workspace lint configuration and were removed. Binary-specific
 `#![allow(clippy::unwrap_used)]` in IPC validation binaries were converted to targeted
 `#[expect(clippy::too_many_lines, reason = "validation binary exercises full pipeline")]`
@@ -266,9 +294,21 @@ into themed sub-modules. Preserve the public API signature.
 
 ### Tolerance Centralization
 
-5 new `Tolerance` constants added for cross-spring and NUCLEUS validation domains.
-All inline tolerance literals (magic numbers) in validation binaries reference named
-constants from `tolerances.rs` with scientific justification.
+57 named `Tolerance` constants organized into a 4-submodule hierarchy:
+
+| Submodule | Constants | Domains |
+|-----------|-----------|---------|
+| `atmospheric.rs` | 15 | ET₀, vapour pressure, radiation, MC propagation |
+| `soil.rs` | 19 | Water balance, Richards PDE, SCS-CN, Green-Ampt, GDD, yield |
+| `gpu.rs` | 9 | GPU/CPU cross-validation, kriging, NUCLEUS IPC |
+| `instrument.rs` | 14 | Sensors, IoT, NPU, biodiversity, statistical quality |
+
+Naming convention: `{DOMAIN}_{METRIC}_{QUALIFIER}` (e.g. `ET0_SAT_VAPOUR_PRESSURE`,
+`GPU_CPU_CROSS`, `BIO_DIVERSITY_SHANNON`). All tolerances have documented scientific
+justification. The hierarchy follows the same pattern as wetSpring V118.
+
+**Recommendation for barraCuda**: Adopt a similar tolerance hierarchy for upstream
+validation. The naming convention enables cross-spring tolerance alignment.
 
 ---
 
@@ -277,9 +317,9 @@ constants from `tolerances.rs` with scientific justification.
 | Check | Result |
 |-------|--------|
 | Python control baselines | **1284/1284** checks, 54 scripts |
-| `cargo test --lib` (barracuda) | **851 passed**, 0 failures |
+| `cargo test --lib` (barracuda) | **848 passed**, 0 failures |
 | `cargo test --tests` (integration) | **280 passed**, 0 failures |
-| `cargo test --lib` (metalForge forge) | **62 passed**, 0 failures |
+| `cargo test --lib` (metalForge forge) | **61 passed**, 0 failures |
 | Validation binaries (hotSpring exit 0/1) | **54+ binaries** exit 0 |
 | CPU benchmark (Rust vs Python) | **24/24 parity**, 14.3× geometric mean |
 | CPU-GPU parity | **21/21 modules** validated |
@@ -288,9 +328,11 @@ constants from `tolerances.rs` with scientific justification.
 | `cargo fmt --check` | **Clean** |
 | Edition | **2024** (rust-version 1.87) |
 | `unsafe` in production | **Zero** (`#![deny(unsafe_code)]`) |
+| `unsafe` in tests | **Zero** (DI `_with`/`_in` pattern, no `set_var`) |
 | `#[allow()]` in library | **Zero** (all evolved) |
 | `panic!()` in library | **Zero** (all evolved to structured exit) |
-| Named tolerances | **57** (all with justification) |
+| Named tolerances | **57** in 4 domain submodules (all with justification) |
+| BYOB niche | `niches/airspring-ecology.yaml` deployed |
 
 ---
 
@@ -305,16 +347,19 @@ constants from `tolerances.rs` with scientific justification.
 | `barracuda/src/niche.rs` | **NEW** — niche self-knowledge (41 caps, deps, costs, semantic mappings) |
 | `barracuda/src/bin/airspring_primal.rs` | Refactored to transitional niche adapter (1034→635 LOC) |
 | `barracuda/src/eco/isotherm.rs` | Edition 2024 pattern fix |
-| `barracuda/src/ipc/provenance.rs` | `#[must_use]`, test unsafe blocks |
-| `barracuda/src/biomeos.rs` | Test unsafe blocks |
-| `barracuda/tests/nucleus_integration.rs` | Test unsafe blocks |
+| `barracuda/src/ipc/provenance.rs` | `#[must_use]`, `dag.dehydration.trigger`, `crate::niche::NICHE_NAME` |
+| `barracuda/src/biomeos.rs` | `SocketConfig` + `_with`/`_in` DI variants, 24 tests rewritten (zero unsafe) |
+| `barracuda/tests/nucleus_integration.rs` | Rewritten to use `SocketConfig` (15 tests, zero unsafe, no `#[serial]`) |
 | `metalForge/forge/src/lib.rs` | `forbid(unsafe_code)` → `deny(unsafe_code)` |
-| `metalForge/forge/src/neural.rs` | Test unsafe blocks |
+| `metalForge/forge/src/neural.rs` | Tests rewritten (5 tests, zero unsafe, no env mutation) |
 | `metalForge/forge/src/graph.rs` | Edition 2024 pattern fix |
+| `niches/airspring-ecology.yaml` | **NEW** — BYOB niche definition for biomeOS deployment |
+| `graphs/airspring_niche_deploy.toml` | Version 0.8.2, `dag.dehydration.trigger`, `health.check` |
+| `metalForge/deploy/airspring_deploy.toml` | `dag.dehydration.trigger`, `discovery.resolve` capability |
 | 88 `barracuda/src/bin/*.rs` files | Removed redundant crate-level lint attributes |
 | `barracuda/src/validation.rs` | `panic!()` → structured `exit(1)` in JSON helpers |
 | `barracuda/src/primal_science.rs` → `barracuda/src/primal_science/` | Refactored 810 LOC monolith → 7 sub-modules |
-| `barracuda/src/tolerances.rs` | +5 cross-spring/NUCLEUS tolerance constants (52→57) |
+| `barracuda/src/tolerances/` | **Refactored** from 790 LOC flat file → 4 domain submodules (atmospheric/soil/gpu/instrument), 57 named constants |
 | `barracuda/src/gpu/stats.rs` | Fixed `clippy::let_and_return` |
 | `metalForge/forge/src/pipeline.rs` | Refactored duplicated match arms, removed `#[allow()]` |
 | `metalForge/forge/src/bin/validate_dispatch_routing.rs` | Extracted 6 helper functions, removed `#[allow(too_many_lines)]` |
@@ -328,14 +373,19 @@ constants from `tolerances.rs` with scientific justification.
 | # | Owner | Action | Priority |
 |---|-------|--------|----------|
 | 1 | barraCuda | Migrate to Edition 2024 (see §3 for strategy) | High |
-| 2 | barraCuda | Add `provenance` feature flag for automatic GPU provenance | Medium |
-| 3 | barraCuda | Accept `DispatchHint` for biomeOS-influenced routing | Medium |
-| 4 | barraCuda | Add structured metrics to `WgpuDevice::submit()` | High |
-| 5 | barraCuda | Audit crate-level lint attributes vs workspace config | Low |
-| 6 | ToadStool | Expose `compute.provenance` capability | High |
-| 7 | ToadStool | Evolve to niche-aware dispatch (graph-level optimization) | Medium |
-| 8 | All Springs | Extract self-knowledge module (`niche.rs` pattern) | Medium |
-| 9 | All Springs | Plan transitional adapter → pure graph deployment | Low |
+| 2 | barraCuda | Adopt DI `_with`/`_in` pattern for env-dependent functions (see §3) | High |
+| 3 | barraCuda | Add `provenance` feature flag for automatic GPU provenance | Medium |
+| 4 | barraCuda | Accept `DispatchHint` for biomeOS-influenced routing | Medium |
+| 5 | barraCuda | Add structured metrics to `WgpuDevice::submit()` | High |
+| 6 | barraCuda | Adopt tolerance hierarchy (4-submodule pattern, naming convention) | Medium |
+| 7 | barraCuda | Audit crate-level lint attributes vs workspace config | Low |
+| 8 | ToadStool | Expose `compute.provenance` capability | High |
+| 9 | ToadStool | Evolve to niche-aware dispatch (graph-level optimization) | Medium |
+| 10 | All Springs | Extract self-knowledge module (`niche.rs` pattern) | Medium |
+| 11 | All Springs | Adopt DI pattern for zero-unsafe tests | High |
+| 12 | All Springs | BYOB niche YAML + deploy graph alignment | Medium |
+| 13 | All Springs | Align rhizoCrypt RPC names (`dag.dehydration.trigger`) | High |
+| 14 | All Springs | Plan transitional adapter → pure graph deployment | Low |
 
 ---
 

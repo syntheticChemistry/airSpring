@@ -40,7 +40,7 @@ Re-implement the same computations in pure Rust using BarraCuda. Compare:
 - **Reproducibility**: Deterministic results
 - **GPU readiness**: Architecture suitable for ToadStool GPU acceleration
 - **Code quality**: Zero clippy pedantic and nursery warnings, proper error types, idiomatic Rust
-- **Binaries**: 94 binaries
+- **Binaries**: 91 binaries
 
 ### Phase 2: Cross-Validation (Python↔Rust)
 
@@ -169,17 +169,17 @@ All experiments run on a single consumer workstation:
 | IoT Pipeline | SoilWatch 10 + irrigation correct | — | CSV stats + calibration match | ≤1e-5 tolerance |
 | Water Balance | Mass balance < 0.001 mm | Savings per Dong (2024) | Mass balance match Python | ≤1e-5 tolerance |
 
-### Grand Total: 1284 Python + 851 Lib + 61 Forge Tests + 1498 Atlas + 15,300 Real Data Points
+### Grand Total: 1284 Python + 848 Lib + 61 Forge Tests + 1498 Atlas + 15,300 Real Data Points
 
 | Phase | Checks | Description |
 |-------|:------:|-------------|
 | Phase 0 (Python control) | 1284 | 87 experiments: FAO-56, soil, IoT, water balance, dual Kc, cover crops, regional ET₀, Richards, biochar, 60yr WB, yield, CW2D, scheduling, lysimeter, sensitivity, PT ET₀, ET₀ intercomparison, Thornthwaite, GDD, pedotransfer, AmeriFlux, Hargreaves, diversity, Anderson coupling |
-| Phase 1 (Rust validation) | 94 binaries | All pass: same benchmarks validated in Rust |
-| Phase 1 (Rust tests) | 851 lib + 62 forge | lib + forge |
+| Phase 1 (Rust validation) | 91 binaries | All pass: same benchmarks validated in Rust |
+| Phase 1 (Rust tests) | 848 lib + 61 forge | lib + forge |
 | Phase 1 (Atlas validation) | 1498 | 100 Michigan stations |
 | Phase 1.5 (CPU benchmark) | 24/24 | Rust 14.3× faster than Python (geometric mean, 24/24 algorithms, 21/21 CPU-GPU parity modules) |
 | Phase 2 (Cross-validation) | 75 + 690 | Python↔Rust identical (tol=1e-5); 690 crop-station yield pairs within 0.01 |
-| **Total** | **1284 + 851 + 61 + 1498 + 75** | **All pass** |
+| **Total** | **1284 + 848 + 61 + 1498 + 75** | **All pass** |
 | Phase 0+ (Real data) | 15,300 station-days | R²=0.967, 100 Michigan stations, zero synthetic |
 
 ---
@@ -194,7 +194,7 @@ All experiments run on a single consumer workstation:
 | pandas | 2.0+ | Data handling |
 | pyet | 1.4+ | FAO-56 PM cross-reference |
 | R | 4.3.1 (paper match) | One-way ANOVA (planned) |
-| Rust | stable (1.80+) | BarraCuda, edition 2021, zero unsafe |
+| Rust | stable (1.80+) | BarraCuda, edition 2024, zero unsafe |
 | serde | 1.x | Rust serialization |
 | serde_json | 1.x | Benchmark JSON + cross-validation |
 | OS | Pop!_OS 22.04 | Linux 6.17 |

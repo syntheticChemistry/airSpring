@@ -1,6 +1,6 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: March 15, 2026 (v0.8.2 — 87 experiments, 851 lib + 280 integration + 62 forge tests, 94 binaries. Deep debt resolved: zero panic!() in library, zero #[allow()] in library (all evolved to targeted #[expect()] or removed), zero unsafe in production, ecoBin-clean default build, UniBin subcommands, primal_science refactored (810→7 modules), 57 centralized tolerances (5 new: cross-spring analytical/GPU/evolution, NUCLEUS roundtrip/pipeline), hardcoded primal names evolved to discovery-based, validation binaries evolved from panic to structured exit(1))
+**Last Updated**: March 15, 2026 (v0.8.2 — 87 experiments, 848 lib + 280 integration + 61 forge tests, 91 binaries. Deep debt resolved: zero panic!() in library, zero #[allow()] in library (all evolved to targeted #[expect()] or removed), zero unsafe in production AND tests (DI `_with`/`_in` pattern eliminates `set_var`/`remove_var`), ecoBin-clean default build, UniBin subcommands, primal_science refactored (810→7 modules), 57 centralized tolerances in 4 domain submodules (atmospheric/soil/gpu/instrument), hardcoded primal names evolved to discovery-based, validation binaries evolved from panic to structured exit(1). BYOB niche deployment via `niches/airspring-ecology.yaml`.)
 **barraCuda**: v0.3.5 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry, SpringDomain newtype, F64BuiltinCapabilities DF64 fields)
 **ToadStool**: S147+ (20,015 tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient, hw-learn, spirv_codegen_safety)
 **coralReef**: Phase 10 Iteration 44 sovereign Rust GPU compiler (NVIDIA + AMD, 1669+48 tests, VFIO dispatch)
@@ -413,7 +413,7 @@ metalForge forge migrated from wgpu 22 to wgpu 28 (eliminated duplicate wgpu com
 |------|--------|
 | `cargo fmt --check` | **PASS** (both crates) |
 | `cargo clippy --all-targets -- -W clippy::pedantic -W clippy::nursery -D warnings` | **PASS** — 0 warnings |
-| `cargo test --lib` | **851 lib pass**, 0 fail |
+| `cargo test --lib` | **848 lib pass**, 0 fail |
 | `cargo test --tests` | **280 integration pass**, 0 fail |
 | Cross-spring evolution | **11/11 pass** |
 | CPU vs Python | **24/24 algorithms**, 21.0× geometric mean speedup |
