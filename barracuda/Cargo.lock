@@ -19,7 +19,7 @@ dependencies = [
 
 [[package]]
 name = "airspring-barracuda"
-version = "0.7.6"
+version = "0.8.1"
 dependencies = [
  "akida-driver",
  "barracuda",

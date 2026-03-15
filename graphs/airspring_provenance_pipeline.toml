@@ -1,0 +1,148 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# biomeOS Provenance Pipeline Graph — airSpring ecology experiments
+#
+# neuralAPI pattern: graph-as-contract for automatic provenance.
+# biomeOS executes this graph; primals fulfill via capability routing.
+# Provenance happens automatically — no primal code needed.
+#
+# Composition: airSpring + rhizoCrypt + loamSpine + sweetGrass + NestGate
+# All interaction via capability routing — zero compile-time coupling.
+#
+# STATUS: Production-ready (Mar 15, 2026)
+# Requires: biomeOS + airSpring primal + provenance trio (graceful degradation)
+#
+# Parameters:
+#   EXPERIMENT_NAME — experiment identifier (e.g., "exp042_et0_fao56")
+#   METHOD          — science method to invoke (e.g., "science.et0_fao56")
+#   PARAMS          — JSON-encoded science method parameters
+#
+# Usage:
+#   biomeos graph exec --graph graphs/airspring_provenance_pipeline.toml \
+#     --param EXPERIMENT_NAME=exp042_et0_fao56 \
+#     --param METHOD=science.et0_fao56 \
+#     --param PARAMS='{"tmax":32,"tmin":18,"elevation":250}'
+
+[graph]
+id = "airspring_provenance_pipeline"
+description = "Provenance-tracked ecology experiment via neuralAPI capability routing"
+coordination = "ConditionalDag"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 1: HEALTH CHECKS (parallel — neuralAPI detects independence)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[[nodes]]
+id = "check_airspring"
+capability = "ecology"
+output = "airspring_healthy"
+budget_ms = 5000
+
+[nodes.operation]
+name = "health.check"
+
+[[nodes]]
+id = "check_provenance"
+capability = "ecology"
+output = "provenance_status"
+budget_ms = 5000
+
+[nodes.operation]
+name = "provenance.status"
+
+[nodes.constraints]
+required = false
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 2: BEGIN PROVENANCE SESSION (rhizoCrypt DAG via capability routing)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[[nodes]]
+id = "begin_session"
+capability = "ecology"
+depends_on = ["check_airspring"]
+output = "session_result"
+budget_ms = 10000
+
+[nodes.operation]
+name = "provenance.begin"
+
+[nodes.operation.params]
+experiment = "${EXPERIMENT_NAME}"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 3: EXECUTE SCIENCE METHOD (parameterized — any ecology method)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[[nodes]]
+id = "execute_science"
+capability = "ecology"
+depends_on = ["begin_session"]
+output = "science_result"
+budget_ms = 120000
+
+[nodes.operation]
+name = "${METHOD}"
+
+[nodes.operation.params]
+__json_passthrough = "${PARAMS}"
+session_id = "${session_result.session_id}"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 4: RECORD STEP (auto_record_provenance fires in dispatch, this is belt)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[[nodes]]
+id = "record_step"
+capability = "ecology"
+depends_on = ["execute_science"]
+output = "step_recorded"
+budget_ms = 10000
+
+[nodes.operation]
+name = "provenance.record"
+
+[nodes.operation.params]
+session_id = "${session_result.session_id}"
+step = { method = "${METHOD}", result = "${science_result}", experiment = "${EXPERIMENT_NAME}" }
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 5: COMPLETE PROVENANCE (dehydrate → commit → attribute)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[[nodes]]
+id = "complete_provenance"
+capability = "ecology"
+depends_on = ["record_step"]
+output = "provenance_completion"
+budget_ms = 30000
+
+[nodes.operation]
+name = "provenance.complete"
+
+[nodes.operation.params]
+session_id = "${session_result.session_id}"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 6: STORE IN NESTGATE (capability routing, not primal-specific)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+[[nodes]]
+id = "store_results"
+capability = "storage"
+depends_on = ["complete_provenance"]
+output = "stored"
+budget_ms = 15000
+
+[nodes.operation]
+name = "storage.store"
+
+[nodes.operation.params]
+key = "airspring:experiment:${EXPERIMENT_NAME}"
+value = "${science_result}"
+provenance = "${provenance_completion}"
+family_id = "airspring"
+schema = "ecoPrimals/experiment-result/v1"
+
+[nodes.constraints]
+required = false

@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
 **Updated**: March 14, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.7.6)
-**Status**: 87 experiments, 1284/1284 Python + 834 lib + 41 integration + 186 forge tests + 95 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.5× CPU speedup (21/21 parity) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + `PrecisionRoutingAdvice` wired + upstream provenance registry + 66/66 metalForge cross-system + NUCLEUS primal (35 capabilities) + zero clippy pedantic+nursery. Deep debt execution complete: all compilation blockers resolved, GPU stream smoother f64→f32 shader bug fixed, akida-driver evolved from stub to Rust facade, validation integrity verified, tolerance provenance complete, all features compile
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.8.0)
+**Status**: 87 experiments, 1284/1284 Python + 847 lib + 41 integration + 186 forge tests + 95 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.5× CPU speedup (21/21 parity) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + `PrecisionRoutingAdvice` wired + upstream provenance registry + 66/66 metalForge cross-system + NUCLEUS primal (35 capabilities) + zero clippy pedantic+nursery. Deep debt execution complete: all compilation blockers resolved, GPU stream smoother f64→f32 shader bug fixed, akida-driver evolved from stub to Rust facade, validation integrity verified, tolerance provenance complete, all features compile
 
 ---
 
@@ -231,7 +231,7 @@ S79 modernization: `libc`→`rustix`, `async-trait`→AFIT, universal f64 precis
 |----------|---------|
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C breakdown, absorbed vs stays-local, quality gates |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
-| `wateringHole/handoffs/` | V076 current — deep debt resolution, upstream sync, toadStool/barraCuda evolution |
+| `wateringHole/handoffs/` | V080 current — deep debt resolution, upstream sync, toadStool/barraCuda evolution |
 | `specs/CROSS_SPRING_EVOLUTION.md` | 845+ WGSL shader provenance across all Springs (S93) |
 
 ### Next Steps (Dong Lab)

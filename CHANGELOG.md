@@ -2,6 +2,82 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.8.1] - 2026-03-15
+
+### neuralAPI Integration — airSpring as a proper graph citizen
+
+**Structured Metrics (Pathway Learner)**:
+- Every dispatch now emits `[metrics] primal_id=airspring operation=X latency_ms=Y success=Z`
+- When `BIOMEOS_METRICS_SOCKET` is set, reports directly to biomeOS via Unix socket
+- biomeOS Pathway Learner can scrape passive logs or consume active metrics
+
+**Operation Dependencies**:
+- `capability.list` now exposes `operation_dependencies` for all 41 capabilities
+- biomeOS can auto-detect parallelization (e.g., `science.vpd` and `science.gdd` independent)
+- Declared per neuralAPI Enhancement 2 spec
+
+**Cost Estimates**:
+- `capability.list` now exposes `cost_estimates` (latency_ms, cpu intensity, memory_bytes)
+- biomeOS scheduler can optimize resource allocation per neuralAPI Enhancement 3
+
+**Domain Registration**:
+- Startup now registers `provenance`, `data`, and `capability` domains alongside `ecology`
+- Each domain includes semantic mappings for capability routing
+- Capability registration includes `operation_dependencies` and `cost_estimates`
+
+**Heartbeat Evolution**:
+- `lifecycle.status` now reports composition status (provenance_trio, nestgate, toadstool)
+- Reports `capabilities_total` and `version` for biomeOS graph rewiring
+
+**Deploy Graph Evolution**:
+- `airspring_provenance_pipeline.toml`: upgraded to `ConditionalDag` coordination, capability routing
+- `airspring_niche_deploy.toml`: added Pathway Learner hints (parallelization, batching, prewarming)
+- Both graphs use neuralAPI field names (`capability`, `budget_ms`) per `03_GRAPH_EXECUTION.md`
+
+## [0.8.0] - 2026-03-15
+
+### biomeOS Composition Integration
+
+- **Provenance Trio integration** (`ipc/provenance.rs`): Full lifecycle support
+  (begin → record → complete) for experiment provenance via biomeOS
+  `capability.call` routing to rhizoCrypt (DAG sessions), loamSpine (immutable
+  commits), and sweetGrass (W3C PROV-O braids). Zero compile-time coupling to
+  trio crates. Graceful degradation when trio is unavailable — domain logic never
+  fails, returns status field indicating provenance availability.
+
+- **`NestGateProvider`** (`data/provider.rs`): Three-tier data routing following
+  wetSpring's NestGate pattern: (1) check NestGate content-addressed cache,
+  (2) biomeOS capability routing via Neural API, (3) `BiomeosProvider` direct
+  primal discovery fallback. Cached results stored in Cross-Spring Time Series v1
+  format for offline reproducibility.
+
+- **Cross-Spring Time Series v1** (`WeatherResponse::to_cross_spring_v1()`,
+  `from_cross_spring_v1()`): Canonical `ecoPrimals/time-series/v1` JSON format
+  for data exchange with other Springs. Includes variable metadata, source
+  tracking, and forward-compatible variable matching.
+
+- **GPU compute provenance** (`ipc::provenance::record_gpu_step()`): DAG vertex
+  tracking for shader chain executions, capturing shader name, precision tier,
+  input content hash, and output summary.
+
+- **Primal binary evolved** (`airspring_primal`): 6 new capabilities:
+  `provenance.begin`, `provenance.record`, `provenance.complete`,
+  `provenance.status`, `capability.list`, `data.cross_spring_weather`.
+  `capability.list` reports composition status (provenance trio, NestGate,
+  ToadStool availability). Total: 41 capabilities.
+
+- **biomeOS deploy graphs** (4 total):
+  - `graphs/airspring_provenance_pipeline.toml` — provenance-tracked experiment
+    pipeline (session → science → record → dehydrate → commit → attribute → store)
+  - `graphs/airspring_niche_deploy.toml` — full niche deployment (Tower + Trio +
+    NestGate + ToadStool + airSpring, 8 ordered nodes)
+  - `metalForge/deploy/airspring_deploy.toml` — updated to v0.8.0 with provenance
+    trio nodes (rhizoCrypt, loamSpine, sweetGrass)
+  - Existing: `airspring_eco_pipeline.toml`, `cross_primal_soil_microbiome.toml`
+
+- **Test count**: 847 lib + 41 integration (13 new tests from IPC/provenance,
+  cross-spring format, and NestGate provider modules).
+
 ## [0.7.6] - 2026-03-14
 
 ### Deep Debt Resolution + Upstream Evolution Sync

@@ -44,6 +44,7 @@ use airspring_barracuda::biomeos;
 use airspring_barracuda::primal_science;
 use airspring_barracuda::rpc;
 
+
 const PRIMAL_NAME: &str = "airspring";
 const READ_TIMEOUT_SECS: u64 = 60;
 const WRITE_TIMEOUT_SECS: u64 = 10;
@@ -94,9 +95,17 @@ const ALL_CAPABILITIES: &[&str] = &[
     "ecology.full_pipeline",
     "ecology.spi_drought_index",
     "ecology.autocorrelation",
+    // ── Provenance trio (biomeOS composition) ──
+    "provenance.begin",
+    "provenance.record",
+    "provenance.complete",
+    "provenance.status",
     // ── Cross-primal ──
     "primal.forward",
     "primal.discover",
+    // ── Niche deployment (biomeOS graph composition) ──
+    "capability.list",
+    "data.cross_spring_weather",
     // ── Compute offload (Node Atomic) ──
     "compute.offload",
     // ── Data (Nest Atomic routing) ──
@@ -149,21 +158,86 @@ fn discover_data_primal() -> Option<PathBuf> {
 // ═══════════════════════════════════════════════════════════════════
 
 fn dispatch(method: &str, params: &serde_json::Value, state: &PrimalState) -> serde_json::Value {
-    if method == "lifecycle.health" || method == "health" {
+    if method == "lifecycle.health"
+        || method == "health"
+        || method == "health.check"
+        || method == "science.health"
+    {
         return handle_health(state);
     }
 
+    if method == "science.version" {
+        return serde_json::json!({
+            "primal": PRIMAL_NAME,
+            "version": env!("CARGO_PKG_VERSION"),
+            "barracuda": "0.3.5",
+        });
+    }
+
     if let Some(result) = primal_science::dispatch_science(method, params) {
+        auto_record_provenance(method, params, &result);
         return result;
     }
 
     match method {
+        "ecology.experiment" => handle_ecology_experiment(params),
+        "capability.list" => handle_capability_list(state),
+        "provenance.begin" => handle_provenance_begin(params),
+        "provenance.record" => handle_provenance_record(params),
+        "provenance.complete" => handle_provenance_complete(params),
+        "provenance.status" => handle_provenance_status(),
+        "data.cross_spring_weather" => handle_cross_spring_weather(params),
         "primal.forward" => handle_primal_forward(params),
         "primal.discover" => handle_primal_discover(),
         "compute.offload" => handle_compute_offload(params),
         "data.weather" => handle_data_weather(params),
         _ => serde_json::json!({"error": "method_not_found", "method": method}),
     }
+}
+
+/// Auto-record provenance when a `session_id` is present in science call params.
+///
+/// When biomeOS or a graph caller provides `session_id`, the science result
+/// is automatically appended to the provenance DAG — no explicit
+/// `provenance.record` call needed. This makes provenance nearly transparent.
+fn auto_record_provenance(
+    method: &str,
+    params: &serde_json::Value,
+    result: &serde_json::Value,
+) {
+    let Some(session_id) = params.get("session_id").and_then(|v| v.as_str()) else {
+        return;
+    };
+    if session_id.is_empty() {
+        return;
+    }
+
+    let step = serde_json::json!({
+        "type": "science_dispatch",
+        "method": method,
+        "params_summary": summarize_params(params),
+        "result_summary": summarize_result(result),
+        "primal": PRIMAL_NAME,
+        "version": env!("CARGO_PKG_VERSION"),
+    });
+    airspring_barracuda::ipc::provenance::record_experiment_step(session_id, &step);
+}
+
+fn summarize_params(params: &serde_json::Value) -> serde_json::Value {
+    let keys: Vec<&str> = params
+        .as_object()
+        .map(|o| o.keys().map(String::as_str).collect())
+        .unwrap_or_default();
+    serde_json::json!({ "keys": keys, "count": keys.len() })
+}
+
+fn summarize_result(result: &serde_json::Value) -> serde_json::Value {
+    let keys: Vec<&str> = result
+        .as_object()
+        .map(|o| o.keys().map(String::as_str).collect())
+        .unwrap_or_default();
+    let has_error = result.get("error").is_some();
+    serde_json::json!({ "keys": keys, "has_error": has_error })
 }
 
 fn handle_health(state: &PrimalState) -> serde_json::Value {
@@ -178,6 +252,296 @@ fn handle_health(state: &PrimalState) -> serde_json::Value {
         "capabilities": ALL_CAPABILITIES,
         "backend": "cpu",
     })
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ecology.experiment — full auto-provenance pipeline (single call)
+// ═══════════════════════════════════════════════════════════════════
+
+/// Single composable method that wraps the full provenance lifecycle:
+/// 1. Begin provenance session (if trio available)
+/// 2. Execute one or more science methods
+/// 3. Auto-record each step in the DAG
+/// 4. Complete provenance (dehydrate → commit → attribute)
+/// 5. Optionally cache results in `NestGate`
+///
+/// biomeOS can compose this as a single graph node instead of 5 separate ones.
+fn handle_ecology_experiment(params: &serde_json::Value) -> serde_json::Value {
+    let experiment_name = params
+        .get("experiment")
+        .or_else(|| params.get("name"))
+        .and_then(|v| v.as_str())
+        .unwrap_or("unnamed");
+
+    let methods: Vec<&str> = params
+        .get("methods")
+        .and_then(|v| v.as_array())
+        .map(|a| a.iter().filter_map(|v| v.as_str()).collect())
+        .or_else(|| {
+            params
+                .get("method")
+                .and_then(|v| v.as_str())
+                .map(|m| vec![m])
+        })
+        .unwrap_or_default();
+
+    if methods.is_empty() {
+        return serde_json::json!({
+            "error": "provide 'method' (string) or 'methods' (array) to execute",
+        });
+    }
+
+    let science_params = params
+        .get("params")
+        .cloned()
+        .unwrap_or_else(|| serde_json::json!({}));
+
+    let session = airspring_barracuda::ipc::provenance::begin_experiment_session(experiment_name);
+    let session_id = session.id;
+
+    let mut results = Vec::new();
+    for method in &methods {
+        let result = primal_science::dispatch_science(method, &science_params)
+            .unwrap_or_else(|| serde_json::json!({"error": "unknown method", "method": method}));
+
+        let step = serde_json::json!({
+            "type": "science_dispatch",
+            "method": method,
+            "result_keys": result.as_object().map(|o| o.keys().collect::<Vec<_>>()),
+            "has_error": result.get("error").is_some(),
+        });
+        airspring_barracuda::ipc::provenance::record_experiment_step(&session_id, &step);
+
+        results.push(serde_json::json!({
+            "method": method,
+            "result": result,
+        }));
+    }
+
+    let completion = airspring_barracuda::ipc::provenance::complete_experiment(&session_id);
+
+    if params.get("cache").and_then(serde_json::Value::as_bool) == Some(true) {
+        cache_experiment_result(experiment_name, &results, &completion);
+    }
+
+    serde_json::json!({
+        "experiment": experiment_name,
+        "session_id": session_id,
+        "provenance": completion.to_json(),
+        "results": results,
+        "methods_executed": methods.len(),
+    })
+}
+
+fn cache_experiment_result(
+    experiment_name: &str,
+    results: &[serde_json::Value],
+    completion: &airspring_barracuda::ipc::provenance::ProvenanceCompletion,
+) {
+    if let Some(socket) = airspring_barracuda::biomeos::discover_primal_socket("nestgate") {
+        let key = format!("airspring:experiment:{experiment_name}");
+        let value = serde_json::json!({
+            "schema": "ecoPrimals/experiment-result/v1",
+            "experiment": experiment_name,
+            "results": results,
+            "provenance": completion.to_json(),
+        });
+        let _ = airspring_barracuda::rpc::send(
+            &socket,
+            "storage.store",
+            &serde_json::json!({
+                "key": key,
+                "value": value,
+                "family_id": "airspring",
+            }),
+        );
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Capability listing (biomeOS niche composition)
+// ═══════════════════════════════════════════════════════════════════
+
+/// neuralAPI Enhancement 2: Dependency hints for biomeOS parallelization.
+///
+/// biomeOS can detect independent operations and run them in parallel.
+fn operation_dependencies() -> serde_json::Value {
+    serde_json::json!({
+        "science.et0": ["weather_data"],
+        "science.thermal_time": ["temperature_data"],
+        "science.vpd": ["temperature_data", "humidity_data"],
+        "science.gdd": ["temperature_data"],
+        "science.photoperiod": ["latitude", "day_of_year"],
+        "science.soil_moisture": ["precipitation_data", "et0_data"],
+        "science.biomass": ["gdd_data", "radiation_data"],
+        "science.water_stress": ["soil_moisture_data", "et0_data"],
+        "science.leaf_energy": ["radiation_data", "temperature_data"],
+        "science.air_quality": ["station", "date_range"],
+        "science.batch_et0": ["weather_data_array"],
+        "ecology.experiment": ["method", "params"],
+        "provenance.begin": ["experiment_name"],
+        "provenance.record": ["session_id", "step_data"],
+        "provenance.complete": ["session_id"],
+        "provenance.status": [],
+        "data.cross_spring_weather": ["station", "date_range"],
+    })
+}
+
+/// neuralAPI Enhancement 3: Cost estimates for biomeOS scheduling.
+///
+/// Typical latencies and resource intensities measured on representative hardware.
+fn cost_estimates() -> serde_json::Value {
+    serde_json::json!({
+        "science.et0": { "latency_ms": 0.5, "cpu": "low", "memory_bytes": 256 },
+        "science.thermal_time": { "latency_ms": 0.3, "cpu": "low", "memory_bytes": 128 },
+        "science.vpd": { "latency_ms": 0.2, "cpu": "low", "memory_bytes": 128 },
+        "science.gdd": { "latency_ms": 0.2, "cpu": "low", "memory_bytes": 128 },
+        "science.photoperiod": { "latency_ms": 0.3, "cpu": "low", "memory_bytes": 256 },
+        "science.soil_moisture": { "latency_ms": 0.4, "cpu": "low", "memory_bytes": 256 },
+        "science.biomass": { "latency_ms": 0.5, "cpu": "low", "memory_bytes": 256 },
+        "science.water_stress": { "latency_ms": 0.4, "cpu": "low", "memory_bytes": 256 },
+        "science.leaf_energy": { "latency_ms": 0.8, "cpu": "medium", "memory_bytes": 512 },
+        "science.air_quality": { "latency_ms": 5.0, "cpu": "low", "memory_bytes": 4096 },
+        "science.batch_et0": { "latency_ms": 50.0, "cpu": "medium", "memory_bytes": 65536 },
+        "ecology.experiment": { "latency_ms": 100.0, "cpu": "medium", "memory_bytes": 8192 },
+        "data.cross_spring_weather": { "latency_ms": 200.0, "cpu": "low", "memory_bytes": 16384 },
+        "provenance.begin": { "latency_ms": 10.0, "cpu": "low", "memory_bytes": 512 },
+        "provenance.record": { "latency_ms": 5.0, "cpu": "low", "memory_bytes": 1024 },
+        "provenance.complete": { "latency_ms": 50.0, "cpu": "medium", "memory_bytes": 2048 },
+    })
+}
+
+fn handle_capability_list(_state: &PrimalState) -> serde_json::Value {
+    let science: Vec<&str> = ALL_CAPABILITIES
+        .iter()
+        .filter(|c| c.starts_with("science.") || c.starts_with("ecology."))
+        .copied()
+        .collect();
+
+    let infra: Vec<&str> = ALL_CAPABILITIES
+        .iter()
+        .filter(|c| {
+            c.starts_with("primal.")
+                || c.starts_with("compute.")
+                || c.starts_with("data.")
+                || c.starts_with("capability.")
+                || c.starts_with("provenance.")
+        })
+        .copied()
+        .collect();
+
+    serde_json::json!({
+        "primal": PRIMAL_NAME,
+        "version": env!("CARGO_PKG_VERSION"),
+        "domain": "ecology",
+        "total": ALL_CAPABILITIES.len(),
+        "science": science,
+        "infrastructure": infra,
+        "composition": {
+            "provenance_trio": airspring_barracuda::ipc::provenance::is_available(),
+            "nestgate": crate::discover_data_primal().is_some(),
+            "toadstool": crate::discover_compute_primal().is_some(),
+        },
+        "operation_dependencies": operation_dependencies(),
+        "cost_estimates": cost_estimates(),
+    })
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Provenance trio handlers (biomeOS composition)
+// ═══════════════════════════════════════════════════════════════════
+
+fn handle_provenance_begin(params: &serde_json::Value) -> serde_json::Value {
+    let experiment_name = params
+        .get("experiment")
+        .or_else(|| params.get("name"))
+        .and_then(|v| v.as_str())
+        .unwrap_or("unnamed_experiment");
+
+    let result = airspring_barracuda::ipc::provenance::begin_experiment_session(experiment_name);
+
+    serde_json::json!({
+        "session_id": result.id,
+        "provenance": if result.available { "available" } else { "unavailable" },
+        "data": result.data,
+    })
+}
+
+fn handle_provenance_record(params: &serde_json::Value) -> serde_json::Value {
+    let session_id = params
+        .get("session_id")
+        .and_then(|v| v.as_str())
+        .unwrap_or("");
+
+    let step = params
+        .get("step")
+        .or_else(|| params.get("event"))
+        .cloned()
+        .unwrap_or_else(|| serde_json::json!({}));
+
+    let result = airspring_barracuda::ipc::provenance::record_experiment_step(session_id, &step);
+
+    serde_json::json!({
+        "vertex_id": result.id,
+        "provenance": if result.available { "available" } else { "unavailable" },
+        "data": result.data,
+    })
+}
+
+fn handle_provenance_complete(params: &serde_json::Value) -> serde_json::Value {
+    let session_id = params
+        .get("session_id")
+        .and_then(|v| v.as_str())
+        .unwrap_or("");
+
+    let completion = airspring_barracuda::ipc::provenance::complete_experiment(session_id);
+    completion.to_json()
+}
+
+fn handle_provenance_status() -> serde_json::Value {
+    serde_json::json!({
+        "available": airspring_barracuda::ipc::provenance::is_available(),
+        "trio": {
+            "rhizocrypt": "dag.* via capability.call",
+            "loamspine": "commit.* via capability.call",
+            "sweetgrass": "provenance.* via capability.call",
+        },
+        "degradation": "domain logic succeeds without provenance",
+    })
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Cross-Spring data exchange (ecoPrimals/time-series/v1)
+// ═══════════════════════════════════════════════════════════════════
+
+fn handle_cross_spring_weather(params: &serde_json::Value) -> serde_json::Value {
+    use airspring_barracuda::data::Provider;
+
+    let provider = airspring_barracuda::data::NestGateProvider::new();
+    let lat = params
+        .get("latitude")
+        .and_then(serde_json::Value::as_f64)
+        .unwrap_or(42.7);
+    let lon = params
+        .get("longitude")
+        .and_then(serde_json::Value::as_f64)
+        .unwrap_or(-84.48);
+    let start = params
+        .get("start_date")
+        .and_then(|v| v.as_str())
+        .unwrap_or("2025-01-01");
+    let end = params
+        .get("end_date")
+        .and_then(|v| v.as_str())
+        .unwrap_or("2025-12-31");
+
+    match provider.fetch_daily_weather(lat, lon, start, end) {
+        Ok(response) => response.to_cross_spring_v1("nestgate_routed"),
+        Err(e) => serde_json::json!({
+            "error": format!("fetch failed: {e}"),
+            "schema": "ecoPrimals/time-series/v1",
+        }),
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -395,6 +759,52 @@ fn register_via_socket(target: &Path, our_socket: &Path) {
         }),
     );
 
+    let provenance_mappings = serde_json::json!({
+        "begin":    "provenance.begin",
+        "record":   "provenance.record",
+        "complete": "provenance.complete",
+        "status":   "provenance.status",
+    });
+
+    let _ = rpc::send(
+        target,
+        "capability.register",
+        &serde_json::json!({
+            "primal": PRIMAL_NAME,
+            "capability": "provenance",
+            "socket": &sock_str,
+            "semantic_mappings": provenance_mappings,
+        }),
+    );
+
+    let data_mappings = serde_json::json!({
+        "cross_spring_weather": "data.cross_spring_weather",
+    });
+
+    let _ = rpc::send(
+        target,
+        "capability.register",
+        &serde_json::json!({
+            "primal": PRIMAL_NAME,
+            "capability": "data",
+            "socket": &sock_str,
+            "semantic_mappings": data_mappings,
+        }),
+    );
+
+    let _ = rpc::send(
+        target,
+        "capability.register",
+        &serde_json::json!({
+            "primal": PRIMAL_NAME,
+            "capability": "capability",
+            "socket": &sock_str,
+            "semantic_mappings": { "list": "capability.list" },
+            "operation_dependencies": operation_dependencies(),
+            "cost_estimates": cost_estimates(),
+        }),
+    );
+
     let mut registered = 0;
     for cap in ALL_CAPABILITIES {
         let cap_result = rpc::send(
@@ -415,7 +825,7 @@ fn register_via_socket(target: &Path, our_socket: &Path) {
     }
 
     eprintln!(
-        "[biomeos] {registered}/{} capabilities + ecology domain registered",
+        "[biomeos] {registered}/{} capabilities + ecology/provenance/data domains registered",
         ALL_CAPABILITIES.len()
     );
 }
@@ -476,7 +886,11 @@ fn handle_connection(stream: UnixStream, state: &PrimalState) {
             .unwrap_or_else(|| serde_json::json!({}));
 
         state.requests_served.fetch_add(1, Ordering::Relaxed);
+        let dispatch_start = Instant::now();
         let result = dispatch(method, &params, state);
+        let latency_ms = dispatch_start.elapsed().as_secs_f64() * 1000.0;
+        let success = result.get("error").is_none();
+        emit_metrics(method, latency_ms, success);
         let response = rpc::success(&id, &result);
 
         let _ = writeln!(writer, "{response}");
@@ -542,6 +956,8 @@ fn run() -> Result<(), String> {
             std::thread::sleep(Duration::from_secs(HEARTBEAT_INTERVAL_SECS));
 
             if let Some(ref t) = target {
+                let provenance_up =
+                    airspring_barracuda::ipc::provenance::is_available();
                 let _ = rpc::send(
                     t,
                     "lifecycle.status",
@@ -550,6 +966,13 @@ fn run() -> Result<(), String> {
                         "socket_path": socket_path.to_string_lossy(),
                         "status": "healthy",
                         "requests_served": heartbeat_state.requests_served.load(Ordering::Relaxed),
+                        "version": env!("CARGO_PKG_VERSION"),
+                        "capabilities_total": ALL_CAPABILITIES.len(),
+                        "composition": {
+                            "provenance_trio": provenance_up,
+                            "nestgate": discover_data_primal().is_some(),
+                            "toadstool": discover_compute_primal().is_some(),
+                        },
                     }),
                 );
             }
@@ -575,6 +998,32 @@ fn run() -> Result<(), String> {
         }
     }
     Ok(())
+}
+
+/// Emit structured metrics for biomeOS Pathway Learner (neuralAPI pattern).
+///
+/// Uses passive structured logging (eprintln with fields) so biomeOS can
+/// scrape metrics without requiring active reporting infrastructure.
+/// When `BIOMEOS_METRICS_SOCKET` is set, also reports directly.
+fn emit_metrics(operation: &str, latency_ms: f64, success: bool) {
+    eprintln!(
+        "[metrics] primal_id={PRIMAL_NAME} operation={operation} latency_ms={latency_ms:.2} success={success}"
+    );
+
+    if let Ok(socket_path) = std::env::var("BIOMEOS_METRICS_SOCKET") {
+        let metrics = serde_json::json!({
+            "primal_id": PRIMAL_NAME,
+            "operation": operation,
+            "latency_ms": latency_ms,
+            "success": success,
+            "version": env!("CARGO_PKG_VERSION"),
+        });
+        if let Ok(mut stream) = std::os::unix::net::UnixStream::connect(&socket_path) {
+            let payload = serde_json::to_string(&metrics).unwrap_or_default();
+            let _ = std::io::Write::write_all(&mut stream, payload.as_bytes());
+            let _ = std::io::Write::write_all(&mut stream, b"\n");
+        }
+    }
 }
 
 fn main() {

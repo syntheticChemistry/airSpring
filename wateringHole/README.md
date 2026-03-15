@@ -1,13 +1,14 @@
 # airSpring wateringHole
 
-**Updated**: March 14, 2026 | **Version**: v0.7.6
+**Updated**: March 15, 2026 | **Version**: v0.8.0
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.7.6** | [AIRSPRING_V076_DEEP_DEBT_UPSTREAM_SYNC_HANDOFF_MAR14_2026.md](handoffs/AIRSPRING_V076_DEEP_DEBT_UPSTREAM_SYNC_HANDOFF_MAR14_2026.md) | 2026-03-14 | **current** — Deep debt resolution + execution: barraCuda 0.3.5 sync, bingocube-nautilus 0.1.0 migration (NautilusBrain), new `data` module (Provider trait), 4 compilation blockers resolved (validate_cytokine, nucleus_integration, akida-driver facade, snake_case), GPU stream smoother f64→f32 shader fix, validation hardcoding eliminated, tolerance provenance complete (20 entries), tracing::warn migration. 834 lib + 41 integration + 186 forge, all --all-features compile |
+| **V0.8.0** | [AIRSPRING_V080_BIOMEOS_COMPOSITION_HANDOFF_MAR15_2026.md](handoffs/AIRSPRING_V080_BIOMEOS_COMPOSITION_HANDOFF_MAR15_2026.md) | 2026-03-15 | **current** — biomeOS composition: Provenance Trio (`ipc/provenance.rs`), `NestGateProvider` three-tier routing, Cross-Spring Time Series v1, GPU compute provenance, 41 capabilities, 4 deploy graphs (provenance pipeline, niche deploy), 847 lib + 41 integration |
+| **V0.7.6** | [AIRSPRING_V076_DEEP_DEBT_UPSTREAM_SYNC_HANDOFF_MAR14_2026.md](handoffs/AIRSPRING_V076_DEEP_DEBT_UPSTREAM_SYNC_HANDOFF_MAR14_2026.md) | 2026-03-14 | Deep debt resolution + execution: barraCuda 0.3.5 sync, 4 compilation blockers, GPU stream smoother fix, akida-driver facade, 834 lib + 41 integration |
 | **V0.7.5** | [AIRSPRING_V075_BARRACUDA_TOADSTOOL_EVOLUTION_HANDOFF_MAR08_2026.md](handoffs/AIRSPRING_V075_BARRACUDA_TOADSTOOL_EVOLUTION_HANDOFF_MAR08_2026.md) | 2026-03-08 | Comprehensive evolution handoff: CPU/GPU parity (18 modules), 14 JSON-RPC methods for compute.offload, NUCLEUS mesh, deployment graphs, 9 absorption candidates, cross-spring intelligence |
 | **V0.7.5** | [AIRSPRING_V075_NUCLEUS_EXPERIMENTS_HANDOFF_MAR08_2026.md](handoffs/AIRSPRING_V075_NUCLEUS_EXPERIMENTS_HANDOFF_MAR08_2026.md) | 2026-03-08 | Exp 084-087 (79/79): CPU/GPU parity, toadStool dispatch, metalForge NUCLEUS mesh, graph coordination |
 | **V0.7.5** | [AIRSPRING_V075_UPSTREAM_REWIRE_TOADSTOOL_HANDOFF_MAR08_2026.md](handoffs/AIRSPRING_V075_UPSTREAM_REWIRE_TOADSTOOL_HANDOFF_MAR08_2026.md) | 2026-03-08 | **superseded** — barraCuda HEAD sync (`a898dee`), `regularized_gamma_p` lean, 9 new upstream capabilities documented, toadStool S130+ / coralReef Phase 10 alignment |
@@ -27,6 +28,8 @@
 | `../specs/NUCLEUS_INTEGRATION.md` | NUCLEUS deployment: graphs, workloads, Neural API bridge |
 | `../specs/GPU_PROMOTION_MAP.md` | GPU tier status: 25 Tier A + 6 GPU-local + Tier B + Tier C |
 | `../graphs/airspring_eco_pipeline.toml` | biomeOS deployment graph: weather → ET₀ → WB → yield |
+| `../graphs/airspring_provenance_pipeline.toml` | Provenance-tracked experiment: session → science → dehydrate → commit → attribute |
+| `../graphs/airspring_niche_deploy.toml` | Full niche deployment: Tower + Trio + NestGate + ToadStool + airSpring |
 | `../graphs/cross_primal_soil_microbiome.toml` | Cross-Spring pipeline: airSpring θ(t) → wetSpring diversity |
 | `../barracuda/EVOLUTION_READINESS.md` | Tier A/B/C status, absorbed/stays-local, quality gates |
 | `../metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66), post-absorption leaning status |

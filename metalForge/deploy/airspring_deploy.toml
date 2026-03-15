@@ -11,8 +11,8 @@
 
 [graph]
 name = "airspring_ecology"
-description = "airSpring ecology pipeline on Node Atomic (Tower + ToadStool + airSpring)"
-version = "0.6.0"
+description = "airSpring ecology pipeline on Node Atomic (Tower + ToadStool + Provenance Trio + airSpring)"
+version = "0.8.0"
 
 # ── Node 1: BearDog (crypto + key management) ─────────────────────
 [[graph.node]]
@@ -42,11 +42,53 @@ capabilities = [
     "network.dns_resolve",
 ]
 
-# ── Node 3: ToadStool (GPU/CPU compute dispatch) ──────────────────
+# ── Node 3: rhizoCrypt (ephemeral DAG sessions — provenance) ──────
+[[graph.node]]
+name = "rhizocrypt"
+binary = "rhizocrypt_primal"
+order = 3
+required = false
+depends_on = ["beardog"]
+health_method = "dag.health"
+by_capability = "dag"
+capabilities = [
+    "dag.create_session",
+    "dag.append_event",
+    "dag.dehydrate",
+]
+
+# ── Node 4: loamSpine (immutable ledger — provenance) ─────────────
+[[graph.node]]
+name = "loamspine"
+binary = "loamspine_primal"
+order = 4
+required = false
+depends_on = ["beardog", "rhizocrypt"]
+health_method = "commit.health"
+by_capability = "commit"
+capabilities = [
+    "commit.session",
+]
+
+# ── Node 5: sweetGrass (semantic braids — provenance) ─────────────
+[[graph.node]]
+name = "sweetgrass"
+binary = "sweetgrass_primal"
+order = 5
+required = false
+depends_on = ["beardog", "loamspine"]
+health_method = "provenance.health"
+by_capability = "provenance"
+capabilities = [
+    "provenance.create_braid",
+    "provenance.lineage",
+]
+
+# ── Node 6: ToadStool (GPU/CPU compute dispatch) ──────────────────
 [[graph.node]]
 name = "toadstool"
 binary = "toadstool_primal"
-order = 3
+order = 6
 required = false
 depends_on = ["beardog", "songbird"]
 health_method = "compute.health"
@@ -62,14 +104,14 @@ capabilities = [
 TOADSTOOL_PRECISION = "auto"
 TOADSTOOL_MULTI_DEVICE = "true"
 
-# ── Node 4: airSpring (ecology + agriculture science) ──────────────
+# ── Node 7: airSpring (ecology + agriculture science) ──────────────
 [[graph.node]]
 name = "airspring"
 binary = "airspring_primal"
-order = 4
+order = 7
 required = true
-depends_on = ["beardog", "songbird", "toadstool"]
-health_method = "science.health"
+depends_on = ["beardog", "songbird"]
+health_method = "health.check"
 by_capability = "ecology"
 capabilities = [
     # ET₀ methods (9)
@@ -105,7 +147,14 @@ capabilities = [
     "ecology.diversity.bray_curtis",
     # Physics (1)
     "ecology.anderson.coupling_chain",
-    # Cross-primal (2)
+    # Provenance trio (biomeOS composition)
+    "provenance.begin",
+    "provenance.record",
+    "provenance.complete",
+    "provenance.status",
+    # Cross-primal
+    "capability.list",
+    "data.cross_spring_weather",
     "science.health",
     "science.version",
     "compute.offload",

@@ -48,6 +48,10 @@
 //! # I/O
 //! - [`io::csv_ts`] — Time series CSV streaming parser for `IoT` sensor data
 //!
+//! # Inter-Primal Communication (IPC)
+//! - [`ipc::provenance`] — Provenance trio integration via biomeOS `capability.call`
+//!   (rhizoCrypt + loamSpine + sweetGrass) with graceful degradation
+//!
 //! # Error Handling
 //! - [`error`] — [`error::AirSpringError`] unified error type
 //!
@@ -75,6 +79,7 @@ pub mod eco;
 pub mod error;
 pub mod gpu;
 pub mod io;
+pub mod ipc;
 pub mod nautilus;
 #[cfg(feature = "npu")]
 pub mod npu;
