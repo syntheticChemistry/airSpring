@@ -152,8 +152,9 @@ capabilities = [
     "provenance.record",
     "provenance.complete",
     "provenance.status",
-    # Cross-primal
+    # Cross-primal discovery + coordination
     "capability.list",
+    "discovery.resolve",
     "data.cross_spring_weather",
     "science.health",
     "science.version",

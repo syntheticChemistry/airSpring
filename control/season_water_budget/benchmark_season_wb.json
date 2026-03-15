@@ -4,7 +4,7 @@
     "data_source": "Deterministic synthetic weather (Michigan lat 42.7\u00b0N, elev 256 m)",
     "experiment": "054",
     "baseline_script": "control/season_water_budget/season_water_budget.py",
-    "baseline_commit": "87df5f6",
+    "baseline_commit": "d8959c9",
     "baseline_command": "python control/season_water_budget/season_water_budget.py",
     "baseline_date": "2026-02-28",
     "baseline_result": "34/34 PASS"

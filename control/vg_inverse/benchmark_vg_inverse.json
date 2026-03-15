@@ -4,7 +4,7 @@
     "data_source": "Carsel & Parrish (1988) Table 1 \u2014 12 USDA soil texture classes (open literature)",
     "experiment": "053",
     "baseline_script": "control/vg_inverse/vg_inverse_fitting.py",
-    "baseline_commit": "87df5f6",
+    "baseline_commit": "d8959c9",
     "baseline_command": "python control/vg_inverse/vg_inverse_fitting.py",
     "baseline_date": "2026-02-28",
     "baseline_result": "84/84 PASS"

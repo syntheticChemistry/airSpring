@@ -203,21 +203,21 @@ fn check_reasons_and_inventory(inv: &[Substrate], v: &mut ValidationHarness) {
     let all = workloads::all_workloads();
     v.check_bool(
         &format!("{} workloads in catalog", all.len()),
-        all.len() == 21,
+        all.len() == 27,
     );
 
     let all_route = all
         .iter()
         .all(|ew| dispatch::route(&ew.workload, inv).is_some());
-    v.check_bool("All 21 workloads route in full inventory", all_route);
+    v.check_bool("All 27 workloads route in full inventory", all_route);
 
     let (absorbed, local, npu_native, cpu_only) = workloads::origin_summary();
     v.check_bool(
         &format!(
-            "14 absorbed + 0 local + 4 NPU + 3 CPU = {}",
+            "20 absorbed + 0 local + 4 NPU + 3 CPU = {}",
             absorbed + local + npu_native + cpu_only
         ),
-        absorbed == 14 && local == 0 && npu_native == 4 && cpu_only == 3,
+        absorbed == 20 && local == 0 && npu_native == 4 && cpu_only == 3,
     );
 }
 

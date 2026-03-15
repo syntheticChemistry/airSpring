@@ -2,7 +2,7 @@
 
 **Last Updated**: March 15, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 87 experiments (1284/1284 Python + 851 Rust lib + 280 integration + 61 forge tests + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.3.5 (wgpu 28), Edition 2024, 94 binaries. 14.5× Rust-vs-Python geometric mean speedup (21/21 algorithms). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired. metalForge 66/66 mixed pipeline. V082 handoff. biomeOS niche: 41 capabilities, 4 deploy graphs. Deep code quality complete. Exp 084 CPU/GPU parity (21/21), Exp 085 toadStool dispatch (19/19), Exp 086 metalForge NUCLEUS (17/17), Exp 087 graph coordination (22/22).
+**Status**: 87 experiments (1284/1284 Python + 851 Rust lib + 280 integration + 61 forge tests + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.3.5 (wgpu 28), Edition 2024, 94 binaries. 14.3× Rust-vs-Python geometric mean speedup (24/24 algorithms, 21/21 CPU-GPU parity modules). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired. metalForge 66/66 mixed pipeline. V082 handoff. biomeOS niche: 41 capabilities, 4 deploy graphs. Deep code quality complete. Exp 084 CPU/GPU parity (21/21), Exp 085 toadStool dispatch (19/19), Exp 086 metalForge NUCLEUS (17/17), Exp 087 graph coordination (22/22).
 
 ---
 
@@ -82,7 +82,7 @@ All 61 completed papers have:
 - **Open or published data** (no institutional access required)
 - **Cross-validation** (33/33 Python↔Rust match at 1e-5; 690 crop-station yield pairs within 0.01; PT↔PM cross-validated)
 - **GPU wiring**: 25 Tier A modules + fused Welford (SeasonalReducer) + fused Pearson (pairwise_correlation_gpu) + `BrentGpu` (VG inverse) + `RichardsGpu` (Picard)
-- **CPU benchmarks**: 20.6× geometric mean speedup vs Python (24/24 algorithms), 13,000× atlas-scale
+- **CPU benchmarks**: 14.3× geometric mean speedup vs Python (24/24 algorithms, 21/21 CPU-GPU parity modules), 13,000× atlas-scale
 - **GPU pipeline**: Local GPU 6/6 ops parity (<0.002 error). 27 GPU dispatch failures (upstream wgpu 28 NVK).
 - **Cross-spring provenance**: 146/146 evolution benchmarks across 5 springs (barraCuda 0.3.3)
 

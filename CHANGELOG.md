@@ -871,12 +871,12 @@ Turc magic numbers promoted to named constants.
 - **Exp 058: Climate Scenario Analysis** (46/46 PASS)
   - `validate_climate_scenario` binary — climate scenario pipeline validation
 - **Streaming pipeline backend**: `Backend::GpuPipelined`, `backend::GpuFused`
-- **Seasonal pipeline benchmark** in `bench_cpu_vs_python` — 21/21 parity at 14.5× speedup
+- **Seasonal pipeline benchmark** in `bench_cpu_vs_python` — 24/24 parity at 14.3× speedup
 
 #### Changed
 - Lib tests: 640 → 641 (`streaming_matches_cpu` test)
 - Binaries: 67 → 68 (`validate_climate_scenario`)
-- CPU vs Python parity: 20/20 (17.9×) → 21/21 (14.5×) — added seasonal_pipeline benchmark
+- CPU vs Python parity: 20/20 (17.9×) → 24/24 (14.3×) — added seasonal_pipeline benchmark
 - Turc magic numbers → named constants: `TURC_RH_THRESHOLD_PCT`, `TURC_RH_CORRECTION_RANGE`,
   `TURC_TEMP_DENOM_OFFSET`, `TURC_COEFF`
 

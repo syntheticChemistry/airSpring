@@ -177,7 +177,7 @@ All experiments run on a single consumer workstation:
 | Phase 1 (Rust validation) | 95 binaries | All pass: same benchmarks validated in Rust |
 | Phase 1 (Rust tests) | 851 lib + 61 forge | lib + forge |
 | Phase 1 (Atlas validation) | 1498 | 100 Michigan stations |
-| Phase 1.5 (CPU benchmark) | 21/21 | Rust 14.5× faster than Python (geometric mean, 21/21 parity) |
+| Phase 1.5 (CPU benchmark) | 24/24 | Rust 14.3× faster than Python (geometric mean, 24/24 algorithms, 21/21 CPU-GPU parity modules) |
 | Phase 2 (Cross-validation) | 75 + 690 | Python↔Rust identical (tol=1e-5); 690 crop-station yield pairs within 0.01 |
 | **Total** | **1284 + 851 + 61 + 1498 + 75** | **All pass** |
 | Phase 0+ (Real data) | 15,300 station-days | R²=0.967, 100 Michigan stations, zero synthetic |

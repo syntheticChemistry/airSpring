@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: March 15, 2026
-**Status**: 87 experiments, barraCuda 0.3.5 (wgpu 28), v0.8.2, Edition 2024 (rust-version 1.87). 1284/1284 Python + 851 lib + 280 integration + 61 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. 14.5× Rust-vs-Python speedup (21/21 parity). Niche architecture: 41 capabilities, 4 deploy graphs, transitional adapter → biomeOS graph deployment. All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired. Deep code quality: zero `#[allow()]` in production (95 binaries cleaned), zero clippy pedantic+nursery warnings, zero unsafe in production.
+**Status**: 87 experiments, barraCuda 0.3.5 (wgpu 28), v0.8.2, Edition 2024 (rust-version 1.87). 1284/1284 Python + 851 lib + 280 integration + 61 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 parity). 21/21 CPU-GPU parity modules. Niche architecture: 41 capabilities, 4 deploy graphs, transitional adapter → biomeOS graph deployment. All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired. Deep code quality: zero `#[allow()]` in production (95 binaries cleaned), zero clippy pedantic+nursery warnings, zero unsafe in production. Full validation pipeline green (2026-03-15).
 
 ---
 
@@ -97,7 +97,7 @@
 | 086 | metalForge Mixed Hardware Live NUCLEUS | Hardware | **Complete** | Rust | Live probe (RTX 4070 + Titan V + i9-12900K), NUCLEUS mesh (Tower+Node), 23/27 workload routing, ecology pipeline (3 stages GPU), PCIe bypass, transfer matrix | 17/17 |
 | 087 | NUCLEUS Graph Coordination | Integration | **Complete** | Rust | biomeOS TOML graph parsing, DAG validation, capability refs, dependency ordering, prerequisite checks, Tower/Node atomic detection, 7 primals | 22/22 |
 
-**Grand Total**: 1284 Python + **851 lib + 280 integration + 61 forge tests** + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (41 capabilities) + 95 binaries + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + 14.5× CPU speedup (21/21 parity) + 87 experiments (v0.8.2). Exp 084 CPU/GPU 21/21, Exp 085 toadStool 19/19, Exp 086 metalForge NUCLEUS 17/17, Exp 087 Graphs 22/22. Full NUCLEUS mesh: Tower+Node+Nest live.
+**Grand Total**: 1284 Python + **851 lib + 280 integration + 61 forge tests** + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (41 capabilities) + 95 binaries + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + 14.3× CPU speedup (24/24 parity) + 21/21 CPU-GPU parity modules + 87 experiments (v0.8.2). Exp 084 CPU/GPU 21/21, Exp 085 toadStool 19/19, Exp 086 metalForge NUCLEUS 17/17, Exp 087 Graphs 22/22. Full NUCLEUS mesh: Tower+Node+Nest live. Full validation pipeline green (2026-03-15).
 
 ---
 

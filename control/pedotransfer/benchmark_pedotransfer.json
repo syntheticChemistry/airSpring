@@ -4,7 +4,7 @@
     "baseline_script": "control/pedotransfer/saxton_rawls.py",
     "baseline_commit": "fad2e1b",
     "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
-    "python_version": "3.10",
+    "python_version": "3.13",
     "created": "2026-02-26",
     "references": [
       "Saxton KE, Rawls WJ (2006) SSSAJ 70(5):1569-1578"

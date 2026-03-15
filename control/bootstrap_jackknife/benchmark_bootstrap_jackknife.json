@@ -6,7 +6,7 @@
     "baseline_script": "control/bootstrap_jackknife/bootstrap_jackknife_et0.py",
     "baseline_command": "python3 control/bootstrap_jackknife/bootstrap_jackknife_et0.py",
     "baseline_commit": "1c11763",
-    "python_version": "3.10.12",
+    "python_version": "3.13.2",
     "repository": "ecoPrimals/airSpring",
     "references": [
       "Efron B (1979) Bootstrap methods: another look at the jackknife",
@@ -178,22 +178,22 @@
     3.183360606635773
   ],
   "bootstrap_full_season": {
-    "mean": 5.275541854202318,
+    "mean": 5.275541854202322,
     "ci_lower": 5.040803159505025,
     "ci_upper": 5.508184531414281,
-    "std_error": 0.11637107838855755,
+    "std_error": 0.11637107838855754,
     "n_bootstrap": 1000
   },
   "jackknife_full_season": {
-    "mean": 5.275541854202318,
-    "variance": 0.013098260419296227,
-    "std_error": 0.11444763177670488
+    "mean": 5.275541854202322,
+    "variance": 0.01309826041929618,
+    "std_error": 0.11444763177670467
   },
   "bootstrap_known_1_10": {
     "mean": 5.5,
     "ci_lower": 3.7,
     "ci_upper": 7.2,
-    "std_error": 0.9032928594868915,
+    "std_error": 0.9032928594868886,
     "n_bootstrap": 2000
   },
   "jackknife_known_1_10": {
@@ -205,7 +205,7 @@
     "mean": 3.68332751961114,
     "ci_lower": 3.298688843608192,
     "ci_upper": 3.9882193641075254,
-    "std_error": 0.1665909623904365,
+    "std_error": 0.16659096239043664,
     "n_bootstrap": 500
   },
   "jackknife_small_n5": {

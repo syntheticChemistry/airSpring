@@ -231,11 +231,11 @@ fn validate_workload_catalog(v: &mut ValidationHarness) {
         "  Absorbed: {absorbed}, Local: {local}, NPU-native: {npu_native}, CPU-only: {cpu_only_ct}"
     );
 
-    v.check_bool("18 total workloads", all.len() == 18);
-    v.check_bool("9 absorbed GPU", absorbed == 9);
-    v.check_bool("4 local WGSL (Tier B)", local == 4);
-    v.check_bool("3 NPU-native classifiers", npu_native == 3);
-    v.check_bool("2 CPU-only domains", cpu_only_ct == 2);
+    v.check_bool("27 total workloads", all.len() == 27);
+    v.check_bool("20 absorbed GPU", absorbed == 20);
+    v.check_bool("0 local WGSL (all absorbed upstream)", local == 0);
+    v.check_bool("4 NPU-native classifiers", npu_native == 4);
+    v.check_bool("3 CPU-only domains", cpu_only_ct == 3);
 
     let npu_prefer_ok = all
         .iter()

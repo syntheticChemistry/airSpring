@@ -149,13 +149,13 @@ Also wired: `validation::ValidationHarness` (neuralSpring), `stats::pearson`, `s
 25 Tier A GPU modules (ops 0-19 all upstream via `BatchedElementwiseF64`) + jackknife/bootstrap/diversity uncertainty stack. `local_dispatch` retired (v0.7.2 Write→Absorb→Lean complete). `PrecisionRoutingAdvice` wired (v0.7.3). Upstream provenance registry integrated.
 See `barracuda/src/gpu/evolution_gaps.rs` and `barracuda/EVOLUTION_READINESS.md` for the full roadmap.
 
-### CPU Benchmarks: Rust vs Python (14.5× geometric mean speedup, 21/21 parity)
+### CPU Benchmarks: Rust vs Python (14.3× geometric mean speedup, 24/24 parity)
 
-Run `cargo run --release --bin bench_cpu_vs_python`. 21 algorithms, same f64
-precision, same inputs, same outputs. 14.5× geometric mean includes the seasonal
-pipeline (ET₀→Kc→WB→Yield chain) which gives Python a relative advantage due to
-NumPy vectorization. Individual algorithm speedups range from 1× (Thornthwaite —
-Rust computes daylight per-day vs Python mid-month) to 190× (water balance step).
+Run `cargo run --release --bin bench_cpu_vs_python`. 24 algorithms, same f64
+precision, same inputs, same outputs. 14.3× geometric mean includes the seasonal
+pipeline (ET₀→Kc→WB→Yield chain) and Paper 12 immunological modules. Individual
+algorithm speedups range from 5× to 124× for pure compute, with 21/21 CPU-GPU
+parity modules validated via `validate_cpu_gpu_comprehensive`.
 
 ## Quick Start
 

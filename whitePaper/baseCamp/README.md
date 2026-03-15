@@ -2,7 +2,7 @@
 
 **Updated**: March 15, 2026
 **Project**: airSpring — Ecological & Agricultural Sciences (v0.8.2)
-**Status**: 87 experiments, 1284/1284 Python + 851 lib + 280 integration + 61 forge tests + 95 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.5× CPU speedup (21/21 parity) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-version 1.87) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, transitional adapter → biomeOS graph deployment) + zero `#[allow()]` in production + zero clippy pedantic+nursery + zero unsafe in production. Deep code quality complete
+**Status**: 87 experiments, 1284/1284 Python + 851 lib + 280 integration + 61 forge tests + 95 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-version 1.87) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, transitional adapter → biomeOS graph deployment) + zero `#[allow()]` in production + zero clippy pedantic+nursery + zero unsafe in production. Deep code quality complete
 
 ---
 
@@ -12,7 +12,7 @@
 Phase 0   Python/R baselines    — reproduce paper results with original tools (1284/1284)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
 Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (851 lib + 1498 atlas, 95 binaries + 146/146 + 32/32 cross-spring benchmarks)
-Phase 1.5 CPU benchmark         — 14.5× Rust-vs-Python geometric mean (21/21 parity)
+Phase 1.5 CPU benchmark         — 14.3× Rust-vs-Python geometric mean (24/24 algorithms, 21/21 CPU-GPU parity modules)
 Phase 2   BarraCuda GPU bridge  — 25 Tier A + 6 GPU-local modules wired (cross-spring S87 fully rewired)
 Phase 2.5 Ops 5-8 GPU-first   — Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed
 Phase 2.6 Seasonal pipeline    — GPU Stages 1-2 (ET₀ + Kc), atlas stream, MC ET₀ GPU path
@@ -184,7 +184,7 @@ Phase 5.5 Niche architecture    — Edition 2024, niche self-knowledge module, t
 | `validate_toadstool_dispatch` | 19 | 14 JSON-RPC science methods, compute.offload (Exp 085) |
 | `validate_mixed_nucleus_live` | 17 | Live NUCLEUS mesh, ecology pipeline, PCIe bypass (Exp 086, forge) |
 | `validate_nucleus_graphs` | 22 | biomeOS TOML graph validation, DAG acyclicity (Exp 087) |
-| `bench_cpu_vs_python` | 21/21 parity | Full pipeline Rust vs Python (14.5× geometric mean) |
+| `bench_cpu_vs_python` | 24/24 parity | Full pipeline Rust vs Python (14.3× geometric mean) |
 
 ### GPU Orchestrators (Phase 2+2.5+2.9) — 25 Tier A integrated + 3 pipeline
 
@@ -214,7 +214,7 @@ Phase 5.5 Niche architecture    — Edition 2024, niche self-knowledge module, t
 
 S79 modernization: `libc`→`rustix`, `async-trait`→AFIT, universal f64 precision, `pollster`→`test_pool`.
 
-### CPU Benchmarks (v0.5.7) — Rust 14.5× Geometric Mean (21/21 Parity)
+### CPU Benchmarks (v0.5.7) — Rust 14.3× Geometric Mean (24/24 Algorithms, 21/21 CPU-GPU Parity Modules)
 
 | Algorithm | Speedup | Parity | Cross-Spring Provenance |
 |-----------|:-------:|:------:|------------------------|
