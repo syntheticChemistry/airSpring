@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![deny(unsafe_code)]
+#![forbid(unsafe_code)]
+#![deny(clippy::unwrap_used, clippy::expect_used)]
+#![warn(missing_docs)]
 //! airSpring metalForge — cross-system compute dispatch.
 //!
 //! Discovers CPU, GPU, and NPU substrates at runtime and routes

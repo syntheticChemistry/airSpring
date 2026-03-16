@@ -34,8 +34,22 @@ struct NicheState {
     requests_served: AtomicU64,
 }
 
-fn orchestrator_socket_name() -> String {
-    std::env::var("BIOMEOS_ORCHESTRATOR_SOCKET").unwrap_or_else(|_| "biomeOS.sock".to_string())
+fn discover_orchestrator_socket() -> Option<std::path::PathBuf> {
+    if let Ok(name) = std::env::var("BIOMEOS_ORCHESTRATOR_SOCKET") {
+        let path = biomeos::resolve_socket_dir().join(name);
+        if path.exists() {
+            return Some(path);
+        }
+    }
+    let socket_dir = biomeos::resolve_socket_dir();
+    let family_id = biomeos::get_family_id();
+    for base in ["biomeOS", "biomeos"] {
+        let found = biomeos::discover_primal_socket_in(base, &socket_dir, &family_id);
+        if found.is_some() {
+            return found;
+        }
+    }
+    None
 }
 
 fn discover_compute_primal() -> Option<std::path::PathBuf> {
@@ -54,39 +68,47 @@ fn discover_data_primal() -> Option<std::path::PathBuf> {
 // Request dispatch
 // ═══════════════════════════════════════════════════════════════════
 
-fn dispatch(method: &str, params: &serde_json::Value, state: &NicheState) -> serde_json::Value {
+enum DispatchOutcome {
+    Ok(serde_json::Value),
+    RpcError { code: i32, message: String },
+}
+
+fn dispatch(method: &str, params: &serde_json::Value, state: &NicheState) -> DispatchOutcome {
     if matches!(
         method,
         "lifecycle.health" | "health" | "health.check" | "science.health"
     ) {
-        return handle_health(state);
+        return DispatchOutcome::Ok(handle_health(state));
     }
 
     if method == "science.version" {
-        return serde_json::json!({
+        return DispatchOutcome::Ok(serde_json::json!({
             "niche": niche::NICHE_NAME,
             "version": env!("CARGO_PKG_VERSION"),
-        });
+        }));
     }
 
     if let Some(result) = primal_science::dispatch_science(method, params) {
         auto_record_provenance(method, params, &result);
-        return result;
+        return DispatchOutcome::Ok(result);
     }
 
     match method {
-        "ecology.experiment" => handle_ecology_experiment(params),
-        "capability.list" => handle_capability_list(state),
-        "provenance.begin" => handle_provenance_begin(params),
-        "provenance.record" => handle_provenance_record(params),
-        "provenance.complete" => handle_provenance_complete(params),
-        "provenance.status" => handle_provenance_status(),
-        "data.cross_spring_weather" => handle_cross_spring_weather(params),
-        "primal.forward" => handle_primal_forward(params),
-        "primal.discover" => handle_primal_discover(),
-        "compute.offload" => handle_compute_offload(params),
-        "data.weather" => handle_data_weather(params),
-        _ => serde_json::json!({"error": "method_not_found", "method": method}),
+        "ecology.experiment" => DispatchOutcome::Ok(handle_ecology_experiment(params)),
+        "capability.list" => DispatchOutcome::Ok(handle_capability_list(state)),
+        "provenance.begin" => DispatchOutcome::Ok(handle_provenance_begin(params)),
+        "provenance.record" => DispatchOutcome::Ok(handle_provenance_record(params)),
+        "provenance.complete" => DispatchOutcome::Ok(handle_provenance_complete(params)),
+        "provenance.status" => DispatchOutcome::Ok(handle_provenance_status()),
+        "data.cross_spring_weather" => DispatchOutcome::Ok(handle_cross_spring_weather(params)),
+        "primal.forward" => DispatchOutcome::Ok(handle_primal_forward(params)),
+        "primal.discover" => DispatchOutcome::Ok(handle_primal_discover()),
+        "compute.offload" => DispatchOutcome::Ok(handle_compute_offload(params)),
+        "data.weather" => DispatchOutcome::Ok(handle_data_weather(params)),
+        _ => DispatchOutcome::RpcError {
+            code: rpc::METHOD_NOT_FOUND,
+            message: format!("Method not found: {method}"),
+        },
     }
 }
 
@@ -432,26 +454,27 @@ fn handle_primal_discover() -> serde_json::Value {
 // ═══════════════════════════════════════════════════════════════════
 
 fn register_with_biomeos(our_socket: &Path) {
-    let biomeos_socket = biomeos::resolve_socket_dir().join(orchestrator_socket_name());
-    if !biomeos_socket.exists() {
+    if let Some(orchestrator) = discover_orchestrator_socket() {
         eprintln!(
-            "[biomeos] No orchestrator at {}, running standalone",
-            biomeos_socket.display()
+            "[biomeos] Registering with orchestrator at {}",
+            orchestrator.display()
         );
-        if let Some(fallback_name) = biomeos::fallback_registration_primal() {
-            if let Some(ref fallback_sock) = biomeos::discover_primal_socket(&fallback_name) {
-                eprintln!(
-                    "[biomeos] Found {fallback_name} at {}, registering via fallback",
-                    fallback_sock.display()
-                );
-                niche::register_with_target(fallback_sock, our_socket);
-                return;
-            }
-            eprintln!("[biomeos] Fallback '{fallback_name}' not found — fully standalone");
-        }
+        niche::register_with_target(&orchestrator, our_socket);
         return;
     }
-    niche::register_with_target(&biomeos_socket, our_socket);
+    eprintln!("[biomeos] No orchestrator discovered, trying fallback");
+    if let Some(fallback_name) = biomeos::fallback_registration_primal() {
+        if let Some(ref fallback_sock) = biomeos::discover_primal_socket(&fallback_name) {
+            eprintln!(
+                "[biomeos] Found {fallback_name} at {}, registering via fallback",
+                fallback_sock.display()
+            );
+            niche::register_with_target(fallback_sock, our_socket);
+            return;
+        }
+        eprintln!("[biomeos] Fallback '{fallback_name}' not found — fully standalone");
+    }
+    eprintln!("[biomeos] Running standalone (no orchestrator, no fallback)");
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -502,12 +525,28 @@ fn handle_connection(stream: UnixStream, state: &NicheState) {
             .unwrap_or_else(|| serde_json::json!({}));
 
         state.requests_served.fetch_add(1, Ordering::Relaxed);
-        let t0 = Instant::now();
-        let result = dispatch(method, &params, state);
-        let latency_ms = t0.elapsed().as_secs_f64() * 1000.0;
-        emit_metrics(method, latency_ms, result.get("error").is_none());
 
-        let _ = writeln!(writer, "{}", rpc::success(&id, &result));
+        if method.is_empty() {
+            let resp = rpc::error(&id, rpc::INVALID_REQUEST, "Missing 'method' field");
+            let _ = writeln!(writer, "{resp}");
+            let _ = writer.flush();
+            emit_metrics("<invalid>", 0.0, false);
+            continue;
+        }
+
+        let t0 = Instant::now();
+        let outcome = dispatch(method, &params, state);
+        let latency_ms = t0.elapsed().as_secs_f64() * 1000.0;
+
+        let (resp, success) = match outcome {
+            DispatchOutcome::Ok(result) => (rpc::success(&id, &result), true),
+            DispatchOutcome::RpcError { code, message } => {
+                (rpc::error(&id, code, &message), false)
+            }
+        };
+        emit_metrics(method, latency_ms, success);
+
+        let _ = writeln!(writer, "{resp}");
         let _ = writer.flush();
     }
 }
@@ -576,15 +615,10 @@ fn run() -> Result<(), String> {
     let heartbeat_state = state.clone();
     let heartbeat_running = running.clone();
     std::thread::spawn(move || {
-        let target = {
-            let biomeos_sock = biomeos::resolve_socket_dir().join(orchestrator_socket_name());
-            if biomeos_sock.exists() {
-                Some(biomeos_sock)
-            } else {
-                biomeos::fallback_registration_primal()
-                    .and_then(|name| biomeos::discover_primal_socket(&name))
-            }
-        };
+        let target = discover_orchestrator_socket().or_else(|| {
+            biomeos::fallback_registration_primal()
+                .and_then(|name| biomeos::discover_primal_socket(&name))
+        });
 
         while heartbeat_running.load(Ordering::Relaxed) {
             std::thread::sleep(Duration::from_secs(HEARTBEAT_INTERVAL_SECS));

@@ -69,6 +69,25 @@ pub const CROSS_SPRING_EVOLUTION: Tolerance = Tolerance {
     justification: "Chained rewire (CPU→GPU): accumulates DF64 rounding across 3-5 ops",
 };
 
+/// GPU parity for simplified ET₀ methods (Makkink, Turc): compound DF64
+/// operations (exp, log, division) accumulate rounding across 4-6 chained ops.
+pub const GPU_SIMPLIFIED_ET0: Tolerance = Tolerance {
+    name: "gpu_simplified_et0",
+    abs_tol: 5e-3,
+    rel_tol: 5e-3,
+    justification: "Makkink/Turc GPU: 4-6 chained DF64 ops accumulate ~5e-3 relative",
+};
+
+/// GPU parity for empirical PET methods (Hamon, Blaney-Criddle): these
+/// use temperature-only inputs with wider numerical spread and more
+/// intermediate divisions, yielding ~1% relative rounding.
+pub const GPU_EMPIRICAL_PET: Tolerance = Tolerance {
+    name: "gpu_empirical_pet",
+    abs_tol: 1e-2,
+    rel_tol: 1e-2,
+    justification: "Hamon/Blaney-Criddle GPU: temperature-only, wide spread, ~1% DF64",
+};
+
 /// NUCLEUS round-trip: JSON-RPC serialization introduces no numerical error
 /// for f64 values that survive IEEE-754 → JSON → IEEE-754 round-trip.
 pub const NUCLEUS_ROUNDTRIP: Tolerance = Tolerance {

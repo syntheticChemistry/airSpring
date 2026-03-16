@@ -206,15 +206,24 @@ mod tests {
             &IOT_CSV_ROUNDTRIP,
             // NPU streaming classification
             &NPU_SIGMA_FLOOR,
+            // Biodiversity
+            &BIO_DIVERSITY_SHANNON,
+            &BIO_DIVERSITY_SIMPSON,
+            &BIO_BRAY_CURTIS,
             // Stochastic / Monte Carlo
             &MC_ET0_PROPAGATION,
             // Cross-spring analytical
             &CROSS_SPRING_ANALYTICAL,
             &CROSS_SPRING_GPU_CPU,
             &CROSS_SPRING_EVOLUTION,
+            // GPU method-specific parity tiers
+            &GPU_SIMPLIFIED_ET0,
+            &GPU_EMPIRICAL_PET,
             // NUCLEUS / IPC
             &NUCLEUS_ROUNDTRIP,
             &NUCLEUS_PIPELINE,
+            // Bootstrap / jackknife
+            &BOOTSTRAP_JACKKNIFE_KNOWN,
         ];
         for tol in all_tolerances {
             assert!(
@@ -229,10 +238,11 @@ mod tests {
             );
             assert!(tol.abs_tol > 0.0, "{}: abs_tol must be positive", tol.name);
         }
-        // 52 Tolerance structs + 1 plain threshold (NPU_STRESS_DEPLETION_THRESHOLD)
+        // 58 Tolerance structs + 1 plain threshold (NPU_STRESS_DEPLETION_THRESHOLD)
+        // + 1 plain count (NPU_MIN_ANOMALY_SAMPLES)
         assert_eq!(
             all_tolerances.len(),
-            52,
+            58,
             "test must include every Tolerance constant defined in this file"
         );
         let threshold = NPU_STRESS_DEPLETION_THRESHOLD;

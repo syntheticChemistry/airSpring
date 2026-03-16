@@ -49,6 +49,7 @@ use airspring_barracuda::gpu::simple_et0::{
     BlaneyCriddleInput, GpuSimpleEt0, HamonInput, MakkinkInput, TurcInput,
 };
 use airspring_barracuda::gpu::yield_response::{GpuYieldResponse, YieldInput};
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation;
 use barracuda::validation::ValidationHarness;
 
@@ -182,8 +183,7 @@ fn bench_scs_cn(v: &mut ValidationHarness, gpu: &GpuRunoff) {
     let max_err = max_rel_error(&gpu_result, &cpu);
     println!("  N={n}, GPU={gpu_us}µs, CPU={cpu_us}µs, max_rel_err={max_err:.2e}");
 
-    let tol = 1e-3;
-    v.check_rel("scs_cn_parity", max_err, 0.0, tol);
+    v.check_rel("scs_cn_parity", max_err, 0.0, tolerances::CROSS_SPRING_EVOLUTION.abs_tol);
 }
 
 fn bench_stewart(v: &mut ValidationHarness, gpu: &GpuYieldResponse) {
@@ -218,8 +218,7 @@ fn bench_stewart(v: &mut ValidationHarness, gpu: &GpuYieldResponse) {
     let max_err = max_rel_error(&gpu_result, &cpu);
     println!("  N={n}, GPU={gpu_us}µs, CPU={cpu_us}µs, max_rel_err={max_err:.2e}");
 
-    let tol = 1e-4;
-    v.check_rel("stewart_parity", max_err, 0.0, tol);
+    v.check_rel("stewart_parity", max_err, 0.0, tolerances::CROSS_SPRING_GPU_CPU.abs_tol);
 }
 
 fn bench_makkink(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
@@ -247,8 +246,7 @@ fn bench_makkink(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
     let max_err = max_rel_error(&gpu_result, &cpu);
     println!("  N={n}, GPU={gpu_us}µs, CPU={cpu_us}µs, max_rel_err={max_err:.2e}");
 
-    let tol = 5e-3;
-    v.check_rel("makkink_parity", max_err, 0.0, tol);
+    v.check_rel("makkink_parity", max_err, 0.0, tolerances::GPU_SIMPLIFIED_ET0.abs_tol);
 }
 
 fn bench_turc(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
@@ -276,8 +274,7 @@ fn bench_turc(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
     let max_err = max_rel_error(&gpu_result, &cpu);
     println!("  N={n}, GPU={gpu_us}µs, CPU={cpu_us}µs, max_rel_err={max_err:.2e}");
 
-    let tol = 5e-3;
-    v.check_rel("turc_parity", max_err, 0.0, tol);
+    v.check_rel("turc_parity", max_err, 0.0, tolerances::GPU_SIMPLIFIED_ET0.abs_tol);
 }
 
 /// Upstream Hamon (1963 ASCE) CPU reference, matching the `BatchedElementwiseF64` shader.
@@ -316,8 +313,7 @@ fn bench_hamon(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
     let max_err = max_rel_error(&gpu_result, &cpu);
     println!("  N={n}, GPU={gpu_us}µs, CPU={cpu_us}µs, max_rel_err={max_err:.2e}");
 
-    let tol = 1e-2;
-    v.check_rel("hamon_parity", max_err, 0.0, tol);
+    v.check_rel("hamon_parity", max_err, 0.0, tolerances::GPU_EMPIRICAL_PET.abs_tol);
 }
 
 fn bench_blaney_criddle(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
@@ -346,8 +342,12 @@ fn bench_blaney_criddle(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
     let max_err = max_rel_error(&gpu_result, &cpu);
     println!("  N={n}, GPU={gpu_us}µs, CPU={cpu_us}µs, max_rel_err={max_err:.2e}");
 
-    let tol = 1e-2;
-    v.check_rel("blaney_criddle_parity", max_err, 0.0, tol);
+    v.check_rel(
+        "blaney_criddle_parity",
+        max_err,
+        0.0,
+        tolerances::GPU_EMPIRICAL_PET.abs_tol,
+    );
 }
 
 fn bench_scaling(v: &mut ValidationHarness, gpu: &GpuRunoff) {

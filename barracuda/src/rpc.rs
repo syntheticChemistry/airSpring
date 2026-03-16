@@ -4,6 +4,16 @@
 //!
 //! Provides helpers for constructing JSON-RPC 2.0 requests and responses,
 //! and for sending requests over Unix domain sockets to biomeOS primals.
+//!
+//! # Platform Support
+//!
+//! Transport is currently **Unix-only** (`std::os::unix::net::UnixStream`).
+//! ecoBin standard requires platform-agnostic IPC (Unix sockets, abstract
+//! sockets, named pipes, TCP fallback). Windows named pipe and TCP transports
+//! are not yet implemented — contributions welcome.
+//!
+//! Evolution path: Unix sockets → platform-agnostic transport trait →
+//! Songbird relay (sovereign TLS 1.3) for remote primals.
 
 use std::io::{BufRead, BufReader, Write};
 use std::os::unix::net::UnixStream;
@@ -11,11 +21,15 @@ use std::path::Path;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
 
-/// JSON-RPC 2.0 standard error codes.
+/// JSON-RPC 2.0 parse error (malformed JSON).
 pub const PARSE_ERROR: i32 = -32700;
+/// JSON-RPC 2.0 invalid request (missing required fields).
 pub const INVALID_REQUEST: i32 = -32600;
+/// JSON-RPC 2.0 method not found.
 pub const METHOD_NOT_FOUND: i32 = -32601;
+/// JSON-RPC 2.0 invalid parameters.
 pub const INVALID_PARAMS: i32 = -32602;
+/// JSON-RPC 2.0 internal error.
 pub const INTERNAL_ERROR: i32 = -32603;
 
 static REQUEST_ID: AtomicU64 = AtomicU64::new(0);

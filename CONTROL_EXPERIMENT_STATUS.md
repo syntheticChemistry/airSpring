@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-03-15 (v0.8.2 — 87 experiments, barraCuda 0.3.5 (wgpu 28), 1284/1284 Python + 863 lib + 280 integration + 61 forge + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 algorithms, 21/21 CPU-GPU parity modules). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired (v0.7.2). `PrecisionRoutingAdvice` wired, upstream provenance registry (v0.7.3). metalForge 61/61 mixed pipeline. Write→Absorb→Lean cycle complete. Deep debt resolved: zero panic!() in library, zero #[allow()] in library, zero unsafe in production AND tests (DI `_with`/`_in` pattern), ecoBin-clean default build, UniBin subcommands, primal_science refactored to 7 modules, 57 centralized tolerances (4 submodules), hardcoded primal discovery evolved, validation binaries use structured exit(1). BYOB niche deployment via `niches/airspring-ecology.yaml`.)
+**Updated**: 2026-03-16 (v0.8.3 — 87 experiments, barraCuda 0.3.5 (wgpu 28), 1284/1284 Python + 863 lib + 285 integration + 61 forge + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 algorithms, 21/21 CPU-GPU parity modules). Deep debt round: `#![forbid(unsafe_code)]`, JSON-RPC 2.0 protocol compliant, capability-based orchestrator discovery, 58 centralized tolerances, `warn(missing_docs)`, cargo-deny aligned, IPC integration tests, rust-toolchain 1.92.)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 

@@ -2,7 +2,7 @@
 
 SPDX-License-Identifier: AGPL-3.0-or-later
 
-**Last updated**: 2026-03-15 (v0.8.2, barraCuda 0.3.5+ / wgpu 28, PrecisionRoutingAdvice wired, upstream provenance registry integrated)
+**Last updated**: 2026-03-16 (v0.8.3, barraCuda 0.3.5+ / wgpu 28, PrecisionRoutingAdvice wired, upstream provenance registry integrated)
 **Sources**: `EVOLUTION_READINESS.md`, `gpu/evolution_gaps.rs`, `BARRACUDA_REQUIREMENTS.md`
 
 ---
@@ -100,12 +100,13 @@ SPDX-License-Identifier: AGPL-3.0-or-later
 
 ## Blocker Summary
 
-| Blocker | Modules | Resolution |
-|---------|---------|------------|
-| ~~Local ops f64 absorption~~ | ~~runoff, yield_response, simple_et0~~ | **RESOLVED** (v0.7.2) — all 6 ops absorbed into `BatchedElementwiseF64` ops 14-19 |
-| Fused GPU seasonal pipeline | seasonal_pipeline | Fuse ops 0→7→1→yield in single dispatch |
-| `UnidirectionalPipeline` | atlas_stream | Implement fire-and-forget GPU streaming |
-| Anderson shader | anderson | New WGSL for θ→S_e→d_eff→QS coupling |
+| Blocker | Modules | Resolution | Effort |
+|---------|---------|------------|--------|
+| ~~Local ops f64 absorption~~ | ~~runoff, yield_response, simple_et0~~ | **RESOLVED** (v0.7.2) — all 6 ops absorbed into `BatchedElementwiseF64` ops 14-19 | — |
+| Fused GPU seasonal pipeline | seasonal_pipeline | Fuse ops 0→7→1→yield in single dispatch; needs barraCuda `PipelineSession` or chained persistent buffers | Medium |
+| `UnidirectionalPipeline` | atlas_stream | Fire-and-forget GPU streaming; needs barraCuda async dispatch with completion callback | Medium |
+| Anderson coupling shader | anderson | New WGSL for θ→S_e→d_eff→QS iterative fixed-point loop; cannot be single elementwise op | High |
+| ET₀ ensemble meta-logic | et0_ensemble | CPU method selection dispatching to GPU per-method; ensemble coordination inherently serial | Low |
 
 ---
 

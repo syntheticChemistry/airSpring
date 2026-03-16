@@ -1,6 +1,6 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: March 15, 2026 (v0.8.2 — 863 lib + 61 forge tests, 91 binaries, 87 experiments, barraCuda 0.3.5 (wgpu 28), ops 0-19 upstream via `BatchedElementwiseF64`, `local_dispatch` retired, `PrecisionRoutingAdvice` wired, upstream provenance registry. Exp 084: CPU/GPU parity 21/21, Exp 085: toadStool dispatch 19/19)
+**Last Updated**: March 16, 2026 (v0.8.3 — 863 lib + 61 forge tests, 91 binaries, 87 experiments, barraCuda 0.3.5 (wgpu 28), ops 0-19 upstream via `BatchedElementwiseF64`, `local_dispatch` retired, `PrecisionRoutingAdvice` wired, upstream provenance registry. Exp 084: CPU/GPU parity 21/21, Exp 085: toadStool dispatch 19/19)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
 **ToadStool HEAD**: S94b — barraCuda v0.3.5 standalone (wgpu 28, DF64 precision tier)
 
@@ -70,7 +70,7 @@
 | `stats::spearman_correlation` | `testutil::spearman_r` | Working |
 | `stats::bootstrap_ci` | `testutil::bootstrap_rmse` | Working |
 | `stats::std_dev` | Integration tests | Working |
-| `validation::ValidationHarness` | 22 binaries | Absorbed (S59) |
+| `validation::ValidationHarness` | 84+ binaries | Absorbed (S59) |
 
 ---
 

@@ -1,7 +1,7 @@
-# Tolerance Registry — airSpring v0.8.2
+# Tolerance Registry — airSpring v0.8.3
 
-All 57 named validation tolerances used in airSpring's Rust validation
-pipeline and Python control baselines. Each tolerance is defined once in
+58 named `Tolerance` structs used in airSpring's Rust validation pipeline
+and Python control baselines. Each tolerance is defined once in
 `barracuda/src/tolerances/` (Rust) and mirrored in `control/tolerances.py`
 (Python). Tolerances are never hardcoded inline.
 
@@ -11,9 +11,9 @@ pipeline and Python control baselines. Each tolerance is defined once in
 |--------|--------|-------|
 | Atmospheric | `tolerances/atmospheric.rs` | 15 |
 | Soil | `tolerances/soil.rs` | 19 |
-| GPU | `tolerances/gpu.rs` | 9 |
-| Instrument | `tolerances/instrument.rs` | 14 |
-| **Total** | | **57** |
+| GPU | `tolerances/gpu.rs` | 11 |
+| Instrument | `tolerances/instrument.rs` | 13 |
+| **Total (Tolerance structs)** | | **58** |
 
 ## Atmospheric (15)
 
@@ -59,7 +59,7 @@ pipeline and Python control baselines. Each tolerance is defined once in
 | `gdd_exact` | 1e-10 | 1e-10 | f64-exact integer arithmetic |
 | `irrigation_depth` | 0.01 | 0.01 | (FC − VWC) × depth |
 
-## GPU (9)
+## GPU (11)
 
 | Name | abs_tol | rel_tol | Justification |
 |------|---------|---------|---------------|
@@ -70,10 +70,12 @@ pipeline and Python control baselines. Each tolerance is defined once in
 | `cross_spring_analytical` | 1e-10 | 1e-10 | Mathematical identities |
 | `cross_spring_gpu_cpu` | 1e-4 | 1e-4 | DF64 compound ops chained |
 | `cross_spring_evolution` | 1e-3 | 1e-3 | Rewire CPU→GPU accumulation |
+| `gpu_simplified_et0` | 5e-3 | 5e-3 | Makkink/Turc: 4-6 chained DF64 ops |
+| `gpu_empirical_pet` | 1e-2 | 1e-2 | Hamon/Blaney-Criddle: temperature-only, ~1% DF64 |
 | `nucleus_roundtrip` | 1e-10 | 1e-10 | JSON f64 round-trip |
 | `nucleus_pipeline` | 1e-6 | 1e-6 | Multi-stage JSON-RPC |
 
-## Instrument (14)
+## Instrument (13)
 
 | Name | abs_tol | rel_tol | Justification |
 |------|---------|---------|---------------|
@@ -89,8 +91,9 @@ pipeline and Python control baselines. Each tolerance is defined once in
 | `index_of_agreement_criterion` | 0.80 | 0.0 | Dong (2020) Table 3 |
 | `p_significance` | 0.05 | 0.0 | Two-tailed α = 0.05 |
 | `water_savings` | 0.1 | 0.05 | Irrigation ±10% |
+| `bootstrap_jackknife_known` | 0.01 | 1e-3 | Fixed-seed resampling mean parity |
 
-Plus 2 physical threshold constants (not tolerances):
+Plus 2 physical threshold constants (not `Tolerance` structs):
 - `NPU_MIN_ANOMALY_SAMPLES` = 10
 - `NPU_STRESS_DEPLETION_THRESHOLD` = 0.55
 
@@ -112,4 +115,5 @@ assert abs(rust_val - py_val) < ET0_REFERENCE.abs_tol
 
 - v0.8.0: 46 tolerances in monolithic `tolerances.rs`
 - v0.8.1: 52 tolerances, added GPU/cross-spring/nucleus
-- v0.8.2: 57 tolerances in 4 submodules + Python mirror `control/tolerances.py`
+- v0.8.2: 52 tolerances in 4 submodules + Python mirror `control/tolerances.py`
+- v0.8.3: 58 tolerances — 3 new (gpu_simplified_et0, gpu_empirical_pet, bootstrap_jackknife_known), 3 biodiversity added to count

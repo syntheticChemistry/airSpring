@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Pinned toolchain for reproducible builds across all airSpring crates.
+[toolchain]
+channel = "1.92"
+components = ["rustfmt", "clippy", "llvm-tools-preview"]

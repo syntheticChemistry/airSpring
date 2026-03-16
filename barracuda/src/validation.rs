@@ -19,6 +19,16 @@
 //! assert_eq!(v.total_count(), 1);
 //! // v.finish() exits the process — call only in validation binaries
 //! ```
+//!
+//! # Early Exit Contract
+//!
+//! Validation binaries should call `v.finish()` as the final statement in `main()`.
+//! The harness exits with code 0 (all checks passed) or 1 (any check failed).
+//!
+//! Some binaries exit early via [`exit_no_gpu()`] when GPU hardware is unavailable.
+//! This is a graceful exit (code 0) that indicates the binary cannot run, not that
+//! validation failed. CI should distinguish "no GPU" from "validation failure" by
+//! checking whether the harness emitted any check results.
 
 pub use barracuda::validation::{ValidationHarness, exit_no_gpu, gpu_required};
 

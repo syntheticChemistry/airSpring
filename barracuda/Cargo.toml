@@ -1,8 +1,8 @@
 [package]
 name = "airspring-barracuda"
-version = "0.8.2"
+version = "0.8.3"
 edition = "2024"
-rust-version = "1.87"
+rust-version = "1.92"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"
 description = "Ecological & agricultural science pipelines — Rust + GPU + NPU via BarraCuda"

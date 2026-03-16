@@ -263,6 +263,6 @@ The same BarraCuda/ToadStool infrastructure supports both domains. The key share
 
 ---
 
-*March 15, 2026 — 1284 Python + 863 lib + 280 integration + 61 forge tests, 91 binaries all pass,
+*March 16, 2026 — 1284 Python + 863 lib + 285 integration + 61 forge tests, 91 binaries all pass,
 15,300 station-days (100 stations) real data, 75/75 cross-validation match, 14.3× Rust-vs-Python speedup (24/24 algorithms, 21/21 CPU-GPU parity modules), zero synthetic.
-v0.8.2: niche architecture, Edition 2024, 41 capabilities, deep code quality. AGPL-3.0-or-later.*
+v0.8.3: niche architecture, Edition 2024, 41 capabilities, deep code quality. AGPL-3.0-or-later.*

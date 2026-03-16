@@ -1,14 +1,14 @@
 # airSpring wateringHole
 
-**Updated**: March 15, 2026 | **Version**: v0.8.2
+**Updated**: March 16, 2026 | **Version**: v0.8.3
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.8.2** | [AIRSPRING_V082_NICHE_ARCHITECTURE_BARRACUDA_TOADSTOOL_HANDOFF_MAR15_2026.md](handoffs/AIRSPRING_V082_NICHE_ARCHITECTURE_BARRACUDA_TOADSTOOL_HANDOFF_MAR15_2026.md) | 2026-03-15 | **primary** — niche architecture, Edition 2024, deep code quality + deep debt resolution, barraCuda absorption & evolution handoff |
-| **≤V0.8.1** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
+| **V0.8.3** | [AIRSPRING_V083_DEEP_DEBT_BARRACUDA_TOADSTOOL_HANDOFF_MAR16_2026.md](handoffs/AIRSPRING_V083_DEEP_DEBT_BARRACUDA_TOADSTOOL_HANDOFF_MAR16_2026.md) | 2026-03-16 | **primary** — deep debt resolution (19 findings), JSON-RPC protocol fix, `forbid(unsafe_code)`, capability-based discovery, 58 tolerances, barraCuda/ToadStool evolution recommendations |
+| **≤V0.8.2** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 
 ## Cross-Spring Documents
 
@@ -17,7 +17,8 @@
 | `../specs/CROSS_SPRING_EVOLUTION.md` | 767+ WGSL shader provenance (hotSpring/wetSpring/neuralSpring/airSpring/groundSpring) |
 | `../specs/BIOMEOS_CAPABILITIES.md` | Ecology capability domain for biomeOS Neural API |
 | `../specs/NUCLEUS_INTEGRATION.md` | NUCLEUS deployment: graphs, workloads, Neural API bridge |
-| `../specs/GPU_PROMOTION_MAP.md` | GPU tier status: 25 Tier A + 6 GPU-local + Tier B + Tier C |
+| `../specs/GPU_PROMOTION_MAP.md` | GPU tier status: 24 Tier A + 2 Tier B + 2 Tier C, with blocker effort estimates |
+| `../specs/TOLERANCE_REGISTRY.md` | 58 centralized `Tolerance` structs across 4 domain submodules |
 | `../graphs/airspring_eco_pipeline.toml` | biomeOS deployment graph: weather → ET₀ → WB → yield |
 | `../graphs/airspring_provenance_pipeline.toml` | Provenance-tracked experiment: session → science → dehydrate → commit → attribute |
 | `../graphs/airspring_niche_deploy.toml` | Full niche deployment: Tower + Trio + NestGate + ToadStool + airSpring |
@@ -30,6 +31,7 @@
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_V082_NICHE_ARCHITECTURE_BARRACUDA_TOADSTOOL_HANDOFF_MAR15_2026.md` | v0.8.2: niche architecture, Edition 2024, deep code quality, barraCuda absorption (superseded by V083) |
 | `handoffs/archive/AIRSPRING_V081_NEURALAPI_BARRACUDA_TOADSTOOL_HANDOFF_MAR15_2026.md` | v0.8.1: neuralAPI integration, barracuda usage analysis, evolution opportunities (superseded by V082) |
 | `handoffs/archive/AIRSPRING_V080_BIOMEOS_COMPOSITION_HANDOFF_MAR15_2026.md` | v0.8.0: biomeOS composition, Provenance Trio, NestGateProvider, Cross-Spring Time Series (superseded by V082) |
 | `handoffs/archive/AIRSPRING_V076_DEEP_DEBT_UPSTREAM_SYNC_HANDOFF_MAR14_2026.md` | v0.7.6: Deep debt resolution, barraCuda 0.3.5 sync (superseded by V082) |

@@ -110,3 +110,12 @@ pub const WATER_SAVINGS: Tolerance = Tolerance {
     rel_tol: 0.05,
     justification: "IoT irrigation savings: ±10% comparison margin (Dong 2024 Fig 7)",
 };
+
+/// Bootstrap/jackknife known-value mean: analytical mean for fixed-seed
+/// resampling should match within 0.01 (≤0.2% for typical ET₀ means).
+pub const BOOTSTRAP_JACKKNIFE_KNOWN: Tolerance = Tolerance {
+    name: "bootstrap_jackknife_known",
+    abs_tol: 0.01,
+    rel_tol: 1e-3,
+    justification: "Resampling with fixed seed: analytical mean parity ≤0.01 mm/day",
+};

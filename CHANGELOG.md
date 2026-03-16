@@ -2,6 +2,42 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.8.3] - 2026-03-16
+
+### Deep Debt Resolution (19 findings)
+
+**Safety & Protocol**:
+- `#![forbid(unsafe_code)]` in both `airspring-barracuda` and `airspring-forge` (upgraded from `deny`)
+- `#![deny(clippy::unwrap_used, clippy::expect_used)]` added to `airspring-forge`
+- JSON-RPC 2.0 protocol compliance: method-not-found returns `rpc::error()` with code -32601 (was wrapped in `rpc::success()`)
+- `DispatchOutcome` enum distinguishes protocol errors from application results
+
+**Capability-Based Discovery**:
+- `discover_orchestrator_socket()` replaces hardcoded `"biomeOS.sock"`: env override → runtime scan → fallback
+- Hardcoded provenance migrated: `PY_KR_BARE_SOIL_DRYDOWN` constant with documented origin
+
+**Tolerances**:
+- 3 new centralized tolerances: `GPU_SIMPLIFIED_ET0`, `GPU_EMPIRICAL_PET`, `BOOTSTRAP_JACKKNIFE_KNOWN`
+- 3 biodiversity tolerances added to test count (`BIO_DIVERSITY_SHANNON`, `BIO_DIVERSITY_SIMPSON`, `BIO_BRAY_CURTIS`)
+- Total: 58 `Tolerance` structs across 4 submodules
+- `TOLERANCE_REGISTRY.md` and count assertion aligned
+
+**Build & Quality**:
+- `rust-toolchain.toml` pinned at channel 1.92 (wgpu 28 MSRV)
+- `#![warn(missing_docs)]` in both crate roots
+- `cargo-deny` aligned: `unknown-git = "deny"`, advisory policies consistent
+- Stale barraCuda version comment in `forge/Cargo.toml` corrected (v0.3.5)
+
+**Tests**:
+- New `tests/ipc_roundtrip.rs`: 5 self-contained JSON-RPC round-trip integration tests
+- Tests: health, echo params, method-not-found error, multiple requests, jsonrpc version
+
+**Documentation**:
+- `validation.rs` early-exit contract documented
+- `rpc.rs` platform support and evolution path documented
+- `GPU_PROMOTION_MAP.md` blocker effort estimates added
+- `BARRACUDA_REQUIREMENTS.md` ValidationHarness count corrected (84+ binaries)
+
 ## [0.8.2] - 2026-03-15
 
 ### Deep Debt + Modern Idiomatic Rust

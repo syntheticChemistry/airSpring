@@ -1,8 +1,8 @@
 # airSpring — Ecological & Agricultural Sciences
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
-**Date**: March 15, 2026
-**Version**: 0.8.2
+**Date**: March 16, 2026
+**Version**: 0.8.3
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -13,7 +13,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → biomeOS (NUCLEUS atomics, deployment graphs) → Penny Irrigation
 ```
 
-## Current Status (v0.8.2)
+## Current Status (v0.8.3)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
@@ -47,7 +47,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | Check | Status |
 |-------|--------|
 | `cargo test --lib` (barracuda) | **863 passed**, 0 failures |
-| `cargo test --test '*'` (integration) | **280 passed** (15 test files) |
+| `cargo test --test '*'` (integration) | **285 passed** (16 test files) |
 | `cargo test --lib` (metalForge) | **61 passed**, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **95.66% line coverage** |
 | `cargo clippy (pedantic)` | **0 warnings** (pedantic, both crates) |
@@ -231,7 +231,7 @@ airSpring/
 │   │   ├── nautilus.rs          # bingoCube/nautilus evolutionary reservoir (NautilusBrain v0.1.0)
 │   │   ├── rpc.rs               # JSON-RPC 2.0 inter-primal communication
 │   │   ├── npu.rs               # BrainChip AKD1000 NPU (feature-gated)
-│   │   ├── tolerances/          # Domain-specific validation tolerances (57 named, 4 submodules)
+│   │   ├── tolerances/          # Domain-specific validation tolerances (58 named, 4 submodules)
 │   │   └── bin/                 # validate_*, bench_*, airspring_primal (91 declared)
 │   ├── tests/                   # Integration + property tests (15 files + common/)
 │   └── Cargo.toml               # v0.8.2
@@ -287,15 +287,12 @@ AGPL-3.0-or-later
 
 ---
 
-*March 15, 2026 — v0.8.2. Rust Edition 2024 (rust-version 1.87). Niche architecture
-clarified: airSpring is a niche deployment of primals via biomeOS graphs, not a
-standalone primal. `airspring_primal` is a transitional niche adapter (635 LOC);
-niche self-knowledge centralized in `src/niche.rs` (41 capabilities, operation
-dependencies, cost estimates, semantic mappings). Deep code quality: zero
-`#[allow()]` in production (redundant lints removed from 91 binaries), zero
-clippy pedantic+nursery warnings, `#![deny(unsafe_code)]` — zero unsafe in
-production AND tests (DI `_with`/`_in` pattern eliminates `set_var`/`remove_var`).
-BYOB niche deployment via `niches/airspring-ecology.yaml`. Tolerance hierarchy:
-4 domain submodules (atmospheric, soil, gpu, instrument). metalForge forge
-Edition 2024 migrated. 863 lib + 280 integration + 61 forge tests, 0 failures.
-AGPL-3.0-or-later.*
+*March 16, 2026 — v0.8.3. Deep debt resolution round: `#![forbid(unsafe_code)]`
+(upgraded from deny — cannot be overridden), JSON-RPC 2.0 protocol compliance
+(method-not-found now returns proper error object, not success wrapper),
+capability-based orchestrator discovery (hardcoded socket name eliminated),
+`warn(missing_docs)` enforced, 58 centralized tolerances (3 new: gpu_simplified_et0,
+gpu_empirical_pet, bootstrap_jackknife_known), cargo-deny policies aligned (unknown-git
+deny), self-contained IPC integration tests (5 new), rust-toolchain.toml pinned at
+1.92. Builds on v0.8.2 niche architecture. 863 lib + 285 integration + 61 forge
+tests, 0 failures. AGPL-3.0-or-later.*

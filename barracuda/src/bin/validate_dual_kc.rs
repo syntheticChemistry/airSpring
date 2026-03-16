@@ -25,6 +25,13 @@ use airspring_barracuda::validation::{
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/dual_kc/benchmark_dual_kc.json");
 
+/// Python baseline Kr values for 7-day bare soil drydown (TEW=33, REW=9).
+///
+/// Source: `control/dual_kc/cover_crop_dual_kc.py`, commit `3afc229`,
+/// date 2026-02-25. Values not yet in `benchmark_dual_kc.json` — the
+/// benchmark only contains scenario inputs, not Kr outputs.
+const PY_KR_BARE_SOIL_DRYDOWN: [f64; 7] = [1.0, 1.0, 0.6975, 0.3313, 0.1643, 0.0746, 0.0394];
+
 fn validate_eq69(v: &mut ValidationHarness, bench: &serde_json::Value) {
     validation::section("Eq. 69: ETc = (Kcb × Ks + Ke) × ET₀");
 
@@ -244,10 +251,11 @@ fn validate_bare_soil_drydown(v: &mut ValidationHarness, bench: &serde_json::Val
         final_state.de <= tew,
     );
 
-    // Python baseline expected Kr values (7 days). Not in benchmark_dual_kc.json;
-    // benchmark only has inputs (et0_daily, precip_daily, tew, rew, etc.), not expected Kr.
-    // Provenance: control/dual_kc/cover_crop_dual_kc.py, commit=3afc229, date=2026-02-25.
-    let py_kr = [1.0, 1.0, 0.6975, 0.3313, 0.1643, 0.0746, 0.0394];
+    // Provenance: control/dual_kc/cover_crop_dual_kc.py
+    //   commit = 3afc229, date = 2026-02-25
+    //   command = python3 control/dual_kc/cover_crop_dual_kc.py
+    //   evolution: migrate into benchmark_dual_kc.json when script is next regenerated
+    let py_kr: &[f64] = &PY_KR_BARE_SOIL_DRYDOWN;
     for (i, (&py, out)) in py_kr.iter().zip(outputs.iter()).enumerate() {
         v.check_abs(
             &format!("Day {} Kr vs Python", i + 1),
