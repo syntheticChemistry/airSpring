@@ -88,7 +88,7 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 - `barracuda/src/ipc/provenance.rs`: literal `"airspring"` → `crate::niche::NICHE_NAME`
 - Capability-based spring identification throughout IPC layer
 
-**Quality**: 848 lib + 280 integration + 61 forge tests, 0 failures, 0 clippy warnings, zero unsafe everywhere.
+**Quality**: 863 lib + 280 integration + 61 forge tests, 0 failures, 0 clippy warnings, zero unsafe everywhere.
 
 ### Niche Architecture + Deep Code Quality
 
@@ -115,7 +115,7 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 - Zero clippy pedantic+nursery warnings across both crates
 
 **Documentation Cleanup**:
-- Root README.md: corrected test counts (848 lib + 280 integration + 61 forge), version to v0.8.2
+- Root README.md: corrected test counts (863 lib + 280 integration + 61 forge), version to v0.8.2
 - whitePaper/README.md: corrected Python checks (1284), test counts, handoff version V082
 - whitePaper/STUDY.md: corrected test counts, updated date
 - whitePaper/baseCamp/README.md: corrected status line, added Phase 5.5, niche architecture
@@ -130,7 +130,7 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 - Updated wateringHole/README.md with V082 as current
 - Updated ecoPrimals/whitePaper/gen3/baseCamp/README.md with v0.8.2 status
 
-**Quality**: 848 lib + 280 integration + 61 forge tests, 0 failures, 0 clippy warnings, 0 fmt diff, 0 doc warnings.
+**Quality**: 863 lib + 280 integration + 61 forge tests, 0 failures, 0 clippy warnings, 0 fmt diff, 0 doc warnings.
 
 ## [0.8.1] - 2026-03-15
 
@@ -450,7 +450,7 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
   - `batched_elementwise_f64.wgsl` provenance entry: now lists all 20 ops (0-19)
 
 - **Quality gates**: `cargo fmt` ✓, `cargo clippy --all-targets` ✓ (0 errors),
-  `cargo doc --no-deps` ✓, `cargo test --lib` ✓ (848/848 pass)
+  `cargo doc --no-deps` ✓, `cargo test --lib` ✓ (863/863 pass)
 
 ### Cross-Spring Shader Evolution Map
 

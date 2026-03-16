@@ -46,7 +46,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` (barracuda) | **848 passed**, 0 failures |
+| `cargo test --lib` (barracuda) | **863 passed**, 0 failures |
 | `cargo test --test '*'` (integration) | **280 passed** (15 test files) |
 | `cargo test --lib` (metalForge) | **61 passed**, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **95.66% line coverage** |

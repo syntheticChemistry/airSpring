@@ -34,7 +34,7 @@ airSpring v0.8.2 completes four major evolutions:
    UniBin subcommands (`server`/`status`/`version`/`capabilities`).
 
 4. **Full validation pipeline green** (2026-03-15): 1284/1284 Python control checks,
-   848 + 280 + 61 Rust tests, 54+ validation binaries exit 0, 24/24 CPU algorithms
+   863 + 280 + 61 Rust tests, 54+ validation binaries exit 0, 24/24 CPU algorithms
    match Python at 14.3× geometric mean speedup, 21/21 CPU-GPU parity modules validated,
    metalForge 32/32 dispatch + 21/21 routing + 17/17 mixed hardware.
 
@@ -43,7 +43,16 @@ airSpring v0.8.2 completes four major evolutions:
    rhizoCrypt semantic RPC alignment (`dag.dehydrate` → `dag.dehydration.trigger`).
    Tolerance hierarchy refactored from flat file to 4-submodule domain structure.
 
-**Quality: 848 lib + 280 integration + 61 forge tests, 0 failures, 0 clippy warnings.**
+6. **Modern idiomatic Rust — deep debt round 2**: Centralized primal name constants
+   (`primal_names.rs` — 9 primals + 4 capability domains), typed IPC errors
+   (`AirSpringError::Ipc` replaces `Result<_, String>`), cross-spring time series IPC
+   (`ipc/timeseries.rs` — `ecoPrimals/time-series/v1` schema from wetSpring), smart file
+   refactoring (`device_info/` and `atlas_stream/` directory modules), `ProvenanceConfig`
+   DI pattern eliminates last `unsafe` in provenance tests, shared Python tolerance
+   vocabulary (`control/tolerances.py` mirrors all 57 Rust constants), formal tolerance
+   registry (`specs/TOLERANCE_REGISTRY.md`), `pollster` 0.3→0.4 upgrade in metalForge.
+
+**Quality: 863 lib + 280 integration + 61 forge tests, 0 failures, 0 clippy warnings.**
 
 ---
 
@@ -312,12 +321,110 @@ validation. The naming convention enables cross-spring tolerance alignment.
 
 ---
 
-## §8 Quality Gate
+## §8 Deep Debt Round 2 — Patterns for barraCuda/ToadStool
+
+### Primal Name Centralization
+
+Hardcoded primal name strings (`"toadstool"`, `"beardog"`, etc.) create fragile coupling
+and prevent capability-based discovery. airSpring now centralizes these in
+`barracuda/src/primal_names.rs`:
+
+```rust
+pub const TOADSTOOL: &str = "toadstool";
+pub const BEARDOG: &str = "beardog";
+pub mod domains {
+    pub const DAG: &str = "dag";
+    pub const COMPUTE: &str = "compute";
+    pub const COMMIT: &str = "commit";
+    pub const PROVENANCE: &str = "provenance";
+}
+```
+
+All IPC callers reference `primal_names::TOADSTOOL` and `primal_names::domains::DAG`
+instead of raw strings. Unit tests enforce all names are lowercase.
+
+**Recommendation for barraCuda**: Adopt a similar pattern. Primals should only have
+self-knowledge and discover others at runtime via capability queries.
+
+### Typed IPC Errors
+
+IPC functions previously returned `Result<_, String>`. airSpring now uses a dedicated
+`AirSpringError::Ipc(String)` variant, enabling pattern matching on error categories:
+
+```rust
+pub enum AirSpringError {
+    Io(std::io::Error),
+    Parse(String),
+    Ipc(String),    // socket connect, timeout, protocol errors
+    // ...
+}
+```
+
+All `capability_call` and provenance functions propagate `AirSpringError::Ipc` instead
+of opaque strings. This enables callers to distinguish IPC failures from parse failures
+from I/O failures.
+
+**Recommendation for barraCuda**: Define typed error enums for IPC. This eliminates
+`String` error propagation and enables structured error handling in composing primals.
+
+### Cross-Spring Time Series IPC
+
+airSpring adopted the `ecoPrimals/time-series/v1` JSON schema from wetSpring for
+standardized time series data exchange between Springs:
+
+```json
+{
+  "schema": "ecoPrimals/time-series/v1",
+  "source_spring": "airspring",
+  "variable": "et0_reference",
+  "unit": "mm/day",
+  "timestamps": ["2024-01-01T00:00:00Z", ...],
+  "values": [3.42, ...]
+}
+```
+
+Implemented in `ipc/timeseries.rs` with builders, parsers, and domain-specific
+constructors (`build_et0_series`, `build_soil_moisture_series`). All builders and
+parsers return `Result<_, AirSpringError>` with typed errors.
+
+**Recommendation for barraCuda**: Consider adding time series utilities to the
+`ops` or `stats` module. Springs are converging on this schema for cross-spring
+data exchange; upstream support would reduce duplication.
+
+### Smart File Refactoring
+
+Two files exceeding 800 LOC were refactored into themed directory modules:
+
+| Original | → Directory | Sub-modules | Rationale |
+|----------|-------------|-------------|-----------|
+| `gpu/device_info.rs` (946 LOC) | `gpu/device_info/` | `mod.rs` (probe logic), `shader_provenance.rs` (static provenance) | Device probing is runtime; provenance is compile-time static data |
+| `gpu/atlas_stream.rs` (887 LOC) | `gpu/atlas_stream/` | `mod.rs` (streaming core), `drift.rs` (drift monitoring) | Core streaming is data I/O; drift detection is statistical analysis |
+
+Public API unchanged — `pub use` re-exports maintain backwards compatibility.
+
+**Recommendation for barraCuda**: Apply the same pattern to large upstream files.
+Split along domain boundaries (runtime vs static, I/O vs analysis), not line count.
+
+### Shared Python Tolerance Vocabulary
+
+`control/tolerances.py` mirrors all 57 Rust `Tolerance` constants as Python dataclasses:
+
+```python
+ET0_REFERENCE = Tolerance("et0_reference", 0.01, 1e-3,
+    "FAO-56 Examples 17-19: validated against 3-decimal tables")
+```
+
+This ensures Python baselines and Rust validation use identical thresholds. The formal
+registry at `specs/TOLERANCE_REGISTRY.md` documents all 57 tolerances with justifications.
+
+---
+
+## §9 Quality Gate
 
 | Check | Result |
 |-------|--------|
 | Python control baselines | **1284/1284** checks, 54 scripts |
-| `cargo test --lib` (barracuda) | **848 passed**, 0 failures |
+| `cargo test --lib` (barracuda) | **863 passed**, 0 failures |
 | `cargo test --tests` (integration) | **280 passed**, 0 failures |
 | `cargo test --lib` (metalForge forge) | **61 passed**, 0 failures |
 | Validation binaries (hotSpring exit 0/1) | **54+ binaries** exit 0 |
@@ -361,6 +468,15 @@ validation. The naming convention enables cross-spring tolerance alignment.
 | `barracuda/src/primal_science.rs` → `barracuda/src/primal_science/` | Refactored 810 LOC monolith → 7 sub-modules |
 | `barracuda/src/tolerances/` | **Refactored** from 790 LOC flat file → 4 domain submodules (atmospheric/soil/gpu/instrument), 57 named constants |
 | `barracuda/src/gpu/stats.rs` | Fixed `clippy::let_and_return` |
+| `barracuda/src/primal_names.rs` | **NEW** — centralized primal name constants (9 primals + 4 domains) |
+| `barracuda/src/error.rs` | Added `Ipc(String)` variant for typed IPC errors |
+| `barracuda/src/ipc/timeseries.rs` | **NEW** — cross-spring time series IPC (`ecoPrimals/time-series/v1`) |
+| `barracuda/src/ipc/provenance.rs` | `ProvenanceConfig` DI, `_with` variants, typed errors, `niche_did()` |
+| `barracuda/src/gpu/device_info.rs` → `gpu/device_info/` | Split: `mod.rs` (probe), `shader_provenance.rs` (static data) |
+| `barracuda/src/gpu/atlas_stream.rs` → `gpu/atlas_stream/` | Split: `mod.rs` (streaming), `drift.rs` (drift monitor) |
+| `control/tolerances.py` | **NEW** — Python tolerance vocabulary mirroring 57 Rust constants |
+| `specs/TOLERANCE_REGISTRY.md` | **NEW** — formal tolerance registry with justifications |
+| `metalForge/forge/Cargo.toml` | `pollster` 0.3→0.4 upgrade |
 | `metalForge/forge/src/pipeline.rs` | Refactored duplicated match arms, removed `#[allow()]` |
 | `metalForge/forge/src/bin/validate_dispatch_routing.rs` | Extracted 6 helper functions, removed `#[allow(too_many_lines)]` |
 | 12 `barracuda/src/bin/validate_*.rs` | `panic!()` → structured `exit(1)` |
@@ -386,6 +502,12 @@ validation. The naming convention enables cross-spring tolerance alignment.
 | 12 | All Springs | BYOB niche YAML + deploy graph alignment | Medium |
 | 13 | All Springs | Align rhizoCrypt RPC names (`dag.dehydration.trigger`) | High |
 | 14 | All Springs | Plan transitional adapter → pure graph deployment | Low |
+| 15 | barraCuda | Centralize primal name constants (eliminate hardcoded strings) | Medium |
+| 16 | barraCuda | Add typed IPC error enum (replace `Result<_, String>`) | High |
+| 17 | barraCuda | Add time series utilities for `ecoPrimals/time-series/v1` schema | Medium |
+| 18 | barraCuda | Smart-refactor files >800 LOC along domain boundaries | Medium |
+| 19 | All Springs | Adopt shared Python tolerance vocabulary pattern | Medium |
+| 20 | All Springs | Adopt `ProvenanceConfig` DI pattern for provenance tests | High |
 
 ---
 
