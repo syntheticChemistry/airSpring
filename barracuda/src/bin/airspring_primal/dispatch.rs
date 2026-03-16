@@ -1,14 +1,18 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! JSON-RPC method dispatch and provenance auto-recording.
 
-use airspring_barracuda::{niche, primal_science, rpc};
+use airspring_barracuda::{niche, primal_science};
 
 use super::handlers;
 use super::NicheState;
 
+/// Outcome of dispatching a JSON-RPC method (biomeOS standard).
+#[allow(dead_code)] // InvalidParams, InternalError reserved for future use
 pub enum DispatchOutcome {
     Ok(serde_json::Value),
-    RpcError { code: i32, message: String },
+    MethodNotFound(String),
+    InvalidParams { method: String, reason: String },
+    InternalError { method: String, source: String },
 }
 
 pub fn dispatch(method: &str, params: &serde_json::Value, state: &NicheState) -> DispatchOutcome {
@@ -45,10 +49,7 @@ pub fn dispatch(method: &str, params: &serde_json::Value, state: &NicheState) ->
         "primal.discover" => DispatchOutcome::Ok(handlers::handle_primal_discover()),
         "compute.offload" => DispatchOutcome::Ok(handlers::handle_compute_offload(params)),
         "data.weather" => DispatchOutcome::Ok(handlers::handle_data_weather(params)),
-        _ => DispatchOutcome::RpcError {
-            code: rpc::METHOD_NOT_FOUND,
-            message: format!("Method not found: {method}"),
-        },
+        _ => DispatchOutcome::MethodNotFound(method.to_string()),
     }
 }
 

@@ -121,7 +121,7 @@ fn rpc_health_roundtrip() {
     std::thread::sleep(Duration::from_millis(50));
 
     let resp = rpc::send(&path, "health", &serde_json::json!({}));
-    assert!(resp.is_some(), "health should return a response");
+    assert!(resp.is_ok(), "health should return a response");
     let resp = resp.unwrap();
     assert_eq!(resp["result"]["status"], "healthy");
     assert_eq!(resp["jsonrpc"], "2.0");
@@ -139,7 +139,7 @@ fn rpc_echo_params_roundtrip() {
 
     let params = serde_json::json!({"tmax": 32.5, "station": "MSU"});
     let resp = rpc::send(&path, "echo", &params);
-    assert!(resp.is_some());
+    assert!(resp.is_ok());
     let resp = resp.unwrap();
     assert_eq!(resp["result"]["tmax"], 32.5);
     assert_eq!(resp["result"]["station"], "MSU");
@@ -156,7 +156,7 @@ fn rpc_method_not_found_returns_error_object() {
     std::thread::sleep(Duration::from_millis(50));
 
     let resp = rpc::send(&path, "nonexistent.method", &serde_json::json!({}));
-    assert!(resp.is_some());
+    assert!(resp.is_ok());
     let resp = resp.unwrap();
     assert!(
         resp.get("error").is_some(),
@@ -185,7 +185,7 @@ fn rpc_multiple_requests_same_connection_via_send() {
             "echo",
             &serde_json::json!({"iteration": i}),
         );
-        assert!(resp.is_some(), "request {i} should succeed");
+        assert!(resp.is_ok(), "request {i} should succeed");
         let resp = resp.unwrap();
         assert_eq!(resp["result"]["iteration"], i);
     }

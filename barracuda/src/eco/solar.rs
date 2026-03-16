@@ -8,23 +8,23 @@
 use std::f64::consts::PI;
 
 /// Earth orbit eccentricity coefficient. FAO-56 Eq. 23.
-const ECCENTRICITY_COEFF: f64 = 0.033;
+pub const ECCENTRICITY_COEFF: f64 = 0.033;
 /// Days in standard year.
-const DAYS_PER_YEAR: f64 = 365.0;
+pub const DAYS_PER_YEAR: f64 = 365.0;
 /// Maximum solar declination (radians). FAO-56 Eq. 24.
-const MAX_DECLINATION: f64 = 0.409;
+pub const MAX_DECLINATION: f64 = 0.409;
 /// Solar declination phase offset (radians). FAO-56 Eq. 24.
-const DECLINATION_PHASE: f64 = 1.39;
+pub const DECLINATION_PHASE: f64 = 1.39;
 /// Solar constant Gsc (MJ/m²/min). FAO-56 Table 2.7.
-const SOLAR_CONSTANT_MJ: f64 = 0.0820;
+pub const SOLAR_CONSTANT_MJ: f64 = 0.0820;
 /// Stefan-Boltzmann constant (MJ/m²/day/K⁴).
-const STEFAN_BOLTZMANN: f64 = 4.903e-9;
+pub const STEFAN_BOLTZMANN: f64 = 4.903e-9;
 /// Clear-sky elevation coefficient (per metre). FAO-56 Eq. 37.
-const CLEAR_SKY_ELEV_COEFF: f64 = 2.0e-5;
+pub const CLEAR_SKY_ELEV_COEFF: f64 = 2.0e-5;
 /// Clear-sky base transmissivity. FAO-56 Eq. 37.
-const CLEAR_SKY_BASE: f64 = 0.75;
+pub const CLEAR_SKY_BASE: f64 = 0.75;
 /// Net longwave humidity factor coefficient. FAO-56 Eq. 39.
-const LW_HUMIDITY_COEFF: f64 = 0.14;
+pub const LW_HUMIDITY_COEFF: f64 = 0.14;
 
 /// Inverse relative distance Earth–Sun (FAO-56 Eq. 23).
 ///

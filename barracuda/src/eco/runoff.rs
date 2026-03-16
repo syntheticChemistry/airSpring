@@ -22,26 +22,55 @@
 //! USDA-SCS (1972) National Engineering Handbook, Section 4.
 //! USDA-SCS (1986) TR-55: Urban Hydrology for Small Watersheds.
 
+// ── SCS-CN equation constants ────────────────────────────────────────
+
+/// SCS-CN potential retention numerator (mm). S = (25400/CN) − 254. NEH-4.
+const SCS_RETENTION_NUMERATOR: f64 = 25_400.0;
+/// SCS-CN potential retention offset (mm). S = (25400/CN) − 254. NEH-4.
+const SCS_RETENTION_OFFSET: f64 = 254.0;
+
+/// AMC I (dry) conversion: `CN_I` = `CN_II` / (2.281 − 0.01281×`CN_II`). Hawkins (1985).
+const AMC_DRY_COEFF: f64 = 0.01281;
+/// AMC I (dry) conversion denominator offset. Hawkins (1985).
+const AMC_DRY_OFFSET: f64 = 2.281;
+/// AMC III (wet) conversion: `CN_III` = `CN_II` / (0.4036 + 0.0059×`CN_II`). Hawkins (1985).
+const AMC_WET_COEFF: f64 = 0.0059;
+/// AMC III (wet) conversion denominator offset. Hawkins (1985).
+const AMC_WET_OFFSET: f64 = 0.4036;
+
 /// Hydrologic Soil Group (HSG) per USDA classification.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SoilGroup {
+    /// Low runoff potential: deep, well-drained sands and gravels.
     A,
+    /// Moderate infiltration: moderately deep, moderately well-drained.
     B,
+    /// Slow infiltration: soils with layers impeding downward movement.
     C,
+    /// High runoff potential: clays, shallow soils over impervious material.
     D,
 }
 
 /// Land use categories with standard CN values from NEH-4 / TR-55.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LandUse {
+    /// Fallow with bare soil (no residue).
     FallowBare,
+    /// Row crops with straight-row planting.
     RowCropsStraight,
+    /// Row crops with contoured rows.
     RowCropsContoured,
+    /// Small grain with straight-row planting.
     SmallGrainStraight,
+    /// Pasture in good hydrologic condition.
     PastureGood,
+    /// Meadow (continuous grass, protected from grazing).
     Meadow,
+    /// Woods in good hydrologic condition.
     WoodsGood,
+    /// Farmstead (buildings, driveways, surrounding lots).
     Farmstead,
+    /// Impervious surfaces (roads, parking lots).
     Impervious,
 }
 
@@ -99,7 +128,7 @@ pub fn potential_retention(cn: f64) -> f64 {
     if cn <= 0.0 {
         return f64::MAX;
     }
-    (25_400.0 / cn) - 254.0
+    (SCS_RETENTION_NUMERATOR / cn) - SCS_RETENTION_OFFSET
 }
 
 /// Initial abstraction Ia (mm).
@@ -148,13 +177,13 @@ pub fn scs_cn_runoff_standard(precip_mm: f64, cn: f64) -> f64 {
 /// Antecedent Moisture Condition I (dry) CN from AMC-II (Hawkins 1985).
 #[must_use]
 pub fn amc_cn_dry(cn_ii: f64) -> f64 {
-    cn_ii / 0.01281f64.mul_add(-cn_ii, 2.281)
+    cn_ii / AMC_DRY_COEFF.mul_add(-cn_ii, AMC_DRY_OFFSET)
 }
 
 /// Antecedent Moisture Condition III (wet) CN from AMC-II (Hawkins 1985).
 #[must_use]
 pub fn amc_cn_wet(cn_ii: f64) -> f64 {
-    cn_ii / 0.0059f64.mul_add(cn_ii, 0.4036)
+    cn_ii / AMC_WET_COEFF.mul_add(cn_ii, AMC_WET_OFFSET)
 }
 
 #[cfg(test)]

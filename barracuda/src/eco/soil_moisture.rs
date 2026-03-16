@@ -112,6 +112,80 @@ pub struct SoilHydraulicProps {
     pub porosity: f64,
 }
 
+/// Soil texture hydraulic properties. Saxton & Rawls (2006), USDA NRCS.
+const PROPS_SAND: SoilHydraulicProps = SoilHydraulicProps {
+    field_capacity: 0.10,
+    wilting_point: 0.05,
+    ksat_mm_hr: 210.0,
+    porosity: 0.43,
+};
+const PROPS_LOAMY_SAND: SoilHydraulicProps = SoilHydraulicProps {
+    field_capacity: 0.12,
+    wilting_point: 0.06,
+    ksat_mm_hr: 61.0,
+    porosity: 0.44,
+};
+const PROPS_SANDY_LOAM: SoilHydraulicProps = SoilHydraulicProps {
+    field_capacity: 0.18,
+    wilting_point: 0.08,
+    ksat_mm_hr: 26.0,
+    porosity: 0.45,
+};
+const PROPS_LOAM: SoilHydraulicProps = SoilHydraulicProps {
+    field_capacity: 0.27,
+    wilting_point: 0.12,
+    ksat_mm_hr: 13.0,
+    porosity: 0.46,
+};
+const PROPS_SILT_LOAM: SoilHydraulicProps = SoilHydraulicProps {
+    field_capacity: 0.33,
+    wilting_point: 0.13,
+    ksat_mm_hr: 6.8,
+    porosity: 0.47,
+};
+const PROPS_SILT: SoilHydraulicProps = SoilHydraulicProps {
+    field_capacity: 0.33,
+    wilting_point: 0.09,
+    ksat_mm_hr: 6.8,
+    porosity: 0.46,
+};
+const PROPS_SANDY_CLAY_LOAM: SoilHydraulicProps = SoilHydraulicProps {
+    field_capacity: 0.26,
+    wilting_point: 0.15,
+    ksat_mm_hr: 4.3,
+    porosity: 0.40,
+};
+const PROPS_CLAY_LOAM: SoilHydraulicProps = SoilHydraulicProps {
+    field_capacity: 0.32,
+    wilting_point: 0.20,
+    ksat_mm_hr: 2.3,
+    porosity: 0.42,
+};
+const PROPS_SILTY_CLAY_LOAM: SoilHydraulicProps = SoilHydraulicProps {
+    field_capacity: 0.37,
+    wilting_point: 0.22,
+    ksat_mm_hr: 1.5,
+    porosity: 0.43,
+};
+const PROPS_SANDY_CLAY: SoilHydraulicProps = SoilHydraulicProps {
+    field_capacity: 0.30,
+    wilting_point: 0.21,
+    ksat_mm_hr: 1.2,
+    porosity: 0.38,
+};
+const PROPS_SILTY_CLAY: SoilHydraulicProps = SoilHydraulicProps {
+    field_capacity: 0.37,
+    wilting_point: 0.25,
+    ksat_mm_hr: 0.9,
+    porosity: 0.41,
+};
+const PROPS_CLAY: SoilHydraulicProps = SoilHydraulicProps {
+    field_capacity: 0.36,
+    wilting_point: 0.25,
+    ksat_mm_hr: 0.6,
+    porosity: 0.38,
+};
+
 impl SoilTexture {
     /// Typical hydraulic properties from USDA soil texture triangle.
     ///
@@ -119,78 +193,18 @@ impl SoilTexture {
     #[must_use]
     pub const fn hydraulic_properties(&self) -> SoilHydraulicProps {
         match self {
-            Self::Sand => SoilHydraulicProps {
-                field_capacity: 0.10,
-                wilting_point: 0.05,
-                ksat_mm_hr: 210.0,
-                porosity: 0.43,
-            },
-            Self::LoamySand => SoilHydraulicProps {
-                field_capacity: 0.12,
-                wilting_point: 0.06,
-                ksat_mm_hr: 61.0,
-                porosity: 0.44,
-            },
-            Self::SandyLoam => SoilHydraulicProps {
-                field_capacity: 0.18,
-                wilting_point: 0.08,
-                ksat_mm_hr: 26.0,
-                porosity: 0.45,
-            },
-            Self::Loam => SoilHydraulicProps {
-                field_capacity: 0.27,
-                wilting_point: 0.12,
-                ksat_mm_hr: 13.0,
-                porosity: 0.46,
-            },
-            Self::SiltLoam => SoilHydraulicProps {
-                field_capacity: 0.33,
-                wilting_point: 0.13,
-                ksat_mm_hr: 6.8,
-                porosity: 0.47,
-            },
-            Self::Silt => SoilHydraulicProps {
-                field_capacity: 0.33,
-                wilting_point: 0.09,
-                ksat_mm_hr: 6.8,
-                porosity: 0.46,
-            },
-            Self::SandyClayLoam => SoilHydraulicProps {
-                field_capacity: 0.26,
-                wilting_point: 0.15,
-                ksat_mm_hr: 4.3,
-                porosity: 0.40,
-            },
-            Self::ClayLoam => SoilHydraulicProps {
-                field_capacity: 0.32,
-                wilting_point: 0.20,
-                ksat_mm_hr: 2.3,
-                porosity: 0.42,
-            },
-            Self::SiltyClayLoam => SoilHydraulicProps {
-                field_capacity: 0.37,
-                wilting_point: 0.22,
-                ksat_mm_hr: 1.5,
-                porosity: 0.43,
-            },
-            Self::SandyClay => SoilHydraulicProps {
-                field_capacity: 0.30,
-                wilting_point: 0.21,
-                ksat_mm_hr: 1.2,
-                porosity: 0.38,
-            },
-            Self::SiltyClay => SoilHydraulicProps {
-                field_capacity: 0.37,
-                wilting_point: 0.25,
-                ksat_mm_hr: 0.9,
-                porosity: 0.41,
-            },
-            Self::Clay => SoilHydraulicProps {
-                field_capacity: 0.36,
-                wilting_point: 0.25,
-                ksat_mm_hr: 0.6,
-                porosity: 0.38,
-            },
+            Self::Sand => PROPS_SAND,
+            Self::LoamySand => PROPS_LOAMY_SAND,
+            Self::SandyLoam => PROPS_SANDY_LOAM,
+            Self::Loam => PROPS_LOAM,
+            Self::SiltLoam => PROPS_SILT_LOAM,
+            Self::Silt => PROPS_SILT,
+            Self::SandyClayLoam => PROPS_SANDY_CLAY_LOAM,
+            Self::ClayLoam => PROPS_CLAY_LOAM,
+            Self::SiltyClayLoam => PROPS_SILTY_CLAY_LOAM,
+            Self::SandyClay => PROPS_SANDY_CLAY,
+            Self::SiltyClay => PROPS_SILTY_CLAY,
+            Self::Clay => PROPS_CLAY,
         }
     }
 }
@@ -301,12 +315,21 @@ fn sr_theta_s(s: f64, c: f64, om: f64) -> f64 {
     sr_theta_33(s, c, om) + sr_theta_s_33(s, c, om) - 0.097 * s + 0.043
 }
 
+/// Wilting point pressure head (kPa). Saxton & Rawls (2006).
+const SR_PRESSURE_1500_KPA: f64 = 1500.0;
+/// Field capacity pressure head (kPa). Saxton & Rawls (2006).
+const SR_PRESSURE_33_KPA: f64 = 33.0;
+/// Ksat empirical coefficient (mm/hr). Saxton & Rawls (2006).
+const SR_KSAT_COEFF: f64 = 1930.0;
+/// Ksat exponent in (θs − θ33)^(3−λ). Saxton & Rawls (2006).
+const SR_KSAT_EXPONENT: f64 = 3.0;
+
 /// Lambda parameter (slope of moisture-tension curve in log-log space).
 #[must_use]
 fn sr_lambda(s: f64, c: f64, om: f64) -> f64 {
     let t33 = sr_theta_33(s, c, om);
     let t1500 = sr_theta_1500(s, c, om);
-    let b = (1500.0_f64.ln() - 33.0_f64.ln()) / (t33.ln() - t1500.ln());
+    let b = (SR_PRESSURE_1500_KPA.ln() - SR_PRESSURE_33_KPA.ln()) / (t33.ln() - t1500.ln());
     1.0 / b
 }
 
@@ -316,7 +339,7 @@ fn sr_ksat(s: f64, c: f64, om: f64) -> f64 {
     let ts = sr_theta_s(s, c, om);
     let t33 = sr_theta_33(s, c, om);
     let lam = sr_lambda(s, c, om);
-    1930.0 * (ts - t33).powf(3.0 - lam)
+    SR_KSAT_COEFF * (ts - t33).powf(SR_KSAT_EXPONENT - lam)
 }
 
 /// Compute all Saxton-Rawls hydraulic properties from soil texture and OM.

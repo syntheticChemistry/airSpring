@@ -120,9 +120,18 @@ fn handle_connection(stream: UnixStream, state: &NicheState) {
 
         let (resp, success) = match outcome {
             DispatchOutcome::Ok(result) => (rpc::success(&id, &result), true),
-            DispatchOutcome::RpcError { code, message } => {
-                (rpc::error(&id, code, &message), false)
-            }
+            DispatchOutcome::MethodNotFound(method) => (
+                rpc::error(&id, rpc::METHOD_NOT_FOUND, &format!("Method not found: {method}")),
+                false,
+            ),
+            DispatchOutcome::InvalidParams { method, reason } => (
+                rpc::error(&id, rpc::INVALID_PARAMS, &format!("{method}: {reason}")),
+                false,
+            ),
+            DispatchOutcome::InternalError { method, source } => (
+                rpc::error(&id, rpc::INTERNAL_ERROR, &format!("{method}: {source}")),
+                false,
+            ),
         };
         emit_metrics(method, latency_ms, success);
 

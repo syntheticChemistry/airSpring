@@ -64,6 +64,17 @@ const HARGREAVES_TEMP_OFFSET: f64 = 17.8;
 /// Latent heat conversion: MJ/m²/day → mm/day. FAO-56 (1/λ at 20°C).
 const MJ_TO_MM: f64 = 0.408;
 
+/// Priestley-Taylor α coefficient. Priestley & Taylor (1972).
+const PRIESTLEY_TAYLOR_ALPHA: f64 = 1.26;
+
+/// Celsius to Kelvin offset. FAO-56 Eq. 6 uses T+273; 273.15 is the
+/// standard conversion for thermodynamic consistency.
+const CELSIUS_TO_KELVIN: f64 = 273.15;
+/// Penman-Monteith wind term numerator (900). FAO-56 Eq. 6.
+const FAO56_PM_WIND_NUMERATOR: f64 = 900.0;
+/// Penman-Monteith wind term u₂ coefficient. FAO-56 Eq. 6: γ(1 + 0.34 u₂).
+const FAO56_PM_WIND_U2_COEFF: f64 = 0.34;
+
 // Simplified ET₀ methods (Makkink, Turc, Hamon, Blaney-Criddle) live in
 // `eco::simple_et0` — re-exported here for backward compatibility.
 pub use super::simple_et0::{
@@ -232,11 +243,10 @@ pub fn hargreaves_et0(tmin: f64, tmax: f64, ra_mm_day: f64) -> f64 {
 /// The 0.408 factor converts MJ/m²/day to mm/day (= 1/λ for water at 20°C).
 #[must_use]
 pub fn priestley_taylor_et0(rn: f64, g: f64, tmean_c: f64, elevation_m: f64) -> f64 {
-    const ALPHA_PT: f64 = 1.26;
     let pressure = atmospheric_pressure(elevation_m);
     let gamma = psychrometric_constant(pressure);
     let delta = vapour_pressure_slope(tmean_c);
-    (ALPHA_PT * MJ_TO_MM * (delta / (delta + gamma)) * (rn - g)).max(0.0)
+    (PRIESTLEY_TAYLOR_ALPHA * MJ_TO_MM * (delta / (delta + gamma)) * (rn - g)).max(0.0)
 }
 
 /// Compute both Priestley-Taylor and Penman-Monteith ET₀ from the same inputs.
@@ -353,9 +363,11 @@ pub fn fao56_penman_monteith(
     delta: f64,
     gamma: f64,
 ) -> f64 {
-    let numerator =
-        (0.408 * delta).mul_add(rn - g, gamma * (900.0 / (tmean_c + 273.0)) * u2 * vpd_kpa);
-    let denominator = gamma.mul_add(0.34f64.mul_add(u2, 1.0), delta);
+    let numerator = (MJ_TO_MM * delta).mul_add(
+        rn - g,
+        gamma * (FAO56_PM_WIND_NUMERATOR / (tmean_c + CELSIUS_TO_KELVIN)) * u2 * vpd_kpa,
+    );
+    let denominator = gamma.mul_add(FAO56_PM_WIND_U2_COEFF.mul_add(u2, 1.0), delta);
     (numerator / denominator).max(0.0)
 }
 

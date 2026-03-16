@@ -140,7 +140,10 @@ fn main() {
     validation::init_tracing();
     validation::banner("Priestley-Taylor ET₀ Validation");
     let mut v = ValidationHarness::new("Priestley-Taylor ET₀ Validation");
-    let bench = parse_benchmark_json(BENCHMARK_JSON).expect("valid benchmark JSON");
+    let Ok(bench) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_analytical(&mut v, &bench);
     validate_uccle(&mut v, &bench);

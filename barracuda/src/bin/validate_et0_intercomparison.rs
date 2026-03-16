@@ -73,7 +73,10 @@ fn main() {
     validation::init_tracing();
     validation::banner("ET₀ Three-Method Intercomparison");
     let mut v = ValidationHarness::new("ET₀ Three-Method Intercomparison");
-    let bench = parse_benchmark_json(BENCHMARK_JSON).expect("valid benchmark JSON");
+    let Ok(bench) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
     let thresholds = &bench["thresholds"];
 
     let stations = bench["stations"].as_object().expect("stations object");

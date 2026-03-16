@@ -248,7 +248,10 @@ fn main() {
     validation::init_tracing();
     validation::banner("Thornthwaite Monthly ET₀ Validation");
     let mut v = ValidationHarness::new("Thornthwaite Monthly ET₀");
-    let bench = parse_benchmark_json(BENCHMARK_JSON).expect("valid benchmark JSON");
+    let Ok(bench) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_analytical(&mut v, &bench);
     validate_station(&mut v, &bench, "east_lansing");

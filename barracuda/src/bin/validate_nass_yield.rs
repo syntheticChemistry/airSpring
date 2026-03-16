@@ -433,8 +433,10 @@ fn main() {
     validation::init_tracing();
     validation::banner("Exp 024: NASS Yield Validation (Stewart 1977 + Michigan Pipeline)");
     let mut v = ValidationHarness::new("NASS Yield Validation");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_nass_yield.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_ky_consistency(&mut v, &benchmark);
     validate_drought_response(&mut v);

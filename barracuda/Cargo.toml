@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.8.3"
+version = "0.8.5"
 edition = "2024"
 rust-version = "1.92"
 authors = ["Squirrel Team"]
@@ -12,7 +12,6 @@ description = "Ecological & agricultural science pipelines — Rust + GPU + NPU 
 [features]
 default = ["testutil"]
 testutil = []
-standalone-http = ["dep:ureq"]
 npu = ["dep:akida-driver"]
 
 [dependencies]
@@ -36,16 +35,6 @@ tracing = "0.1"
 # Tracing subscriber: ValidationHarness (upstream S68+) uses tracing::info!.
 # We init a simple fmt subscriber so harness output is visible.
 tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
-
-# Synchronous HTTP client for standalone data providers (pre-biomeOS).
-# C DEPENDENCY: ureq 3 → rustls 0.23 → ring 0.17 (C/asm crypto).
-# This is the ONLY non-Pure-Rust dependency chain in airSpring.
-# When Tower Atomic is running, HTTPS routes through Songbird
-# (Pure Rust TLS 1.3 via BearDog crypto delegation).
-# Evolution: ureq (standalone) → Songbird capability.call (sovereign).
-# ecoBin compliance: build with `--no-default-features --features testutil`
-# to eliminate ring and achieve zero C dependencies.
-ureq = { version = "3", optional = true }
 
 # Nautilus Shell: evolutionary reservoir computing via BingoCube board populations.
 # Domain-agnostic feed-forward reservoir — no temporal recurrence needed.

@@ -225,8 +225,10 @@ fn main() {
     validation::banner("Exp 066: Tissue Diversity Profiling (Paper 12)");
 
     let mut v = ValidationHarness::new("Tissue Diversity");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_tissue_diversity.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_tissue_shannon(&mut v, &benchmark);
     validate_tissue_pielou(&mut v, &benchmark);

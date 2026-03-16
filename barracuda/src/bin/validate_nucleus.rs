@@ -69,7 +69,7 @@ fn main() {
 
     // ── Phase 2: Health Check ──────────────────────────────────────
     let health =
-        rpc::send(&socket, "health", &serde_json::json!({})).and_then(|r| r.get("result").cloned());
+        rpc::send(&socket, "health", &serde_json::json!({})).ok().and_then(|r| r.get("result").cloned());
     v.check_bool("health_response", health.is_some());
 
     if let Some(ref h) = health {
@@ -86,10 +86,10 @@ fn main() {
             h.get("version").and_then(|v| v.as_str()) == Some(env!("CARGO_PKG_VERSION")),
         );
 
-        let cap_count = h
-            .get("capabilities")
-            .and_then(|v| v.as_array())
-            .map_or(0, |a| a.len());
+        let caps = biomeos::parse_capabilities(
+            h.get("capabilities").unwrap_or(&serde_json::Value::Null),
+        );
+        let cap_count = caps.len();
         // Architectural: 30 capabilities from airspring_primal v0.6.0
         // (science.* + ecology.* + primal.* + compute.* + data.*).
         v.check_abs("capability_count", cap_count as f64, 30.0, 1.0);
@@ -123,6 +123,7 @@ fn main() {
             "elevation_m": 256.0,
         }),
     )
+    .ok()
     .and_then(|r| r.get("result").cloned());
 
     v.check_bool("et0_fao56_response", rpc_result.is_some());
@@ -154,6 +155,7 @@ fn main() {
             "day_of_year": 200,
         }),
     )
+    .ok()
     .and_then(|r| r.get("result").cloned());
 
     v.check_bool("et0_hargreaves_response", rpc_hg.is_some());
@@ -173,6 +175,7 @@ fn main() {
         "science.et0_makkink",
         &serde_json::json!({"tmean": 22.5, "solar_radiation": 20.0, "elevation_m": 250.0}),
     )
+    .ok()
     .and_then(|r| r.get("result").cloned());
     v.check_bool("et0_makkink_response", rpc_mak.is_some());
     if let Some(ref r) = rpc_mak {
@@ -186,6 +189,7 @@ fn main() {
         "science.et0_turc",
         &serde_json::json!({"tmean": 22.5, "solar_radiation": 20.0, "rh_pct": 60.0}),
     )
+    .ok()
     .and_then(|r| r.get("result").cloned());
     v.check_bool("et0_turc_response", rpc_turc.is_some());
     if let Some(ref r) = rpc_turc {
@@ -199,6 +203,7 @@ fn main() {
         "science.et0_hamon",
         &serde_json::json!({"tmean": 22.5, "latitude_deg": 42.727, "day_of_year": 200}),
     )
+    .ok()
     .and_then(|r| r.get("result").cloned());
     v.check_bool("et0_hamon_response", rpc_ham.is_some());
     if let Some(ref r) = rpc_ham {
@@ -212,6 +217,7 @@ fn main() {
         "science.et0_blaney_criddle",
         &serde_json::json!({"tmean": 22.5, "latitude_deg": 42.727, "day_of_year": 200}),
     )
+    .ok()
     .and_then(|r| r.get("result").cloned());
     v.check_bool("et0_blaney_criddle_response", rpc_bc.is_some());
     if let Some(ref r) = rpc_bc {
@@ -232,6 +238,7 @@ fn main() {
             "wilting_point_mm": 50.0,
         }),
     )
+    .ok()
     .and_then(|r| r.get("result").cloned());
 
     v.check_bool("water_balance_response", rpc_wb.is_some());
@@ -254,6 +261,7 @@ fn main() {
         "science.yield_response",
         &serde_json::json!({"ky": 1.25, "eta_over_etm": 0.75, "max_yield_t_ha": 12.0}),
     )
+    .ok()
     .and_then(|r| r.get("result").cloned());
 
     v.check_bool("yield_response_response", rpc_yr.is_some());

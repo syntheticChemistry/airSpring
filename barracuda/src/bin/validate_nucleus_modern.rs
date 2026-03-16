@@ -72,7 +72,7 @@ fn main() {
     // ═══════════════════════════════════════════════════════════════
 
     let health =
-        rpc::send(&socket, "health", &serde_json::json!({})).and_then(|r| r.get("result").cloned());
+        rpc::send(&socket, "health", &serde_json::json!({})).ok().and_then(|r| r.get("result").cloned());
     v.check_bool("health_response", health.is_some());
 
     if let Some(ref h) = health {
@@ -84,31 +84,29 @@ fn main() {
         v.check_bool("version_matches", version == env!("CARGO_PKG_VERSION"));
         eprintln!("  Primal version: {version}");
 
-        let caps: Vec<&str> = h
-            .get("capabilities")
-            .and_then(|c| c.as_array())
-            .map(|a| a.iter().filter_map(|v| v.as_str()).collect())
-            .unwrap_or_default();
+        let caps: Vec<String> = biomeos::parse_capabilities(
+            h.get("capabilities").unwrap_or(&serde_json::Value::Null),
+        );
 
         v.check_bool(
             "has_spi_capability",
-            caps.contains(&"science.spi_drought_index"),
+            caps.iter().any(|c| c == "science.spi_drought_index"),
         );
         v.check_bool(
             "has_autocorrelation_capability",
-            caps.contains(&"science.autocorrelation"),
+            caps.iter().any(|c| c == "science.autocorrelation"),
         );
         v.check_bool(
             "has_gamma_cdf_capability",
-            caps.contains(&"science.gamma_cdf"),
+            caps.iter().any(|c| c == "science.gamma_cdf"),
         );
         v.check_bool(
             "has_ecology_spi_alias",
-            caps.contains(&"ecology.spi_drought_index"),
+            caps.iter().any(|c| c == "ecology.spi_drought_index"),
         );
         v.check_bool(
             "has_ecology_acf_alias",
-            caps.contains(&"ecology.autocorrelation"),
+            caps.iter().any(|c| c == "ecology.autocorrelation"),
         );
 
         eprintln!("  Capabilities registered: {}", caps.len());
@@ -132,6 +130,7 @@ fn main() {
             "scale": 3
         }),
     )
+    .ok()
     .and_then(|r| r.get("result").cloned());
 
     v.check_bool("spi_response", rpc_spi.is_some());
@@ -191,6 +190,7 @@ fn main() {
             "scale": 3
         }),
     )
+    .ok()
     .and_then(|r| r.get("result").cloned());
     v.check_bool("ecology_spi_alias_works", rpc_eco_spi.is_some());
 
@@ -215,6 +215,7 @@ fn main() {
             "max_lag": 25
         }),
     )
+    .ok()
     .and_then(|r| r.get("result").cloned());
 
     v.check_bool("acf_response", rpc_acf.is_some());
@@ -262,6 +263,7 @@ fn main() {
         "ecology.autocorrelation",
         &serde_json::json!({"data": [1.0, 2.0, 3.0, 4.0, 5.0], "max_lag": 3}),
     )
+    .ok()
     .and_then(|r| r.get("result").cloned());
     v.check_bool("ecology_acf_alias_works", rpc_eco_acf.is_some());
 
@@ -274,6 +276,7 @@ fn main() {
         "science.gamma_cdf",
         &serde_json::json!({"x": 2.0, "alpha": 3.0, "beta": 1.0}),
     )
+    .ok()
     .and_then(|r| r.get("result").cloned());
 
     v.check_bool("gamma_cdf_response", rpc_gamma.is_some());
@@ -322,6 +325,7 @@ fn main() {
             "max_yield_t_ha": 12.0,
         }),
     )
+    .ok()
     .and_then(|r| r.get("result").cloned());
 
     v.check_bool("full_pipeline_response", rpc_pipeline.is_some());
@@ -354,6 +358,7 @@ fn main() {
     // ═══════════════════════════════════════════════════════════════
 
     let rpc_discover = rpc::send(&socket, "primal.discover", &serde_json::json!({}))
+        .ok()
         .and_then(|r| r.get("result").cloned());
 
     v.check_bool("primal_discover_response", rpc_discover.is_some());
@@ -372,6 +377,7 @@ fn main() {
     if let Some(ref ts) = toadstool_socket {
         eprintln!("  ToadStool socket: {}", ts.display());
         let provenance = rpc::send(ts, "toadstool.provenance", &serde_json::json!({}))
+            .ok()
             .and_then(|r| r.get("result").cloned());
         if let Some(ref p) = provenance {
             let total = p.get("total_flows").and_then(|t| t.as_u64()).unwrap_or(0);

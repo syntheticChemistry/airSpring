@@ -26,7 +26,7 @@ use barracuda::stats::normal;
 use airspring_barracuda::gpu::autocorrelation;
 use airspring_barracuda::gpu::device_info;
 
-#[allow(clippy::too_many_lines)]
+#[expect(clippy::too_many_lines, reason = "validation binary main() is a linear test sequence")]
 fn main() {
     let mut pass = 0_u32;
     let mut fail = 0_u32;
@@ -233,7 +233,7 @@ fn main() {
                 state = state
                     .wrapping_mul(6_364_136_223_846_793_005)
                     .wrapping_add(1_442_695_040_888_963_407);
-                #[allow(clippy::cast_precision_loss)]
+                #[expect(clippy::cast_precision_loss, reason = "provenance count < 2^53; usize→f64 exact")]
                 let v = (state >> 11) as f64 / ((1_u64 << 53) as f64) - 0.5;
                 v
             })

@@ -121,12 +121,13 @@ fn main() {
         let health = rpc::send(ts, "toadstool.health", &serde_json::json!({}));
         let ts_healthy = health
             .as_ref()
+            .ok()
             .is_some_and(|r| r.get("status").and_then(|s| s.as_str()).unwrap_or("") == "healthy");
         if ts_healthy {
             v.check_bool("toadstool_health", true);
             eprintln!("  toadStool healthy: true");
             let provenance = rpc::send(ts, "toadstool.provenance", &serde_json::json!({}));
-            v.check_bool("toadstool_provenance", provenance.is_some());
+            v.check_bool("toadstool_provenance", provenance.is_ok());
         } else {
             // Socket exists but daemon not responding — stale socket, treat as absent.
             v.check_bool("toadstool_socket_stale_graceful", true);
@@ -146,7 +147,7 @@ fn main() {
             "compute.et0",
             &serde_json::json!({"tmax": 30.0, "tmin": 15.0}),
         );
-        v.check_bool("compute_offload_dispatch", offload_test.is_some());
+        v.check_bool("compute_offload_dispatch", offload_test.is_ok());
     } else {
         v.check_bool("compute_offload_absent_graceful", true);
         eprintln!("  Compute offload: no primal (graceful — local GPU used)");

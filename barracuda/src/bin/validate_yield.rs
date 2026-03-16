@@ -286,8 +286,10 @@ fn main() {
     validation::init_tracing();
     validation::banner("Yield Response Validation (FAO-56 Ch. 10 / Stewart 1977)");
     let mut v = ValidationHarness::new("Yield Response Validation");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_yield_response.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_ky_table(&mut v, &benchmark);
     validate_single_stage(&mut v, &benchmark);

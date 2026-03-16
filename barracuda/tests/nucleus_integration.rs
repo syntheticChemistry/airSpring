@@ -74,11 +74,10 @@ fn biomeos_provider_fails_gracefully_without_tower() {
     );
 }
 
-#[cfg(feature = "standalone-http")]
 #[test]
-fn http_provider_has_open_meteo_url() {
-    use airspring_barracuda::data::provider::HttpProvider;
-    let _ = HttpProvider::open_meteo();
+fn songbird_http_provider_open_meteo() {
+    use airspring_barracuda::data::provider::SongbirdHttpProvider;
+    let _ = SongbirdHttpProvider::open_meteo();
 }
 
 // ── Primal discovery ───────────────────────────────────────────────

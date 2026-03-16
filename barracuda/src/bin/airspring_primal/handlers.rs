@@ -243,7 +243,7 @@ pub fn handle_compute_offload(params: &serde_json::Value) -> serde_json::Value {
         .cloned()
         .unwrap_or_else(|| serde_json::json!({}));
     rpc::send(&socket, &format!("compute.{op}"), &inner).map_or_else(
-        || serde_json::json!({"error": format!("compute.{op} dispatch failed"), "fallback": "cpu"}),
+        |_| serde_json::json!({"error": format!("compute.{op} dispatch failed"), "fallback": "cpu"}),
         |resp| {
             serde_json::json!({
                 "offloaded_to": socket.display().to_string(),
@@ -265,7 +265,7 @@ pub fn handle_data_weather(params: &serde_json::Value) -> serde_json::Value {
         });
     };
     rpc::send(&socket, "data.open_meteo_weather", params).map_or_else(
-        || {
+        |_| {
             serde_json::json!({
                 "error": "data.open_meteo_weather dispatch failed",
                 "fallback": "direct_http",
@@ -296,7 +296,7 @@ pub fn handle_primal_forward(params: &serde_json::Value) -> serde_json::Value {
         return serde_json::json!({"error": format!("primal '{primal}' not found")});
     };
     rpc::send(&socket, method, &inner).map_or_else(
-        || serde_json::json!({"error": format!("forward to {primal}:{method} failed")}),
+        |_| serde_json::json!({"error": format!("forward to {primal}:{method} failed")}),
         |resp| serde_json::json!({"forwarded_to": primal, "method": method, "response": resp}),
     )
 }

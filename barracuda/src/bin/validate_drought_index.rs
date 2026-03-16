@@ -55,7 +55,7 @@ fn spi_stats(spi: &[f64]) -> (usize, f64, f64, f64, f64) {
     if n == 0 {
         return (0, 0.0, 0.0, 0.0, 0.0);
     }
-    #[allow(clippy::cast_precision_loss)]
+    #[expect(clippy::cast_precision_loss, reason = "month count and sample sizes < 2^53; usize→f64 exact")]
     let nf = n as f64;
     let mean_val = valid.iter().sum::<f64>() / nf;
     let var_val = valid.iter().map(|x| (x - mean_val).powi(2)).sum::<f64>() / nf;
@@ -94,7 +94,7 @@ fn validate_gamma_fit(v: &mut ValidationHarness, benchmark: &serde_json::Value) 
         tolerances::MC_ET0_PROPAGATION.abs_tol,
     );
 
-    #[allow(clippy::cast_precision_loss)]
+    #[expect(clippy::cast_precision_loss, reason = "month count and sample sizes < 2^53; usize→f64 exact")]
     let data_mean = known.iter().sum::<f64>() / known.len() as f64;
     v.check_abs(
         "alpha*beta ≈ data mean",
@@ -123,9 +123,9 @@ fn validate_spi1(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     let py_mean = json_f64_required(benchmark, &["spi1", "mean"]);
     let py_std = json_f64_required(benchmark, &["spi1", "std"]);
 
-    #[allow(clippy::cast_precision_loss)]
+    #[expect(clippy::cast_precision_loss, reason = "month count and sample sizes < 2^53; usize→f64 exact")]
     let n_f64 = n_valid as f64;
-    #[allow(clippy::cast_precision_loss)]
+    #[expect(clippy::cast_precision_loss, reason = "month count and sample sizes < 2^53; usize→f64 exact")]
     let py_n_f64 = py_n_valid as f64;
     v.check_abs("all 60 months valid", n_f64, py_n_f64, f64::EPSILON);
 
@@ -159,7 +159,7 @@ fn validate_spi1(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
         }
     }
 
-    #[allow(clippy::cast_precision_loss)]
+    #[expect(clippy::cast_precision_loss, reason = "month count and sample sizes < 2^53; usize→f64 exact")]
     let match_ratio = if compared > 0 {
         f64::from(matched) / f64::from(compared)
     } else {
@@ -182,7 +182,7 @@ fn validate_spi3(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     let py_n = json_f64_required(benchmark, &["spi3", "n_valid"]) as usize;
     let py_mean = json_f64_required(benchmark, &["spi3", "mean"]);
 
-    #[allow(clippy::cast_precision_loss)]
+    #[expect(clippy::cast_precision_loss, reason = "month count and sample sizes < 2^53; usize→f64 exact")]
     v.check_abs("58 months valid", n_valid as f64, py_n as f64, f64::EPSILON);
     v.check_abs(
         "mean near 0",
@@ -206,13 +206,13 @@ fn validate_spi6_12(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     let spi6 = compute_spi(&precip, 6);
     let (n6, _, _, _, _) = spi_stats(&spi6);
     let py_n6 = json_f64_required(benchmark, &["spi6", "n_valid"]) as usize;
-    #[allow(clippy::cast_precision_loss)]
+    #[expect(clippy::cast_precision_loss, reason = "month count and sample sizes < 2^53; usize→f64 exact")]
     v.check_abs("SPI-6: 55 valid", n6 as f64, py_n6 as f64, f64::EPSILON);
 
     let spi12 = compute_spi(&precip, 12);
     let (n12, _, _, _, _) = spi_stats(&spi12);
     let py_n12 = json_f64_required(benchmark, &["spi12", "n_valid"]) as usize;
-    #[allow(clippy::cast_precision_loss)]
+    #[expect(clippy::cast_precision_loss, reason = "month count and sample sizes < 2^53; usize→f64 exact")]
     v.check_abs("SPI-12: 49 valid", n12 as f64, py_n12 as f64, f64::EPSILON);
 
     let first_11_nan = spi12.iter().take(11).all(|x| x.is_nan());

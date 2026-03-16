@@ -383,7 +383,7 @@ fn bench_scaling_modern(v: &mut ValidationHarness, gpu: &GpuRunoff) {
     for &n in &[100_usize, 1_000, 10_000, 100_000] {
         let inputs: Vec<RunoffInput> = (0..n)
             .map(|i| {
-                #[allow(clippy::cast_precision_loss)]
+                #[expect(clippy::cast_precision_loss, reason = "benchmark iteration count < 2^53; usize→f64 exact")]
                 let fi = i as f64;
                 RunoffInput {
                     precip_mm: fi.mul_add(0.001, 20.0),

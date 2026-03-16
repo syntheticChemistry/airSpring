@@ -17,7 +17,7 @@
 
 use std::io::{BufRead, BufReader, Write};
 use std::os::unix::net::UnixStream;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
 
@@ -31,6 +31,66 @@ pub const METHOD_NOT_FOUND: i32 = -32601;
 pub const INVALID_PARAMS: i32 = -32602;
 /// JSON-RPC 2.0 internal error.
 pub const INTERNAL_ERROR: i32 = -32603;
+
+/// IPC transport errors (biomeOS standard).
+#[derive(Debug)]
+pub enum IpcError {
+    /// Connection to the socket failed.
+    ConnectionFailed {
+        /// Target socket path.
+        socket: PathBuf,
+        /// Underlying I/O error.
+        source: std::io::Error,
+    },
+    /// Request timed out.
+    Timeout {
+        /// JSON-RPC method that timed out.
+        method: String,
+        /// Duration before timeout.
+        elapsed: Duration,
+    },
+    /// Server returned a JSON-RPC error.
+    RpcError {
+        /// JSON-RPC error code.
+        code: i32,
+        /// Human-readable error message.
+        message: String,
+    },
+    /// Response deserialization failed.
+    DeserializationFailed {
+        /// JSON-RPC method whose response failed parsing.
+        method: String,
+        /// Underlying JSON error.
+        source: serde_json::Error,
+    },
+}
+
+impl std::fmt::Display for IpcError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            IpcError::ConnectionFailed { socket, source } => {
+                write!(f, "connection failed to {}: {source}", socket.display())
+            }
+            IpcError::Timeout { method, elapsed } => {
+                write!(f, "timeout calling {method} after {:?}", elapsed)
+            }
+            IpcError::RpcError { code, message } => write!(f, "RPC error {code}: {message}"),
+            IpcError::DeserializationFailed { method, source } => {
+                write!(f, "deserialization failed for {method}: {source}")
+            }
+        }
+    }
+}
+
+impl std::error::Error for IpcError {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            IpcError::ConnectionFailed { source, .. } => Some(source),
+            IpcError::DeserializationFailed { source, .. } => Some(source),
+            _ => None,
+        }
+    }
+}
 
 static REQUEST_ID: AtomicU64 = AtomicU64::new(0);
 
@@ -115,11 +175,9 @@ pub fn request(method: &str, params: &serde_json::Value) -> serde_json::Value {
 ///
 /// # Errors
 ///
-/// Returns `None` if:
+/// Returns `Err(IpcError)` if:
 /// - Connection to the socket fails
-/// - Serialization of the request fails
-/// - Write to the socket fails
-/// - Read from the socket fails or times out
+/// - Write/read times out
 /// - Response is not valid JSON
 ///
 /// # Examples
@@ -129,7 +187,7 @@ pub fn request(method: &str, params: &serde_json::Value) -> serde_json::Value {
 /// use std::path::Path;
 ///
 /// let path = Path::new("/run/user/1000/biomeos/airspring-abc.sock");
-/// if let Some(resp) = rpc::send(path, "health", &serde_json::json!({})) {
+/// if let Ok(resp) = rpc::send(path, "health", &serde_json::json!({})) {
 ///     let result = resp.get("result").cloned();
 ///     // ...
 /// }
@@ -139,23 +197,75 @@ pub fn send(
     socket_path: &Path,
     method: &str,
     params: &serde_json::Value,
-) -> Option<serde_json::Value> {
-    let mut stream = UnixStream::connect(socket_path).ok()?;
-    let timeout = Some(socket_timeout());
-    stream.set_read_timeout(timeout).ok()?;
-    stream.set_write_timeout(timeout).ok()?;
+) -> Result<serde_json::Value, IpcError> {
+    let mut stream = UnixStream::connect(socket_path).map_err(|e| IpcError::ConnectionFailed {
+        socket: socket_path.to_path_buf(),
+        source: e,
+    })?;
+    let timeout_dur = socket_timeout();
+    let timeout = Some(timeout_dur);
+    stream.set_read_timeout(timeout).map_err(|e| IpcError::ConnectionFailed {
+        socket: socket_path.to_path_buf(),
+        source: e,
+    })?;
+    stream.set_write_timeout(timeout).map_err(|e| IpcError::ConnectionFailed {
+        socket: socket_path.to_path_buf(),
+        source: e,
+    })?;
 
     let req = request(method, params);
-    let mut payload = serde_json::to_vec(&req).ok()?;
+    let mut payload = serde_json::to_vec(&req).map_err(|e| IpcError::DeserializationFailed {
+        method: method.to_string(),
+        source: e,
+    })?;
     payload.push(b'\n');
-    stream.write_all(&payload).ok()?;
-    stream.flush().ok()?;
+    stream.write_all(&payload).map_err(|e| {
+        if e.kind() == std::io::ErrorKind::TimedOut {
+            IpcError::Timeout {
+                method: method.to_string(),
+                elapsed: timeout_dur,
+            }
+        } else {
+            IpcError::ConnectionFailed {
+                socket: socket_path.to_path_buf(),
+                source: e,
+            }
+        }
+    })?;
+    stream.flush().map_err(|e| {
+        if e.kind() == std::io::ErrorKind::TimedOut {
+            IpcError::Timeout {
+                method: method.to_string(),
+                elapsed: timeout_dur,
+            }
+        } else {
+            IpcError::ConnectionFailed {
+                socket: socket_path.to_path_buf(),
+                source: e,
+            }
+        }
+    })?;
 
     let mut reader = BufReader::new(stream);
     let mut line = String::new();
-    reader.read_line(&mut line).ok()?;
+    reader.read_line(&mut line).map_err(|e| {
+        if e.kind() == std::io::ErrorKind::TimedOut {
+            IpcError::Timeout {
+                method: method.to_string(),
+                elapsed: timeout_dur,
+            }
+        } else {
+            IpcError::ConnectionFailed {
+                socket: socket_path.to_path_buf(),
+                source: e,
+            }
+        }
+    })?;
 
-    serde_json::from_str(line.trim()).ok()
+    serde_json::from_str(line.trim()).map_err(|e| IpcError::DeserializationFailed {
+        method: method.to_string(),
+        source: e,
+    })
 }
 
 #[cfg(test)]
@@ -222,10 +332,10 @@ mod tests {
     }
 
     #[test]
-    fn send_returns_none_for_nonexistent_socket() {
+    fn send_returns_err_for_nonexistent_socket() {
         let path = Path::new("/nonexistent/rpc/socket/path/that/does/not/exist.sock");
         let result = send(path, "health", &serde_json::json!({}));
-        assert_eq!(result, None);
+        assert!(result.is_err());
     }
 
     #[test]
@@ -299,7 +409,7 @@ mod tests {
     }
 
     #[test]
-    fn send_returns_none_when_server_sends_malformed_json() {
+    fn send_returns_err_when_server_sends_malformed_json() {
         let dir = std::env::temp_dir().join(format!("rpc_test_{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("malformed.sock");
@@ -315,11 +425,11 @@ mod tests {
         std::thread::sleep(std::time::Duration::from_millis(50));
         let result = send(&path, "health", &serde_json::json!({}));
         std::fs::remove_file(&path).ok();
-        assert_eq!(result, None);
+        assert!(result.is_err());
     }
 
     #[test]
-    fn send_returns_none_when_server_sends_empty_line() {
+    fn send_returns_err_when_server_sends_empty_line() {
         let dir = std::env::temp_dir().join(format!("rpc_test_{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("empty.sock");
@@ -335,11 +445,11 @@ mod tests {
         std::thread::sleep(std::time::Duration::from_millis(50));
         let result = send(&path, "health", &serde_json::json!({}));
         std::fs::remove_file(&path).ok();
-        assert_eq!(result, None);
+        assert!(result.is_err());
     }
 
     #[test]
-    fn send_returns_none_when_server_sends_partial_json() {
+    fn send_returns_err_when_server_sends_partial_json() {
         let dir = std::env::temp_dir().join(format!("rpc_test_{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("partial.sock");
@@ -355,11 +465,11 @@ mod tests {
         std::thread::sleep(std::time::Duration::from_millis(50));
         let result = send(&path, "health", &serde_json::json!({}));
         std::fs::remove_file(&path).ok();
-        assert_eq!(result, None);
+        assert!(result.is_err());
     }
 
     #[test]
-    fn send_returns_some_when_server_sends_valid_json_response() {
+    fn send_returns_ok_when_server_sends_valid_json_response() {
         let dir = std::env::temp_dir().join(format!("rpc_valid_{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("valid.sock");
@@ -382,14 +492,14 @@ mod tests {
         std::thread::sleep(std::time::Duration::from_millis(100));
         let result = send(&path, "health", &serde_json::json!({}));
         std::fs::remove_file(&path).ok();
-        assert!(result.is_some());
+        assert!(result.is_ok());
         let resp = result.unwrap();
         assert_eq!(resp["result"]["ok"], true);
         assert_eq!(resp["id"], 1);
     }
 
     #[test]
-    fn send_returns_some_when_server_sends_error_response() {
+    fn send_returns_ok_when_server_sends_error_response() {
         let dir = std::env::temp_dir().join(format!("rpc_err_{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("error_resp.sock");
@@ -412,7 +522,7 @@ mod tests {
         std::thread::sleep(std::time::Duration::from_millis(100));
         let result = send(&path, "unknown", &serde_json::json!({}));
         std::fs::remove_file(&path).ok();
-        assert!(result.is_some());
+        assert!(result.is_ok());
         let resp = result.unwrap();
         assert!(resp.get("error").is_some());
         assert_eq!(resp["error"]["code"], METHOD_NOT_FOUND);

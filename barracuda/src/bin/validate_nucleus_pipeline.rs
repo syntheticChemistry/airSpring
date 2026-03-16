@@ -58,17 +58,17 @@ fn main() {
 
     // ── Phase 1: Health + Capabilities ─────────────────────────────
     let health =
-        rpc::send(&sock, "health", &serde_json::json!({})).and_then(|r| r.get("result").cloned());
+        rpc::send(&sock, "health", &serde_json::json!({})).ok().and_then(|r| r.get("result").cloned());
     v.check_bool("health_response", health.is_some());
     if let Some(ref h) = health {
         v.check_bool(
             "health_healthy",
             h.get("status").and_then(|v| v.as_str()) == Some("healthy"),
         );
-        let cap_count = h
-            .get("capabilities")
-            .and_then(|v| v.as_array())
-            .map_or(0, |a| a.len());
+        let caps = biomeos::parse_capabilities(
+            h.get("capabilities").unwrap_or(&serde_json::Value::Null),
+        );
+        let cap_count = caps.len();
         // Architectural: 16 capabilities registered by airspring_primal main()
         // v0.6.0: 30 capabilities (21 science + 5 ecology + 2 primal + 1 compute + 1 data).
         // Tolerance 1.0 accommodates capability evolution across versions.
@@ -84,9 +84,9 @@ fn main() {
     });
 
     let science_et0 =
-        rpc::send(&sock, "science.et0_fao56", &test_params).and_then(|r| r.get("result").cloned());
+        rpc::send(&sock, "science.et0_fao56", &test_params).ok().and_then(|r| r.get("result").cloned());
     let ecology_et0 =
-        rpc::send(&sock, "ecology.et0_fao56", &test_params).and_then(|r| r.get("result").cloned());
+        rpc::send(&sock, "ecology.et0_fao56", &test_params).ok().and_then(|r| r.get("result").cloned());
 
     v.check_bool("science_et0_response", science_et0.is_some());
     v.check_bool("ecology_et0_response", ecology_et0.is_some());
@@ -127,6 +127,7 @@ fn main() {
             "ky": 1.25, "max_yield_t_ha": 12.0,
         }),
     )
+    .ok()
     .and_then(|r| r.get("result").cloned());
 
     v.check_bool("full_pipeline_response", pipeline_result.is_some());
@@ -171,6 +172,7 @@ fn main() {
         "capability.forward",
         &serde_json::json!({"capability": "compute.dispatch", "method": "health", "params": {}}),
     )
+    .ok()
     .and_then(|r| r.get("result").cloned());
     v.check_bool("forward_compute_response", compute_fwd.is_some());
     if let Some(ref t) = compute_fwd {
@@ -186,6 +188,7 @@ fn main() {
         "capability.forward",
         &serde_json::json!({"capability": "crypto.tls", "method": "health", "params": {}}),
     )
+    .ok()
     .and_then(|r| r.get("result").cloned());
     v.check_bool("forward_crypto_response", crypto_fwd.is_some());
     if let Some(ref b) = crypto_fwd {
@@ -198,15 +201,17 @@ fn main() {
 
     // ── Phase 5: Capability Discovery ──────────────────────────────
     let discovery = rpc::send(&sock, "capability.discover", &serde_json::json!({}))
+        .ok()
         .and_then(|r| r.get("result").cloned());
     v.check_bool("capability_discover_response", discovery.is_some());
     if let Some(ref d) = discovery {
         let count = d.get("count").and_then(|v| v.as_u64()).unwrap_or(0);
         v.check_lower("discover_multiple_capabilities", count as f64, 3.0);
 
-        let capabilities = d.get("capabilities").and_then(|v| v.as_array());
-        if let Some(caps) = capabilities {
-            let names: Vec<&str> = caps.iter().filter_map(|v| v.as_str()).collect();
+        let names = biomeos::parse_capabilities(
+            d.get("capabilities").unwrap_or(&serde_json::Value::Null),
+        );
+        if !names.is_empty() {
             v.check_bool(
                 "discover_science",
                 names.iter().any(|n| n.starts_with("science.")),
@@ -240,6 +245,7 @@ fn main() {
                 },
             }),
         )
+        .ok()
         .and_then(|r| r.get("result").cloned());
 
         v.check_bool("neural_api_capability_call", cap_result.is_some());

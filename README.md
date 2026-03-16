@@ -2,7 +2,7 @@
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
 **Date**: March 16, 2026
-**Version**: 0.8.4
+**Version**: 0.8.5
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -13,7 +13,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → biomeOS (NUCLEUS atomics, deployment graphs) → Penny Irrigation
 ```
 
-## Current Status (v0.8.4)
+## Current Status (v0.8.5)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
@@ -42,12 +42,13 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | Phase 4.6: neuralAPI integration | **3 enhancements** | Structured metrics, operation dependencies, cost estimates — Pathway Learner ready |
 | Phase 4.7: Penny Irrigation | Vision | Sovereign, consumer hardware |
 | Phase 5.6: Deep debt resolution | **All findings resolved** | v0.8.4: cast lint evolution, eprintln→tracing, hardcoded primal names→constants, deny.toml wildcards=deny, Blaney-Criddle p→benchmark JSON, primal binary refactored (4 modules), Python provenance standardized (20 scripts), CI expanded (cross-compile, metalForge deny, 11 more validation binaries) |
+| Phase 5.7: Cross-spring absorption | **Zero C deps achieved** | v0.8.5: ureq→Songbird IPC (Tower Atomic, zero C deps), `IpcError`+`DispatchOutcome` biomeOS alignment, `#[expect(reason)]` migration, zero-panic validation (top 9 binaries), named physical constants (FAO-56, SCS-CN, AMC), dual-format capability discovery, 58→58 warnings (0 new) |
 
 ### Code Quality
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` (barracuda) | **863 passed**, 0 failures |
+| `cargo test --lib` (barracuda) | **865 passed**, 0 failures |
 | `cargo test --test '*'` (integration) | **285 passed** (16 test files) |
 | `cargo test --lib` (metalForge) | **61 passed**, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **95.66% line coverage** |

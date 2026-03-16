@@ -241,7 +241,10 @@ fn main() {
     validation::init_tracing();
     validation::banner("CW2D Richards Extension (Dong et al. 2019)");
     let mut v = ValidationHarness::new("CW2D Richards Validation");
-    let benchmark = parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_cw2d.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_retention(&mut v, &benchmark);
     validate_conductivity(&mut v, &benchmark);

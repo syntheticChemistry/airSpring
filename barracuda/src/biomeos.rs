@@ -29,6 +29,32 @@
 
 use std::path::{Path, PathBuf};
 
+/// Parse capability names from either flat-array or nested-object formats.
+///
+/// Handles both formats returned by diverse ecosystem sources:
+/// - String array: `["health", "compute.dispatch", "data.weather"]`
+/// - Object array: `[{"name": "health", "version": "1.0"}, {"capability": "compute.dispatch"}]`
+///
+/// Use when parsing `capability.list`, `health`, or `capability.discover` responses.
+#[must_use]
+pub fn parse_capabilities(value: &serde_json::Value) -> Vec<String> {
+    match value {
+        serde_json::Value::Array(arr) => arr
+            .iter()
+            .filter_map(|v| match v {
+                serde_json::Value::String(s) => Some(s.clone()),
+                serde_json::Value::Object(obj) => obj
+                    .get("name")
+                    .or_else(|| obj.get("capability"))
+                    .and_then(|n| n.as_str())
+                    .map(str::to_owned),
+                _ => None,
+            })
+            .collect(),
+        _ => Vec::new(),
+    }
+}
+
 /// Explicit configuration for biomeOS socket resolution.
 ///
 /// Mirrors the environment variables but accepts them as plain values,

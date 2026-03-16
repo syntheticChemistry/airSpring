@@ -185,7 +185,7 @@ pub fn register_with_target(target: &Path, our_socket: &Path) {
         }),
     );
 
-    if reg_result.is_some() {
+    if reg_result.is_ok() {
         info!(target: "biomeos", "registered with lifecycle manager");
     } else {
         warn!(target: "biomeos", "lifecycle.register failed (non-fatal)");
@@ -241,7 +241,7 @@ pub fn register_with_target(target: &Path, our_socket: &Path) {
                 "socket": &sock_str,
             }),
         )
-        .is_some()
+        .is_ok()
         {
             registered += 1;
         } else {

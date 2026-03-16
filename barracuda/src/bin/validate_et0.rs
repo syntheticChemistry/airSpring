@@ -231,7 +231,10 @@ fn main() {
     validation::init_tracing();
     validation::banner("FAO-56 Penman-Monteith Validation");
     let mut v = ValidationHarness::new("FAO-56 Penman-Monteith Validation");
-    let benchmark = parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_fao56.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_svp_table(&mut v, &benchmark);
     validate_delta_table(&mut v, &benchmark);

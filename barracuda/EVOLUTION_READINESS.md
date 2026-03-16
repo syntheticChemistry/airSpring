@@ -1,10 +1,10 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: March 16, 2026 (v0.8.4 — 87 experiments, 863 lib + 285 integration + 61 forge tests, 91 binaries. Deep debt resolved: zero panic!() in library, zero #[allow()] in library (all evolved to targeted #[expect()] or removed), zero unsafe in production AND tests (DI `_with`/`_in` pattern eliminates `set_var`/`remove_var`), ecoBin-clean default build, UniBin subcommands, primal_science refactored (810→7 modules), 58 centralized tolerances in 4 domain submodules (atmospheric/soil/gpu/instrument), hardcoded primal names evolved to discovery-based, validation binaries evolved from panic to structured exit(1). BYOB niche deployment via `niches/airspring-ecology.yaml`.) + V084 deep debt execution (primal binary refactored, primal_names constants, Python provenance, CI expanded, deny wildcards=deny)
+**Last Updated**: March 16, 2026 (v0.8.5 — 87 experiments, 865 lib + 285 integration + 61 forge tests, 91 binaries. Zero C dependencies achieved: ureq→Songbird IPC (Tower Atomic). IpcError+DispatchOutcome aligned with biomeOS ecosystem standard. #[expect(reason)] migration (zero #[allow()] in production). Zero-panic validation binaries (top 9 evolved). Named physical constants (FAO-56, SCS-CN, AMC Hawkins). Dual-format capability discovery. 58 warnings (pre-existing missing_docs only).)
 **barraCuda**: v0.3.5 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry, SpringDomain newtype, F64BuiltinCapabilities DF64 fields)
 **ToadStool**: S147+ (20,015 tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient, hw-learn, spirv_codegen_safety)
 **coralReef**: Phase 10 Iteration 44 sovereign Rust GPU compiler (NVIDIA + AMD, 1669+48 tests, VFIO dispatch)
-**Handoff**: V0.8.4 (full validation pipeline green + deep debt + upstream sync + toadStool/barraCuda evolution)
+**Handoff**: V0.8.5 (full validation pipeline green + cross-spring absorption + zero C deps + biomeOS IPC alignment)
 **License**: AGPL-3.0-or-later
 
 ---
