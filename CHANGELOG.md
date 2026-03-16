@@ -4,6 +4,61 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [0.8.2] - 2026-03-15
 
+### Deep Debt + Modern Idiomatic Rust
+
+**Primal Names Centralization** (`primal_names.rs`):
+- New `barracuda/src/primal_names.rs`: constants for all known primals (toadstool, beardog, songbird, nestgate, squirrel, rhizocrypt, loamspine, sweetgrass, petaltongue)
+- `domains` submodule for capability domain constants (dag, commit, provenance, compute)
+- All `capability_call()` invocations in `ipc/provenance.rs` now use `primal_names::domains::*`
+- Eliminates hardcoded string literals for primal discovery
+
+**Typed IPC Errors**:
+- New `AirSpringError::Ipc(String)` variant for structured IPC error propagation
+- `capability_call()` returns `Result<_, AirSpringError>` instead of `Result<_, String>`
+- `serde_json` errors auto-convert via existing `From` impl
+- Zero behavioral change for callers (errors were already discarded at boundary)
+
+**Cross-Spring Time Series IPC** (`ipc/timeseries.rs`):
+- New `barracuda/src/ipc/timeseries.rs`: implements `ecoPrimals/time-series/v1` schema
+- `build_time_series()`, `parse_time_series()`, `handle_timeseries()` for cross-spring exchange
+- `build_et0_series()`, `build_soil_moisture_series()` for domain-specific outbound payloads
+- `science.timeseries` capability registered in `niche.rs` with dependencies and cost estimates
+- Adopted from wetSpring's `ipc/timeseries.rs` pattern
+
+**Provenance DI Pattern (Zero Unsafe in All Tests)**:
+- `ipc/provenance.rs`: introduced `ProvenanceConfig` struct and `_with` variants for all public functions
+- All 10 provenance tests rewritten to use `ProvenanceConfig` directly — no env var mutation
+- Eliminated `#![allow(unsafe_code)]` from provenance test module
+- `AIRSPRING_DID` constant → `niche_did()` function deriving from `crate::niche::NICHE_NAME`
+- `local_session_id()` now uses `crate::niche::NICHE_NAME` instead of literal "airspring"
+
+**Smart File Refactoring**:
+- `gpu/device_info.rs` (699 LOC) → `gpu/device_info/` directory module:
+  - `mod.rs` (157 LOC): device probing, `DevicePrecisionReport`, `probe_device`, `try_f64_device`
+  - `shader_provenance.rs` (370 LOC): `PROVENANCE` array, `ShaderProvenance`, upstream query functions
+- `gpu/atlas_stream.rs` (782 LOC) → `gpu/atlas_stream/` directory module:
+  - `mod.rs` (core streaming): `AtlasStream`, `StationBatch`, `AtlasStreamConfig`, batch/unified processing
+  - `drift.rs` (230 LOC): `FitnessDriftMonitor`, `RegimeChange`, `MonitoredAtlasStream`
+- All `pub use` re-exports preserve backward compatibility — zero import path changes
+
+**Shared Python Tolerance Vocabulary** (`control/tolerances.py`):
+- New `control/tolerances.py`: mirrors all 57 Rust tolerances with `Tolerance` dataclass
+- `ALL_TOLERANCES` list for introspection; includes physical threshold constants
+- Python scripts can `from tolerances import ET0_REFERENCE` instead of hardcoding
+
+**Formal Tolerance Registry** (`specs/TOLERANCE_REGISTRY.md`):
+- Documents all 57 named tolerances across 4 domains (atmospheric, soil, GPU, instrument)
+- Usage examples for Rust and Python
+- Evolution history (v0.8.0→v0.8.2)
+
+**External Dependency Audit**:
+- Upgraded `pollster` 0.3 → 0.4 in metalForge/forge
+- Confirmed: only `ureq` (optional, `standalone-http`) pulls C code (ring); plan Songbird migration
+- `wgpu` features already minimal (`wgsl`, `vulkan`, `vulkan-portability`)
+- All other deps pure Rust
+
+**Quality**: 863 lib + 280 integration + 61 forge tests, 0 failures, 0 clippy warnings, zero unsafe everywhere.
+
 ### Cross-Spring Evolution + Zero Unsafe
 
 **BYOB Niche Deployment**:

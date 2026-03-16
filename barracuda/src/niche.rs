@@ -72,6 +72,8 @@ pub const CAPABILITIES: &[&str] = &[
     "provenance.record",
     "provenance.complete",
     "provenance.status",
+    // ── Cross-spring time series ──
+    "science.timeseries",
     // ── Cross-primal ──
     "primal.forward",
     "primal.discover",
@@ -105,6 +107,7 @@ pub fn operation_dependencies() -> serde_json::Value {
         "provenance.complete": ["session_id"],
         "provenance.status": [],
         "data.cross_spring_weather": ["station", "date_range"],
+        "science.timeseries": ["time_series"],
     })
 }
 
@@ -128,6 +131,7 @@ pub fn cost_estimates() -> serde_json::Value {
         "provenance.begin": { "latency_ms": 10.0, "cpu": "low", "memory_bytes": 512 },
         "provenance.record": { "latency_ms": 5.0, "cpu": "low", "memory_bytes": 1024 },
         "provenance.complete": { "latency_ms": 50.0, "cpu": "medium", "memory_bytes": 2048 },
+        "science.timeseries": { "latency_ms": 5.0, "cpu": "low", "memory_bytes": 8192 },
     })
 }
 
@@ -160,6 +164,7 @@ pub fn ecology_semantic_mappings() -> serde_json::Value {
         "spi_drought_index":      "science.spi_drought_index",
         "autocorrelation":        "science.autocorrelation",
         "gamma_cdf":              "science.gamma_cdf",
+        "timeseries":             "science.timeseries",
     })
 }
 

@@ -8,5 +8,7 @@
 //! | Module | Purpose |
 //! |--------|---------|
 //! | [`provenance`] | Provenance trio (rhizoCrypt + loamSpine + sweetGrass) |
+//! | [`timeseries`] | Cross-spring time series exchange (`ecoPrimals/time-series/v1`) |
 
 pub mod provenance;
+pub mod timeseries;

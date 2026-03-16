@@ -50,6 +50,10 @@
 //! # Inter-Primal Communication (IPC)
 //! - [`ipc::provenance`] — Provenance trio integration via biomeOS `capability.call`
 //!   (rhizoCrypt + loamSpine + sweetGrass) with graceful degradation
+//! - [`ipc::timeseries`] — Cross-spring time series exchange (`ecoPrimals/time-series/v1`)
+//!
+//! # Primal Names
+//! - [`primal_names`] — Centralized constants for capability-based primal discovery
 //!
 //! # Error Handling
 //! - [`error`] — [`error::AirSpringError`] unified error type
@@ -83,6 +87,7 @@ pub mod nautilus;
 pub mod niche;
 #[cfg(feature = "npu")]
 pub mod npu;
+pub mod primal_names;
 pub mod primal_science;
 pub mod rpc;
 #[cfg(any(test, feature = "testutil"))]

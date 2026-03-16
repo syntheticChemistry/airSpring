@@ -23,6 +23,8 @@ pub enum AirSpringError {
     Barracuda(barracuda::error::BarracudaError),
     /// NPU errors (discovery, DMA, inference).
     Npu(String),
+    /// IPC errors (socket connect, timeout, protocol).
+    Ipc(String),
 }
 
 impl AirSpringError {
@@ -43,6 +45,7 @@ impl fmt::Display for AirSpringError {
             Self::InvalidInput(msg) => write!(f, "Invalid input: {msg}"),
             Self::Barracuda(e) => write!(f, "barracuda error: {e}"),
             Self::Npu(msg) => write!(f, "NPU error: {msg}"),
+            Self::Ipc(msg) => write!(f, "IPC error: {msg}"),
         }
     }
 }
@@ -53,7 +56,11 @@ impl std::error::Error for AirSpringError {
             Self::Io(e) => Some(e),
             Self::JsonParse(e) => Some(e),
             Self::Barracuda(e) => Some(e),
-            Self::CsvParse(_) | Self::BenchmarkParse(_) | Self::InvalidInput(_) | Self::Npu(_) => {
+            Self::CsvParse(_)
+            | Self::BenchmarkParse(_)
+            | Self::InvalidInput(_)
+            | Self::Npu(_)
+            | Self::Ipc(_) => {
                 None
             }
         }
@@ -82,7 +89,7 @@ impl From<barracuda::error::BarracudaError> for AirSpringError {
 pub type Result<T> = std::result::Result<T, AirSpringError>;
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, clippy::expect_used)]
+#[expect(clippy::unwrap_used, clippy::expect_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
 
@@ -148,6 +155,19 @@ mod tests {
     #[test]
     fn test_npu_no_source() {
         let err = AirSpringError::Npu("discovery failed".into());
+        assert!(std::error::Error::source(&err).is_none());
+    }
+
+    #[test]
+    fn test_ipc_display() {
+        let err = AirSpringError::Ipc("connect: connection refused".into());
+        assert!(format!("{err}").contains("IPC error"));
+        assert!(format!("{err}").contains("connection refused"));
+    }
+
+    #[test]
+    fn test_ipc_no_source() {
+        let err = AirSpringError::Ipc("timeout".into());
         assert!(std::error::Error::source(&err).is_none());
     }
 
