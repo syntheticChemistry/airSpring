@@ -2,7 +2,7 @@
 
 **Updated**: March 16, 2026
 **Project**: airSpring — Ecological & Agricultural Sciences (v0.8.5)
-**Status**: 87 experiments, 1284/1284 Python + 863 lib + 285 integration + 61 forge tests + 91 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, BYOB niche deployment) + `#![forbid(unsafe_code)]` both crates + zero clippy pedantic+nursery + `warn(missing_docs)`. 58 tolerances in 4 submodules. JSON-RPC 2.0 protocol compliant. Full validation pipeline green (2026-03-16) + hardcoded primal names→primal_names constants + primal binary refactored (discovery/dispatch/handlers/main) + Python provenance standardized + CI expanded
+**Status**: 87 experiments, 1284/1284 Python + 865 lib + 285 integration + 61 forge tests + 91 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, BYOB niche deployment) + `#![forbid(unsafe_code)]` both crates + zero clippy pedantic+nursery + `warn(missing_docs)`. 58 tolerances in 4 submodules. JSON-RPC 2.0 protocol compliant. **Zero C dependencies** (ureq→Songbird IPC). `IpcError`+`DispatchOutcome` biomeOS alignment. `#[expect(reason)]` migration. Full validation pipeline green (2026-03-16)
 
 ---
 
@@ -41,6 +41,7 @@ Phase 5.3 Graph coordination  — Exp 087: biomeOS TOML graphs, DAG validation, 
 Phase 5.4 neuralAPI Pathway Learner — Pathway Learner integration, 4 deploy graphs
 Phase 5.5 Niche architecture    — Edition 2024, niche self-knowledge module, transitional adapter (635 LOC), deep code quality (zero #[allow()], zero unsafe everywhere, 91 binaries cleaned), BYOB niche, V071-V076 archived
 Phase 5.6 Deep debt       — cast lint evolution, eprintln→tracing, deny.toml wildcards=deny, Blaney-Criddle hardcoding→JSON, primal binary refactored (4 modules), primal_names constants, Python provenance (20 scripts), CI expanded (cross-compile, metalForge deny, 11 validation binaries)
+Phase 5.7 Cross-spring   — zero C deps (ureq→Songbird IPC), IpcError+DispatchOutcome biomeOS alignment, #[expect(reason)] migration, zero-panic validation (top 9 binaries), named physical constants (FAO-56, SCS-CN, AMC), dual-format capability discovery
 ```
 
 ## Faculty Summary
@@ -234,12 +235,12 @@ S79 modernization: `libc`→`rustix`, `async-trait`→AFIT, universal f64 precis
 |----------|---------|
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C breakdown, absorbed vs stays-local, quality gates |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
-| `wateringHole/handoffs/` | V083 current — deep debt resolution (19 findings), JSON-RPC protocol fix, barraCuda/ToadStool evolution recommendations |
+| `wateringHole/handoffs/` | V085 current — zero C deps, biomeOS IPC alignment, cross-spring absorption |
 | `specs/CROSS_SPRING_EVOLUTION.md` | 845+ WGSL shader provenance across all Springs (S93) |
 
 ### Next Steps (Dong Lab)
 
-- **Deep debt resolution (v0.8.3)**: 19 audit findings resolved — `#![forbid(unsafe_code)]` (cannot override), JSON-RPC 2.0 protocol compliance (method-not-found returns error object), capability-based orchestrator discovery (no hardcoded socket names), `warn(missing_docs)` enforced, 58 centralized tolerances, cargo-deny aligned. Self-contained IPC integration tests (5 new). rust-toolchain.toml pinned at 1.92
+- **Cross-spring absorption (v0.8.5)**: Zero C dependencies achieved (ureq→Songbird IPC). `IpcError`+`DispatchOutcome` aligned with biomeOS ecosystem standard. `#[expect(reason)]` migration complete (zero `#[allow()]` in production). Zero-panic validation (top 9 binaries). Named physical constants (FAO-56, SCS-CN, AMC). Dual-format capability discovery. 865 lib tests, 58 warnings
 - **Coverage**: target 98%+ (remaining gaps: GPU-dependent code paths)
 - **ToadStool absorption**: All 6 local ops absorbed upstream into `BatchedElementwiseF64` (ops 14-19), `local_dispatch` retired — Write→Absorb→Lean complete (v0.7.2)
 - **GPU at scale**: Profile `compute_gpu()` at N=100K+ (multi-year regional grids, crossover point via `AtlasStream`)
