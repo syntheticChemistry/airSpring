@@ -1,4 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# Provenance:
+#   script: control/tissue_diversity/tissue_diversity.py
+#   commit: af1eb97
+#   date: 2026-02-26
+#   command: python3 control/tissue_diversity/tissue_diversity.py
 #!/usr/bin/env python3
 """
 Exp 066: Tissue Diversity Profiling — Python Control Baseline

@@ -1,4 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# Provenance:
+#   script: control/pedotransfer/saxton_rawls.py
+#   commit: af1eb97
+#   date: 2026-02-26
+#   command: python3 control/pedotransfer/saxton_rawls.py
 #!/usr/bin/env python3
 """
 Exp 023: Pedotransfer Functions (Saxton & Rawls 2006) — Python Control Baseline

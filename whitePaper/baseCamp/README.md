@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
 **Updated**: March 16, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.8.3)
-**Status**: 87 experiments, 1284/1284 Python + 863 lib + 285 integration + 61 forge tests + 91 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, BYOB niche deployment) + `#![forbid(unsafe_code)]` both crates + zero clippy pedantic+nursery + `warn(missing_docs)`. 58 tolerances in 4 submodules. JSON-RPC 2.0 protocol compliant. Full validation pipeline green (2026-03-16)
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.8.4)
+**Status**: 87 experiments, 1284/1284 Python + 863 lib + 285 integration + 61 forge tests + 91 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, BYOB niche deployment) + `#![forbid(unsafe_code)]` both crates + zero clippy pedantic+nursery + `warn(missing_docs)`. 58 tolerances in 4 submodules. JSON-RPC 2.0 protocol compliant. Full validation pipeline green (2026-03-16) + hardcoded primal names→primal_names constants + primal binary refactored (discovery/dispatch/handlers/main) + Python provenance standardized + CI expanded
 
 ---
 
@@ -40,6 +40,7 @@ Phase 5.2 NUCLEUS mesh        — Exp 086: live hardware → NUCLEUS mesh → ec
 Phase 5.3 Graph coordination  — Exp 087: biomeOS TOML graphs, DAG validation, capability refs (22/22)
 Phase 5.4 neuralAPI Pathway Learner — Pathway Learner integration, 4 deploy graphs
 Phase 5.5 Niche architecture    — Edition 2024, niche self-knowledge module, transitional adapter (635 LOC), deep code quality (zero #[allow()], zero unsafe everywhere, 91 binaries cleaned), BYOB niche, V071-V076 archived
+Phase 5.6 Deep debt       — cast lint evolution, eprintln→tracing, deny.toml wildcards=deny, Blaney-Criddle hardcoding→JSON, primal binary refactored (4 modules), primal_names constants, Python provenance (20 scripts), CI expanded (cross-compile, metalForge deny, 11 validation binaries)
 ```
 
 ## Faculty Summary

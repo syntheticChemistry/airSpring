@@ -26,6 +26,7 @@
 use std::path::PathBuf;
 
 use airspring_barracuda::biomeos;
+use airspring_barracuda::niche;
 use airspring_barracuda::eco::evapotranspiration as et;
 use airspring_barracuda::eco::simple_et0;
 use airspring_barracuda::rpc;
@@ -37,7 +38,7 @@ fn resolve_socket_dir() -> PathBuf {
 }
 
 fn find_airspring_socket() -> Option<PathBuf> {
-    biomeos::find_socket("airspring")
+    biomeos::find_socket(niche::NICHE_NAME)
 }
 
 #[expect(

@@ -1,4 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# Provenance:
+#   script: control/diversity/diversity_indices.py
+#   commit: af1eb97
+#   date: 2026-02-26
+#   command: python3 control/diversity/diversity_indices.py
 #!/usr/bin/env python3
 """
 Exp 032: Ecological Diversity Indices — Python Control Baseline

@@ -29,6 +29,8 @@ use std::path::PathBuf;
 
 use airspring_barracuda::biomeos;
 use airspring_barracuda::eco::evapotranspiration as et;
+use airspring_barracuda::niche;
+use airspring_barracuda::primal_names;
 use airspring_barracuda::rpc;
 
 use barracuda::validation::ValidationHarness;
@@ -46,7 +48,7 @@ fn main() {
 
     let mut v = ValidationHarness::new("Exp 063: NUCLEUS Cross-Primal Pipeline");
 
-    let airspring = find_socket("airspring");
+    let airspring = find_socket(niche::NICHE_NAME);
     v.check_bool("airspring_socket_found", airspring.is_some());
     if airspring.is_none() {
         eprintln!("ERROR: airspring_primal not running");
@@ -221,7 +223,7 @@ fn main() {
     }
 
     // ── Phase 6: Neural-API Capability Routing ─────────────────────
-    let neural_api = find_socket("neural-api");
+    let neural_api = find_socket(primal_names::NEURAL_API);
     v.check_bool("neural_api_socket_found", neural_api.is_some());
 
     if let Some(ref api_sock) = neural_api {

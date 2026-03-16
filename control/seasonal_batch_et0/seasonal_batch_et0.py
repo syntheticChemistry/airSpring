@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# Provenance:
+#   script: control/seasonal_batch_et0/seasonal_batch_et0.py
+#   commit: af1eb97
+#   date: 2026-02-26
+#   command: python3 control/seasonal_batch_et0/seasonal_batch_et0.py
 """Exp 042 — Seasonal Batch ET₀ at GPU Scale (Python control).
 
 Generates synthetic 365-day weather for 4 US climate stations, computes

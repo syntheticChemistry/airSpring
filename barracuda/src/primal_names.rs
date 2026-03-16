@@ -27,6 +27,8 @@ pub const LOAMSPINE: &str = "loamspine";
 pub const SWEETGRASS: &str = "sweetgrass";
 /// Visualization / interactive exploration primal.
 pub const PETALTONGUE: &str = "petaltongue";
+/// Neural API / capability routing primal (provenance trio gateway).
+pub const NEURAL_API: &str = "neural-api";
 
 /// Provenance trio capability domains (used in `capability.call`).
 pub mod domains {
@@ -44,7 +46,7 @@ mod tests {
     fn all_names_are_lowercase() {
         for name in [
             TOADSTOOL, BEARDOG, SONGBIRD, NESTGATE, SQUIRREL, RHIZOCRYPT,
-            LOAMSPINE, SWEETGRASS, PETALTONGUE,
+            LOAMSPINE, SWEETGRASS, PETALTONGUE, NEURAL_API,
         ] {
             assert_eq!(name, name.to_lowercase(), "{name} must be lowercase");
         }

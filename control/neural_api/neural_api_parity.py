@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# Provenance:
+#   script: control/neural_api/neural_api_parity.py
+#   commit: af1eb97
+#   date: 2026-02-26
+#   command: python3 control/neural_api/neural_api_parity.py
 """Exp 036 — biomeOS Neural API Round-Trip Parity Control.
 
 Validates that the concept of orchestrated compute via JSON-RPC produces

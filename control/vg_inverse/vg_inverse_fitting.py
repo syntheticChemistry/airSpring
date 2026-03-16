@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# Provenance:
+#   script: control/vg_inverse/vg_inverse_fitting.py
+#   commit: af1eb97
+#   date: 2026-02-26
+#   command: python3 control/vg_inverse/vg_inverse_fitting.py
 """
 Exp 053 — Van Genuchten Inverse Parameter Estimation.
 

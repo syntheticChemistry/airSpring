@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# Provenance:
+#   script: control/pedotransfer_richards/pedotransfer_richards.py
+#   commit: af1eb97
+#   date: 2026-02-26
+#   command: python3 control/pedotransfer_richards/pedotransfer_richards.py
 """Exp 038 — Pedotransfer → Richards Coupled Simulation.
 
 Couples Saxton-Rawls pedotransfer functions (soil texture → hydraulic

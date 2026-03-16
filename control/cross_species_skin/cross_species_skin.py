@@ -1,4 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# Provenance:
+#   script: control/cross_species_skin/cross_species_skin.py
+#   commit: af1eb97
+#   date: 2026-02-26
+#   command: python3 control/cross_species_skin/cross_species_skin.py
 #!/usr/bin/env python3
 """
 Exp 069: Cross-Species Skin Comparison — Python Control Baseline

@@ -22,6 +22,8 @@
 
 use std::path::Path;
 
+use tracing::{info, warn};
+
 /// Niche identity.
 pub const NICHE_NAME: &str = "airspring";
 
@@ -183,9 +185,10 @@ pub fn register_with_target(target: &Path, our_socket: &Path) {
         }),
     );
 
-    match reg_result {
-        Some(_) => eprintln!("[biomeos] Registered with lifecycle manager"),
-        None => eprintln!("[biomeos] lifecycle.register failed (non-fatal)"),
+    if reg_result.is_some() {
+        info!(target: "biomeos", "registered with lifecycle manager");
+    } else {
+        warn!(target: "biomeos", "lifecycle.register failed (non-fatal)");
     }
 
     let sock_str = our_socket.to_string_lossy().to_string();
@@ -242,14 +245,16 @@ pub fn register_with_target(target: &Path, our_socket: &Path) {
         {
             registered += 1;
         } else {
-            eprintln!("[biomeos] capability.register({cap}) failed (non-fatal)");
+            warn!(target: "biomeos", capability = cap, "capability.register failed (non-fatal)");
         }
     }
 
-    eprintln!(
-        "[biomeos] {registered}/{} capabilities + {} domains registered",
-        CAPABILITIES.len(),
-        domains.len()
+    info!(
+        target: "biomeos",
+        registered,
+        total = CAPABILITIES.len(),
+        domains = domains.len(),
+        "capabilities + domains registered",
     );
 }
 

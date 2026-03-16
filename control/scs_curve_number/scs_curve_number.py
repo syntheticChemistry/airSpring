@@ -21,6 +21,12 @@ moisture condition (AMC I-III).
 Data: All benchmarks from published tables. USDA public domain.
 """
 
+# Provenance:
+#   script: control/scs_curve_number/scs_curve_number.py
+#   commit: af1eb97
+#   date: 2026-02-26
+#   command: python3 control/scs_curve_number/scs_curve_number.py
+
 import json
 import sys
 from pathlib import Path

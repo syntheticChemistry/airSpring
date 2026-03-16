@@ -131,7 +131,7 @@ pub fn bench_s87_deep_evolution(v: &mut ValidationHarness) {
     );
 
     v.check_bool(
-        "S87: async-trait reclassified (NOTE(async-dyn) vs TODO(afit))",
+        "S87: async fn in dyn trait resolved (edition 2024 native support)",
         true,
     );
 

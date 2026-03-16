@@ -34,22 +34,24 @@ fn validate_analytical(v: &mut ValidationHarness, benchmark: &serde_json::Value)
     }
 }
 
-fn validate_daylight(v: &mut ValidationHarness) {
+fn validate_daylight(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Daylight Fraction");
 
     let p_tol = tolerances::BLANEY_CRIDDLE_DAYLIGHT.abs_tol;
+    let daylight = &benchmark["monthly_daylight_pct"];
 
-    // Summer solstice at 40°N
+    let p_summer_expected = json_field(&daylight["latitude_40N"], "jul");
+    let p_winter_expected = json_field(&daylight["latitude_40N"], "jan");
+    let p_equator_expected = json_field(&daylight["latitude_0N"], "jul");
+
     let p = blaney_criddle_p(40.0_f64.to_radians(), 172);
-    v.check_abs("p_summer_40N", p, 0.333, p_tol);
+    v.check_abs("p_summer_40N", p, p_summer_expected, p_tol);
 
-    // Winter solstice at 40°N
     let p = blaney_criddle_p(40.0_f64.to_radians(), 356);
-    v.check_abs("p_winter_40N", p, 0.222, p_tol);
+    v.check_abs("p_winter_40N", p, p_winter_expected, p_tol);
 
-    // Equator year-round (tighter: equator p is well-constrained)
     let p = blaney_criddle_p(0.0, 172);
-    v.check_abs("p_equator", p, 0.274, p_tol / 3.0);
+    v.check_abs("p_equator", p, p_equator_expected, p_tol / 3.0);
 }
 
 fn validate_monotonicity(v: &mut ValidationHarness) {
@@ -101,7 +103,7 @@ fn main() {
     let benchmark = parse_benchmark_json(BENCHMARK_JSON).expect("valid JSON");
     let mut v = ValidationHarness::new("Exp 049: Blaney-Criddle (1950) PET");
     validate_analytical(&mut v, &benchmark);
-    validate_daylight(&mut v);
+    validate_daylight(&mut v, &benchmark);
     validate_monotonicity(&mut v);
     validate_cross_method(&mut v);
     validate_non_negative(&mut v);

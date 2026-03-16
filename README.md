@@ -2,7 +2,7 @@
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
 **Date**: March 16, 2026
-**Version**: 0.8.3
+**Version**: 0.8.4
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -13,7 +13,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → biomeOS (NUCLEUS atomics, deployment graphs) → Penny Irrigation
 ```
 
-## Current Status (v0.8.3)
+## Current Status (v0.8.4)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
@@ -41,6 +41,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | Phase 4.5: biomeOS composition | **4 graphs** | Provenance trio, NestGate routing, niche deploy, cross-spring data exchange |
 | Phase 4.6: neuralAPI integration | **3 enhancements** | Structured metrics, operation dependencies, cost estimates — Pathway Learner ready |
 | Phase 4.7: Penny Irrigation | Vision | Sovereign, consumer hardware |
+| Phase 5.6: Deep debt resolution | **All findings resolved** | v0.8.4: cast lint evolution, eprintln→tracing, hardcoded primal names→constants, deny.toml wildcards=deny, Blaney-Criddle p→benchmark JSON, primal binary refactored (4 modules), Python provenance standardized (20 scripts), CI expanded (cross-compile, metalForge deny, 11 more validation binaries) |
 
 ### Code Quality
 
@@ -247,7 +248,7 @@ airSpring/
 │   └── baseCamp/                # Per-faculty research briefings + baseCamp extensions
 ├── experiments/                 # Experiment protocols and results (87 experiments)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
-│   └── handoffs/                # Versioned handoffs (V082 current)
+│   └── handoffs/                # Versioned handoffs (V084 current)
 ├── graphs/                      # biomeOS deployment graphs (eco pipeline, provenance pipeline, niche deploy, cross-primal)
 ├── CHANGELOG.md                 # Keep-a-Changelog versioned history
 ├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
@@ -279,7 +280,7 @@ airSpring/
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance (S87) |
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (87 experiments) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V082 current) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V084 current) |
 
 ## License
 

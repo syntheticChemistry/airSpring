@@ -21,6 +21,12 @@ original 1950 form used in western US irrigation districts).
 Data: All benchmarks from published equations. Open literature, no proprietary data.
 """
 
+# Provenance:
+#   script: control/blaney_criddle/blaney_criddle_et0.py
+#   commit: af1eb97
+#   date: 2026-02-26
+#   command: python3 control/blaney_criddle/blaney_criddle_et0.py
+
 import json
 import math
 import sys

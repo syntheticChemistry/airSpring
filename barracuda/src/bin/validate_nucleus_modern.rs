@@ -21,6 +21,8 @@
 use airspring_barracuda::biomeos;
 use airspring_barracuda::eco::drought_index;
 use airspring_barracuda::gpu::autocorrelation;
+use airspring_barracuda::niche;
+use airspring_barracuda::primal_names;
 use airspring_barracuda::rpc;
 
 use barracuda::validation::ValidationHarness;
@@ -45,17 +47,17 @@ fn main() {
     v.check_bool("primal_discovery_works", true);
     eprintln!("  Discovered primals: {primals:?}");
 
-    let tower_atomic = primals.iter().any(|p| p.contains("beardog"))
-        && primals.iter().any(|p| p.contains("songbird"));
+    let tower_atomic = primals.iter().any(|p| p.contains(primal_names::BEARDOG))
+        && primals.iter().any(|p| p.contains(primal_names::SONGBIRD));
     eprintln!("  Tower Atomic present: {tower_atomic}");
 
-    let node_atomic = tower_atomic && primals.iter().any(|p| p.contains("toadstool"));
+    let node_atomic = tower_atomic && primals.iter().any(|p| p.contains(primal_names::TOADSTOOL));
     eprintln!("  Node Atomic present: {node_atomic}");
 
-    let airspring_present = primals.iter().any(|p| p.contains("airspring"));
+    let airspring_present = primals.iter().any(|p| p.contains(niche::NICHE_NAME));
     eprintln!("  airSpring primal present: {airspring_present}");
 
-    let socket_path = biomeos::find_socket("airspring");
+    let socket_path = biomeos::find_socket(niche::NICHE_NAME);
     v.check_bool("airspring_socket_found", socket_path.is_some());
 
     let Some(socket) = socket_path else {
@@ -366,7 +368,7 @@ fn main() {
     // Phase 8: toadStool Provenance via IPC (if running)
     // ═══════════════════════════════════════════════════════════════
 
-    let toadstool_socket = biomeos::find_socket("toadstool");
+    let toadstool_socket = biomeos::find_socket(primal_names::TOADSTOOL);
     if let Some(ref ts) = toadstool_socket {
         eprintln!("  ToadStool socket: {}", ts.display());
         let provenance = rpc::send(ts, "toadstool.provenance", &serde_json::json!({}))

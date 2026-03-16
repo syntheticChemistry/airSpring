@@ -1,4 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# Provenance:
+#   script: control/thornthwaite/thornthwaite_et0.py
+#   commit: af1eb97
+#   date: 2026-02-26
+#   command: python3 control/thornthwaite/thornthwaite_et0.py
 #!/usr/bin/env python3
 """
 Exp 021: Thornthwaite Monthly ET₀ — Python Control Baseline

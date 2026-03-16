@@ -16,6 +16,7 @@
 #![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use airspring_barracuda::biomeos;
+use airspring_barracuda::primal_names;
 use airspring_barracuda::primal_science;
 use airspring_barracuda::rpc;
 
@@ -103,7 +104,7 @@ fn main() {
     let compute_socket = std::env::var("AIRSPRING_COMPUTE_PRIMAL")
         .ok()
         .and_then(|name| biomeos::discover_primal_socket(&name));
-    let ts_socket = biomeos::find_socket("toadstool");
+    let ts_socket = biomeos::find_socket(primal_names::TOADSTOOL);
 
     let has_compute = compute_socket.is_some();
     let has_toadstool = ts_socket.is_some();

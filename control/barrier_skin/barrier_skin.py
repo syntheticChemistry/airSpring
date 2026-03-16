@@ -1,4 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# Provenance:
+#   script: control/barrier_skin/barrier_skin.py
+#   commit: af1eb97
+#   date: 2026-02-26
+#   command: python3 control/barrier_skin/barrier_skin.py
 #!/usr/bin/env python3
 """
 Exp 068: Barrier State Model — Python Control Baseline

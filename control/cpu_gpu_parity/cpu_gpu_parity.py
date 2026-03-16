@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# Provenance:
+#   script: control/cpu_gpu_parity/cpu_gpu_parity.py
+#   commit: af1eb97
+#   date: 2026-02-26
+#   command: python3 control/cpu_gpu_parity/cpu_gpu_parity.py
 """Exp 040 — CPU vs GPU Parity Validation (Python control).
 
 Validates that the GPU dispatch path (via BatchedElementwiseF64) produces

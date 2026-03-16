@@ -25,6 +25,12 @@ Ponding time under constant rainfall intensity i:
 Data: Rawls et al. (1983) Table 1 soil parameters (open literature).
 """
 
+# Provenance:
+#   script: control/green_ampt/green_ampt_infiltration.py
+#   commit: af1eb97
+#   date: 2026-02-26
+#   command: python3 control/green_ampt/green_ampt_infiltration.py
+
 import json
 import math
 import sys

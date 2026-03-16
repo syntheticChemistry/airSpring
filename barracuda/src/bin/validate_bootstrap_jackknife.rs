@@ -58,6 +58,9 @@ fn validate_bootstrap_season(v: &mut ValidationHarness, benchmark: &serde_json::
         tolerances::ET0_REFERENCE.abs_tol,
     );
 
+    // Heuristic range check: ET₀ seasonal mean for Michigan corn belt
+    // is 2–7 mm/day (Allen et al. 1998, FAO-56 Table A2 for temperate).
+    // Centre 4.5 ± 2.5 covers full plausible range.
     v.check_abs("mean plausible (2-7 mm)", est.mean, 4.5, 2.5);
 
     let ci_contains = if est.ci_lower < est.mean && est.ci_upper > est.mean {

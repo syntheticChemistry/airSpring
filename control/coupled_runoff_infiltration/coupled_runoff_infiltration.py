@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# Provenance:
+#   script: control/coupled_runoff_infiltration/coupled_runoff_infiltration.py
+#   commit: af1eb97
+#   date: 2026-02-26
+#   command: python3 control/coupled_runoff_infiltration/coupled_runoff_infiltration.py
 """
 Exp 052 — Coupled SCS-CN + Green-Ampt Rainfall Partitioning.
 

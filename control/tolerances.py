@@ -261,7 +261,11 @@ WATER_SAVINGS = Tolerance(
 NPU_MIN_ANOMALY_SAMPLES: int = 10
 NPU_STRESS_DEPLETION_THRESHOLD: float = 0.55
 
-# ── Registry (all 57 tolerances, for introspection) ──
+BOOTSTRAP_JACKKNIFE_KNOWN = Tolerance(
+    "bootstrap_jackknife_known", 0.15, 0.05,
+    "Jackknife variance of mean([1..10]): analytical = 0.825; empirical noise ±0.15")
+
+# ── Registry (all 58 tolerances, for introspection) ──
 
 ALL_TOLERANCES: list[Tolerance] = [
     v for v in globals().values() if isinstance(v, Tolerance)

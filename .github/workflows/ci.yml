@@ -222,7 +222,7 @@ jobs:
       - name: Check no production file exceeds 1000 lines
         run: |
           violations=0
-          for f in $(find barracuda/src -name '*.rs' -not -path '*/tests/*'); do
+          for f in $(find barracuda/src metalForge/forge/src -name '*.rs' -not -path '*/tests/*'); do
             lines=$(wc -l < "$f")
             if [ "$lines" -gt 1000 ]; then
               echo "FAIL: $f has $lines lines (max 1000)"
@@ -288,6 +288,17 @@ jobs:
           cargo run --bin validate_cytokine
           cargo run --bin validate_tissue
           cargo run --bin validate_gpu_math
+          cargo run --bin validate_richards
+          cargo run --bin validate_biochar
+          cargo run --bin validate_long_term_wb
+          cargo run --bin validate_drought_index
+          cargo run --bin validate_bootstrap_jackknife
+          cargo run --bin validate_mc_et0
+          cargo run --bin validate_ncbi_diversity
+          cargo run --bin validate_season_wb
+          cargo run --bin validate_et0_ensemble
+          cargo run --bin validate_et0_bias
+          cargo run --bin validate_paper_chain
           cargo run --bin cross_validate
 
   deny:
@@ -307,3 +318,43 @@ jobs:
       - uses: EmbarkStudios/cargo-deny-action@v2
         with:
           manifest-path: airSpring/barracuda/Cargo.toml
+
+  deny-forge:
+    name: Dependency Audit (metalForge/forge)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: airSpring
+
+      - uses: actions/checkout@v4
+        with:
+          repository: syntheticChemistry/ecoPrimals
+          path: phase1
+          sparse-checkout: toadstool/crates/barracuda
+
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          manifest-path: airSpring/metalForge/forge/Cargo.toml
+
+  cross-compile:
+    name: Cross-Compile Check (ecoBin)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: airSpring
+
+      - uses: actions/checkout@v4
+        with:
+          repository: syntheticChemistry/ecoPrimals
+          path: phase1
+          sparse-checkout: toadstool/crates/barracuda
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-unknown-linux-gnu
+
+      - name: cargo check (aarch64)
+        working-directory: airSpring/barracuda
+        run: cargo check --target aarch64-unknown-linux-gnu --no-default-features --features testutil

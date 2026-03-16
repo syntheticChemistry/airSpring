@@ -114,7 +114,7 @@ pub(crate) fn neural_api_socket_path_with(config: &ProvenanceConfig) -> Option<P
 
     let socket_dir = crate::biomeos::resolve_socket_dir();
     let family_id = crate::biomeos::get_family_id();
-    let sock_name = format!("neural-api-{family_id}.sock");
+    let sock_name = format!("{}-{family_id}.sock", crate::primal_names::NEURAL_API);
 
     let candidate = socket_dir.join(&sock_name);
     if candidate.exists() {

@@ -1,4 +1,9 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# Provenance:
+#   script: control/gdd/growing_degree_days.py
+#   commit: af1eb97
+#   date: 2026-02-26
+#   command: python3 control/gdd/growing_degree_days.py
 #!/usr/bin/env python3
 """
 Exp 022: Growing Degree Days (GDD) + Crop Phenology — Python Control Baseline

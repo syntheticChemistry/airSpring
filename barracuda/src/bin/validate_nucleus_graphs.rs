@@ -16,6 +16,8 @@
 use std::collections::{HashMap, HashSet};
 
 use airspring_barracuda::biomeos;
+use airspring_barracuda::niche;
+use airspring_barracuda::primal_names;
 use barracuda::validation::ValidationHarness;
 
 #[expect(
@@ -204,10 +206,10 @@ fn main() {
         eprintln!("    {name}");
     }
 
-    let has_airspring = biomeos::find_socket("airspring").is_some();
-    let has_toadstool = biomeos::find_socket("toadstool").is_some();
-    let has_beardog = biomeos::find_socket("beardog").is_some();
-    let has_songbird = biomeos::find_socket("songbird").is_some();
+    let has_airspring = biomeos::find_socket(niche::NICHE_NAME).is_some();
+    let has_toadstool = biomeos::find_socket(primal_names::TOADSTOOL).is_some();
+    let has_beardog = biomeos::find_socket(primal_names::BEARDOG).is_some();
+    let has_songbird = biomeos::find_socket(primal_names::SONGBIRD).is_some();
 
     eprintln!("  Socket discovery:");
     eprintln!("    airspring: {has_airspring}");

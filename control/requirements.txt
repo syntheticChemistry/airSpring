@@ -2,6 +2,7 @@
 # airSpring Phase 0 — Python baseline dependencies
 # Install: pip install -r control/requirements.txt
 #
+# Requires: Python >= 3.10 (match types, structural pattern matching)
 # Pinned to exact versions for baseline reproducibility.
 # Validated against: commit af1eb97 (2026-02-26)
 
