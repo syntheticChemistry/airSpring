@@ -1,4 +1,4 @@
-# Tolerance Registry — airSpring v0.8.3
+# Tolerance Registry — airSpring v0.8.7
 
 58 named `Tolerance` structs used in airSpring's Rust validation pipeline
 and Python control baselines. Each tolerance is defined once in
@@ -116,4 +116,4 @@ assert abs(rust_val - py_val) < ET0_REFERENCE.abs_tol
 - v0.8.0: 46 tolerances in monolithic `tolerances.rs`
 - v0.8.1: 52 tolerances, added GPU/cross-spring/nucleus
 - v0.8.2: 52 tolerances in 4 submodules + Python mirror `control/tolerances.py`
-- v0.8.3: 58 tolerances — 3 new (gpu_simplified_et0, gpu_empirical_pet, bootstrap_jackknife_known), 3 biodiversity added to count
+- v0.8.7: 58 tolerances — 3 new (gpu_simplified_et0, gpu_empirical_pet, bootstrap_jackknife_known), 3 biodiversity added to count

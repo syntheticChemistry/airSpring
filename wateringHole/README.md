@@ -1,14 +1,15 @@
 # airSpring wateringHole
 
-**Updated**: March 16, 2026 | **Version**: v0.8.5
+**Updated**: March 16, 2026 | **Version**: v0.8.7
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.8.5** | [AIRSPRING_V085_CROSS_SPRING_ABSORPTION_HANDOFF_MAR16_2026.md](handoffs/AIRSPRING_V085_CROSS_SPRING_ABSORPTION_HANDOFF_MAR16_2026.md) | 2026-03-16 | **primary** — zero C deps (ureq→Songbird IPC), `IpcError`+`DispatchOutcome` biomeOS alignment, `#[expect(reason)]` migration, zero-panic validation, named physical constants, dual-format capability discovery |
-| **≤V0.8.4** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
+| **V0.8.7** | [AIRSPRING_V087_ECOSYSTEM_ABSORPTION_HANDOFF_MAR16_2026.md](handoffs/AIRSPRING_V087_ECOSYSTEM_ABSORPTION_HANDOFF_MAR16_2026.md) | 2026-03-16 | **primary** — zero hardcoded primals, 4-format `parse_capabilities`, JSON-RPC proptest fuzz, `#[expect]` complete, collapsible-if let-chains, 872 lib + 22 property tests |
+| **V0.8.7** | [AIRSPRING_V087_BARRACUDA_TOADSTOOL_EVOLUTION_HANDOFF_MAR16_2026.md](handoffs/AIRSPRING_V087_BARRACUDA_TOADSTOOL_EVOLUTION_HANDOFF_MAR16_2026.md) | 2026-03-16 | barraCuda/toadStool consumption audit, 75+ delegations, Write→Absorb→Lean complete, upstream absorption candidates |
+| **≤V0.8.6** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 
 ## Cross-Spring Documents
 
@@ -18,7 +19,7 @@
 | `../specs/BIOMEOS_CAPABILITIES.md` | Ecology capability domain for biomeOS Neural API |
 | `../specs/NUCLEUS_INTEGRATION.md` | NUCLEUS deployment: graphs, workloads, Neural API bridge |
 | `../specs/GPU_PROMOTION_MAP.md` | GPU tier status: 24 Tier A + 2 Tier B + 2 Tier C, with blocker effort estimates |
-| `../specs/TOLERANCE_REGISTRY.md` | 58 centralized `Tolerance` structs across 4 domain submodules |
+| `../specs/TOLERANCE_REGISTRY.md` | 60 centralized `Tolerance` structs across 4 domain submodules (Rust + Python mirror) |
 | `../graphs/airspring_eco_pipeline.toml` | biomeOS deployment graph: weather → ET₀ → WB → yield |
 | `../graphs/airspring_provenance_pipeline.toml` | Provenance-tracked experiment: session → science → dehydrate → commit → attribute |
 | `../graphs/airspring_niche_deploy.toml` | Full niche deployment: Tower + Trio + NestGate + ToadStool + airSpring |

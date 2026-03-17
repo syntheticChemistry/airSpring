@@ -2,7 +2,7 @@
 
 **Updated**: March 16, 2026
 **Project**: airSpring — Ecological & Agricultural Sciences (v0.8.7)
-**Status**: 87 experiments, 1284/1284 Python + 866 lib + 285 integration + 61 forge tests + 91 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, BYOB niche deployment) + `#![forbid(unsafe_code)]` both crates + zero clippy pedantic+nursery + `warn(missing_docs)`. 60 tolerances in 4 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies** (ureq→Songbird IPC). Zero-panic validation (47/47 binaries). Typed `compute_dispatch` client. `extract_rpc_error()` centralized. Full validation pipeline green (2026-03-16)
+**Status**: 87 experiments, 1284/1284 Python + 872 lib + 285 integration + 61 forge + 22 property tests + 91 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, BYOB niche deployment) + `#![forbid(unsafe_code)]` both crates + zero clippy pedantic+nursery + `warn(missing_docs)`. 60 tolerances in 4 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies** (ureq→Songbird IPC). Zero-panic validation (47/47 binaries). Typed `compute_dispatch` client. `extract_rpc_error()` centralized. Full validation pipeline green (2026-03-16)
 
 ---
 
@@ -237,12 +237,12 @@ S79 modernization: `libc`→`rustix`, `async-trait`→AFIT, universal f64 precis
 |----------|---------|
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C breakdown, absorbed vs stays-local, quality gates |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
-| `wateringHole/handoffs/` | V085 current — zero C deps, biomeOS IPC alignment, cross-spring absorption |
+| `wateringHole/handoffs/` | V087 current — ecosystem absorption, proptest fuzz, zero hardcoded primals |
 | `specs/CROSS_SPRING_EVOLUTION.md` | 845+ WGSL shader provenance across all Springs (S93) |
 
 ### Next Steps (Dong Lab)
 
-- **Cross-spring absorption (v0.8.5)**: Zero C dependencies achieved (ureq→Songbird IPC). `IpcError`+`DispatchOutcome` aligned with biomeOS ecosystem standard. `#[expect(reason)]` migration complete (zero `#[allow()]` in production). Zero-panic validation (top 9 binaries). Named physical constants (FAO-56, SCS-CN, AMC). Dual-format capability discovery. 865 lib tests, 58 warnings
+- **Ecosystem absorption (v0.8.7)**: Zero hardcoded primals (`primal_names::BIOMEOS`). 4-format `parse_capabilities` (neuralSpring S156+). JSON-RPC proptest fuzz (7 properties, petalTongue V166 pattern). `#[expect]` complete (zero `#[allow]` in production). Edition 2024 let-chains. 872 lib + 22 property tests. PRIMAL_REGISTRY v0.8.7. Zero-panic 47/47 binaries. Typed `compute_dispatch` client. `extract_rpc_error()`. Python tolerance mirror (60 constants). Zero C deps
 - **Coverage**: target 98%+ (remaining gaps: GPU-dependent code paths)
 - **ToadStool absorption**: All 6 local ops absorbed upstream into `BatchedElementwiseF64` (ops 14-19), `local_dispatch` retired — Write→Absorb→Lean complete (v0.7.2)
 - **GPU at scale**: Profile `compute_gpu()` at N=100K+ (multi-year regional grids, crossover point via `AtlasStream`)

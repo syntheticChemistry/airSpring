@@ -1,7 +1,7 @@
 # airSpring Specifications
 
 **Last Updated**: March 16, 2026
-**Status**: Phase 0–5 complete — 1284/1284 Python + 863 lib + 285 integration + 61 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 91 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.3.5 (wgpu 28) + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + metalForge 66/66 + niche adapter (41 capabilities) + 87 experiments (v0.8.3). Edition 2024, deep code quality complete. Exp 084-087: 79/79 PASS (CPU/GPU parity, toadStool dispatch, metalForge NUCLEUS, graph coordination)
+**Status**: Phase 0–5 complete — 1284/1284 Python + 863 lib + 285 integration + 61 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 91 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.3.5 (wgpu 28) + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + metalForge 66/66 + niche adapter (41 capabilities) + 87 experiments (v0.8.7). Edition 2024, deep code quality complete. Exp 084-087: 79/79 PASS (CPU/GPU parity, toadStool dispatch, metalForge NUCLEUS, graph coordination)
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling, Anderson coupling
 
 ---
@@ -26,7 +26,7 @@
 | Phase 3.9 (Niche adapter) | 41 capabilities, ecology domain in biomeOS registry |
 | Phase 4.0 (Cross-primal) | 28/28 PASS — capability.call routing, cross-primal forwarding |
 | Faculty | Dong (BAE, MSU — new lab 2026) |
-| Handoff | V082 in `wateringHole/handoffs/` |
+| Handoff | V087 in `wateringHole/handoffs/` |
 | ToadStool | S147+ — barraCuda v0.3.5 standalone (wgpu 28) |
 
 ---
@@ -106,7 +106,7 @@ Re-run `run_all_baselines.sh` at the respective commits to verify.
 `../whitePaper/STUDY.md` → `../CONTROL_EXPERIMENT_STATUS.md` → BARRACUDA_REQUIREMENTS.md
 
 **Cross-spring evolution** (15 min):
-CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/` (V082 active)
+CROSS_SPRING_EVOLUTION.md → `../wateringHole/handoffs/` (V087 active)
 
 ---
 

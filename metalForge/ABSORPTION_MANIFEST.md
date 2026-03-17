@@ -1,6 +1,6 @@
 # Absorption Manifest — airSpring → barracuda
 
-**Date**: March 16, 2026 (updated v0.8.5 — V085 active handoff, forge evolved to mixed hardware dispatch, 27 workloads, 32/32 dispatch + 21/21 routing + 17/17 mixed hardware, barraCuda 0.3.5 wgpu 28, all 20 ops absorbed upstream, zero C deps)
+**Date**: March 16, 2026 (updated v0.8.7 — V087 active handoff, forge evolved to mixed hardware dispatch, 27 workloads, 32/32 dispatch + 21/21 routing + 17/17 mixed hardware, barraCuda 0.3.5 wgpu 28, all 20 ops absorbed upstream, zero C deps). metalForge remains active for dispatch routing and CI validation.
 **Source**: `metalForge/forge/` (airspring-forge v0.2.0)
 **Target**: `barracuda` (ToadStool crate)
 **Absorption Status**: 6/6 absorbed upstream — ALL modules absorbed as of S66
@@ -109,12 +109,10 @@ Linearized initial guess functions remain local in `eco::isotherm` (domain-speci
 
 ## metalForge Status
 
-The `metalForge/forge/` crate is now **vestigial** — all 6 modules have upstream
-equivalents in barracuda. The crate is retained as a fossil record with provenance
-and as the staging area for cross-system routing validation (27 eco workloads).
-
-The forge crate validates dispatch routing (GPU > NPU > CPU) and cross-system
-hardware probing. 31 tests covering substrate discovery + capability routing + 4 Tier B local workloads.
+The `metalForge/forge/` crate has all 6 modules absorbed upstream into barracuda.
+**metalForge remains active** for dispatch routing (GPU > NPU > CPU) and CI validation.
+The forge crate validates dispatch routing and cross-system hardware probing.
+31 tests covering substrate discovery + capability routing + 4 Tier B local workloads.
 
 ---
 

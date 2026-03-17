@@ -238,7 +238,7 @@ airSpring/
 │   │   ├── tolerances/          # Domain-specific validation tolerances (58 named, 4 submodules)
 │   │   └── bin/                 # validate_*, bench_*, airspring_primal (91 declared)
 │   ├── tests/                   # Integration + property tests (15 files + common/)
-│   └── Cargo.toml               # v0.8.2
+│   └── Cargo.toml               # v0.8.7
 ├── niches/                      # BYOB niche definitions (airspring-ecology.yaml)
 ├── metalForge/                  # Mixed hardware dispatch (CPU+GPU+NPU)
 │   ├── deploy/                  # biomeOS deployment graphs (airspring_deploy.toml)
@@ -251,7 +251,7 @@ airSpring/
 │   └── baseCamp/                # Per-faculty research briefings + baseCamp extensions
 ├── experiments/                 # Experiment protocols and results (87 experiments)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
-│   └── handoffs/                # Versioned handoffs (V084 current)
+│   └── handoffs/                # Versioned handoffs (V087 current)
 ├── graphs/                      # biomeOS deployment graphs (eco pipeline, provenance pipeline, niche deploy, cross-primal)
 ├── CHANGELOG.md                 # Keep-a-Changelog versioned history
 ├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
@@ -283,7 +283,7 @@ airSpring/
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance (S87) |
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (87 experiments) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V084 current) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V087 current) |
 
 ## License
 
@@ -291,12 +291,12 @@ AGPL-3.0-or-later
 
 ---
 
-*March 16, 2026 — v0.8.3. Deep debt resolution round: `#![forbid(unsafe_code)]`
+*March 16, 2026 — v0.8.7. Deep debt resolution round: `#![forbid(unsafe_code)]`
 (upgraded from deny — cannot be overridden), JSON-RPC 2.0 protocol compliance
 (method-not-found now returns proper error object, not success wrapper),
 capability-based orchestrator discovery (hardcoded socket name eliminated),
 `warn(missing_docs)` enforced, 58 centralized tolerances (3 new: gpu_simplified_et0,
 gpu_empirical_pet, bootstrap_jackknife_known), cargo-deny policies aligned (unknown-git
 deny), self-contained IPC integration tests (5 new), rust-toolchain.toml pinned at
-1.92. Builds on v0.8.2 niche architecture. 863 lib + 285 integration + 61 forge
+1.92. Builds on v0.8.7 niche architecture. 863 lib + 285 integration + 61 forge
 tests, 0 failures. AGPL-3.0-or-later.*
