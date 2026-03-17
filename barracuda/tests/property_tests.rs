@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-//! Property-based tests for airSpring `BarraCuda` scientific computations.
+//! Property-based tests for airSpring `BarraCuda` scientific computations
+//! and JSON-RPC infrastructure robustness.
 //!
-//! Uses proptest to verify invariants hold across physically meaningful input ranges.
+//! Uses proptest to verify invariants hold across physically meaningful input ranges
+//! and that IPC infrastructure never panics on arbitrary inputs.
 
 use airspring_barracuda::eco::crop::gdd_avg;
 use airspring_barracuda::eco::diversity::{bray_curtis, shannon};
@@ -322,5 +324,86 @@ proptest! {
         let bc = bray_curtis(&pa, &pb);
         prop_assert!((0.0..=1.0).contains(&bc) || bc.is_nan(),
             "Bray-Curtis {} must be in [0,1]", bc);
+    }
+}
+
+// ── JSON-RPC infrastructure fuzz (petalTongue V166 pattern) ──────────────
+
+fn json_value_strategy() -> impl Strategy<Value = serde_json::Value> {
+    use proptest::prelude::*;
+    prop_oneof![
+        Just(serde_json::Value::Null),
+        any::<bool>().prop_map(serde_json::Value::Bool),
+        (-1_000_000i64..1_000_000).prop_map(|n| serde_json::json!(n)),
+        "[ a-zA-Z0-9_.-]{0,32}".prop_map(|s| serde_json::Value::String(s)),
+        Just(serde_json::json!([])),
+        Just(serde_json::json!({})),
+        Just(serde_json::json!(["health", "compute.dispatch"])),
+        Just(serde_json::json!({"capabilities": ["a", "b"]})),
+        Just(serde_json::json!({"error": {"code": -32601, "message": "not found"}})),
+        Just(serde_json::json!({"result": {"job_id": "abc-123"}})),
+    ]
+}
+
+proptest! {
+    #[test]
+    fn extract_rpc_error_never_panics(val in json_value_strategy()) {
+        let _ = airspring_barracuda::rpc::extract_rpc_error(&val);
+    }
+}
+
+proptest! {
+    #[test]
+    fn parse_capabilities_never_panics(val in json_value_strategy()) {
+        let _ = airspring_barracuda::biomeos::parse_capabilities(&val);
+    }
+}
+
+proptest! {
+    #[test]
+    fn rpc_request_roundtrip(
+        method in "[a-z.]{1,30}",
+    ) {
+        let params = serde_json::json!({"test": true});
+        let req = airspring_barracuda::rpc::request(&method, &params);
+        prop_assert_eq!(&req["jsonrpc"], "2.0");
+        prop_assert_eq!(&req["method"], method.as_str());
+        prop_assert!(req["params"]["test"].as_bool() == Some(true));
+    }
+}
+
+proptest! {
+    #[test]
+    fn extract_rpc_error_correct_on_valid_error(
+        code in -32700i64..-32600,
+        msg in "[a-zA-Z ]{1,50}",
+    ) {
+        let val = serde_json::json!({"error": {"code": code, "message": msg}});
+        let result = airspring_barracuda::rpc::extract_rpc_error(&val);
+        prop_assert!(result.is_some());
+        let (c, m) = result.unwrap();
+        prop_assert_eq!(c, code);
+        prop_assert_eq!(m, msg);
+    }
+}
+
+proptest! {
+    #[test]
+    fn parse_capabilities_flat_roundtrip(
+        caps in prop::collection::vec("[a-z.]{1,20}", 0..10),
+    ) {
+        let val = serde_json::Value::Array(
+            caps.iter().map(|s| serde_json::Value::String(s.clone())).collect()
+        );
+        let parsed = airspring_barracuda::biomeos::parse_capabilities(&val);
+        prop_assert_eq!(parsed, caps);
+    }
+}
+
+proptest! {
+    #[test]
+    fn arbitrary_bytes_never_panic_rpc_parse(bytes in prop::collection::vec(any::<u8>(), 0..256)) {
+        let s = String::from_utf8_lossy(&bytes);
+        let _ = serde_json::from_str::<serde_json::Value>(&s);
     }
 }

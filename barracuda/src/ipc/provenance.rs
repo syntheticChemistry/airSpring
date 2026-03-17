@@ -106,10 +106,10 @@ pub(crate) fn neural_api_socket_path_with(config: &ProvenanceConfig) -> Option<P
         return Some(override_path.clone());
     }
 
-    if let Some(ref path) = config.neural_api_socket {
-        if path.exists() {
-            return Some(path.clone());
-        }
+    if let Some(ref path) = config.neural_api_socket
+        && path.exists()
+    {
+        return Some(path.clone());
     }
 
     let socket_dir = crate::biomeos::resolve_socket_dir();

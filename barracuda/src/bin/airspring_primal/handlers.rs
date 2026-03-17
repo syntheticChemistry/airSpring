@@ -3,7 +3,7 @@
 
 use std::sync::atomic::Ordering;
 
-use airspring_barracuda::{biomeos, niche, rpc};
+use airspring_barracuda::{biomeos, niche, primal_names, rpc};
 
 use super::NicheState;
 use super::discovery::{discover_compute_primal, discover_data_primal};

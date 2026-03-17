@@ -1,7 +1,7 @@
 # baseCamp: Per-Faculty Research Briefings
 
 **Updated**: March 16, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.8.6)
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.8.7)
 **Status**: 87 experiments, 1284/1284 Python + 866 lib + 285 integration + 61 forge tests + 91 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, BYOB niche deployment) + `#![forbid(unsafe_code)]` both crates + zero clippy pedantic+nursery + `warn(missing_docs)`. 60 tolerances in 4 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies** (ureq→Songbird IPC). Zero-panic validation (47/47 binaries). Typed `compute_dispatch` client. `extract_rpc_error()` centralized. Full validation pipeline green (2026-03-16)
 
 ---
@@ -43,6 +43,7 @@ Phase 5.5 Niche architecture    — Edition 2024, niche self-knowledge module, t
 Phase 5.6 Deep debt       — cast lint evolution, eprintln→tracing, deny.toml wildcards=deny, Blaney-Criddle hardcoding→JSON, primal binary refactored (4 modules), primal_names constants, Python provenance (20 scripts), CI expanded (cross-compile, metalForge deny, 11 validation binaries)
 Phase 5.7 Cross-spring   — zero C deps (ureq→Songbird IPC), IpcError+DispatchOutcome biomeOS alignment, #[expect(reason)] migration, zero-panic validation (top 9 binaries), named physical constants (FAO-56, SCS-CN, AMC), dual-format capability discovery
 Phase 5.8 Deep execution — zero-panic expanded 9→47 binaries, typed compute_dispatch client (toadStool compute.dispatch.submit/result/capabilities), extract_rpc_error centralized, Python tolerance mirror complete (60 constants), 866 lib tests
+Phase 5.9 Ecosystem absorption — zero hardcoded primals, parse_capabilities 4-format (S156+), JSON-RPC proptest fuzz (7 properties), collapsible-if let-chains, #[expect] complete, PRIMAL_REGISTRY v0.8.7, 872 lib + 22 property tests
 ```
 
 ## Faculty Summary

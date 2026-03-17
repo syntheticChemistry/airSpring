@@ -29,15 +29,26 @@
 
 use std::path::{Path, PathBuf};
 
-/// Parse capability names from either flat-array or nested-object formats.
+/// Parse capability names from flat-array, nested-object, or wrapped formats.
 ///
-/// Handles both formats returned by diverse ecosystem sources:
-/// - String array: `["health", "compute.dispatch", "data.weather"]`
-/// - Object array: `[{"name": "health", "version": "1.0"}, {"capability": "compute.dispatch"}]`
+/// Handles all formats returned by diverse ecosystem sources:
+/// - **Format A** — String array: `["health", "compute.dispatch"]`
+/// - **Format B** — Object array: `[{"name": "health", "version": "1.0"}]`
+/// - **Format C** — Nested wrapper: `{"capabilities": ["health", ...]}` (neuralSpring S156+)
+/// - **Format D** — Double-nested: `{"capabilities": {"capabilities": [...]}}` (toadStool S155+)
 ///
 /// Use when parsing `capability.list`, `health`, or `capability.discover` responses.
 #[must_use]
 pub fn parse_capabilities(value: &serde_json::Value) -> Vec<String> {
+    if let serde_json::Value::Object(obj) = value {
+        if let Some(inner) = obj.get("capabilities") {
+            return parse_capabilities(inner);
+        }
+        if let Some(inner) = obj.get("result") {
+            return parse_capabilities(inner);
+        }
+    }
+
     match value {
         serde_json::Value::Array(arr) => arr
             .iter()
@@ -569,5 +580,53 @@ mod tests {
 
         let _all = discover_all_primals();
         let _fb = fallback_registration_primal();
+    }
+
+    #[test]
+    fn parse_capabilities_flat_string_array() {
+        let val = serde_json::json!(["health", "compute.dispatch", "data.weather"]);
+        let caps = parse_capabilities(&val);
+        assert_eq!(caps, vec!["health", "compute.dispatch", "data.weather"]);
+    }
+
+    #[test]
+    fn parse_capabilities_object_array() {
+        let val = serde_json::json!([
+            {"name": "health", "version": "1.0"},
+            {"capability": "compute.dispatch"}
+        ]);
+        let caps = parse_capabilities(&val);
+        assert_eq!(caps, vec!["health", "compute.dispatch"]);
+    }
+
+    #[test]
+    fn parse_capabilities_nested_wrapper() {
+        let val = serde_json::json!({"capabilities": ["health", "data.weather"]});
+        let caps = parse_capabilities(&val);
+        assert_eq!(caps, vec!["health", "data.weather"]);
+    }
+
+    #[test]
+    fn parse_capabilities_double_nested() {
+        let val = serde_json::json!({
+            "capabilities": {"capabilities": ["health", "compute.dispatch"]}
+        });
+        let caps = parse_capabilities(&val);
+        assert_eq!(caps, vec!["health", "compute.dispatch"]);
+    }
+
+    #[test]
+    fn parse_capabilities_result_wrapper() {
+        let val = serde_json::json!({"result": ["health", "data.weather"]});
+        let caps = parse_capabilities(&val);
+        assert_eq!(caps, vec!["health", "data.weather"]);
+    }
+
+    #[test]
+    fn parse_capabilities_empty() {
+        let val = serde_json::json!(null);
+        assert!(parse_capabilities(&val).is_empty());
+        assert!(parse_capabilities(&serde_json::json!(42)).is_empty());
+        assert!(parse_capabilities(&serde_json::json!([])).is_empty());
     }
 }

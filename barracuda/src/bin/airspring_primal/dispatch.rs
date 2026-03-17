@@ -7,7 +7,7 @@ use super::handlers;
 use super::NicheState;
 
 /// Outcome of dispatching a JSON-RPC method (biomeOS standard).
-#[allow(dead_code)] // InvalidParams, InternalError reserved for future use
+#[expect(dead_code, reason = "InvalidParams and InternalError reserved for biomeOS standard error codes")]
 pub enum DispatchOutcome {
     Ok(serde_json::Value),
     MethodNotFound(String),

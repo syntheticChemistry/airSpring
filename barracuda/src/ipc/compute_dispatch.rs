@@ -26,7 +26,7 @@ pub enum DispatchError {
     NoComputePrimal,
     /// IPC transport error.
     Ipc(IpcError),
-    /// Server did not return a job_id.
+    /// Server did not return a `job_id`.
     MissingJobId,
     /// Server returned an RPC error.
     RpcError {

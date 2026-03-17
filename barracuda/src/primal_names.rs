@@ -9,10 +9,12 @@
 //! Primal code only has self-knowledge (see [`crate::niche`]); these names
 //! are discovery hints, not compile-time coupling.
 
-/// Security primal (Ed25519 signing, encryption, key generation).
-pub const TOADSTOOL: &str = "toadstool";
 /// Hardware discovery and GPU compute orchestration.
+pub const TOADSTOOL: &str = "toadstool";
+/// Security primal (Ed25519 signing, encryption, key generation).
 pub const BEARDOG: &str = "beardog";
+/// Ecosystem orchestrator.
+pub const BIOMEOS: &str = "biomeos";
 /// Network (TLS, HTTP fetch, DNS) primal.
 pub const SONGBIRD: &str = "songbird";
 /// Data storage and retrieval primal.
@@ -45,8 +47,8 @@ mod tests {
     #[test]
     fn all_names_are_lowercase() {
         for name in [
-            TOADSTOOL, BEARDOG, SONGBIRD, NESTGATE, SQUIRREL, RHIZOCRYPT,
-            LOAMSPINE, SWEETGRASS, PETALTONGUE, NEURAL_API,
+            TOADSTOOL, BEARDOG, BIOMEOS, SONGBIRD, NESTGATE, SQUIRREL,
+            RHIZOCRYPT, LOAMSPINE, SWEETGRASS, PETALTONGUE, NEURAL_API,
         ] {
             assert_eq!(name, name.to_lowercase(), "{name} must be lowercase");
         }
