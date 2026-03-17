@@ -213,8 +213,10 @@ fn compute_et0(row: &DayRow, lat_deg: f64, elevation_m: f64) -> f64 {
 fn main() {
     tracing_subscriber::fmt().with_env_filter("info").init();
 
-    let benchmark: serde_json::Value =
-        serde_json::from_str(BENCHMARK_JSON).expect("benchmark JSON");
+    let Ok(benchmark): Result<serde_json::Value, _> = serde_json::from_str(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     let mut v = ValidationHarness::new("Exp 059: Atlas 80yr Decade Analysis");
 

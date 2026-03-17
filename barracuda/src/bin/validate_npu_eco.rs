@@ -20,8 +20,10 @@ const BENCHMARK_JSON: &str = include_str!("../../../control/npu_eco/benchmark_np
 fn validate_benchmark_provenance(v: &mut ValidationHarness) {
     validation::section("Benchmark Provenance");
 
-    let bench =
-        validation::parse_benchmark_json(BENCHMARK_JSON).expect("benchmark JSON must parse");
+    let Ok(bench) = validation::parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     let experiments = validation::json_object_opt(&bench, &["experiments"]);
     v.check_bool(

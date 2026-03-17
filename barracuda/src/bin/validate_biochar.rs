@@ -24,8 +24,10 @@ fn main() {
     validation::init_tracing();
     validation::banner("Biochar Adsorption Isotherms Validation");
     let mut v = ValidationHarness::new("Biochar Adsorption Isotherms Validation");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_biochar.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     let datasets = json_object_opt(&benchmark, &["isotherm_data", "datasets"]);
     v.check_bool(

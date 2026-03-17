@@ -132,8 +132,10 @@ fn main() {
     validation::banner("Exp 031: Hargreaves-Samani Temperature-Only ET₀");
 
     let mut v = ValidationHarness::new("Hargreaves-Samani ET₀");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_hargreaves.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_analytical(&mut v, &benchmark);
     validate_ra(&mut v, &benchmark);

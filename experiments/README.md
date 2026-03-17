@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: March 16, 2026
-**Status**: 87 experiments, barraCuda 0.3.5 (wgpu 28), v0.8.5, Edition 2024 (rust-toolchain 1.92). 1284/1284 Python + 865 lib + 285 integration + 61 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 parity). 21/21 CPU-GPU parity modules. `#![forbid(unsafe_code)]`, `warn(missing_docs)`, 58 centralized tolerances, JSON-RPC 2.0 protocol compliant. Zero C dependencies (ureq→Songbird IPC). Full validation pipeline green (2026-03-16).
+**Status**: 87 experiments, barraCuda 0.3.5 (wgpu 28), v0.8.6, Edition 2024 (rust-toolchain 1.92). 1284/1284 Python + 866 lib + 285 integration + 61 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 parity). 21/21 CPU-GPU parity modules. `#![forbid(unsafe_code)]`, `warn(missing_docs)`, 60 centralized tolerances (Rust + Python mirror), JSON-RPC 2.0 protocol compliant. Zero C dependencies (ureq→Songbird IPC). Zero-panic validation (47/47 binaries). Typed `compute_dispatch` client. Full validation pipeline green (2026-03-16).
 
 ---
 

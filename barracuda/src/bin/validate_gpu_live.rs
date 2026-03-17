@@ -348,8 +348,14 @@ fn main() {
 
     let mut v = ValidationHarness::new("GPU Live Dispatch");
 
-    let parity_bm = parse_benchmark_json(PARITY_JSON).expect("parity benchmark must parse");
-    let seasonal_bm = parse_benchmark_json(SEASONAL_JSON).expect("seasonal benchmark must parse");
+    let Ok(parity_bm) = parse_benchmark_json(PARITY_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
+    let Ok(seasonal_bm) = parse_benchmark_json(SEASONAL_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     let Some(device) = create_device() else {
         validation::exit_no_gpu();

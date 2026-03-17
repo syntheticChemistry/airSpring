@@ -2,7 +2,7 @@
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
 **Date**: March 16, 2026
-**Version**: 0.8.5
+**Version**: 0.8.6
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -13,13 +13,13 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → biomeOS (NUCLEUS atomics, deployment graphs) → Penny Irrigation
 ```
 
-## Current Status (v0.8.5)
+## Current Status (v0.8.6)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,284/1,284 PASS** | 60 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB, MC ET₀ uncertainty, bootstrap/jackknife CI, SPI drought index |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **863 lib + 280 integration** | 91 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
+| Phase 1: Rust validation | **866 lib + 280 integration** | 91 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (34/34 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -43,12 +43,13 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | Phase 4.7: Penny Irrigation | Vision | Sovereign, consumer hardware |
 | Phase 5.6: Deep debt resolution | **All findings resolved** | v0.8.4: cast lint evolution, eprintln→tracing, hardcoded primal names→constants, deny.toml wildcards=deny, Blaney-Criddle p→benchmark JSON, primal binary refactored (4 modules), Python provenance standardized (20 scripts), CI expanded (cross-compile, metalForge deny, 11 more validation binaries) |
 | Phase 5.7: Cross-spring absorption | **Zero C deps achieved** | v0.8.5: ureq→Songbird IPC (Tower Atomic, zero C deps), `IpcError`+`DispatchOutcome` biomeOS alignment, `#[expect(reason)]` migration, zero-panic validation (top 9 binaries), named physical constants (FAO-56, SCS-CN, AMC), dual-format capability discovery, 58→58 warnings (0 new) |
+| Phase 5.8: Deep execution | **All 47 binaries zero-panic** | v0.8.6: Zero-panic validation expanded from 9→47 binaries, typed `compute_dispatch` client (toadStool `compute.dispatch.submit/result/capabilities`), centralized `extract_rpc_error()`, Python tolerance mirror complete (60 constants), 866 lib tests |
 
 ### Code Quality
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` (barracuda) | **865 passed**, 0 failures |
+| `cargo test --lib` (barracuda) | **866 passed**, 0 failures |
 | `cargo test --test '*'` (integration) | **285 passed** (16 test files) |
 | `cargo test --lib` (metalForge) | **61 passed**, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **95.66% line coverage** |

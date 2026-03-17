@@ -232,7 +232,10 @@ fn main() {
     let mut v = ValidationHarness::new("Sensor Calibration Validation (Dong et al. 2024)");
 
     let json_str = include_str!("../../../control/iot_irrigation/benchmark_dong2024.json");
-    let bm = validation::parse_benchmark_json(json_str).expect("benchmark JSON");
+    let Ok(bm) = validation::parse_benchmark_json(json_str) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_soilwatch10(&mut v, &bm);
     validate_irrigation(&mut v, &bm);

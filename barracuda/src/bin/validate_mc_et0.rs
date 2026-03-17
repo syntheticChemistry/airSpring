@@ -331,7 +331,10 @@ fn main() {
     validation::banner("Exp 079: Monte Carlo ET₀ Uncertainty Propagation");
 
     let mut v = ValidationHarness::new("MC ET₀");
-    let benchmark = parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_mc_et0.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_default_uncertainty(&mut v, &benchmark);
     validate_zero_uncertainty(&mut v, &benchmark);

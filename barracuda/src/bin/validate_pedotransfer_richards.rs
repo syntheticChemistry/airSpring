@@ -283,8 +283,10 @@ fn main() {
     validation::banner("Exp 038: Pedotransfer → Richards Coupled Simulation");
 
     let mut v = ValidationHarness::new("Pedotransfer-Richards");
-    let benchmark = parse_benchmark_json(BENCHMARK_JSON)
-        .expect("benchmark_pedotransfer_richards.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_pedotransfer(&mut v, &benchmark);
     validate_vg_retention(&mut v, &benchmark);

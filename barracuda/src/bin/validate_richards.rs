@@ -389,8 +389,10 @@ fn main() {
     validation::init_tracing();
     validation::banner("Richards Equation Validation");
     let mut v = ValidationHarness::new("Richards Equation Validation");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_richards.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_van_genuchten_retention(&mut v, &benchmark);
     validate_hydraulic_conductivity(&mut v, &benchmark);

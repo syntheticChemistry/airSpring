@@ -295,8 +295,10 @@ fn main() {
     validation::banner("Exp 081: Standardized Precipitation Index (SPI)");
 
     let mut v = ValidationHarness::new("Drought Index (SPI)");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_drought_index.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_gamma_fit(&mut v, &benchmark);
     validate_spi1(&mut v, &benchmark);

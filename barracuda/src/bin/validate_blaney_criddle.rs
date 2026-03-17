@@ -100,7 +100,10 @@ fn validate_non_negative(v: &mut ValidationHarness) {
 }
 
 fn main() {
-    let benchmark = parse_benchmark_json(BENCHMARK_JSON).expect("valid JSON");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
     let mut v = ValidationHarness::new("Exp 049: Blaney-Criddle (1950) PET");
     validate_analytical(&mut v, &benchmark);
     validate_daylight(&mut v, &benchmark);

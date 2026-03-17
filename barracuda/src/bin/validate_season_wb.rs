@@ -298,7 +298,10 @@ fn validate_cross_crop(harness: &mut ValidationHarness) {
 }
 
 fn main() {
-    let benchmark = parse_benchmark_json(BENCHMARK_JSON).expect("valid JSON");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
     let mut harness = ValidationHarness::new("Exp 054: Full-Season Irrigation Water Budget Audit");
     validate_season_results(&mut harness);
     validate_benchmark_parity(&mut harness, &benchmark);

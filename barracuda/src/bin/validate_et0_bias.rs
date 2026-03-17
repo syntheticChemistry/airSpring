@@ -188,8 +188,10 @@ fn main() {
     validation::banner("Exp 039: Cross-Method ET₀ Bias Correction");
 
     let mut v = ValidationHarness::new("ET₀ Bias Correction");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_et0_bias.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_bias_quantification(&mut v, &benchmark);
     validate_correction_factors(&mut v, &benchmark);

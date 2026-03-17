@@ -201,8 +201,10 @@ fn main() {
     validation::init_tracing();
     validation::banner("ET₀ Sensitivity Analysis (Exp 017)");
     let mut v = ValidationHarness::new("Sensitivity Analysis");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_sensitivity.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     let baseline = MeteoParams::from_json(&benchmark["baseline_conditions"]);
     let pct = json_field(&benchmark, "perturbation_pct");

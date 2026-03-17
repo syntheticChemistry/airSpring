@@ -145,8 +145,10 @@ fn main() {
     validation::init_tracing();
     validation::banner("Soil Moisture Calibration Validation");
     let mut v = ValidationHarness::new("Soil Moisture Calibration Validation");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_dong2020.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_topp(&mut v, &benchmark);
     println!();

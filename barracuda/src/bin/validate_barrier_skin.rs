@@ -151,8 +151,10 @@ fn main() {
     validation::banner("Exp 068: Barrier State Model (Paper 12)");
 
     let mut v = ValidationHarness::new("Barrier Skin");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_barrier_skin.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_retention(&mut v, &benchmark);
     validate_conductivity(&mut v, &benchmark);

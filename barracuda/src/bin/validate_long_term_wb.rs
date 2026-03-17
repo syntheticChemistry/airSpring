@@ -534,8 +534,10 @@ fn main() {
     validation::init_tracing();
     validation::banner("Long-Term Water Balance Validation (Exp 015)");
 
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_long_term_wb.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     let site = benchmark.get("site").expect("benchmark must have site");
     let lat = json_f64(site, &["latitude"]).expect("site.latitude");

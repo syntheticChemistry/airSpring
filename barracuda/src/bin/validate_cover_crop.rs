@@ -241,7 +241,10 @@ fn main() {
     validation::init_tracing();
     validation::banner("Cover Crop + No-Till Validation (FAO-56 Ch 11)");
     let mut v = ValidationHarness::new("Cover Crop Validation");
-    let bench = parse_benchmark_json(BENCHMARK_JSON).expect("benchmark must parse");
+    let Ok(bench) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_cover_crop_kcb(&mut v);
     validate_mulch_ke(&mut v, &bench);

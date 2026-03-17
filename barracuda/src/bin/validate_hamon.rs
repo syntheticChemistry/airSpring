@@ -104,7 +104,10 @@ fn main() {
     validation::banner("Exp 035: Hamon (1961) Temperature-Based PET");
 
     let mut v = ValidationHarness::new("Hamon PET");
-    let benchmark = parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_hamon.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_analytical(&mut v, &benchmark);
     validate_day_length(&mut v, &benchmark);

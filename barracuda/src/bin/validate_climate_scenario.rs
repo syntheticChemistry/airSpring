@@ -53,7 +53,10 @@ fn main() {
          FAO-56 + Stewart + SeasonalPipeline::cpu()\n"
     );
 
-    let benchmark = parse_benchmark_json(BENCHMARK_JSON).expect("parse benchmark");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
     let theta_fc = benchmark["soil"]["field_capacity"].as_f64().unwrap_or(0.28);
     let theta_wp = benchmark["soil"]["wilting_point"].as_f64().unwrap_or(0.14);
     let scenarios = benchmark["scenarios"].as_array().expect("scenarios array");

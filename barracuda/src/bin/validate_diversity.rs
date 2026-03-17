@@ -101,8 +101,10 @@ fn main() {
     validation::banner("Exp 032: Ecological Diversity Indices");
 
     let mut v = ValidationHarness::new("Diversity Indices");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_diversity.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_shannon(&mut v, &benchmark);
     validate_simpson(&mut v, &benchmark);

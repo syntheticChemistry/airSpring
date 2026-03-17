@@ -32,7 +32,10 @@ const BENCHMARK: &str =
 fn main() {
     tracing_subscriber::fmt().with_env_filter("info").init();
 
-    let bench: serde_json::Value = serde_json::from_str(BENCHMARK).expect("benchmark JSON");
+    let Ok(bench): Result<serde_json::Value, _> = serde_json::from_str(BENCHMARK) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
     let mut v = ValidationHarness::new("Exp 061: Cross-Spring Shannon H' Diversity Gradient");
 
     let theta_r = 0.095;

@@ -80,8 +80,10 @@ fn main() {
     validation::init_tracing();
     validation::banner("Lysimeter ET Direct Measurement (Exp 016)");
     let mut v = ValidationHarness::new("Lysimeter Validation");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_lysimeter.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     // ── Mass-to-ET conversion ──
     validation::section("Mass-to-ET Conversion");

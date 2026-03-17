@@ -92,6 +92,18 @@ impl std::error::Error for IpcError {
     }
 }
 
+/// Extract a JSON-RPC error code and message from a response.
+///
+/// Returns `Some((code, message))` if the response contains an `error` object
+/// with `code` and `message` fields, `None` otherwise.
+#[must_use]
+pub fn extract_rpc_error(response: &serde_json::Value) -> Option<(i64, String)> {
+    let err = response.get("error")?;
+    let code = err.get("code")?.as_i64()?;
+    let message = err.get("message")?.as_str()?.to_owned();
+    Some((code, message))
+}
+
 static REQUEST_ID: AtomicU64 = AtomicU64::new(0);
 
 fn socket_timeout() -> Duration {

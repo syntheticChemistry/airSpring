@@ -385,8 +385,10 @@ fn main() {
     validation::banner("Exp 040: CPU vs GPU Parity Validation");
 
     let mut v = ValidationHarness::new("CPU-GPU Parity");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_cpu_gpu_parity.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_et0_parity(&mut v, &benchmark);
     validate_wb_parity(&mut v, &benchmark);

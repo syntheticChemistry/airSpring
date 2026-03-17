@@ -246,8 +246,10 @@ fn main() {
     validation::init_tracing();
     validation::banner("Water Balance Validation");
     let mut v = ValidationHarness::new("Water Balance Validation");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_water_balance.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     let per_step_tol = json_f64(&benchmark, &["mass_balance_test", "tolerance"])
         .expect("benchmark must have mass_balance_test.tolerance");

@@ -26,8 +26,10 @@ const BENCHMARK_JSON: &str = include_str!("../../../control/nass_real/benchmark_
 fn main() {
     tracing_subscriber::fmt().with_env_filter("info").init();
 
-    let benchmark: serde_json::Value =
-        serde_json::from_str(BENCHMARK_JSON).expect("benchmark JSON");
+    let Ok(benchmark): Result<serde_json::Value, _> = serde_json::from_str(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     let mut v = ValidationHarness::new("Exp 060: NASS Real Yield Comparison");
 

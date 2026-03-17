@@ -166,8 +166,10 @@ fn main() {
     validation::banner("Exp 036: biomeOS Neural API Round-Trip Parity");
 
     let mut v = ValidationHarness::new("Neural API Parity");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_neural_api.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_direct_compute(&mut v, &benchmark);
     validate_json_serialization_parity(&mut v, &benchmark);

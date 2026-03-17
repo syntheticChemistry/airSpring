@@ -1,10 +1,10 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: March 16, 2026 (v0.8.5 — 87 experiments, 865 lib + 285 integration + 61 forge tests, 91 binaries. Zero C dependencies achieved: ureq→Songbird IPC (Tower Atomic). IpcError+DispatchOutcome aligned with biomeOS ecosystem standard. #[expect(reason)] migration (zero #[allow()] in production). Zero-panic validation binaries (top 9 evolved). Named physical constants (FAO-56, SCS-CN, AMC Hawkins). Dual-format capability discovery. 58 warnings (pre-existing missing_docs only).)
+**Last Updated**: March 16, 2026 (v0.8.6 — 87 experiments, 866 lib + 285 integration + 61 forge tests, 91 binaries. Zero-panic validation expanded from 9→47 binaries (all active). Typed `compute_dispatch` client for toadStool `compute.dispatch.submit/result/capabilities`. Centralized `extract_rpc_error()`. Python tolerance mirror complete (60 constants). Zero C dependencies. IpcError+DispatchOutcome biomeOS aligned. #[expect(reason)] migration. Named physical constants. 58 warnings (pre-existing missing_docs only).)
 **barraCuda**: v0.3.5 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry, SpringDomain newtype, F64BuiltinCapabilities DF64 fields)
 **ToadStool**: S147+ (20,015 tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient, hw-learn, spirv_codegen_safety)
 **coralReef**: Phase 10 Iteration 44 sovereign Rust GPU compiler (NVIDIA + AMD, 1669+48 tests, VFIO dispatch)
-**Handoff**: V0.8.5 (full validation pipeline green + cross-spring absorption + zero C deps + biomeOS IPC alignment)
+**Handoff**: V0.8.6 (full validation pipeline green + cross-spring absorption + zero C deps + biomeOS IPC alignment + all-binary zero-panic + compute_dispatch client)
 **License**: AGPL-3.0-or-later
 
 ---

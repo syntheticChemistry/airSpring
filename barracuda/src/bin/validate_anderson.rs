@@ -265,8 +265,10 @@ fn main() {
     validation::init_tracing();
     validation::banner("Anderson Soil-Moisture Coupling (Exp 045)");
 
-    let benchmark =
-        validation::parse_benchmark_json(BENCHMARK_JSON).expect("benchmark JSON must parse");
+    let Ok(benchmark) = validation::parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
     let soils = load_soils(&benchmark);
     let mut v = ValidationHarness::new("Anderson Coupling Validation");
 

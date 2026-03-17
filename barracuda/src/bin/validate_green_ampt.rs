@@ -175,7 +175,10 @@ fn validate_monotonicity(v: &mut ValidationHarness) {
 }
 
 fn main() {
-    let benchmark = parse_benchmark_json(BENCHMARK_JSON).expect("valid JSON");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
     let mut v = ValidationHarness::new("Exp 051: Green-Ampt (1911) Infiltration");
     validate_analytical(&mut v, &benchmark);
     validate_soil_params(&mut v);

@@ -37,8 +37,10 @@ struct Scenario {
 }
 
 fn load_scenarios() -> Vec<Scenario> {
-    let bm: serde_json::Value =
-        serde_json::from_str(BENCHMARK_WB).expect("benchmark_water_balance.json must parse");
+    let Ok(bm) = serde_json::from_str::<serde_json::Value>(BENCHMARK_WB) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
     let arr = bm["real_data_scenarios"]["scenarios"]
         .as_array()
         .expect("real_data_scenarios.scenarios must be an array");

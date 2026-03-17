@@ -221,7 +221,10 @@ fn validate_irrigation_transition(v: &mut ValidationHarness) {
 fn validate_benchmark_provenance(v: &mut ValidationHarness) {
     validation::section("Benchmark Provenance");
 
-    let bench: serde_json::Value = serde_json::from_str(BENCHMARK).expect("parse benchmark");
+    let Ok(bench) = serde_json::from_str::<serde_json::Value>(BENCHMARK) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
     let prov = &bench["_provenance"];
 
     v.check_bool(

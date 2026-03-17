@@ -298,7 +298,10 @@ fn main() {
     validation::init_tracing();
     validation::banner("Exp 026: USDA SCAN Soil Moisture Validation (Rust)");
 
-    let benchmark = parse_benchmark_json(BENCHMARK_JSON).expect("invalid benchmark JSON");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
     let mut harness = ValidationHarness::new("SCAN Soil Moisture");
 
     validate_retention(&mut harness, &benchmark);

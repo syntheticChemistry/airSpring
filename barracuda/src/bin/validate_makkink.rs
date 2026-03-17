@@ -109,8 +109,10 @@ fn main() {
     validation::banner("Exp 033: Makkink (1957) Radiation-Based ET₀");
 
     let mut v = ValidationHarness::new("Makkink ET₀");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_makkink.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_analytical(&mut v, &benchmark);
     validate_pm_cross(&mut v, &benchmark);

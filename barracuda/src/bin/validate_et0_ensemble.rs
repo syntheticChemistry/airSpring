@@ -166,8 +166,10 @@ fn main() {
     validation::banner("Exp 037: ET₀ Ensemble Consensus (6-Method)");
 
     let mut v = ValidationHarness::new("ET₀ Ensemble");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_et0_ensemble.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_full_weather(&mut v, &benchmark);
     validate_temp_only(&mut v, &benchmark);

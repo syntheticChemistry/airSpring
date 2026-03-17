@@ -171,8 +171,10 @@ fn main() {
     validation::banner("Exp 030: AmeriFlux Eddy Covariance ET Validation");
 
     let mut v = ValidationHarness::new("AmeriFlux ET Validation");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_ameriflux_et.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_le_conversion(&mut v, &benchmark);
     validate_energy_balance(&mut v, &benchmark);

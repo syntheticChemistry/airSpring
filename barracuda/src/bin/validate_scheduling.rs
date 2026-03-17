@@ -243,8 +243,10 @@ fn main() {
     validation::init_tracing();
     validation::banner("Irrigation Scheduling Optimization (Exp 014)");
     let mut v = ValidationHarness::new("Scheduling Optimization");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_scheduling.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     let crop = &benchmark["crop_parameters"];
     let soil = &benchmark["soil_parameters"];

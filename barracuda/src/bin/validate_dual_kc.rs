@@ -306,7 +306,10 @@ fn main() {
     validation::init_tracing();
     validation::banner("Dual Crop Coefficient Validation (FAO-56 Ch 7)");
     let mut v = ValidationHarness::new("Dual Kc Validation");
-    let bench = parse_benchmark_json(BENCHMARK_JSON).expect("benchmark must parse");
+    let Ok(bench) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_eq69(&mut v, &bench);
     validate_kc_max(&mut v, &bench);

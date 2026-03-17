@@ -198,6 +198,14 @@ CROSS_SPRING_EVOLUTION = Tolerance(
     "cross_spring_evolution", 1e-3, 1e-3,
     "Chained rewire (CPU→GPU): accumulates DF64 rounding across 3-5 ops")
 
+GPU_SIMPLIFIED_ET0 = Tolerance(
+    "gpu_simplified_et0", 5e-3, 5e-3,
+    "Makkink/Turc GPU parity — simplified ET₀ methods tolerate wider GPU variance")
+
+GPU_EMPIRICAL_PET = Tolerance(
+    "gpu_empirical_pet", 1e-2, 1e-2,
+    "Hamon/Blaney-Criddle GPU parity — temperature-only empirical methods")
+
 NUCLEUS_ROUNDTRIP = Tolerance(
     "nucleus_roundtrip", 1e-10, 1e-10,
     "JSON f64 round-trip: IEEE-754 double → serde_json → double is exact")
@@ -261,11 +269,12 @@ WATER_SAVINGS = Tolerance(
 NPU_MIN_ANOMALY_SAMPLES: int = 10
 NPU_STRESS_DEPLETION_THRESHOLD: float = 0.55
 
+# NOTE: Rust uses (0.01, 1e-3) for analytical known-value checks; Python (0.15, 0.05) is for heuristic range checks. Both are intentional.
 BOOTSTRAP_JACKKNIFE_KNOWN = Tolerance(
     "bootstrap_jackknife_known", 0.15, 0.05,
     "Jackknife variance of mean([1..10]): analytical = 0.825; empirical noise ±0.15")
 
-# ── Registry (all 58 tolerances, for introspection) ──
+# ── Registry (all 60 tolerances, for introspection) ──
 
 ALL_TOLERANCES: list[Tolerance] = [
     v for v in globals().values() if isinstance(v, Tolerance)

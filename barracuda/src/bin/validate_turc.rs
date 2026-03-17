@@ -115,7 +115,10 @@ fn main() {
     validation::banner("Exp 034: Turc (1961) Temperature-Radiation ET₀");
 
     let mut v = ValidationHarness::new("Turc ET₀");
-    let benchmark = parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_turc.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_analytical(
         &mut v,

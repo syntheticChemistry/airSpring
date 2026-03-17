@@ -240,8 +240,10 @@ fn main() {
     validation::banner("Exp 080: Bootstrap & Jackknife CI for Seasonal ET₀");
 
     let mut v = ValidationHarness::new("Bootstrap & Jackknife");
-    let benchmark = parse_benchmark_json(BENCHMARK_JSON)
-        .expect("benchmark_bootstrap_jackknife.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_bootstrap_season(&mut v, &benchmark);
     validate_jackknife_season(&mut v, &benchmark);

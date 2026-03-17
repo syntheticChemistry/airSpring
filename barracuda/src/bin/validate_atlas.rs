@@ -571,8 +571,10 @@ fn validate_atlas_summary(results: &[StationResult], v: &mut ValidationHarness) 
 fn validate_against_benchmark(results: &[StationResult], v: &mut ValidationHarness) {
     validation::section("Benchmark Cross-Check");
 
-    let bench =
-        validation::parse_benchmark_json(BENCHMARK_JSON).expect("atlas benchmark JSON must parse");
+    let Ok(bench) = validation::parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     let Some(stations) = validation::json_object_opt(&bench, &["stations"]) else {
         return;

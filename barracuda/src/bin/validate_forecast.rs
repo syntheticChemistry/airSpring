@@ -482,8 +482,10 @@ fn main() {
     validation::init_tracing();
     validation::banner("Exp 025: Forecast Scheduling Hindcast");
     let mut v = ValidationHarness::new("Forecast Scheduling Hindcast");
-    let benchmark = parse_benchmark_json(BENCHMARK_JSON)
-        .expect("benchmark_forecast_scheduling.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     let season = &benchmark["season_parameters"];
     let n_days = season["length_days"].as_u64().unwrap() as usize;

@@ -201,7 +201,10 @@ fn validate_boundary(harness: &mut ValidationHarness) {
 }
 
 fn main() {
-    let benchmark = parse_benchmark_json(BENCHMARK_JSON).expect("valid JSON");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
     let mut harness = ValidationHarness::new("Exp 053: Van Genuchten Inverse Parameter Estimation");
     validate_forward(&mut harness);
     validate_benchmark_parity(&mut harness, &benchmark);

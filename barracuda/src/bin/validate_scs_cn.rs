@@ -129,7 +129,10 @@ fn validate_edge_cases(v: &mut ValidationHarness) {
 fn main() {
     validation::init_tracing();
     validation::banner("SCS Curve Number Validation");
-    let benchmark = parse_benchmark_json(BENCHMARK_JSON).expect("valid JSON");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
     let mut v = ValidationHarness::new("Exp 050: SCS Curve Number Runoff");
     validate_analytical(&mut v, &benchmark);
     validate_amc(&mut v, &benchmark);

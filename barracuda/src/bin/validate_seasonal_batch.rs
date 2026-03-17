@@ -89,8 +89,10 @@ fn main() {
     validation::banner("Exp 042: Seasonal Batch ET₀ at GPU Scale");
 
     let mut v = ValidationHarness::new("Seasonal Batch ET₀");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_seasonal_batch.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     let stations = parse_stations(&benchmark);
     let batcher = BatchedEt0::cpu();

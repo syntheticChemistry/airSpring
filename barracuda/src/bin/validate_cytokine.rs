@@ -220,8 +220,10 @@ fn main() {
     validation::banner("Exp 067: CytokineBrain Regime Prediction (Paper 12)");
 
     let mut v = ValidationHarness::new("CytokineBrain");
-    let benchmark =
-        parse_benchmark_json(BENCHMARK_JSON).expect("benchmark_cytokine_brain.json must parse");
+    let Ok(benchmark) = parse_benchmark_json(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     validate_normalization(&mut v, &benchmark);
     validate_regime_classification(&mut v, &benchmark);
