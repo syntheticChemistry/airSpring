@@ -4,7 +4,7 @@
 **barraCuda**: v0.3.5 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry, SpringDomain newtype, F64BuiltinCapabilities DF64 fields)
 **ToadStool**: S147+ (20,015 tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient, hw-learn, spirv_codegen_safety)
 **coralReef**: Phase 10 Iteration 44 sovereign Rust GPU compiler (NVIDIA + AMD, 1669+48 tests, VFIO dispatch)
-**Handoff**: V0.8.7 (full validation pipeline green + cross-spring absorption + zero C deps + biomeOS IPC alignment + all-binary zero-panic + compute_dispatch client + zero hardcoded primals + proptest fuzz)
+**Handoff**: V0.8.8 (full validation pipeline green + cross-spring absorption + zero C deps + biomeOS IPC alignment + all-binary zero-panic + compute_dispatch client + zero hardcoded primals + proptest fuzz)
 **License**: AGPL-3.0-or-later
 
 ---

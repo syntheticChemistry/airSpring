@@ -43,7 +43,7 @@ Phase 5.5 Niche architecture    — Edition 2024, niche self-knowledge module, t
 Phase 5.6 Deep debt       — cast lint evolution, eprintln→tracing, deny.toml wildcards=deny, Blaney-Criddle hardcoding→JSON, primal binary refactored (4 modules), primal_names constants, Python provenance (20 scripts), CI expanded (cross-compile, metalForge deny, 11 validation binaries)
 Phase 5.7 Cross-spring   — zero C deps (ureq→Songbird IPC), IpcError+DispatchOutcome biomeOS alignment, #[expect(reason)] migration, zero-panic validation (top 9 binaries), named physical constants (FAO-56, SCS-CN, AMC), dual-format capability discovery
 Phase 5.8 Deep execution — zero-panic expanded 9→47 binaries, typed compute_dispatch client (toadStool compute.dispatch.submit/result/capabilities), extract_rpc_error centralized, Python tolerance mirror complete (60 constants), 866 lib tests
-Phase 5.9 Ecosystem absorption — zero hardcoded primals, parse_capabilities 4-format (S156+), JSON-RPC proptest fuzz (7 properties), collapsible-if let-chains, #[expect] complete, PRIMAL_REGISTRY v0.8.7, 872 lib + 22 property tests
+Phase 5.9 Ecosystem absorption — zero hardcoded primals, parse_capabilities 4-format (S156+), JSON-RPC proptest fuzz (7 properties), collapsible-if let-chains, #[expect] complete, PRIMAL_REGISTRY v0.8.8, 880 lib + 22 property tests
 Phase 5.10 Cross-ecosystem absorption — health probes, circuit breaker, OrExit, thiserror, socket_env_var, structured tracing, IpcError::is_recoverable (v0.8.8, 880 lib)
 ```
 
@@ -243,7 +243,7 @@ S79 modernization: `libc`→`rustix`, `async-trait`→AFIT, universal f64 precis
 
 ### Next Steps (Dong Lab)
 
-- **Ecosystem absorption (v0.8.7)**: Zero hardcoded primals (`primal_names::BIOMEOS`). 4-format `parse_capabilities` (neuralSpring S156+). JSON-RPC proptest fuzz (7 properties, petalTongue V166 pattern). `#[expect]` complete (zero `#[allow]` in production). Edition 2024 let-chains. 872 lib + 22 property tests. PRIMAL_REGISTRY v0.8.7. Zero-panic 47/47 binaries. Typed `compute_dispatch` client. `extract_rpc_error()`. Python tolerance mirror (60 constants). Zero C deps
+- **Ecosystem absorption (v0.8.8)**: Zero hardcoded primals (`primal_names::BIOMEOS`). 4-format `parse_capabilities` (neuralSpring S156+). JSON-RPC proptest fuzz (7 properties, petalTongue V166 pattern). `#[expect]` complete (zero `#[allow]` in production). Edition 2024 let-chains. 880 lib + 22 property tests. PRIMAL_REGISTRY v0.8.8. Zero-panic 47/47 binaries. Typed `compute_dispatch` client. `extract_rpc_error()`. Python tolerance mirror (60 constants). Zero C deps
 - **Cross-ecosystem absorption (v0.8.8)**: Health probes, circuit breaker, OrExit, thiserror, socket_env_var, structured tracing, `IpcError::is_recoverable`. 880 lib tests.
 - **Coverage**: target 98%+ (remaining gaps: GPU-dependent code paths)
 - **ToadStool absorption**: All 6 local ops absorbed upstream into `BatchedElementwiseF64` (ops 14-19), `local_dispatch` retired — Write→Absorb→Lean complete (v0.7.2)

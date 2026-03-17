@@ -8,6 +8,7 @@
 | Version | File | Date | Scope |
 |---------|------|------|-------|
 | **V0.8.8** | [AIRSPRING_V088_CROSS_ECOSYSTEM_ABSORPTION_HANDOFF_MAR16_2026.md](handoffs/AIRSPRING_V088_CROSS_ECOSYSTEM_ABSORPTION_HANDOFF_MAR16_2026.md) | 2026-03-16 | **primary** — `thiserror`, health probes, circuit breaker, `OrExit<T>`, `IpcError` 8 variants + `is_recoverable()`, `socket_env_var()`, structured tracing, workspace `deny.toml`, 880 lib + 22 property tests |
+| **V0.8.8** | [AIRSPRING_V088_BARRACUDA_TOADSTOOL_EVOLUTION_HANDOFF_MAR16_2026.md](handoffs/AIRSPRING_V088_BARRACUDA_TOADSTOOL_EVOLUTION_HANDOFF_MAR16_2026.md) | 2026-03-16 | barraCuda/toadStool evolution — 75+ delegations, upstream absorption candidates, action items by primal |
 | **≤V0.8.7** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 
 ## Cross-Spring Documents
