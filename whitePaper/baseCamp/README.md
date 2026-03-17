@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
 **Updated**: March 16, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.8.7)
-**Status**: 87 experiments, 1284/1284 Python + 872 lib + 285 integration + 61 forge + 22 property tests + 91 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, BYOB niche deployment) + `#![forbid(unsafe_code)]` both crates + zero clippy pedantic+nursery + `warn(missing_docs)`. 60 tolerances in 4 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies** (ureq→Songbird IPC). Zero-panic validation (47/47 binaries). Typed `compute_dispatch` client. `extract_rpc_error()` centralized. Full validation pipeline green (2026-03-16)
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.8.8)
+**Status**: 87 experiments, 1284/1284 Python + 880 lib + 285 integration + 61 forge + 22 property tests + 91 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, BYOB niche deployment) + `#![forbid(unsafe_code)]` both crates + zero clippy pedantic+nursery + `warn(missing_docs)`. 60 tolerances in 4 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies** (ureq→Songbird IPC). Zero-panic validation (47/47 binaries). Typed `compute_dispatch` client. `extract_rpc_error()` centralized. Full validation pipeline green (2026-03-16)
 
 ---
 
@@ -11,7 +11,7 @@
 ```
 Phase 0   Python/R baselines    — reproduce paper results with original tools (1284/1284)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (863 lib + 1498 atlas, 91 binaries + 146/146 + 32/32 cross-spring benchmarks)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (880 lib + 1498 atlas, 91 binaries + 146/146 + 32/32 cross-spring benchmarks)
 Phase 1.5 CPU benchmark         — 14.3× Rust-vs-Python geometric mean (24/24 algorithms, 21/21 CPU-GPU parity modules)
 Phase 2   BarraCuda GPU bridge  — 25 Tier A + 6 GPU-local modules wired (cross-spring S87 fully rewired)
 Phase 2.5 Ops 5-8 GPU-first   — Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed
@@ -44,13 +44,14 @@ Phase 5.6 Deep debt       — cast lint evolution, eprintln→tracing, deny.toml
 Phase 5.7 Cross-spring   — zero C deps (ureq→Songbird IPC), IpcError+DispatchOutcome biomeOS alignment, #[expect(reason)] migration, zero-panic validation (top 9 binaries), named physical constants (FAO-56, SCS-CN, AMC), dual-format capability discovery
 Phase 5.8 Deep execution — zero-panic expanded 9→47 binaries, typed compute_dispatch client (toadStool compute.dispatch.submit/result/capabilities), extract_rpc_error centralized, Python tolerance mirror complete (60 constants), 866 lib tests
 Phase 5.9 Ecosystem absorption — zero hardcoded primals, parse_capabilities 4-format (S156+), JSON-RPC proptest fuzz (7 properties), collapsible-if let-chains, #[expect] complete, PRIMAL_REGISTRY v0.8.7, 872 lib + 22 property tests
+Phase 5.10 Cross-ecosystem absorption — health probes, circuit breaker, OrExit, thiserror, socket_env_var, structured tracing, IpcError::is_recoverable (v0.8.8, 880 lib)
 ```
 
 ## Faculty Summary
 
 | Faculty | Institution | Track | Papers | Experiments | Checks | Domain |
 |---------|------------|-------|:------:|:-----------:|:------:|--------|
-| Dong | MSU BAE | Irrigation & Soil | 10+ | 87 | 1284+863 | ET₀ (8 methods), soil, IoT, WB, dual Kc, Richards, yield, ensemble, bias correction, GPU parity, GPU math portability, metalForge dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB audit, climate scenario, streaming pipeline, decade analysis, NASS yield, Shannon H' diversity, NUCLEUS primal, cross-primal pipeline, Paper 12 immunological Anderson, local GPU parity (Exp 075), NUCLEUS routing (Exp 076), cross-spring provenance (Exp 077), MC ET₀ uncertainty (Exp 079), Bootstrap/Jackknife CI (Exp 080), SPI drought index (Exp 081), CPU/GPU parity (Exp 084), toadStool dispatch (Exp 085), metalForge NUCLEUS (Exp 086), graph coordination (Exp 087) |
+| Dong | MSU BAE | Irrigation & Soil | 10+ | 87 | 1284+880 | ET₀ (8 methods), soil, IoT, WB, dual Kc, Richards, yield, ensemble, bias correction, GPU parity, GPU math portability, metalForge dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB audit, climate scenario, streaming pipeline, decade analysis, NASS yield, Shannon H' diversity, NUCLEUS primal, cross-primal pipeline, Paper 12 immunological Anderson, local GPU parity (Exp 075), NUCLEUS routing (Exp 076), cross-spring provenance (Exp 077), MC ET₀ uncertainty (Exp 079), Bootstrap/Jackknife CI (Exp 080), SPI drought index (Exp 081), CPU/GPU parity (Exp 084), toadStool dispatch (Exp 085), metalForge NUCLEUS (Exp 086), graph coordination (Exp 087) |
 
 ## Faculty: Younsuk Dong, PhD
 
@@ -243,6 +244,7 @@ S79 modernization: `libc`→`rustix`, `async-trait`→AFIT, universal f64 precis
 ### Next Steps (Dong Lab)
 
 - **Ecosystem absorption (v0.8.7)**: Zero hardcoded primals (`primal_names::BIOMEOS`). 4-format `parse_capabilities` (neuralSpring S156+). JSON-RPC proptest fuzz (7 properties, petalTongue V166 pattern). `#[expect]` complete (zero `#[allow]` in production). Edition 2024 let-chains. 872 lib + 22 property tests. PRIMAL_REGISTRY v0.8.7. Zero-panic 47/47 binaries. Typed `compute_dispatch` client. `extract_rpc_error()`. Python tolerance mirror (60 constants). Zero C deps
+- **Cross-ecosystem absorption (v0.8.8)**: Health probes, circuit breaker, OrExit, thiserror, socket_env_var, structured tracing, `IpcError::is_recoverable`. 880 lib tests.
 - **Coverage**: target 98%+ (remaining gaps: GPU-dependent code paths)
 - **ToadStool absorption**: All 6 local ops absorbed upstream into `BatchedElementwiseF64` (ops 14-19), `local_dispatch` retired — Write→Absorb→Lean complete (v0.7.2)
 - **GPU at scale**: Profile `compute_gpu()` at N=100K+ (multi-year regional grids, crossover point via `AtlasStream`)

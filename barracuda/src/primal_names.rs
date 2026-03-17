@@ -32,11 +32,35 @@ pub const PETALTONGUE: &str = "petaltongue";
 /// Neural API / capability routing primal (provenance trio gateway).
 pub const NEURAL_API: &str = "neural-api";
 
+/// Derive the environment variable name for a primal's socket override.
+///
+/// Convention: `{PRIMAL_UPPER}_SOCKET`, e.g. `socket_env_var("toadstool")` →
+/// `"TOADSTOOL_SOCKET"`. Used for capability-based discovery with env overrides.
+///
+/// Absorbed from groundSpring V112 / wetSpring V125 ecosystem pattern.
+#[must_use]
+pub fn socket_env_var(primal: &str) -> String {
+    format!("{}_SOCKET", primal.to_ascii_uppercase())
+}
+
+/// Derive the environment variable name for a primal's address (HTTP/TCP).
+///
+/// Convention: `{PRIMAL_UPPER}_ADDRESS`, e.g. `address_env_var("nestgate")` →
+/// `"NESTGATE_ADDRESS"`.
+#[must_use]
+pub fn address_env_var(primal: &str) -> String {
+    format!("{}_ADDRESS", primal.to_ascii_uppercase())
+}
+
 /// Provenance trio capability domains (used in `capability.call`).
 pub mod domains {
+    /// DAG (directed acyclic graph) workflow capability.
     pub const DAG: &str = "dag";
+    /// Commit/snapshot capability for versioned state.
     pub const COMMIT: &str = "commit";
+    /// Provenance tracking and lineage capability.
     pub const PROVENANCE: &str = "provenance";
+    /// Compute dispatch and execution capability.
     pub const COMPUTE: &str = "compute";
 }
 
@@ -59,5 +83,19 @@ mod tests {
         for d in [domains::DAG, domains::COMMIT, domains::PROVENANCE, domains::COMPUTE] {
             assert_eq!(d, d.to_lowercase(), "{d} must be lowercase");
         }
+    }
+
+    #[test]
+    fn socket_env_var_convention() {
+        assert_eq!(socket_env_var(TOADSTOOL), "TOADSTOOL_SOCKET");
+        assert_eq!(socket_env_var(NESTGATE), "NESTGATE_SOCKET");
+        assert_eq!(socket_env_var(BIOMEOS), "BIOMEOS_SOCKET");
+        assert_eq!(socket_env_var("neural-api"), "NEURAL-API_SOCKET");
+    }
+
+    #[test]
+    fn address_env_var_convention() {
+        assert_eq!(address_env_var(NESTGATE), "NESTGATE_ADDRESS");
+        assert_eq!(address_env_var(SONGBIRD), "SONGBIRD_ADDRESS");
     }
 }

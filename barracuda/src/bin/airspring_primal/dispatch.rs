@@ -23,6 +23,14 @@ pub fn dispatch(method: &str, params: &serde_json::Value, state: &NicheState) ->
         return DispatchOutcome::Ok(handlers::handle_health(state));
     }
 
+    if method == "health.liveness" {
+        return DispatchOutcome::Ok(handlers::handle_liveness());
+    }
+
+    if method == "health.readiness" {
+        return DispatchOutcome::Ok(handlers::handle_readiness(state));
+    }
+
     if method == "science.version" {
         return DispatchOutcome::Ok(serde_json::json!({
             "niche": niche::NICHE_NAME,

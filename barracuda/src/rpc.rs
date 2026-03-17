@@ -33,16 +33,34 @@ pub const INVALID_PARAMS: i32 = -32602;
 pub const INTERNAL_ERROR: i32 = -32603;
 
 /// IPC transport errors (biomeOS standard).
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
 pub enum IpcError {
     /// Connection to the socket failed.
+    #[error("connection failed to {}: {source}", socket.display())]
     ConnectionFailed {
         /// Target socket path.
         socket: PathBuf,
         /// Underlying I/O error.
         source: std::io::Error,
     },
+    /// Write to socket failed (distinct from connect for recovery).
+    #[error("write failed to {}: {source}", socket.display())]
+    WriteFailed {
+        /// Target socket path.
+        socket: PathBuf,
+        /// Underlying I/O error.
+        source: std::io::Error,
+    },
+    /// Read from socket failed (distinct from connect for recovery).
+    #[error("read failed from {}: {source}", socket.display())]
+    ReadFailed {
+        /// Target socket path.
+        socket: PathBuf,
+        /// Underlying I/O error.
+        source: std::io::Error,
+    },
     /// Request timed out.
+    #[error("timeout calling {method} after {elapsed:?}")]
     Timeout {
         /// JSON-RPC method that timed out.
         method: String,
@@ -50,6 +68,7 @@ pub enum IpcError {
         elapsed: Duration,
     },
     /// Server returned a JSON-RPC error.
+    #[error("RPC error {code}: {message}")]
     RpcError {
         /// JSON-RPC error code.
         code: i32,
@@ -57,38 +76,42 @@ pub enum IpcError {
         message: String,
     },
     /// Response deserialization failed.
+    #[error("deserialization failed for {method}: {source}")]
     DeserializationFailed {
         /// JSON-RPC method whose response failed parsing.
         method: String,
         /// Underlying JSON error.
         source: serde_json::Error,
     },
+    /// Socket path could not be resolved.
+    #[error("socket path not found for {primal}")]
+    SocketNotFound {
+        /// Primal name that was being discovered.
+        primal: String,
+    },
+    /// Response contained no result or error (empty/malformed).
+    #[error("empty response from {method}")]
+    EmptyResponse {
+        /// JSON-RPC method that returned nothing.
+        method: String,
+    },
 }
 
-impl std::fmt::Display for IpcError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            IpcError::ConnectionFailed { socket, source } => {
-                write!(f, "connection failed to {}: {source}", socket.display())
-            }
-            IpcError::Timeout { method, elapsed } => {
-                write!(f, "timeout calling {method} after {:?}", elapsed)
-            }
-            IpcError::RpcError { code, message } => write!(f, "RPC error {code}: {message}"),
-            IpcError::DeserializationFailed { method, source } => {
-                write!(f, "deserialization failed for {method}: {source}")
-            }
-        }
-    }
-}
-
-impl std::error::Error for IpcError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            IpcError::ConnectionFailed { source, .. } => Some(source),
-            IpcError::DeserializationFailed { source, .. } => Some(source),
-            _ => None,
-        }
+impl IpcError {
+    /// Whether this error is transient and the operation may succeed on retry.
+    ///
+    /// Returns `true` for `ConnectionFailed`, `Timeout`, `WriteFailed`,
+    /// and `ReadFailed` — these indicate network or scheduling issues,
+    /// not protocol violations.
+    #[must_use]
+    pub const fn is_recoverable(&self) -> bool {
+        matches!(
+            self,
+            Self::ConnectionFailed { .. }
+                | Self::Timeout { .. }
+                | Self::WriteFailed { .. }
+                | Self::ReadFailed { .. }
+        )
     }
 }
 
@@ -204,7 +227,6 @@ pub fn request(method: &str, params: &serde_json::Value) -> serde_json::Value {
 ///     // ...
 /// }
 /// ```
-#[must_use]
 pub fn send(
     socket_path: &Path,
     method: &str,
@@ -238,7 +260,7 @@ pub fn send(
                 elapsed: timeout_dur,
             }
         } else {
-            IpcError::ConnectionFailed {
+            IpcError::WriteFailed {
                 socket: socket_path.to_path_buf(),
                 source: e,
             }
@@ -251,7 +273,7 @@ pub fn send(
                 elapsed: timeout_dur,
             }
         } else {
-            IpcError::ConnectionFailed {
+            IpcError::WriteFailed {
                 socket: socket_path.to_path_buf(),
                 source: e,
             }
@@ -267,7 +289,7 @@ pub fn send(
                 elapsed: timeout_dur,
             }
         } else {
-            IpcError::ConnectionFailed {
+            IpcError::ReadFailed {
                 socket: socket_path.to_path_buf(),
                 source: e,
             }

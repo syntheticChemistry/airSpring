@@ -12,4 +12,5 @@
 
 pub mod compute_dispatch;
 pub mod provenance;
+pub mod resilience;
 pub mod timeseries;

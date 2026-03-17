@@ -49,6 +49,7 @@ pub enum QsRegime {
 }
 
 impl QsRegime {
+    /// Human-readable label for the regime.
     #[must_use]
     pub const fn as_str(self) -> &'static str {
         match self {
@@ -62,12 +63,19 @@ impl QsRegime {
 /// Full coupling result.
 #[derive(Debug, Clone, Copy)]
 pub struct CouplingResult {
+    /// Volumetric water content [m³/m³].
     pub theta: f64,
+    /// Effective saturation (van Genuchten), dimensionless [0, 1].
     pub se: f64,
+    /// Pore connectivity `p_c` = `S_e^L` (Mualem), dimensionless.
     pub connectivity: f64,
+    /// Coordination number z = `z_max` × `p_c`.
     pub coordination: f64,
+    /// Effective dimension `d_eff` = z/2 (Bethe lattice).
     pub d_eff: f64,
+    /// Anderson disorder parameter W = `W_0` × (1 − `S_e`).
     pub disorder: f64,
+    /// Quorum-sensing regime classification.
     pub regime: QsRegime,
 }
 

@@ -84,7 +84,6 @@ pub use gpu::*;
 pub use instrument::*;
 
 #[cfg(test)]
-#[expect(clippy::unwrap_used, clippy::expect_used, reason = "test clarity")]
 mod tests {
     use super::*;
 

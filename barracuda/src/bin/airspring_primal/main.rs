@@ -24,6 +24,8 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::time::{Duration, Instant};
 
+use tracing::{error, info, warn};
+
 use airspring_barracuda::{biomeos, niche, rpc};
 
 use dispatch::DispatchOutcome;
@@ -39,26 +41,33 @@ struct NicheState {
 
 fn register_with_biomeos(our_socket: &Path) {
     if let Some(orchestrator) = discovery::discover_orchestrator_socket() {
-        eprintln!(
-            "[biomeos] Registering with orchestrator at {}",
-            orchestrator.display()
+        info!(
+            target: "biomeos",
+            socket = %orchestrator.display(),
+            "registering with orchestrator"
         );
         niche::register_with_target(&orchestrator, our_socket);
         return;
     }
-    eprintln!("[biomeos] No orchestrator discovered, trying fallback");
+    info!(target: "biomeos", "no orchestrator discovered, trying fallback");
     if let Some(fallback_name) = biomeos::fallback_registration_primal() {
         if let Some(ref fallback_sock) = biomeos::discover_primal_socket(&fallback_name) {
-            eprintln!(
-                "[biomeos] Found {fallback_name} at {}, registering via fallback",
-                fallback_sock.display()
+            info!(
+                target: "biomeos",
+                fallback = fallback_name,
+                socket = %fallback_sock.display(),
+                "registering via fallback"
             );
             niche::register_with_target(fallback_sock, our_socket);
             return;
         }
-        eprintln!("[biomeos] Fallback '{fallback_name}' not found — fully standalone");
+        warn!(
+            target: "biomeos",
+            fallback = fallback_name,
+            "fallback primal not found — fully standalone"
+        );
     }
-    eprintln!("[biomeos] Running standalone (no orchestrator, no fallback)");
+    info!(target: "biomeos", "running standalone (no orchestrator, no fallback)");
 }
 
 #[expect(
@@ -141,9 +150,12 @@ fn handle_connection(stream: UnixStream, state: &NicheState) {
 }
 
 fn emit_metrics(operation: &str, latency_ms: f64, success: bool) {
-    eprintln!(
-        "[metrics] niche={} operation={operation} latency_ms={latency_ms:.2} success={success}",
-        niche::NICHE_NAME
+    info!(
+        target: "metrics",
+        niche = niche::NICHE_NAME,
+        operation,
+        latency_ms = format!("{latency_ms:.2}"),
+        success,
     );
     if let Ok(socket_path) = std::env::var("BIOMEOS_METRICS_SOCKET") {
         let payload = serde_json::json!({
@@ -161,7 +173,18 @@ fn emit_metrics(operation: &str, latency_ms: f64, success: bool) {
     }
 }
 
+fn init_tracing() {
+    use tracing_subscriber::EnvFilter;
+    tracing_subscriber::fmt()
+        .with_env_filter(
+            EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")),
+        )
+        .with_target(true)
+        .init();
+}
+
 fn run() -> Result<(), String> {
+    init_tracing();
     let family_id = biomeos::get_family_id();
     let socket_path = biomeos::resolve_socket_path(niche::NICHE_NAME, &family_id);
 
@@ -182,17 +205,15 @@ fn run() -> Result<(), String> {
     let listener = UnixListener::bind(&socket_path)
         .map_err(|e| format!("Cannot bind to {}: {e}", socket_path.display()))?;
 
-    eprintln!(
-        "{} niche listening on {}",
-        niche::NICHE_NAME,
-        socket_path.display()
+    info!(
+        target: "airspring",
+        niche = niche::NICHE_NAME,
+        socket = %socket_path.display(),
+        family_id,
+        version = env!("CARGO_PKG_VERSION"),
+        capabilities = niche::CAPABILITIES.len(),
+        "niche listening"
     );
-    eprintln!("  Family ID: {family_id}");
-    eprintln!("  Version: {}", env!("CARGO_PKG_VERSION"));
-    eprintln!("  Capabilities ({}):", niche::CAPABILITIES.len());
-    for cap in niche::CAPABILITIES {
-        eprintln!("    - {cap}");
-    }
 
     register_with_biomeos(&socket_path);
 
@@ -229,7 +250,7 @@ fn run() -> Result<(), String> {
         }
     });
 
-    eprintln!("[ready] Accepting connections...");
+    info!(target: "airspring", "accepting connections");
     for stream in listener.incoming() {
         if !running.load(Ordering::Relaxed) {
             break;
@@ -239,7 +260,7 @@ fn run() -> Result<(), String> {
                 let st = state.clone();
                 std::thread::spawn(move || handle_connection(s, &st));
             }
-            Err(e) => eprintln!("[error] Accept failed: {e}"),
+            Err(e) => error!(target: "airspring", error = %e, "accept failed"),
         }
     }
     Ok(())

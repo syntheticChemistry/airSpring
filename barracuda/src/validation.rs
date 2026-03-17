@@ -32,6 +32,44 @@
 
 pub use barracuda::validation::{ValidationHarness, exit_no_gpu, gpu_required};
 
+/// Zero-panic exit trait for validation binaries.
+///
+/// Converts `Result<T, E>` / `Option<T>` to `T`, printing the error to stderr
+/// and exiting with code 1 on failure. Prevents panic backtraces in CI output.
+///
+/// Absorbed from groundSpring V112 / wetSpring V125 ecosystem pattern.
+pub trait OrExit<T> {
+    /// Unwrap the value or exit with a descriptive error message.
+    fn or_exit(self, context: &str) -> T;
+}
+
+impl<T, E: std::fmt::Display> OrExit<T> for Result<T, E> {
+    fn or_exit(self, context: &str) -> T {
+        self.unwrap_or_else(|e| {
+            eprintln!("FATAL: {context}: {e}");
+            std::process::exit(1);
+        })
+    }
+}
+
+impl<T> OrExit<T> for Option<T> {
+    fn or_exit(self, context: &str) -> T {
+        self.unwrap_or_else(|| {
+            eprintln!("FATAL: {context}");
+            std::process::exit(1);
+        })
+    }
+}
+
+/// Parse a benchmark JSON string, exiting on failure.
+///
+/// Combines `parse_benchmark_json` with `OrExit` for one-call benchmark
+/// loading in validation binaries.
+#[must_use]
+pub fn parse_benchmark(json_str: &str) -> serde_json::Value {
+    parse_benchmark_json(json_str).or_exit("failed to parse benchmark JSON")
+}
+
 /// Initialise tracing so that `ValidationHarness::finish()` output is visible.
 ///
 /// Call once at the top of every validation binary's `main()`.
@@ -266,7 +304,7 @@ pub fn json_object_required<'a>(
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, clippy::expect_used)]
+#[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
 

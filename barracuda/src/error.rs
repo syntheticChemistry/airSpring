@@ -4,27 +4,33 @@
 //! Provides a unified error type that replaces ad-hoc `String` errors
 //! throughout the crate, enabling proper error propagation with `?`.
 
-use std::fmt;
-
 /// Unified error type for airSpring operations.
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
 pub enum AirSpringError {
     /// I/O errors (file open, read, write).
-    Io(std::io::Error),
+    #[error("I/O error: {0}")]
+    Io(#[from] std::io::Error),
     /// CSV parsing errors (malformed input, missing columns).
+    #[error("CSV parse error: {0}")]
     CsvParse(String),
     /// JSON parsing errors (benchmark files).
-    JsonParse(serde_json::Error),
+    #[error("JSON parse error: {0}")]
+    JsonParse(#[from] serde_json::Error),
     /// Benchmark JSON structure errors (missing keys, wrong types).
+    #[error("Benchmark parse error: {0}")]
     BenchmarkParse(String),
     /// Invalid input (out of range, wrong dimensions).
+    #[error("Invalid input: {0}")]
     InvalidInput(String),
     /// Errors propagated from barracuda primitives (preserves source chain).
-    Barracuda(barracuda::error::BarracudaError),
+    #[error("barracuda error: {0}")]
+    Barracuda(#[from] barracuda::error::BarracudaError),
     /// NPU errors (discovery, DMA, inference).
+    #[error("NPU error: {0}")]
     Npu(String),
     /// IPC errors (socket connect, timeout, protocol).
-    Ipc(String),
+    #[error("IPC error: {0}")]
+    Ipc(#[from] crate::rpc::IpcError),
 }
 
 impl AirSpringError {
@@ -35,61 +41,11 @@ impl AirSpringError {
     }
 }
 
-impl fmt::Display for AirSpringError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Io(e) => write!(f, "I/O error: {e}"),
-            Self::CsvParse(msg) => write!(f, "CSV parse error: {msg}"),
-            Self::JsonParse(e) => write!(f, "JSON parse error: {e}"),
-            Self::BenchmarkParse(msg) => write!(f, "Benchmark parse error: {msg}"),
-            Self::InvalidInput(msg) => write!(f, "Invalid input: {msg}"),
-            Self::Barracuda(e) => write!(f, "barracuda error: {e}"),
-            Self::Npu(msg) => write!(f, "NPU error: {msg}"),
-            Self::Ipc(msg) => write!(f, "IPC error: {msg}"),
-        }
-    }
-}
-
-impl std::error::Error for AirSpringError {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        match self {
-            Self::Io(e) => Some(e),
-            Self::JsonParse(e) => Some(e),
-            Self::Barracuda(e) => Some(e),
-            Self::CsvParse(_)
-            | Self::BenchmarkParse(_)
-            | Self::InvalidInput(_)
-            | Self::Npu(_)
-            | Self::Ipc(_) => {
-                None
-            }
-        }
-    }
-}
-
-impl From<std::io::Error> for AirSpringError {
-    fn from(e: std::io::Error) -> Self {
-        Self::Io(e)
-    }
-}
-
-impl From<serde_json::Error> for AirSpringError {
-    fn from(e: serde_json::Error) -> Self {
-        Self::JsonParse(e)
-    }
-}
-
-impl From<barracuda::error::BarracudaError> for AirSpringError {
-    fn from(e: barracuda::error::BarracudaError) -> Self {
-        Self::Barracuda(e)
-    }
-}
-
 /// Convenience alias used throughout the crate.
 pub type Result<T> = std::result::Result<T, AirSpringError>;
 
 #[cfg(test)]
-#[expect(clippy::unwrap_used, clippy::expect_used, reason = "test code uses unwrap for clarity")]
+#[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
 
@@ -160,15 +116,19 @@ mod tests {
 
     #[test]
     fn test_ipc_display() {
-        let err = AirSpringError::Ipc("connect: connection refused".into());
+        let err = AirSpringError::Ipc(crate::rpc::IpcError::SocketNotFound {
+            primal: "nestgate".into(),
+        });
         assert!(format!("{err}").contains("IPC error"));
-        assert!(format!("{err}").contains("connection refused"));
+        assert!(format!("{err}").contains("nestgate"));
     }
 
     #[test]
-    fn test_ipc_no_source() {
-        let err = AirSpringError::Ipc("timeout".into());
-        assert!(std::error::Error::source(&err).is_none());
+    fn test_ipc_source() {
+        let err = AirSpringError::Ipc(crate::rpc::IpcError::SocketNotFound {
+            primal: "toadstool".into(),
+        });
+        assert!(std::error::Error::source(&err).is_some());
     }
 
     #[test]

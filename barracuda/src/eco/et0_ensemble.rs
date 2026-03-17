@@ -46,12 +46,17 @@ pub struct EnsembleResult {
     pub spread: f64,
     /// Number of methods that contributed.
     pub n_methods: u8,
-    /// Individual method results (NaN if method was not applicable).
+    /// Penman-Monteith estimate [mm/day]; NaN if not applicable.
     pub pm: f64,
+    /// Priestley-Taylor estimate [mm/day]; NaN if not applicable.
     pub pt: f64,
+    /// Hargreaves estimate [mm/day]; NaN if not applicable.
     pub hargreaves: f64,
+    /// Makkink estimate [mm/day]; NaN if not applicable.
     pub makkink: f64,
+    /// Turc estimate [mm/day]; NaN if not applicable.
     pub turc: f64,
+    /// Hamon estimate [mm/day]; NaN if not applicable.
     pub hamon: f64,
 }
 

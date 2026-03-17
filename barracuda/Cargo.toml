@@ -1,6 +1,6 @@
 [package]
 name = "airspring-barracuda"
-version = "0.8.7"
+version = "0.8.8"
 edition = "2024"
 rust-version = "1.92"
 authors = ["Squirrel Team"]
@@ -53,6 +53,7 @@ bytemuck = { version = "1", features = ["derive"] }
 
 # BrainChip AKD1000 NPU driver — pure Rust, optional.
 akida-driver = { path = "../../phase1/toadstool/crates/neuromorphic/akida-driver", optional = true }
+thiserror = "2.0.18"
 
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }

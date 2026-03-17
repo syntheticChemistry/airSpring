@@ -25,12 +25,19 @@ use barracuda::stats::normal::norm_ppf;
 /// WMO drought classification category.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DroughtClass {
+    /// SPI ≥ 2.0.
     ExtremelyWet,
+    /// 1.5 ≤ SPI < 2.0.
     VeryWet,
+    /// 1.0 ≤ SPI < 1.5.
     ModeratelyWet,
+    /// −1.0 < SPI < 1.0.
     NearNormal,
+    /// −1.5 < SPI ≤ −1.0.
     ModeratelyDry,
+    /// −2.0 < SPI ≤ −1.5.
     SeverelyDry,
+    /// SPI ≤ −2.0.
     ExtremelyDry,
 }
 

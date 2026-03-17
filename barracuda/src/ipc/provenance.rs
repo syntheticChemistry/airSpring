@@ -132,7 +132,9 @@ pub(crate) fn neural_api_socket_path_with(config: &ProvenanceConfig) -> Option<P
 }
 
 fn ipc_err(msg: impl Into<String>) -> crate::error::AirSpringError {
-    crate::error::AirSpringError::Ipc(msg.into())
+    crate::error::AirSpringError::Ipc(crate::rpc::IpcError::EmptyResponse {
+        method: msg.into(),
+    })
 }
 
 fn capability_call(

@@ -1,15 +1,14 @@
 # airSpring wateringHole
 
-**Updated**: March 16, 2026 | **Version**: v0.8.7
+**Updated**: March 16, 2026 | **Version**: v0.8.8
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.8.7** | [AIRSPRING_V087_ECOSYSTEM_ABSORPTION_HANDOFF_MAR16_2026.md](handoffs/AIRSPRING_V087_ECOSYSTEM_ABSORPTION_HANDOFF_MAR16_2026.md) | 2026-03-16 | **primary** — zero hardcoded primals, 4-format `parse_capabilities`, JSON-RPC proptest fuzz, `#[expect]` complete, collapsible-if let-chains, 872 lib + 22 property tests |
-| **V0.8.7** | [AIRSPRING_V087_BARRACUDA_TOADSTOOL_EVOLUTION_HANDOFF_MAR16_2026.md](handoffs/AIRSPRING_V087_BARRACUDA_TOADSTOOL_EVOLUTION_HANDOFF_MAR16_2026.md) | 2026-03-16 | barraCuda/toadStool consumption audit, 75+ delegations, Write→Absorb→Lean complete, upstream absorption candidates |
-| **≤V0.8.6** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
+| **V0.8.8** | [AIRSPRING_V088_CROSS_ECOSYSTEM_ABSORPTION_HANDOFF_MAR16_2026.md](handoffs/AIRSPRING_V088_CROSS_ECOSYSTEM_ABSORPTION_HANDOFF_MAR16_2026.md) | 2026-03-16 | **primary** — `thiserror`, health probes, circuit breaker, `OrExit<T>`, `IpcError` 8 variants + `is_recoverable()`, `socket_env_var()`, structured tracing, workspace `deny.toml`, 880 lib + 22 property tests |
+| **≤V0.8.7** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 
 ## Cross-Spring Documents
 

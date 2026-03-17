@@ -26,32 +26,44 @@ use crate::eco::solar::daylight_hours;
 /// Makkink input: (`tmean_c`, `rs_mj`, `elevation_m`).
 #[derive(Debug, Clone, Copy)]
 pub struct MakkinkInput {
+    /// Mean air temperature (°C).
     pub tmean_c: f64,
+    /// Incoming solar radiation (MJ/m²/day).
     pub rs_mj: f64,
+    /// Site elevation (m) for atmospheric pressure correction.
     pub elevation_m: f64,
 }
 
 /// Turc input: (`tmean_c`, `rs_mj`, `rh_pct`).
 #[derive(Debug, Clone, Copy)]
 pub struct TurcInput {
+    /// Mean air temperature (°C).
     pub tmean_c: f64,
+    /// Incoming solar radiation (MJ/m²/day).
     pub rs_mj: f64,
+    /// Relative humidity (%).
     pub rh_pct: f64,
 }
 
 /// Hamon input: (`tmean_c`, `latitude_rad`, `doy`).
 #[derive(Debug, Clone, Copy)]
 pub struct HamonInput {
+    /// Mean air temperature (°C).
     pub tmean_c: f64,
+    /// Site latitude (radians).
     pub latitude_rad: f64,
+    /// Day of year (1–366).
     pub doy: u32,
 }
 
 /// Blaney-Criddle input: (`tmean_c`, `latitude_rad`, `doy`).
 #[derive(Debug, Clone, Copy)]
 pub struct BlaneyCriddleInput {
+    /// Mean air temperature (°C).
     pub tmean_c: f64,
+    /// Site latitude (radians).
     pub latitude_rad: f64,
+    /// Day of year (1–366).
     pub doy: u32,
 }
 
@@ -64,6 +76,7 @@ pub struct BatchedSimpleEt0;
 /// Uses `batched_elementwise_f64.wgsl` ops 14-16 and 19 via
 /// `BatchedElementwiseF64`.
 pub struct GpuSimpleEt0 {
+    /// Batched elementwise compute pipeline for Makkink, Turc, Hamon, Blaney-Criddle.
     executor: BatchedElementwiseF64,
 }
 

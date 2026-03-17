@@ -85,17 +85,29 @@ pub fn inverse_topp(theta_v: f64) -> f64 {
 /// Values sourced from Saxton & Rawls (2006) and USDA NRCS Soil Survey Manual.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SoilTexture {
+    /// Coarse-textured; high drainage, low water retention.
     Sand,
+    /// Sandy with minor silt/clay; moderate drainage.
     LoamySand,
+    /// Sandy with appreciable silt/clay; good aeration and moisture.
     SandyLoam,
+    /// Balanced sand–silt–clay; widely used for agriculture.
     Loam,
+    /// Silt-dominated; high water retention, moderate drainage.
     SiltLoam,
+    /// Fine silt; high water retention, prone to compaction.
     Silt,
+    /// Sandy with significant clay; moderate drainage and retention.
     SandyClayLoam,
+    /// Balanced clay–silt–sand; moderate drainage, good fertility.
     ClayLoam,
+    /// Silt and clay dominated; high water retention, slow drainage.
     SiltyClayLoam,
+    /// Sandy with high clay; sticky when wet, hard when dry.
     SandyClay,
+    /// Silt and clay; very high water retention, poor drainage.
     SiltyClay,
+    /// Fine-textured; very high water retention, low permeability.
     Clay,
 }
 

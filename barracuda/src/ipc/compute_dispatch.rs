@@ -72,6 +72,13 @@ fn discover_compute_socket() -> Result<PathBuf, DispatchError> {
 /// Submit a GPU workload to the compute primal.
 ///
 /// Returns a [`DispatchHandle`] for polling results.
+///
+/// # Errors
+///
+/// Returns [`DispatchError::NoComputePrimal`] if no compute primal socket is discovered.
+/// Returns [`DispatchError::Ipc`] on transport failure.
+/// Returns [`DispatchError::MissingJobId`] if the server response lacks `job_id`.
+/// Returns [`DispatchError::RpcError`] if the server returns an RPC error.
 pub fn submit(
     workload_type: &str,
     params: &serde_json::Value,
@@ -99,10 +106,15 @@ pub fn submit(
         .ok_or(DispatchError::MissingJobId)?
         .to_owned();
 
-    Ok(DispatchHandle { socket, job_id })
+    Ok(DispatchHandle { job_id, socket })
 }
 
 /// Poll for the result of a dispatched compute job.
+///
+/// # Errors
+///
+/// Returns [`DispatchError::Ipc`] on transport failure.
+/// Returns [`DispatchError::RpcError`] if the server returns an RPC error.
 pub fn result(handle: &DispatchHandle) -> Result<serde_json::Value, DispatchError> {
     let resp = rpc::send(
         &handle.socket,
@@ -118,6 +130,12 @@ pub fn result(handle: &DispatchHandle) -> Result<serde_json::Value, DispatchErro
 }
 
 /// Query available compute capabilities from the compute primal.
+///
+/// # Errors
+///
+/// Returns [`DispatchError::NoComputePrimal`] if no compute primal socket is discovered.
+/// Returns [`DispatchError::Ipc`] on transport failure.
+/// Returns [`DispatchError::RpcError`] if the server returns an RPC error.
 pub fn capabilities() -> Result<serde_json::Value, DispatchError> {
     let socket = discover_compute_socket()?;
 

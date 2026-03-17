@@ -79,6 +79,9 @@ pub const CAPABILITIES: &[&str] = &[
     // ── Cross-primal ──
     "primal.forward",
     "primal.discover",
+    // ── Health probes (biomeOS orchestration) ──
+    "health.liveness",
+    "health.readiness",
     // ── Niche deployment (biomeOS graph composition) ──
     "capability.list",
     "data.cross_spring_weather",

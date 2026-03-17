@@ -3,7 +3,7 @@
 
 use std::sync::atomic::Ordering;
 
-use airspring_barracuda::{biomeos, niche, primal_names, rpc};
+use airspring_barracuda::{biomeos, niche, rpc};
 
 use super::NicheState;
 use super::discovery::{discover_compute_primal, discover_data_primal};
@@ -17,6 +17,34 @@ pub fn handle_health(state: &NicheState) -> serde_json::Value {
         "requests_served": state.requests_served.load(Ordering::Relaxed),
         "capabilities": niche::CAPABILITIES,
         "backend": "cpu",
+    })
+}
+
+/// Minimal liveness probe — confirms the process is running and responsive.
+pub fn handle_liveness() -> serde_json::Value {
+    serde_json::json!({
+        "alive": true,
+        "niche": niche::NICHE_NAME,
+    })
+}
+
+/// Readiness probe — confirms subsystems are operational.
+pub fn handle_readiness(state: &NicheState) -> serde_json::Value {
+    let trio_available = airspring_barracuda::ipc::provenance::is_available();
+    let nestgate_available = discover_data_primal().is_some();
+    let toadstool_available = discover_compute_primal().is_some();
+
+    serde_json::json!({
+        "ready": true,
+        "niche": niche::NICHE_NAME,
+        "version": env!("CARGO_PKG_VERSION"),
+        "uptime_secs": state.start_time.elapsed().as_secs(),
+        "subsystems": {
+            "science_dispatch": true,
+            "provenance_trio": trio_available,
+            "nestgate": nestgate_available,
+            "toadstool": toadstool_available,
+        },
     })
 }
 

@@ -276,25 +276,35 @@ pub fn evaporation_layer_balance(
 /// State of the evaporation layer for multi-day simulation.
 #[derive(Debug, Clone, Copy)]
 pub struct EvaporationLayerState {
+    /// Cumulative depth of evaporation from the soil surface [mm].
     pub de: f64,
+    /// Total evaporable water (readily + slowly evaporable) [mm].
     pub tew: f64,
+    /// Readily evaporable water (stage I limit) [mm].
     pub rew: f64,
 }
 
 /// Output of a single dual Kc simulation step.
 #[derive(Debug, Clone, Copy)]
 pub struct DualKcOutput {
+    /// Cumulative evaporation depth from soil surface [mm].
     pub de: f64,
+    /// Transpiration reduction coefficient (0–1).
     pub kr: f64,
+    /// Evaporation coefficient for soil surface.
     pub ke: f64,
+    /// Crop evapotranspiration [mm/day].
     pub etc: f64,
 }
 
 /// Daily input for dual Kc simulation.
 #[derive(Debug, Clone, Copy)]
 pub struct DualKcInput {
+    /// Reference evapotranspiration [mm/day].
     pub et0: f64,
+    /// Precipitation [mm].
     pub precipitation: f64,
+    /// Irrigation [mm].
     pub irrigation: f64,
 }
 

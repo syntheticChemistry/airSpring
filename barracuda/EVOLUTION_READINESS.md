@@ -1,6 +1,6 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: March 16, 2026 (v0.8.7 — 87 experiments, 872 lib + 285 integration + 61 forge + 22 property tests, 91 binaries. Ecosystem absorption: `primal_names::BIOMEOS`, `parse_capabilities` 4-format (flat, object, nested, double-nested), `discovery.rs` hardcoding eliminated, `#[allow]`→`#[expect]` complete, collapsible-if (Edition 2024 let-chains), JSON-RPC proptest fuzz (7 properties), PRIMAL_REGISTRY v0.8.7. 58 warnings (pre-existing missing_docs only).)
+**Last Updated**: March 16, 2026 (v0.8.8 — 87 experiments, 880 lib + 285 integration + 61 forge + 22 property tests, 91 binaries. Ecosystem absorption: `primal_names::BIOMEOS`, `parse_capabilities` 4-format (flat, object, nested, double-nested), `discovery.rs` hardcoding eliminated, `#[allow]`→`#[expect]` complete, collapsible-if (Edition 2024 let-chains), JSON-RPC proptest fuzz (7 properties), PRIMAL_REGISTRY v0.8.7. 58 warnings (pre-existing missing_docs only).)
 **barraCuda**: v0.3.5 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry, SpringDomain newtype, F64BuiltinCapabilities DF64 fields)
 **ToadStool**: S147+ (20,015 tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient, hw-learn, spirv_codegen_safety)
 **coralReef**: Phase 10 Iteration 44 sovereign Rust GPU compiler (NVIDIA + AMD, 1669+48 tests, VFIO dispatch)
@@ -413,7 +413,7 @@ metalForge forge migrated from wgpu 22 to wgpu 28 (eliminated duplicate wgpu com
 |------|--------|
 | `cargo fmt --check` | **PASS** (both crates) |
 | `cargo clippy --all-targets -- -W clippy::pedantic -W clippy::nursery -D warnings` | **PASS** — 0 warnings |
-| `cargo test --lib` | **863 lib pass**, 0 fail |
+| `cargo test --lib` | **880 lib pass**, 0 fail |
 | `cargo test --tests` | **280 integration pass**, 0 fail |
 | Cross-spring evolution | **11/11 pass** |
 | CPU vs Python | **24/24 algorithms**, 21.0× geometric mean speedup |

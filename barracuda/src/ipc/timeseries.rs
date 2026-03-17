@@ -70,7 +70,7 @@ pub fn parse_time_series(params: &serde_json::Value) -> Result<TimeSeriesData, A
         .unwrap_or("");
 
     if schema != SCHEMA {
-        return Err(AirSpringError::Ipc(format!(
+        return Err(AirSpringError::InvalidInput(format!(
             "expected schema '{SCHEMA}', got '{schema}'"
         )));
     }
