@@ -489,11 +489,7 @@ mod tests {
     // ── SeasonalReducer (device-backed, skips if no GPU) ────────────────────
 
     fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
-        barracuda::device::test_pool::tokio_block_on(
-            barracuda::device::WgpuDevice::new_f64_capable(),
-        )
-        .ok()
-        .map(std::sync::Arc::new)
+        crate::gpu::device_info::try_f64_device()
     }
 
     #[test]

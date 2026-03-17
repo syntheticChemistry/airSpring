@@ -127,13 +127,13 @@ fn richards_rhs(
         q[0] = 0.0;
     } else {
         let k_top = van_genuchten_k(h_top, ks, theta_r, theta_s, alpha, n_vg);
-        q[0] = k_top * ((h_top - h[0]) / (0.5 * dz) + 1.0);
+        q[0] = k_top.mul_add((h_top - h[0]) / (0.5 * dz), k_top);
     }
     for i in 0..n - 1 {
         let k_mid = 0.5
             * (van_genuchten_k(h[i], ks, theta_r, theta_s, alpha, n_vg)
                 + van_genuchten_k(h[i + 1], ks, theta_r, theta_s, alpha, n_vg));
-        q[i + 1] = k_mid * ((h[i + 1] - h[i]) / dz + 1.0);
+        q[i + 1] = k_mid.mul_add((h[i + 1] - h[i]) / dz, k_mid);
     }
     if bottom_free_drain {
         q[n] = van_genuchten_k(h[n - 1], ks, theta_r, theta_s, alpha, n_vg);
@@ -231,7 +231,7 @@ pub fn solve_richards_1d_with_config(
         ));
     }
 
-    let dz = depth_cm / (n_nodes as f64);
+    let dz = depth_cm / crate::cast::usize_f64(n_nodes);
     let theta_r = params.theta_r;
     let theta_s = params.theta_s;
     let alpha = params.alpha;
@@ -243,7 +243,7 @@ pub fn solve_richards_1d_with_config(
     let mut h: Vec<f64> = vec![h_initial.clamp(h_clip_min, h_clip_max); n_nodes];
     let mut profiles = Vec::new();
 
-    let n_steps = (duration_days / dt_days).ceil().max(1.0) as usize;
+    let n_steps = crate::cast::f64_usize((duration_days / dt_days).ceil().max(1.0));
     let mut t = 0.0_f64;
 
     let mut a = vec![0.0_f64; n_nodes];
@@ -321,7 +321,7 @@ pub fn solve_richards_1d_with_config(
                         d[i] = (ci / dt).mul_add(h_old[i], -k_ip12 / dz);
                     } else {
                         let k_top = van_genuchten_k(h_top, ks, theta_r, theta_s, alpha, n_vg);
-                        let q_top = k_top * ((h_top - h_old[0]) / (0.5 * dz) + 1.0);
+                        let q_top = k_top.mul_add((h_top - h_old[0]) / (0.5 * dz), k_top);
                         d[i] = (ci / dt).mul_add(h_old[i], q_top / dz - k_ip12 / dz);
                     }
                 } else if i == n_nodes - 1 && bottom_free_drain {
@@ -374,7 +374,9 @@ pub fn solve_richards_1d_with_config(
             .iter()
             .map(|&hi| van_genuchten_theta(hi, theta_r, theta_s, alpha, n_vg))
             .collect();
-        let z: Vec<f64> = (0..n_nodes).map(|i| dz * (i as f64 + 0.5)).collect();
+        let z: Vec<f64> = (0..n_nodes)
+            .map(|i| (crate::cast::usize_f64(i) + 0.5) * dz)
+            .collect();
 
         profiles.push(RichardsProfile {
             z,
@@ -446,20 +448,20 @@ pub fn mass_balance_check(
             0.0
         } else {
             let k_top = van_genuchten_k(h_top, ks, theta_r, theta_s, alpha, n_vg);
-            k_top * ((h_top - p.h[0]) / (0.5 * dz) + 1.0)
+            k_top.mul_add((h_top - p.h[0]) / (0.5 * dz), k_top)
         };
         let q_top_prev = if j == 0 {
             if zero_flux_top {
                 0.0
             } else {
                 let k_top = van_genuchten_k(h_top, ks, theta_r, theta_s, alpha, n_vg);
-                k_top * ((h_top - h_initial) / (0.5 * dz) + 1.0)
+                k_top.mul_add((h_top - h_initial) / (0.5 * dz), k_top)
             }
         } else if zero_flux_top {
             0.0
         } else {
             let k_top = van_genuchten_k(h_top, ks, theta_r, theta_s, alpha, n_vg);
-            k_top * ((h_top - profiles[j - 1].h[0]) / (0.5 * dz) + 1.0)
+            k_top.mul_add((h_top - profiles[j - 1].h[0]) / (0.5 * dz), k_top)
         };
         let k_bot = van_genuchten_k(p.h[n - 1], ks, theta_r, theta_s, alpha, n_vg);
         let k_bot_prev = if j == 0 {
@@ -467,8 +469,8 @@ pub fn mass_balance_check(
         } else {
             van_genuchten_k(profiles[j - 1].h[n - 1], ks, theta_r, theta_s, alpha, n_vg)
         };
-        total_inflow += 0.5 * (q_top + q_top_prev) * dt_days;
-        total_outflow += 0.5 * (k_bot + k_bot_prev) * dt_days;
+        total_inflow += (0.5 * dt_days).mul_add(q_top, 0.5 * dt_days * q_top_prev);
+        total_outflow += (0.5 * dt_days).mul_add(k_bot, 0.5 * dt_days * k_bot_prev);
     }
 
     let theta_init_val = van_genuchten_theta(h_initial, theta_r, theta_s, alpha, n_vg);

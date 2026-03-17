@@ -74,14 +74,14 @@
 pub use barracuda::tolerances::{Tolerance, check};
 
 mod atmospheric;
-mod soil;
 mod gpu;
 mod instrument;
+mod soil;
 
 pub use atmospheric::*;
-pub use soil::*;
 pub use gpu::*;
 pub use instrument::*;
+pub use soil::*;
 
 #[cfg(test)]
 mod tests {

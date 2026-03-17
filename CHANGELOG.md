@@ -2,6 +2,43 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.8.9] - 2026-03-17
+
+### Cross-Ecosystem Evolution
+
+**Structural Identity and Safety**:
+- Canonical `PRIMAL_NAME` / `PRIMAL_DOMAIN` constants at crate root (healthSpring V34 pattern)
+- `niche::NICHE_NAME` delegates to `crate::PRIMAL_NAME` (single source of truth)
+- Hardcoded `"airspring"` strings replaced in validation binaries
+- `OnceLock` GPU probe caching in `gpu/device_info/mod.rs` — single `wgpu::Instance` per process (toadStool S158 pattern)
+- 10+ test-local `try_device()` functions refactored to centralized `try_f64_device()`
+- `cast` module: `usize_f64()`, `f64_usize()`, `usize_u32()`, `i32_f64()`, `u32_f64()`, `f64_u32()` (neuralSpring S162 / healthSpring V33 pattern)
+- ~30 `as` casts migrated across `eco/`, `gpu/`, `io/`, `ipc/`, `primal_science/`
+
+**IPC and Discovery Evolution**:
+- `DispatchOutcome<T>` promoted from binary-local to library type in `ipc/dispatch_outcome.rs` (wetSpring V126 pattern)
+- `primal_names::CORALREEF`, `domains::SHADER`, `domains::INFERENCE` constants
+- `biomeos::discover_shader_compiler()` — three-tier resolution for coralReef
+- `biomeos::discover_inference_primal()` — three-tier resolution for Squirrel
+
+**Code Quality**:
+- `mul_add()` FMA evolution: 18 sites across 7 files (barraCuda Sprint 7 pattern)
+- `eprintln!` → `tracing::error!` for server fatal error path
+- Removed unfulfilled `#[expect]` lint attributes
+
+**Smart Refactoring** (4 monoliths → 19 focused modules):
+- `eco/evapotranspiration.rs` (755 LOC) → `eco/evapotranspiration/` (5 sub-modules: atmosphere, penman_monteith, radiation, hargreaves, priestley_taylor)
+- `eco/dual_kc.rs` (712 LOC) → `eco/dual_kc/` (8 sub-modules: types, equations, simulation, cover_crop, mulch, crop_basal, evaporation_params, tests)
+- `biomeos.rs` (713 LOC) → `biomeos/` (3 sub-modules: mod, discovery, capabilities)
+- `validation.rs` (679 LOC) → `validation/` (2 sub-modules: mod, json)
+
+**Documentation**:
+- `AIRSPRING_COMPOSITION_GUIDANCE.md` for wateringHole: solo, trio, and wider primal compositions
+- barraCuda/toadStool evolution handoff with 3 upstream absorption candidates
+- Updated root README, specs, baseCamp, experiments, metalForge version refs
+
+**Tests**: 891 lib tests (was 880), zero clippy warnings, both crates green.
+
 ## [0.8.3] - 2026-03-16
 
 ### Deep Debt Resolution (19 findings)

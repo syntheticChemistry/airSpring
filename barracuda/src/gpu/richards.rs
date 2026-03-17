@@ -128,14 +128,9 @@ impl BatchedRichards {
         req: &RichardsRequest,
     ) -> crate::error::Result<pde_richards::RichardsResult> {
         let soil = to_barracuda_params(&req.params);
-        let dz = req.depth_cm / (req.n_nodes as f64);
+        let dz = req.depth_cm / crate::cast::usize_f64(req.n_nodes);
         let dt_s = req.dt_days * 86_400.0;
-        #[expect(
-            clippy::cast_possible_truncation,
-            clippy::cast_sign_loss,
-            reason = "duration/dt is non-negative, ceil yields finite usize"
-        )]
-        let n_steps = (req.duration_days / req.dt_days).ceil() as usize;
+        let n_steps = crate::cast::f64_usize((req.duration_days / req.dt_days).ceil());
 
         let config = pde_richards::RichardsConfig {
             soil,
@@ -209,14 +204,9 @@ impl BatchedRichards {
     /// Returns `AirSpringError::Barracuda` if the solver fails or parameters are invalid.
     pub fn solve_cn_diffusion(req: &RichardsRequest) -> crate::error::Result<Vec<f64>> {
         let d_cm_per_s = (req.params.ks / 86_400.0) / (req.params.theta_s - req.params.theta_r);
-        let dx = req.depth_cm / (req.n_nodes.saturating_sub(1).max(1)) as f64;
+        let dx = req.depth_cm / crate::cast::usize_f64(req.n_nodes.saturating_sub(1).max(1));
         let dt_s = req.dt_days * 86_400.0;
-        #[expect(
-            clippy::cast_possible_truncation,
-            clippy::cast_sign_loss,
-            reason = "duration/dt is non-negative, ceil yields finite usize"
-        )]
-        let n_steps = (req.duration_days / req.dt_days).ceil() as usize;
+        let n_steps = crate::cast::f64_usize((req.duration_days / req.dt_days).ceil());
 
         let cn_config = CrankNicolsonConfig::new(d_cm_per_s, dx, dt_s, req.n_nodes)
             .with_boundary_conditions(req.h_initial, req.h_initial);
@@ -249,14 +239,9 @@ impl BatchedRichards {
         req: &RichardsRequest,
     ) -> crate::error::Result<pde_richards::RichardsResult> {
         let soil = to_barracuda_params(&req.params);
-        let dz = req.depth_cm / (req.n_nodes as f64);
+        let dz = req.depth_cm / crate::cast::usize_f64(req.n_nodes);
         let dt_s = req.dt_days * 86_400.0;
-        #[expect(
-            clippy::cast_possible_truncation,
-            clippy::cast_sign_loss,
-            reason = "duration/dt is non-negative, ceil yields finite usize"
-        )]
-        let n_steps = (req.duration_days / req.dt_days).ceil() as usize;
+        let n_steps = crate::cast::f64_usize((req.duration_days / req.dt_days).ceil());
 
         let config = pde_richards::RichardsConfig {
             soil,

@@ -230,18 +230,16 @@ impl NucleusMesh {
                 cross_node_hops += 1;
             }
 
-            if same_node && decision.substrate.kind == crate::substrate::SubstrateKind::Gpu {
-                if let Some(npu_sub) = node
+            if same_node
+                && decision.substrate.kind == crate::substrate::SubstrateKind::Gpu
+                && let Some(npu_sub) = node
                     .substrates
                     .iter()
                     .find(|s| s.kind == crate::substrate::SubstrateKind::Npu)
-                {
-                    if npu_sub.identity.pci_id.is_some()
-                        && decision.substrate.identity.pci_id.is_some()
-                    {
-                        local_pcie_bypasses += 1;
-                    }
-                }
+                && npu_sub.identity.pci_id.is_some()
+                && decision.substrate.identity.pci_id.is_some()
+            {
+                local_pcie_bypasses += 1;
             }
 
             stages.push(MeshStage {
@@ -298,7 +296,7 @@ impl MeshPipeline<'_> {
 }
 
 #[cfg(test)]
-#[allow(clippy::expect_used, clippy::unwrap_used)]
+#[expect(clippy::expect_used, reason = "test assertions")]
 mod tests {
     use super::*;
     use crate::substrate::{Capability, Identity, Properties, SubstrateKind};

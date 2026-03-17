@@ -114,7 +114,7 @@ pub fn analyze_tissue_disorder(
         )
     })?;
 
-    let richness = n_species as f64;
+    let richness = crate::cast::usize_f64(n_species);
     let w_effective = (1.0 - dm.evenness) * richness.ln();
 
     let d = compartment.effective_dimension_intact();

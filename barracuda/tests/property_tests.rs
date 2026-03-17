@@ -335,7 +335,7 @@ fn json_value_strategy() -> impl Strategy<Value = serde_json::Value> {
         Just(serde_json::Value::Null),
         any::<bool>().prop_map(serde_json::Value::Bool),
         (-1_000_000i64..1_000_000).prop_map(|n| serde_json::json!(n)),
-        "[ a-zA-Z0-9_.-]{0,32}".prop_map(|s| serde_json::Value::String(s)),
+        "[ a-zA-Z0-9_.-]{0,32}".prop_map(serde_json::Value::String),
         Just(serde_json::json!([])),
         Just(serde_json::json!({})),
         Just(serde_json::json!(["health", "compute.dispatch"])),

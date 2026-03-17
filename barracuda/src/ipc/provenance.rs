@@ -132,9 +132,7 @@ pub(crate) fn neural_api_socket_path_with(config: &ProvenanceConfig) -> Option<P
 }
 
 fn ipc_err(msg: impl Into<String>) -> crate::error::AirSpringError {
-    crate::error::AirSpringError::Ipc(crate::rpc::IpcError::EmptyResponse {
-        method: msg.into(),
-    })
+    crate::error::AirSpringError::Ipc(crate::rpc::IpcError::EmptyResponse { method: msg.into() })
 }
 
 fn capability_call(
@@ -155,18 +153,25 @@ fn capability_call(
     });
 
     let timeout = Duration::from_secs(PROVENANCE_TIMEOUT_SECS);
-    let mut stream = UnixStream::connect(socket_path).map_err(|e| ipc_err(format!("connect: {e}")))?;
+    let mut stream =
+        UnixStream::connect(socket_path).map_err(|e| ipc_err(format!("connect: {e}")))?;
     stream.set_read_timeout(Some(timeout)).ok();
     stream.set_write_timeout(Some(timeout)).ok();
 
     let payload = serde_json::to_string(&request)?;
-    stream.write_all(payload.as_bytes()).map_err(|e| ipc_err(format!("write: {e}")))?;
-    stream.write_all(b"\n").map_err(|e| ipc_err(format!("write newline: {e}")))?;
+    stream
+        .write_all(payload.as_bytes())
+        .map_err(|e| ipc_err(format!("write: {e}")))?;
+    stream
+        .write_all(b"\n")
+        .map_err(|e| ipc_err(format!("write newline: {e}")))?;
     stream.flush().map_err(|e| ipc_err(format!("flush: {e}")))?;
 
     let mut reader = BufReader::new(stream);
     let mut line = String::new();
-    reader.read_line(&mut line).map_err(|e| ipc_err(format!("read: {e}")))?;
+    reader
+        .read_line(&mut line)
+        .map_err(|e| ipc_err(format!("read: {e}")))?;
 
     let parsed: serde_json::Value = serde_json::from_str(line.trim())?;
 
@@ -227,7 +232,13 @@ pub fn begin_experiment_session_with(
         "description": experiment_name,
     });
 
-    capability_call(&socket, crate::primal_names::domains::DAG, "create_session", &args).map_or_else(
+    capability_call(
+        &socket,
+        crate::primal_names::domains::DAG,
+        "create_session",
+        &args,
+    )
+    .map_or_else(
         |_| ProvenanceResult {
             id: local_session_id(),
             available: false,
@@ -278,7 +289,13 @@ pub fn record_experiment_step_with(
         "event": step,
     });
 
-    capability_call(&socket, crate::primal_names::domains::DAG, "append_event", &args).map_or_else(
+    capability_call(
+        &socket,
+        crate::primal_names::domains::DAG,
+        "append_event",
+        &args,
+    )
+    .map_or_else(
         |_| ProvenanceResult {
             id: "unavailable".to_string(),
             available: false,
@@ -415,7 +432,14 @@ pub fn record_gpu_step(
     input_hash: &str,
     output_summary: &serde_json::Value,
 ) -> ProvenanceResult {
-    record_gpu_step_with(session_id, shader_name, precision, input_hash, output_summary, &ProvenanceConfig::from_env())
+    record_gpu_step_with(
+        session_id,
+        shader_name,
+        precision,
+        input_hash,
+        output_summary,
+        &ProvenanceConfig::from_env(),
+    )
 }
 
 /// DI variant — accepts explicit [`ProvenanceConfig`].
@@ -451,7 +475,13 @@ pub fn is_available_with(config: &ProvenanceConfig) -> bool {
     let Some(socket) = neural_api_socket_path_with(config) else {
         return false;
     };
-    capability_call(&socket, crate::primal_names::domains::DAG, "health", &serde_json::json!({})).is_ok()
+    capability_call(
+        &socket,
+        crate::primal_names::domains::DAG,
+        "health",
+        &serde_json::json!({}),
+    )
+    .is_ok()
 }
 
 impl ProvenanceCompletion {

@@ -103,7 +103,7 @@ fn phase_1_graph_topology(v: &mut ValidationHarness) {
     );
     v.check_bool(
         "graph_has_airspring",
-        deploy_toml.contains("airspring") || deploy_toml.contains("airSpring"),
+        deploy_toml.contains(airspring_barracuda::PRIMAL_NAME) || deploy_toml.contains("airSpring"),
     );
 
     let node_count =

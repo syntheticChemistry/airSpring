@@ -158,9 +158,14 @@ pub fn mc_et0_cpu(
 
         let ea_p = et::actual_vapour_pressure_rh(tmin_p, tmax_p, rh_min_p, rh_max_p);
 
-        let wind_p =
-            (input.wind_speed_2m * (1.0 + z_wind * uncertainties.sigma_wind_frac)).max(0.01);
-        let rs_p = (input.solar_radiation * (1.0 + z_rs * uncertainties.sigma_rs_frac)).max(0.01);
+        let wind_p = (input
+            .wind_speed_2m
+            .mul_add(z_wind * uncertainties.sigma_wind_frac, input.wind_speed_2m))
+        .max(0.01);
+        let rs_p = (input
+            .solar_radiation
+            .mul_add(z_rs * uncertainties.sigma_rs_frac, input.solar_radiation))
+        .max(0.01);
 
         let perturbed = DailyEt0Input {
             tmin: tmin_p,
@@ -283,10 +288,16 @@ pub fn mc_et0_gpu(
             .mul_add(100.0, z_rh_min * uncertainties.sigma_rh_min)
             .clamp(1.0, 100.0);
 
-        let wind_p =
-            (base_input.wind_speed_2m * (1.0 + z_wind * uncertainties.sigma_wind_frac)).max(0.01);
-        let rs_p =
-            (base_input.solar_radiation * (1.0 + z_rs * uncertainties.sigma_rs_frac)).max(0.01);
+        let wind_p = (base_input.wind_speed_2m.mul_add(
+            z_wind * uncertainties.sigma_wind_frac,
+            base_input.wind_speed_2m,
+        ))
+        .max(0.01);
+        let rs_p = (base_input.solar_radiation.mul_add(
+            z_rs * uncertainties.sigma_rs_frac,
+            base_input.solar_radiation,
+        ))
+        .max(0.01);
 
         station_days.push(StationDay {
             tmax: tmax_p,
@@ -502,11 +513,7 @@ mod tests {
     }
 
     fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
-        barracuda::device::test_pool::tokio_block_on(
-            barracuda::device::WgpuDevice::new_f64_capable(),
-        )
-        .ok()
-        .map(std::sync::Arc::new)
+        crate::gpu::device_info::try_f64_device()
     }
 
     #[test]

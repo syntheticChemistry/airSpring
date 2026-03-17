@@ -26,7 +26,7 @@
 | Phase 3.9 (Niche adapter) | 41 capabilities, ecology domain in biomeOS registry |
 | Phase 4.0 (Cross-primal) | 28/28 PASS — capability.call routing, cross-primal forwarding |
 | Faculty | Dong (BAE, MSU — new lab 2026) |
-| Handoff | V087 in `wateringHole/handoffs/` |
+| Handoff | V089 in `wateringHole/handoffs/` |
 | ToadStool | S147+ — barraCuda v0.3.5 standalone (wgpu 28) |
 
 ---

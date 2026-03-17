@@ -103,12 +103,13 @@ impl GpuBootstrap {
             sorted.sort_by(f64::total_cmp);
             let ci_lower = percentile(&sorted, 2.5);
             let ci_upper = percentile(&sorted, 97.5);
-            let boot_mean: f64 = distribution.iter().sum::<f64>() / distribution.len() as f64;
+            let n_f = crate::cast::usize_f64(distribution.len());
+            let boot_mean: f64 = distribution.iter().sum::<f64>() / n_f;
             let variance: f64 = distribution
                 .iter()
                 .map(|&x| (x - boot_mean).powi(2))
                 .sum::<f64>()
-                / (distribution.len() as f64);
+                / n_f;
             let std_error = variance.sqrt();
             Ok(BootstrapEstimate {
                 mean: mean_est,
@@ -130,7 +131,7 @@ fn bootstrap_mean_cpu(
 ) -> crate::error::Result<BootstrapEstimate> {
     let ci = bootstrap_ci(
         data,
-        |d| d.iter().sum::<f64>() / d.len() as f64,
+        |d| d.iter().sum::<f64>() / crate::cast::usize_f64(d.len()),
         n_bootstrap,
         0.95,
         seed,

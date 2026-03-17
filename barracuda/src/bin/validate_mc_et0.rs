@@ -316,12 +316,18 @@ fn validate_sample_count(v: &mut ValidationHarness) {
     validation::section("Sample counts");
 
     let result = mc_et0_cpu(&uccle_input(), &Et0Uncertainties::default(), 2000, 42);
-    #[expect(clippy::cast_precision_loss, reason = "sample count N < 2^53; usize→f64 exact")]
+    #[expect(
+        clippy::cast_precision_loss,
+        reason = "sample count N < 2^53; usize→f64 exact"
+    )]
     let n = result.n_samples as f64;
     v.check_abs("all 2000 samples valid", n, 2000.0, f64::EPSILON);
 
     let zero = mc_et0_cpu(&uccle_input(), &Et0Uncertainties::default(), 0, 42);
-    #[expect(clippy::cast_precision_loss, reason = "sample count N < 2^53; usize→f64 exact")]
+    #[expect(
+        clippy::cast_precision_loss,
+        reason = "sample count N < 2^53; usize→f64 exact"
+    )]
     let n0 = zero.n_samples as f64;
     v.check_abs("zero samples returns 0", n0, 0.0, f64::EPSILON);
 }

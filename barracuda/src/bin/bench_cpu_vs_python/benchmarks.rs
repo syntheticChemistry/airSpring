@@ -374,10 +374,9 @@ pub fn bench_richards_1d(n: usize) -> (f64, f64, String) {
             true,
             0.005,
             0.005,
-        )) {
-            if let Some(last) = profiles.last() {
-                final_theta = last.theta[0];
-            }
+        )) && let Some(last) = profiles.last()
+        {
+            final_theta = last.theta[0];
         }
     }
     let elapsed = t0.elapsed().as_secs_f64();

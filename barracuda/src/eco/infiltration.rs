@@ -121,7 +121,10 @@ pub fn infiltration_rate(params: &GreenAmptParams, f_cumulative_cm: f64) -> f64 
     if f_cumulative_cm <= 0.0 {
         return f64::MAX;
     }
-    params.ks_cm_hr * (1.0 + params.psi_cm * params.delta_theta / f_cumulative_cm)
+    params.ks_cm_hr.mul_add(
+        params.psi_cm * params.delta_theta / f_cumulative_cm,
+        params.ks_cm_hr,
+    )
 }
 
 /// Infiltration rate at time t (cm/hr). Convenience wrapper.

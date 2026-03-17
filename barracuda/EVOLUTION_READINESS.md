@@ -1,10 +1,10 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: March 16, 2026 (v0.8.8 — 87 experiments, 880 lib + 285 integration + 61 forge + 22 property tests, 91 binaries. Ecosystem absorption: `primal_names::BIOMEOS`, `parse_capabilities` 4-format (flat, object, nested, double-nested), `discovery.rs` hardcoding eliminated, `#[allow]`→`#[expect]` complete, collapsible-if (Edition 2024 let-chains), JSON-RPC proptest fuzz (7 properties), PRIMAL_REGISTRY v0.8.7. 58 warnings (pre-existing missing_docs only).)
+**Last Updated**: March 17, 2026 (v0.8.9 — Cross-ecosystem absorption: canonical `PRIMAL_NAME`/`PRIMAL_DOMAIN` (healthSpring V34), `OnceLock` GPU probe caching (toadStool S158), `cast` module with safe numeric casts (neuralSpring S162), `DispatchOutcome<T>` as library type (wetSpring V126), coralReef/Squirrel discovery functions (healthSpring V34), `mul_add()` FMA evolution (18 sites, barraCuda Sprint 7), `GemmF64` transpose documented in evolution gaps (groundSpring V113), `ValidationSink` upstream proposal (ludoSpring V23). Zero clippy warnings.)
 **barraCuda**: v0.3.5 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry, SpringDomain newtype, F64BuiltinCapabilities DF64 fields)
 **ToadStool**: S147+ (20,015 tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient, hw-learn, spirv_codegen_safety)
 **coralReef**: Phase 10 Iteration 44 sovereign Rust GPU compiler (NVIDIA + AMD, 1669+48 tests, VFIO dispatch)
-**Handoff**: V0.8.8 (full validation pipeline green + cross-spring absorption + zero C deps + biomeOS IPC alignment + all-binary zero-panic + compute_dispatch client + zero hardcoded primals + proptest fuzz)
+**Handoff**: V0.8.9 (full validation pipeline green + cross-spring absorption + zero C deps + biomeOS IPC alignment + all-binary zero-panic + compute_dispatch client + zero hardcoded primals + proptest fuzz)
 **License**: AGPL-3.0-or-later
 
 ---

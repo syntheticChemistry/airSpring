@@ -1,8 +1,8 @@
 # airSpring — Ecological & Agricultural Sciences
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
-**Date**: March 16, 2026
-**Version**: 0.8.8
+**Date**: March 17, 2026
+**Version**: 0.8.9
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -13,7 +13,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
      → biomeOS (NUCLEUS atomics, deployment graphs) → Penny Irrigation
 ```
 
-## Current Status (v0.8.8)
+## Current Status (v0.8.9)
 
 | Phase | Status | Key Metric |
 |-------|--------|------------|
@@ -46,12 +46,13 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | Phase 5.8: Deep execution | **All 47 binaries zero-panic** | v0.8.6: Zero-panic validation expanded from 9→47 binaries, typed `compute_dispatch` client (toadStool `compute.dispatch.submit/result/capabilities`), centralized `extract_rpc_error()`, Python tolerance mirror complete (60 constants), 866 lib tests |
 | Phase 5.9: Ecosystem absorption | **Zero hardcoded primals** | v0.8.7: `primal_names::BIOMEOS` constant, swapped TOADSTOOL/BEARDOG docs, `discovery.rs` hardcoding eliminated, `#[allow]`→`#[expect]` migration complete, `parse_capabilities` 4-format support (S156+), collapsible-if (Edition 2024 let-chains), JSON-RPC proptest fuzz (7 properties), PRIMAL_REGISTRY v0.8.7, 880 lib + 22 property tests |
 | Phase 5.10: Cross-ecosystem absorption | **Health probes, circuit breaker** | v0.8.8: health probes, circuit breaker, OrExit, thiserror, socket_env_var, structured tracing, `IpcError::is_recoverable` |
+| Phase 5.11: Cross-ecosystem evolution | **All absorbed** | v0.8.9: Canonical `PRIMAL_NAME`/`PRIMAL_DOMAIN`, `OnceLock` GPU probe cache, `cast` module (safe numeric casts), `DispatchOutcome<T>` library type, coralReef/Squirrel discovery, `mul_add()` FMA (18 sites), smart refactors (4 monoliths → 19 modules: evapotranspiration, dual_kc, biomeos, validation), composition guidance |
 
 ### Code Quality
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` (barracuda) | **880 passed**, 0 failures |
+| `cargo test --lib` (barracuda) | **891 passed**, 0 failures |
 | `cargo test --test '*'` (integration) | **285 passed** (16 test files) |
 | `cargo test --lib` (metalForge) | **61 passed**, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **95.66% line coverage** |
@@ -228,7 +229,7 @@ airSpring/
 │   └── requirements.txt
 ├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (880 lib tests, 91 binaries, barraCuda 0.3.5 / wgpu 28, Edition 2024)
 │   ├── src/
-│   │   ├── biomeos.rs           # biomeOS socket resolution + primal discovery (shared)
+│   │   ├── biomeos/                # biomeOS socket resolution + primal discovery (3 sub-modules)
 │   │   ├── eco/                 # Domain modules (22 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine + drought_index)
 │   │   ├── gpu/                 # ToadStool/BarraCuda GPU bridge (25 Tier A, ops 0-19 upstream + BrentGpu + RichardsGpu)
 │   │   ├── data/                # Data provider abstraction (HttpProvider, BiomeosProvider, NestGateProvider)
@@ -284,7 +285,7 @@ airSpring/
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance (S87) |
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (87 experiments) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V087 current) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V089 current) |
 
 ## License
 
@@ -292,7 +293,7 @@ AGPL-3.0-or-later
 
 ---
 
-*March 16, 2026 — v0.8.8. Deep debt resolution round: `#![forbid(unsafe_code)]`
+*March 17, 2026 — v0.8.9. Deep debt resolution round: `#![forbid(unsafe_code)]`
 (upgraded from deny — cannot be overridden), JSON-RPC 2.0 protocol compliance
 (method-not-found now returns proper error object, not success wrapper),
 capability-based orchestrator discovery (hardcoded socket name eliminated),
@@ -300,4 +301,4 @@ capability-based orchestrator discovery (hardcoded socket name eliminated),
 gpu_empirical_pet, bootstrap_jackknife_known), cargo-deny policies aligned (unknown-git
 deny), self-contained IPC integration tests (5 new), rust-toolchain.toml pinned at
 1.92. Builds on v0.8.8 niche architecture. 880 lib + 285 integration + 61 forge
-tests, 0 failures. AGPL-3.0-or-later.*
+tests, 0 failures. AGPL-3.0-or-later. Cross-ecosystem evolution: PRIMAL_NAME/PRIMAL_DOMAIN constants, OnceLock GPU probe, cast module, DispatchOutcome<T>, coralReef/Squirrel discovery, mul_add FMA, smart refactors (4→19 modules), composition guidance. 891 lib tests.*

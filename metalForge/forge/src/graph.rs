@@ -106,7 +106,12 @@ pub enum GraphError {
     /// Graph has a cycle (not a DAG).
     Cycle(Vec<String>),
     /// Unknown node referenced in `depends_on`.
-    UnknownDependency { node: String, dependency: String },
+    UnknownDependency {
+        /// The node that declared the dependency.
+        node: String,
+        /// The dependency target that was not found.
+        dependency: String,
+    },
 }
 
 impl std::fmt::Display for GraphError {
@@ -259,7 +264,7 @@ impl GraphDef {
 }
 
 #[cfg(test)]
-#[allow(clippy::expect_used, clippy::unwrap_used)]
+#[expect(clippy::expect_used, clippy::unwrap_used, reason = "test assertions")]
 mod tests {
     use super::*;
 

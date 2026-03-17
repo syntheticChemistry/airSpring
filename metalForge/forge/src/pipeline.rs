@@ -197,7 +197,7 @@ pub fn route_pipeline<'a>(
 }
 
 #[cfg(test)]
-#[allow(clippy::expect_used, clippy::unwrap_used)]
+#[expect(clippy::expect_used, reason = "test assertions")]
 mod tests {
     use super::*;
     use crate::substrate::{Capability, Identity, Properties};

@@ -565,6 +565,15 @@ pub const GAPS: &[EvolutionGap] = &[
         action: "Wired via pde::richards (v0.4.0) — direct use available for other PDE solvers",
     },
     EvolutionGap {
+        id: "gemm_f64_transpose",
+        description: "Batched GEMM with transpose for least-squares normal equations (K^T K, K^T G)",
+        tier: Tier::A,
+        barracuda_primitive: Some("ops::linalg::GemmF64::execute_gemm_ex(trans_a=true) (S6+)"),
+        action: "Available upstream. Currently consumed via stats_f64::linear_regression \
+                 (neuralSpring S69) which uses GEMM internally. Direct use if custom \
+                 regression or matrix ops needed beyond OLS.",
+    },
+    EvolutionGap {
         id: "rk45_adaptive",
         description: "Adaptive RK45 ODE solver for dynamic soil/water models",
         tier: Tier::B,
@@ -611,6 +620,16 @@ pub const GAPS: &[EvolutionGap] = &[
         tier: Tier::C,
         barracuda_primitive: None,
         action: "Future: not GPU, but needed for automated data ingestion",
+    },
+    EvolutionGap {
+        id: "validation_sink",
+        description: "ValidationSink trait for testable harness output (ludoSpring V23 pattern)",
+        tier: Tier::C,
+        barracuda_primitive: None,
+        action: "Upstream barracuda::validation::ValidationHarness does not yet support sinks. \
+                 Propose upstream absorption of ludoSpring's ValidationSink trait \
+                 (StderrSink for production, BufferSink for testing). \
+                 airSpring's 91 validation binaries would benefit from testable harness output.",
     },
 ];
 

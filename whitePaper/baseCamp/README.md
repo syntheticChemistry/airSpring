@@ -1,7 +1,7 @@
 # baseCamp: Per-Faculty Research Briefings
 
-**Updated**: March 16, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.8.8)
+**Updated**: March 17, 2026
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.8.9)
 **Status**: 87 experiments, 1284/1284 Python + 880 lib + 285 integration + 61 forge + 22 property tests + 91 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, BYOB niche deployment) + `#![forbid(unsafe_code)]` both crates + zero clippy pedantic+nursery + `warn(missing_docs)`. 60 tolerances in 4 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies** (ureq→Songbird IPC). Zero-panic validation (47/47 binaries). Typed `compute_dispatch` client. `extract_rpc_error()` centralized. Full validation pipeline green (2026-03-16)
 
 ---
@@ -238,11 +238,12 @@ S79 modernization: `libc`→`rustix`, `async-trait`→AFIT, universal f64 precis
 |----------|---------|
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C breakdown, absorbed vs stays-local, quality gates |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
-| `wateringHole/handoffs/` | V087 current — ecosystem absorption, proptest fuzz, zero hardcoded primals |
+| `wateringHole/handoffs/` | V089 current — ecosystem absorption, proptest fuzz, zero hardcoded primals |
 | `specs/CROSS_SPRING_EVOLUTION.md` | 845+ WGSL shader provenance across all Springs (S93) |
 
 ### Next Steps (Dong Lab)
 
+- **Cross-ecosystem evolution (v0.8.9)**: Canonical `PRIMAL_NAME`/`PRIMAL_DOMAIN` constants (healthSpring V34). `OnceLock` GPU probe cache (toadStool S158). `cast` module for safe numeric casts (neuralSpring S162). `DispatchOutcome<T>` library type (wetSpring V126). coralReef/Squirrel capability discovery (healthSpring V34). `mul_add()` FMA at 18 sites (barraCuda Sprint 7). Smart refactors: 4 monoliths → 19 focused modules (evapotranspiration, dual_kc, biomeos, validation). Composition guidance for solo/trio/wider primal combos. 891 lib tests, zero clippy warnings.
 - **Ecosystem absorption (v0.8.8)**: Zero hardcoded primals (`primal_names::BIOMEOS`). 4-format `parse_capabilities` (neuralSpring S156+). JSON-RPC proptest fuzz (7 properties, petalTongue V166 pattern). `#[expect]` complete (zero `#[allow]` in production). Edition 2024 let-chains. 880 lib + 22 property tests. PRIMAL_REGISTRY v0.8.8. Zero-panic 47/47 binaries. Typed `compute_dispatch` client. `extract_rpc_error()`. Python tolerance mirror (60 constants). Zero C deps
 - **Cross-ecosystem absorption (v0.8.8)**: Health probes, circuit breaker, OrExit, thiserror, socket_env_var, structured tracing, `IpcError::is_recoverable`. 880 lib tests.
 - **Coverage**: target 98%+ (remaining gaps: GPU-dependent code paths)

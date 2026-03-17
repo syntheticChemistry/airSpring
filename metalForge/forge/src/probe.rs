@@ -108,10 +108,10 @@ pub fn probe_npus() -> Vec<Substrate> {
     if let Ok(entries) = std::fs::read_dir("/dev") {
         for entry in entries.flatten() {
             let name = entry.file_name();
-            if name.to_str().is_some_and(|n| n.starts_with("akida")) {
-                if let Some(s) = probe_npu_at(&entry.path().to_string_lossy()) {
-                    npus.push(s);
-                }
+            if name.to_str().is_some_and(|n| n.starts_with("akida"))
+                && let Some(s) = probe_npu_at(&entry.path().to_string_lossy())
+            {
+                npus.push(s);
             }
         }
     }
@@ -182,7 +182,7 @@ fn parse_meminfo(content: &str) -> Option<u64> {
 }
 
 #[cfg(test)]
-#[allow(clippy::expect_used, clippy::unwrap_used)]
+#[expect(clippy::unwrap_used, reason = "test assertions")]
 mod tests {
     use super::*;
 

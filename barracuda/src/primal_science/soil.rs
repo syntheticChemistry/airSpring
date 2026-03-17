@@ -32,7 +32,7 @@ pub(super) fn richards_1d(params: &Value) -> Value {
             let Some(last) = profiles.last() else {
                 return serde_json::json!({"error": "solver returned no profiles"});
             };
-            let mean = last.theta.iter().sum::<f64>() / last.theta.len() as f64;
+            let mean = last.theta.iter().sum::<f64>() / crate::cast::usize_f64(last.theta.len());
             serde_json::json!({"mean_theta": mean, "n_nodes": last.theta.len(), "n_timesteps": profiles.len(), "final_theta": last.theta, "method": "richards_1d_implicit_euler_picard"})
         }
         Err(e) => serde_json::json!({"error": format!("{e}")}),

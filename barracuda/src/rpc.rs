@@ -238,14 +238,18 @@ pub fn send(
     })?;
     let timeout_dur = socket_timeout();
     let timeout = Some(timeout_dur);
-    stream.set_read_timeout(timeout).map_err(|e| IpcError::ConnectionFailed {
-        socket: socket_path.to_path_buf(),
-        source: e,
-    })?;
-    stream.set_write_timeout(timeout).map_err(|e| IpcError::ConnectionFailed {
-        socket: socket_path.to_path_buf(),
-        source: e,
-    })?;
+    stream
+        .set_read_timeout(timeout)
+        .map_err(|e| IpcError::ConnectionFailed {
+            socket: socket_path.to_path_buf(),
+            source: e,
+        })?;
+    stream
+        .set_write_timeout(timeout)
+        .map_err(|e| IpcError::ConnectionFailed {
+            socket: socket_path.to_path_buf(),
+            source: e,
+        })?;
 
     let req = request(method, params);
     let mut payload = serde_json::to_vec(&req).map_err(|e| IpcError::DeserializationFailed {

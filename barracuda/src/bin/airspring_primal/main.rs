@@ -26,9 +26,8 @@ use std::time::{Duration, Instant};
 
 use tracing::{error, info, warn};
 
+use airspring_barracuda::ipc::DispatchOutcome;
 use airspring_barracuda::{biomeos, niche, rpc};
-
-use dispatch::DispatchOutcome;
 
 const READ_TIMEOUT_SECS: u64 = 60;
 const WRITE_TIMEOUT_SECS: u64 = 10;
@@ -130,7 +129,11 @@ fn handle_connection(stream: UnixStream, state: &NicheState) {
         let (resp, success) = match outcome {
             DispatchOutcome::Ok(result) => (rpc::success(&id, &result), true),
             DispatchOutcome::MethodNotFound(method) => (
-                rpc::error(&id, rpc::METHOD_NOT_FOUND, &format!("Method not found: {method}")),
+                rpc::error(
+                    &id,
+                    rpc::METHOD_NOT_FOUND,
+                    &format!("Method not found: {method}"),
+                ),
                 false,
             ),
             DispatchOutcome::InvalidParams { method, reason } => (
@@ -309,7 +312,7 @@ fn main() {
     match subcommand {
         "server" | "serve" => {
             if let Err(e) = run() {
-                eprintln!("[fatal] {e}");
+                tracing::error!(error = %e, "fatal server error");
                 std::process::exit(1);
             }
         }

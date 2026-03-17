@@ -123,7 +123,7 @@ impl TimeseriesData {
         if count == 0 {
             return None;
         }
-        let count_f = count as f64;
+        let count_f = crate::cast::usize_f64(count);
         let mean = sum / count_f;
         let variance = values
             .iter()

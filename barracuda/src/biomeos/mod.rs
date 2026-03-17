@@ -27,44 +27,17 @@
 //! }
 //! ```
 
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
-/// Parse capability names from flat-array, nested-object, or wrapped formats.
-///
-/// Handles all formats returned by diverse ecosystem sources:
-/// - **Format A** — String array: `["health", "compute.dispatch"]`
-/// - **Format B** — Object array: `[{"name": "health", "version": "1.0"}]`
-/// - **Format C** — Nested wrapper: `{"capabilities": ["health", ...]}` (neuralSpring S156+)
-/// - **Format D** — Double-nested: `{"capabilities": {"capabilities": [...]}}` (toadStool S155+)
-///
-/// Use when parsing `capability.list`, `health`, or `capability.discover` responses.
-#[must_use]
-pub fn parse_capabilities(value: &serde_json::Value) -> Vec<String> {
-    if let serde_json::Value::Object(obj) = value {
-        if let Some(inner) = obj.get("capabilities") {
-            return parse_capabilities(inner);
-        }
-        if let Some(inner) = obj.get("result") {
-            return parse_capabilities(inner);
-        }
-    }
+mod capabilities;
+mod discovery;
 
-    match value {
-        serde_json::Value::Array(arr) => arr
-            .iter()
-            .filter_map(|v| match v {
-                serde_json::Value::String(s) => Some(s.clone()),
-                serde_json::Value::Object(obj) => obj
-                    .get("name")
-                    .or_else(|| obj.get("capability"))
-                    .and_then(|n| n.as_str())
-                    .map(str::to_owned),
-                _ => None,
-            })
-            .collect(),
-        _ => Vec::new(),
-    }
-}
+pub use capabilities::parse_capabilities;
+pub use discovery::{
+    discover_all_primals, discover_all_primals_in, discover_inference_primal,
+    discover_primal_socket, discover_primal_socket_in, discover_shader_compiler, find_socket,
+    find_socket_in,
+};
 
 /// Explicit configuration for biomeOS socket resolution.
 ///
@@ -134,85 +107,6 @@ pub fn fallback_registration_primal_with(config: &SocketConfig) -> Option<String
     config.fallback_primal.clone()
 }
 
-/// Discover a primal's socket by scanning a specific directory.
-///
-/// Tries `{name}-{family}.sock` first, then `{name}.sock`, then any
-/// file starting with `{name}` and ending with `.sock`.
-#[must_use]
-pub fn discover_primal_socket_in(
-    primal_name: &str,
-    socket_dir: &Path,
-    family_id: &str,
-) -> Option<PathBuf> {
-    let with_family = socket_dir.join(format!("{primal_name}-{family_id}.sock"));
-    if with_family.exists() {
-        return Some(with_family);
-    }
-
-    let without_family = socket_dir.join(format!("{primal_name}.sock"));
-    if without_family.exists() {
-        return Some(without_family);
-    }
-
-    if let Ok(entries) = std::fs::read_dir(socket_dir) {
-        for entry in entries.flatten() {
-            let name = entry.file_name();
-            let name_str = name.to_string_lossy();
-            if name_str.starts_with(primal_name) && name_str.ends_with(".sock") {
-                return Some(entry.path());
-            }
-        }
-    }
-
-    None
-}
-
-/// Find a socket by prefix in a specific directory.
-#[must_use]
-pub fn find_socket_in(prefix: &str, socket_dir: &Path) -> Option<PathBuf> {
-    if let Ok(entries) = std::fs::read_dir(socket_dir) {
-        for entry in entries.flatten() {
-            let name = entry.file_name();
-            let s = name.to_string_lossy();
-            if s.starts_with(prefix) && s.ends_with(".sock") {
-                return Some(entry.path());
-            }
-        }
-    }
-    None
-}
-
-/// List all discovered primals in a specific directory.
-#[must_use]
-pub fn discover_all_primals_in(socket_dir: &Path) -> Vec<String> {
-    let mut primals = Vec::new();
-
-    if let Ok(entries) = std::fs::read_dir(socket_dir) {
-        for entry in entries.flatten() {
-            let name = entry.file_name();
-            let name_str = name.to_string_lossy().to_string();
-            if Path::new(&name_str)
-                .extension()
-                .is_some_and(|ext| ext.eq_ignore_ascii_case("sock"))
-            {
-                let primal_name = name_str
-                    .split('-')
-                    .next()
-                    .unwrap_or(&name_str)
-                    .trim_end_matches(".sock")
-                    .to_string();
-
-                if !primals.contains(&primal_name) {
-                    primals.push(primal_name);
-                }
-            }
-        }
-    }
-
-    primals.sort();
-    primals
-}
-
 // ── Public wrappers (read from environment) ──────────────────────────
 
 /// Resolve the biomeOS socket directory from environment.
@@ -237,37 +131,12 @@ pub fn resolve_socket_path(primal_name: &str, family_id: &str) -> PathBuf {
     resolve_socket_dir().join(format!("{primal_name}-{family_id}.sock"))
 }
 
-/// Discover a primal's socket by scanning the socket directory.
-///
-/// Tries `{name}-{family}.sock` first, then `{name}.sock`, then any
-/// file starting with `{name}` and ending with `.sock`.
-#[must_use]
-pub fn discover_primal_socket(primal_name: &str) -> Option<PathBuf> {
-    let config = SocketConfig::from_env();
-    let socket_dir = resolve_socket_dir_with(&config);
-    let family_id = get_family_id_with(&config);
-    discover_primal_socket_in(primal_name, &socket_dir, &family_id)
-}
-
-/// Find a socket by prefix (e.g., `"airspring"` finds `airspring-*.sock`).
-#[must_use]
-pub fn find_socket(prefix: &str) -> Option<PathBuf> {
-    let socket_dir = resolve_socket_dir();
-    find_socket_in(prefix, &socket_dir)
-}
-
 /// Resolve the fallback registration primal from environment.
 ///
 /// Returns the primal name from `BIOMEOS_FALLBACK_PRIMAL` or `None` if unset.
 #[must_use]
 pub fn fallback_registration_primal() -> Option<String> {
     fallback_registration_primal_with(&SocketConfig::from_env())
-}
-
-/// List all discovered primals in the socket directory.
-#[must_use]
-pub fn discover_all_primals() -> Vec<String> {
-    discover_all_primals_in(&resolve_socket_dir())
 }
 
 // ── Platform fallback ────────────────────────────────────────────────
@@ -279,7 +148,7 @@ fn platform_fallback_socket_dir() -> PathBuf {
         if let Ok(meta) = std::fs::metadata("/proc/self") {
             let uid = meta.uid();
             let dir = PathBuf::from(format!("/run/user/{uid}/biomeos"));
-            if dir.parent().is_some_and(Path::exists) {
+            if dir.parent().is_some_and(std::path::Path::exists) {
                 return dir;
             }
         }
@@ -292,6 +161,8 @@ fn platform_fallback_socket_dir() -> PathBuf {
 #[cfg(test)]
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
+    use std::path::PathBuf;
+
     use super::*;
 
     fn tmp_dir(suffix: &str) -> PathBuf {

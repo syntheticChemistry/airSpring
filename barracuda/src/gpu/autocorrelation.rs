@@ -100,7 +100,7 @@ pub fn autocorrelation_cpu(data: &[f64], max_lag: usize) -> Vec<f64> {
                 return 0.0;
             }
             let sum: f64 = (0..pairs).map(|t| data[t] * data[t + lag]).sum();
-            sum / pairs as f64
+            sum / crate::cast::usize_f64(pairs)
         })
         .collect()
 }
@@ -163,14 +163,10 @@ mod tests {
 
     #[test]
     fn test_gpu_matches_cpu() {
-        let device = barracuda::device::test_pool::tokio_block_on(
-            barracuda::device::WgpuDevice::new_f64_capable(),
-        );
-        let Ok(device) = device else {
+        let Some(device) = crate::gpu::device_info::try_f64_device() else {
             eprintln!("SKIP: No GPU device for AutocorrelationF64");
             return;
         };
-        let device = Arc::new(device);
         let engine = HydroAutocorrelation::new(device).unwrap();
 
         let data: Vec<f64> = (0..50).map(|i| f64::from(i).sin()).collect();

@@ -1,13 +1,14 @@
 # airSpring wateringHole
 
-**Updated**: March 16, 2026 | **Version**: v0.8.8
+**Updated**: March 17, 2026 | **Version**: v0.8.9
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.8.8** | [AIRSPRING_V088_CROSS_ECOSYSTEM_ABSORPTION_HANDOFF_MAR16_2026.md](handoffs/AIRSPRING_V088_CROSS_ECOSYSTEM_ABSORPTION_HANDOFF_MAR16_2026.md) | 2026-03-16 | **primary** — `thiserror`, health probes, circuit breaker, `OrExit<T>`, `IpcError` 8 variants + `is_recoverable()`, `socket_env_var()`, structured tracing, workspace `deny.toml`, 880 lib + 22 property tests |
+| **V0.8.9** | [AIRSPRING_V089_CROSS_ECOSYSTEM_EVOLUTION_HANDOFF_MAR17_2026.md](handoffs/AIRSPRING_V089_CROSS_ECOSYSTEM_EVOLUTION_HANDOFF_MAR17_2026.md) | 2026-03-17 | **primary** — `PRIMAL_NAME`/`PRIMAL_DOMAIN`, `OnceLock` GPU probe, `cast` module, `DispatchOutcome<T>`, coralReef/Squirrel discovery, `mul_add()` FMA, smart refactors (4→19 modules), composition guidance, 891 lib tests |
+| **V0.8.8** | [AIRSPRING_V088_CROSS_ECOSYSTEM_ABSORPTION_HANDOFF_MAR16_2026.md](handoffs/AIRSPRING_V088_CROSS_ECOSYSTEM_ABSORPTION_HANDOFF_MAR16_2026.md) | 2026-03-16 | `thiserror`, health probes, circuit breaker, `OrExit<T>`, `IpcError` 8 variants + `is_recoverable()`, `socket_env_var()`, structured tracing, workspace `deny.toml`, 880 lib + 22 property tests |
 | **V0.8.8** | [AIRSPRING_V088_BARRACUDA_TOADSTOOL_EVOLUTION_HANDOFF_MAR16_2026.md](handoffs/AIRSPRING_V088_BARRACUDA_TOADSTOOL_EVOLUTION_HANDOFF_MAR16_2026.md) | 2026-03-16 | barraCuda/toadStool evolution — 75+ delegations, upstream absorption candidates, action items by primal |
 | **≤V0.8.7** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 
@@ -25,6 +26,7 @@
 | `../graphs/airspring_niche_deploy.toml` | Full niche deployment: Tower + Trio + NestGate + ToadStool + airSpring |
 | `../graphs/cross_primal_soil_microbiome.toml` | Cross-Spring pipeline: airSpring θ(t) → wetSpring diversity |
 | `../barracuda/EVOLUTION_READINESS.md` | Tier A/B/C status, absorbed/stays-local, quality gates |
+| `airspring/AIRSPRING_COMPOSITION_GUIDANCE.md` | Solo, trio, and wider primal composition patterns |
 | `../metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66), post-absorption leaning status |
 | `../../wateringHole/SPRING_EVOLUTION_ISSUES.md` | **Shared** — Cross-primal issues for biomeOS and Spring teams |
 

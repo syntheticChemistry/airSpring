@@ -311,12 +311,13 @@ fn topo_sort(nodes: &HashSet<String>, deps: &HashMap<String, Vec<String>>) -> Op
     while let Some(n) = queue.pop() {
         order.push(n.clone());
         for (node, dep_list) in deps {
-            if dep_list.contains(&n) && nodes.contains(node) {
-                if let Some(d) = deg.get_mut(node) {
-                    *d = d.saturating_sub(1);
-                    if *d == 0 {
-                        queue.push(node.clone());
-                    }
+            if dep_list.contains(&n)
+                && nodes.contains(node)
+                && let Some(d) = deg.get_mut(node)
+            {
+                *d = d.saturating_sub(1);
+                if *d == 0 {
+                    queue.push(node.clone());
                 }
             }
         }

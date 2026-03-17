@@ -163,8 +163,8 @@ fn bench_scs_cn(v: &mut ValidationHarness, gpu: &GpuRunoff) {
     let n = 1000;
     let inputs: Vec<RunoffInput> = (0..n)
         .map(|i| RunoffInput {
-            precip_mm: 10.0 + (i as f64) * 0.1,
-            cn: 60.0 + (i as f64) * 0.03,
+            precip_mm: f64::from(i).mul_add(0.1, 10.0),
+            cn: f64::from(i).mul_add(0.03, 60.0),
             ia_ratio: 0.2,
         })
         .collect();
@@ -183,7 +183,12 @@ fn bench_scs_cn(v: &mut ValidationHarness, gpu: &GpuRunoff) {
     let max_err = max_rel_error(&gpu_result, &cpu);
     println!("  N={n}, GPU={gpu_us}µs, CPU={cpu_us}µs, max_rel_err={max_err:.2e}");
 
-    v.check_rel("scs_cn_parity", max_err, 0.0, tolerances::CROSS_SPRING_EVOLUTION.abs_tol);
+    v.check_rel(
+        "scs_cn_parity",
+        max_err,
+        0.0,
+        tolerances::CROSS_SPRING_EVOLUTION.abs_tol,
+    );
 }
 
 fn bench_stewart(v: &mut ValidationHarness, gpu: &GpuYieldResponse) {
@@ -191,8 +196,8 @@ fn bench_stewart(v: &mut ValidationHarness, gpu: &GpuYieldResponse) {
     let n = 500;
     let inputs: Vec<YieldInput> = (0..n)
         .map(|i| YieldInput {
-            ky: 0.5 + (i as f64) * 0.003,
-            et_actual: (0.3 + (i as f64) * 0.0014) * 600.0,
+            ky: f64::from(i).mul_add(0.003, 0.5),
+            et_actual: f64::from(i).mul_add(0.0014, 0.3) * 600.0,
             et_crop: 600.0,
         })
         .collect();
@@ -218,7 +223,12 @@ fn bench_stewart(v: &mut ValidationHarness, gpu: &GpuYieldResponse) {
     let max_err = max_rel_error(&gpu_result, &cpu);
     println!("  N={n}, GPU={gpu_us}µs, CPU={cpu_us}µs, max_rel_err={max_err:.2e}");
 
-    v.check_rel("stewart_parity", max_err, 0.0, tolerances::CROSS_SPRING_GPU_CPU.abs_tol);
+    v.check_rel(
+        "stewart_parity",
+        max_err,
+        0.0,
+        tolerances::CROSS_SPRING_GPU_CPU.abs_tol,
+    );
 }
 
 fn bench_makkink(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
@@ -226,8 +236,8 @@ fn bench_makkink(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
     let n = 500;
     let inputs: Vec<MakkinkInput> = (0..n)
         .map(|i| MakkinkInput {
-            tmean_c: 5.0 + (i as f64) * 0.05,
-            rs_mj: 8.0 + (i as f64) * 0.04,
+            tmean_c: f64::from(i).mul_add(0.05, 5.0),
+            rs_mj: f64::from(i).mul_add(0.04, 8.0),
             elevation_m: 150.0,
         })
         .collect();
@@ -246,7 +256,12 @@ fn bench_makkink(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
     let max_err = max_rel_error(&gpu_result, &cpu);
     println!("  N={n}, GPU={gpu_us}µs, CPU={cpu_us}µs, max_rel_err={max_err:.2e}");
 
-    v.check_rel("makkink_parity", max_err, 0.0, tolerances::GPU_SIMPLIFIED_ET0.abs_tol);
+    v.check_rel(
+        "makkink_parity",
+        max_err,
+        0.0,
+        tolerances::GPU_SIMPLIFIED_ET0.abs_tol,
+    );
 }
 
 fn bench_turc(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
@@ -254,9 +269,9 @@ fn bench_turc(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
     let n = 500;
     let inputs: Vec<TurcInput> = (0..n)
         .map(|i| TurcInput {
-            tmean_c: 10.0 + (i as f64) * 0.04,
-            rs_mj: 10.0 + (i as f64) * 0.02,
-            rh_pct: 30.0 + (i as f64) * 0.1,
+            tmean_c: f64::from(i).mul_add(0.04, 10.0),
+            rs_mj: f64::from(i).mul_add(0.02, 10.0),
+            rh_pct: f64::from(i).mul_add(0.1, 30.0),
         })
         .collect();
 
@@ -274,7 +289,12 @@ fn bench_turc(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
     let max_err = max_rel_error(&gpu_result, &cpu);
     println!("  N={n}, GPU={gpu_us}µs, CPU={cpu_us}µs, max_rel_err={max_err:.2e}");
 
-    v.check_rel("turc_parity", max_err, 0.0, tolerances::GPU_SIMPLIFIED_ET0.abs_tol);
+    v.check_rel(
+        "turc_parity",
+        max_err,
+        0.0,
+        tolerances::GPU_SIMPLIFIED_ET0.abs_tol,
+    );
 }
 
 /// Upstream Hamon (1963 ASCE) CPU reference, matching the `BatchedElementwiseF64` shader.
@@ -313,7 +333,12 @@ fn bench_hamon(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
     let max_err = max_rel_error(&gpu_result, &cpu);
     println!("  N={n}, GPU={gpu_us}µs, CPU={cpu_us}µs, max_rel_err={max_err:.2e}");
 
-    v.check_rel("hamon_parity", max_err, 0.0, tolerances::GPU_EMPIRICAL_PET.abs_tol);
+    v.check_rel(
+        "hamon_parity",
+        max_err,
+        0.0,
+        tolerances::GPU_EMPIRICAL_PET.abs_tol,
+    );
 }
 
 fn bench_blaney_criddle(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
@@ -355,7 +380,7 @@ fn bench_scaling(v: &mut ValidationHarness, gpu: &GpuRunoff) {
     for &n in &[100, 1_000, 10_000, 100_000] {
         let inputs: Vec<RunoffInput> = (0..n)
             .map(|i| RunoffInput {
-                precip_mm: 20.0 + (i as f64) * 0.001,
+                precip_mm: (i as f64).mul_add(0.001, 20.0),
                 cn: 75.0,
                 ia_ratio: 0.2,
             })

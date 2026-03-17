@@ -21,6 +21,8 @@ pub const SONGBIRD: &str = "songbird";
 pub const NESTGATE: &str = "nestgate";
 /// AI narration and ecology interpretation primal.
 pub const SQUIRREL: &str = "squirrel";
+/// Sovereign shader compiler primal.
+pub const CORALREEF: &str = "coralreef";
 /// DAG session management (provenance trio).
 pub const RHIZOCRYPT: &str = "rhizocrypt";
 /// Immutable ledger / certificate primal (provenance trio).
@@ -62,6 +64,10 @@ pub mod domains {
     pub const PROVENANCE: &str = "provenance";
     /// Compute dispatch and execution capability.
     pub const COMPUTE: &str = "compute";
+    /// Shader compilation capability.
+    pub const SHADER: &str = "shader";
+    /// Model inference / routing capability.
+    pub const INFERENCE: &str = "inference";
 }
 
 #[cfg(test)]
@@ -71,8 +77,18 @@ mod tests {
     #[test]
     fn all_names_are_lowercase() {
         for name in [
-            TOADSTOOL, BEARDOG, BIOMEOS, SONGBIRD, NESTGATE, SQUIRREL,
-            RHIZOCRYPT, LOAMSPINE, SWEETGRASS, PETALTONGUE, NEURAL_API,
+            TOADSTOOL,
+            BEARDOG,
+            BIOMEOS,
+            SONGBIRD,
+            NESTGATE,
+            SQUIRREL,
+            CORALREEF,
+            RHIZOCRYPT,
+            LOAMSPINE,
+            SWEETGRASS,
+            PETALTONGUE,
+            NEURAL_API,
         ] {
             assert_eq!(name, name.to_lowercase(), "{name} must be lowercase");
         }
@@ -80,7 +96,14 @@ mod tests {
 
     #[test]
     fn domains_are_lowercase() {
-        for d in [domains::DAG, domains::COMMIT, domains::PROVENANCE, domains::COMPUTE] {
+        for d in [
+            domains::DAG,
+            domains::COMMIT,
+            domains::PROVENANCE,
+            domains::COMPUTE,
+            domains::SHADER,
+            domains::INFERENCE,
+        ] {
             assert_eq!(d, d.to_lowercase(), "{d} must be lowercase");
         }
     }

@@ -57,17 +57,17 @@ fn main() {
     let sock = airspring.expect("airspring socket required after socket_found check");
 
     // ── Phase 1: Health + Capabilities ─────────────────────────────
-    let health =
-        rpc::send(&sock, "health", &serde_json::json!({})).ok().and_then(|r| r.get("result").cloned());
+    let health = rpc::send(&sock, "health", &serde_json::json!({}))
+        .ok()
+        .and_then(|r| r.get("result").cloned());
     v.check_bool("health_response", health.is_some());
     if let Some(ref h) = health {
         v.check_bool(
             "health_healthy",
             h.get("status").and_then(|v| v.as_str()) == Some("healthy"),
         );
-        let caps = biomeos::parse_capabilities(
-            h.get("capabilities").unwrap_or(&serde_json::Value::Null),
-        );
+        let caps =
+            biomeos::parse_capabilities(h.get("capabilities").unwrap_or(&serde_json::Value::Null));
         let cap_count = caps.len();
         // Architectural: 16 capabilities registered by airspring_primal main()
         // v0.6.0: 30 capabilities (21 science + 5 ecology + 2 primal + 1 compute + 1 data).
@@ -83,17 +83,25 @@ fn main() {
         "day_of_year": 200, "latitude_deg": 42.727, "elevation_m": 256.0,
     });
 
-    let science_et0 =
-        rpc::send(&sock, "science.et0_fao56", &test_params).ok().and_then(|r| r.get("result").cloned());
-    let ecology_et0 =
-        rpc::send(&sock, "ecology.et0_fao56", &test_params).ok().and_then(|r| r.get("result").cloned());
+    let science_et0 = rpc::send(&sock, "science.et0_fao56", &test_params)
+        .ok()
+        .and_then(|r| r.get("result").cloned());
+    let ecology_et0 = rpc::send(&sock, "ecology.et0_fao56", &test_params)
+        .ok()
+        .and_then(|r| r.get("result").cloned());
 
     v.check_bool("science_et0_response", science_et0.is_some());
     v.check_bool("ecology_et0_response", ecology_et0.is_some());
 
     if let (Some(s), Some(e)) = (&science_et0, &ecology_et0) {
-        let s_val = s.get("et0_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
-        let e_val = e.get("et0_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
+        let s_val = s
+            .get("et0_mm")
+            .and_then(serde_json::Value::as_f64)
+            .unwrap_or(0.0);
+        let e_val = e
+            .get("et0_mm")
+            .and_then(serde_json::Value::as_f64)
+            .unwrap_or(0.0);
         v.check_abs("ecology_science_et0_parity", s_val, e_val, 1e-15);
     }
 
@@ -110,7 +118,10 @@ fn main() {
         elevation_m: 256.0,
     });
     if let Some(ref e) = ecology_et0 {
-        let rpc_val = e.get("et0_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
+        let rpc_val = e
+            .get("et0_mm")
+            .and_then(serde_json::Value::as_f64)
+            .unwrap_or(0.0);
         v.check_abs("ecology_direct_rust_parity", rpc_val, direct.et0, 1e-10);
     }
 
@@ -138,20 +149,20 @@ fn main() {
         if let Some(stages) = stages {
             let et0_mm = stages
                 .pointer("/et0/et0_mm")
-                .and_then(|v| v.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             v.check_lower("pipeline_et0_positive", et0_mm, 0.0);
             v.check_abs("pipeline_et0_value", et0_mm, direct.et0, 1e-10);
 
             let etc = stages
                 .pointer("/water_balance/etc_mm")
-                .and_then(|v| v.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             v.check_abs("pipeline_etc_computed", etc, et0_mm * 1.15, 1e-10);
 
             let sw = stages
                 .pointer("/water_balance/soil_water_mm")
-                .and_then(|v| v.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             // Bounds from pipeline soil params: WP=50 mm, FC=200 mm.
             // Margins ±0.1 mm guard against f64 rounding at boundaries.
@@ -160,7 +171,7 @@ fn main() {
 
             let yield_ratio = stages
                 .pointer("/yield/yield_ratio")
-                .and_then(|v| v.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(-1.0);
             v.check_lower("pipeline_yield_ratio_non_negative", yield_ratio, -0.01);
         }
@@ -179,7 +190,7 @@ fn main() {
         let inner = t.pointer("/response/result/healthy");
         v.check_bool(
             "compute_provider_healthy",
-            inner.and_then(|v| v.as_bool()).unwrap_or(false),
+            inner.and_then(serde_json::Value::as_bool).unwrap_or(false),
         );
     }
 
@@ -205,12 +216,14 @@ fn main() {
         .and_then(|r| r.get("result").cloned());
     v.check_bool("capability_discover_response", discovery.is_some());
     if let Some(ref d) = discovery {
-        let count = d.get("count").and_then(|v| v.as_u64()).unwrap_or(0);
+        let count = d
+            .get("count")
+            .and_then(serde_json::Value::as_u64)
+            .unwrap_or(0);
         v.check_lower("discover_multiple_capabilities", count as f64, 3.0);
 
-        let names = biomeos::parse_capabilities(
-            d.get("capabilities").unwrap_or(&serde_json::Value::Null),
-        );
+        let names =
+            biomeos::parse_capabilities(d.get("capabilities").unwrap_or(&serde_json::Value::Null));
         if !names.is_empty() {
             v.check_bool(
                 "discover_science",
@@ -250,11 +263,13 @@ fn main() {
 
         v.check_bool("neural_api_capability_call", cap_result.is_some());
         if let Some(ref r) = cap_result {
-            let et0 = r.get("et0_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
+            let et0 = r
+                .get("et0_mm")
+                .and_then(serde_json::Value::as_f64)
+                .unwrap_or(0.0);
             v.check_abs("neural_api_et0_parity", et0, direct.et0, 1e-10);
             eprintln!(
-                "  Neural-API capability.call(ecology.et0_fao56): {:.6} mm (routed to airSpring)",
-                et0
+                "  Neural-API capability.call(ecology.et0_fao56): {et0:.6} mm (routed to airSpring)"
             );
         }
     }

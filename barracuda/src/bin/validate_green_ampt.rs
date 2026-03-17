@@ -36,16 +36,15 @@ fn validate_analytical(v: &mut ValidationHarness, benchmark: &serde_json::Value)
 
         if let Some(t) = inputs.get("t_hr").and_then(serde_json::Value::as_f64) {
             // Cumulative infiltration check
-            if let Some(expected_f) = tc.get("expected_F_cm").and_then(serde_json::Value::as_f64) {
-                if !tc
+            if let Some(expected_f) = tc.get("expected_F_cm").and_then(serde_json::Value::as_f64)
+                && !tc
                     .get("expected_f_infinite")
                     .and_then(serde_json::Value::as_bool)
                     .unwrap_or(false)
-                {
-                    let tol = json_field(tc, "tolerance");
-                    let computed = cumulative_infiltration(&params, t);
-                    v.check_abs(&format!("F({name})"), computed, expected_f, tol);
-                }
+            {
+                let tol = json_field(tc, "tolerance");
+                let computed = cumulative_infiltration(&params, t);
+                v.check_abs(&format!("F({name})"), computed, expected_f, tol);
             }
 
             // Rate check

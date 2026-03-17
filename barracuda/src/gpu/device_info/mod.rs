@@ -27,15 +27,22 @@
 pub mod shader_provenance;
 
 pub use shader_provenance::{
-    upstream_airspring_provenance, upstream_cross_spring_matrix, upstream_evolution_report,
-    ShaderProvenance, PROVENANCE,
+    PROVENANCE, ShaderProvenance, upstream_airspring_provenance, upstream_cross_spring_matrix,
+    upstream_evolution_report,
 };
 
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 
 use barracuda::device::driver_profile::PrecisionRoutingAdvice;
 use barracuda::device::probe::F64BuiltinCapabilities;
 use barracuda::device::{Fp64Rate, Fp64Strategy, GpuDriverProfile, WgpuDevice};
+
+/// Process-wide cached GPU device.
+///
+/// `wgpu::Instance` creation is not safe to call concurrently from multiple
+/// threads (observed as SIGSEGV on NVK/Mesa). `OnceLock` ensures exactly one
+/// probe per process lifetime — the same fix applied in toadStool S158.
+static GPU_DEVICE: OnceLock<Option<Arc<WgpuDevice>>> = OnceLock::new();
 
 /// Precision report for a GPU device.
 #[derive(Debug, Clone)]
@@ -116,23 +123,26 @@ pub fn probe_device(device: &WgpuDevice) -> DevicePrecisionReport {
     }
 }
 
-/// Try to create a GPU device respecting `BARRACUDA_GPU_ADAPTER` selection.
+/// Try to obtain the process-wide GPU device.
 ///
-/// Uses `WgpuDevice::from_env()` which reads the environment variable:
-/// - `BARRACUDA_GPU_ADAPTER=titan` → selects adapter containing "titan"
-/// - `BARRACUDA_GPU_ADAPTER=0` → selects first adapter
-/// - `BARRACUDA_GPU_ADAPTER=auto` or unset → wgpu `HighPerformance` default
-///
-/// Falls back to `new_f64_capable()` if `from_env()` fails.
-///
-/// # Errors
+/// The first call probes the GPU via `WgpuDevice::from_env()` (which reads
+/// `BARRACUDA_GPU_ADAPTER`), falling back to `new_f64_capable()`. Subsequent
+/// calls return the cached result — this prevents SIGSEGV from concurrent
+/// `wgpu::Instance` creation in parallel test threads (toadStool S158 pattern).
 ///
 /// Returns `None` if no suitable GPU is available.
+#[must_use]
 pub fn try_f64_device() -> Option<Arc<WgpuDevice>> {
-    barracuda::device::test_pool::tokio_block_on(WgpuDevice::from_env())
-        .or_else(|_| barracuda::device::test_pool::tokio_block_on(WgpuDevice::new_f64_capable()))
-        .ok()
-        .map(Arc::new)
+    GPU_DEVICE
+        .get_or_init(|| {
+            barracuda::device::test_pool::tokio_block_on(WgpuDevice::from_env())
+                .or_else(|_| {
+                    barracuda::device::test_pool::tokio_block_on(WgpuDevice::new_f64_capable())
+                })
+                .ok()
+                .map(Arc::new)
+        })
+        .clone()
 }
 
 #[cfg(test)]

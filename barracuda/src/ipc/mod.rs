@@ -11,6 +11,9 @@
 //! | [`timeseries`] | Cross-spring time series exchange (`ecoPrimals/time-series/v1`) |
 
 pub mod compute_dispatch;
+pub mod dispatch_outcome;
 pub mod provenance;
 pub mod resilience;
 pub mod timeseries;
+
+pub use dispatch_outcome::DispatchOutcome;

@@ -48,10 +48,11 @@ impl FitnessDriftMonitor {
             self.best_historical_mean = mean_fit;
         }
 
+        let pop_f64 = crate::cast::usize_f64(pop_size);
         let ne_s = if self.best_historical_mean > 0.0 {
-            (mean_fit / self.best_historical_mean) * pop_size as f64
+            (mean_fit / self.best_historical_mean) * pop_f64
         } else {
-            pop_size as f64
+            pop_f64
         };
         self.latest_ne_s = ne_s;
 
@@ -170,7 +171,7 @@ impl MonitoredAtlasStream {
         for key in &keys {
             if let Some(group) = by_station_year.get(key) {
                 let yields: Vec<f64> = group.iter().map(|r| r.result.yield_ratio).collect();
-                let mean_yield = yields.iter().sum::<f64>() / yields.len() as f64;
+                let mean_yield = yields.iter().sum::<f64>() / crate::cast::usize_f64(yields.len());
                 let best_yield = yields.iter().fold(0.0_f64, |a, &b| a.max(b));
 
                 self.monitor

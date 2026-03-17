@@ -238,7 +238,7 @@ fn check_dispatch(v: &mut ValidationHarness, method: &str, params: &serde_json::
     v.check_bool(&format!("dispatch_{tag}"), ok);
     if !ok {
         if let Some(ref r) = result {
-            eprintln!("  {method}: FAIL {:?}", r);
+            eprintln!("  {method}: FAIL {r:?}");
         } else {
             eprintln!("  {method}: no handler");
         }

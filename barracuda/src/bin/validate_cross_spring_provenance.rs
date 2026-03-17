@@ -10,11 +10,11 @@
 //! 1. Every GPU module produces results matching CPU baselines
 //! 2. GPU dispatch provides measurable throughput gains for batch workloads
 //! 3. Cross-spring shader provenance is traceable (which spring evolved what)
-//! 4. BarraCuda S87 universal precision architecture works end-to-end
+//! 4. `BarraCuda` S87 universal precision architecture works end-to-end
 //!
 //! # Cross-Spring Shader Provenance Map
 //!
-//! | GPU Module | BarraCuda Shader | Origin Spring | Session | Precision |
+//! | GPU Module | `BarraCuda` Shader | Origin Spring | Session | Precision |
 //! |------------|-----------------|---------------|---------|-----------|
 //! | `gpu::et0` | `batched_elementwise_f64` op=0 | airSpring | S54 | f64 canonical |
 //! | `gpu::water_balance` | `batched_elementwise_f64` op=1 | airSpring | S54 | f64 canonical |
@@ -38,9 +38,9 @@
 //! | `gpu::isotherm` | `nelder_mead` (CPU) | neuralSpring | S52 | f64 (CPU) |
 //! | `gpu::mc_et0` | CPU → GPU ET₀ batch → CPU | groundSpring | S64 | f64 hybrid |
 //! | `gpu::seasonal_pipeline` | Chained ops 0→7→1→yield | airSpring | S70+ | f64 canonical |
-//! | `gpu::runoff` | `batched_elementwise_f64` op=17 | airSpring→upstream | v0.7.2 | f64 canonical (BatchedElementwiseF64) |
-//! | `gpu::yield_response` | `batched_elementwise_f64` op=18 | airSpring→upstream | v0.7.2 | f64 canonical (BatchedElementwiseF64) |
-//! | `gpu::simple_et0` | `batched_elementwise_f64` ops 14-16, 19 | airSpring→upstream | v0.7.2 | f64 canonical (BatchedElementwiseF64) |
+//! | `gpu::runoff` | `batched_elementwise_f64` op=17 | airSpring→upstream | v0.7.2 | f64 canonical (`BatchedElementwiseF64`) |
+//! | `gpu::yield_response` | `batched_elementwise_f64` op=18 | airSpring→upstream | v0.7.2 | f64 canonical (`BatchedElementwiseF64`) |
+//! | `gpu::simple_et0` | `batched_elementwise_f64` ops 14-16, 19 | airSpring→upstream | v0.7.2 | f64 canonical (`BatchedElementwiseF64`) |
 //!
 //! # Precision Lineage
 //!
@@ -237,29 +237,29 @@ fn bench_water_balance_cpu_vs_gpu(v: &mut ValidationHarness, device: Option<&Arc
         state.depletion >= 0.0 && state.depletion <= state.taw,
     );
 
-    if let Some(_dev) = device {
-        if let Ok(wb) = BatchedWaterBalance::gpu_only() {
-            let fields: Vec<airspring_barracuda::gpu::water_balance::FieldDayInput> = (0..N)
-                .map(|i| airspring_barracuda::gpu::water_balance::FieldDayInput {
-                    dr_prev: 20.0,
-                    precipitation: if i % 7 == 0 { 8.0 } else { 0.0 },
-                    irrigation: 0.0,
-                    etc: 4.0,
-                    taw: 162.0,
-                    raw: 89.1,
-                    p: 0.55,
-                })
-                .collect();
+    if let Some(_dev) = device
+        && let Ok(wb) = BatchedWaterBalance::gpu_only()
+    {
+        let fields: Vec<airspring_barracuda::gpu::water_balance::FieldDayInput> = (0..N)
+            .map(|i| airspring_barracuda::gpu::water_balance::FieldDayInput {
+                dr_prev: 20.0,
+                precipitation: if i % 7 == 0 { 8.0 } else { 0.0 },
+                irrigation: 0.0,
+                etc: 4.0,
+                taw: 162.0,
+                raw: 89.1,
+                p: 0.55,
+            })
+            .collect();
 
-            let gpu_start = Instant::now();
-            if let Ok(dr_new) = wb.gpu_step(&fields) {
-                let gpu_elapsed = gpu_start.elapsed();
-                let all_valid = dr_new.iter().all(|&d| d >= 0.0);
-                v.check_bool(
-                    &format!("WB GPU: {N} fields ({gpu_elapsed:.1?})"),
-                    all_valid && dr_new.len() == N,
-                );
-            }
+        let gpu_start = Instant::now();
+        if let Ok(dr_new) = wb.gpu_step(&fields) {
+            let gpu_elapsed = gpu_start.elapsed();
+            let all_valid = dr_new.iter().all(|&d| d >= 0.0);
+            v.check_bool(
+                &format!("WB GPU: {N} fields ({gpu_elapsed:.1?})"),
+                all_valid && dr_new.len() == N,
+            );
         }
     }
 }
@@ -374,16 +374,16 @@ fn bench_vg_theta_k_provenance(v: &mut ValidationHarness, device: Option<&Arc<Wg
         cpu_theta.iter().all(|&r| (0.045..=0.43).contains(&r)),
     );
 
-    if let Some(dev) = device {
-        if let Ok(engine) = BatchedVanGenuchten::gpu(Arc::clone(dev)) {
-            let gpu_start = Instant::now();
-            if let Ok(result) = engine.compute_theta_gpu(0.045, 0.43, 0.036, 1.56, &h_values) {
-                let gpu_elapsed = gpu_start.elapsed();
-                v.check_bool(
-                    &format!("VG θ(h) GPU: {N} ({gpu_elapsed:.1?})"),
-                    result.len() == N,
-                );
-            }
+    if let Some(dev) = device
+        && let Ok(engine) = BatchedVanGenuchten::gpu(Arc::clone(dev))
+    {
+        let gpu_start = Instant::now();
+        if let Ok(result) = engine.compute_theta_gpu(0.045, 0.43, 0.036, 1.56, &h_values) {
+            let gpu_elapsed = gpu_start.elapsed();
+            v.check_bool(
+                &format!("VG θ(h) GPU: {N} ({gpu_elapsed:.1?})"),
+                result.len() == N,
+            );
         }
     }
 }
@@ -405,16 +405,16 @@ fn bench_thornthwaite_gdd_provenance(v: &mut ValidationHarness, device: Option<&
         cpu_gdd.iter().all(|r| r.is_finite()),
     );
 
-    if let Some(dev) = device {
-        if let Ok(engine) = airspring_barracuda::gpu::gdd::BatchedGdd::gpu(Arc::clone(dev)) {
-            let gpu_start = Instant::now();
-            if let Ok(result) = engine.compute_gpu(&tvals, 10.0) {
-                let gpu_elapsed = gpu_start.elapsed();
-                v.check_bool(
-                    &format!("GDD GPU: {N} ({gpu_elapsed:.1?})"),
-                    result.len() == N,
-                );
-            }
+    if let Some(dev) = device
+        && let Ok(engine) = airspring_barracuda::gpu::gdd::BatchedGdd::gpu(Arc::clone(dev))
+    {
+        let gpu_start = Instant::now();
+        if let Ok(result) = engine.compute_gpu(&tvals, 10.0) {
+            let gpu_elapsed = gpu_start.elapsed();
+            v.check_bool(
+                &format!("GDD GPU: {N} ({gpu_elapsed:.1?})"),
+                result.len() == N,
+            );
         }
     }
 }
@@ -485,7 +485,7 @@ fn bench_uncertainty_provenance(v: &mut ValidationHarness, device: Option<&Arc<W
     );
 
     let data: Vec<f64> = (0..200)
-        .map(|i| (i as f64 * 0.05).sin().mul_add(0.5, 3.0))
+        .map(|i| (f64::from(i) * 0.05).sin().mul_add(0.5, 3.0))
         .collect();
 
     if let Some(dev) = device {
@@ -588,23 +588,23 @@ fn bench_seasonal_pipeline_provenance(v: &mut ValidationHarness, device: Option<
         PIPELINE_MB_TOL,
     );
 
-    if let Some(dev) = device {
-        if let Ok(gpu_pipeline) = SeasonalPipeline::gpu(Arc::clone(dev)) {
-            let gpu_start = Instant::now();
-            let gpu_result = gpu_pipeline.run_season(&weather, &config);
-            let gpu_elapsed = gpu_start.elapsed();
+    if let Some(dev) = device
+        && let Ok(gpu_pipeline) = SeasonalPipeline::gpu(Arc::clone(dev))
+    {
+        let gpu_start = Instant::now();
+        let gpu_result = gpu_pipeline.run_season(&weather, &config);
+        let gpu_elapsed = gpu_start.elapsed();
 
-            let yield_diff = (cpu_result.yield_ratio - gpu_result.yield_ratio).abs();
-            v.check_abs(
-                &format!(
-                    "Pipeline GPU: {} days ({gpu_elapsed:.1?}), yield={:.3}, Δ={yield_diff:.4}",
-                    gpu_result.n_days, gpu_result.yield_ratio
-                ),
-                gpu_result.yield_ratio,
-                cpu_result.yield_ratio,
-                tolerances::DUAL_KC_PRECISION.abs_tol,
-            );
-        }
+        let yield_diff = (cpu_result.yield_ratio - gpu_result.yield_ratio).abs();
+        v.check_abs(
+            &format!(
+                "Pipeline GPU: {} days ({gpu_elapsed:.1?}), yield={:.3}, Δ={yield_diff:.4}",
+                gpu_result.n_days, gpu_result.yield_ratio
+            ),
+            gpu_result.yield_ratio,
+            cpu_result.yield_ratio,
+            tolerances::DUAL_KC_PRECISION.abs_tol,
+        );
     }
 }
 

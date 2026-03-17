@@ -83,7 +83,7 @@ pub fn thornthwaite_unadjusted_et0(tmean_c: f64, heat_index: f64, exponent_a: f6
             clippy::suboptimal_flops,
             reason = "Willmott high-temp correction formula"
         )]
-        return (WILLMOTT_A + WILLMOTT_B * tmean_c + WILLMOTT_C * tmean_c * tmean_c).max(0.0);
+        return (WILLMOTT_B.mul_add(tmean_c, WILLMOTT_A) + WILLMOTT_C * tmean_c * tmean_c).max(0.0);
     }
     PET_BASE_COEFF * (PET_TEMP_FACTOR * tmean_c / heat_index).powf(exponent_a)
 }

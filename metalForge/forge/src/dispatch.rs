@@ -81,13 +81,13 @@ pub fn route<'a>(workload: &Workload, substrates: &'a [Substrate]) -> Option<Dec
         return None;
     }
 
-    if let Some(pref) = workload.preferred_substrate {
-        if let Some(s) = capable.iter().find(|s| s.kind == pref) {
-            return Some(Decision {
-                substrate: s,
-                reason: Reason::Preferred,
-            });
-        }
+    if let Some(pref) = workload.preferred_substrate
+        && let Some(s) = capable.iter().find(|s| s.kind == pref)
+    {
+        return Some(Decision {
+            substrate: s,
+            reason: Reason::Preferred,
+        });
     }
 
     let best = capable
@@ -104,7 +104,7 @@ pub fn route<'a>(workload: &Workload, substrates: &'a [Substrate]) -> Option<Dec
 }
 
 #[cfg(test)]
-#[allow(clippy::expect_used, clippy::unwrap_used)]
+#[expect(clippy::expect_used, reason = "test assertions")]
 mod tests {
     use super::*;
     use crate::substrate::{Identity, Properties};

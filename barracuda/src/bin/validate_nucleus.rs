@@ -26,9 +26,9 @@
 use std::path::PathBuf;
 
 use airspring_barracuda::biomeos;
-use airspring_barracuda::niche;
 use airspring_barracuda::eco::evapotranspiration as et;
 use airspring_barracuda::eco::simple_et0;
+use airspring_barracuda::niche;
 use airspring_barracuda::rpc;
 
 use barracuda::validation::ValidationHarness;
@@ -68,8 +68,9 @@ fn main() {
     eprintln!("  Found airSpring socket: {}", socket.display());
 
     // ── Phase 2: Health Check ──────────────────────────────────────
-    let health =
-        rpc::send(&socket, "health", &serde_json::json!({})).ok().and_then(|r| r.get("result").cloned());
+    let health = rpc::send(&socket, "health", &serde_json::json!({}))
+        .ok()
+        .and_then(|r| r.get("result").cloned());
     v.check_bool("health_response", health.is_some());
 
     if let Some(ref h) = health {
@@ -79,16 +80,15 @@ fn main() {
         );
         v.check_bool(
             "health_primal_name",
-            h.get("primal").and_then(|v| v.as_str()) == Some("airspring"),
+            h.get("primal").and_then(|v| v.as_str()) == Some(airspring_barracuda::PRIMAL_NAME),
         );
         v.check_bool(
             "health_version",
             h.get("version").and_then(|v| v.as_str()) == Some(env!("CARGO_PKG_VERSION")),
         );
 
-        let caps = biomeos::parse_capabilities(
-            h.get("capabilities").unwrap_or(&serde_json::Value::Null),
-        );
+        let caps =
+            biomeos::parse_capabilities(h.get("capabilities").unwrap_or(&serde_json::Value::Null));
         let cap_count = caps.len();
         // Architectural: 30 capabilities from airspring_primal v0.6.0
         // (science.* + ecology.* + primal.* + compute.* + data.*).
@@ -128,8 +128,14 @@ fn main() {
 
     v.check_bool("et0_fao56_response", rpc_result.is_some());
     if let Some(ref r) = rpc_result {
-        let rpc_et0 = r.get("et0_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
-        let rpc_rn = r.get("rn_mj").and_then(|v| v.as_f64()).unwrap_or(0.0);
+        let rpc_et0 = r
+            .get("et0_mm")
+            .and_then(serde_json::Value::as_f64)
+            .unwrap_or(0.0);
+        let rpc_rn = r
+            .get("rn_mj")
+            .and_then(serde_json::Value::as_f64)
+            .unwrap_or(0.0);
 
         v.check_abs("et0_fao56_parity", rpc_et0, direct_result.et0, 1e-10);
         v.check_abs("et0_rn_parity", rpc_rn, direct_result.rn, 1e-10);
@@ -160,12 +166,12 @@ fn main() {
 
     v.check_bool("et0_hargreaves_response", rpc_hg.is_some());
     if let Some(ref r) = rpc_hg {
-        let rpc_val = r.get("et0_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
+        let rpc_val = r
+            .get("et0_mm")
+            .and_then(serde_json::Value::as_f64)
+            .unwrap_or(0.0);
         v.check_abs("et0_hargreaves_parity", rpc_val, direct_hg, 1e-10);
-        eprintln!(
-            "  Hargreaves ET₀: {:.6} mm (direct) vs {:.6} mm (JSON-RPC)",
-            direct_hg, rpc_val
-        );
+        eprintln!("  Hargreaves ET₀: {direct_hg:.6} mm (direct) vs {rpc_val:.6} mm (JSON-RPC)");
     }
 
     // ── Phase 5: Simplified ET₀ Methods Parity ─────────────────────
@@ -179,7 +185,10 @@ fn main() {
     .and_then(|r| r.get("result").cloned());
     v.check_bool("et0_makkink_response", rpc_mak.is_some());
     if let Some(ref r) = rpc_mak {
-        let rpc_val = r.get("et0_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
+        let rpc_val = r
+            .get("et0_mm")
+            .and_then(serde_json::Value::as_f64)
+            .unwrap_or(0.0);
         v.check_abs("et0_makkink_parity", rpc_val, direct_makkink, 1e-10);
     }
 
@@ -193,7 +202,10 @@ fn main() {
     .and_then(|r| r.get("result").cloned());
     v.check_bool("et0_turc_response", rpc_turc.is_some());
     if let Some(ref r) = rpc_turc {
-        let rpc_val = r.get("et0_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
+        let rpc_val = r
+            .get("et0_mm")
+            .and_then(serde_json::Value::as_f64)
+            .unwrap_or(0.0);
         v.check_abs("et0_turc_parity", rpc_val, direct_turc, 1e-10);
     }
 
@@ -207,7 +219,10 @@ fn main() {
     .and_then(|r| r.get("result").cloned());
     v.check_bool("et0_hamon_response", rpc_ham.is_some());
     if let Some(ref r) = rpc_ham {
-        let rpc_val = r.get("pet_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
+        let rpc_val = r
+            .get("pet_mm")
+            .and_then(serde_json::Value::as_f64)
+            .unwrap_or(0.0);
         v.check_abs("et0_hamon_parity", rpc_val, direct_hamon, 1e-10);
     }
 
@@ -221,7 +236,10 @@ fn main() {
     .and_then(|r| r.get("result").cloned());
     v.check_bool("et0_blaney_criddle_response", rpc_bc.is_some());
     if let Some(ref r) = rpc_bc {
-        let rpc_val = r.get("et0_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
+        let rpc_val = r
+            .get("et0_mm")
+            .and_then(serde_json::Value::as_f64)
+            .unwrap_or(0.0);
         v.check_abs("et0_blaney_criddle_parity", rpc_val, direct_bc, 1e-10);
     }
 
@@ -243,13 +261,16 @@ fn main() {
 
     v.check_bool("water_balance_response", rpc_wb.is_some());
     if let Some(ref r) = rpc_wb {
-        let etc = r.get("etc_mm").and_then(|v| v.as_f64()).unwrap_or(0.0);
+        let etc = r
+            .get("etc_mm")
+            .and_then(serde_json::Value::as_f64)
+            .unwrap_or(0.0);
         let expected_etc: f64 = 6.0 * 1.15;
         v.check_abs("wb_etc_parity", etc, expected_etc, 1e-10);
 
         let sw = r
             .get("soil_water_mm")
-            .and_then(|v| v.as_f64())
+            .and_then(serde_json::Value::as_f64)
             .unwrap_or(0.0);
         let expected_sw: f64 = (150.0_f64 + 2.5 - expected_etc).clamp(50.0, 200.0);
         v.check_abs("wb_soil_water_parity", sw, expected_sw, 1e-10);
@@ -266,8 +287,11 @@ fn main() {
 
     v.check_bool("yield_response_response", rpc_yr.is_some());
     if let Some(ref r) = rpc_yr {
-        let yield_val = r.get("yield_t_ha").and_then(|v| v.as_f64()).unwrap_or(0.0);
-        let expected_ratio: f64 = 1.0 - 1.25 * (1.0 - 0.75);
+        let yield_val = r
+            .get("yield_t_ha")
+            .and_then(serde_json::Value::as_f64)
+            .unwrap_or(0.0);
+        let expected_ratio: f64 = 1.25f64.mul_add(-(1.0 - 0.75), 1.0);
         let expected_yield: f64 = 12.0 * expected_ratio;
         v.check_abs("yield_parity", yield_val, expected_yield, 1e-10);
     }

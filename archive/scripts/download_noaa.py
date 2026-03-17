@@ -1,4 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
+# SUPERSEDED: Replaced by scripts/download_open_meteo.py (v0.4.x).
+# Open-Meteo provides the same ERA5 data without API key requirements.
+# Kept as fossil record in archive/.
 #!/usr/bin/env python3
 """
 Download historical weather data from NOAA Climate Data Online (CDO).

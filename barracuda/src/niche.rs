@@ -24,8 +24,8 @@ use std::path::Path;
 
 use tracing::{info, warn};
 
-/// Niche identity.
-pub const NICHE_NAME: &str = "airspring";
+/// Niche identity — delegates to the canonical [`crate::PRIMAL_NAME`].
+pub const NICHE_NAME: &str = crate::PRIMAL_NAME;
 
 /// All capabilities this niche exposes to biomeOS.
 pub const CAPABILITIES: &[&str] = &[
@@ -317,7 +317,7 @@ mod tests {
 
     #[test]
     fn niche_name_matches_convention() {
-        assert_eq!(NICHE_NAME, "airspring");
+        assert_eq!(NICHE_NAME, crate::PRIMAL_NAME);
         assert!(NICHE_NAME.chars().all(|c| c.is_ascii_lowercase()));
     }
 }

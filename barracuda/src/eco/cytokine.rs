@@ -263,7 +263,7 @@ impl CytokineBrain {
         self.concept_edge_hours.clear();
 
         for (beta, _error) in &edges {
-            let hours = (beta * 720.0).round() as u32;
+            let hours = crate::cast::f64_u32((beta * 720.0).round());
             self.concept_edge_hours.push(hours);
         }
 

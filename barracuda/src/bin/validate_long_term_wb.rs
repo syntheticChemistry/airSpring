@@ -144,13 +144,13 @@ struct SeasonResult {
     total_et0_om: f64,
     total_precip: f64,
     total_et: f64,
-    /// Total deep percolation (mm); used to derive has_dp.
+    /// Total deep percolation (mm); used to derive `has_dp`.
     _total_dp: f64,
     /// Total irrigation applied (mm); used for mass balance / audit.
     _total_irrig: f64,
     irrig_events: usize,
     mb_error: f64,
-    /// Days with water stress; used to derive has_stress.
+    /// Days with water stress; used to derive `has_stress`.
     _stress_days: usize,
     has_stress: bool,
     has_dp: bool,

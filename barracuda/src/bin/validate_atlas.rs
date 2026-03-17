@@ -17,10 +17,10 @@
 //! Run: `python3 control/atlas/atlas_water_budget.py`
 //!
 //! Runtime config via env vars (all optional):
-//!   ATLAS_DATA_DIR   — path to Open-Meteo CSVs (default: data/open_meteo)
-//!   ATLAS_YEAR_START — first year to process (default: 1945)
-//!   ATLAS_YEAR_END   — last year to process (default: 2024)
-//!   ATLAS_OUT_DIR    — output directory for results (default: data/atlas_results)
+//!   `ATLAS_DATA_DIR`   — path to Open-Meteo CSVs (default: `data/open_meteo`)
+//!   `ATLAS_YEAR_START` — first year to process (default: 1945)
+//!   `ATLAS_YEAR_END`   — last year to process (default: 2024)
+//!   `ATLAS_OUT_DIR`    — output directory for results (default: `data/atlas_results`)
 
 use airspring_barracuda::eco::{
     crop::CropType,

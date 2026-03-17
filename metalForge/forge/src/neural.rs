@@ -44,6 +44,7 @@ pub struct NeuralBridge {
 /// Result of a `capability.call` invocation.
 #[derive(Debug)]
 pub struct CallResult {
+    /// The JSON value returned by the capability call.
     pub value: serde_json::Value,
 }
 
@@ -57,7 +58,12 @@ pub enum NeuralError {
     /// JSON serialization/deserialization error.
     Json(String),
     /// JSON-RPC error response from the Neural API.
-    Rpc { code: i64, message: String },
+    Rpc {
+        /// JSON-RPC error code.
+        code: i64,
+        /// Human-readable error message.
+        message: String,
+    },
     /// Timeout waiting for response.
     Timeout,
 }
@@ -307,16 +313,13 @@ fn parse_response(response: &serde_json::Value) -> Result<CallResult, NeuralErro
 }
 
 #[cfg(test)]
-#[expect(clippy::expect_used, clippy::unwrap_used, reason = "test clarity")]
+#[expect(clippy::unwrap_used, reason = "test clarity")]
 mod tests {
     use super::*;
 
     #[test]
     fn resolve_socket_none_when_dir_empty() {
-        let dir = std::env::temp_dir().join(format!(
-            "neural_empty_{}",
-            std::process::id()
-        ));
+        let dir = std::env::temp_dir().join(format!("neural_empty_{}", std::process::id()));
         std::fs::create_dir_all(&dir).ok();
         let sock = dir.join("biomeos").join("neural-api-test.sock");
         assert!(!sock.exists(), "socket should not exist in fresh dir");

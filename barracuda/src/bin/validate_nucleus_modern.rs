@@ -71,8 +71,9 @@ fn main() {
     // Phase 2: Health & Capability Enumeration (v0.7.5)
     // ═══════════════════════════════════════════════════════════════
 
-    let health =
-        rpc::send(&socket, "health", &serde_json::json!({})).ok().and_then(|r| r.get("result").cloned());
+    let health = rpc::send(&socket, "health", &serde_json::json!({}))
+        .ok()
+        .and_then(|r| r.get("result").cloned());
     v.check_bool("health_response", health.is_some());
 
     if let Some(ref h) = health {
@@ -84,9 +85,8 @@ fn main() {
         v.check_bool("version_matches", version == env!("CARGO_PKG_VERSION"));
         eprintln!("  Primal version: {version}");
 
-        let caps: Vec<String> = biomeos::parse_capabilities(
-            h.get("capabilities").unwrap_or(&serde_json::Value::Null),
-        );
+        let caps: Vec<String> =
+            biomeos::parse_capabilities(h.get("capabilities").unwrap_or(&serde_json::Value::Null));
 
         v.check_bool(
             "has_spi_capability",
@@ -140,7 +140,10 @@ fn main() {
         if let Some(spi) = spi_vals {
             v.check_abs("spi_length", spi.len() as f64, 24.0, 0.1);
         }
-        let n_valid = r.get("n_valid").and_then(|n| n.as_u64()).unwrap_or(0);
+        let n_valid = r
+            .get("n_valid")
+            .and_then(serde_json::Value::as_u64)
+            .unwrap_or(0);
         v.check_bool("spi_has_valid_values", n_valid > 0);
 
         let upstream = r.get("upstream").and_then(|u| u.as_str()).unwrap_or("");
@@ -162,7 +165,7 @@ fn main() {
             .and_then(|s| s.as_array())
             .expect("spi array from RPC response")
             .iter()
-            .map(|v| v.as_f64())
+            .map(serde_json::Value::as_f64)
             .collect();
 
         let mut spi_parity_ok = true;
@@ -172,11 +175,11 @@ fn main() {
                     spi_parity_ok = false;
                     eprintln!("  SPI[{i}]: direct=NaN but RPC={rpc_opt:?}");
                 }
-            } else if let Some(rpc_val) = rpc_opt {
-                if (direct - rpc_val).abs() > 1e-10 {
-                    spi_parity_ok = false;
-                    eprintln!("  SPI[{i}]: direct={direct} vs RPC={rpc_val}");
-                }
+            } else if let Some(rpc_val) = rpc_opt
+                && (direct - rpc_val).abs() > 1e-10
+            {
+                spi_parity_ok = false;
+                eprintln!("  SPI[{i}]: direct={direct} vs RPC={rpc_val}");
             }
         }
         v.check_bool("spi_parity_direct_vs_rpc", spi_parity_ok);
@@ -245,7 +248,7 @@ fn main() {
             .and_then(|a| a.as_array())
             .expect("acf array from RPC response")
             .iter()
-            .filter_map(|v| v.as_f64())
+            .filter_map(serde_json::Value::as_f64)
             .collect();
 
         let mut acf_parity_ok = true;
@@ -281,7 +284,10 @@ fn main() {
 
     v.check_bool("gamma_cdf_response", rpc_gamma.is_some());
     if let Some(ref r) = rpc_gamma {
-        let cdf = r.get("gamma_cdf").and_then(|c| c.as_f64()).unwrap_or(0.0);
+        let cdf = r
+            .get("gamma_cdf")
+            .and_then(serde_json::Value::as_f64)
+            .unwrap_or(0.0);
         let direct_cdf = drought_index::gamma_cdf(
             2.0,
             &drought_index::GammaParams {
@@ -341,12 +347,12 @@ fn main() {
             v.check_bool("pipeline_has_yield_stage", yr_stage.is_some());
             let et0 = et0_stage
                 .and_then(|e| e.get("et0_mm"))
-                .and_then(|e| e.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(0.0);
             v.check_bool("pipeline_et0_positive", et0 > 0.0);
             let yield_val = yr_stage
                 .and_then(|y| y.get("yield_t_ha"))
-                .and_then(|y| y.as_f64())
+                .and_then(serde_json::Value::as_f64)
                 .unwrap_or(-1.0);
             v.check_bool("pipeline_yield_present", yield_val >= 0.0);
             eprintln!("  Full pipeline ET0: {et0:.4} mm, yield: {yield_val:.4} t/ha");
@@ -365,7 +371,10 @@ fn main() {
     if let Some(ref d) = rpc_discover {
         let socket_dir_str = d.get("socket_dir").and_then(|s| s.as_str()).unwrap_or("");
         v.check_bool("discover_has_socket_dir", !socket_dir_str.is_empty());
-        let count = d.get("count").and_then(|c| c.as_u64()).unwrap_or(0);
+        let count = d
+            .get("count")
+            .and_then(serde_json::Value::as_u64)
+            .unwrap_or(0);
         eprintln!("  Discovered {count} primal(s) in {socket_dir_str}");
     }
 
@@ -380,7 +389,10 @@ fn main() {
             .ok()
             .and_then(|r| r.get("result").cloned());
         if let Some(ref p) = provenance {
-            let total = p.get("total_flows").and_then(|t| t.as_u64()).unwrap_or(0);
+            let total = p
+                .get("total_flows")
+                .and_then(serde_json::Value::as_u64)
+                .unwrap_or(0);
             v.check_bool("provenance_has_flows", total > 0);
             eprintln!("  Cross-spring provenance flows: {total}");
         } else {

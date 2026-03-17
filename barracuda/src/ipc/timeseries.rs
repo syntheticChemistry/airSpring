@@ -127,12 +127,11 @@ pub fn parse_time_series(params: &serde_json::Value) -> Result<TimeSeriesData, A
 /// # Errors
 ///
 /// Returns `AirSpringError::InvalidInput` if `time_series` is missing or empty.
-#[expect(clippy::cast_precision_loss)]
 pub fn handle_timeseries(params: &serde_json::Value) -> Result<serde_json::Value, AirSpringError> {
     let data = extract_ts_data(params)?;
     let values = &data.values;
 
-    let n = values.len() as f64;
+    let n = crate::cast::usize_f64(values.len());
     let mean = values.iter().sum::<f64>() / n;
     let variance = values.iter().map(|v| (v - mean).powi(2)).sum::<f64>() / n;
 
@@ -178,7 +177,13 @@ pub fn build_soil_moisture_series(
     vwc_values: &[f64],
     experiment: Option<&str>,
 ) -> serde_json::Value {
-    build_time_series("soil_moisture_vwc", "m³/m³", timestamps, vwc_values, experiment)
+    build_time_series(
+        "soil_moisture_vwc",
+        "m³/m³",
+        timestamps,
+        vwc_values,
+        experiment,
+    )
 }
 
 fn extract_ts_data(params: &serde_json::Value) -> Result<TimeSeriesData, AirSpringError> {
@@ -244,7 +249,11 @@ mod tests {
         let ts = build_time_series(
             "temperature",
             "°C",
-            &["2024-01-01".into(), "2024-01-02".into(), "2024-01-03".into()],
+            &[
+                "2024-01-01".into(),
+                "2024-01-02".into(),
+                "2024-01-03".into(),
+            ],
             &[10.0, 20.0, 30.0],
             None,
         );
@@ -271,22 +280,14 @@ mod tests {
 
     #[test]
     fn build_et0_series_uses_correct_variable() {
-        let ts = build_et0_series(
-            &["2024-01-01".into()],
-            &[5.0],
-            None,
-        );
+        let ts = build_et0_series(&["2024-01-01".into()], &[5.0], None);
         assert_eq!(ts["variable"], "et0_fao56");
         assert_eq!(ts["unit"], "mm/day");
     }
 
     #[test]
     fn build_soil_moisture_series_uses_correct_variable() {
-        let ts = build_soil_moisture_series(
-            &["2024-01-01".into()],
-            &[0.35],
-            None,
-        );
+        let ts = build_soil_moisture_series(&["2024-01-01".into()], &[0.35], None);
         assert_eq!(ts["variable"], "soil_moisture_vwc");
         assert_eq!(ts["unit"], "m³/m³");
     }

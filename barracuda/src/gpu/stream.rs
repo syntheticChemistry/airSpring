@@ -282,12 +282,8 @@ mod tests {
             .collect();
         let result = smooth_cpu(&data, 10).unwrap();
         let input_var = crate::gpu::reduce::sample_variance(&data);
-        #[expect(
-            clippy::cast_precision_loss,
-            reason = "usize→f64 for statistical mean; window sizes are small"
-        )]
         let output_var_mean: f64 =
-            result.variance.iter().sum::<f64>() / result.variance.len() as f64;
+            result.variance.iter().sum::<f64>() / crate::cast::usize_f64(result.variance.len());
         // Smoothed output should have lower average variance per window
         assert!(
             output_var_mean < input_var * 1.5,
@@ -318,11 +314,7 @@ mod tests {
     // ── StreamSmoother (device-backed, skips if no GPU) ───────────────────────
 
     fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
-        barracuda::device::test_pool::tokio_block_on(
-            barracuda::device::WgpuDevice::new_f64_capable(),
-        )
-        .ok()
-        .map(std::sync::Arc::new)
+        crate::gpu::device_info::try_f64_device()
     }
 
     #[test]

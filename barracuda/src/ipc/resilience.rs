@@ -43,7 +43,10 @@ impl CircuitBreaker {
         if !self.open.load(Ordering::Relaxed) {
             return false;
         }
-        let guard = self.opened_at.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        let guard = self
+            .opened_at
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         if let Some(opened) = *guard
             && opened.elapsed() >= CIRCUIT_OPEN_DURATION
         {
@@ -67,7 +70,10 @@ impl CircuitBreaker {
         let count = self.failure_count.fetch_add(1, Ordering::Relaxed) + 1;
         if count > u64::from(MAX_RETRIES) {
             self.open.store(true, Ordering::Relaxed);
-            let mut guard = self.opened_at.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+            let mut guard = self
+                .opened_at
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner);
             *guard = Some(Instant::now());
         }
     }
@@ -75,7 +81,10 @@ impl CircuitBreaker {
     fn reset(&self) {
         self.open.store(false, Ordering::Relaxed);
         self.failure_count.store(0, Ordering::Relaxed);
-        let mut guard = self.opened_at.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        let mut guard = self
+            .opened_at
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         *guard = None;
     }
 }

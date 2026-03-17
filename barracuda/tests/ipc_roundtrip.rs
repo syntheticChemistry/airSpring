@@ -14,17 +14,15 @@
 use std::io::{BufRead, BufReader, Write};
 use std::os::unix::net::{UnixListener, UnixStream};
 use std::path::PathBuf;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::Duration;
 
 use airspring_barracuda::rpc;
 
 fn tmp_socket(name: &str) -> PathBuf {
-    let dir = std::env::temp_dir().join(format!(
-        "airspring_ipc_test_{}_{name}",
-        std::process::id()
-    ));
+    let dir =
+        std::env::temp_dir().join(format!("airspring_ipc_test_{}_{name}", std::process::id()));
     std::fs::create_dir_all(&dir).unwrap();
     dir.join(format!("{name}.sock"))
 }
@@ -37,17 +35,13 @@ fn spawn_echo_server(path: &std::path::Path) -> (std::thread::JoinHandle<()>, Ar
 
     let handle = std::thread::spawn(move || {
         let listener = UnixListener::bind(&path).expect("bind");
-        listener
-            .set_nonblocking(true)
-            .expect("set_nonblocking");
+        listener.set_nonblocking(true).expect("set_nonblocking");
 
         while server_running.load(Ordering::Relaxed) {
             match listener.accept() {
                 Ok((stream, _)) => {
-                    stream
-                        .set_read_timeout(Some(Duration::from_secs(2)))
-                        .ok();
-                    handle_echo_connection(stream);
+                    stream.set_read_timeout(Some(Duration::from_secs(2))).ok();
+                    handle_echo_connection(&stream);
                 }
                 Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
                     std::thread::sleep(Duration::from_millis(10));
@@ -60,9 +54,9 @@ fn spawn_echo_server(path: &std::path::Path) -> (std::thread::JoinHandle<()>, Ar
     (handle, running)
 }
 
-fn handle_echo_connection(stream: UnixStream) {
-    let reader = BufReader::new(&stream);
-    let mut writer = &stream;
+fn handle_echo_connection(stream: &UnixStream) {
+    let reader = BufReader::new(stream);
+    let mut writer = stream;
 
     for line_result in reader.lines() {
         let Ok(line) = line_result else { break };
@@ -72,24 +66,14 @@ fn handle_echo_connection(stream: UnixStream) {
         }
 
         let Ok(parsed) = serde_json::from_str::<serde_json::Value>(trimmed) else {
-            let resp = rpc::error(
-                &serde_json::Value::Null,
-                rpc::PARSE_ERROR,
-                "Parse error",
-            );
+            let resp = rpc::error(&serde_json::Value::Null, rpc::PARSE_ERROR, "Parse error");
             let _ = writeln!(writer, "{resp}");
             let _ = writer.flush();
             continue;
         };
 
-        let id = parsed
-            .get("id")
-            .cloned()
-            .unwrap_or(serde_json::Value::Null);
-        let method = parsed
-            .get("method")
-            .and_then(|v| v.as_str())
-            .unwrap_or("");
+        let id = parsed.get("id").cloned().unwrap_or(serde_json::Value::Null);
+        let method = parsed.get("method").and_then(|v| v.as_str()).unwrap_or("");
         let params = parsed
             .get("params")
             .cloned()
@@ -180,11 +164,7 @@ fn rpc_multiple_requests_same_connection_via_send() {
     std::thread::sleep(Duration::from_millis(50));
 
     for i in 0..5 {
-        let resp = rpc::send(
-            &path,
-            "echo",
-            &serde_json::json!({"iteration": i}),
-        );
+        let resp = rpc::send(&path, "echo", &serde_json::json!({"iteration": i}));
         assert!(resp.is_ok(), "request {i} should succeed");
         let resp = resp.unwrap();
         assert_eq!(resp["result"]["iteration"], i);
@@ -201,15 +181,11 @@ fn rpc_response_has_correct_jsonrpc_version() {
     let (handle, running) = spawn_echo_server(&path);
     std::thread::sleep(Duration::from_millis(50));
 
-    let resp = rpc::send(&path, "health", &serde_json::json!({}))
-        .expect("should get response");
-    assert_eq!(
-        resp["jsonrpc"], "2.0",
-        "JSON-RPC version must be 2.0"
-    );
+    let resp = rpc::send(&path, "health", &serde_json::json!({})).expect("should get response");
+    assert_eq!(resp["jsonrpc"], "2.0", "JSON-RPC version must be 2.0");
 
-    let err_resp = rpc::send(&path, "unknown", &serde_json::json!({}))
-        .expect("should get error response");
+    let err_resp =
+        rpc::send(&path, "unknown", &serde_json::json!({})).expect("should get error response");
     assert_eq!(
         err_resp["jsonrpc"], "2.0",
         "JSON-RPC version must be 2.0 even for errors"

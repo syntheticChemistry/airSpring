@@ -6,12 +6,7 @@
 //! They validate the JSON-RPC dispatch, capability registration payloads,
 //! socket resolution, and provider discovery logic.
 
-#![expect(
-    clippy::float_cmp,
-    clippy::expect_used,
-    clippy::unwrap_used,
-    reason = "integration test clarity"
-)]
+#![expect(clippy::unwrap_used, reason = "integration test clarity")]
 
 use airspring_barracuda::biomeos::{self, SocketConfig};
 use airspring_barracuda::data::provider::{BiomeosProvider, Provider, WeatherResponse};

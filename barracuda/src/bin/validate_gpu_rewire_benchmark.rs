@@ -556,6 +556,10 @@ struct BenchRow {
 }
 
 impl BenchRow {
+    #[expect(
+        clippy::similar_names,
+        reason = "t_gpu and t_cpu are distinct hardware targets"
+    )]
     const fn new(name: &'static str, n: usize, t_gpu: f64, t_cpu: f64) -> Self {
         Self {
             name,

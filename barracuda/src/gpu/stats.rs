@@ -67,9 +67,9 @@ pub fn sensor_regression_gpu(
         device,
         &x,
         reference_vwc,
-        n_sensors as u32,
-        n_points as u32,
-        k as u32,
+        crate::cast::usize_u32(n_sensors),
+        crate::cast::usize_u32(n_points),
+        crate::cast::usize_u32(k),
     )?;
 
     Ok(betas.chunks(k).map(<[f64]>::to_vec).collect())
@@ -94,7 +94,12 @@ pub fn soil_correlation_gpu(
     n_variables: usize,
 ) -> Result<Vec<f64>, barracuda::error::BarracudaError> {
     assert_eq!(data.len(), n_observations * n_variables);
-    stats_f64::matrix_correlation(device, data, n_observations as u32, n_variables as u32)
+    stats_f64::matrix_correlation(
+        device,
+        data,
+        crate::cast::usize_u32(n_observations),
+        crate::cast::usize_u32(n_variables),
+    )
 }
 
 /// Fused Pearson correlation between two sensor streams (single GPU pass).
@@ -168,9 +173,7 @@ mod tests {
     use super::*;
 
     fn try_device() -> Option<Arc<WgpuDevice>> {
-        barracuda::device::test_pool::tokio_block_on(WgpuDevice::new_f64_capable())
-            .ok()
-            .map(Arc::new)
+        crate::gpu::device_info::try_f64_device()
     }
 
     #[test]

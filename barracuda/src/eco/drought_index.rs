@@ -97,7 +97,7 @@ pub fn gamma_mle_fit(data: &[f64]) -> Option<GammaParams> {
         return None;
     }
 
-    let nf = n as f64;
+    let nf = crate::cast::usize_f64(n);
     let mean_val: f64 = positive.iter().sum::<f64>() / nf;
     let log_mean: f64 = positive.iter().map(|x| x.ln()).sum::<f64>() / nf;
     let a_param = mean_val.ln() - log_mean;
@@ -155,7 +155,8 @@ pub fn compute_spi(monthly_precip: &[f64], scale: usize) -> Vec<f64> {
         return spi;
     };
 
-    let q = valid.iter().filter(|&&x| x == 0.0).count() as f64 / valid.len() as f64;
+    let q = crate::cast::usize_f64(valid.iter().filter(|&&x| x == 0.0).count())
+        / crate::cast::usize_f64(valid.len());
 
     for i in 0..n {
         if accum[i].is_nan() {

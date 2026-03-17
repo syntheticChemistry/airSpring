@@ -468,7 +468,7 @@ fn compute_et0(w: &WeatherDay) -> f64 {
 }
 
 fn stage_kc(kc: &CropCoefficients, day_idx: usize, total_days: usize) -> f64 {
-    let frac = day_idx as f64 / total_days as f64;
+    let frac = crate::cast::usize_f64(day_idx) / crate::cast::usize_f64(total_days);
     if frac < 0.2 {
         kc.kc_ini
     } else if frac < 0.7 {

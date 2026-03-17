@@ -77,7 +77,16 @@
 //! - **Validation**: `ValidationHarness`, `tolerances::Tolerance`
 //! - **Nautilus**: `bingocube-nautilus` (evolutionary reservoir computing, drift monitoring)
 
+/// Canonical primal identity — single source of truth for all IPC, socket
+/// resolution, capability registration, and cross-spring serialization.
+/// Follows the healthSpring V34 / ludoSpring V23 pattern.
+pub const PRIMAL_NAME: &str = "airspring";
+
+/// Capability domain for biomeOS semantic routing.
+pub const PRIMAL_DOMAIN: &str = "ecology";
+
 pub mod biomeos;
+pub mod cast;
 pub mod data;
 pub mod eco;
 pub mod error;

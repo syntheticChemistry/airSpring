@@ -25,7 +25,7 @@
 /// FAO-56 Eq. 82.
 #[must_use]
 pub fn total_available_water(theta_fc: f64, theta_wp: f64, root_depth_mm: f64) -> f64 {
-    (theta_fc - theta_wp) * root_depth_mm
+    theta_fc.mul_add(root_depth_mm, -theta_wp * root_depth_mm)
 }
 
 /// Readily Available Water (RAW) — the fraction of TAW easily extracted (mm).
@@ -181,7 +181,7 @@ impl WaterBalanceState {
     /// Uses `RunoffModel::None` (FAO-56 default) for runoff estimation.
     #[must_use]
     pub fn new(fc: f64, wp: f64, root_depth_mm: f64, p: f64) -> Self {
-        let taw = (fc - wp) * root_depth_mm;
+        let taw = fc.mul_add(root_depth_mm, -wp * root_depth_mm);
         let raw = p * taw;
         Self {
             depletion: 0.0,

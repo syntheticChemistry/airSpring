@@ -159,7 +159,7 @@ pub fn fit_freundlich(ce: &[f64], qe: &[f64]) -> Option<IsothermFit> {
     let mut best_n = n_init;
 
     for i in 0..=N_GRID {
-        let t = (i as f64) / (N_GRID as f64);
+        let t = crate::cast::usize_f64(i) / crate::cast::usize_f64(N_GRID);
         let n = t.mul_add(n_hi - n_lo, n_lo);
         let n_inv = 1.0 / n;
 

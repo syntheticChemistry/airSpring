@@ -1,21 +1,17 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! JSON-RPC method dispatch and provenance auto-recording.
 
+use airspring_barracuda::ipc::DispatchOutcome;
 use airspring_barracuda::{niche, primal_science};
 
-use super::handlers;
 use super::NicheState;
+use super::handlers;
 
-/// Outcome of dispatching a JSON-RPC method (biomeOS standard).
-#[expect(dead_code, reason = "InvalidParams and InternalError reserved for biomeOS standard error codes")]
-pub enum DispatchOutcome {
-    Ok(serde_json::Value),
-    MethodNotFound(String),
-    InvalidParams { method: String, reason: String },
-    InternalError { method: String, source: String },
-}
-
-pub fn dispatch(method: &str, params: &serde_json::Value, state: &NicheState) -> DispatchOutcome {
+pub fn dispatch(
+    method: &str,
+    params: &serde_json::Value,
+    state: &NicheState,
+) -> DispatchOutcome<serde_json::Value> {
     if matches!(
         method,
         "lifecycle.health" | "health" | "health.check" | "science.health"

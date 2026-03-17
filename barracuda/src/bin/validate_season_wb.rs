@@ -143,6 +143,10 @@ struct SeasonResult {
     relative_yield: f64,
 }
 
+#[expect(
+    clippy::similar_names,
+    reason = "FAO-56 terminology: ET₀/ETc/ETa are distinct quantities"
+)]
 fn run_season(crop: &CropDef) -> SeasonResult {
     let taw = total_available_water(crop.theta_fc, crop.theta_wp, crop.root_depth_mm);
     let raw = readily_available_water(taw, 0.5);

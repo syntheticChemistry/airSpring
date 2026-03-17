@@ -155,10 +155,10 @@ impl BatchedWaterBalance {
     ///
     /// Returns an error if GPU device or `BatchedElementwiseF64` cannot init.
     pub fn gpu_only() -> crate::error::Result<Self> {
-        let device = barracuda::device::test_pool::tokio_block_on(
-            barracuda::device::WgpuDevice::new_f64_capable(),
-        )?;
-        let engine = BatchedElementwiseF64::new(std::sync::Arc::new(device))?;
+        let device = crate::gpu::device_info::try_f64_device().ok_or_else(|| {
+            crate::error::AirSpringError::barracuda_msg("no f64-capable GPU device")
+        })?;
+        let engine = BatchedElementwiseF64::new(device)?;
         Ok(Self {
             state: WaterBalanceState::new(0.30, 0.12, 600.0, 0.50),
             gpu_engine: Some(engine),
@@ -483,11 +483,7 @@ mod tests {
     }
 
     fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
-        barracuda::device::test_pool::tokio_block_on(
-            barracuda::device::WgpuDevice::new_f64_capable(),
-        )
-        .ok()
-        .map(std::sync::Arc::new)
+        crate::gpu::device_info::try_f64_device()
     }
 
     #[test]
