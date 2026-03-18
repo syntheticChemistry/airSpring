@@ -30,7 +30,7 @@ use barracuda::ops::batched_elementwise_f64::{self as bef64, BatchedElementwiseF
 use airspring_barracuda::eco::crop::CropType;
 use airspring_barracuda::gpu::seasonal_pipeline::{CropConfig, SeasonalPipeline, WeatherDay};
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation::{self, ValidationHarness};
+use airspring_barracuda::validation::{self, OrExit, ValidationHarness};
 
 // ─── Domain constants (synthetic validation data) ────────────────────────────
 
@@ -190,7 +190,7 @@ fn main() {
     };
 
     let engine =
-        BatchedElementwiseF64::new(Arc::clone(&device)).expect("GPU engine initialization");
+        BatchedElementwiseF64::new(Arc::clone(&device)).or_exit("GPU engine initialization");
     let mut benchmarks: Vec<BenchRow> = Vec::new();
 
     // ═══ Section 1: Op 0 — FAO-56 Penman-Monteith ET₀ ═════════════════════
@@ -203,7 +203,7 @@ fn main() {
     let station_days = generate_station_days(n_et0);
     let et0_gpu = engine
         .fao56_et0_batch(&station_days)
-        .expect("GPU engine FAO-56 ET₀ execution");
+        .or_exit("GPU engine FAO-56 ET₀ execution");
 
     v.check_bool("op=0 returns N results", et0_gpu.len() == n_et0);
     v.check_bool("op=0 all positive", et0_gpu.iter().all(|&x| x > 0.0));
@@ -239,7 +239,7 @@ fn main() {
     let wb_data = generate_water_balance_data(n_wb);
     let wb_gpu = engine
         .execute(&wb_data, n_wb, Op::WaterBalance)
-        .expect("GPU engine water balance execution");
+        .or_exit("GPU engine water balance execution");
 
     v.check_bool("op=1 returns N results", wb_gpu.len() == n_wb);
     v.check_bool("op=1 all non-negative", wb_gpu.iter().all(|&x| x >= 0.0));
@@ -255,7 +255,7 @@ fn main() {
     let sensor_data = generate_sensor_data(n_sensor);
     let sensor_gpu = engine
         .execute(&sensor_data, n_sensor, Op::SensorCalibration)
-        .expect("GPU engine sensor calibration execution");
+        .or_exit("GPU engine sensor calibration execution");
 
     let sensor_cpu: Vec<f64> = sensor_data.iter().map(|&raw| sensor_cal_cpu(raw)).collect();
 
@@ -269,7 +269,7 @@ fn main() {
     );
     let vwc_10k = engine
         .execute(&[10_000.0], 1, Op::SensorCalibration)
-        .expect("GPU engine VWC(10000) execution")[0];
+        .or_exit("GPU engine VWC(10000) execution")[0];
     // Provenance: SoilWatch 10 Topp polynomial, Topp et al. (1980).
     // VWC(ε=10000) verified against control/soil_sensors/calibration_dong2020.py
     // commit 502f2ada, 2026-02-16.
@@ -313,7 +313,7 @@ fn main() {
     let hg_data = generate_hargreaves_data(n_hg);
     let hg_gpu = engine
         .execute(&hg_data, n_hg, Op::HargreavesEt0)
-        .expect("GPU engine Hargreaves ET₀ execution");
+        .or_exit("GPU engine Hargreaves ET₀ execution");
 
     let hg_cpu: Vec<f64> = hg_data
         .chunks(4)
@@ -352,7 +352,7 @@ fn main() {
     let kc_data = generate_kc_data(n_kc);
     let kc_gpu = engine
         .execute(&kc_data, n_kc, Op::KcClimateAdjust)
-        .expect("GPU engine Kc climate execution");
+        .or_exit("GPU engine Kc climate execution");
 
     let kc_cpu: Vec<f64> = kc_data
         .chunks(4)
@@ -374,7 +374,7 @@ fn main() {
             1,
             Op::KcClimateAdjust,
         )
-        .expect("GPU engine Kc standard conditions execution")[0];
+        .or_exit("GPU engine Kc standard conditions execution")[0];
     // Provenance: FAO-56 Eq. 62 Kc_adj identity — standard conditions
     // (u2=2.0 m/s, RHmin=45%) produce no adjustment, so Kc_adj = Kc_tab = 1.20.
     v.check_abs(
@@ -404,7 +404,7 @@ fn main() {
     let dk_data = generate_dual_kc_data(n_dk);
     let dk_gpu = engine
         .execute(&dk_data, n_dk, Op::DualKcKe)
-        .expect("GPU engine Dual Kc Ke execution");
+        .or_exit("GPU engine Dual Kc Ke execution");
 
     v.check_bool("op=8 returns N results", dk_gpu.len() == n_dk);
     v.check_bool("op=8 all Ke non-negative", dk_gpu.iter().all(|&x| x >= 0.0));
@@ -445,7 +445,7 @@ fn main() {
     let config = CropConfig::standard(CropType::Corn);
 
     let gpu_pipeline =
-        SeasonalPipeline::gpu(Arc::clone(&device)).expect("GPU seasonal pipeline initialization");
+        SeasonalPipeline::gpu(Arc::clone(&device)).or_exit("GPU seasonal pipeline initialization");
     let cpu_pipeline = SeasonalPipeline::cpu();
 
     // warmup

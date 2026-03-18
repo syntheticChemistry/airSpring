@@ -18,7 +18,7 @@
 use airspring_barracuda::eco::water_balance::{self as wb, DailyInput, WaterBalanceState};
 use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{
-    self, ValidationHarness, json_f64, json_f64_required, parse_benchmark_json,
+    self, OrExit, ValidationHarness, json_f64, json_f64_required, parse_benchmark_json,
 };
 
 /// Benchmark JSON embedded at compile time for reproducibility.
@@ -252,7 +252,7 @@ fn main() {
     };
 
     let per_step_tol = json_f64(&benchmark, &["mass_balance_test", "tolerance"])
-        .expect("benchmark must have mass_balance_test.tolerance");
+        .or_exit("benchmark must have mass_balance_test.tolerance");
     assert!(
         per_step_tol < tolerances::WATER_BALANCE_PER_STEP.abs_tol,
         "per-step tolerance from benchmark should be strict: {per_step_tol}"
@@ -262,10 +262,10 @@ fn main() {
         .get("michigan_summer_scenario")
         .and_then(|m| m.get("expected_seasonal_et_range_mm"))
         .and_then(|r| r.as_array())
-        .expect("benchmark must have michigan_summer_scenario.expected_seasonal_et_range_mm");
+        .or_exit("benchmark must have michigan_summer_scenario.expected_seasonal_et_range_mm");
 
-    let mi_et_low = mi_et_range[0].as_f64().expect("ET range low");
-    let mi_et_high = mi_et_range[1].as_f64().expect("ET range high");
+    let mi_et_low = mi_et_range[0].as_f64().or_exit("ET range low");
+    let mi_et_high = mi_et_range[1].as_f64().or_exit("ET range high");
     let mi_et_mid = f64::midpoint(mi_et_low, mi_et_high);
     let mi_et_tol = (mi_et_high - mi_et_low) / 2.0;
 

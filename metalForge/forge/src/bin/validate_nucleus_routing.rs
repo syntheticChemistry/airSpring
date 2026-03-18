@@ -22,6 +22,19 @@ use airspring_forge::pipeline::{self, TransferPath};
 use airspring_forge::substrate::{Capability, Identity, Properties, Substrate, SubstrateKind};
 use airspring_forge::workloads;
 
+trait OrExit<T> {
+    fn or_exit(self, context: &str) -> T;
+}
+
+impl<T> OrExit<T> for Option<T> {
+    fn or_exit(self, context: &str) -> T {
+        self.unwrap_or_else(|| {
+            eprintln!("FATAL: {context}");
+            std::process::exit(1);
+        })
+    }
+}
+
 #[expect(
     clippy::too_many_lines,
     reason = "validation binary sequentially checks many baseline comparisons"
@@ -231,7 +244,8 @@ fn main() {
         Workload::new("validation", vec![Capability::F64Compute]).prefer(SubstrateKind::Cpu),
     ];
 
-    let pipeline = pipeline::route_pipeline(&seven_stage, &substrates).expect("pipeline");
+    let pipeline = pipeline::route_pipeline(&seven_stage, &substrates)
+        .or_exit("7-stage pipeline should route");
     check!(
         "pipeline_stages",
         pipeline.stages.len() == 7,
@@ -297,7 +311,8 @@ fn main() {
         "1 Nest atomic"
     );
 
-    let mesh_pipeline = mesh.route_pipeline(&seven_stage).expect("mesh pipeline");
+    let mesh_pipeline = mesh.route_pipeline(&seven_stage)
+        .or_exit("mesh pipeline should route");
     check!(
         "mesh_single_node",
         mesh_pipeline.is_single_node(),
@@ -340,7 +355,7 @@ fn main() {
     ];
     let mp = multi_mesh
         .route_pipeline(&cross_pipeline)
-        .expect("cross-node");
+        .or_exit("cross-node pipeline should route");
     check!(
         "multi_node_cross_hop",
         mp.cross_node_hops == 1,

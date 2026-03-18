@@ -14,14 +14,14 @@
 //! Provenance: script=`control/hargreaves/hargreaves_samani.py`, commit=fad2e1b, date=2026-03-02
 
 use airspring_barracuda::eco::evapotranspiration::{extraterrestrial_radiation, hargreaves_et0};
-use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
+use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/hargreaves/benchmark_hargreaves.json");
 
 fn validate_analytical(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Analytical Benchmarks");
     let checks = &benchmark["validation_checks"]["analytical"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let tmin = json_field(tc, "tmin");
         let tmax = json_field(tc, "tmax");
         let ra = json_field(tc, "ra_mm_day");
@@ -40,7 +40,7 @@ fn validate_analytical(v: &mut ValidationHarness, benchmark: &serde_json::Value)
 fn validate_ra(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Extraterrestrial Radiation Ra");
     let checks = &benchmark["validation_checks"]["ra_computation"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let latitude = json_field(tc, "latitude");
         #[expect(
             clippy::cast_sign_loss,
@@ -62,7 +62,7 @@ fn validate_ra(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
 fn validate_cross_comparison(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("FAO-56 Cross-Comparison (HG vs PM)");
     let checks = &benchmark["validation_checks"]["fao56_cross_comparison"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let city = tc["city"].as_str().unwrap_or("city");
         let latitude = json_field(tc, "latitude");
         #[expect(
@@ -94,7 +94,7 @@ fn validate_cross_comparison(v: &mut ValidationHarness, benchmark: &serde_json::
 fn validate_edge_cases(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Edge Cases");
     let checks = &benchmark["validation_checks"]["edge_cases"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let label = tc["label"].as_str().unwrap_or("edge");
         let tmin = json_field(tc, "tmin");
         let tmax = json_field(tc, "tmax");
@@ -113,7 +113,7 @@ fn validate_edge_cases(v: &mut ValidationHarness, benchmark: &serde_json::Value)
 fn validate_monotonicity(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Monotonicity");
     let checks = &benchmark["validation_checks"]["monotonicity"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let label = tc["label"].as_str().unwrap_or("mono");
         let ra = json_field(tc, "ra_mm_day");
         let base = &tc["base"];

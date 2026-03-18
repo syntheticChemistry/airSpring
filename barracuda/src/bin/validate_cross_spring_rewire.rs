@@ -50,7 +50,7 @@ use airspring_barracuda::eco::van_genuchten;
 use airspring_barracuda::gpu::richards::{BatchedRichards, RichardsRequest};
 use airspring_barracuda::gpu::van_genuchten::{BatchedVanGenuchten, compute_theta_cpu};
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation;
+use airspring_barracuda::validation::{self, OrExit};
 use barracuda::validation::ValidationHarness;
 
 fn try_gpu_device() -> Option<Arc<barracuda::device::WgpuDevice>> {
@@ -88,7 +88,7 @@ fn validate_brent_gpu_vg_inverse(v: &mut ValidationHarness) {
         return;
     };
 
-    let vg = BatchedVanGenuchten::gpu(Arc::clone(&device)).unwrap();
+    let vg = BatchedVanGenuchten::gpu(Arc::clone(&device)).or_exit("BatchedVanGenuchten::gpu init");
     let theta_r = 0.065;
     let theta_s = 0.41;
     let alpha = 0.075;
@@ -391,7 +391,7 @@ fn validate_cross_spring_provenance(v: &mut ValidationHarness) {
         1e-6,
     );
 
-    let gamma_val = barracuda::math::gamma(5.0).expect("gamma(5) should not fail");
+    let gamma_val = barracuda::math::gamma(5.0).or_exit("gamma(5) should not fail");
     v.check_abs("hotSpring: Γ(5) = 24", gamma_val, 24.0, 1e-4);
 
     let h = barracuda::spectral::anderson::anderson_4d(3, 1.0, 42);
@@ -441,7 +441,7 @@ fn validate_cross_spring_provenance(v: &mut ValidationHarness) {
         0.95,
         42,
     )
-    .expect("bootstrap_ci should succeed");
+    .or_exit("bootstrap_ci should succeed");
     v.check_bool(
         "groundSpring: bootstrap CI lower < upper",
         ci.lower < ci.upper,
@@ -492,11 +492,11 @@ fn benchmark_modern_rewire(v: &mut ValidationHarness) {
         .collect();
     let cpu_elapsed = t_cpu.elapsed();
 
-    let vg = BatchedVanGenuchten::gpu(Arc::clone(&device)).unwrap();
+    let vg = BatchedVanGenuchten::gpu(Arc::clone(&device)).or_exit("BatchedVanGenuchten::gpu for benchmark");
     let t_gpu = Instant::now();
     let _gpu_roots = vg
         .compute_inverse_gpu(theta_r, theta_s, alpha, n_vg, &targets)
-        .unwrap();
+        .or_exit("compute_inverse_gpu result");
     let gpu_elapsed = t_gpu.elapsed();
 
     let cpu_rate = f64::from(batch_n) / cpu_elapsed.as_secs_f64();
@@ -540,11 +540,11 @@ fn benchmark_modern_rewire(v: &mut ValidationHarness) {
     };
 
     let t_rcpu = Instant::now();
-    let _ = BatchedRichards::solve_upstream(&req).unwrap();
+    let _ = BatchedRichards::solve_upstream(&req).or_exit("Richards CPU solve");
     let rcpu_elapsed = t_rcpu.elapsed();
 
     let t_rgpu = Instant::now();
-    let _ = BatchedRichards::solve_gpu(device, &req).unwrap();
+    let _ = BatchedRichards::solve_gpu(device, &req).or_exit("Richards GPU solve");
     let rgpu_elapsed = t_rgpu.elapsed();
 
     v.check_bool(

@@ -23,14 +23,14 @@
 use airspring_barracuda::eco::evapotranspiration::{
     self, DailyEt0Input, hamon_pet, hargreaves_et0, makkink_et0, turc_et0,
 };
-use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
+use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/neural_api/benchmark_neural_api.json");
 
 fn validate_direct_compute(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Direct Compute — barracuda library");
     let tests = &benchmark["validation_checks"]["et0_round_trip"]["test_cases"];
-    for tc in tests.as_array().expect("array") {
+    for tc in tests.as_array().or_exit("array") {
         let method = tc["method"].as_str().unwrap_or("unknown");
         let params = &tc["params"];
 
@@ -46,15 +46,15 @@ fn validate_direct_compute(v: &mut ValidationHarness, benchmark: &serde_json::Va
 fn validate_json_serialization_parity(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("JSON Serialization Parity");
     let tests = &benchmark["validation_checks"]["et0_round_trip"]["test_cases"];
-    for tc in tests.as_array().expect("array") {
+    for tc in tests.as_array().or_exit("array") {
         let method = tc["method"].as_str().unwrap_or("unknown");
         let params = &tc["params"];
         let tol = json_field(tc, "tolerance");
 
         let direct = compute_et0(method, params);
 
-        let json_str = serde_json::to_string(params).expect("serialize");
-        let rt_params: serde_json::Value = serde_json::from_str(&json_str).expect("deserialize");
+        let json_str = serde_json::to_string(params).or_exit("serialize");
+        let rt_params: serde_json::Value = serde_json::from_str(&json_str).or_exit("deserialize");
         let via_json = compute_et0(method, &rt_params);
 
         v.check_abs(
@@ -117,7 +117,7 @@ fn validate_substrate_detection(v: &mut ValidationHarness, benchmark: &serde_jso
 
     let caps = expected["expected_capabilities"]
         .as_array()
-        .expect("caps array");
+        .or_exit("caps array");
     v.check_bool(
         "substrate detection spec has capabilities listed",
         !caps.is_empty(),
@@ -148,7 +148,7 @@ fn validate_substrate_detection(v: &mut ValidationHarness, benchmark: &serde_jso
 fn validate_capability_spec(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Capability Discovery Spec");
     let caps = &benchmark["validation_checks"]["capability_discovery"]["expected_capabilities"];
-    let cap_list = caps.as_array().expect("caps array");
+    let cap_list = caps.as_array().or_exit("caps array");
 
     v.check_bool("capability list is non-empty", !cap_list.is_empty());
 

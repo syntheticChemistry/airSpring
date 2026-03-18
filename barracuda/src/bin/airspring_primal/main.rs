@@ -27,7 +27,7 @@ use std::time::{Duration, Instant};
 use tracing::{error, info, warn};
 
 use airspring_barracuda::ipc::DispatchOutcome;
-use airspring_barracuda::{biomeos, niche, rpc};
+use airspring_barracuda::{biomeos, niche, primal_names, rpc};
 
 const READ_TIMEOUT_SECS: u64 = 60;
 const WRITE_TIMEOUT_SECS: u64 = 10;
@@ -244,8 +244,8 @@ fn run() -> Result<(), String> {
                         "capabilities_total": niche::CAPABILITIES.len(),
                         "composition": {
                             "provenance_trio": airspring_barracuda::ipc::provenance::is_available(),
-                            "nestgate": discovery::discover_data_primal().is_some(),
-                            "toadstool": discovery::discover_compute_primal().is_some(),
+                            (primal_names::NESTGATE): discovery::discover_data_primal().is_some(),
+                            (primal_names::TOADSTOOL): discovery::discover_compute_primal().is_some(),
                         },
                     }),
                 );

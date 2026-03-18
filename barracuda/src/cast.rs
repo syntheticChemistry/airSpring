@@ -101,6 +101,33 @@ pub const fn u64_f64(v: u64) -> f64 {
     v as f64
 }
 
+/// `f64` → `i32` via truncation toward zero. For loop counters and indices.
+///
+/// # Panics
+///
+/// Debug-panics if `v` is NaN, infinite, or outside i32 range.
+#[inline]
+#[must_use]
+pub fn f64_i32(v: f64) -> i32 {
+    debug_assert!(
+        v.is_finite() && v >= f64::from(i32::MIN) && v <= f64::from(i32::MAX),
+        "f64_i32: {v} out of range"
+    );
+    v as i32
+}
+
+/// `usize` → `i32`. For converting lengths to signed counters.
+///
+/// # Panics
+///
+/// Debug-panics if `v > i32::MAX`.
+#[inline]
+#[must_use]
+pub const fn usize_i32(v: usize) -> i32 {
+    debug_assert!(v <= i32::MAX as usize, "usize_i32: overflow");
+    v as i32
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

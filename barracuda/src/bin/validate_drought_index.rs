@@ -19,7 +19,7 @@
 use airspring_barracuda::eco::drought_index::{DroughtClass, compute_spi, gamma_mle_fit};
 use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{
-    self, ValidationHarness, json_f64_required, parse_benchmark_json,
+    self, OrExit, ValidationHarness, json_f64_required, parse_benchmark_json,
 };
 
 const BENCHMARK_JSON: &str =
@@ -28,16 +28,16 @@ const BENCHMARK_JSON: &str =
 fn load_precip(benchmark: &serde_json::Value) -> Vec<f64> {
     benchmark["monthly_precip_mm"]
         .as_array()
-        .expect("monthly_precip_mm must be array")
+        .or_exit("monthly_precip_mm must be array")
         .iter()
-        .map(|v| v.as_f64().expect("f64"))
+        .map(|v| v.as_f64().or_exit("f64"))
         .collect()
 }
 
 fn load_spi_values(benchmark: &serde_json::Value, key: &str) -> Vec<f64> {
     benchmark[key]["values"]
         .as_array()
-        .expect("values array")
+        .or_exit("values array")
         .iter()
         .map(|v| {
             if v.is_null() {
@@ -73,15 +73,15 @@ fn validate_gamma_fit(v: &mut ValidationHarness, benchmark: &serde_json::Value) 
 
     let known: Vec<f64> = benchmark["gamma_fit_known"]["data"]
         .as_array()
-        .expect("data array")
+        .or_exit("data array")
         .iter()
-        .map(|x| x.as_f64().expect("f64"))
+        .map(|x| x.as_f64().or_exit("f64"))
         .collect();
 
     let py_alpha = json_f64_required(benchmark, &["gamma_fit_known", "alpha"]);
     let py_beta = json_f64_required(benchmark, &["gamma_fit_known", "beta"]);
 
-    let params = gamma_mle_fit(&known).expect("gamma fit should succeed");
+    let params = gamma_mle_fit(&known).or_exit("gamma fit should succeed");
 
     v.check_abs(
         "alpha matches Python",

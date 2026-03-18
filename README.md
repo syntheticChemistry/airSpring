@@ -48,12 +48,13 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | Phase 5.10: Cross-ecosystem absorption | **Health probes, circuit breaker** | v0.8.8: health probes, circuit breaker, OrExit, thiserror, socket_env_var, structured tracing, `IpcError::is_recoverable` |
 | Phase 5.11: Cross-ecosystem evolution | **All absorbed** | v0.8.9: Canonical `PRIMAL_NAME`/`PRIMAL_DOMAIN`, `OnceLock` GPU probe cache, `cast` module (safe numeric casts), `DispatchOutcome<T>` library type, coralReef/Squirrel discovery, `mul_add()` FMA (18 sites), smart refactors (4 monoliths → 19 modules: evapotranspiration, dual_kc, biomeos, validation), composition guidance |
 | Phase 5.12: Audit execution | **All findings resolved** | v0.9.0: `#![deny(cast_*)]` library strict, 3 new cast helpers (u32_usize, u64_usize, u64_f64), soil_moisture refactored (672→4 submodules), petalTongue 3-tier discovery, primal_dispatch integration tests (14), benchmark JSON provenance for all hardcoded values, CI lint config via Cargo.toml only, hardcoded socket paths removed |
+| Phase 5.13: Deep audit execution | **All debt resolved** | v0.10.0: Provenance registry 11→63 baselines, OrExit zero-panic across all 91 binaries, centralized tolerances (R², RMSE, IA, bio-diversity), `#[allow]`→`#[expect]` Rust 2024, smart refactors (data/provider→4 modules, evolution_gaps→resolved_issues), hardcoded primal names→`primal_names::*` constants, data accession IDs, cast helpers (f64_i32, usize_i32), determinism contract documented |
 
 ### Code Quality
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` (barracuda) | **894 passed**, 0 failures |
+| `cargo test --lib` (barracuda) | **908 passed**, 0 failures |
 | `cargo test --test '*'` (integration) | **299 passed** (17 test files) |
 | `cargo test --lib` (metalForge) | **61 passed**, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **95.66% line coverage** |
@@ -228,7 +229,7 @@ airSpring/
 │   ├── bootstrap_jackknife/     # Bootstrap & Jackknife CI (20/20)
 │   ├── drought_index/           # SPI drought index (20/20)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (894 lib tests, 91 binaries, barraCuda 0.3.5 / wgpu 28, Edition 2024)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (908 lib tests, 91 binaries, barraCuda 0.3.5 / wgpu 28, Edition 2024)
 │   ├── src/
 │   │   ├── biomeos/                # biomeOS socket resolution + primal discovery (3 sub-modules)
 │   │   ├── eco/                 # Domain modules (22 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine + drought_index)
@@ -241,7 +242,7 @@ airSpring/
 │   │   ├── tolerances/          # Domain-specific validation tolerances (58 named, 4 submodules)
 │   │   └── bin/                 # validate_*, bench_*, airspring_primal (91 declared)
 │   ├── tests/                   # Integration + property tests (15 files + common/)
-│   └── Cargo.toml               # v0.8.9
+│   └── Cargo.toml               # v0.10.0
 ├── niches/                      # BYOB niche definitions (airspring-ecology.yaml)
 ├── metalForge/                  # Mixed hardware dispatch (CPU+GPU+NPU)
 │   ├── deploy/                  # biomeOS deployment graphs (airspring_deploy.toml)
@@ -254,7 +255,7 @@ airSpring/
 │   └── baseCamp/                # Per-faculty research briefings + baseCamp extensions
 ├── experiments/                 # Experiment protocols and results (87 experiments)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
-│   └── handoffs/                # Versioned handoffs (V090 current)
+│   └── handoffs/                # Versioned handoffs (V010 current)
 ├── graphs/                      # biomeOS deployment graphs (eco pipeline, provenance pipeline, niche deploy, cross-primal)
 ├── CHANGELOG.md                 # Keep-a-Changelog versioned history
 ├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
@@ -286,7 +287,7 @@ airSpring/
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance (S87) |
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (87 experiments) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
-| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V090 current) |
+| `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V010 current) |
 
 ## License
 
@@ -294,11 +295,9 @@ AGPL-3.0-or-later
 
 ---
 
-*March 18, 2026 — v0.9.0. Audit execution: `#![deny(cast_*)]` library-strict
-(cast helpers for all production code, crate-level allows cover 91 binaries only),
-soil_moisture refactored (672 LOC → 4 cohesive submodules), petalTongue 3-tier
-discovery wired, primal_dispatch integration tests (14 tests: health/caps/science/
-provenance/discovery), benchmark JSON provenance for all hardcoded validation values,
-CI lint config consolidated to Cargo.toml `[lints]` (no CLI flag conflicts),
-hardcoded socket paths removed from deployment manifests. 894 lib + 299 integration
-+ 61 forge tests, 0 failures. AGPL-3.0-or-later.*
+*March 18, 2026 — v0.10.0. Deep audit execution: provenance registry expanded
+(11→63 Python baselines), OrExit zero-panic migration across all 91 validation
+binaries, centralized tolerances, `#[allow]`→`#[expect]` Rust 2024 migration,
+smart refactors (data/provider 781→4 modules, gpu/evolution_gaps→resolved_issues),
+hardcoded primal names→constants, data provenance accession IDs documented.
+908 lib + 299 integration + 61 forge tests, 0 failures. AGPL-3.0-or-later.*

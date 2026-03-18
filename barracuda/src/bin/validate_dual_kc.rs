@@ -20,7 +20,7 @@ use airspring_barracuda::eco::dual_kc::{self, DualKcInput, EvaporationLayerState
 use airspring_barracuda::eco::soil_moisture::SoilTexture;
 use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{
-    self, ValidationHarness, json_array, json_field, json_str, parse_benchmark_json,
+    self, OrExit, ValidationHarness, json_array, json_field, json_str, parse_benchmark_json,
 };
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/dual_kc/benchmark_dual_kc.json");
@@ -193,9 +193,9 @@ fn validate_tew_vs_rew(v: &mut ValidationHarness) {
 
 fn f64_vec(arr: &serde_json::Value) -> Vec<f64> {
     arr.as_array()
-        .expect("expected JSON array")
+        .or_exit("expected JSON array")
         .iter()
-        .map(|v| v.as_f64().expect("expected f64 in array"))
+        .map(|v| v.as_f64().or_exit("expected f64 in array"))
         .collect()
 }
 

@@ -18,7 +18,7 @@ use airspring_barracuda::eco::{
     water_balance::{self as wb, DailyInput, WaterBalanceState},
 };
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation::{self, ValidationHarness, json_f64, parse_benchmark_json};
+use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_f64, parse_benchmark_json};
 use std::path::Path;
 
 const BENCHMARK_JSON: &str =
@@ -539,12 +539,12 @@ fn main() {
         std::process::exit(1);
     };
 
-    let site = benchmark.get("site").expect("benchmark must have site");
-    let lat = json_f64(site, &["latitude"]).expect("site.latitude");
-    let fc = json_f64(site, &["field_capacity"]).expect("site.field_capacity");
-    let wp = json_f64(site, &["wilting_point"]).expect("site.wilting_point");
-    let root_depth_m = json_f64(site, &["root_depth_m"]).expect("site.root_depth_m");
-    let p = json_f64(site, &["depletion_fraction"]).expect("site.depletion_fraction");
+    let site = benchmark.get("site").or_exit("benchmark must have site");
+    let lat = json_f64(site, &["latitude"]).or_exit("site.latitude");
+    let fc = json_f64(site, &["field_capacity"]).or_exit("site.field_capacity");
+    let wp = json_f64(site, &["wilting_point"]).or_exit("site.wilting_point");
+    let root_depth_m = json_f64(site, &["root_depth_m"]).or_exit("site.root_depth_m");
+    let p = json_f64(site, &["depletion_fraction"]).or_exit("site.depletion_fraction");
 
     let root_depth_mm = root_depth_m * 1000.0;
     let coeffs = CropType::Corn.coefficients();
@@ -555,7 +555,7 @@ fn main() {
         |_| {
             Path::new(env!("CARGO_MANIFEST_DIR"))
                 .parent()
-                .expect("manifest parent")
+                .or_exit("manifest parent")
                 .join("control")
                 .join("long_term_wb")
                 .join("data")
@@ -575,12 +575,12 @@ fn main() {
     }
 
     let cache: serde_json::Value = {
-        let file = std::fs::File::open(&cache_path).expect("open weather cache");
+        let file = std::fs::File::open(&cache_path).or_exit("open weather cache");
         let reader = std::io::BufReader::new(file);
-        serde_json::from_reader(reader).expect("parse weather cache")
+        serde_json::from_reader(reader).or_exit("parse weather cache")
     };
 
-    let seasons = parse_weather_cache(&cache).expect("parse seasons from cache");
+    let seasons = parse_weather_cache(&cache).or_exit("parse seasons from cache");
 
     let params = SiteParams {
         lat_deg: lat,

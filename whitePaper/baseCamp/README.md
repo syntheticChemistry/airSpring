@@ -2,7 +2,7 @@
 
 **Updated**: March 18, 2026
 **Project**: airSpring — Ecological & Agricultural Sciences (v0.10.0)
-**Status**: 87 experiments, 1284/1284 Python + 908 lib + 299 integration + 61 forge + 22 property tests + 91 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, BYOB niche deployment) + `#![forbid(unsafe_code)]` both crates + `#![deny(cast_*)]` library-strict + zero clippy pedantic+nursery + `warn(missing_docs)`. 60 tolerances in 4 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies** (ureq→Songbird IPC). Zero-panic validation (47/47 binaries). 10 MCP tools (Squirrel AI). Python baseline provenance registry. kahan_sum delegation. ecoBin deny.toml (14 C-dep bans). `f64::total_cmp`. `assert!`→`Result`. Full validation pipeline green (2026-03-18)
+**Status**: 87 experiments, 1284/1284 Python + 908 lib + 299 integration + 61 forge + 22 property tests + 91 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, BYOB niche deployment) + `#![forbid(unsafe_code)]` both crates + `#![deny(cast_*)]` library-strict + zero clippy pedantic+nursery + `warn(missing_docs)`. 63 tolerances in 4 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies** (ureq→Songbird IPC). Zero-panic validation (91/91 binaries). 10 MCP tools (Squirrel AI). Python baseline provenance registry (63 baselines). kahan_sum delegation. ecoBin deny.toml (14 C-dep bans). `f64::total_cmp`. `assert!`→`Result`. `#[allow]`→`#[expect]` Rust 2024 complete. Full validation pipeline green (2026-03-18)
 
 ---
 
@@ -11,7 +11,7 @@
 ```
 Phase 0   Python/R baselines    — reproduce paper results with original tools (1284/1284)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (894 lib + 1498 atlas, 91 binaries + 146/146 + 32/32 cross-spring benchmarks)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (908 lib + 1498 atlas, 91 binaries + 146/146 + 32/32 cross-spring benchmarks)
 Phase 1.5 CPU benchmark         — 14.3× Rust-vs-Python geometric mean (24/24 algorithms, 21/21 CPU-GPU parity modules)
 Phase 2   BarraCuda GPU bridge  — 25 Tier A + 6 GPU-local modules wired (cross-spring S87 fully rewired)
 Phase 2.5 Ops 5-8 GPU-first   — Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed
@@ -45,6 +45,9 @@ Phase 5.7 Cross-spring   — zero C deps (ureq→Songbird IPC), IpcError+Dispatc
 Phase 5.8 Deep execution — zero-panic expanded 9→47 binaries, typed compute_dispatch client (toadStool compute.dispatch.submit/result/capabilities), extract_rpc_error centralized, Python tolerance mirror complete (60 constants), 866 lib tests
 Phase 5.9 Ecosystem absorption — zero hardcoded primals, parse_capabilities 4-format (S156+), JSON-RPC proptest fuzz (7 properties), collapsible-if let-chains, #[expect] complete, PRIMAL_REGISTRY v0.8.8, 880 lib + 22 property tests
 Phase 5.10 Cross-ecosystem absorption — health probes, circuit breaker, OrExit, thiserror, socket_env_var, structured tracing, IpcError::is_recoverable (v0.8.8, 880 lib)
+Phase 5.11 Cross-ecosystem evolution — PRIMAL_NAME/PRIMAL_DOMAIN canonical, OnceLock GPU probe cache, cast module, DispatchOutcome<T>, coralReef/Squirrel discovery, mul_add FMA, smart refactors (4 monoliths→19 modules), composition guidance (v0.8.9, 891 lib)
+Phase 5.12 Audit execution    — #![deny(cast_*)] library strict, soil_moisture refactored (672→4 submodules), petalTongue 3-tier discovery, primal_dispatch integration tests (14), benchmark JSON provenance, CI lint consolidated (v0.9.0, 894 lib)
+Phase 5.13 Deep audit execution — provenance 11→63 baselines, OrExit zero-panic all 91 binaries, centralized tolerances, #[allow]→#[expect] Rust 2024, smart refactors (data/provider→4 modules, evolution_gaps→resolved_issues), primal_names constants, data accession IDs, cast helpers (f64_i32, usize_i32), determinism contract (v0.10.0, 908 lib)
 ```
 
 ## Faculty Summary

@@ -14,14 +14,14 @@
 //! Provenance: script=`control/makkink/makkink_et0.py`, commit=d3ecdc8, date=2026-02-27
 
 use airspring_barracuda::eco::evapotranspiration::makkink_et0;
-use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
+use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/makkink/benchmark_makkink.json");
 
 fn validate_analytical(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Analytical Benchmarks");
     let checks = &benchmark["validation_checks"]["analytical"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let tmean = json_field(tc, "tmean");
         let rs = json_field(tc, "rs_mj");
         let elev = json_field(tc, "elevation_m");
@@ -40,7 +40,7 @@ fn validate_analytical(v: &mut ValidationHarness, benchmark: &serde_json::Value)
 fn validate_pm_cross(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("PM Cross-Comparison");
     let checks = &benchmark["validation_checks"]["pm_cross_comparison"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let label = tc["label"].as_str().unwrap_or("city");
         let tmean = json_field(tc, "tmean");
         let rs = json_field(tc, "rs_mj");
@@ -64,7 +64,7 @@ fn validate_pm_cross(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
 fn validate_edge_cases(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Edge Cases");
     let checks = &benchmark["validation_checks"]["edge_cases"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let label = tc["label"].as_str().unwrap_or("edge");
         let tmean = json_field(tc, "tmean");
         let rs = json_field(tc, "rs_mj");
@@ -84,7 +84,7 @@ fn validate_edge_cases(v: &mut ValidationHarness, benchmark: &serde_json::Value)
 fn validate_monotonicity(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Monotonicity");
     let checks = &benchmark["validation_checks"]["monotonicity"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let label = tc["label"].as_str().unwrap_or("mono");
         let elev = json_field(tc, "elevation_m");
         let (low, high) = if tc.get("base_rs").is_some() {

@@ -44,6 +44,51 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 **Pre-existing Fix**:
 - `test_soil_texture_into_water_balance`: `f64::EPSILON` → `1e-10` tolerance (avoids false failure from float arithmetic)
 
+### Deep Audit Execution
+
+**Provenance Registry Expansion**:
+- `provenance.rs`: 11→63 `PythonBaseline` entries — every CI validation binary now has a corresponding provenance record
+- 14 new commit epoch constants (SIMPLIFIED_ET0, EXPERIMENT_V3, PAPER12, STOCHASTIC_V1, NCBI_ATLAS, etc.)
+- Test assertion updated: `python_baselines().len() >= 60`
+
+**OrExit Zero-Panic Migration**:
+- All 91 validation binaries migrated from `.expect()`/`.unwrap()` to `.or_exit()` pattern
+- ~180 call sites converted across 25+ binaries (cross_validate, cover_crop, cpu_gpu_parity, anderson, gpu_rewire, long_term_wb, real_data, lysimeter, cross_species, hargreaves, gpu_live, nass_yield, forecast, climate_scenario, and more)
+- metalForge binaries (validate_dispatch, validate_mixed_pipeline, validate_nucleus_routing) include local `OrExit` trait
+- `.unwrap_or()`/`.unwrap_or_else()` safe fallbacks left untouched
+
+**Tolerance Centralization**:
+- `validate_lysimeter.rs`: hardcoded `0.80` → `IA_CRITERION.abs_tol`
+- `validate_richards.rs`: fallback tolerances → `SOIL_HYDRAULIC`, `RICHARDS_TRANSIENT`, `RICHARDS_STEADY`
+- `validate_diversity.rs`: → `BIO_DIVERSITY_SHANNON`, `BIO_DIVERSITY_SIMPSON`, `BIO_BRAY_CURTIS`
+- `validate_atlas.rs`: hardcoded `> 0.85` → `tolerances::R2_MINIMUM.abs_tol`
+
+**Smart Refactoring**:
+- `data/provider.rs` (781 LOC) → 4 modules: `provider.rs` (core trait + helpers), `songbird.rs`, `biomeos_provider.rs`, `nestgate.rs`
+- `gpu/evolution_gaps.rs` (731 LOC) → extracted `resolved_issues.rs` (BarraCudaIssue types + 4-entry array); re-exported for backward compat
+
+**Cast Evolution**:
+- 2 new helpers: `cast::f64_i32()`, `cast::usize_i32()`
+- Progressive migration strategy documented in `Cargo.toml` comments
+
+**Rust 2024 Lint Migration**:
+- `tests/common/mod.rs`: 3× `#[allow()]` → `#[expect()]` with reason strings
+
+**Data Provenance**:
+- `data/provider.rs` module docs: formal accession-style identifiers for all data sources (ECMWF CDS, SCAN network, AmeriFlux DOI, NASS API, SRA BioProject, NOAA GHCND)
+
+**Hardcoded Primal Names**:
+- `airspring_primal/handlers.rs` and `main.rs`: literal `"nestgate"`, `"toadstool"` → `primal_names::NESTGATE`, `primal_names::TOADSTOOL`
+
+**Determinism Documentation**:
+- `nautilus.rs` `AirSpringBrainConfig`: determinism contract documented (structural, no RNG seed needed)
+
+**Version Sync**:
+- `niches/airspring-ecology.yaml`: `0.9.0` → `0.10.0`
+
+**metalForge**:
+- `neural.rs` doc example: `.unwrap()` → `.expect("biomeOS Neural API socket must be discoverable")`
+
 ## [0.9.0] - 2026-03-18
 
 ### Audit Execution

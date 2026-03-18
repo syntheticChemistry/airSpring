@@ -8,7 +8,7 @@
 
 use airspring_barracuda::eco::evapotranspiration::{self as et, DailyEt0Input};
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation::{self, ValidationHarness, json_f64, parse_benchmark_json};
+use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_f64, parse_benchmark_json};
 
 /// Benchmark JSON embedded at compile time for reproducibility.
 const BENCHMARK_JSON: &str = include_str!("../../../control/fao56/benchmark_fao56.json");
@@ -21,7 +21,7 @@ fn validate_svp_table(v: &mut ValidationHarness, benchmark: &serde_json::Value) 
         .get("saturation_vapour_pressure_table")
         .and_then(|t| t.get("data"))
         .and_then(|d| d.as_array())
-        .expect("SVP table must exist in benchmark JSON");
+        .or_exit("SVP table must exist in benchmark JSON");
     let svp_tol = json_f64(
         benchmark,
         &["saturation_vapour_pressure_table", "tolerance_kpa"],
@@ -32,11 +32,11 @@ fn validate_svp_table(v: &mut ValidationHarness, benchmark: &serde_json::Value) 
         let temp = entry
             .get("temp_c")
             .and_then(serde_json::Value::as_f64)
-            .expect("SVP table entry must have 'temp_c'");
+            .or_exit("SVP table entry must have 'temp_c'");
         let expected = entry
             .get("es_kpa")
             .and_then(serde_json::Value::as_f64)
-            .expect("SVP table entry must have 'es_kpa'");
+            .or_exit("SVP table entry must have 'es_kpa'");
         let es = et::saturation_vapour_pressure(temp);
         v.check_abs(&format!("es({temp:.0}°C)"), es, expected, svp_tol);
     }
@@ -51,7 +51,7 @@ fn validate_delta_table(v: &mut ValidationHarness, benchmark: &serde_json::Value
         .get("slope_vapour_pressure_table")
         .and_then(|t| t.get("data"))
         .and_then(|d| d.as_array())
-        .expect("Δ table must exist in benchmark JSON");
+        .or_exit("Δ table must exist in benchmark JSON");
     let delta_tol = json_f64(
         benchmark,
         &["slope_vapour_pressure_table", "tolerance_kpa_per_c"],
@@ -62,11 +62,11 @@ fn validate_delta_table(v: &mut ValidationHarness, benchmark: &serde_json::Value
         let temp = entry
             .get("temp_c")
             .and_then(serde_json::Value::as_f64)
-            .expect("Delta table entry must have 'temp_c'");
+            .or_exit("Delta table entry must have 'temp_c'");
         let expected = entry
             .get("delta_kpa_per_c")
             .and_then(serde_json::Value::as_f64)
-            .expect("Delta table entry must have 'delta_kpa_per_c'");
+            .or_exit("Delta table entry must have 'delta_kpa_per_c'");
         let delta = et::vapour_pressure_slope(temp);
         v.check_abs(&format!("Δ({temp:.0}°C)"), delta, expected, delta_tol);
     }
@@ -87,21 +87,21 @@ fn validate_uccle(v: &mut ValidationHarness, benchmark: &serde_json::Value) -> f
 
     let uccle = &benchmark["example_18_uccle_daily"];
 
-    let tmin_uc = json_f64(uccle, &["inputs", "tmin_c"]).expect("Uccle: inputs.tmin_c");
-    let tmax_uc = json_f64(uccle, &["inputs", "tmax_c"]).expect("Uccle: inputs.tmax_c");
+    let tmin_uc = json_f64(uccle, &["inputs", "tmin_c"]).or_exit("Uccle: inputs.tmin_c");
+    let tmax_uc = json_f64(uccle, &["inputs", "tmax_c"]).or_exit("Uccle: inputs.tmax_c");
     let tmean_uc =
-        json_f64(uccle, &["intermediates", "tmean_c"]).expect("Uccle: intermediates.tmean_c");
-    let u2_uc = json_f64(uccle, &["intermediates", "u2_m_s"]).expect("Uccle: intermediates.u2_m_s");
-    let ea_uc = json_f64(uccle, &["intermediates", "ea_kpa"]).expect("Uccle: intermediates.ea_kpa");
+        json_f64(uccle, &["intermediates", "tmean_c"]).or_exit("Uccle: intermediates.tmean_c");
+    let u2_uc = json_f64(uccle, &["intermediates", "u2_m_s"]).or_exit("Uccle: intermediates.u2_m_s");
+    let ea_uc = json_f64(uccle, &["intermediates", "ea_kpa"]).or_exit("Uccle: intermediates.ea_kpa");
     let rs_uc = json_f64(uccle, &["intermediates", "rs_mj_m2_day"])
-        .expect("Uccle: intermediates.rs_mj_m2_day");
+        .or_exit("Uccle: intermediates.rs_mj_m2_day");
     let lat_uc =
-        json_f64(uccle, &["inputs", "latitude_deg_n"]).expect("Uccle: inputs.latitude_deg_n");
-    let elev_uc = json_f64(uccle, &["inputs", "altitude_m"]).expect("Uccle: inputs.altitude_m");
-    let doy_uc = json_f64(uccle, &["inputs", "day_of_year"]).expect("Uccle: inputs.day_of_year");
+        json_f64(uccle, &["inputs", "latitude_deg_n"]).or_exit("Uccle: inputs.latitude_deg_n");
+    let elev_uc = json_f64(uccle, &["inputs", "altitude_m"]).or_exit("Uccle: inputs.altitude_m");
+    let doy_uc = json_f64(uccle, &["inputs", "day_of_year"]).or_exit("Uccle: inputs.day_of_year");
     let expected_et0_uc =
-        json_f64(uccle, &["expected_et0_mm_day"]).expect("Uccle: expected_et0_mm_day");
-    let tol_et0_uc = json_f64(uccle, &["tolerance_mm_day"]).expect("Uccle: tolerance_mm_day");
+        json_f64(uccle, &["expected_et0_mm_day"]).or_exit("Uccle: expected_et0_mm_day");
+    let tol_et0_uc = json_f64(uccle, &["tolerance_mm_day"]).or_exit("Uccle: tolerance_mm_day");
 
     let input_uc = DailyEt0Input {
         tmin: tmin_uc,
@@ -121,11 +121,11 @@ fn validate_uccle(v: &mut ValidationHarness, benchmark: &serde_json::Value) -> f
     println!("  VPD = {:.3} kPa", result_uc.vpd);
 
     let pub_es =
-        json_f64(uccle, &["intermediates", "es_kpa"]).expect("Uccle: intermediates.es_kpa");
+        json_f64(uccle, &["intermediates", "es_kpa"]).or_exit("Uccle: intermediates.es_kpa");
     let pub_vpd =
-        json_f64(uccle, &["intermediates", "vpd_kpa"]).expect("Uccle: intermediates.vpd_kpa");
+        json_f64(uccle, &["intermediates", "vpd_kpa"]).or_exit("Uccle: intermediates.vpd_kpa");
     let pub_rn = json_f64(uccle, &["intermediates", "rn_mj_m2_day"])
-        .expect("Uccle: intermediates.rn_mj_m2_day");
+        .or_exit("Uccle: intermediates.rn_mj_m2_day");
 
     v.check_abs(
         "Uccle es",
@@ -158,11 +158,11 @@ fn validate_bangkok(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     println!("  We validate component functions, not final ET₀ (monthly bias).");
 
     let bangkok = &benchmark["example_17_bangkok_monthly"];
-    let tmin_bk = json_f64(bangkok, &["inputs", "tmin_c"]).expect("Bangkok: inputs.tmin_c");
-    let tmax_bk = json_f64(bangkok, &["inputs", "tmax_c"]).expect("Bangkok: inputs.tmax_c");
+    let tmin_bk = json_f64(bangkok, &["inputs", "tmin_c"]).or_exit("Bangkok: inputs.tmin_c");
+    let tmax_bk = json_f64(bangkok, &["inputs", "tmax_c"]).or_exit("Bangkok: inputs.tmax_c");
 
     let pub_es_bk =
-        json_f64(bangkok, &["intermediates", "es_kpa"]).expect("Bangkok: intermediates.es_kpa");
+        json_f64(bangkok, &["intermediates", "es_kpa"]).or_exit("Bangkok: intermediates.es_kpa");
     let calc_es_bk = et::mean_saturation_vapour_pressure(tmin_bk, tmax_bk);
     v.check_abs(
         "Bangkok es",
@@ -172,9 +172,9 @@ fn validate_bangkok(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     );
 
     let pub_delta_bk = json_f64(bangkok, &["intermediates", "delta_kpa_per_c"])
-        .expect("Bangkok: intermediates.delta_kpa_per_c");
+        .or_exit("Bangkok: intermediates.delta_kpa_per_c");
     let tmean_bk =
-        json_f64(bangkok, &["intermediates", "tmean_c"]).expect("Bangkok: intermediates.tmean_c");
+        json_f64(bangkok, &["intermediates", "tmean_c"]).or_exit("Bangkok: intermediates.tmean_c");
     let calc_delta_bk = et::vapour_pressure_slope(tmean_bk);
     v.check_abs(
         "Bangkok Δ",
@@ -184,9 +184,9 @@ fn validate_bangkok(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     );
 
     let pub_gamma_bk = json_f64(bangkok, &["intermediates", "gamma_kpa_per_c"])
-        .expect("Bangkok: intermediates.gamma_kpa_per_c");
+        .or_exit("Bangkok: intermediates.gamma_kpa_per_c");
     let pub_p_bk = json_f64(bangkok, &["intermediates", "pressure_kpa"])
-        .expect("Bangkok: intermediates.pressure_kpa");
+        .or_exit("Bangkok: intermediates.pressure_kpa");
     let calc_gamma_bk = et::psychrometric_constant(pub_p_bk);
     v.check_abs(
         "Bangkok γ",

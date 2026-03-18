@@ -16,7 +16,7 @@
 //! Run: `python3 control/et0_ensemble/et0_ensemble.py`
 
 use airspring_barracuda::eco::evapotranspiration::{EnsembleInput, et0_ensemble};
-use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
+use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/et0_ensemble/benchmark_et0_ensemble.json");
@@ -44,7 +44,7 @@ fn build_input(tc: &serde_json::Value) -> EnsembleInput {
 fn validate_full_weather(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Full Weather Ensemble");
     let tests = &benchmark["validation_checks"]["full_weather_ensemble"]["test_cases"];
-    for tc in tests.as_array().expect("array") {
+    for tc in tests.as_array().or_exit("array") {
         let label = tc["label"].as_str().unwrap_or("test");
         let input = build_input(tc);
         let result = et0_ensemble(&input);
@@ -67,7 +67,7 @@ fn validate_full_weather(v: &mut ValidationHarness, benchmark: &serde_json::Valu
 fn validate_temp_only(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Temperature-Only Ensemble");
     let tests = &benchmark["validation_checks"]["temperature_only_ensemble"]["test_cases"];
-    for tc in tests.as_array().expect("array") {
+    for tc in tests.as_array().or_exit("array") {
         let label = tc["label"].as_str().unwrap_or("test");
         let input = build_input(tc);
         let result = et0_ensemble(&input);
@@ -84,7 +84,7 @@ fn validate_temp_only(v: &mut ValidationHarness, benchmark: &serde_json::Value) 
 fn validate_method_ranking(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Method Ranking");
     let tests = &benchmark["validation_checks"]["method_ranking"]["test_cases"];
-    for tc in tests.as_array().expect("array") {
+    for tc in tests.as_array().or_exit("array") {
         let label = tc["label"].as_str().unwrap_or("test");
         let check = tc["check"].as_str().unwrap_or("");
         let input = build_input(tc);
@@ -119,7 +119,7 @@ fn validate_method_ranking(v: &mut ValidationHarness, benchmark: &serde_json::Va
 fn validate_monotonicity(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Monotonicity");
     let tests = &benchmark["validation_checks"]["monotonicity"]["test_cases"];
-    for tc in tests.as_array().expect("array") {
+    for tc in tests.as_array().or_exit("array") {
         let base_t = json_field(tc, "base_tmean");
         let step_t = json_field(tc, "step_tmean");
         let tmin_off = json_field(tc, "tmin_offset");

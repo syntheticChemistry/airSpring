@@ -10,7 +10,7 @@
 use airspring_barracuda::eco::isotherm::{self, langmuir_rl};
 use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{
-    self, ValidationHarness, json_array_opt, json_object_opt, parse_benchmark_json,
+    self, OrExit, ValidationHarness, json_array_opt, json_object_opt, parse_benchmark_json,
 };
 
 /// Benchmark JSON embedded at compile time for reproducibility.
@@ -81,8 +81,8 @@ fn main() {
         println!("\n── Dataset: {ds_name} ──");
         println!("  Source: {source}");
 
-        let lang_fit = isotherm::fit_langmuir(&ce, &qe).expect("Langmuir fit must succeed");
-        let freund_fit = isotherm::fit_freundlich(&ce, &qe).expect("Freundlich fit must succeed");
+        let lang_fit = isotherm::fit_langmuir(&ce, &qe).or_exit("Langmuir fit must succeed");
+        let freund_fit = isotherm::fit_freundlich(&ce, &qe).or_exit("Freundlich fit must succeed");
 
         let qmax = lang_fit.params[0];
         let kl = lang_fit.params[1];

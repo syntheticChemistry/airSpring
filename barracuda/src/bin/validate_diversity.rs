@@ -18,26 +18,45 @@
 //! Provenance: script=`control/diversity/diversity_indices.py`, commit=fad2e1b, date=2026-02-27
 
 use airspring_barracuda::eco::diversity;
+use airspring_barracuda::tolerances::{BIO_BRAY_CURTIS, BIO_DIVERSITY_SHANNON, BIO_DIVERSITY_SIMPSON};
 use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/diversity/benchmark_diversity.json");
 
 fn parse_f64_array(val: &serde_json::Value) -> Vec<f64> {
-    val.as_array()
-        .expect("array")
-        .iter()
-        .map(|v| v.as_f64().expect("f64"))
-        .collect()
+    let Some(arr) = val.as_array() else {
+        eprintln!("[FAIL] expected JSON array for counts/samples");
+        std::process::exit(1);
+    };
+    arr.iter().filter_map(serde_json::Value::as_f64).collect()
+}
+
+fn tol_or_fallback(tc: &serde_json::Value, fallback: f64) -> f64 {
+    tc.get("tolerance")
+        .and_then(serde_json::Value::as_f64)
+        .unwrap_or(fallback)
+}
+
+fn test_cases_or_exit(benchmark: &serde_json::Value, section: &str) -> Vec<serde_json::Value> {
+    let Some(arr) = benchmark
+        .get("validation_checks")
+        .and_then(|vc| vc.get(section))
+        .and_then(|s| s.get("test_cases"))
+        .and_then(|tc| tc.as_array())
+    else {
+        eprintln!("[FAIL] benchmark JSON: validation_checks.{section}.test_cases missing");
+        std::process::exit(1);
+    };
+    arr.clone()
 }
 
 fn validate_shannon(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Shannon Entropy");
-    let checks = &benchmark["validation_checks"]["shannon"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in &test_cases_or_exit(benchmark, "shannon") {
         let label = tc["label"].as_str().unwrap_or("case");
         let counts = parse_f64_array(&tc["counts"]);
         let expected = json_field(tc, "expected");
-        let tol = json_field(tc, "tolerance");
+        let tol = tol_or_fallback(tc, BIO_DIVERSITY_SHANNON.abs_tol);
         let computed = diversity::shannon(&counts);
         v.check_abs(&format!("H' {label}"), computed, expected, tol);
     }
@@ -45,12 +64,11 @@ fn validate_shannon(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
 
 fn validate_simpson(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Simpson Diversity");
-    let checks = &benchmark["validation_checks"]["simpson"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in &test_cases_or_exit(benchmark, "simpson") {
         let label = tc["label"].as_str().unwrap_or("case");
         let counts = parse_f64_array(&tc["counts"]);
         let expected = json_field(tc, "expected");
-        let tol = json_field(tc, "tolerance");
+        let tol = tol_or_fallback(tc, BIO_DIVERSITY_SIMPSON.abs_tol);
         let computed = diversity::simpson(&counts);
         v.check_abs(&format!("D {label}"), computed, expected, tol);
     }
@@ -58,12 +76,11 @@ fn validate_simpson(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
 
 fn validate_chao1(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Chao1 Richness");
-    let checks = &benchmark["validation_checks"]["chao1"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in &test_cases_or_exit(benchmark, "chao1") {
         let label = tc["label"].as_str().unwrap_or("case");
         let counts = parse_f64_array(&tc["counts"]);
         let expected = json_field(tc, "expected");
-        let tol = json_field(tc, "tolerance");
+        let tol = tol_or_fallback(tc, BIO_DIVERSITY_SHANNON.abs_tol);
         let computed = diversity::chao1(&counts);
         v.check_abs(&format!("Chao1 {label}"), computed, expected, tol);
     }
@@ -71,12 +88,11 @@ fn validate_chao1(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
 
 fn validate_pielou(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Pielou Evenness");
-    let checks = &benchmark["validation_checks"]["pielou"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in &test_cases_or_exit(benchmark, "pielou") {
         let label = tc["label"].as_str().unwrap_or("case");
         let counts = parse_f64_array(&tc["counts"]);
         let expected = json_field(tc, "expected");
-        let tol = json_field(tc, "tolerance");
+        let tol = tol_or_fallback(tc, BIO_DIVERSITY_SHANNON.abs_tol);
         let computed = diversity::pielou_evenness(&counts);
         v.check_abs(&format!("J' {label}"), computed, expected, tol);
     }
@@ -84,13 +100,12 @@ fn validate_pielou(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
 
 fn validate_bray_curtis(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Bray-Curtis Dissimilarity");
-    let checks = &benchmark["validation_checks"]["bray_curtis"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in &test_cases_or_exit(benchmark, "bray_curtis") {
         let label = tc["label"].as_str().unwrap_or("case");
         let a = parse_f64_array(&tc["sample_a"]);
         let b = parse_f64_array(&tc["sample_b"]);
         let expected = json_field(tc, "expected");
-        let tol = json_field(tc, "tolerance");
+        let tol = tol_or_fallback(tc, BIO_BRAY_CURTIS.abs_tol);
         let computed = diversity::bray_curtis(&a, &b);
         v.check_abs(&format!("BC {label}"), computed, expected, tol);
     }

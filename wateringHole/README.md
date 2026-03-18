@@ -1,6 +1,6 @@
 # airSpring wateringHole
 
-**Updated**: March 17, 2026 | **Version**: v0.8.9
+**Updated**: March 18, 2026 | **Version**: v0.10.0
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs

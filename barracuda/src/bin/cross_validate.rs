@@ -20,7 +20,7 @@ use airspring_barracuda::eco::{
 };
 use airspring_barracuda::testutil;
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation::{self, ValidationHarness, json_f64};
+use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_f64};
 use serde_json::json;
 
 const BENCHMARK_FAO56: &str = include_str!("../../../control/fao56/benchmark_fao56.json");
@@ -42,26 +42,26 @@ struct UccleInputs {
 
 fn load_uccle_inputs() -> UccleInputs {
     let bm: serde_json::Value =
-        serde_json::from_str(BENCHMARK_FAO56).expect("benchmark_fao56.json must parse");
+        serde_json::from_str(BENCHMARK_FAO56).or_exit("benchmark_fao56.json must parse");
     let uccle = &bm["example_18_uccle_daily"];
 
-    let tmin = json_f64(uccle, &["inputs", "tmin_c"]).expect("inputs.tmin_c");
-    let tmax = json_f64(uccle, &["inputs", "tmax_c"]).expect("inputs.tmax_c");
-    let rh_max = json_f64(uccle, &["inputs", "rhmax_pct"]).expect("inputs.rhmax_pct");
-    let rh_min = json_f64(uccle, &["inputs", "rhmin_pct"]).expect("inputs.rhmin_pct");
+    let tmin = json_f64(uccle, &["inputs", "tmin_c"]).or_exit("inputs.tmin_c");
+    let tmax = json_f64(uccle, &["inputs", "tmax_c"]).or_exit("inputs.tmax_c");
+    let rh_max = json_f64(uccle, &["inputs", "rhmax_pct"]).or_exit("inputs.rhmax_pct");
+    let rh_min = json_f64(uccle, &["inputs", "rhmin_pct"]).or_exit("inputs.rhmin_pct");
     let wind_10m_km_h =
-        json_f64(uccle, &["inputs", "wind_speed_10m_km_h"]).expect("inputs.wind_speed_10m_km_h");
+        json_f64(uccle, &["inputs", "wind_speed_10m_km_h"]).or_exit("inputs.wind_speed_10m_km_h");
     let wind_10m_ms = wind_10m_km_h / 3.6;
     let sunshine_hours =
-        json_f64(uccle, &["inputs", "sunshine_hours"]).expect("inputs.sunshine_hours");
+        json_f64(uccle, &["inputs", "sunshine_hours"]).or_exit("inputs.sunshine_hours");
     let latitude_deg =
-        json_f64(uccle, &["inputs", "latitude_deg_n"]).expect("inputs.latitude_deg_n");
-    let elevation_m = json_f64(uccle, &["inputs", "altitude_m"]).expect("inputs.altitude_m");
-    let doy_f = json_f64(uccle, &["inputs", "day_of_year"]).expect("inputs.day_of_year");
+        json_f64(uccle, &["inputs", "latitude_deg_n"]).or_exit("inputs.latitude_deg_n");
+    let elevation_m = json_f64(uccle, &["inputs", "altitude_m"]).or_exit("inputs.altitude_m");
+    let doy_f = json_f64(uccle, &["inputs", "day_of_year"]).or_exit("inputs.day_of_year");
 
-    let tmean = json_f64(uccle, &["intermediates", "tmean_c"]).expect("intermediates.tmean_c");
+    let tmean = json_f64(uccle, &["intermediates", "tmean_c"]).or_exit("intermediates.tmean_c");
     let rs =
-        json_f64(uccle, &["intermediates", "rs_mj_m2_day"]).expect("intermediates.rs_mj_m2_day");
+        json_f64(uccle, &["intermediates", "rs_mj_m2_day"]).or_exit("intermediates.rs_mj_m2_day");
 
     #[expect(
         clippy::cast_possible_truncation,
@@ -97,7 +97,7 @@ fn uccle_core(u: &UccleInputs) -> serde_json::Value {
     let delta = et::vapour_pressure_slope(u.tmean);
     let es = et::mean_saturation_vapour_pressure(u.tmin, u.tmax);
     let ea = et::actual_vapour_pressure_rh(u.tmin, u.tmax, u.rh_min, u.rh_max);
-    let u2 = et::wind_speed_at_2m(u.wind_10m_ms, 10.0).expect("valid 10m height");
+    let u2 = et::wind_speed_at_2m(u.wind_10m_ms, 10.0).or_exit("valid 10m height");
 
     let lat_rad = u.latitude_deg.to_radians();
     let dr = et::inverse_rel_distance(u.doy);
@@ -156,7 +156,7 @@ fn uccle_core(u: &UccleInputs) -> serde_json::Value {
 /// Extended ET₀ methods: sunshine, temperature-based, Hargreaves, low-level PM.
 fn uccle_extended(u: &UccleInputs) -> serde_json::Value {
     let ea = et::actual_vapour_pressure_rh(u.tmin, u.tmax, u.rh_min, u.rh_max);
-    let u2 = et::wind_speed_at_2m(u.wind_10m_ms, 10.0).expect("valid 10m height");
+    let u2 = et::wind_speed_at_2m(u.wind_10m_ms, 10.0).or_exit("valid 10m height");
     let lat_rad = u.latitude_deg.to_radians();
     let ra = et::extraterrestrial_radiation(lat_rad, u.doy);
     let n_hours = et::daylight_hours(lat_rad, u.doy);
@@ -171,7 +171,7 @@ fn uccle_extended(u: &UccleInputs) -> serde_json::Value {
     let delta = et::vapour_pressure_slope(u.tmean);
 
     let rs_sunshine = et::solar_radiation_from_sunshine(u.sunshine_hours, n_hours, ra)
-        .expect("valid daylight hours");
+        .or_exit("valid daylight hours");
     let rs_temp_interior = et::solar_radiation_from_temperature(u.tmax, u.tmin, ra, 0.16);
     let rs_temp_coastal = et::solar_radiation_from_temperature(u.tmax, u.tmin, ra, 0.19);
     let g_warming = et::soil_heat_flux_monthly(25.0, 22.0);
@@ -361,14 +361,14 @@ fn isotherm_values() -> serde_json::Value {
 
 /// Merge a source JSON object's keys into a destination map.
 fn merge_into(dest: &mut serde_json::Map<String, serde_json::Value>, src: &serde_json::Value) {
-    for (key, val) in src.as_object().expect("expected JSON object") {
+    for (key, val) in src.as_object().or_exit("expected JSON object") {
         dest.insert(key.clone(), val.clone());
     }
 }
 
 fn run_json_mode() {
     let uccle = load_uccle_inputs();
-    let mut output = uccle_core(&uccle).as_object().expect("core JSON").clone();
+    let mut output = uccle_core(&uccle).as_object().or_exit("core JSON").clone();
     merge_into(&mut output, &uccle_extended(&uccle));
     merge_into(&mut output, &soil_and_sensor_values());
     merge_into(&mut output, &water_balance_and_correction());
@@ -378,7 +378,7 @@ fn run_json_mode() {
     println!(
         "{}",
         serde_json::to_string_pretty(&serde_json::Value::Object(output))
-            .expect("JSON serialization")
+            .or_exit("JSON serialization")
     );
 }
 
@@ -412,7 +412,7 @@ fn run_validation_mode() {
     let mut v = ValidationHarness::new("Phase 2 Cross-Validation");
 
     let bm: serde_json::Value =
-        serde_json::from_str(BENCHMARK_FAO56).expect("benchmark_fao56.json must parse");
+        serde_json::from_str(BENCHMARK_FAO56).or_exit("benchmark_fao56.json must parse");
 
     let uccle = load_uccle_inputs();
     let core = uccle_core(&uccle);
@@ -436,31 +436,31 @@ fn run_validation_mode() {
     v.check_abs(
         "pressure_kpa vs FAO-56",
         f("pressure_kpa"),
-        json_f64(ex_interm, &["pressure_kpa"]).expect("pressure_kpa"),
+        json_f64(ex_interm, &["pressure_kpa"]).or_exit("pressure_kpa"),
         paper_tol,
     );
     v.check_abs(
         "gamma vs FAO-56",
         f("gamma_kpa_c"),
-        json_f64(ex_interm, &["gamma_kpa_per_c"]).expect("gamma_kpa_per_c"),
+        json_f64(ex_interm, &["gamma_kpa_per_c"]).or_exit("gamma_kpa_per_c"),
         0.001,
     );
     v.check_abs(
         "delta vs FAO-56",
         f("delta_kpa_c"),
-        json_f64(ex_interm, &["delta_kpa_per_c"]).expect("delta_kpa_per_c"),
+        json_f64(ex_interm, &["delta_kpa_per_c"]).or_exit("delta_kpa_per_c"),
         0.001,
     );
     v.check_abs(
         "es_kpa vs FAO-56",
         f("es_kpa"),
-        json_f64(ex_interm, &["es_kpa"]).expect("es_kpa"),
+        json_f64(ex_interm, &["es_kpa"]).or_exit("es_kpa"),
         0.01,
     );
     v.check_abs(
         "ea_kpa vs FAO-56",
         f("ea_kpa"),
-        json_f64(ex_interm, &["ea_kpa"]).expect("ea_kpa"),
+        json_f64(ex_interm, &["ea_kpa"]).or_exit("ea_kpa"),
         0.01,
     );
 
@@ -506,7 +506,7 @@ fn run_validation_mode() {
     validation::section("Isotherm models");
     validate_section(&mut v, "iso", &iso["isotherm"], &iso["isotherm"]);
 
-    let mut full = core.as_object().expect("core JSON").clone();
+    let mut full = core.as_object().or_exit("core JSON").clone();
     merge_into(&mut full, &extended);
     merge_into(&mut full, &soil);
     merge_into(&mut full, &wb);

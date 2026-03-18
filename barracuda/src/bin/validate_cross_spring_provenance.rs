@@ -69,6 +69,7 @@ use airspring_barracuda::gpu::seasonal_pipeline::{CropConfig, SeasonalPipeline, 
 use airspring_barracuda::gpu::van_genuchten::BatchedVanGenuchten;
 use airspring_barracuda::gpu::water_balance::BatchedWaterBalance;
 use airspring_barracuda::tolerances;
+use airspring_barracuda::validation::OrExit;
 use barracuda::device::WgpuDevice;
 use barracuda::validation::ValidationHarness;
 
@@ -162,7 +163,7 @@ fn bench_et0_cpu_vs_gpu(v: &mut ValidationHarness, device: Option<&Arc<WgpuDevic
                 actual_vapour_pressure: (fi * 0.01).sin().mul_add(0.3, 1.2),
                 elevation_m: 200.0,
                 latitude_deg: 42.5,
-                day_of_year: u32::try_from(i % 365 + 1).unwrap(),
+                day_of_year: u32::try_from(i % 365 + 1).or_exit("day_of_year conversion"),
             }
         })
         .collect();
@@ -294,7 +295,7 @@ fn bench_hargreaves_provenance(v: &mut ValidationHarness, device: Option<&Arc<Wg
                     tmax: (fi * 0.01).sin().mul_add(5.0, 25.0),
                     tmin: (fi * 0.01).cos().mul_add(3.0, 10.0),
                     latitude_deg: 42.5,
-                    day_of_year: u32::try_from(i % 365 + 1).unwrap(),
+                    day_of_year: u32::try_from(i % 365 + 1).or_exit("day_of_year conversion"),
                 }
             })
             .collect();
@@ -678,7 +679,7 @@ fn bench_precision_lineage(v: &mut ValidationHarness) {
         500,
         1e-10,
     )
-    .unwrap();
+    .or_exit("nelder_mead convergence");
     v.check_abs(
         "Nelder-Mead x₀ [neuralSpring S52 → airSpring isotherm]",
         best_x[0],

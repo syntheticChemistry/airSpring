@@ -13,7 +13,7 @@
 
 use airspring_barracuda::eco::anderson::{self, CouplingResult, D_EFF_CRITICAL};
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation::{self, ValidationHarness};
+use airspring_barracuda::validation::{self, OrExit, ValidationHarness};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/anderson_coupling/benchmark_anderson_coupling.json");
@@ -27,13 +27,13 @@ struct SoilParams {
 fn load_soils(benchmark: &serde_json::Value) -> Vec<SoilParams> {
     let soils_obj = benchmark["soil_types"]
         .as_object()
-        .expect("benchmark must contain soil_types");
+        .or_exit("benchmark must contain soil_types");
     soils_obj
         .iter()
         .map(|(key, v)| SoilParams {
             key: key.clone(),
-            theta_r: v["theta_r"].as_f64().expect("theta_r"),
-            theta_s: v["theta_s"].as_f64().expect("theta_s"),
+            theta_r: v["theta_r"].as_f64().or_exit("theta_r"),
+            theta_s: v["theta_s"].as_f64().or_exit("theta_s"),
         })
         .collect()
 }
@@ -46,7 +46,7 @@ fn check_point_coupling(
     validation::section("Point coupling (from benchmark JSON)");
     let checks = benchmark["checks"]
         .as_array()
-        .expect("benchmark must contain checks");
+        .or_exit("benchmark must contain checks");
 
     for check in checks {
         let label = check["label"].as_str().unwrap_or("?");
@@ -59,9 +59,9 @@ fn check_point_coupling(
         let Some(soil) = soils.iter().find(|s| s.key == soil_key) else {
             continue;
         };
-        let theta = check["theta"].as_f64().expect("theta in check");
-        let expected_regime = check["expected_regime"].as_str().expect("expected_regime");
-        let expected_d_eff = check["d_eff"].as_f64().expect("d_eff in check");
+        let theta = check["theta"].as_f64().or_exit("theta in check");
+        let expected_regime = check["expected_regime"].as_str().or_exit("expected_regime");
+        let expected_d_eff = check["d_eff"].as_f64().or_exit("d_eff in check");
 
         let r = anderson::coupling_chain(theta, soil.theta_r, soil.theta_s);
         let actual = r.regime.as_str();
@@ -226,17 +226,17 @@ fn check_reference_values(
     validation::section("Numeric reference parity (from benchmark JSON)");
     let refs = benchmark["reference_values"]
         .as_array()
-        .expect("benchmark must contain reference_values");
+        .or_exit("benchmark must contain reference_values");
 
     for rv in refs {
-        let soil_key = rv["soil"].as_str().expect("soil in reference_values");
+        let soil_key = rv["soil"].as_str().or_exit("soil in reference_values");
         let Some(soil) = soils.iter().find(|s| s.key == soil_key) else {
             continue;
         };
-        let theta = rv["theta"].as_f64().expect("theta");
-        let expected_d_eff = rv["d_eff"].as_f64().expect("d_eff");
-        let expected_se = rv["se"].as_f64().expect("se");
-        let expected_disorder = rv["disorder"].as_f64().expect("disorder");
+        let theta = rv["theta"].as_f64().or_exit("theta");
+        let expected_d_eff = rv["d_eff"].as_f64().or_exit("d_eff");
+        let expected_se = rv["se"].as_f64().or_exit("se");
+        let expected_disorder = rv["disorder"].as_f64().or_exit("disorder");
 
         let r = anderson::coupling_chain(theta, soil.theta_r, soil.theta_s);
 

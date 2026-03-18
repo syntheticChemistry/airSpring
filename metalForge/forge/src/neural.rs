@@ -19,7 +19,8 @@
 //! ```no_run
 //! use airspring_forge::neural::NeuralBridge;
 //!
-//! let bridge = NeuralBridge::discover().unwrap();
+//! let bridge = NeuralBridge::discover()
+//!     .expect("biomeOS Neural API socket must be discoverable");
 //! let result = bridge.capability_call("ecology", "et0_pm", &serde_json::json!({
 //!     "tmin": 12.3, "tmax": 21.5
 //! }));

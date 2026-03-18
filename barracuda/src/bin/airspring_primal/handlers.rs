@@ -3,7 +3,7 @@
 
 use std::sync::atomic::Ordering;
 
-use airspring_barracuda::{biomeos, niche, rpc};
+use airspring_barracuda::{biomeos, niche, primal_names, rpc};
 
 use super::NicheState;
 use super::discovery::{discover_compute_primal, discover_data_primal};
@@ -42,8 +42,8 @@ pub fn handle_readiness(state: &NicheState) -> serde_json::Value {
         "subsystems": {
             "science_dispatch": true,
             "provenance_trio": trio_available,
-            "nestgate": nestgate_available,
-            "toadstool": toadstool_available,
+            (primal_names::NESTGATE): nestgate_available,
+            (primal_names::TOADSTOOL): toadstool_available,
         },
     })
 }
@@ -163,8 +163,8 @@ pub fn handle_capability_list(state: &NicheState) -> serde_json::Value {
         "infrastructure": infra,
         "composition": {
             "provenance_trio": airspring_barracuda::ipc::provenance::is_available(),
-            "nestgate": discover_data_primal().is_some(),
-            "toadstool": discover_compute_primal().is_some(),
+            (primal_names::NESTGATE): discover_data_primal().is_some(),
+            (primal_names::TOADSTOOL): discover_compute_primal().is_some(),
         },
         "operation_dependencies": niche::operation_dependencies(),
         "cost_estimates": niche::cost_estimates(),

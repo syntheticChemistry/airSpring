@@ -502,12 +502,13 @@ fn validate_station(station_id: &str, result: &StationResult, v: &mut Validation
     );
 
     if result.et0_r2_vs_openmeteo.is_finite() {
+        let r2_min = tolerances::R2_MINIMUM.abs_tol;
         v.check_bool(
             &format!(
-                "{station_id} ET₀ R² > 0.85 (R²={:.3})",
+                "{station_id} ET₀ R² > {r2_min} (R²={:.3})",
                 result.et0_r2_vs_openmeteo
             ),
-            result.et0_r2_vs_openmeteo > 0.85,
+            result.et0_r2_vs_openmeteo > r2_min,
         );
     }
 

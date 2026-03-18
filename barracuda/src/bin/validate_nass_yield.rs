@@ -18,7 +18,7 @@
 use airspring_barracuda::eco::water_balance;
 use airspring_barracuda::eco::yield_response::{clamp_yield_ratio, ky_table, yield_ratio_single};
 use airspring_barracuda::validation::{
-    self, ValidationHarness, json_f64_required, parse_benchmark_json,
+    self, OrExit, ValidationHarness, json_f64_required, parse_benchmark_json,
 };
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/nass_yield/benchmark_nass_yield.json");
@@ -326,34 +326,34 @@ fn validate_multi_year_variability(v: &mut ValidationHarness, benchmark: &serde_
     let mean_stress: f64 = stress_list.iter().sum::<f64>() / stress_list.len() as f64;
 
     let my = &benchmark["multi_year"];
-    let yr_range = my["mean_yr_range"].as_array().expect("array");
-    let cv_range = my["cv_range"].as_array().expect("array");
-    let stress_range = my["mean_stress_range"].as_array().expect("array");
+    let yr_range = my["mean_yr_range"].as_array().or_exit("array");
+    let cv_range = my["cv_range"].as_array().or_exit("array");
+    let stress_range = my["mean_stress_range"].as_array().or_exit("array");
 
     v.check_bool(
         &format!(
             "mean yield ratio {mean_yr:.4} in [{}, {}]",
-            yr_range[0].as_f64().unwrap(),
-            yr_range[1].as_f64().unwrap()
+            yr_range[0].as_f64().or_exit("mean_yr_range[0] f64"),
+            yr_range[1].as_f64().or_exit("mean_yr_range[1] f64")
         ),
-        mean_yr >= yr_range[0].as_f64().unwrap() && mean_yr <= yr_range[1].as_f64().unwrap(),
+        mean_yr >= yr_range[0].as_f64().or_exit("mean_yr_range[0] f64") && mean_yr <= yr_range[1].as_f64().or_exit("mean_yr_range[1] f64"),
     );
     v.check_bool(
         &format!(
             "yield CV {cv:.4} in [{}, {}]",
-            cv_range[0].as_f64().unwrap(),
-            cv_range[1].as_f64().unwrap()
+            cv_range[0].as_f64().or_exit("cv_range[0] f64"),
+            cv_range[1].as_f64().or_exit("cv_range[1] f64")
         ),
-        cv >= cv_range[0].as_f64().unwrap() && cv <= cv_range[1].as_f64().unwrap(),
+        cv >= cv_range[0].as_f64().or_exit("cv_range[0] f64") && cv <= cv_range[1].as_f64().or_exit("cv_range[1] f64"),
     );
     v.check_bool(
         &format!(
             "mean stress days {mean_stress:.1} in [{}, {}]",
-            stress_range[0].as_f64().unwrap(),
-            stress_range[1].as_f64().unwrap()
+            stress_range[0].as_f64().or_exit("mean_stress_range[0] f64"),
+            stress_range[1].as_f64().or_exit("mean_stress_range[1] f64")
         ),
-        mean_stress >= stress_range[0].as_f64().unwrap()
-            && mean_stress <= stress_range[1].as_f64().unwrap(),
+        mean_stress >= stress_range[0].as_f64().or_exit("mean_stress_range[0] f64")
+            && mean_stress <= stress_range[1].as_f64().or_exit("mean_stress_range[1] f64"),
     );
     v.check_bool(
         "some years > 0.55 (better years exist)",
@@ -387,8 +387,8 @@ fn validate_crop_ranking(v: &mut ValidationHarness) {
         yields.push((crop.name, yr));
     }
 
-    let soy_yr = yields.iter().find(|y| y.0 == "soybean").unwrap().1;
-    let corn_yr = yields.iter().find(|y| y.0 == "corn").unwrap().1;
+    let soy_yr = yields.iter().find(|y| y.0 == "soybean").or_exit("soybean in crop yields").1;
+    let corn_yr = yields.iter().find(|y| y.0 == "corn").or_exit("corn in crop yields").1;
     v.check_bool(
         &format!("soybean ({soy_yr:.3}) > corn ({corn_yr:.3}) under drought"),
         soy_yr > corn_yr,

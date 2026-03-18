@@ -14,14 +14,14 @@
 //! Provenance: script=`control/hamon/hamon_pet.py`, commit=d3ecdc8, date=2026-02-27
 
 use airspring_barracuda::eco::evapotranspiration::{daylight_hours, hamon_pet};
-use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
+use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/hamon/benchmark_hamon.json");
 
 fn validate_analytical(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Analytical Benchmarks");
     let checks = &benchmark["validation_checks"]["analytical"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let tmean = json_field(tc, "tmean");
         let dl = json_field(tc, "day_length_hours");
         let expected = json_field(tc, "expected_pet");
@@ -39,7 +39,7 @@ fn validate_analytical(v: &mut ValidationHarness, benchmark: &serde_json::Value)
 fn validate_day_length(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Day Length Computation");
     let checks = &benchmark["validation_checks"]["day_length_computation"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let lat = json_field(tc, "latitude");
         #[expect(
             clippy::cast_sign_loss,
@@ -56,7 +56,7 @@ fn validate_day_length(v: &mut ValidationHarness, benchmark: &serde_json::Value)
 fn validate_edge_cases(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Edge Cases");
     let checks = &benchmark["validation_checks"]["edge_cases"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let label = tc["label"].as_str().unwrap_or("edge");
         let tmean = json_field(tc, "tmean");
         let dl = json_field(tc, "day_length_hours");
@@ -75,7 +75,7 @@ fn validate_edge_cases(v: &mut ValidationHarness, benchmark: &serde_json::Value)
 fn validate_monotonicity(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Monotonicity");
     let checks = &benchmark["validation_checks"]["monotonicity"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let label = tc["label"].as_str().unwrap_or("mono");
         let (low, high) = if tc.get("base_t").is_some() && tc.get("base_dl").is_some() {
             (

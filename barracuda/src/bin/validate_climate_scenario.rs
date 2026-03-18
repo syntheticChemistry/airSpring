@@ -19,7 +19,7 @@ use std::f64::consts::PI;
 
 use airspring_barracuda::eco::crop::CropType;
 use airspring_barracuda::gpu::seasonal_pipeline::{CropConfig, SeasonalPipeline, WeatherDay};
-use airspring_barracuda::validation::{self, ValidationHarness, parse_benchmark_json};
+use airspring_barracuda::validation::{self, OrExit, ValidationHarness, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/climate_scenario/benchmark_climate_scenario.json");
@@ -59,7 +59,7 @@ fn main() {
     };
     let theta_fc = benchmark["soil"]["field_capacity"].as_f64().unwrap_or(0.28);
     let theta_wp = benchmark["soil"]["wilting_point"].as_f64().unwrap_or(0.14);
-    let scenarios = benchmark["scenarios"].as_array().expect("scenarios array");
+    let scenarios = benchmark["scenarios"].as_array().or_exit("scenarios array");
     let et0_lo = benchmark["et0_pct_increase_per_degC"]["lo"]
         .as_f64()
         .unwrap_or(2.0);
@@ -93,7 +93,7 @@ fn main() {
             config.irrigation_depth_mm = 0.0; // rainfed
 
             let result = pipeline.run_season(&weather, &config);
-            results.get_mut(name).unwrap().insert(
+            results.get_mut(name).or_exit("scenario name in results").insert(
                 crop_name.to_string(),
                 (
                     result.total_et0,
@@ -111,7 +111,7 @@ fn main() {
     for &crop_name in &crop_names {
         let et0_vals: Vec<f64> = scenarios
             .iter()
-            .map(|s| results[s["name"].as_str().unwrap()][crop_name].0)
+            .map(|s| results[s["name"].as_str().or_exit("scenario name")][crop_name].0)
             .collect();
         let monotonic = et0_vals.windows(2).all(|w| w[0] <= w[1]);
         v.check_bool(
@@ -125,7 +125,7 @@ fn main() {
     for &crop_name in &crop_names {
         let etc_vals: Vec<f64> = scenarios
             .iter()
-            .map(|s| results[s["name"].as_str().unwrap()][crop_name].1)
+            .map(|s| results[s["name"].as_str().or_exit("scenario name")][crop_name].1)
             .collect();
         let monotonic = etc_vals.windows(2).all(|w| w[0] <= w[1]);
         v.check_bool(
@@ -139,7 +139,7 @@ fn main() {
     for &crop_name in &crop_names {
         let sd_vals: Vec<usize> = scenarios
             .iter()
-            .map(|s| results[s["name"].as_str().unwrap()][crop_name].2)
+            .map(|s| results[s["name"].as_str().or_exit("scenario name")][crop_name].2)
             .collect();
         let monotonic = sd_vals.windows(2).all(|w| w[0] <= w[1]);
         v.check_bool(
@@ -153,7 +153,7 @@ fn main() {
     for &crop_name in &crop_names {
         let yr_vals: Vec<f64> = scenarios
             .iter()
-            .map(|s| results[s["name"].as_str().unwrap()][crop_name].3)
+            .map(|s| results[s["name"].as_str().or_exit("scenario name")][crop_name].3)
             .collect();
         let monotonic = yr_vals.windows(2).all(|w| w[0] >= w[1]);
         v.check_bool(
@@ -178,7 +178,7 @@ fn main() {
     // 6. All yield ratios in [0, 1]
     validation::section("Yield Ratios in [0, 1]");
     for scen in scenarios {
-        let name = scen["name"].as_str().unwrap();
+        let name = scen["name"].as_str().or_exit("scenario name");
         for &crop_name in &crop_names {
             let yr = results[name][crop_name].3;
             v.check_bool(
@@ -191,7 +191,7 @@ fn main() {
     // 7. Mass balance conservation
     validation::section("Mass Balance Conservation");
     for scen in scenarios {
-        let name = scen["name"].as_str().unwrap();
+        let name = scen["name"].as_str().or_exit("scenario name");
         for &crop_name in &crop_names {
             let mb = results[name][crop_name].4;
             v.check_abs(&format!("{name} {crop_name} mass balance"), mb, 0.0, mb_tol);
@@ -219,7 +219,7 @@ fn main() {
     // 9. Cross-crop ET₀ identical (same weather)
     validation::section("Cross-Crop ET₀ Identical (Same Weather)");
     for scen in scenarios {
-        let name = scen["name"].as_str().unwrap();
+        let name = scen["name"].as_str().or_exit("scenario name");
         let et0_corn = results[name]["corn"].0;
         let et0_soy = results[name]["soybean"].0;
         let et0_wheat = results[name]["winter_wheat"].0;

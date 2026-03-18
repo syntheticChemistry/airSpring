@@ -15,7 +15,7 @@ use airspring_barracuda::eco::water_balance;
 use airspring_barracuda::eco::yield_response::{
     clamp_yield_ratio, ky_table, water_use_efficiency, yield_ratio_multistage, yield_ratio_single,
 };
-use airspring_barracuda::validation::{self, ValidationHarness, json_str, parse_benchmark_json};
+use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_str, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/yield_response/benchmark_yield_response.json");
@@ -32,14 +32,14 @@ fn validate_ky_table(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
 
     let test_cases = benchmark["validation_checks"]["ky_table_values"]["test_cases"]
         .as_array()
-        .expect("test_cases must be array");
+        .or_exit("test_cases must be array");
 
     for tc in test_cases {
         let crop = json_str(tc, "crop");
         let expected = f64_field(tc, "ky_total");
         let tol = f64_field(tc, "tolerance");
 
-        let ky = ky_table(crop).expect("crop must be in table");
+        let ky = ky_table(crop).or_exit("crop must be in table");
         v.check_abs(&format!("Ky({crop})"), ky.ky_total, expected, tol);
     }
 }
@@ -49,7 +49,7 @@ fn validate_single_stage(v: &mut ValidationHarness, benchmark: &serde_json::Valu
 
     let test_cases = benchmark["validation_checks"]["single_stage_analytical"]["test_cases"]
         .as_array()
-        .expect("test_cases must be array");
+        .or_exit("test_cases must be array");
 
     for tc in test_cases {
         let label = json_str(tc, "label");
@@ -68,21 +68,21 @@ fn validate_multi_stage(v: &mut ValidationHarness, benchmark: &serde_json::Value
 
     let test_cases = benchmark["validation_checks"]["multi_stage_analytical"]["test_cases"]
         .as_array()
-        .expect("test_cases must be array");
+        .or_exit("test_cases must be array");
 
     for tc in test_cases {
         let label = json_str(tc, "label");
         let stages_ky: Vec<f64> = tc["stages_ky"]
             .as_array()
-            .expect("stages_ky must be array")
+            .or_exit("stages_ky must be array")
             .iter()
-            .map(|v| v.as_f64().expect("ky must be f64"))
+            .map(|v| v.as_f64().or_exit("ky must be f64"))
             .collect();
         let stages_eta_etc: Vec<f64> = tc["stages_eta_etc"]
             .as_array()
-            .expect("stages_eta_etc must be array")
+            .or_exit("stages_eta_etc must be array")
             .iter()
-            .map(|v| v.as_f64().expect("eta_etc must be f64"))
+            .map(|v| v.as_f64().or_exit("eta_etc must be f64"))
             .collect();
         let expected = f64_field(tc, "expected_ratio");
         let tol = f64_field(tc, "tolerance");
@@ -93,7 +93,7 @@ fn validate_multi_stage(v: &mut ValidationHarness, benchmark: &serde_json::Value
             .map(|(&k, &e)| (k, e))
             .collect();
 
-        let computed = yield_ratio_multistage(&stages).expect("multistage must succeed");
+        let computed = yield_ratio_multistage(&stages).or_exit("multistage must succeed");
         v.check_abs(label, computed, expected, tol);
     }
 }
@@ -103,7 +103,7 @@ fn validate_wue(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
 
     let test_cases = benchmark["validation_checks"]["water_use_efficiency"]["test_cases"]
         .as_array()
-        .expect("test_cases must be array");
+        .or_exit("test_cases must be array");
 
     for tc in test_cases {
         let label = json_str(tc, "label");
@@ -112,7 +112,7 @@ fn validate_wue(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
         let expected = f64_field(tc, "expected_wue_kg_m3");
         let tol = f64_field(tc, "tolerance");
 
-        let computed = water_use_efficiency(yield_kg, eta_mm).expect("wue must succeed");
+        let computed = water_use_efficiency(yield_kg, eta_mm).or_exit("wue must succeed");
         v.check_abs(label, computed, expected, tol);
     }
 }
@@ -180,25 +180,25 @@ fn validate_scheduling(v: &mut ValidationHarness, benchmark: &serde_json::Value)
 
         let yr_range = strat["expected_yield_ratio_range"]
             .as_array()
-            .expect("range array");
-        let yr_lo = yr_range[0].as_f64().unwrap();
-        let yr_hi = yr_range[1].as_f64().unwrap();
+            .or_exit("expected_yield_ratio_range array");
+        let yr_lo = yr_range[0].as_f64().or_exit("yr_range[0] f64");
+        let yr_hi = yr_range[1].as_f64().or_exit("yr_range[1] f64");
 
         let sd_range = strat["expected_stress_days_range"]
             .as_array()
-            .expect("range array");
+            .or_exit("expected_stress_days_range array");
         #[expect(
             clippy::cast_possible_truncation,
             clippy::cast_sign_loss,
             reason = "yield range bounds from JSON f64 are non-negative integers"
         )]
-        let sd_lo = sd_range[0].as_f64().unwrap() as usize;
+        let sd_lo = sd_range[0].as_f64().or_exit("sd_range[0] f64") as usize;
         #[expect(
             clippy::cast_possible_truncation,
             clippy::cast_sign_loss,
             reason = "yield range upper bound from JSON f64 is a non-negative integer"
         )]
-        let sd_hi = sd_range[1].as_f64().unwrap() as usize;
+        let sd_hi = sd_range[1].as_f64().or_exit("sd_range[1] f64") as usize;
 
         v.check_bool(
             &format!("{name}_yield_ratio in [{yr_lo}, {yr_hi}]"),

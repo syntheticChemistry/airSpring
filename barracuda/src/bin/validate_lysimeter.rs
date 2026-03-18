@@ -16,8 +16,9 @@
 //! script=`control/lysimeter/lysimeter_et.py`, commit=e651409, date=2026-02-26
 //! Run: `python3 control/lysimeter/lysimeter_et.py`
 
+use airspring_barracuda::tolerances::{IA_CRITERION, RMSE_MAXIMUM};
 use airspring_barracuda::validation::{
-    self, ValidationHarness, json_field, json_str, parse_benchmark_json,
+    self, OrExit, ValidationHarness, json_field, json_str, parse_benchmark_json,
 };
 use barracuda::stats::{pearson_correlation, regression::fit_linear, rmse};
 
@@ -88,7 +89,7 @@ fn main() {
     // ── Mass-to-ET conversion ──
     validation::section("Mass-to-ET Conversion");
     let et_cases = &benchmark["validation_checks"]["mass_to_et_conversion"]["test_cases"];
-    for tc in et_cases.as_array().expect("array") {
+    for tc in et_cases.as_array().or_exit("mass_to_et_conversion test_cases array") {
         let label = json_str(tc, "label");
         let mass_kg = json_field(tc, "mass_change_kg");
         let area = json_field(tc, "area_m2");
@@ -104,7 +105,7 @@ fn main() {
     let alpha = json_field(tc_params, "alpha_g_per_c");
     let t_ref = json_field(tc_params, "t_ref_c");
     let temp_cases = &benchmark["validation_checks"]["temperature_compensation"]["test_cases"];
-    for tc in temp_cases.as_array().expect("array") {
+    for tc in temp_cases.as_array().or_exit("temperature_compensation test_cases array") {
         let label = json_str(tc, "label");
         let mass_raw = json_field(tc, "mass_raw_kg");
         let temp_c = json_field(tc, "temp_c");
@@ -117,10 +118,10 @@ fn main() {
     // ── Data quality filtering ──
     validation::section("Data Quality Filtering");
     let dq_cases = &benchmark["validation_checks"]["data_quality_filter"]["test_cases"];
-    for tc in dq_cases.as_array().expect("array") {
+    for tc in dq_cases.as_array().or_exit("data_quality_filter test_cases array") {
         let label = json_str(tc, "label");
         let delta_g = json_field(tc, "delta_g");
-        let expected = tc["expected_valid"].as_bool().expect("bool");
+        let expected = tc["expected_valid"].as_bool().or_exit("expected_valid bool");
         let computed = is_valid_reading(delta_g, 10.0, 500.0);
         v.check_bool(
             &format!("{label}: valid={computed}, expected={expected}"),
@@ -133,17 +134,17 @@ fn main() {
     let cal = &benchmark["calibration"];
     let known: Vec<f64> = cal["known_masses_kg"]
         .as_array()
-        .expect("array")
+        .or_exit("calibration known_masses_kg array")
         .iter()
-        .map(|v| v.as_f64().unwrap())
+        .map(|v| v.as_f64().or_exit("known_masses_kg f64 element"))
         .collect();
     let measured: Vec<f64> = cal["measured_readings_kg"]
         .as_array()
-        .expect("array")
+        .or_exit("calibration measured_readings_kg array")
         .iter()
-        .map(|v| v.as_f64().unwrap())
+        .map(|v| v.as_f64().or_exit("measured_readings_kg f64 element"))
         .collect();
-    let fit = fit_linear(&known, &measured).expect("calibration fit must succeed");
+    let fit = fit_linear(&known, &measured).or_exit("calibration fit must succeed");
     let slope = fit.params[0];
     let intercept = fit.params[1];
     let expected_r2 = json_field(cal, "expected_r_squared");
@@ -161,7 +162,7 @@ fn main() {
     // ── Hourly diurnal pattern ──
     validation::section("Hourly Diurnal ET Pattern");
     let hr_cases = &benchmark["validation_checks"]["hourly_et_pattern"]["test_cases"];
-    for tc in hr_cases.as_array().expect("array") {
+    for tc in hr_cases.as_array().or_exit("hourly_et_pattern test_cases array") {
         let label = json_str(tc, "label");
         #[expect(
             clippy::cast_possible_truncation,
@@ -195,8 +196,10 @@ fn main() {
     let (et0, et_lys) = generate_synthetic_comparison(30);
     let r = pearson_correlation(&et0, &et_lys).unwrap_or(0.0);
     let rms = rmse(&et0, &et_lys);
-    v.check_bool(&format!("correlation r={r:.4} >= 0.80"), r >= 0.80);
-    v.check_bool(&format!("RMSE={rms:.4} <= 1.0"), rms <= 1.0);
+    let ia_min = IA_CRITERION.abs_tol;
+    let rmse_max = RMSE_MAXIMUM.abs_tol;
+    v.check_bool(&format!("correlation r={r:.4} >= {ia_min}"), r >= ia_min);
+    v.check_bool(&format!("RMSE={rms:.4} <= {rmse_max}"), rms <= rmse_max);
 
     v.finish();
 }

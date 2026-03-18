@@ -20,6 +20,7 @@ use airspring_barracuda::eco::richards::{
     self as richards, VanGenuchtenParams, mass_balance_check, solve_richards_1d, van_genuchten_k,
     van_genuchten_theta,
 };
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{
     self, ValidationHarness, json_array_opt, json_f64, json_object_opt, json_str_opt,
     parse_benchmark_json,
@@ -142,7 +143,7 @@ fn validate_hydraulic_conductivity(v: &mut ValidationHarness, benchmark: &serde_
             v.check_bool("benchmark JSON: test case h_cm present", false);
             continue;
         };
-        let tol = json_f64(tc, &["tolerance"]).unwrap_or(0.01);
+        let tol = json_f64(tc, &["tolerance"]).unwrap_or(tolerances::SOIL_HYDRAULIC.abs_tol);
 
         let k = van_genuchten_k(
             h_cm,
@@ -339,7 +340,7 @@ fn validate_drainage_silt_loam(v: &mut ValidationHarness, benchmark: &serde_json
             .find(|c| c.get("id").and_then(serde_json::Value::as_str) == Some("mass_balance"))
             .and_then(|c| c.get("tolerance_pct").and_then(serde_json::Value::as_f64))
     })
-    .unwrap_or(50.0);
+    .unwrap_or(tolerances::RICHARDS_TRANSIENT.abs_tol * 1e4);
 
     let dz = depth / 50.0;
     let err_pct = mass_balance_check(&params, &profiles, h_initial, h_initial, true, dt_days, dz);
@@ -359,7 +360,7 @@ fn validate_steady_state_flux(v: &mut ValidationHarness, benchmark: &serde_json:
         .and_then(|a| a.get(0))
         .and_then(|c| c.get("tolerance_pct"))
         .and_then(serde_json::Value::as_f64)
-        .unwrap_or(5.0);
+        .unwrap_or(tolerances::RICHARDS_STEADY.abs_tol * 5e3);
 
     let Some(soils) = json_object_opt(benchmark, &["soil_types"]) else {
         v.check_bool("benchmark JSON: soil_types present", false);

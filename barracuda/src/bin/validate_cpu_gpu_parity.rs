@@ -31,7 +31,7 @@ use airspring_barracuda::gpu::diversity::GpuDiversity;
 use airspring_barracuda::gpu::et0::{Backend, BatchedEt0, StationDay};
 use airspring_barracuda::gpu::water_balance::{BatchedWaterBalance, FieldDayInput};
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
+use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json, OrExit};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/cpu_gpu_parity/benchmark_cpu_gpu_parity.json");
@@ -76,7 +76,7 @@ fn validate_et0_parity(v: &mut ValidationHarness, benchmark: &serde_json::Value)
     let tests = &benchmark["validation_checks"]["et0_cpu_gpu_parity"]["test_cases"];
     let batcher = BatchedEt0::cpu();
 
-    for tc in tests.as_array().expect("array") {
+    for tc in tests.as_array().or_exit("et0_cpu_gpu_parity test_cases must be array") {
         let label = tc["label"].as_str().unwrap_or("test");
         let tmin = json_field(tc, "tmin");
         let tmax = json_field(tc, "tmax");
@@ -118,7 +118,7 @@ fn validate_et0_parity(v: &mut ValidationHarness, benchmark: &serde_json::Value)
         };
         let batch_result = batcher
             .compute_gpu(&[station])
-            .expect("compute_gpu should succeed on CPU fallback");
+            .or_exit("compute_gpu should succeed on CPU fallback");
         let batched_et0 = batch_result.et0_values[0];
 
         v.check_abs(
@@ -142,7 +142,7 @@ fn validate_wb_parity(v: &mut ValidationHarness, benchmark: &serde_json::Value) 
 
     let tests = &benchmark["validation_checks"]["water_balance_cpu_gpu_parity"]["test_cases"];
 
-    for tc in tests.as_array().expect("array") {
+    for tc in tests.as_array().or_exit("water_balance_cpu_gpu_parity test_cases must be array") {
         let label = tc["label"].as_str().unwrap_or("test");
         let dr_prev = json_field(tc, "dr_prev");
         let precip = json_field(tc, "precipitation");
@@ -171,7 +171,7 @@ fn validate_wb_parity(v: &mut ValidationHarness, benchmark: &serde_json::Value) 
         // fc/wp/root_depth don't affect gpu_step; use reasonable defaults
         let bwb =
             BatchedWaterBalance::new(WB_DEFAULT_FC, WB_DEFAULT_WP, WB_DEFAULT_ROOT_DEPTH_MM, p);
-        let gpu_result = bwb.gpu_step(&[field_input]).expect("gpu_step fallback");
+        let gpu_result = bwb.gpu_step(&[field_input]).or_exit("gpu_step fallback");
 
         v.check_abs(
             &format!("{label}: direct vs GPU Dr"),
@@ -198,7 +198,7 @@ fn validate_batch_scaling(v: &mut ValidationHarness, benchmark: &serde_json::Val
     let tc = &benchmark["validation_checks"]["et0_cpu_gpu_parity"]["test_cases"][0];
     let sizes = benchmark["validation_checks"]["batch_scaling"]["batch_sizes"]
         .as_array()
-        .expect("array");
+        .or_exit("batch_scaling batch_sizes must be array");
 
     let station = StationDay {
         tmax: json_field(tc, "tmax"),
@@ -216,13 +216,13 @@ fn validate_batch_scaling(v: &mut ValidationHarness, benchmark: &serde_json::Val
     let batcher = BatchedEt0::cpu();
     let ref_et0 = batcher
         .compute_gpu(&[station])
-        .expect("single compute")
+        .or_exit("single compute")
         .et0_values[0];
 
     for sz_val in sizes {
         let sz = sz_val.as_u64().unwrap_or(1) as usize;
         let batch: Vec<StationDay> = vec![station; sz];
-        let result = batcher.compute_gpu(&batch).expect("batch compute");
+        let result = batcher.compute_gpu(&batch).or_exit("batch compute");
 
         let all_match = result
             .et0_values
@@ -252,7 +252,7 @@ fn validate_backend_selection(v: &mut ValidationHarness, _benchmark: &serde_json
         latitude: BACKEND_LATITUDE_DEG,
         doy: BACKEND_DOY,
     };
-    let result = batcher.compute_gpu(&[station]).expect("cpu fallback");
+    let result = batcher.compute_gpu(&[station]).or_exit("cpu fallback");
     v.check_bool(
         "BatchedEt0::cpu() reports CPU backend",
         result.backend_used == Backend::Cpu,
@@ -277,7 +277,7 @@ fn validate_backend_selection(v: &mut ValidationHarness, _benchmark: &serde_json
         raw: WB_TEST_RAW,
         p: WB_DEFAULT_P,
     };
-    let wb_result = bwb.gpu_step(&[field]).expect("wb cpu fallback");
+    let wb_result = bwb.gpu_step(&[field]).or_exit("wb cpu fallback");
     v.check_bool(
         "BatchedWaterBalance CPU fallback returns result",
         !wb_result.is_empty(),
@@ -322,10 +322,10 @@ fn validate_tissue_gpu_parity(v: &mut ValidationHarness, _benchmark: &serde_json
 
     let epi_result =
         analyze_tissue_disorder(&epidermis_cells, SkinCompartment::Epidermis, &cpu_engine)
-            .expect("epidermis analysis should succeed");
+            .or_exit("epidermis analysis should succeed");
     let derm_result =
         analyze_tissue_disorder(&dermis_cells, SkinCompartment::PapillaryDermis, &cpu_engine)
-            .expect("dermis analysis should succeed");
+            .or_exit("dermis analysis should succeed");
 
     v.check_bool("epidermis: shannon > 0", epi_result.diversity.shannon > 0.0);
     v.check_bool(
@@ -361,10 +361,10 @@ fn validate_tissue_gpu_parity(v: &mut ValidationHarness, _benchmark: &serde_json
 
     let epi_cpu = cpu_engine
         .compute_alpha(&epi_abundances, 1, epi_abundances.len())
-        .expect("cpu alpha");
+        .or_exit("cpu alpha");
     let derm_cpu = cpu_engine
         .compute_alpha(&derm_abundances, 1, derm_abundances.len())
-        .expect("cpu alpha");
+        .or_exit("cpu alpha");
 
     v.check_abs(
         "cpu alpha path matches tissue: epidermis shannon",

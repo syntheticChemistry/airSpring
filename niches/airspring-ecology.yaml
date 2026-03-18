@@ -8,7 +8,7 @@
 niche:
   id: "airspring-ecology"
   name: "Ecology & Precision Agriculture"
-  version: "0.9.0"
+  version: "0.10.0"
   description: |
     Ecological and agricultural science niche proving Python baselines can be
     faithfully ported to sovereign Rust+GPU compute. 24 algorithms validated

@@ -19,7 +19,7 @@ use airspring_barracuda::eco::cytokine::{
     CytokineBrain, CytokineBrainConfig, CytokineObservation, CytokinePrediction,
 };
 use airspring_barracuda::eco::tissue::AndersonRegime;
-use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
+use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_field, parse_benchmark_json};
 use bingocube_nautilus::NautilusBrainConfig;
 
 const BENCHMARK_JSON: &str =
@@ -68,7 +68,7 @@ fn normalize_field(tc: &serde_json::Value) -> f64 {
 fn validate_normalization(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Input Normalization");
     let checks = &benchmark["validation_checks"]["input_normalization"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("input_normalization test_cases array") {
         let label = tc["label"].as_str().unwrap_or("case");
         let expected = json_field(tc, "expected_normalized");
         let tol = json_field(tc, "tolerance");
@@ -80,7 +80,7 @@ fn validate_normalization(v: &mut ValidationHarness, benchmark: &serde_json::Val
 fn validate_regime_classification(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Prediction Regime Classification");
     let checks = &benchmark["validation_checks"]["prediction_regime"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("prediction_regime test_cases array") {
         let label = tc["label"].as_str().unwrap_or("case");
         let signal = json_field(tc, "signal_extent");
         let w = json_field(tc, "w_predicted");
@@ -112,7 +112,7 @@ fn validate_regime_classification(v: &mut ValidationHarness, benchmark: &serde_j
 fn validate_brain_lifecycle(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Brain Lifecycle");
     let checks = &benchmark["validation_checks"]["brain_lifecycle"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("brain_lifecycle test_cases array") {
         let label = tc["label"].as_str().unwrap_or("case");
         let n_obs = tc["n_observations"].as_u64().unwrap_or(0) as usize;
         let min_pts = tc["min_training_points"].as_u64().unwrap_or(5) as usize;
@@ -178,7 +178,7 @@ fn validate_brain_lifecycle(v: &mut ValidationHarness, benchmark: &serde_json::V
                 .and_then(serde_json::Value::as_bool)
                 == Some(true)
             {
-                let json = brain.export_json().expect("export should succeed");
+                let json = brain.export_json().or_exit("export should succeed");
                 v.check_bool(&format!("export nonempty {label}"), !json.is_empty());
 
                 let imported = CytokineBrain::import_json(config, &json);
@@ -201,11 +201,11 @@ fn validate_brain_lifecycle(v: &mut ValidationHarness, benchmark: &serde_json::V
 fn validate_data_profile(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Gonzales Data Profile");
     let checks = &benchmark["validation_checks"]["gonzales_data_profile"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("gonzales_data_profile test_cases array") {
         let label = tc["label"].as_str().unwrap_or("case");
         let time_points = tc["time_points_hours"]
             .as_array()
-            .expect("time_points array");
+            .or_exit("time_points array");
         let n_features = tc["expected_n_features"].as_u64().unwrap_or(0) as usize;
         let n_targets = tc["expected_n_targets"].as_u64().unwrap_or(0) as usize;
 

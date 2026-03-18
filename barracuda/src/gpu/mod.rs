@@ -92,6 +92,7 @@ pub mod diversity;
 pub mod dual_kc;
 pub mod et0;
 pub mod evolution_gaps;
+pub mod resolved_issues;
 pub mod gdd;
 pub mod hargreaves;
 pub mod infiltration;

@@ -14,7 +14,7 @@
 //! Provenance: script=`control/turc/turc_et0.py`, commit=d3ecdc8, date=2026-02-27
 
 use airspring_barracuda::eco::evapotranspiration::turc_et0;
-use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
+use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/turc/benchmark_turc.json");
 
@@ -26,7 +26,7 @@ fn validate_analytical(
 ) {
     validation::section(section_label);
     let checks = &benchmark["validation_checks"][section_key]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let tmean = json_field(tc, "tmean");
         let rs = json_field(tc, "rs_mj");
         let rh = json_field(tc, "rh");
@@ -45,7 +45,7 @@ fn validate_analytical(
 fn validate_humidity_boundary(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Humidity Boundary (RH=50%)");
     let checks = &benchmark["validation_checks"]["humidity_boundary"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let tmean = json_field(tc, "tmean");
         let rs = json_field(tc, "rs_mj");
         let tol = json_field(tc, "tolerance");
@@ -62,7 +62,7 @@ fn validate_humidity_boundary(v: &mut ValidationHarness, benchmark: &serde_json:
 fn validate_edge_cases(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Edge Cases");
     let checks = &benchmark["validation_checks"]["edge_cases"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let label = tc["label"].as_str().unwrap_or("edge");
         let tmean = json_field(tc, "tmean");
         let rs = json_field(tc, "rs_mj");
@@ -82,7 +82,7 @@ fn validate_edge_cases(v: &mut ValidationHarness, benchmark: &serde_json::Value)
 fn validate_monotonicity(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Monotonicity");
     let checks = &benchmark["validation_checks"]["monotonicity"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let label = tc["label"].as_str().unwrap_or("mono");
         let (low, high) = if tc.get("base_rs").is_some() {
             let tmean = json_field(tc, "tmean");

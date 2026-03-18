@@ -22,16 +22,16 @@ use airspring_barracuda::eco::tissue::{
     barrier_disruption_d_eff, multi_compartment_analysis,
 };
 use airspring_barracuda::gpu::diversity::GpuDiversity;
-use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
+use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/tissue_diversity/benchmark_tissue_diversity.json");
 
 fn parse_f64_array(val: &serde_json::Value) -> Vec<f64> {
     val.as_array()
-        .expect("array")
+        .or_exit("parse_f64_array: value must be array")
         .iter()
-        .map(|v| v.as_f64().expect("f64"))
+        .map(|v| v.as_f64().or_exit("parse_f64_array: element must be f64"))
         .collect()
 }
 
@@ -62,7 +62,7 @@ fn validate_tissue_shannon(v: &mut ValidationHarness, benchmark: &serde_json::Va
     validation::section("Tissue Shannon Entropy");
     let engine = GpuDiversity::cpu();
     let checks = &benchmark["validation_checks"]["tissue_shannon"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("tissue_shannon test_cases array") {
         let label = tc["label"].as_str().unwrap_or("case");
         let abundances = parse_f64_array(&tc["abundances"]);
         let expected = json_field(tc, "expected_shannon");
@@ -70,7 +70,7 @@ fn validate_tissue_shannon(v: &mut ValidationHarness, benchmark: &serde_json::Va
 
         let cell_types = make_cell_types(&abundances);
         let result = analyze_tissue_disorder(&cell_types, SkinCompartment::Epidermis, &engine)
-            .expect("tissue analysis should succeed");
+            .or_exit("tissue analysis should succeed");
         v.check_abs(
             &format!("H' {label}"),
             result.diversity.shannon,
@@ -84,7 +84,7 @@ fn validate_tissue_pielou(v: &mut ValidationHarness, benchmark: &serde_json::Val
     validation::section("Tissue Pielou Evenness");
     let engine = GpuDiversity::cpu();
     let checks = &benchmark["validation_checks"]["tissue_pielou"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("tissue_pielou test_cases array") {
         let label = tc["label"].as_str().unwrap_or("case");
         let abundances = parse_f64_array(&tc["abundances"]);
         let expected = json_field(tc, "expected_pielou");
@@ -92,7 +92,7 @@ fn validate_tissue_pielou(v: &mut ValidationHarness, benchmark: &serde_json::Val
 
         let cell_types = make_cell_types(&abundances);
         let result = analyze_tissue_disorder(&cell_types, SkinCompartment::Epidermis, &engine)
-            .expect("tissue analysis should succeed");
+            .or_exit("tissue analysis should succeed");
         v.check_abs(
             &format!("J' {label}"),
             result.diversity.evenness,
@@ -106,7 +106,7 @@ fn validate_anderson_w(v: &mut ValidationHarness, benchmark: &serde_json::Value)
     validation::section("Anderson W Effective");
     let engine = GpuDiversity::cpu();
     let checks = &benchmark["validation_checks"]["anderson_w_effective"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("anderson_w_effective test_cases array") {
         let label = tc["label"].as_str().unwrap_or("case");
         let abundances = parse_f64_array(&tc["abundances"]);
         let expected = json_field(tc, "expected_w");
@@ -114,7 +114,7 @@ fn validate_anderson_w(v: &mut ValidationHarness, benchmark: &serde_json::Value)
 
         let cell_types = make_cell_types(&abundances);
         let result = analyze_tissue_disorder(&cell_types, SkinCompartment::Epidermis, &engine)
-            .expect("tissue analysis should succeed");
+            .or_exit("tissue analysis should succeed");
         v.check_abs(&format!("W {label}"), result.w_effective, expected, tol);
     }
 }
@@ -122,7 +122,7 @@ fn validate_anderson_w(v: &mut ValidationHarness, benchmark: &serde_json::Value)
 fn validate_regime(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Anderson Regime Classification");
     let checks = &benchmark["validation_checks"]["anderson_regime"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("anderson_regime test_cases array") {
         let label = tc["label"].as_str().unwrap_or("case");
         let expected_str = tc["expected_regime"].as_str().unwrap_or("?");
 
@@ -168,7 +168,7 @@ fn validate_regime(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
 fn validate_barrier(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Barrier Disruption d_eff");
     let checks = &benchmark["validation_checks"]["barrier_disruption"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("barrier_disruption test_cases array") {
         let label = tc["label"].as_str().unwrap_or("case");
         let breach_fraction = json_field(tc, "breach_fraction");
         let expected = json_field(tc, "expected_d_eff");
@@ -182,7 +182,7 @@ fn validate_barrier(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
 fn validate_compartments(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Compartment Dimensions");
     let checks = &benchmark["validation_checks"]["compartment_dimensions"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("compartment_dimensions test_cases array") {
         let label = tc["label"].as_str().unwrap_or("case");
         let compartment_str = tc["compartment"].as_str().unwrap_or("?");
         let expected = json_field(tc, "expected_d");
@@ -198,11 +198,11 @@ fn validate_multi_compartment(v: &mut ValidationHarness, benchmark: &serde_json:
     validation::section("Multi-Compartment Analysis");
     let engine = GpuDiversity::cpu();
     let checks = &benchmark["validation_checks"]["multi_compartment"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("multi_compartment test_cases array") {
         let label = tc["label"].as_str().unwrap_or("case");
         let expected_count = tc["expected_count"].as_u64().unwrap_or(0) as usize;
 
-        let compartments_json = tc["compartments"].as_array().expect("compartments array");
+        let compartments_json = tc["compartments"].as_array().or_exit("compartments array");
         let compartments: Vec<(SkinCompartment, Vec<CellTypeAbundance>)> = compartments_json
             .iter()
             .map(|c| {
@@ -214,7 +214,7 @@ fn validate_multi_compartment(v: &mut ValidationHarness, benchmark: &serde_json:
             .collect();
 
         let results = multi_compartment_analysis(&compartments, &engine)
-            .expect("multi-compartment analysis should succeed");
+            .or_exit("multi-compartment analysis should succeed");
 
         v.check_bool(&format!("count {label}"), results.len() == expected_count);
     }

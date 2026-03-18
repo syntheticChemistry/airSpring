@@ -14,7 +14,7 @@
 //! Run: `python3 control/seasonal_batch_et0/seasonal_batch_et0.py`
 
 use airspring_barracuda::gpu::et0::{Backend, BatchedEt0, StationDay};
-use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
+use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/seasonal_batch_et0/benchmark_seasonal_batch.json");
@@ -44,12 +44,12 @@ struct StationSpec {
 fn parse_stations(benchmark: &serde_json::Value) -> Vec<StationSpec> {
     benchmark["stations"]
         .as_array()
-        .expect("stations array")
+        .or_exit("stations array")
         .iter()
         .map(|st| {
             let range = |key: &str| -> (f64, f64) {
-                let arr = st[key].as_array().expect("range array");
-                (arr[0].as_f64().expect("f64"), arr[1].as_f64().expect("f64"))
+                let arr = st[key].as_array().or_exit("range array");
+                (arr[0].as_f64().or_exit("f64"), arr[1].as_f64().or_exit("f64"))
             };
             StationSpec {
                 label: st["label"].as_str().unwrap_or("").to_string(),
@@ -61,8 +61,8 @@ fn parse_stations(benchmark: &serde_json::Value) -> Vec<StationSpec> {
                 rh_min_range: range("rh_min_range"),
                 wind_2m: json_field(st, "wind_2m"),
                 rs_range: range("rs_range"),
-                annual_et0_min: st["expected_annual_et0_mm"]["min"].as_f64().expect("min"),
-                annual_et0_max: st["expected_annual_et0_mm"]["max"].as_f64().expect("max"),
+                annual_et0_min: st["expected_annual_et0_mm"]["min"].as_f64().or_exit("min"),
+                annual_et0_max: st["expected_annual_et0_mm"]["max"].as_f64().or_exit("max"),
             }
         })
         .collect()
@@ -110,7 +110,7 @@ fn main() {
     validation::section("Batch Computation (all stations)");
     let batch_result = batcher
         .compute_gpu(&all_days)
-        .expect("batch compute should succeed");
+        .or_exit("batch compute should succeed");
 
     v.check_bool(
         "Backend reports CPU (no GPU device)",
@@ -176,7 +176,7 @@ fn main() {
     // Batch consistency: compute one station individually, compare to batch
     validation::section("Batch Consistency");
     let single_days = generate_year(&stations[0]);
-    let single_result = batcher.compute_gpu(&single_days).expect("single compute");
+    let single_result = batcher.compute_gpu(&single_days).or_exit("single compute");
     let (s0, e0) = station_offsets[0];
     let batch_slice = &batch_result.et0_values[s0..e0];
     let all_match = single_result

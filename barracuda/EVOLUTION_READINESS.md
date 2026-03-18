@@ -1,6 +1,6 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: March 17, 2026 (v0.8.9 — Cross-ecosystem absorption: canonical `PRIMAL_NAME`/`PRIMAL_DOMAIN` (healthSpring V34), `OnceLock` GPU probe caching (toadStool S158), `cast` module with safe numeric casts (neuralSpring S162), `DispatchOutcome<T>` as library type (wetSpring V126), coralReef/Squirrel discovery functions (healthSpring V34), `mul_add()` FMA evolution (18 sites, barraCuda Sprint 7), `GemmF64` transpose documented in evolution gaps (groundSpring V113), `ValidationSink` upstream proposal (ludoSpring V23). Zero clippy warnings.)
+**Last Updated**: March 18, 2026 (v0.10.0 — Cross-ecosystem absorption: canonical `PRIMAL_NAME`/`PRIMAL_DOMAIN` (healthSpring V34), `OnceLock` GPU probe caching (toadStool S158), `cast` module with safe numeric casts (neuralSpring S162), `DispatchOutcome<T>` as library type (wetSpring V126), coralReef/Squirrel discovery functions (healthSpring V34), `mul_add()` FMA evolution (18 sites, barraCuda Sprint 7), `GemmF64` transpose documented in evolution gaps (groundSpring V113), `ValidationSink` upstream proposal (ludoSpring V23). Zero clippy warnings.)
 **barraCuda**: v0.3.5 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry, SpringDomain newtype, F64BuiltinCapabilities DF64 fields)
 **ToadStool**: S147+ (20,015 tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient, hw-learn, spirv_codegen_safety)
 **coralReef**: Phase 10 Iteration 44 sovereign Rust GPU compiler (NVIDIA + AMD, 1669+48 tests, VFIO dispatch)
@@ -413,8 +413,8 @@ metalForge forge migrated from wgpu 22 to wgpu 28 (eliminated duplicate wgpu com
 |------|--------|
 | `cargo fmt --check` | **PASS** (both crates) |
 | `cargo clippy --all-targets -- -W clippy::pedantic -W clippy::nursery -D warnings` | **PASS** — 0 warnings |
-| `cargo test --lib` | **880 lib pass**, 0 fail |
-| `cargo test --tests` | **280 integration pass**, 0 fail |
+| `cargo test --lib` | **908 lib pass**, 0 fail |
+| `cargo test --tests` | **299 integration pass**, 0 fail |
 | Cross-spring evolution | **11/11 pass** |
 | CPU vs Python | **24/24 algorithms**, 21.0× geometric mean speedup |
 | `#![forbid(unsafe_code)]` | **Both crates** |

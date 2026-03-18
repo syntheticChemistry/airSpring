@@ -16,7 +16,7 @@
 
 use airspring_barracuda::eco::tissue::barrier_disruption_d_eff;
 use airspring_barracuda::eco::van_genuchten::{van_genuchten_k, van_genuchten_theta};
-use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
+use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/barrier_skin/benchmark_barrier_skin.json");
@@ -34,7 +34,7 @@ fn normalize_barrier(theta: f64) -> f64 {
 fn validate_retention(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Barrier VG Retention");
     let checks = &benchmark["validation_checks"]["barrier_vg_retention"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let label = tc["label"].as_str().unwrap_or("case");
         let h = json_field(tc, "h");
         let theta = van_genuchten_theta(h, SKIN_THETA_R, SKIN_THETA_S, SKIN_ALPHA, SKIN_N_VG);
@@ -63,7 +63,7 @@ fn validate_retention(v: &mut ValidationHarness, benchmark: &serde_json::Value) 
 fn validate_conductivity(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Barrier Conductivity");
     let checks = &benchmark["validation_checks"]["barrier_conductivity"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let label = tc["label"].as_str().unwrap_or("case");
         let h = json_field(tc, "h");
         let k = van_genuchten_k(
@@ -100,7 +100,7 @@ fn validate_conductivity(v: &mut ValidationHarness, benchmark: &serde_json::Valu
 fn validate_d_eff_mapping(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Barrier → d_eff Mapping");
     let checks = &benchmark["validation_checks"]["barrier_to_d_eff_mapping"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let label = tc["label"].as_str().unwrap_or("case");
         let bi = json_field(tc, "barrier_integrity");
         let expected_d = json_field(tc, "expected_d_eff");
@@ -114,7 +114,7 @@ fn validate_d_eff_mapping(v: &mut ValidationHarness, benchmark: &serde_json::Val
 fn validate_skin_params(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Skin VG Parameters");
     let checks = &benchmark["validation_checks"]["skin_vg_params"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let label = tc["label"].as_str().unwrap_or("case");
         let tr = json_field(tc, "theta_r");
         let ts = json_field(tc, "theta_s");
@@ -132,7 +132,7 @@ fn validate_skin_params(v: &mut ValidationHarness, benchmark: &serde_json::Value
 fn validate_duality(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Dimensional Duality");
     let checks = &benchmark["validation_checks"]["duality_check"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("array") {
         let label = tc["label"].as_str().unwrap_or("case");
         let d_before = json_field(tc, "d_before");
         let d_after = json_field(tc, "d_after");

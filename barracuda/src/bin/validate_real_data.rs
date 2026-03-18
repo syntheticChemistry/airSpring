@@ -14,7 +14,7 @@ use airspring_barracuda::eco::{
 };
 use airspring_barracuda::testutil;
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation::{self, ValidationHarness};
+use airspring_barracuda::validation::{self, OrExit, ValidationHarness};
 use std::io::BufRead;
 use std::path::Path;
 
@@ -43,15 +43,15 @@ fn load_scenarios() -> Vec<Scenario> {
     };
     let arr = bm["real_data_scenarios"]["scenarios"]
         .as_array()
-        .expect("real_data_scenarios.scenarios must be an array");
+        .or_exit("real_data_scenarios.scenarios must be an array");
 
     arr.iter()
         .map(|s| {
-            let f = |key| validation::json_f64(s, &[key]).expect(key);
+            let f = |key| validation::json_f64(s, &[key]).or_exit(key);
             Scenario {
-                name: s["name"].as_str().expect("name").to_string(),
-                station: s["station"].as_str().expect("station").to_string(),
-                crop: s["crop"].as_str().expect("crop").to_string(),
+                name: s["name"].as_str().or_exit("name").to_string(),
+                station: s["station"].as_str().or_exit("station").to_string(),
+                crop: s["crop"].as_str().or_exit("crop").to_string(),
                 kc: f("kc"),
                 theta_fc: f("theta_fc"),
                 theta_wp: f("theta_wp"),
@@ -114,7 +114,7 @@ impl RuntimeConfig {
             |_| {
                 Path::new(env!("CARGO_MANIFEST_DIR"))
                     .parent()
-                    .expect("CARGO_MANIFEST_DIR parent")
+                    .or_exit("CARGO_MANIFEST_DIR parent")
                     .join("data")
                     .join("open_meteo")
             },
@@ -185,13 +185,13 @@ struct WeatherRow {
 }
 
 fn parse_open_meteo_csv(path: &Path) -> Vec<WeatherRow> {
-    let file = std::fs::File::open(path).expect("Cannot open CSV — verify data/ exists");
+    let file = std::fs::File::open(path).or_exit("Cannot open CSV — verify data/ exists");
     let reader = std::io::BufReader::new(file);
     let mut rows = Vec::new();
     let mut header_map: Vec<String> = Vec::new();
 
     for (i, line) in reader.lines().enumerate() {
-        let line = line.expect("I/O error reading CSV line");
+        let line = line.or_exit("I/O error reading CSV line");
         if i == 0 {
             header_map = line.split(',').map(String::from).collect();
             continue;
@@ -205,14 +205,14 @@ fn parse_open_meteo_csv(path: &Path) -> Vec<WeatherRow> {
             let idx = header_map
                 .iter()
                 .position(|h| h == name)
-                .expect("Open-Meteo CSV missing required column");
+                .or_exit("Open-Meteo CSV missing required column");
             fields[idx].parse::<f64>().unwrap_or(f64::NAN)
         };
 
         let date_idx = header_map
             .iter()
             .position(|h| h == "date")
-            .expect("Open-Meteo CSV must have a 'date' column");
+            .or_exit("Open-Meteo CSV must have a 'date' column");
         let doy = date_to_doy(fields[date_idx]);
 
         rows.push(WeatherRow {

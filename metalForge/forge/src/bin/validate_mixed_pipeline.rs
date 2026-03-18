@@ -15,6 +15,19 @@ use airspring_forge::substrate::pci;
 use airspring_forge::substrate::{Capability, Identity, Properties, Substrate, SubstrateKind};
 use barracuda::validation::ValidationHarness;
 
+trait OrExit<T> {
+    fn or_exit(self, context: &str) -> T;
+}
+
+impl<T> OrExit<T> for Option<T> {
+    fn or_exit(self, context: &str) -> T {
+        self.unwrap_or_else(|| {
+            eprintln!("FATAL: {context}");
+            std::process::exit(1);
+        })
+    }
+}
+
 fn titan_v() -> Substrate {
     Substrate {
         kind: SubstrateKind::Gpu,
@@ -192,7 +205,8 @@ fn validate_pcie_bypass_pipeline(v: &mut ValidationHarness) {
         ),
     ];
 
-    let pipe = pipeline::route_pipeline(&workloads, &substrates).expect("should route");
+    let pipe = pipeline::route_pipeline(&workloads, &substrates)
+        .or_exit("3-stage pipeline should route");
 
     v.check_bool("3-stage pipeline", pipe.stages.len() == 3);
     v.check_bool(
@@ -240,7 +254,8 @@ fn validate_cpu_roundtrip_counting(v: &mut ValidationHarness) {
         ),
     ];
 
-    let pipe = pipeline::route_pipeline(&workloads, &substrates).expect("should route");
+    let pipe = pipeline::route_pipeline(&workloads, &substrates)
+        .or_exit("roundtrip pipeline should route");
     v.check_bool("GPU→CPU→GPU has 2 roundtrips", pipe.cpu_roundtrips == 2);
     v.check_bool("Does NOT fully bypass CPU", !pipe.fully_bypasses_cpu());
 }
@@ -377,7 +392,8 @@ fn validate_full_eco_pipeline(v: &mut ValidationHarness) {
         Workload::new("weather_ingest", vec![Capability::CpuCompute]),
     ];
 
-    let pipe = pipeline::route_pipeline(&workloads, &substrates).expect("should route");
+    let pipe = pipeline::route_pipeline(&workloads, &substrates)
+        .or_exit("5-stage pipeline should route");
 
     v.check_bool("5-stage pipeline", pipe.stages.len() == 5);
 
@@ -445,7 +461,8 @@ fn validate_full_seasonal_cross_system(v: &mut ValidationHarness) {
         Workload::new("validation_harness", vec![Capability::CpuCompute]),
     ];
 
-    let pipe = pipeline::route_pipeline(&workloads, &substrates).expect("7-stage route");
+    let pipe = pipeline::route_pipeline(&workloads, &substrates)
+        .or_exit("7-stage seasonal pipeline should route");
     v.check_bool("7-stage seasonal pipeline", pipe.stages.len() == 7);
 
     v.check_bool(
@@ -526,7 +543,7 @@ fn validate_mesh_pipeline_routing(v: &mut ValidationHarness) {
 
     let mp = mesh
         .route_pipeline(&workloads)
-        .expect("should route on mesh");
+        .or_exit("mesh pipeline should route");
     v.check_bool("Mesh pipeline: 3 stages", mp.stage_count() == 3);
     v.check_bool("Mesh pipeline: single node", mp.is_single_node());
     v.check_bool(
@@ -584,7 +601,7 @@ fn validate_cross_node_pipeline(v: &mut ValidationHarness) {
 
     let mp = mesh
         .route_pipeline(&workloads)
-        .expect("should route cross-node");
+        .or_exit("cross-node pipeline should route");
     v.check_bool("Cross-node pipeline: 3 stages", mp.stage_count() == 3);
     v.check_bool("Cross-node pipeline: NOT single node", !mp.is_single_node());
     v.check_bool("Cross-node: has hops", mp.cross_node_hops > 0);

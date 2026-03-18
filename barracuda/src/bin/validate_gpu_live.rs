@@ -25,7 +25,7 @@ use airspring_barracuda::eco::evapotranspiration::{
     self as et, DailyEt0Input, actual_vapour_pressure_rh,
 };
 use airspring_barracuda::gpu::et0::{Backend, BatchedEt0, BatchedEt0Result, StationDay};
-use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
+use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_field, parse_benchmark_json};
 
 const PARITY_JSON: &str =
     include_str!("../../../control/cpu_gpu_parity/benchmark_cpu_gpu_parity.json");
@@ -77,12 +77,12 @@ fn validate_gpu_parity(
     validation::section("GPU Parity — BatchedEt0 (live GPU vs CPU)");
 
     let gpu_batcher =
-        BatchedEt0::gpu(Arc::clone(device)).expect("BatchedEt0::gpu() should succeed");
+        BatchedEt0::gpu(Arc::clone(device)).or_exit("BatchedEt0::gpu() should succeed");
     let cpu_batcher = BatchedEt0::cpu();
 
     let tests = &benchmark["validation_checks"]["et0_cpu_gpu_parity"]["test_cases"];
 
-    for tc in tests.as_array().expect("array") {
+    for tc in tests.as_array().or_exit("et0_cpu_gpu_parity test_cases array") {
         let label = tc["label"].as_str().unwrap_or("test");
         let station = StationDay {
             tmax: json_field(tc, "tmax"),
@@ -96,8 +96,8 @@ fn validate_gpu_parity(
             doy: json_field(tc, "doy") as u32,
         };
 
-        let cpu_result = cpu_batcher.compute_gpu(&[station]).expect("CPU compute");
-        let gpu_result = gpu_batcher.compute_gpu(&[station]).expect("GPU compute");
+        let cpu_result = cpu_batcher.compute_gpu(&[station]).or_exit("CPU compute");
+        let gpu_result = gpu_batcher.compute_gpu(&[station]).or_exit("GPU compute");
 
         v.check_bool(
             &format!("{label}: GPU backend reports Gpu"),
@@ -146,42 +146,42 @@ fn validate_gpu_parity(
 }
 
 fn build_seasonal_batch(benchmark: &serde_json::Value) -> Vec<StationDay> {
-    let stations = benchmark["stations"].as_array().expect("stations array");
+    let stations = benchmark["stations"].as_array().or_exit("stations array");
     let mut all_days: Vec<StationDay> = Vec::new();
     for st in stations {
-        let tmax_range = st["tmax_range"].as_array().unwrap();
-        let tmin_range = st["tmin_range"].as_array().unwrap();
-        let rh_max_range = st["rh_max_range"].as_array().unwrap();
-        let rh_min_range = st["rh_min_range"].as_array().unwrap();
-        let rs_range = st["rs_range"].as_array().unwrap();
+        let tmax_range = st["tmax_range"].as_array().or_exit("station tmax_range array");
+        let tmin_range = st["tmin_range"].as_array().or_exit("station tmin_range array");
+        let rh_max_range = st["rh_max_range"].as_array().or_exit("station rh_max_range array");
+        let rh_min_range = st["rh_min_range"].as_array().or_exit("station rh_min_range array");
+        let rs_range = st["rs_range"].as_array().or_exit("station rs_range array");
 
         for doy in 1..=365_u32 {
             all_days.push(StationDay {
                 tmax: seasonal_value(
                     doy,
-                    tmax_range[0].as_f64().unwrap(),
-                    tmax_range[1].as_f64().unwrap(),
+                    tmax_range[0].as_f64().or_exit("tmax_range[0] f64"),
+                    tmax_range[1].as_f64().or_exit("tmax_range[1] f64"),
                 ),
                 tmin: seasonal_value(
                     doy,
-                    tmin_range[0].as_f64().unwrap(),
-                    tmin_range[1].as_f64().unwrap(),
+                    tmin_range[0].as_f64().or_exit("tmin_range[0] f64"),
+                    tmin_range[1].as_f64().or_exit("tmin_range[1] f64"),
                 ),
                 rh_max: seasonal_value(
                     doy,
-                    rh_max_range[0].as_f64().unwrap(),
-                    rh_max_range[1].as_f64().unwrap(),
+                    rh_max_range[0].as_f64().or_exit("rh_max_range[0] f64"),
+                    rh_max_range[1].as_f64().or_exit("rh_max_range[1] f64"),
                 ),
                 rh_min: seasonal_value(
                     doy,
-                    rh_min_range[0].as_f64().unwrap(),
-                    rh_min_range[1].as_f64().unwrap(),
+                    rh_min_range[0].as_f64().or_exit("rh_min_range[0] f64"),
+                    rh_min_range[1].as_f64().or_exit("rh_min_range[1] f64"),
                 ),
                 wind_2m: json_field(st, "wind_2m"),
                 rs: seasonal_value(
                     doy,
-                    rs_range[0].as_f64().unwrap(),
-                    rs_range[1].as_f64().unwrap(),
+                    rs_range[0].as_f64().or_exit("rs_range[0] f64"),
+                    rs_range[1].as_f64().or_exit("rs_range[1] f64"),
                 ),
                 elevation: json_field(st, "elevation"),
                 latitude: json_field(st, "latitude"),
@@ -208,14 +208,14 @@ fn run_throughput_benchmarks(
     let gpu_start = Instant::now();
     let mut gpu_result = None;
     for _ in 0..iters {
-        gpu_result = Some(gpu_batcher.compute_gpu(all_days).expect("GPU compute"));
+        gpu_result = Some(gpu_batcher.compute_gpu(all_days).or_exit("GPU compute"));
     }
     let gpu_per_iter = gpu_start.elapsed() / iters;
 
     let cpu_start = Instant::now();
     let mut cpu_result = None;
     for _ in 0..iters {
-        cpu_result = Some(cpu_batcher.compute_gpu(all_days).expect("CPU compute"));
+        cpu_result = Some(cpu_batcher.compute_gpu(all_days).or_exit("CPU compute"));
     }
     let cpu_per_iter = cpu_start.elapsed() / iters;
 
@@ -238,8 +238,8 @@ fn check_throughput_parity(
         gpu_result.is_some_and(|r| r.backend_used == Backend::Gpu),
     );
 
-    let gpu_vals = &gpu_result.unwrap().et0_values;
-    let cpu_vals = &cpu_result.unwrap().et0_values;
+    let gpu_vals = &gpu_result.or_exit("gpu_result for throughput parity").et0_values;
+    let cpu_vals = &cpu_result.or_exit("cpu_result for throughput parity").et0_values;
 
     let gpu_total: f64 = gpu_vals.iter().sum();
     let cpu_total: f64 = cpu_vals.iter().sum();
@@ -272,7 +272,7 @@ fn benchmark_throughput(
     validation::section("GPU Throughput Benchmark");
 
     let gpu_batcher =
-        BatchedEt0::gpu(Arc::clone(device)).expect("BatchedEt0::gpu() should succeed");
+        BatchedEt0::gpu(Arc::clone(device)).or_exit("BatchedEt0::gpu() should succeed");
     let cpu_batcher = BatchedEt0::cpu();
 
     let all_days = build_seasonal_batch(benchmark);
@@ -299,7 +299,7 @@ fn benchmark_throughput(
 fn validate_batch_scaling_gpu(v: &mut ValidationHarness, device: &Arc<WgpuDevice>) {
     validation::section("GPU Batch Scaling");
 
-    let gpu_batcher = BatchedEt0::gpu(Arc::clone(device)).expect("BatchedEt0::gpu()");
+    let gpu_batcher = BatchedEt0::gpu(Arc::clone(device)).or_exit("BatchedEt0::gpu()");
 
     let station = StationDay {
         tmax: 25.0,
@@ -315,13 +315,13 @@ fn validate_batch_scaling_gpu(v: &mut ValidationHarness, device: &Arc<WgpuDevice
 
     let ref_result = gpu_batcher
         .compute_gpu(&[station])
-        .expect("single GPU compute");
+        .or_exit("single GPU compute");
     let ref_val = ref_result.et0_values[0];
 
     for sz in [10, 100, 1000, 10_000] {
         let batch: Vec<StationDay> = vec![station; sz];
         let start = Instant::now();
-        let result = gpu_batcher.compute_gpu(&batch).expect("batch GPU compute");
+        let result = gpu_batcher.compute_gpu(&batch).or_exit("batch GPU compute");
         let elapsed = start.elapsed();
 
         let max_diff: f64 = result

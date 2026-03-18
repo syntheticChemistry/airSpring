@@ -30,6 +30,14 @@ use bingocube_nautilus::{BetaObservation, NautilusBrain, NautilusBrainConfig, Sh
 pub const N_TARGETS: usize = 3;
 
 /// Configuration for the agricultural Nautilus brain.
+///
+/// # Determinism contract
+///
+/// The brain is deterministic for identical input sequences: the reservoir
+/// uses ridge regression (no random initialization) and tournament selection
+/// that depends only on board fitness ordering. No RNG seed is needed —
+/// determinism is structural, guaranteed by the fixed topology
+/// (`population_size`, `n_targets`, `ridge_lambda`, `input_dim`).
 #[derive(Debug, Clone)]
 pub struct AirSpringBrainConfig {
     /// Upstream brain configuration.

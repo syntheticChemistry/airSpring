@@ -13,6 +13,19 @@ use airspring_forge::substrate::{Capability, Identity, Properties, Substrate, Su
 use airspring_forge::workloads;
 use barracuda::validation::ValidationHarness;
 
+trait OrExit<T> {
+    fn or_exit(self, context: &str) -> T;
+}
+
+impl<T> OrExit<T> for Option<T> {
+    fn or_exit(self, context: &str) -> T {
+        self.unwrap_or_else(|| {
+            eprintln!("FATAL: {context}");
+            std::process::exit(1);
+        })
+    }
+}
+
 const BENCHMARK_JSON: &str =
     include_str!("../../../../control/metalforge_dispatch/benchmark_metalforge_dispatch.json");
 
@@ -186,14 +199,15 @@ fn check_priority_and_fallback(inv: &[Substrate], v: &mut ValidationHarness) {
 
 fn check_reasons_and_inventory(inv: &[Substrate], v: &mut ValidationHarness) {
     println!("\n── Dispatch Reason ──");
-    let r =
-        dispatch::route(&workloads::crop_stress_classifier().workload, inv).expect("should route");
+    let r = dispatch::route(&workloads::crop_stress_classifier().workload, inv)
+        .or_exit("crop_stress_classifier should route");
     v.check_bool(
         "NPU workload reports Preferred reason",
         r.reason == Reason::Preferred,
     );
 
-    let r = dispatch::route(&workloads::et0_batch().workload, inv).expect("should route");
+    let r = dispatch::route(&workloads::et0_batch().workload, inv)
+        .or_exit("et0_batch should route");
     v.check_bool(
         "GPU workload reports BestAvailable reason",
         r.reason == Reason::BestAvailable,
@@ -224,11 +238,11 @@ fn check_reasons_and_inventory(inv: &[Substrate], v: &mut ValidationHarness) {
 fn check_cross_system_routing(inv: &[Substrate], v: &mut ValidationHarness) {
     println!("\n── Cross-System Pipeline ──");
     let seasonal = dispatch::route(&workloads::seasonal_pipeline().workload, inv)
-        .expect("seasonal_pipeline should route");
+        .or_exit("seasonal_pipeline should route");
     let stress = dispatch::route(&workloads::crop_stress_classifier().workload, inv)
-        .expect("crop_stress_classifier should route");
+        .or_exit("crop_stress_classifier should route");
     let ingest = dispatch::route(&workloads::weather_ingest().workload, inv)
-        .expect("weather_ingest should route");
+        .or_exit("weather_ingest should route");
 
     let sub_seasonal = seasonal.substrate.kind;
     let sub_stress = stress.substrate.kind;
@@ -256,8 +270,10 @@ fn check_cross_system_routing(inv: &[Substrate], v: &mut ValidationHarness) {
 }
 
 fn check_benchmark_expectations(v: &mut ValidationHarness) {
-    let json: serde_json::Value =
-        serde_json::from_str(BENCHMARK_JSON).expect("benchmark JSON must parse");
+    let Ok(json) = serde_json::from_str::<serde_json::Value>(BENCHMARK_JSON) else {
+        eprintln!("[FAIL] benchmark JSON parse error");
+        std::process::exit(1);
+    };
 
     println!("\n── Benchmark Provenance ──");
 

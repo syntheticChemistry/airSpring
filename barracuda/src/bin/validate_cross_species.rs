@@ -16,16 +16,16 @@
 
 use airspring_barracuda::eco::diversity;
 use airspring_barracuda::eco::tissue::{AndersonRegime, barrier_disruption_d_eff};
-use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
+use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/cross_species_skin/benchmark_cross_species_skin.json");
 
 fn parse_f64_array(val: &serde_json::Value) -> Vec<f64> {
     val.as_array()
-        .expect("array")
+        .or_exit("parse_f64_array: array")
         .iter()
-        .map(|v| v.as_f64().expect("f64"))
+        .map(|v| v.as_f64().or_exit("parse_f64_array: f64 element"))
         .collect()
 }
 
@@ -52,7 +52,7 @@ const fn regime_str(r: AndersonRegime) -> &'static str {
 fn validate_species_params(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Species Barrier Parameters");
     let checks = &benchmark["validation_checks"]["species_barrier_params"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("species_barrier_params test_cases array") {
         let label = tc["label"].as_str().unwrap_or("case");
         let alpha = json_field(tc, "barrier_alpha");
         let d_eff = json_field(tc, "d_eff_intact");
@@ -66,7 +66,7 @@ fn validate_species_params(v: &mut ValidationHarness, benchmark: &serde_json::Va
 fn validate_breach_threshold(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Breach Threshold");
     let checks = &benchmark["validation_checks"]["breach_threshold"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("breach_threshold test_cases array") {
         let label = tc["label"].as_str().unwrap_or("case");
 
         if tc
@@ -93,7 +93,7 @@ fn validate_breach_threshold(v: &mut ValidationHarness, benchmark: &serde_json::
 fn validate_anderson(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Anderson Predictions");
     let checks = &benchmark["validation_checks"]["anderson_predictions"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("anderson_predictions test_cases array") {
         let label = tc["label"].as_str().unwrap_or("case");
         let w = json_field(tc, "w");
 
@@ -117,13 +117,13 @@ fn validate_anderson(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
 fn validate_diversity(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Comparative Diversity");
     let checks = &benchmark["validation_checks"]["comparative_diversity"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("comparative_diversity test_cases array") {
         let label = tc["label"].as_str().unwrap_or("case");
         let abundances = parse_f64_array(&tc["cell_abundances"]);
         let expected_richness = tc["expected_richness"].as_u64().unwrap_or(0) as usize;
         let range = tc["expected_evenness_range"]
             .as_array()
-            .expect("evenness range");
+            .or_exit("expected_evenness_range array");
         let lo = range[0].as_f64().unwrap_or(0.0);
         let hi = range[1].as_f64().unwrap_or(1.0);
 
@@ -141,7 +141,7 @@ fn validate_diversity(v: &mut ValidationHarness, benchmark: &serde_json::Value) 
 fn validate_one_health(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("One Health Bridge");
     let checks = &benchmark["validation_checks"]["one_health_bridge"]["test_cases"];
-    for tc in checks.as_array().expect("array") {
+    for tc in checks.as_array().or_exit("one_health_bridge test_cases array") {
         let label = tc["label"].as_str().unwrap_or("case");
         let same_target = tc["expected_same_target"].as_bool().unwrap_or(false);
         v.check_bool(&format!("one_health {label}"), same_target);

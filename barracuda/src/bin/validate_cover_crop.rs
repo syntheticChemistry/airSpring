@@ -18,7 +18,8 @@ use airspring_barracuda::eco::dual_kc::{
 };
 use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{
-    self, ValidationHarness, json_array, json_f64, json_field, json_str, parse_benchmark_json,
+    self, OrExit, ValidationHarness, json_array, json_f64, json_field, json_str,
+    parse_benchmark_json,
 };
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/dual_kc/benchmark_cover_crop_kc.json");
@@ -107,9 +108,9 @@ fn validate_mulch_factor_ordering(v: &mut ValidationHarness) {
 
 fn f64_vec(arr: &serde_json::Value) -> Vec<f64> {
     arr.as_array()
-        .expect("expected JSON array")
+        .or_exit("expected JSON array")
         .iter()
-        .map(|v| v.as_f64().expect("expected f64 in array"))
+        .map(|v| v.as_f64().or_exit("expected f64 in array"))
         .collect()
 }
 
@@ -120,17 +121,17 @@ fn validate_notill_vs_conventional(v: &mut ValidationHarness, bench: &serde_json
     let scenario = &bench["validation_checks"]["no_till_conserves_water"]["scenario"];
     let els = &scenario["evap_layer_state"];
     let state = EvaporationLayerState {
-        de: json_f64(els, &["de"]).expect("de"),
-        tew: json_f64(els, &["tew"]).expect("tew"),
-        rew: json_f64(els, &["rew"]).expect("rew"),
+        de: json_f64(els, &["de"]).or_exit("de"),
+        tew: json_f64(els, &["tew"]).or_exit("tew"),
+        rew: json_f64(els, &["rew"]).or_exit("rew"),
     };
 
     let et0_daily = f64_vec(&scenario["et0_daily"]);
     let precip_daily = f64_vec(&scenario["precip_daily"]);
-    let kcb = json_f64(scenario, &["kcb"]).expect("kcb");
-    let kc_max_val = json_f64(scenario, &["kc_max"]).expect("kc_max");
-    let few = json_f64(scenario, &["few"]).expect("few");
-    let mf = json_f64(scenario, &["mulch_factor"]).expect("mulch_factor");
+    let kcb = json_f64(scenario, &["kcb"]).or_exit("kcb");
+    let kc_max_val = json_f64(scenario, &["kc_max"]).or_exit("kc_max");
+    let few = json_f64(scenario, &["few"]).or_exit("few");
+    let mf = json_f64(scenario, &["mulch_factor"]).or_exit("mulch_factor");
 
     let inputs: Vec<DualKcInput> = et0_daily
         .iter()
@@ -157,8 +158,8 @@ fn validate_notill_vs_conventional(v: &mut ValidationHarness, bench: &serde_json
     let savings_pct = 100.0 * (1.0 - notill_et / conv_et);
     let expected_range =
         &bench["validation_checks"]["no_till_conserves_water"]["expected_et_reduction_pct"];
-    let min_pct = json_f64(expected_range, &["min"]).expect("expected_et_reduction_pct.min");
-    let max_pct = json_f64(expected_range, &["max"]).expect("expected_et_reduction_pct.max");
+    let min_pct = json_f64(expected_range, &["min"]).or_exit("expected_et_reduction_pct.min");
+    let max_pct = json_f64(expected_range, &["max"]).or_exit("expected_et_reduction_pct.max");
 
     v.check_bool(
         &format!("ET savings {savings_pct:.1}% in [{min_pct}, {max_pct}]"),
@@ -205,7 +206,7 @@ fn validate_islam_observations(v: &mut ValidationHarness, bench: &serde_json::Va
     let obs = &bench["no_till_soil_moisture"]["observations"];
 
     let f = |metric: &str, variant: &str| -> f64 {
-        json_f64(obs, &[metric, variant]).expect("Islam et al. benchmark value")
+        json_f64(obs, &[metric, variant]).or_exit("Islam et al. benchmark value")
     };
 
     let nt_soc = f("soil_organic_carbon_pct", "no_till");

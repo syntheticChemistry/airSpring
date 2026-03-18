@@ -50,7 +50,7 @@ use airspring_barracuda::gpu::simple_et0::{
 };
 use airspring_barracuda::gpu::yield_response::{GpuYieldResponse, YieldInput};
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation;
+use airspring_barracuda::validation::{self, OrExit};
 use barracuda::validation::ValidationHarness;
 
 fn main() {
@@ -79,8 +79,8 @@ fn main() {
             barracuda::validation::exit_no_gpu();
         }
     };
-    let gpu_yield = GpuYieldResponse::new(device.clone()).expect("GpuYieldResponse");
-    let gpu_et0 = GpuSimpleEt0::new(device).expect("GpuSimpleEt0");
+    let gpu_yield = GpuYieldResponse::new(device.clone()).or_exit("GpuYieldResponse");
+    let gpu_et0 = GpuSimpleEt0::new(device).or_exit("GpuSimpleEt0");
 
     v.check_bool("executor_created", true);
 
@@ -170,7 +170,7 @@ fn bench_scs_cn(v: &mut ValidationHarness, gpu: &GpuRunoff) {
         .collect();
 
     let start = Instant::now();
-    let gpu_result = gpu.compute(&inputs).expect("SCS-CN GPU dispatch");
+    let gpu_result = gpu.compute(&inputs).or_exit("SCS-CN GPU dispatch");
     let gpu_us = start.elapsed().as_micros();
 
     let start = Instant::now();
@@ -203,7 +203,7 @@ fn bench_stewart(v: &mut ValidationHarness, gpu: &GpuYieldResponse) {
         .collect();
 
     let start = Instant::now();
-    let gpu_result = gpu.compute(&inputs).expect("Stewart GPU dispatch");
+    let gpu_result = gpu.compute(&inputs).or_exit("Stewart GPU dispatch");
     let gpu_us = start.elapsed().as_micros();
 
     let start = Instant::now();
@@ -243,7 +243,7 @@ fn bench_makkink(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
         .collect();
 
     let start = Instant::now();
-    let gpu_result = gpu.makkink(&inputs).expect("Makkink GPU dispatch");
+    let gpu_result = gpu.makkink(&inputs).or_exit("Makkink GPU dispatch");
     let gpu_us = start.elapsed().as_micros();
 
     let start = Instant::now();
@@ -276,7 +276,7 @@ fn bench_turc(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
         .collect();
 
     let start = Instant::now();
-    let gpu_result = gpu.turc(&inputs).expect("Turc GPU dispatch");
+    let gpu_result = gpu.turc(&inputs).or_exit("Turc GPU dispatch");
     let gpu_us = start.elapsed().as_micros();
 
     let start = Instant::now();
@@ -317,7 +317,7 @@ fn bench_hamon(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
         .collect();
 
     let start = Instant::now();
-    let gpu_result = gpu.hamon(&inputs).expect("Hamon GPU dispatch");
+    let gpu_result = gpu.hamon(&inputs).or_exit("Hamon GPU dispatch");
     let gpu_us = start.elapsed().as_micros();
 
     let start = Instant::now();
@@ -354,7 +354,7 @@ fn bench_blaney_criddle(v: &mut ValidationHarness, gpu: &GpuSimpleEt0) {
         .collect();
 
     let start = Instant::now();
-    let gpu_result = gpu.blaney_criddle(&inputs).expect("BC GPU dispatch");
+    let gpu_result = gpu.blaney_criddle(&inputs).or_exit("BC GPU dispatch");
     let gpu_us = start.elapsed().as_micros();
 
     let start = Instant::now();
@@ -387,7 +387,7 @@ fn bench_scaling(v: &mut ValidationHarness, gpu: &GpuRunoff) {
             .collect();
 
         let start = Instant::now();
-        let gpu_result = gpu.compute(&inputs).expect("scaling dispatch");
+        let gpu_result = gpu.compute(&inputs).or_exit("scaling dispatch");
         let elapsed = start.elapsed().as_micros();
 
         let cpu_ref = eco::runoff::scs_cn_runoff(inputs[0].precip_mm, 75.0, 0.2);
