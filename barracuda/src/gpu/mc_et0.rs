@@ -200,7 +200,8 @@ pub fn mc_et0_cpu(
     // Population variance (÷ n): these are the entire MC draw, not a sample
     // from a larger population. barracuda::stats::correlation::variance uses
     // sample variance (÷ n-1) so we compute population variance directly.
-    let variance = samples.iter().map(|x| (x - mean_val).powi(2)).sum::<f64>() / n as f64;
+    let variance =
+        samples.iter().map(|x| (x - mean_val).powi(2)).sum::<f64>() / crate::cast::usize_f64(n);
     let std_val = variance.sqrt();
     let p05 = barracuda::stats::percentile(&samples, 5.0);
     let p95 = barracuda::stats::percentile(&samples, 95.0);
@@ -333,7 +334,8 @@ pub fn mc_et0_gpu(
 
     let n = samples.len();
     let mean_val = barracuda::stats::mean(&samples);
-    let variance = samples.iter().map(|x| (x - mean_val).powi(2)).sum::<f64>() / n as f64;
+    let variance =
+        samples.iter().map(|x| (x - mean_val).powi(2)).sum::<f64>() / crate::cast::usize_f64(n);
     let std_val = variance.sqrt();
     let p05 = barracuda::stats::percentile(&samples, 5.0);
     let p95 = barracuda::stats::percentile(&samples, 95.0);
@@ -350,7 +352,7 @@ pub fn mc_et0_gpu(
 
 fn lehmer_next(state: &mut u64) -> f64 {
     *state = state.wrapping_mul(48_271).wrapping_rem(0x7FFF_FFFF);
-    *state as f64 / f64::from(0x7FFF_FFFFu32)
+    crate::cast::u64_f64(*state) / f64::from(0x7FFF_FFFFu32)
 }
 
 fn box_muller_next(state: &mut u64) -> f64 {

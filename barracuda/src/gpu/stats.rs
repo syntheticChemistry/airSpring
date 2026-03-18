@@ -243,7 +243,7 @@ mod tests {
         let p = 3;
         let mut data = Vec::with_capacity(n * p);
         for i in 0..n {
-            let fi = i as f64;
+            let fi = crate::cast::usize_f64(i);
             data.push(fi);
             data.push(fi.mul_add(2.0, 1.0));
             data.push((-fi) + 50.0);

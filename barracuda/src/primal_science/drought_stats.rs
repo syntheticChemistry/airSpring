@@ -48,7 +48,8 @@ pub(super) fn spi_drought(params: &Value) -> Value {
     let scale = params
         .get("scale")
         .and_then(serde_json::Value::as_u64)
-        .unwrap_or(3) as usize;
+        .unwrap_or(3);
+    let scale = crate::cast::u64_usize(scale);
     let spi = drought_index::compute_spi(&monthly_precip, scale);
     let n_valid = spi.iter().filter(|v| v.is_finite()).count();
     let classifications: Vec<&str> = spi
@@ -84,8 +85,8 @@ pub(super) fn autocorrelation_handler(params: &Value) -> Value {
     let max_lag = params
         .get("max_lag")
         .and_then(serde_json::Value::as_u64)
-        .unwrap_or(20) as usize;
-    let max_lag = max_lag.min(data.len());
+        .unwrap_or(20);
+    let max_lag = crate::cast::u64_usize(max_lag).min(data.len());
     let acf = autocorrelation::autocorrelation_cpu(&data, max_lag);
     let nacf = autocorrelation::normalised_acf_cpu(&data, max_lag);
     serde_json::json!({

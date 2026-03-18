@@ -95,7 +95,11 @@ impl GpuBootstrap {
             // Detect and fall back to CPU (same pattern as gpu::reduce).
             let all_zero = distribution.iter().all(|&v| v == 0.0);
             if all_zero && data.iter().any(|&v| v != 0.0) {
-                return bootstrap_mean_cpu(data, n_bootstrap as usize, u64::from(seed));
+                return bootstrap_mean_cpu(
+                    data,
+                    crate::cast::u32_usize(n_bootstrap),
+                    u64::from(seed),
+                );
             }
 
             let mean_est = mean(data);
@@ -118,7 +122,7 @@ impl GpuBootstrap {
                 std_error,
             })
         } else {
-            bootstrap_mean_cpu(data, n_bootstrap as usize, u64::from(seed))
+            bootstrap_mean_cpu(data, crate::cast::u32_usize(n_bootstrap), u64::from(seed))
         }
     }
 }

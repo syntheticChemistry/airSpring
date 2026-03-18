@@ -2,6 +2,49 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.9.0] - 2026-03-18
+
+### Audit Execution
+
+**Cast Lint Evolution**:
+- `#![deny(clippy::cast_precision_loss, clippy::cast_possible_truncation, clippy::cast_sign_loss)]` in `lib.rs`
+- 3 new cast helpers: `u32_usize()`, `u64_usize()`, `u64_f64()` in `cast` module
+- Library code enforces safe casts at compile time; Cargo.toml `[lints]` covers 91 binaries
+- `#[expect()]` annotations for intentional casts in `cast`, `testutil`, `nautilus` modules
+- `mc_et0`, `bootstrap`, `stats`, `npu/inference`, `primal_science/soil`, `primal_science/drought_stats` migrated to cast helpers
+
+**Module Refactoring**:
+- `eco/soil_moisture.rs` (672 LOC) → `eco/soil_moisture/` (4 submodules: topp, texture, saxton_rawls, water)
+- Public API unchanged — `mod.rs` re-exports all types and functions
+- Tests distributed to their respective submodules
+
+**Discovery Evolution**:
+- `discover_visualization_primal()` for petalTongue: 3-tier resolution (env → socket → capability)
+- `primal_names::VISUALIZATION` domain constant
+- `airspring_primal` binary compute/data discovery: 3-tier with toadStool/nestGate fallbacks
+- Hardcoded socket paths removed from `metalForge/deploy/airspring_deploy.toml`, `graphs/airspring_niche_deploy.toml`, `niches/airspring-ecology.yaml`
+
+**Validation Fidelity**:
+- `PY_KR_BARE_SOIL_DRYDOWN` hardcoded constant → `expected_kr` in `benchmark_dual_kc.json` with `_kr_provenance` (script, commit, date, tolerance)
+- All validation targets now traceable to documented Python runs
+
+**Integration Tests**:
+- `tests/primal_dispatch.rs`: 14 tests covering health probes, capability introspection, science dispatch, provenance lifecycle, primal discovery, error handling via in-process Unix socket server
+
+**CI Evolution**:
+- Clippy CLI flags (`-W clippy::pedantic -W clippy::nursery`) removed from CI; Cargo.toml `[lints]` is now the single source
+- CI for both barracuda and metalForge forge uses `cargo clippy --all-targets -- -D warnings`
+
+**Version Sync**:
+- All deployment configs, specs, and docs synchronized to v0.9.0
+
+**Documentation**:
+- toadStool/barraCuda evolution handoff: cast module, `DispatchOutcome<T>`, `ValidationSink` upstream absorption candidates
+- ecoPrimals/whitePaper/gen3/baseCamp EXTENSION_PLAN updated with V0.9.0 learnings
+- Root README, baseCamp README, experiments README updated
+
+**Tests**: 894 lib tests (was 891), 299 integration (was 285, +14 primal_dispatch), zero clippy warnings, both crates green.
+
 ## [0.8.9] - 2026-03-17
 
 ### Cross-Ecosystem Evolution

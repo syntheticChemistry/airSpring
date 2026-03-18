@@ -162,6 +162,32 @@ pub fn discover_inference_primal() -> Option<PathBuf> {
     discover_primal_by_capability(crate::primal_names::domains::INFERENCE)
 }
 
+/// Discover the petalTongue visualization / interactive exploration primal.
+///
+/// Three-tier resolution:
+/// 1. Environment override (`PETALTONGUE_SOCKET`)
+/// 2. Named socket scan for `petaltongue` in biomeOS socket dir
+/// 3. Capability probe: scan all primals for `visualization.*` capabilities
+///
+/// Returns the socket path if found.
+#[must_use]
+pub fn discover_visualization_primal() -> Option<PathBuf> {
+    if let Ok(path) = std::env::var(crate::primal_names::socket_env_var(
+        crate::primal_names::PETALTONGUE,
+    )) {
+        let p = PathBuf::from(path);
+        if p.exists() {
+            return Some(p);
+        }
+    }
+
+    if let Some(path) = discover_primal_socket(crate::primal_names::PETALTONGUE) {
+        return Some(path);
+    }
+
+    discover_primal_by_capability(crate::primal_names::domains::VISUALIZATION)
+}
+
 /// Discover a primal socket by probing all known sockets for a capability domain.
 ///
 /// Scans the socket directory, connects to each primal's `capability.list`,

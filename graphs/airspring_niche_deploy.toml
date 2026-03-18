@@ -21,7 +21,7 @@
 [graph]
 name = "airspring_ecology_niche"
 description = "Full airSpring ecology niche with neuralAPI capability routing"
-version = "0.8.2"
+version = "0.9.0"
 coordination = "Sequential"
 
 # ── Node 1: BearDog (crypto + key management) ─────────────────────

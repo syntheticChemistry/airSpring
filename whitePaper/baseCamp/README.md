@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
-**Updated**: March 17, 2026
-**Project**: airSpring — Ecological & Agricultural Sciences (v0.8.9)
-**Status**: 87 experiments, 1284/1284 Python + 880 lib + 285 integration + 61 forge + 22 property tests + 91 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, BYOB niche deployment) + `#![forbid(unsafe_code)]` both crates + zero clippy pedantic+nursery + `warn(missing_docs)`. 60 tolerances in 4 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies** (ureq→Songbird IPC). Zero-panic validation (47/47 binaries). Typed `compute_dispatch` client. `extract_rpc_error()` centralized. Full validation pipeline green (2026-03-16)
+**Updated**: March 18, 2026
+**Project**: airSpring — Ecological & Agricultural Sciences (v0.9.0)
+**Status**: 87 experiments, 1284/1284 Python + 894 lib + 299 integration + 61 forge + 22 property tests + 91 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, BYOB niche deployment) + `#![forbid(unsafe_code)]` both crates + `#![deny(cast_*)]` library-strict + zero clippy pedantic+nursery + `warn(missing_docs)`. 60 tolerances in 4 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies** (ureq→Songbird IPC). Zero-panic validation (47/47 binaries). soil_moisture refactored (672→4 submodules). petalTongue 3-tier discovery. 14 primal dispatch integration tests. Full validation pipeline green (2026-03-18)
 
 ---
 
@@ -11,7 +11,7 @@
 ```
 Phase 0   Python/R baselines    — reproduce paper results with original tools (1284/1284)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (880 lib + 1498 atlas, 91 binaries + 146/146 + 32/32 cross-spring benchmarks)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (894 lib + 1498 atlas, 91 binaries + 146/146 + 32/32 cross-spring benchmarks)
 Phase 1.5 CPU benchmark         — 14.3× Rust-vs-Python geometric mean (24/24 algorithms, 21/21 CPU-GPU parity modules)
 Phase 2   BarraCuda GPU bridge  — 25 Tier A + 6 GPU-local modules wired (cross-spring S87 fully rewired)
 Phase 2.5 Ops 5-8 GPU-first   — Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed
@@ -238,19 +238,20 @@ S79 modernization: `libc`→`rustix`, `async-trait`→AFIT, universal f64 precis
 |----------|---------|
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C breakdown, absorbed vs stays-local, quality gates |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
-| `wateringHole/handoffs/` | V089 current — ecosystem absorption, proptest fuzz, zero hardcoded primals |
+| `wateringHole/handoffs/` | V090 current — audit execution, cast lint strict, soil_moisture refactored, petalTongue discovery, primal dispatch tests |
 | `specs/CROSS_SPRING_EVOLUTION.md` | 845+ WGSL shader provenance across all Springs (S93) |
 
 ### Next Steps (Dong Lab)
 
+- **Audit execution (v0.9.0)**: `#![deny(cast_*)]` library-strict (all production code uses cast helpers). 3 new helpers: `u32_usize`, `u64_usize`, `u64_f64`. soil_moisture refactored (672 LOC → 4 cohesive submodules: topp, texture, saxton_rawls, water). petalTongue 3-tier discovery wired (`discover_visualization_primal`). 14 primal_dispatch integration tests (health/caps/science/provenance/discovery over Unix sockets). Benchmark JSON provenance for all hardcoded validation values. CI lint config consolidated to Cargo.toml (no CLI flag conflicts). Hardcoded socket paths removed from deployment manifests. 894 lib + 299 integration tests.
 - **Cross-ecosystem evolution (v0.8.9)**: Canonical `PRIMAL_NAME`/`PRIMAL_DOMAIN` constants (healthSpring V34). `OnceLock` GPU probe cache (toadStool S158). `cast` module for safe numeric casts (neuralSpring S162). `DispatchOutcome<T>` library type (wetSpring V126). coralReef/Squirrel capability discovery (healthSpring V34). `mul_add()` FMA at 18 sites (barraCuda Sprint 7). Smart refactors: 4 monoliths → 19 focused modules (evapotranspiration, dual_kc, biomeos, validation). Composition guidance for solo/trio/wider primal combos. 891 lib tests, zero clippy warnings.
-- **Ecosystem absorption (v0.8.8)**: Zero hardcoded primals (`primal_names::BIOMEOS`). 4-format `parse_capabilities` (neuralSpring S156+). JSON-RPC proptest fuzz (7 properties, petalTongue V166 pattern). `#[expect]` complete (zero `#[allow]` in production). Edition 2024 let-chains. 880 lib + 22 property tests. PRIMAL_REGISTRY v0.8.8. Zero-panic 47/47 binaries. Typed `compute_dispatch` client. `extract_rpc_error()`. Python tolerance mirror (60 constants). Zero C deps
-- **Cross-ecosystem absorption (v0.8.8)**: Health probes, circuit breaker, OrExit, thiserror, socket_env_var, structured tracing, `IpcError::is_recoverable`. 880 lib tests.
 - **Coverage**: target 98%+ (remaining gaps: GPU-dependent code paths)
 - **ToadStool absorption**: All 6 local ops absorbed upstream into `BatchedElementwiseF64` (ops 14-19), `local_dispatch` retired — Write→Absorb→Lean complete (v0.7.2)
 - **GPU at scale**: Profile `compute_gpu()` at N=100K+ (multi-year regional grids, crossover point via `AtlasStream`)
 - **NestGate data pipeline**: Open-Meteo + NCBI 16S coupling for baseCamp 06 extension (Phase 1-2 of multi-primal roadmap)
-- **NUCLEUS expansion**: Tower + Node stable, next: NestGate Unix socket integration, local NUCLEUS on Eastgate, LAN HPC across gates
+- **NUCLEUS expansion**: Tower + Node stable, next: NestGate Unix socket integration, local NUCLEUS on Eastgate, LAN HPC across gates — see [`nucleus_local_deployment.md`](nucleus_local_deployment.md) for deployment plan
+- **Cross-spring soil-microbiome pipeline**: Unified pipeline for Papers 06, 03, 04, 16 — see [`cross_spring_soil_microbiome.md`](cross_spring_soil_microbiome.md) for architecture
+- **Per-paper extensions**: Paper 06 (real LTER 16S, EMP Atlas 30K, Brandt farm r(t), kriging), Paper 08 (Penny Irrigation Phase 4, 1-min cadence), Paper 12 (CytokineBrain DriftMonitor, One Health bridge), Paper 16 (soil O2 zonation, QS gene profiling), Paper 03 (orchard theta, Monod kinetics)
 - **Paper 12+**: Multi-sensor calibration network (awaiting field data from new lab)
 
 ### What Good Science Looks Like
@@ -284,6 +285,8 @@ questions the original papers did not.
 | [npu_iot_locomos.md](npu_iot_locomos.md) | NPU-Accelerated Agricultural IoT (LOCOMOS → Edge Sovereign) | Tier 0 (hardware) | **Validated** — Exp 028+029, 32+35+21 checks, live AKD1000 |
 
 | [ncbi_16s_coupling.md](ncbi_16s_coupling.md) | NCBI 16S + Soil Moisture Coupling (baseCamp 06 ext.) | Tier 2 (NCBI free) | **Planned** — providers validated (23/23), pipeline designed |
+| [nucleus_local_deployment.md](nucleus_local_deployment.md) | Local NUCLEUS Deployment on Eastgate | — | **Planning** — prerequisite for all extensions |
+| [cross_spring_soil_microbiome.md](cross_spring_soil_microbiome.md) | Cross-Spring Soil-Microbiome Pipeline | — | **Architecture defined** — 4 papers unified |
 
 Cross-spring explorations (no-till Anderson coupling, soil microbiome response)
 are documented in `ecoPrimals/whitePaper/gen3/baseCamp/06_notill_anderson.md`.
@@ -307,6 +310,8 @@ NPU agricultural IoT is in `ecoPrimals/whitePaper/gen3/baseCamp/08_npu_agricultu
 | Open-Meteo full Michigan grid (10km) | ~292M | ~60GB | Free | ~1000 grid cells |
 | USDA SCAN soil moisture stations | ~2M | ~400MB | Free | In-situ theta(t) |
 | AmeriFlux/FLUXNET eddy covariance | ~365K | ~75MB | Free (registration) | Direct ET |
+| NCBI 16S FASTQ (4-10 studies) | ~500K seqs/study | 25-55GB | Free (NCBI SRA) | No-till + digester 16S |
+| NCBI Protein (QS genes) | ~10K entries | <1GB | Free (NCBI) | FNR/ArcAB/Rex regulon |
 | PRISM 4km daily (Michigan) | ~730M | ~150GB | Free (academic) | Higher-res |
 
 **Tier 3 — Substantial (satellite, reanalysis)**
@@ -326,9 +331,92 @@ NPU agricultural IoT is in `ecoPrimals/whitePaper/gen3/baseCamp/08_npu_agricultu
 | Richards 1D, 1000 grid cells, 80yr | 29M sims | ~2.2 hrs | ~6 min |
 | Kriging 100 stations per timestep | O(100^3) x 29K | ~8 hrs | ~20 min |
 | Full Michigan grid 80yr (ET₀+WB+yield) | ~1B calcs | ~2 min | ~5 sec |
+| 16S diversity (10 studies) | ~500K seqs/study | — | ~hours (strandGate) |
+| Anderson eigenvalue (30K EMP) | 30K matrices | — | ~1 hr (biomeGate) |
+| LSTM r(t) training | ~1M samples | — | ~10 min GPU |
 
 Tier 1-2 data fits on Eastgate (2TB NVMe). Tier 3 benefits from Westgate ZFS
 (76TB cold). Compute is not the bottleneck — download time is.
+
+### Per-Paper Extension Plans
+
+**Paper 06 (No-Till Anderson) — highest priority**
+
+What we have: Exp045 (Anderson coupling 55+95), Exp048 (NCBI 16S 14+29),
+dual Kc cover crops, 60yr water balance, kriging.
+
+Extensions:
+- Real LTER soil time series via NestGate NCBI (Zuber 2016, Liang 2015, OSU Triplett-Van Doren)
+- EMP Atlas 30K Anderson-QS profiling across soil biomes
+- Brandt farm r(t) prediction using LSTM (neuralSpring) on soil parameters
+- Kriging spatial interpolation at field scale (Michigan 10km grid)
+- QS gene profiling from ~105K no-till 16S entries via NestGate ESearch/EFetch
+
+Data: ~25-55 GB FASTQ (Tier 2), ~600 MB weather (done), USDA WSS (<1 MB).
+Compute: 16S diversity (wetSpring, hours), Anderson eigen (wetSpring, ~1hr GPU),
+kriging O(100^3)x29K (~20 min GPU), LSTM training (~10 min GPU).
+Cross-spring: airSpring theta(t) → wetSpring d_eff → groundSpring uncertainty → neuralSpring LSTM r(t).
+
+**Paper 08 (NPU Agricultural IoT) — Penny Irrigation path**
+
+What we have: Exp028-029 (88 checks), AKD1000 live on Eastgate, 20,545 Hz streaming.
+
+Extensions:
+- 1-min cadence pipeline (validated in Exp029b, not yet with real sensors)
+- Multi-sensor fusion (theta + temp + EC + weather forecast)
+- Penny Irrigation Phase 4: real SoilWatch 10 → NPU → valve control
+- Field data from Dong lab (expected 2026 growing season)
+
+Data: minimal — field sensor streams.
+Compute: AKD1000 (48 us inference), negligible CPU/GPU.
+Cross-spring: airSpring sensor pipeline → metalForge NPU dispatch → forecast scheduling.
+
+**Paper 12 (Immunological Anderson) — CytokineBrain evolution**
+
+What we have: Exp066-069 (94/94 checks), GpuDiversity, CytokineBrain, barrier state.
+
+Extensions:
+- CytokineBrain time series → DriftMonitor for treatment steering
+- ADDRC compound selection via Anderson-augmented MATRIX scores
+- Skin-layer Anderson lattice (2D epidermis + 3D dermis)
+- One Health bridge: soil microbiome (airSpring) + gut microbiome (healthSpring) → Anderson W
+
+Data: Gonzales published + NCBI Protein (IL-31RA, IL-4Ra, OSMR), <1 GB.
+Compute: GpuDiversity batch, neuralSpring ESN, negligible.
+Cross-spring: wetSpring tissue lattice → airSpring GpuDiversity → neuralSpring ESN → groundSpring spectral.
+
+**Paper 16 (Anaerobic-Aerobic QS) — soil O2 zonation**
+
+What we have: Paper 06 pore network model, Richards PDE.
+
+Extensions:
+- Soil aerobic/anaerobic zonation from theta(t) via Richards PDE
+- Pore connectivity → O2 gradient → W phase transition
+- FNR/ArcAB/Rex QS gene profiling via NestGate NCBI Protein
+- Waterlogging scenarios: Richards PDE with shallow water table
+
+Data: NCBI BioProjects + NCBI Protein for QS gene families, ~5-10 GB.
+Compute: Richards PDE GPU (~6 min for 1000 grids, 80yr), Anderson spectral (wetSpring).
+Cross-spring: airSpring soil O2 zones ↔ Paper 06 pore network; healthSpring gut mucosal O2.
+
+**Paper 03 (Precision Microbiome) — orchard extension**
+
+What we have: theta(t), ET0, dual Kc, Richards, pedotransfer, biochar P adsorption.
+
+Extensions:
+- Orchard theta(t) for rhizosphere d_eff (tree crop root zones are deeper)
+- Irrigation scheduling for inoculant establishment (dual Kc with cover crops)
+- Monod kinetics for rhizosphere microbial dynamics
+
+Data: Bulgarelli 2012, KBS LTAR (Michigan), <1 GB.
+Compute: Water balance + Richards PDE, negligible for airSpring.
+Cross-spring: airSpring theta(t) → groundSpring calibration → wetSpring 16S → neuralSpring ESN.
+
+**NCBI 16S Coupling (Unified) — NestGate pipeline (prerequisite for Papers 06, 03, 04, 16)**
+
+See [`cross_spring_soil_microbiome.md`](cross_spring_soil_microbiome.md) for full pipeline architecture.
+NestGate has `NCBILiveProvider` (ESearch/EFetch/ESummary). airSpring has `NestGateProvider`
+with 3-tier routing. Pipeline designed but not wired end-to-end.
 
 ### Primal Integration Path
 

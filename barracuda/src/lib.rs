@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #![forbid(unsafe_code)]
 #![deny(clippy::unwrap_used, clippy::expect_used)]
+#![deny(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 #![warn(missing_docs)]
 
 //! airSpring `BarraCuda` — Ecological & Agricultural Science Pipelines
@@ -86,6 +91,12 @@ pub const PRIMAL_NAME: &str = "airspring";
 pub const PRIMAL_DOMAIN: &str = "ecology";
 
 pub mod biomeos;
+#[expect(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    reason = "cast module centralizes all numeric casts with documented safety"
+)]
 pub mod cast;
 pub mod data;
 pub mod eco;
@@ -101,6 +112,10 @@ pub mod primal_names;
 pub mod primal_science;
 pub mod rpc;
 #[cfg(any(test, feature = "testutil"))]
+#[expect(
+    clippy::cast_precision_loss,
+    reason = "test data generators use loop index → f64 casts that are exact for small N"
+)]
 pub mod testutil;
 pub mod tolerances;
 pub mod validation;
@@ -110,6 +125,10 @@ pub mod validation;
 /// For typical sample sizes (< 2^53 elements), the cast from `usize` to `f64`
 /// is exact.
 #[inline]
+#[expect(
+    clippy::cast_precision_loss,
+    reason = "exact for all practical slice lengths (< 2^53)"
+)]
 pub(crate) const fn len_f64<T>(slice: &[T]) -> f64 {
     slice.len() as f64
 }

@@ -72,6 +72,35 @@ pub fn f64_u32(v: f64) -> u32 {
     v as u32
 }
 
+/// `u32` → `usize`. Always exact (u32 ⊆ usize on all Rust targets).
+#[inline]
+#[must_use]
+pub const fn u32_usize(v: u32) -> usize {
+    v as usize
+}
+
+/// `u64` → `usize`. Exact on 64-bit targets; saturates on 32-bit.
+///
+/// # Panics
+///
+/// Debug-panics on 32-bit targets if `v > usize::MAX`.
+#[inline]
+#[must_use]
+pub const fn u64_usize(v: u64) -> usize {
+    debug_assert!(
+        v <= usize::MAX as u64,
+        "u64_usize: overflow on this platform"
+    );
+    v as usize
+}
+
+/// `u64` → `f64`. Exact for values < 2^53 (9 × 10¹⁵).
+#[inline]
+#[must_use]
+pub const fn u64_f64(v: u64) -> f64 {
+    v as f64
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -104,5 +133,24 @@ mod tests {
     #[test]
     fn f64_u32_truncates() {
         assert_eq!(f64_u32(255.9), 255);
+    }
+
+    #[test]
+    fn u32_usize_identity() {
+        assert_eq!(u32_usize(42), 42_usize);
+        assert_eq!(u32_usize(0), 0_usize);
+        assert_eq!(u32_usize(u32::MAX), u32::MAX as usize);
+    }
+
+    #[test]
+    fn u64_usize_identity() {
+        assert_eq!(u64_usize(42), 42_usize);
+        assert_eq!(u64_usize(0), 0_usize);
+    }
+
+    #[test]
+    fn u64_f64_small_values_exact() {
+        assert!((u64_f64(42) - 42.0).abs() < f64::EPSILON);
+        assert!((u64_f64(0) - 0.0).abs() < f64::EPSILON);
     }
 }

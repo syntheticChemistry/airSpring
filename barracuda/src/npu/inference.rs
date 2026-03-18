@@ -162,15 +162,15 @@ pub fn npu_batch_infer(
         total_read_ns += r.read_ns;
     }
 
-    let n = inputs_i8.len() as f64;
+    let n = crate::cast::usize_f64(inputs_i8.len());
     let total_ns = total_write_ns + total_read_ns;
     Ok(NpuBatchResult {
         classes,
-        mean_write_ns: total_write_ns as f64 / n,
-        mean_read_ns: total_read_ns as f64 / n,
-        total_us: total_ns as f64 / 1000.0,
+        mean_write_ns: crate::cast::u64_f64(total_write_ns) / n,
+        mean_read_ns: crate::cast::u64_f64(total_read_ns) / n,
+        total_us: crate::cast::u64_f64(total_ns) / 1000.0,
         throughput_hz: if total_ns > 0 {
-            n * 1_000_000_000.0 / total_ns as f64
+            n * 1_000_000_000.0 / crate::cast::u64_f64(total_ns)
         } else {
             0.0
         },

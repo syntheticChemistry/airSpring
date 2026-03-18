@@ -20,7 +20,7 @@ pub(super) fn richards_1d(params: &Value) -> Value {
     match richards::solve_richards_1d(
         &vg,
         f64_p(params, "depth_cm").unwrap_or(100.0),
-        u32_p(params, "n_nodes").unwrap_or(20) as usize,
+        crate::cast::u32_usize(u32_p(params, "n_nodes").unwrap_or(20)),
         f64_p(params, "h_initial_cm").unwrap_or(-100.0),
         f64_p(params, "h_top_cm").unwrap_or(-75.0),
         false,

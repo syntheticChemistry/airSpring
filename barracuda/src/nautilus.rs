@@ -260,6 +260,11 @@ impl AirSpringBrain {
         self.concept_edge_doys.clear();
 
         for (beta, _error) in &edges {
+            #[expect(
+                clippy::cast_possible_truncation,
+                clippy::cast_sign_loss,
+                reason = "beta ∈ [0,1] so beta*366 ∈ [0,366] — fits in u16"
+            )]
             let doy = (beta * 366.0).round() as u16;
             if doy > 0 && doy <= 366 {
                 self.concept_edge_doys.push(doy);

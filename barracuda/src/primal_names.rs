@@ -68,6 +68,8 @@ pub mod domains {
     pub const SHADER: &str = "shader";
     /// Model inference / routing capability.
     pub const INFERENCE: &str = "inference";
+    /// Visualization and interactive exploration capability.
+    pub const VISUALIZATION: &str = "visualization";
 }
 
 #[cfg(test)]
@@ -103,6 +105,7 @@ mod tests {
             domains::COMPUTE,
             domains::SHADER,
             domains::INFERENCE,
+            domains::VISUALIZATION,
         ] {
             assert_eq!(d, d.to_lowercase(), "{d} must be lowercase");
         }

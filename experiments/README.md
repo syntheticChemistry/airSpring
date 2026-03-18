@@ -1,7 +1,7 @@
 # airSpring Experiments
 
-**Updated**: March 17, 2026
-**Status**: 87 experiments, barraCuda 0.3.5 (wgpu 28), v0.8.9, Edition 2024 (rust-toolchain 1.92). 1284/1284 Python + 891 lib + 285 integration + 61 forge + 22 property + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 parity). 21/21 CPU-GPU parity modules. `#![forbid(unsafe_code)]`, `warn(missing_docs)`, 60 centralized tolerances (Rust + Python mirror), JSON-RPC 2.0 protocol compliant. Zero C dependencies. Zero hardcoded primals. `parse_capabilities` 4-format. JSON-RPC proptest fuzz. Full validation pipeline green (2026-03-17).
+**Updated**: March 18, 2026
+**Status**: 87 experiments, barraCuda 0.3.5 (wgpu 28), v0.9.0, Edition 2024 (rust-toolchain 1.92). 1284/1284 Python + 894 lib + 299 integration + 61 forge + 22 property + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 parity). 21/21 CPU-GPU parity modules. `#![forbid(unsafe_code)]`, `#![deny(cast_*)]` library-strict, `warn(missing_docs)`, 60 centralized tolerances (Rust + Python mirror), JSON-RPC 2.0 protocol compliant. Zero C dependencies. Zero hardcoded primals. soil_moisture refactored (4 submodules). petalTongue 3-tier discovery. 14 primal dispatch tests. Full validation pipeline green (2026-03-18).
 
 ---
 

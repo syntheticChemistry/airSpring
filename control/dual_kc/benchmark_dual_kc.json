@@ -443,7 +443,15 @@
       "kcb": 0.15,
       "kc_max": 1.2,
       "few": 1.0,
-      "_expected": "De starts at 0 after rain, Kr=1 until De>REW, then declining evaporation"
+      "_expected": "De starts at 0 after rain, Kr=1 until De>REW, then declining evaporation",
+      "expected_kr": [1.0, 1.0, 0.6975, 0.3313, 0.1643, 0.0746, 0.0394],
+      "_kr_provenance": {
+        "baseline_script": "control/dual_kc/cover_crop_dual_kc.py",
+        "baseline_command": "python3 control/dual_kc/cover_crop_dual_kc.py",
+        "baseline_commit": "3afc229",
+        "date": "2026-02-25",
+        "tolerance": "RICHARDS_STEADY (1e-6)"
+      }
     },
     "corn_mid_season": {
       "_note": "5-day mid-season corn with full cover \u2014 minimal soil evaporation",

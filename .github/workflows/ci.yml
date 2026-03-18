@@ -34,9 +34,9 @@ jobs:
         working-directory: airSpring/barracuda
         run: cargo fmt --check
 
-      - name: cargo clippy (pedantic + nursery)
+      - name: cargo clippy (pedantic + nursery via Cargo.toml [lints])
         working-directory: airSpring/barracuda
-        run: cargo clippy --all-targets -- -D warnings -W clippy::pedantic -W clippy::nursery
+        run: cargo clippy --all-targets -- -D warnings
 
       - name: cargo doc (warnings = errors)
         working-directory: airSpring/barracuda
@@ -86,9 +86,9 @@ jobs:
         working-directory: airSpring/metalForge/forge
         run: cargo fmt --check
 
-      - name: cargo clippy (pedantic + nursery)
+      - name: cargo clippy (pedantic + nursery via Cargo.toml [lints])
         working-directory: airSpring/metalForge/forge
-        run: cargo clippy --all-targets -- -D warnings -W clippy::pedantic -W clippy::nursery
+        run: cargo clippy --all-targets -- -D warnings
 
       - name: cargo doc (warnings = errors)
         working-directory: airSpring/metalForge/forge
