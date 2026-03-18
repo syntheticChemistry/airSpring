@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-03-18 (v0.9.0 — 87 experiments, barraCuda 0.3.5 (wgpu 28), 1284/1284 Python + 894 lib + 299 integration + 61 forge + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 algorithms, 21/21 CPU-GPU parity modules). Audit execution: `#![deny(cast_*)]` library-strict, soil_moisture refactored, petalTongue 3-tier discovery, 14 primal dispatch tests, benchmark JSON provenance.)
+**Updated**: 2026-03-18 (v0.10.0 — 87 experiments, barraCuda 0.3.5 (wgpu 28), 1284/1284 Python + 908 lib + 299 integration + 61 forge + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 algorithms, 21/21 CPU-GPU parity modules). Audit execution: `#![deny(cast_*)]` library-strict, soil_moisture refactored, petalTongue 3-tier discovery, 14 primal dispatch tests, benchmark JSON provenance. + MCP tools, provenance registry, kahan_sum, f64::total_cmp, assert→Result, ecoBin deny.toml.)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 

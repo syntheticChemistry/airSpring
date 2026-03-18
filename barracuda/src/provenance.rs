@@ -51,21 +51,21 @@ pub const fn python_baselines() -> &'static [PythonBaseline] {
     &[
         PythonBaseline {
             binary: "validate_et0",
-            script: Some("control/fao56/fao56_et0.py"),
+            script: Some("control/fao56/penman_monteith.py"),
             commit: commits::PYTHON_PARITY_V1,
             date: "2026-02-19",
             category: BaselineCategory::PythonParity,
         },
         PythonBaseline {
             binary: "validate_soil",
-            script: Some("control/soil_sensors/soil_sensor_calibration.py"),
+            script: Some("control/soil_sensors/calibration_dong2020.py"),
             commit: commits::PYTHON_PARITY_V1,
             date: "2026-02-19",
             category: BaselineCategory::PythonParity,
         },
         PythonBaseline {
             binary: "validate_water_balance",
-            script: Some("control/water_balance/water_balance.py"),
+            script: Some("control/water_balance/fao56_water_balance.py"),
             commit: commits::PYTHON_PARITY_V1,
             date: "2026-02-19",
             category: BaselineCategory::PythonParity,
@@ -86,7 +86,7 @@ pub const fn python_baselines() -> &'static [PythonBaseline] {
         },
         PythonBaseline {
             binary: "validate_yield",
-            script: Some("control/yield_response/stewart_yield.py"),
+            script: Some("control/yield_response/yield_response.py"),
             commit: commits::PYTHON_PARITY_V1,
             date: "2026-02-19",
             category: BaselineCategory::Published,
@@ -100,14 +100,14 @@ pub const fn python_baselines() -> &'static [PythonBaseline] {
         },
         PythonBaseline {
             binary: "validate_mc_et0",
-            script: Some("control/mc_et0/mc_et0_uncertainty.py"),
+            script: Some("control/mc_et0/mc_et0_propagation.py"),
             commit: commits::PYTHON_PARITY_V2,
             date: "2026-02-25",
             category: BaselineCategory::PythonParity,
         },
         PythonBaseline {
             binary: "validate_drought_index",
-            script: Some("control/drought_index/spi_drought.py"),
+            script: Some("control/drought_index/drought_index_spi.py"),
             commit: commits::PYTHON_PARITY_V2,
             date: "2026-02-25",
             category: BaselineCategory::PythonParity,
@@ -121,7 +121,7 @@ pub const fn python_baselines() -> &'static [PythonBaseline] {
         },
         PythonBaseline {
             binary: "validate_atlas",
-            script: Some("control/atlas/atlas_et0.py"),
+            script: Some("control/atlas/atlas_water_budget.py"),
             commit: commits::GPU_PARITY_V1,
             date: "2026-02-26",
             category: BaselineCategory::PythonParity,
