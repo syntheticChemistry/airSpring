@@ -1,7 +1,7 @@
 # airSpring Specifications
 
 **Last Updated**: March 16, 2026
-**Status**: Phase 0–5 complete — 1284/1284 Python + 880 lib + 285 integration + 61 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 91 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.3.5 (wgpu 28) + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + metalForge 66/66 + niche adapter (41 capabilities) + 87 experiments (v0.9.0). Edition 2024, deep code quality complete. Exp 084-087: 79/79 PASS (CPU/GPU parity, toadStool dispatch, metalForge NUCLEUS, graph coordination)
+**Status**: Phase 0–5 complete — 1284/1284 Python + 880 lib + 285 integration + 61 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 91 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.3.5 (wgpu 28) + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + metalForge 66/66 + niche adapter (41 capabilities) + 87 experiments (v0.10.0). Edition 2024, deep code quality complete. Exp 084-087: 79/79 PASS (CPU/GPU parity, toadStool dispatch, metalForge NUCLEUS, graph coordination)
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling, Anderson coupling
 
 ---

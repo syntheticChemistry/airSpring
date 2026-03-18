@@ -202,7 +202,7 @@ fn extract_ts_data(params: &serde_json::Value) -> Result<TimeSeriesData, AirSpri
 }
 
 #[cfg(test)]
-#[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
+#[allow(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
 

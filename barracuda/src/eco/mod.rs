@@ -12,6 +12,7 @@ pub mod et0_ensemble;
 pub mod evapotranspiration;
 pub mod infiltration;
 pub mod isotherm;
+pub mod numerics;
 pub mod richards;
 pub mod runoff;
 pub mod sensor_calibration;

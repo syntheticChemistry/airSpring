@@ -2,6 +2,48 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.10.0] - 2026-03-18
+
+### Cross-Ecosystem Absorption
+
+**MCP Tool Definitions** (from wetSpring pattern):
+- 10 ecology tools: `airspring_et0`, `airspring_hargreaves`, `airspring_water_balance`,
+  `airspring_soil_moisture`, `airspring_dual_kc`, `airspring_richards`,
+  `airspring_yield_response`, `airspring_spi_drought`, `airspring_diversity`,
+  `airspring_pedotransfer`
+- Typed JSON Schema per MCP specification for Squirrel AI integration
+- `list_tools()` and `tool_to_method()` with capability registration validation
+
+**Python Baseline Provenance Registry**:
+- `provenance.rs`: structured `PythonBaseline` records with commit hashes, dates, categories
+- 11 registered baselines across Python parity, GPU parity, analytical, and published categories
+- `BaselineCategory` enum, canonical `commits` module, no-duplicate validation tests
+
+**NaN-Safe Float Comparison**:
+- `f64::total_cmp` replaces `partial_cmp().unwrap_or(Equal)` in `gpu/atlas_stream/drift.rs`
+
+**Panicking API Evolution**:
+- `wind_speed_at_2m()`: `assert!` → `Result<f64, AirSpringError::InvalidInput>`
+- `solar_radiation_from_sunshine()`: `assert!` → `Result<f64, AirSpringError::InvalidInput>`
+- All callers updated: `.expect()` in binaries, `.unwrap()` in tests
+
+**Kahan Compensated Summation**:
+- `eco::numerics::kahan_sum()` delegates to `barracuda::shaders::precision::cpu::kahan_sum()`
+- O(1) accumulation error vs O(n) for naive `Iterator::sum()`
+
+**ecoBin `deny.toml` Hardening**:
+- `unlicensed = "deny"` added to `[licenses]`
+- 14 C-dependency crates banned: openssl-sys, libz-sys, zstd-sys, curl-sys, ring, etc.
+- Enforces pure Rust sovereign binary reproducibility
+
+**Lint Evolution**:
+- 53 test modules: `#[allow(reason = "...")]` for blanket suppressions
+- `#[expect(reason = "...")]` only where lint is known to fire
+- Zero `#[allow(` without reason in entire codebase
+
+**Pre-existing Fix**:
+- `test_soil_texture_into_water_balance`: `f64::EPSILON` → `1e-10` tolerance (avoids false failure from float arithmetic)
+
 ## [0.9.0] - 2026-03-18
 
 ### Audit Execution

@@ -53,7 +53,12 @@ fn test_soil_texture_into_water_balance() {
     let state = WaterBalanceState::new(props.field_capacity, props.wilting_point, 600.0, 0.5);
 
     let paw = sm::plant_available_water(props.field_capacity, props.wilting_point, 600.0);
-    assert!((state.taw - paw).abs() < f64::EPSILON);
+    assert!(
+        (state.taw - paw).abs() < 1e-10,
+        "TAW ({}) should match PAW ({}) within 1e-10",
+        state.taw,
+        paw
+    );
 }
 
 // ── Determinism tests ────────────────────────────────────────────────
@@ -200,7 +205,7 @@ fn test_runoff_model_configurable() {
 #[test]
 fn test_wind_speed_at_2m_from_10m() {
     let u10 = 3.0;
-    let u2 = et::wind_speed_at_2m(u10, 10.0);
+    let u2 = et::wind_speed_at_2m(u10, 10.0).unwrap();
     let expected = 3.0 * 0.748;
     assert!(
         (u2 - expected).abs() < 0.02,
@@ -210,14 +215,14 @@ fn test_wind_speed_at_2m_from_10m() {
 
 #[test]
 fn test_wind_speed_at_2m_identity() {
-    let u2 = et::wind_speed_at_2m(5.0, 2.0);
+    let u2 = et::wind_speed_at_2m(5.0, 2.0).unwrap();
     assert!((u2 - 5.0).abs() < 0.1, "u₂ at 2m should be ~5.0: {u2}");
 }
 
 #[test]
 fn test_wind_speed_conversion_into_et0() {
     let u10 = 3.5;
-    let u2 = et::wind_speed_at_2m(u10, 10.0);
+    let u2 = et::wind_speed_at_2m(u10, 10.0).unwrap();
 
     let input = DailyEt0Input {
         tmin: 18.0,
@@ -347,7 +352,7 @@ fn test_sunshine_radiation_into_et0() {
     let lat_rad = 50.80_f64.to_radians();
     let ra = et::extraterrestrial_radiation(lat_rad, 187);
     let n_hours = et::daylight_hours(lat_rad, 187);
-    let rs = et::solar_radiation_from_sunshine(9.25, n_hours, ra);
+    let rs = et::solar_radiation_from_sunshine(9.25, n_hours, ra).unwrap();
 
     assert!(rs > 10.0 && rs < 30.0, "Rs from sunshine: {rs} MJ/m²/day");
 

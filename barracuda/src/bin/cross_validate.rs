@@ -97,7 +97,7 @@ fn uccle_core(u: &UccleInputs) -> serde_json::Value {
     let delta = et::vapour_pressure_slope(u.tmean);
     let es = et::mean_saturation_vapour_pressure(u.tmin, u.tmax);
     let ea = et::actual_vapour_pressure_rh(u.tmin, u.tmax, u.rh_min, u.rh_max);
-    let u2 = et::wind_speed_at_2m(u.wind_10m_ms, 10.0);
+    let u2 = et::wind_speed_at_2m(u.wind_10m_ms, 10.0).expect("valid 10m height");
 
     let lat_rad = u.latitude_deg.to_radians();
     let dr = et::inverse_rel_distance(u.doy);
@@ -156,7 +156,7 @@ fn uccle_core(u: &UccleInputs) -> serde_json::Value {
 /// Extended ET₀ methods: sunshine, temperature-based, Hargreaves, low-level PM.
 fn uccle_extended(u: &UccleInputs) -> serde_json::Value {
     let ea = et::actual_vapour_pressure_rh(u.tmin, u.tmax, u.rh_min, u.rh_max);
-    let u2 = et::wind_speed_at_2m(u.wind_10m_ms, 10.0);
+    let u2 = et::wind_speed_at_2m(u.wind_10m_ms, 10.0).expect("valid 10m height");
     let lat_rad = u.latitude_deg.to_radians();
     let ra = et::extraterrestrial_radiation(lat_rad, u.doy);
     let n_hours = et::daylight_hours(lat_rad, u.doy);
@@ -170,7 +170,8 @@ fn uccle_extended(u: &UccleInputs) -> serde_json::Value {
     let gamma = et::psychrometric_constant(pressure);
     let delta = et::vapour_pressure_slope(u.tmean);
 
-    let rs_sunshine = et::solar_radiation_from_sunshine(u.sunshine_hours, n_hours, ra);
+    let rs_sunshine = et::solar_radiation_from_sunshine(u.sunshine_hours, n_hours, ra)
+        .expect("valid daylight hours");
     let rs_temp_interior = et::solar_radiation_from_temperature(u.tmax, u.tmin, ra, 0.16);
     let rs_temp_coastal = et::solar_radiation_from_temperature(u.tmax, u.tmin, ra, 0.19);
     let g_warming = et::soil_heat_flux_monthly(25.0, 22.0);

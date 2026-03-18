@@ -67,7 +67,8 @@ pub fn generate_synthetic_iot_data(n_records: usize) -> TimeseriesData {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, clippy::expect_used)]
+#[allow(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
+#[allow(clippy::expect_used, reason = "test code may use expect")]
 mod tests {
     use super::*;
 

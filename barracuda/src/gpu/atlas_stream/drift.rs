@@ -180,12 +180,7 @@ impl MonitoredAtlasStream {
                 if self.monitor.is_drifting() {
                     let crop_name = group
                         .iter()
-                        .min_by(|a, b| {
-                            a.result
-                                .yield_ratio
-                                .partial_cmp(&b.result.yield_ratio)
-                                .unwrap_or(std::cmp::Ordering::Equal)
-                        })
+                        .min_by(|a, b| a.result.yield_ratio.total_cmp(&b.result.yield_ratio))
                         .map_or_else(String::new, |r| r.crop_name.clone());
 
                     self.regime_changes.push(RegimeChange {

@@ -17,16 +17,20 @@ const SOIL_HEAT_FLUX_COEFF: f64 = 0.14;
 /// Default Ångström coefficients: as = 0.25, bs = 0.50.
 /// `n` is actual sunshine hours, `N` is maximum possible daylight hours.
 ///
-/// # Panics
+/// # Errors
 ///
-/// Panics if `max_daylight_hours` is zero.
-#[must_use]
-pub fn solar_radiation_from_sunshine(sunshine_hours: f64, max_daylight_hours: f64, ra: f64) -> f64 {
-    assert!(
-        max_daylight_hours > 0.0,
-        "Max daylight hours must be positive"
-    );
-    ANGSTROM_BS.mul_add(sunshine_hours / max_daylight_hours, ANGSTROM_AS) * ra
+/// Returns `InvalidInput` if `max_daylight_hours` ≤ 0.0.
+pub fn solar_radiation_from_sunshine(
+    sunshine_hours: f64,
+    max_daylight_hours: f64,
+    ra: f64,
+) -> crate::error::Result<f64> {
+    if max_daylight_hours <= 0.0 {
+        return Err(crate::error::AirSpringError::InvalidInput(
+            "max daylight hours must be positive".into(),
+        ));
+    }
+    Ok(ANGSTROM_BS.mul_add(sunshine_hours / max_daylight_hours, ANGSTROM_AS) * ra)
 }
 
 /// Solar radiation from temperature range — Hargreaves method (FAO-56 Eq. 50).

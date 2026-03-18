@@ -117,7 +117,7 @@ pub fn normalised_acf_cpu(data: &[f64], max_lag: usize) -> Vec<f64> {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used)]
+#[allow(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
 

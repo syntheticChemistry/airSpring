@@ -211,7 +211,7 @@ fn test_zero_flux_top() {
     let err_pct = mass_balance_check(&p, &profiles, -30.0, 0.0, true, 0.005, dz);
     assert!(err_pct < 10.0);
     let theta_init = van_genuchten_theta(-30.0, p.theta_r, p.theta_s, p.alpha, p.n_vg);
-    #[allow(clippy::cast_precision_loss)]
+    #[expect(clippy::cast_precision_loss, reason = "small test array, exact cast")]
     let theta_final: f64 = profiles.last().unwrap().theta.iter().sum::<f64>()
         / profiles.last().unwrap().theta.len() as f64;
     assert!(theta_final <= theta_init + 0.05);
@@ -269,7 +269,11 @@ fn test_multiple_time_steps_profile_count() {
     let p = sand_params();
     let duration = 0.1_f64;
     let dt = 0.01_f64;
-    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+    #[expect(
+        clippy::cast_possible_truncation,
+        clippy::cast_sign_loss,
+        reason = "duration/dt is always a small positive integer"
+    )]
     let n_steps_expected = (duration / dt).ceil() as usize;
     let profiles =
         solve_richards_1d(&p, 100.0, 20, -10.0, -10.0, true, true, duration, dt).unwrap();

@@ -105,11 +105,14 @@ pub fn actual_vapour_pressure_rh(tmin: f64, tmax: f64, rh_min: f64, rh_max: f64)
 /// Most weather stations measure wind at 10 m. The Penman-Monteith equation
 /// requires wind at 2 m. This conversion assumes logarithmic wind profile.
 ///
-/// # Panics
+/// # Errors
 ///
-/// Panics if `z_m` ≤ 0.0 (physically impossible measurement height).
-#[must_use]
-pub fn wind_speed_at_2m(uz: f64, z_m: f64) -> f64 {
-    assert!(z_m > 0.0, "Measurement height must be positive: {z_m}");
-    uz * 4.87 / (67.8f64.mul_add(z_m, -5.42)).ln()
+/// Returns `InvalidInput` if `z_m` ≤ 0.0 (physically impossible measurement height).
+pub fn wind_speed_at_2m(uz: f64, z_m: f64) -> crate::error::Result<f64> {
+    if z_m <= 0.0 {
+        return Err(crate::error::AirSpringError::InvalidInput(format!(
+            "measurement height must be positive: {z_m}"
+        )));
+    }
+    Ok(uz * 4.87 / (67.8f64.mul_add(z_m, -5.42)).ln())
 }

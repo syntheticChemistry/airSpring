@@ -175,7 +175,11 @@ pub fn compute_spi(monthly_precip: &[f64], scale: usize) -> Vec<f64> {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, clippy::float_cmp)]
+#[allow(
+    clippy::unwrap_used,
+    clippy::float_cmp,
+    reason = "test code uses unwrap and exact float comparison"
+)]
 mod tests {
     use super::*;
 
@@ -185,7 +189,7 @@ mod tests {
         let params = gamma_mle_fit(&data).unwrap();
         assert!(params.alpha > 0.0);
         assert!(params.beta > 0.0);
-        #[allow(clippy::cast_precision_loss)]
+        #[expect(clippy::cast_precision_loss, reason = "small test array, exact cast")]
         let mean_data = data.iter().sum::<f64>() / data.len() as f64;
         assert!(params.alpha.mul_add(params.beta, -mean_data).abs() < 0.1);
     }

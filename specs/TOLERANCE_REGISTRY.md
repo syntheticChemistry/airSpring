@@ -1,4 +1,4 @@
-# Tolerance Registry — airSpring v0.9.0
+# Tolerance Registry — airSpring v0.10.0
 
 58 named `Tolerance` structs used in airSpring's Rust validation pipeline
 and Python control baselines. Each tolerance is defined once in

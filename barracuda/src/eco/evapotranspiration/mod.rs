@@ -60,7 +60,8 @@ pub use radiation::{
 };
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, clippy::expect_used)]
+#[allow(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
+#[allow(clippy::expect_used, reason = "test code may use expect")]
 mod tests {
     use super::*;
 
@@ -154,14 +155,14 @@ mod tests {
     fn test_wind_speed_at_2m_from_10m() {
         // FAO-56 Eq. 47: u₂ = uz × 4.87 / ln(67.8z − 5.42)
         // At z=10m: u₂ = 3.0 × 4.87 / ln(672.58) = 3.0 × 0.748 ≈ 2.244
-        let u2 = wind_speed_at_2m(3.0, 10.0);
+        let u2 = wind_speed_at_2m(3.0, 10.0).unwrap();
         assert!((u2 - 2.244).abs() < 0.02, "u₂ from 10m: {u2}");
     }
 
     #[test]
     fn test_wind_speed_at_2m_identity_at_2m() {
         // At z=2m the conversion should be approximately identity.
-        let u2 = wind_speed_at_2m(5.0, 2.0);
+        let u2 = wind_speed_at_2m(5.0, 2.0).unwrap();
         assert!((u2 - 5.0).abs() < 0.15, "u₂ at 2m should be ~5.0: {u2}");
     }
 
@@ -169,7 +170,7 @@ mod tests {
     fn test_wind_speed_lower_at_2m() {
         // Wind at 2m should always be lower than at any height above 2m.
         for &z in &[3.0, 5.0, 10.0, 20.0, 50.0] {
-            let u2 = wind_speed_at_2m(5.0, z);
+            let u2 = wind_speed_at_2m(5.0, z).unwrap();
             assert!(u2 < 5.0, "u₂ should be < uz at z={z}m: u₂={u2}");
         }
     }
@@ -240,7 +241,7 @@ mod tests {
     fn test_solar_radiation_from_sunshine() {
         // FAO-56 Eq. 35: Rs = (0.25 + 0.50 × n/N) × Ra
         // n=7.1, N=11.7, Ra=32.2 → Rs = (0.25 + 0.50 × 7.1/11.7) × 32.2
-        let rs = solar_radiation_from_sunshine(7.1, 11.7, 32.2);
+        let rs = solar_radiation_from_sunshine(7.1, 11.7, 32.2).unwrap();
         let expected = (0.25 + 0.50 * 7.1 / 11.7) * 32.2;
         assert!(
             (rs - expected).abs() < 0.01,
@@ -251,7 +252,7 @@ mod tests {
     #[test]
     fn test_solar_radiation_from_sunshine_zero_sunshine() {
         // Zero sunshine hours: Rs = 0.25 × Ra (cloudy day)
-        let rs = solar_radiation_from_sunshine(0.0, 12.0, 40.0);
+        let rs = solar_radiation_from_sunshine(0.0, 12.0, 40.0).unwrap();
         assert!((rs - 10.0).abs() < 0.01, "Rs(n=0) = {rs}, expected 10.0");
     }
 

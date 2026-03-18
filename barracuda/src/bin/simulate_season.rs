@@ -195,7 +195,8 @@ fn generate_weather(
         let n_hours = et::daylight_hours(lat_rad, doy);
 
         let sunshine = n_hours * rng.normal(0.65, 0.10).clamp(0.2, 0.95);
-        let rs = et::solar_radiation_from_sunshine(sunshine, n_hours, ra);
+        let rs =
+            et::solar_radiation_from_sunshine(sunshine, n_hours, ra).expect("valid daylight hours");
 
         let rh_min = rng.normal(55.0, 8.0).clamp(30.0, 80.0);
         let rh_max = rng.normal(85.0, 5.0).clamp(rh_min + 10.0, 100.0);

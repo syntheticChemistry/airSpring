@@ -110,6 +110,7 @@ pub mod niche;
 pub mod npu;
 pub mod primal_names;
 pub mod primal_science;
+pub mod provenance;
 pub mod rpc;
 #[cfg(any(test, feature = "testutil"))]
 #[expect(

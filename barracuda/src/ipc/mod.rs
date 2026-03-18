@@ -7,11 +7,14 @@
 //!
 //! | Module | Purpose |
 //! |--------|---------|
+//! | [`mcp`] | MCP tool definitions for Squirrel AI integration (10 ecology tools) |
 //! | [`provenance`] | Provenance trio (rhizoCrypt + loamSpine + sweetGrass) |
+//! | [`resilience`] | Circuit breaker + retry with exponential backoff |
 //! | [`timeseries`] | Cross-spring time series exchange (`ecoPrimals/time-series/v1`) |
 
 pub mod compute_dispatch;
 pub mod dispatch_outcome;
+pub mod mcp;
 pub mod provenance;
 pub mod resilience;
 pub mod timeseries;

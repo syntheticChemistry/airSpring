@@ -45,7 +45,7 @@ impl AirSpringError {
 pub type Result<T> = std::result::Result<T, AirSpringError>;
 
 #[cfg(test)]
-#[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
+#[allow(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
 
