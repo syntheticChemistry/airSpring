@@ -19,7 +19,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,284/1,284 PASS** | 60 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB, MC ET₀ uncertainty, bootstrap/jackknife CI, SPI drought index |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **908 lib + 299 integration** | 91 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
+| Phase 1: Rust validation | **911 lib + 311 integration** | 97 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (34/34 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -229,7 +229,7 @@ airSpring/
 │   ├── bootstrap_jackknife/     # Bootstrap & Jackknife CI (20/20)
 │   ├── drought_index/           # SPI drought index (20/20)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (908 lib tests, 91 binaries, barraCuda 0.3.5 / wgpu 28, Edition 2024)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (911 lib tests, 97 binaries, barraCuda 0.3.5 / wgpu 28, Edition 2024)
 │   ├── src/
 │   │   ├── biomeos/                # biomeOS socket resolution + primal discovery (3 sub-modules)
 │   │   ├── eco/                 # Domain modules (22 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine + drought_index)
@@ -300,4 +300,4 @@ AGPL-3.0-or-later
 binaries, centralized tolerances, `#[allow]`→`#[expect]` Rust 2024 migration,
 smart refactors (data/provider 781→4 modules, gpu/evolution_gaps→resolved_issues),
 hardcoded primal names→constants, data provenance accession IDs documented.
-908 lib + 299 integration + 61 forge tests, 0 failures. AGPL-3.0-or-later.*
+911 lib + 311 integration + 61 forge tests, 0 failures. AGPL-3.0-or-later.*

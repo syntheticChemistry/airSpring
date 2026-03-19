@@ -63,24 +63,15 @@ struct AtlasConfig {
 
 impl AtlasConfig {
     fn discover() -> Self {
+        let manifest_parent = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .unwrap_or_else(|| Path::new("."));
         let data_dir = std::env::var("ATLAS_DATA_DIR").map_or_else(
-            |_| {
-                Path::new(env!("CARGO_MANIFEST_DIR"))
-                    .parent()
-                    .expect("CARGO_MANIFEST_DIR parent")
-                    .join("data")
-                    .join("open_meteo")
-            },
+            |_| manifest_parent.join("data").join("open_meteo"),
             std::path::PathBuf::from,
         );
         let out_dir = std::env::var("ATLAS_OUT_DIR").map_or_else(
-            |_| {
-                Path::new(env!("CARGO_MANIFEST_DIR"))
-                    .parent()
-                    .expect("CARGO_MANIFEST_DIR parent")
-                    .join("data")
-                    .join("atlas_results")
-            },
+            |_| manifest_parent.join("data").join("atlas_results"),
             std::path::PathBuf::from,
         );
         let year_start = std::env::var("ATLAS_YEAR_START")
@@ -608,6 +599,7 @@ fn validate_against_benchmark(results: &[StationResult], v: &mut ValidationHarne
                 station_json,
                 &["crops", crop.crop_name.as_str(), "mean_yield_ratio"],
             ) {
+                // 0.001: yield ratio benchmark cross-check; no atlas-specific tolerance
                 v.check_abs(
                     &format!(
                         "{}/{} yield ratio vs benchmark",

@@ -3,23 +3,31 @@
 //! JSON-RPC 2.0 infrastructure for biomeOS IPC.
 //!
 //! Provides helpers for constructing JSON-RPC 2.0 requests and responses,
-//! and for sending requests over Unix domain sockets to biomeOS primals.
+//! and for sending requests over Unix domain sockets or TCP to biomeOS primals.
 //!
-//! # Platform Support
+//! # Platform-Agnostic Transport (ecoBin Standard)
 //!
-//! Transport is currently **Unix-only** (`std::os::unix::net::UnixStream`).
-//! ecoBin standard requires platform-agnostic IPC (Unix sockets, abstract
-//! sockets, named pipes, TCP fallback). Windows named pipe and TCP transports
-//! are not yet implemented — contributions welcome.
+//! The module supports two transports:
 //!
-//! Evolution path: Unix sockets → platform-agnostic transport trait →
-//! Songbird relay (sovereign TLS 1.3) for remote primals.
+//! - **Unix** (`Transport::Unix`) — Unix domain sockets (Unix/macOS only).
+//!   Uses `std::os::unix::net::UnixStream` when available.
+//!
+//! - **TCP** (`Transport::Tcp`) — TCP sockets for Windows and cross-platform use.
+//!   Uses `std::net::TcpStream`; no extra dependencies.
+//!
+//! Use [`resolve_transport`] to resolve a primal's transport from environment
+//! variables (`{PRIMAL}_SOCKET`, `{PRIMAL}_ADDRESS`) or biomeOS discovery.
+//!
+//! Evolution path: Unix + TCP → Songbird relay (sovereign TLS 1.3) for remote primals.
 
-use std::io::{BufRead, BufReader, Write};
-use std::os::unix::net::UnixStream;
+use std::io::{BufRead, BufReader, Read, Write};
+use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
+
+#[cfg(unix)]
+use std::os::unix::net::UnixStream;
 
 /// JSON-RPC 2.0 parse error (malformed JSON).
 pub const PARSE_ERROR: i32 = -32700;
@@ -43,6 +51,14 @@ pub enum IpcError {
         /// Underlying I/O error.
         source: std::io::Error,
     },
+    /// Connection to TCP address failed.
+    #[error("connection failed to {addr}: {source}")]
+    ConnectionFailedTcp {
+        /// Target TCP address.
+        addr: SocketAddr,
+        /// Underlying I/O error.
+        source: std::io::Error,
+    },
     /// Write to socket failed (distinct from connect for recovery).
     #[error("write failed to {}: {source}", socket.display())]
     WriteFailed {
@@ -51,11 +67,27 @@ pub enum IpcError {
         /// Underlying I/O error.
         source: std::io::Error,
     },
+    /// Write to TCP address failed.
+    #[error("write failed to {addr}: {source}")]
+    WriteFailedTcp {
+        /// Target TCP address.
+        addr: SocketAddr,
+        /// Underlying I/O error.
+        source: std::io::Error,
+    },
     /// Read from socket failed (distinct from connect for recovery).
     #[error("read failed from {}: {source}", socket.display())]
     ReadFailed {
         /// Target socket path.
         socket: PathBuf,
+        /// Underlying I/O error.
+        source: std::io::Error,
+    },
+    /// Read from TCP address failed.
+    #[error("read failed from {addr}: {source}")]
+    ReadFailedTcp {
+        /// Target TCP address.
+        addr: SocketAddr,
         /// Underlying I/O error.
         source: std::io::Error,
     },
@@ -95,23 +127,121 @@ pub enum IpcError {
         /// JSON-RPC method that returned nothing.
         method: String,
     },
+    /// Unix sockets not available on this platform (use TCP via {PRIMAL}_ADDRESS).
+    #[error("Unix sockets not available on this platform; use TCP via {{PRIMAL}}_ADDRESS")]
+    UnixNotAvailable,
 }
 
 impl IpcError {
     /// Whether this error is transient and the operation may succeed on retry.
     ///
-    /// Returns `true` for `ConnectionFailed`, `Timeout`, `WriteFailed`,
-    /// and `ReadFailed` — these indicate network or scheduling issues,
-    /// not protocol violations.
+    /// Returns `true` for `ConnectionFailed`, `ConnectionFailedTcp`, `Timeout`,
+    /// `WriteFailed`, `WriteFailedTcp`, `ReadFailed`, and `ReadFailedTcp` —
+    /// these indicate network or scheduling issues, not protocol violations.
     #[must_use]
     pub const fn is_recoverable(&self) -> bool {
         matches!(
             self,
             Self::ConnectionFailed { .. }
+                | Self::ConnectionFailedTcp { .. }
                 | Self::Timeout { .. }
                 | Self::WriteFailed { .. }
+                | Self::WriteFailedTcp { .. }
                 | Self::ReadFailed { .. }
+                | Self::ReadFailedTcp { .. }
         )
+    }
+}
+
+/// Platform-agnostic IPC transport (ecoBin standard).
+///
+/// Abstracts over Unix domain sockets and TCP for cross-platform RPC.
+/// Use [`resolve_transport`] to obtain a transport from environment or biomeOS discovery.
+#[derive(Debug, Clone)]
+pub enum Transport {
+    /// Unix domain socket (Unix/macOS only).
+    #[cfg(unix)]
+    Unix(PathBuf),
+    /// TCP socket (all platforms).
+    Tcp(SocketAddr),
+}
+
+/// Stream type that abstracts over Unix and TCP transports.
+///
+/// Returned by [`connect_transport`] for use with [`send_to`] or custom RPC logic.
+#[derive(Debug)]
+pub enum TransportStream {
+    /// Unix domain socket stream (Unix/macOS only).
+    #[cfg(unix)]
+    Unix(UnixStream),
+    /// TCP stream (all platforms).
+    Tcp(std::net::TcpStream),
+}
+
+impl Read for TransportStream {
+    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+        match self {
+            #[cfg(unix)]
+            Self::Unix(s) => s.read(buf),
+            Self::Tcp(s) => s.read(buf),
+        }
+    }
+}
+
+impl Write for TransportStream {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        match self {
+            #[cfg(unix)]
+            Self::Unix(s) => s.write(buf),
+            Self::Tcp(s) => s.write(buf),
+        }
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        match self {
+            #[cfg(unix)]
+            Self::Unix(s) => s.flush(),
+            Self::Tcp(s) => s.flush(),
+        }
+    }
+}
+
+impl TransportStream {
+    fn set_timeouts(
+        &self,
+        transport: &Transport,
+        timeout: Option<Duration>,
+    ) -> Result<(), IpcError> {
+        match (self, transport) {
+            #[cfg(unix)]
+            (Self::Unix(s), Transport::Unix(socket)) => {
+                s.set_read_timeout(timeout)
+                    .map_err(|e| IpcError::ConnectionFailed {
+                        socket: socket.clone(),
+                        source: e,
+                    })?;
+                s.set_write_timeout(timeout)
+                    .map_err(|e| IpcError::ConnectionFailed {
+                        socket: socket.clone(),
+                        source: e,
+                    })?;
+            }
+            (Self::Tcp(s), Transport::Tcp(addr)) => {
+                s.set_read_timeout(timeout)
+                    .map_err(|e| IpcError::ConnectionFailedTcp {
+                        addr: *addr,
+                        source: e,
+                    })?;
+                s.set_write_timeout(timeout)
+                    .map_err(|e| IpcError::ConnectionFailedTcp {
+                        addr: *addr,
+                        source: e,
+                    })?;
+            }
+            #[cfg(unix)]
+            _ => { /* Tcp stream with Unix transport — unreachable if used correctly */ }
+        }
+        Ok(())
     }
 }
 
@@ -202,11 +332,175 @@ pub fn request(method: &str, params: &serde_json::Value) -> serde_json::Value {
     })
 }
 
+/// Connects to the given transport and returns a stream ready for RPC.
+///
+/// # Errors
+///
+/// Returns `Err(IpcError)` if connection fails.
+pub fn connect_transport(transport: &Transport) -> Result<TransportStream, IpcError> {
+    match transport {
+        #[cfg(unix)]
+        Transport::Unix(path) => {
+            let stream = UnixStream::connect(path).map_err(|e| IpcError::ConnectionFailed {
+                socket: path.clone(),
+                source: e,
+            })?;
+            Ok(TransportStream::Unix(stream))
+        }
+        Transport::Tcp(addr) => {
+            let stream =
+                std::net::TcpStream::connect(addr).map_err(|e| IpcError::ConnectionFailedTcp {
+                    addr: *addr,
+                    source: e,
+                })?;
+            Ok(TransportStream::Tcp(stream))
+        }
+    }
+}
+
+/// Sends a JSON-RPC request over the given transport and reads the response.
+///
+/// Uses newline-delimited framing with configurable timeouts
+/// (`BIOMEOS_RPC_TIMEOUT_SECS`, default 5s).
+/// Returns the full JSON-RPC response (including `result` or `error`).
+///
+/// # Errors
+///
+/// Returns `Err(IpcError)` if connection, write, or read fails.
+pub fn send_to(
+    transport: &Transport,
+    method: &str,
+    params: &serde_json::Value,
+) -> Result<serde_json::Value, IpcError> {
+    let mut stream = connect_transport(transport)?;
+    let timeout_dur = socket_timeout();
+    let timeout = Some(timeout_dur);
+    stream.set_timeouts(transport, timeout)?;
+
+    let req = request(method, params);
+    let mut payload = serde_json::to_vec(&req).map_err(|e| IpcError::DeserializationFailed {
+        method: method.to_string(),
+        source: e,
+    })?;
+    payload.push(b'\n');
+
+    stream.write_all(&payload).map_err(|e| {
+        if e.kind() == std::io::ErrorKind::TimedOut {
+            IpcError::Timeout {
+                method: method.to_string(),
+                elapsed: timeout_dur,
+            }
+        } else {
+            match transport {
+                #[cfg(unix)]
+                Transport::Unix(socket) => IpcError::WriteFailed {
+                    socket: socket.clone(),
+                    source: e,
+                },
+                Transport::Tcp(addr) => IpcError::WriteFailedTcp {
+                    addr: *addr,
+                    source: e,
+                },
+            }
+        }
+    })?;
+    stream.flush().map_err(|e| {
+        if e.kind() == std::io::ErrorKind::TimedOut {
+            IpcError::Timeout {
+                method: method.to_string(),
+                elapsed: timeout_dur,
+            }
+        } else {
+            match transport {
+                #[cfg(unix)]
+                Transport::Unix(socket) => IpcError::WriteFailed {
+                    socket: socket.clone(),
+                    source: e,
+                },
+                Transport::Tcp(addr) => IpcError::WriteFailedTcp {
+                    addr: *addr,
+                    source: e,
+                },
+            }
+        }
+    })?;
+
+    let mut reader = BufReader::new(stream);
+    let mut line = String::new();
+    reader.read_line(&mut line).map_err(|e| {
+        if e.kind() == std::io::ErrorKind::TimedOut {
+            IpcError::Timeout {
+                method: method.to_string(),
+                elapsed: timeout_dur,
+            }
+        } else {
+            match transport {
+                #[cfg(unix)]
+                Transport::Unix(socket) => IpcError::ReadFailed {
+                    socket: socket.clone(),
+                    source: e,
+                },
+                Transport::Tcp(addr) => IpcError::ReadFailedTcp {
+                    addr: *addr,
+                    source: e,
+                },
+            }
+        }
+    })?;
+
+    serde_json::from_str(line.trim()).map_err(|e| IpcError::DeserializationFailed {
+        method: method.to_string(),
+        source: e,
+    })
+}
+
+/// Resolves a primal's transport from environment or biomeOS discovery.
+///
+/// Resolution order:
+/// 1. `{PRIMAL}_SOCKET` env var → `Transport::Unix` (Unix only)
+/// 2. `{PRIMAL}_ADDRESS` env var → `Transport::Tcp` (parse as `host:port`)
+/// 3. biomeOS discovery (`discover_primal_socket`) → `Transport::Unix` (Unix only)
+///
+/// On non-Unix platforms, only TCP transport is available; the `_SOCKET` env var
+/// and biomeOS fallback are skipped.
+///
+/// # Errors
+///
+/// Returns `Err(IpcError::SocketNotFound)` if no transport can be resolved.
+pub fn resolve_transport(primal: &str) -> Result<Transport, IpcError> {
+    let socket_var = crate::primal_names::socket_env_var(primal);
+    let address_var = crate::primal_names::address_env_var(primal);
+
+    #[cfg(unix)]
+    if let Ok(path) = std::env::var(&socket_var) {
+        let p = PathBuf::from(path);
+        return Ok(Transport::Unix(p));
+    }
+
+    if let Ok(addr_str) = std::env::var(&address_var)
+        && let Ok(addr) = addr_str.parse::<SocketAddr>()
+    {
+        return Ok(Transport::Tcp(addr));
+    }
+
+    #[cfg(unix)]
+    if let Some(path) = crate::biomeos::discover_primal_socket(primal) {
+        return Ok(Transport::Unix(path));
+    }
+
+    Err(IpcError::SocketNotFound {
+        primal: primal.to_string(),
+    })
+}
+
 /// Sends a JSON-RPC request over a Unix socket and reads the response.
 ///
 /// Uses newline-delimited framing with configurable timeouts
 /// (`BIOMEOS_RPC_TIMEOUT_SECS`, default 5s).
 /// Returns the full JSON-RPC response (including `result` or `error`).
+///
+/// On non-Unix platforms, returns `Err(IpcError::UnixNotAvailable)` — use
+/// [`send_to`] with `Transport::Tcp` or [`resolve_transport`] instead.
 ///
 /// # Errors
 ///
@@ -232,78 +526,16 @@ pub fn send(
     method: &str,
     params: &serde_json::Value,
 ) -> Result<serde_json::Value, IpcError> {
-    let mut stream = UnixStream::connect(socket_path).map_err(|e| IpcError::ConnectionFailed {
-        socket: socket_path.to_path_buf(),
-        source: e,
-    })?;
-    let timeout_dur = socket_timeout();
-    let timeout = Some(timeout_dur);
-    stream
-        .set_read_timeout(timeout)
-        .map_err(|e| IpcError::ConnectionFailed {
-            socket: socket_path.to_path_buf(),
-            source: e,
-        })?;
-    stream
-        .set_write_timeout(timeout)
-        .map_err(|e| IpcError::ConnectionFailed {
-            socket: socket_path.to_path_buf(),
-            source: e,
-        })?;
+    #[cfg(unix)]
+    {
+        send_to(&Transport::Unix(socket_path.to_path_buf()), method, params)
+    }
 
-    let req = request(method, params);
-    let mut payload = serde_json::to_vec(&req).map_err(|e| IpcError::DeserializationFailed {
-        method: method.to_string(),
-        source: e,
-    })?;
-    payload.push(b'\n');
-    stream.write_all(&payload).map_err(|e| {
-        if e.kind() == std::io::ErrorKind::TimedOut {
-            IpcError::Timeout {
-                method: method.to_string(),
-                elapsed: timeout_dur,
-            }
-        } else {
-            IpcError::WriteFailed {
-                socket: socket_path.to_path_buf(),
-                source: e,
-            }
-        }
-    })?;
-    stream.flush().map_err(|e| {
-        if e.kind() == std::io::ErrorKind::TimedOut {
-            IpcError::Timeout {
-                method: method.to_string(),
-                elapsed: timeout_dur,
-            }
-        } else {
-            IpcError::WriteFailed {
-                socket: socket_path.to_path_buf(),
-                source: e,
-            }
-        }
-    })?;
-
-    let mut reader = BufReader::new(stream);
-    let mut line = String::new();
-    reader.read_line(&mut line).map_err(|e| {
-        if e.kind() == std::io::ErrorKind::TimedOut {
-            IpcError::Timeout {
-                method: method.to_string(),
-                elapsed: timeout_dur,
-            }
-        } else {
-            IpcError::ReadFailed {
-                socket: socket_path.to_path_buf(),
-                source: e,
-            }
-        }
-    })?;
-
-    serde_json::from_str(line.trim()).map_err(|e| IpcError::DeserializationFailed {
-        method: method.to_string(),
-        source: e,
-    })
+    #[cfg(not(unix))]
+    {
+        let _ = (socket_path, method, params);
+        Err(IpcError::UnixNotAvailable)
+    }
 }
 
 #[cfg(test)]
@@ -564,5 +796,38 @@ mod tests {
         let resp = result.unwrap();
         assert!(resp.get("error").is_some());
         assert_eq!(resp["error"]["code"], METHOD_NOT_FOUND);
+    }
+
+    #[test]
+    fn resolve_transport_returns_socket_not_found_for_unknown_primal() {
+        let result = resolve_transport("nonexistent_rpc_test_primal_xyz");
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(matches!(err, IpcError::SocketNotFound { .. }));
+    }
+
+    #[test]
+    fn connect_transport_returns_err_for_unreachable_tcp() {
+        let addr: SocketAddr = "127.0.0.1:1".parse().unwrap();
+        let transport = Transport::Tcp(addr);
+        let result = connect_transport(&transport);
+        assert!(result.is_err());
+        assert!(matches!(
+            result.unwrap_err(),
+            IpcError::ConnectionFailedTcp { .. }
+        ));
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn connect_transport_returns_err_for_nonexistent_unix_socket() {
+        let path = PathBuf::from("/nonexistent/rpc/connect_test.sock");
+        let transport = Transport::Unix(path);
+        let result = connect_transport(&transport);
+        assert!(result.is_err());
+        assert!(matches!(
+            result.unwrap_err(),
+            IpcError::ConnectionFailed { .. }
+        ));
     }
 }

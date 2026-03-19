@@ -548,6 +548,8 @@ fn bench_uncertainty_provenance(v: &mut ValidationHarness, device: Option<&Arc<W
 }
 
 fn bench_seasonal_pipeline_provenance(v: &mut ValidationHarness, device: Option<&Arc<WgpuDevice>>) {
+    // Seasonal pipeline mass balance: accommodates cumulative rounding over 120+ days
+    // (per-step WATER_BALANCE_MASS is 0.01 mm; no single constant for season-wide accumulation)
     const PIPELINE_MB_TOL: f64 = 0.5;
     println!("\n── Seasonal Pipeline (airSpring → all springs contribute) ────");
     let weather: Vec<WeatherDay> = (120..=240)
@@ -614,20 +616,22 @@ fn bench_precision_lineage(v: &mut ValidationHarness) {
 
     let t0 = Instant::now();
 
+    // erf(1): barracuda implementation ~1e-6 precision; CROSS_SPRING_GPU_CPU covers DF64 compound ops
     v.check_abs(
         "erf(1) [hotSpring df64 S54 → all springs]",
         barracuda::math::erf(1.0),
         0.842_700_792_949_715,
-        1e-6,
+        tolerances::CROSS_SPRING_GPU_CPU.abs_tol,
     );
 
     v.check_abs(
         "Γ(5)=24 [hotSpring special S54 → neuralSpring ML]",
         barracuda::math::gamma(5.0).unwrap_or(0.0),
         24.0,
-        1e-10,
+        tolerances::CROSS_SPRING_ANALYTICAL.abs_tol,
     );
 
+    // norm_cdf(0)=0.5: CDF at 0 is exact; 1e-14 from CROSS_SPRING_ANALYTICAL lineage (no dedicated constant)
     v.check_abs(
         "norm_cdf(0)=0.5 [hotSpring → groundSpring MC, airSpring CI]",
         barracuda::stats::normal::norm_cdf(0.0),
@@ -642,7 +646,7 @@ fn bench_precision_lineage(v: &mut ValidationHarness) {
             &format!("cdf↔ppf z={z:.0} [hotSpring ↔ airSpring MC CI]"),
             z_back,
             z,
-            1e-4,
+            tolerances::CROSS_SPRING_GPU_CPU.abs_tol,
         );
     }
 
@@ -684,7 +688,7 @@ fn bench_precision_lineage(v: &mut ValidationHarness) {
         "Nelder-Mead x₀ [neuralSpring S52 → airSpring isotherm]",
         best_x[0],
         3.0,
-        0.01,
+        tolerances::ISOTHERM_PARAMETER.abs_tol,
     );
 
     println!("  Precision lineage: {:.1?}", t0.elapsed());

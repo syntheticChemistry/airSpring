@@ -23,7 +23,9 @@
 use airspring_barracuda::eco::evapotranspiration::{
     self, DailyEt0Input, hamon_pet, hargreaves_et0, makkink_et0, turc_et0,
 };
-use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_field, parse_benchmark_json};
+use airspring_barracuda::validation::{
+    self, OrExit, ValidationHarness, json_field, parse_benchmark_json,
+};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/neural_api/benchmark_neural_api.json");
 

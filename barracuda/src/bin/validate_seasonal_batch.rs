@@ -14,7 +14,9 @@
 //! Run: `python3 control/seasonal_batch_et0/seasonal_batch_et0.py`
 
 use airspring_barracuda::gpu::et0::{Backend, BatchedEt0, StationDay};
-use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_field, parse_benchmark_json};
+use airspring_barracuda::validation::{
+    self, OrExit, ValidationHarness, json_field, parse_benchmark_json,
+};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/seasonal_batch_et0/benchmark_seasonal_batch.json");
@@ -49,7 +51,10 @@ fn parse_stations(benchmark: &serde_json::Value) -> Vec<StationSpec> {
         .map(|st| {
             let range = |key: &str| -> (f64, f64) {
                 let arr = st[key].as_array().or_exit("range array");
-                (arr[0].as_f64().or_exit("f64"), arr[1].as_f64().or_exit("f64"))
+                (
+                    arr[0].as_f64().or_exit("f64"),
+                    arr[1].as_f64().or_exit("f64"),
+                )
             };
             StationSpec {
                 label: st["label"].as_str().unwrap_or("").to_string(),

@@ -18,7 +18,9 @@ use airspring_barracuda::eco::{
     water_balance::{self as wb, DailyInput, WaterBalanceState},
 };
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_f64, parse_benchmark_json};
+use airspring_barracuda::validation::{
+    self, OrExit, ValidationHarness, json_f64, parse_benchmark_json,
+};
 use std::path::Path;
 
 const BENCHMARK_JSON: &str =

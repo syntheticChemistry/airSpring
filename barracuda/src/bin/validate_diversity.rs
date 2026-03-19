@@ -18,7 +18,9 @@
 //! Provenance: script=`control/diversity/diversity_indices.py`, commit=fad2e1b, date=2026-02-27
 
 use airspring_barracuda::eco::diversity;
-use airspring_barracuda::tolerances::{BIO_BRAY_CURTIS, BIO_DIVERSITY_SHANNON, BIO_DIVERSITY_SIMPSON};
+use airspring_barracuda::tolerances::{
+    BIO_BRAY_CURTIS, BIO_DIVERSITY_SHANNON, BIO_DIVERSITY_SIMPSON,
+};
 use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/diversity/benchmark_diversity.json");

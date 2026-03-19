@@ -311,7 +311,8 @@ fn main() {
         "1 Nest atomic"
     );
 
-    let mesh_pipeline = mesh.route_pipeline(&seven_stage)
+    let mesh_pipeline = mesh
+        .route_pipeline(&seven_stage)
         .or_exit("mesh pipeline should route");
     check!(
         "mesh_single_node",

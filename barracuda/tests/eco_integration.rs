@@ -14,6 +14,7 @@ use airspring_barracuda::eco::{
     soil_moisture::{self as sm, SoilTexture},
     water_balance::{self as wb, DailyInput, RunoffModel, WaterBalanceState},
 };
+use airspring_barracuda::tolerances;
 // ── Cross-module integration ─────────────────────────────────────────
 
 #[test]
@@ -54,8 +55,8 @@ fn test_soil_texture_into_water_balance() {
 
     let paw = sm::plant_available_water(props.field_capacity, props.wilting_point, 600.0);
     assert!(
-        (state.taw - paw).abs() < 1e-10,
-        "TAW ({}) should match PAW ({}) within 1e-10",
+        (state.taw - paw).abs() < tolerances::GDD_EXACT.abs_tol,
+        "TAW ({}) should match PAW ({}) within GDD_EXACT",
         state.taw,
         paw
     );
@@ -197,7 +198,7 @@ fn test_runoff_model_configurable() {
         airspring_barracuda::eco::water_balance::simulate_season(&state_runoff, &[heavy_rain]);
 
     assert!((out_default[0].runoff).abs() < f64::EPSILON);
-    assert!((out_runoff[0].runoff - 6.0).abs() < 0.01);
+    assert!((out_runoff[0].runoff - 6.0).abs() < tolerances::WATER_BALANCE_MASS.abs_tol);
 }
 
 // ── Wind speed conversion ───────────────────────────────────────────
@@ -208,7 +209,7 @@ fn test_wind_speed_at_2m_from_10m() {
     let u2 = et::wind_speed_at_2m(u10, 10.0).unwrap();
     let expected = 3.0 * 0.748;
     assert!(
-        (u2 - expected).abs() < 0.02,
+        (u2 - expected).abs() < tolerances::ET0_VPD.abs_tol,
         "u₂ from 10m: {u2}, expected ~{expected:.3}",
     );
 }
@@ -398,7 +399,7 @@ fn test_lowlevel_pm_matches_daily_et0() {
         result.gamma,
     );
     assert!(
-        (pm - result.et0).abs() < 1e-10,
+        (pm - result.et0).abs() < tolerances::SENSOR_EXACT.abs_tol,
         "Low-level PM={pm} vs daily_et0={}",
         result.et0
     );
@@ -430,7 +431,8 @@ fn test_standalone_stress_coefficient() {
 
     let mid = f64::midpoint(taw, raw);
     assert!(
-        (wb::stress_coefficient(mid, taw, raw) - 0.5).abs() < 0.01,
+        (wb::stress_coefficient(mid, taw, raw) - 0.5).abs()
+            < tolerances::STRESS_COEFFICIENT.abs_tol,
         "Ks at midpoint"
     );
 }
@@ -440,9 +442,18 @@ fn test_standalone_daily_step() {
     let taw = wb::total_available_water(0.30, 0.10, 500.0);
     let (new_dr, actual_et, dp) = wb::daily_water_balance_step(20.0, 5.0, 0.0, 4.0, 1.0, 1.0, taw);
 
-    assert!((new_dr - 19.0).abs() < 1e-10, "Dr_new={new_dr}");
-    assert!((actual_et - 4.0).abs() < 1e-10, "ETa={actual_et}");
-    assert!(dp.abs() < 1e-10, "DP should be 0");
+    assert!(
+        (new_dr - 19.0).abs() < tolerances::WATER_BALANCE_PER_STEP.abs_tol,
+        "Dr_new={new_dr}"
+    );
+    assert!(
+        (actual_et - 4.0).abs() < tolerances::WATER_BALANCE_PER_STEP.abs_tol,
+        "ETa={actual_et}"
+    );
+    assert!(
+        dp.abs() < tolerances::WATER_BALANCE_PER_STEP.abs_tol,
+        "DP should be 0"
+    );
 }
 
 // ── Sensor calibration integration ──────────────────────────────────
@@ -509,7 +520,7 @@ fn test_correction_evaluate_roundtrip() {
     for (&xi, &yi) in x.iter().zip(&y) {
         let predicted = correction::evaluate(&model, xi);
         assert!(
-            (predicted - yi).abs() < 1e-6,
+            (predicted - yi).abs() < tolerances::KRIGING_INTERPOLATION.abs_tol,
             "Evaluate({xi})={predicted} vs {yi}"
         );
     }
@@ -535,7 +546,7 @@ fn test_correction_models_soil_calibration_pipeline() {
     let corrected = correction::evaluate(best, new_factory);
     let expected = 0.85f64.mul_add(new_factory, 0.03);
     assert!(
-        (corrected - expected).abs() < 0.01,
+        (corrected - expected).abs() < tolerances::SOIL_HYDRAULIC.abs_tol,
         "Corrected={corrected} vs expected={expected}"
     );
 }

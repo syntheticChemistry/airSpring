@@ -206,8 +206,8 @@ fn check_reasons_and_inventory(inv: &[Substrate], v: &mut ValidationHarness) {
         r.reason == Reason::Preferred,
     );
 
-    let r = dispatch::route(&workloads::et0_batch().workload, inv)
-        .or_exit("et0_batch should route");
+    let r =
+        dispatch::route(&workloads::et0_batch().workload, inv).or_exit("et0_batch should route");
     v.check_bool(
         "GPU workload reports BestAvailable reason",
         r.reason == Reason::BestAvailable,

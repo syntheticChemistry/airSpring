@@ -16,7 +16,10 @@
 
 use airspring_barracuda::eco::tissue::barrier_disruption_d_eff;
 use airspring_barracuda::eco::van_genuchten::{van_genuchten_k, van_genuchten_theta};
-use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_field, parse_benchmark_json};
+use airspring_barracuda::tolerances;
+use airspring_barracuda::validation::{
+    self, OrExit, ValidationHarness, json_field, parse_benchmark_json,
+};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/barrier_skin/benchmark_barrier_skin.json");
@@ -92,7 +95,10 @@ fn validate_conductivity(v: &mut ValidationHarness, benchmark: &serde_json::Valu
             .and_then(serde_json::Value::as_bool)
             == Some(true)
         {
-            v.check_bool(&format!("K≈0 {label}"), k < 0.001 * SKIN_KS);
+            v.check_bool(
+                &format!("K≈0 {label}"),
+                k < tolerances::RICHARDS_STEADY.abs_tol * SKIN_KS,
+            );
         }
     }
 }

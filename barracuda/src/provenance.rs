@@ -53,7 +53,7 @@ pub mod commits {
     pub const RUNOFF_ENSEMBLE: &str = "97e7533";
     /// Makkink + Turc + Hamon + simplified (v0.5.x).
     pub const SIMPLIFIED_V2: &str = "d3ecdc8";
-    /// Forecast + SCAN + multicrop + NASS + AmeriFlux (v0.6.x).
+    /// Forecast + SCAN + multicrop + NASS + `AmeriFlux` (v0.6.x).
     pub const FIELD_DATA: &str = "8c3953b";
     /// VG inverse + season WB (v0.6.x).
     pub const VG_SEASON: &str = "6be822f";
@@ -77,6 +77,10 @@ pub mod commits {
 ///
 /// When a Python control script is rerun, update the commit and date here.
 #[must_use]
+#[expect(
+    clippy::too_many_lines,
+    reason = "provenance registry is a single const table — splitting loses locality"
+)]
 pub const fn python_baselines() -> &'static [PythonBaseline] {
     &[
         // ── Core FAO-56 + soil + water balance (V1 epoch) ──

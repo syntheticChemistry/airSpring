@@ -140,7 +140,7 @@ All mass balances close to 0.0000 mm. Water savings of 53-72% are consistent wit
 
 ---
 
-## 4. Phase 1: Rust BarraCuda (880 lib + 280 integration + 61 forge tests, 91 binaries)
+## 4. Phase 1: Rust BarraCuda (911 lib + 311 integration + 61 forge tests, 97 binaries)
 
 ### 4.1 Module Structure
 

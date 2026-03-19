@@ -22,7 +22,9 @@ use airspring_barracuda::eco::tissue::{
     barrier_disruption_d_eff, multi_compartment_analysis,
 };
 use airspring_barracuda::gpu::diversity::GpuDiversity;
-use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_field, parse_benchmark_json};
+use airspring_barracuda::validation::{
+    self, OrExit, ValidationHarness, json_field, parse_benchmark_json,
+};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/tissue_diversity/benchmark_tissue_diversity.json");
@@ -106,7 +108,10 @@ fn validate_anderson_w(v: &mut ValidationHarness, benchmark: &serde_json::Value)
     validation::section("Anderson W Effective");
     let engine = GpuDiversity::cpu();
     let checks = &benchmark["validation_checks"]["anderson_w_effective"]["test_cases"];
-    for tc in checks.as_array().or_exit("anderson_w_effective test_cases array") {
+    for tc in checks
+        .as_array()
+        .or_exit("anderson_w_effective test_cases array")
+    {
         let label = tc["label"].as_str().unwrap_or("case");
         let abundances = parse_f64_array(&tc["abundances"]);
         let expected = json_field(tc, "expected_w");
@@ -122,7 +127,10 @@ fn validate_anderson_w(v: &mut ValidationHarness, benchmark: &serde_json::Value)
 fn validate_regime(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Anderson Regime Classification");
     let checks = &benchmark["validation_checks"]["anderson_regime"]["test_cases"];
-    for tc in checks.as_array().or_exit("anderson_regime test_cases array") {
+    for tc in checks
+        .as_array()
+        .or_exit("anderson_regime test_cases array")
+    {
         let label = tc["label"].as_str().unwrap_or("case");
         let expected_str = tc["expected_regime"].as_str().unwrap_or("?");
 
@@ -168,7 +176,10 @@ fn validate_regime(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
 fn validate_barrier(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Barrier Disruption d_eff");
     let checks = &benchmark["validation_checks"]["barrier_disruption"]["test_cases"];
-    for tc in checks.as_array().or_exit("barrier_disruption test_cases array") {
+    for tc in checks
+        .as_array()
+        .or_exit("barrier_disruption test_cases array")
+    {
         let label = tc["label"].as_str().unwrap_or("case");
         let breach_fraction = json_field(tc, "breach_fraction");
         let expected = json_field(tc, "expected_d_eff");
@@ -182,7 +193,10 @@ fn validate_barrier(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
 fn validate_compartments(v: &mut ValidationHarness, benchmark: &serde_json::Value) {
     validation::section("Compartment Dimensions");
     let checks = &benchmark["validation_checks"]["compartment_dimensions"]["test_cases"];
-    for tc in checks.as_array().or_exit("compartment_dimensions test_cases array") {
+    for tc in checks
+        .as_array()
+        .or_exit("compartment_dimensions test_cases array")
+    {
         let label = tc["label"].as_str().unwrap_or("case");
         let compartment_str = tc["compartment"].as_str().unwrap_or("?");
         let expected = json_field(tc, "expected_d");
@@ -198,7 +212,10 @@ fn validate_multi_compartment(v: &mut ValidationHarness, benchmark: &serde_json:
     validation::section("Multi-Compartment Analysis");
     let engine = GpuDiversity::cpu();
     let checks = &benchmark["validation_checks"]["multi_compartment"]["test_cases"];
-    for tc in checks.as_array().or_exit("multi_compartment test_cases array") {
+    for tc in checks
+        .as_array()
+        .or_exit("multi_compartment test_cases array")
+    {
         let label = tc["label"].as_str().unwrap_or("case");
         let expected_count = tc["expected_count"].as_u64().unwrap_or(0) as usize;
 

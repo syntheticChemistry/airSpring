@@ -68,11 +68,8 @@ fn main() {
         let mut capabilities_used = Vec::new();
 
         for node in &nodes {
-            let id = node
-                .get("id")
-                .and_then(|v| v.as_str())
-                .unwrap_or("")
-                .to_string();
+            let id_str = node.get("id").and_then(|v| v.as_str()).unwrap_or("");
+            let id = id_str.to_string();
             node_ids.insert(id.clone());
 
             let deps: Vec<String> = node
@@ -84,7 +81,7 @@ fn main() {
                         .collect()
                 })
                 .unwrap_or_default();
-            deps_map.insert(id.clone(), deps);
+            deps_map.insert(id, deps);
 
             if let Some(cap) = node
                 .get("operation")
@@ -96,8 +93,8 @@ fn main() {
             }
 
             eprintln!(
-                "    node={id} deps={:?}",
-                deps_map.get(&id).unwrap_or(&vec![])
+                "    node={id_str} deps={:?}",
+                deps_map.get(id_str).unwrap_or(&vec![])
             );
         }
 

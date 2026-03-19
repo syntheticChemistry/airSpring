@@ -702,9 +702,8 @@ fn validate_live_npu_funky(v: &mut ValidationHarness) {
     let mean_latency_us =
         latencies_ns.iter().sum::<u64>() as f64 / latencies_ns.len() as f64 / 1000.0;
     let p99_idx = (latencies_ns.len() as f64 * 0.99) as usize;
-    let mut sorted_latencies = latencies_ns.clone();
-    sorted_latencies.sort_unstable();
-    let p99_latency_us = sorted_latencies.get(p99_idx).copied().unwrap_or(0) as f64 / 1000.0;
+    latencies_ns.sort_unstable();
+    let p99_latency_us = latencies_ns.get(p99_idx).copied().unwrap_or(0) as f64 / 1000.0;
     let throughput_hz = 500.0 * 1_000_000.0 / latencies_ns.iter().sum::<u64>() as f64 * 1000.0;
 
     println!("  Mean latency: {mean_latency_us:.1} µs");
@@ -735,10 +734,9 @@ fn validate_live_npu_funky(v: &mut ValidationHarness) {
 
     v.check_bool("50 DMA probes completed", raw_outputs.len() == 50);
 
-    let mut unique_outputs = raw_outputs.clone();
-    unique_outputs.sort();
-    unique_outputs.dedup();
-    let unique_count = unique_outputs.len();
+    raw_outputs.sort();
+    raw_outputs.dedup();
+    let unique_count = raw_outputs.len();
     println!("  Unique raw outputs: {unique_count}/50");
     v.check_bool(
         "DMA path functional (got responses)",

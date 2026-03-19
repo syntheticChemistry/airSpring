@@ -15,7 +15,9 @@ use airspring_barracuda::eco::water_balance;
 use airspring_barracuda::eco::yield_response::{
     clamp_yield_ratio, ky_table, water_use_efficiency, yield_ratio_multistage, yield_ratio_single,
 };
-use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_str, parse_benchmark_json};
+use airspring_barracuda::validation::{
+    self, OrExit, ValidationHarness, json_str, parse_benchmark_json,
+};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/yield_response/benchmark_yield_response.json");

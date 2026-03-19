@@ -89,7 +89,10 @@ fn main() {
     // ── Mass-to-ET conversion ──
     validation::section("Mass-to-ET Conversion");
     let et_cases = &benchmark["validation_checks"]["mass_to_et_conversion"]["test_cases"];
-    for tc in et_cases.as_array().or_exit("mass_to_et_conversion test_cases array") {
+    for tc in et_cases
+        .as_array()
+        .or_exit("mass_to_et_conversion test_cases array")
+    {
         let label = json_str(tc, "label");
         let mass_kg = json_field(tc, "mass_change_kg");
         let area = json_field(tc, "area_m2");
@@ -105,7 +108,10 @@ fn main() {
     let alpha = json_field(tc_params, "alpha_g_per_c");
     let t_ref = json_field(tc_params, "t_ref_c");
     let temp_cases = &benchmark["validation_checks"]["temperature_compensation"]["test_cases"];
-    for tc in temp_cases.as_array().or_exit("temperature_compensation test_cases array") {
+    for tc in temp_cases
+        .as_array()
+        .or_exit("temperature_compensation test_cases array")
+    {
         let label = json_str(tc, "label");
         let mass_raw = json_field(tc, "mass_raw_kg");
         let temp_c = json_field(tc, "temp_c");
@@ -118,10 +124,15 @@ fn main() {
     // ── Data quality filtering ──
     validation::section("Data Quality Filtering");
     let dq_cases = &benchmark["validation_checks"]["data_quality_filter"]["test_cases"];
-    for tc in dq_cases.as_array().or_exit("data_quality_filter test_cases array") {
+    for tc in dq_cases
+        .as_array()
+        .or_exit("data_quality_filter test_cases array")
+    {
         let label = json_str(tc, "label");
         let delta_g = json_field(tc, "delta_g");
-        let expected = tc["expected_valid"].as_bool().or_exit("expected_valid bool");
+        let expected = tc["expected_valid"]
+            .as_bool()
+            .or_exit("expected_valid bool");
         let computed = is_valid_reading(delta_g, 10.0, 500.0);
         v.check_bool(
             &format!("{label}: valid={computed}, expected={expected}"),
@@ -162,7 +173,10 @@ fn main() {
     // ── Hourly diurnal pattern ──
     validation::section("Hourly Diurnal ET Pattern");
     let hr_cases = &benchmark["validation_checks"]["hourly_et_pattern"]["test_cases"];
-    for tc in hr_cases.as_array().or_exit("hourly_et_pattern test_cases array") {
+    for tc in hr_cases
+        .as_array()
+        .or_exit("hourly_et_pattern test_cases array")
+    {
         let label = json_str(tc, "label");
         #[expect(
             clippy::cast_possible_truncation,

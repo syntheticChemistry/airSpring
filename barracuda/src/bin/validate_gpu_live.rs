@@ -25,7 +25,10 @@ use airspring_barracuda::eco::evapotranspiration::{
     self as et, DailyEt0Input, actual_vapour_pressure_rh,
 };
 use airspring_barracuda::gpu::et0::{Backend, BatchedEt0, BatchedEt0Result, StationDay};
-use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_field, parse_benchmark_json};
+use airspring_barracuda::tolerances;
+use airspring_barracuda::validation::{
+    self, OrExit, ValidationHarness, json_field, parse_benchmark_json,
+};
 
 const PARITY_JSON: &str =
     include_str!("../../../control/cpu_gpu_parity/benchmark_cpu_gpu_parity.json");
@@ -82,7 +85,10 @@ fn validate_gpu_parity(
 
     let tests = &benchmark["validation_checks"]["et0_cpu_gpu_parity"]["test_cases"];
 
-    for tc in tests.as_array().or_exit("et0_cpu_gpu_parity test_cases array") {
+    for tc in tests
+        .as_array()
+        .or_exit("et0_cpu_gpu_parity test_cases array")
+    {
         let label = tc["label"].as_str().unwrap_or("test");
         let station = StationDay {
             tmax: json_field(tc, "tmax"),
@@ -106,7 +112,7 @@ fn validate_gpu_parity(
 
         // GPU f64 emulation via math_f64.wgsl has minor precision differences
         // in intermediate trig (solar declination, hour angle). 0.02 mm/day
-        // tolerance reflects this while being well within scientific accuracy.
+        // reflects live hardware; no dedicated GPU_LIVE tolerance in gpu.rs.
         let gpu_tol = 0.02_f64;
         v.check_abs(
             &format!("{label}: GPU ET₀ ≈ CPU ET₀"),
@@ -149,10 +155,18 @@ fn build_seasonal_batch(benchmark: &serde_json::Value) -> Vec<StationDay> {
     let stations = benchmark["stations"].as_array().or_exit("stations array");
     let mut all_days: Vec<StationDay> = Vec::new();
     for st in stations {
-        let tmax_range = st["tmax_range"].as_array().or_exit("station tmax_range array");
-        let tmin_range = st["tmin_range"].as_array().or_exit("station tmin_range array");
-        let rh_max_range = st["rh_max_range"].as_array().or_exit("station rh_max_range array");
-        let rh_min_range = st["rh_min_range"].as_array().or_exit("station rh_min_range array");
+        let tmax_range = st["tmax_range"]
+            .as_array()
+            .or_exit("station tmax_range array");
+        let tmin_range = st["tmin_range"]
+            .as_array()
+            .or_exit("station tmin_range array");
+        let rh_max_range = st["rh_max_range"]
+            .as_array()
+            .or_exit("station rh_max_range array");
+        let rh_min_range = st["rh_min_range"]
+            .as_array()
+            .or_exit("station rh_min_range array");
         let rs_range = st["rs_range"].as_array().or_exit("station rs_range array");
 
         for doy in 1..=365_u32 {
@@ -238,8 +252,12 @@ fn check_throughput_parity(
         gpu_result.is_some_and(|r| r.backend_used == Backend::Gpu),
     );
 
-    let gpu_vals = &gpu_result.or_exit("gpu_result for throughput parity").et0_values;
-    let cpu_vals = &cpu_result.or_exit("cpu_result for throughput parity").et0_values;
+    let gpu_vals = &gpu_result
+        .or_exit("gpu_result for throughput parity")
+        .et0_values;
+    let cpu_vals = &cpu_result
+        .or_exit("cpu_result for throughput parity")
+        .et0_values;
 
     let gpu_total: f64 = gpu_vals.iter().sum();
     let cpu_total: f64 = cpu_vals.iter().sum();
@@ -259,7 +277,12 @@ fn check_throughput_parity(
 
     println!("  Max daily divergence: {max_diff:.6} mm/day");
 
-    v.check_bool("Max daily GPU-CPU divergence < 0.1 mm/day", max_diff < 0.1);
+    // Max daily divergence: RMSE_MAXIMUM (1.5 mm/day) is too loose; 0.1 mm/day
+    // reflects seasonal batch GPU↔CPU agreement (no dedicated tolerance).
+    v.check_bool(
+        &format!("Max daily GPU-CPU divergence < {} mm/day", 0.1),
+        max_diff < 0.1,
+    );
 }
 
 const BENCH_ITERS: u32 = 5;
@@ -336,8 +359,11 @@ fn validate_batch_scaling_gpu(v: &mut ValidationHarness, device: &Arc<WgpuDevice
         );
 
         v.check_bool(
-            &format!("batch N={sz}: all within 0.01 mm/day of reference"),
-            max_diff < 0.01,
+            &format!(
+                "batch N={sz}: all within {} mm/day of reference",
+                tolerances::ET0_REFERENCE.abs_tol
+            ),
+            max_diff < tolerances::ET0_REFERENCE.abs_tol,
         );
     }
 }

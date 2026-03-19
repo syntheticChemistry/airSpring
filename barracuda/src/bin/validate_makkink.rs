@@ -14,7 +14,9 @@
 //! Provenance: script=`control/makkink/makkink_et0.py`, commit=d3ecdc8, date=2026-02-27
 
 use airspring_barracuda::eco::evapotranspiration::makkink_et0;
-use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_field, parse_benchmark_json};
+use airspring_barracuda::validation::{
+    self, OrExit, ValidationHarness, json_field, parse_benchmark_json,
+};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/makkink/benchmark_makkink.json");
 

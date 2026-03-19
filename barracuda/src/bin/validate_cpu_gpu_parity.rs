@@ -31,7 +31,9 @@ use airspring_barracuda::gpu::diversity::GpuDiversity;
 use airspring_barracuda::gpu::et0::{Backend, BatchedEt0, StationDay};
 use airspring_barracuda::gpu::water_balance::{BatchedWaterBalance, FieldDayInput};
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json, OrExit};
+use airspring_barracuda::validation::{
+    self, OrExit, ValidationHarness, json_field, parse_benchmark_json,
+};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/cpu_gpu_parity/benchmark_cpu_gpu_parity.json");
@@ -76,7 +78,10 @@ fn validate_et0_parity(v: &mut ValidationHarness, benchmark: &serde_json::Value)
     let tests = &benchmark["validation_checks"]["et0_cpu_gpu_parity"]["test_cases"];
     let batcher = BatchedEt0::cpu();
 
-    for tc in tests.as_array().or_exit("et0_cpu_gpu_parity test_cases must be array") {
+    for tc in tests
+        .as_array()
+        .or_exit("et0_cpu_gpu_parity test_cases must be array")
+    {
         let label = tc["label"].as_str().unwrap_or("test");
         let tmin = json_field(tc, "tmin");
         let tmax = json_field(tc, "tmax");
@@ -142,7 +147,10 @@ fn validate_wb_parity(v: &mut ValidationHarness, benchmark: &serde_json::Value) 
 
     let tests = &benchmark["validation_checks"]["water_balance_cpu_gpu_parity"]["test_cases"];
 
-    for tc in tests.as_array().or_exit("water_balance_cpu_gpu_parity test_cases must be array") {
+    for tc in tests
+        .as_array()
+        .or_exit("water_balance_cpu_gpu_parity test_cases must be array")
+    {
         let label = tc["label"].as_str().unwrap_or("test");
         let dr_prev = json_field(tc, "dr_prev");
         let precip = json_field(tc, "precipitation");

@@ -93,16 +93,19 @@ fn main() {
             config.irrigation_depth_mm = 0.0; // rainfed
 
             let result = pipeline.run_season(&weather, &config);
-            results.get_mut(name).or_exit("scenario name in results").insert(
-                crop_name.to_string(),
-                (
-                    result.total_et0,
-                    result.total_actual_et,
-                    result.stress_days,
-                    result.yield_ratio,
-                    result.mass_balance_error,
-                ),
-            );
+            results
+                .get_mut(name)
+                .or_exit("scenario name in results")
+                .insert(
+                    crop_name.to_string(),
+                    (
+                        result.total_et0,
+                        result.total_actual_et,
+                        result.stress_days,
+                        result.yield_ratio,
+                        result.mass_balance_error,
+                    ),
+                );
         }
     }
 

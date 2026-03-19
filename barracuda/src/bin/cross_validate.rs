@@ -443,25 +443,25 @@ fn run_validation_mode() {
         "gamma vs FAO-56",
         f("gamma_kpa_c"),
         json_f64(ex_interm, &["gamma_kpa_per_c"]).or_exit("gamma_kpa_per_c"),
-        0.001,
+        tolerances::PSYCHROMETRIC_CONSTANT.abs_tol,
     );
     v.check_abs(
         "delta vs FAO-56",
         f("delta_kpa_c"),
         json_f64(ex_interm, &["delta_kpa_per_c"]).or_exit("delta_kpa_per_c"),
-        0.001,
+        tolerances::ET0_SLOPE_VAPOUR.abs_tol,
     );
     v.check_abs(
         "es_kpa vs FAO-56",
         f("es_kpa"),
         json_f64(ex_interm, &["es_kpa"]).or_exit("es_kpa"),
-        0.01,
+        tolerances::ET0_SAT_VAPOUR_PRESSURE.abs_tol,
     );
     v.check_abs(
         "ea_kpa vs FAO-56",
         f("ea_kpa"),
         json_f64(ex_interm, &["ea_kpa"]).or_exit("ea_kpa"),
-        0.01,
+        tolerances::ET0_SAT_VAPOUR_PRESSURE.abs_tol,
     );
 
     if let Some(et0_exp) = json_f64(ex_expected, &["et0_mm_day"]) {

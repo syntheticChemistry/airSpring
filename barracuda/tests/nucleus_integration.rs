@@ -9,7 +9,7 @@
 #![expect(clippy::unwrap_used, reason = "integration test clarity")]
 
 use airspring_barracuda::biomeos::{self, SocketConfig};
-use airspring_barracuda::data::provider::{BiomeosProvider, Provider, WeatherResponse};
+use airspring_barracuda::data::{BiomeosProvider, Provider, WeatherResponse};
 
 // ── Socket resolution (dependency-injected — zero unsafe) ──────────
 
@@ -71,7 +71,7 @@ fn biomeos_provider_fails_gracefully_without_tower() {
 
 #[test]
 fn songbird_http_provider_open_meteo() {
-    use airspring_barracuda::data::provider::SongbirdHttpProvider;
+    use airspring_barracuda::data::SongbirdHttpProvider;
     let _ = SongbirdHttpProvider::open_meteo();
 }
 

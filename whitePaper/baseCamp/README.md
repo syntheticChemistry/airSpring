@@ -1,8 +1,8 @@
 # baseCamp: Per-Faculty Research Briefings
 
-**Updated**: March 18, 2026
+**Updated**: March 19, 2026
 **Project**: airSpring — Ecological & Agricultural Sciences (v0.10.0)
-**Status**: 87 experiments, 1284/1284 Python + 908 lib + 299 integration + 61 forge + 22 property tests + 91 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, BYOB niche deployment) + `#![forbid(unsafe_code)]` both crates + `#![deny(cast_*)]` library-strict + zero clippy pedantic+nursery + `warn(missing_docs)`. 63 tolerances in 4 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies** (ureq→Songbird IPC). Zero-panic validation (91/91 binaries). 10 MCP tools (Squirrel AI). Python baseline provenance registry (63 baselines). kahan_sum delegation. ecoBin deny.toml (14 C-dep bans). `f64::total_cmp`. `assert!`→`Result`. `#[allow]`→`#[expect]` Rust 2024 complete. Full validation pipeline green (2026-03-18)
+**Status**: 87 experiments, 1284/1284 Python + 911 lib + 311 integration + 61 forge + 22 property tests + 97 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, BYOB niche deployment) + `#![forbid(unsafe_code)]` both crates + `#![deny(cast_*)]` library-strict + zero clippy pedantic+nursery + `warn(missing_docs)`. 63 tolerances in 4 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies** (ureq→Songbird IPC). Zero-panic validation (97/97 binaries). 10 MCP tools (Squirrel AI, wired in primal dispatch). Python baseline provenance registry (63 baselines). kahan_sum delegation. ecoBin deny.toml (14 C-dep bans). `f64::total_cmp`. `assert!`→`Result`. `#[allow]`→`#[expect]` Rust 2024 complete. Platform-agnostic IPC (Transport enum: Unix + TCP). Full validation pipeline green (2026-03-19)
 
 ---
 
@@ -48,6 +48,7 @@ Phase 5.10 Cross-ecosystem absorption — health probes, circuit breaker, OrExit
 Phase 5.11 Cross-ecosystem evolution — PRIMAL_NAME/PRIMAL_DOMAIN canonical, OnceLock GPU probe cache, cast module, DispatchOutcome<T>, coralReef/Squirrel discovery, mul_add FMA, smart refactors (4 monoliths→19 modules), composition guidance (v0.8.9, 891 lib)
 Phase 5.12 Audit execution    — #![deny(cast_*)] library strict, soil_moisture refactored (672→4 submodules), petalTongue 3-tier discovery, primal_dispatch integration tests (14), benchmark JSON provenance, CI lint consolidated (v0.9.0, 894 lib)
 Phase 5.13 Deep audit execution — provenance 11→63 baselines, OrExit zero-panic all 91 binaries, centralized tolerances, #[allow]→#[expect] Rust 2024, smart refactors (data/provider→4 modules, evolution_gaps→resolved_issues), primal_names constants, data accession IDs, cast helpers (f64_i32, usize_i32), determinism contract (v0.10.0, 908 lib)
+Phase 5.14 Deep debt evolution — MCP tools/list + tools/call wired in primal dispatch (10 ecology tools discoverable by Squirrel), platform-agnostic IPC Transport enum (Unix + TCP, ecoBin compliant), ValidationHarness migration (validate_cross_spring_modern), 50+ inline tolerances centralized, .expect()→OrExit/Result in binaries, cast_possible_wrap covered, #[expect]→#[allow] for defensive wrappers, doc_markdown fixes, integration test tolerance centralization, metalForge fmt (v0.10.0, 911 lib + 311 integration)
 ```
 
 ## Faculty Summary
@@ -241,7 +242,7 @@ S79 modernization: `libc`→`rustix`, `async-trait`→AFIT, universal f64 precis
 |----------|---------|
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C breakdown, absorbed vs stays-local, quality gates |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66) |
-| `wateringHole/handoffs/` | V090 current — audit execution, cast lint strict, soil_moisture refactored, petalTongue discovery, primal dispatch tests |
+| `wateringHole/handoffs/` | V010 current — MCP dispatch wired, platform-agnostic IPC, tolerance centralization, zero-warning clippy |
 | `specs/CROSS_SPRING_EVOLUTION.md` | 845+ WGSL shader provenance across all Springs (S93) |
 
 ### Next Steps (Dong Lab)

@@ -17,6 +17,7 @@
 
 use airspring_barracuda::eco::water_balance;
 use airspring_barracuda::eco::yield_response::{clamp_yield_ratio, ky_table, yield_ratio_single};
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{
     self, OrExit, ValidationHarness, json_f64_required, parse_benchmark_json,
 };
@@ -199,7 +200,7 @@ fn validate_ky_consistency(v: &mut ValidationHarness, benchmark: &serde_json::Va
             &format!("{} Ky total", crop.name),
             ky.ky_total,
             expected,
-            0.01,
+            tolerances::DUAL_KC_PRECISION.abs_tol,
         );
 
         if let Some(ref stages) = ky.stages {
@@ -239,7 +240,7 @@ fn validate_drought_response(v: &mut ValidationHarness) {
 
             v.check_bool(
                 &format!("{} {} yield {yr:.3} <= prev {prev_yr:.3}", crop.name, label),
-                yr <= prev_yr + 0.001,
+                yr <= prev_yr + tolerances::SOIL_ROUNDTRIP.abs_tol,
             );
             prev_yr = yr;
         }
@@ -279,14 +280,14 @@ fn validate_soil_sensitivity(v: &mut ValidationHarness) {
                 "{}: loam ({:.3}) >= sandy ({:.3})",
                 crop.name, yields[1].1, yields[0].1
             ),
-            yields[1].1 >= yields[0].1 - 0.001,
+            yields[1].1 >= yields[0].1 - tolerances::SOIL_ROUNDTRIP.abs_tol,
         );
         v.check_bool(
             &format!(
                 "{}: clay_loam ({:.3}) >= loam ({:.3})",
                 crop.name, yields[2].1, yields[1].1
             ),
-            yields[2].1 >= yields[1].1 - 0.001,
+            yields[2].1 >= yields[1].1 - tolerances::SOIL_ROUNDTRIP.abs_tol,
         );
     }
 }
@@ -336,7 +337,8 @@ fn validate_multi_year_variability(v: &mut ValidationHarness, benchmark: &serde_
             yr_range[0].as_f64().or_exit("mean_yr_range[0] f64"),
             yr_range[1].as_f64().or_exit("mean_yr_range[1] f64")
         ),
-        mean_yr >= yr_range[0].as_f64().or_exit("mean_yr_range[0] f64") && mean_yr <= yr_range[1].as_f64().or_exit("mean_yr_range[1] f64"),
+        mean_yr >= yr_range[0].as_f64().or_exit("mean_yr_range[0] f64")
+            && mean_yr <= yr_range[1].as_f64().or_exit("mean_yr_range[1] f64"),
     );
     v.check_bool(
         &format!(
@@ -344,7 +346,8 @@ fn validate_multi_year_variability(v: &mut ValidationHarness, benchmark: &serde_
             cv_range[0].as_f64().or_exit("cv_range[0] f64"),
             cv_range[1].as_f64().or_exit("cv_range[1] f64")
         ),
-        cv >= cv_range[0].as_f64().or_exit("cv_range[0] f64") && cv <= cv_range[1].as_f64().or_exit("cv_range[1] f64"),
+        cv >= cv_range[0].as_f64().or_exit("cv_range[0] f64")
+            && cv <= cv_range[1].as_f64().or_exit("cv_range[1] f64"),
     );
     v.check_bool(
         &format!(
@@ -387,8 +390,16 @@ fn validate_crop_ranking(v: &mut ValidationHarness) {
         yields.push((crop.name, yr));
     }
 
-    let soy_yr = yields.iter().find(|y| y.0 == "soybean").or_exit("soybean in crop yields").1;
-    let corn_yr = yields.iter().find(|y| y.0 == "corn").or_exit("corn in crop yields").1;
+    let soy_yr = yields
+        .iter()
+        .find(|y| y.0 == "soybean")
+        .or_exit("soybean in crop yields")
+        .1;
+    let corn_yr = yields
+        .iter()
+        .find(|y| y.0 == "corn")
+        .or_exit("corn in crop yields")
+        .1;
     v.check_bool(
         &format!("soybean ({soy_yr:.3}) > corn ({corn_yr:.3}) under drought"),
         soy_yr > corn_yr,
@@ -420,7 +431,7 @@ fn validate_mass_balance(v: &mut ValidationHarness) {
 
         v.check_bool(
             &format!("{}: ETa ({eta:.1}) <= ETc ({etc:.1})", crop.name),
-            eta <= etc + 0.01,
+            eta <= etc + tolerances::WATER_BALANCE_MASS.abs_tol,
         );
         v.check_bool(
             &format!("{}: ETa/ETc ratio ({ratio:.4}) in [0, 1]", crop.name),

@@ -1,7 +1,7 @@
 # Validation Methodology
 
 **Purpose**: Document the multi-phase validation approach used in the airSpring study
-**Version**: v0.8.8
+**Version**: v0.10.0
 **See also**: [STUDY.md](STUDY.md) for complete results
 
 ---

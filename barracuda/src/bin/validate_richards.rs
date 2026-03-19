@@ -230,7 +230,7 @@ fn validate_infiltration_sand(v: &mut ValidationHarness, benchmark: &serde_json:
     let duration_days = duration_hours / 24.0;
 
     let dt_days = 0.00001;
-    let profiles = solve_richards_1d(
+    let Ok(profiles) = solve_richards_1d(
         &params,
         depth,
         25,
@@ -240,10 +240,12 @@ fn validate_infiltration_sand(v: &mut ValidationHarness, benchmark: &serde_json:
         true,
         duration_days,
         dt_days,
-    )
-    .expect("solver must converge");
+    ) else {
+        v.check_bool("Sand infiltration solver converges", false);
+        return;
+    };
 
-    v.check_bool("Solver completes without error", true);
+    v.check_bool("Sand infiltration solver converges", true);
 
     let min_theta = json_array_opt(
         benchmark,
@@ -309,7 +311,7 @@ fn validate_drainage_silt_loam(v: &mut ValidationHarness, benchmark: &serde_json
     let duration_days = duration_hours / 24.0;
 
     let dt_days = 0.001;
-    let profiles = solve_richards_1d(
+    let Ok(profiles) = solve_richards_1d(
         &params,
         depth,
         50,
@@ -319,10 +321,12 @@ fn validate_drainage_silt_loam(v: &mut ValidationHarness, benchmark: &serde_json
         true,
         duration_days,
         dt_days,
-    )
-    .expect("solver must converge");
+    ) else {
+        v.check_bool("Silt loam drainage solver converges", false);
+        return;
+    };
 
-    v.check_bool("Solver completes without error", true);
+    v.check_bool("Silt loam drainage solver converges", true);
 
     let cum_drain = richards::cumulative_drainage(&params, &profiles, dt_days);
     let total_drain = cum_drain.last().copied().unwrap_or(0.0);

@@ -7,10 +7,9 @@
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.8.9** | [AIRSPRING_V089_CROSS_ECOSYSTEM_EVOLUTION_HANDOFF_MAR17_2026.md](handoffs/AIRSPRING_V089_CROSS_ECOSYSTEM_EVOLUTION_HANDOFF_MAR17_2026.md) | 2026-03-17 | **primary** — `PRIMAL_NAME`/`PRIMAL_DOMAIN`, `OnceLock` GPU probe, `cast` module, `DispatchOutcome<T>`, coralReef/Squirrel discovery, `mul_add()` FMA, smart refactors (4→19 modules), composition guidance, 891 lib tests |
-| **V0.8.8** | [AIRSPRING_V088_CROSS_ECOSYSTEM_ABSORPTION_HANDOFF_MAR16_2026.md](handoffs/AIRSPRING_V088_CROSS_ECOSYSTEM_ABSORPTION_HANDOFF_MAR16_2026.md) | 2026-03-16 | `thiserror`, health probes, circuit breaker, `OrExit<T>`, `IpcError` 8 variants + `is_recoverable()`, `socket_env_var()`, structured tracing, workspace `deny.toml`, 880 lib + 22 property tests |
-| **V0.8.8** | [AIRSPRING_V088_BARRACUDA_TOADSTOOL_EVOLUTION_HANDOFF_MAR16_2026.md](handoffs/AIRSPRING_V088_BARRACUDA_TOADSTOOL_EVOLUTION_HANDOFF_MAR16_2026.md) | 2026-03-16 | barraCuda/toadStool evolution — 75+ delegations, upstream absorption candidates, action items by primal |
-| **≤V0.8.7** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
+| **V0.10.0** | [AIRSPRING_V010_DEEP_DEBT_EVOLUTION_HANDOFF_MAR19_2026.md](handoffs/AIRSPRING_V010_DEEP_DEBT_EVOLUTION_HANDOFF_MAR19_2026.md) | 2026-03-19 | **primary** — MCP tools/list + tools/call wired, `ValidationHarness` migration, platform-agnostic IPC (`Transport` enum), inline tolerance centralization (50+ sites), `.expect()` → `OrExit`/`Result`, zero clippy warnings (pedantic+nursery), 911 lib + 311 integration tests, 1222 total |
+| **V0.10.0** | [../../../wateringHole/handoffs/AIRSPRING_V010_BARRACUDA_TOADSTOOL_EVOLUTION_HANDOFF_MAR19_2026.md](../../../wateringHole/handoffs/AIRSPRING_V010_BARRACUDA_TOADSTOOL_EVOLUTION_HANDOFF_MAR19_2026.md) | 2026-03-19 | barraCuda/toadStool evolution — absorption candidates, Transport trait, ecosystem learnings |
+| **≤V0.8.9** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 
 ## Cross-Spring Documents
 

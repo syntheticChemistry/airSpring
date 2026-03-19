@@ -8,7 +8,9 @@
 
 use airspring_barracuda::eco::evapotranspiration::{self as et, DailyEt0Input};
 use airspring_barracuda::tolerances;
-use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_f64, parse_benchmark_json};
+use airspring_barracuda::validation::{
+    self, OrExit, ValidationHarness, json_f64, parse_benchmark_json,
+};
 
 /// Benchmark JSON embedded at compile time for reproducibility.
 const BENCHMARK_JSON: &str = include_str!("../../../control/fao56/benchmark_fao56.json");
@@ -91,8 +93,10 @@ fn validate_uccle(v: &mut ValidationHarness, benchmark: &serde_json::Value) -> f
     let tmax_uc = json_f64(uccle, &["inputs", "tmax_c"]).or_exit("Uccle: inputs.tmax_c");
     let tmean_uc =
         json_f64(uccle, &["intermediates", "tmean_c"]).or_exit("Uccle: intermediates.tmean_c");
-    let u2_uc = json_f64(uccle, &["intermediates", "u2_m_s"]).or_exit("Uccle: intermediates.u2_m_s");
-    let ea_uc = json_f64(uccle, &["intermediates", "ea_kpa"]).or_exit("Uccle: intermediates.ea_kpa");
+    let u2_uc =
+        json_f64(uccle, &["intermediates", "u2_m_s"]).or_exit("Uccle: intermediates.u2_m_s");
+    let ea_uc =
+        json_f64(uccle, &["intermediates", "ea_kpa"]).or_exit("Uccle: intermediates.ea_kpa");
     let rs_uc = json_f64(uccle, &["intermediates", "rs_mj_m2_day"])
         .or_exit("Uccle: intermediates.rs_mj_m2_day");
     let lat_uc =

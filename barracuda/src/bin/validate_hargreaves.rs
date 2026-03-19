@@ -14,7 +14,9 @@
 //! Provenance: script=`control/hargreaves/hargreaves_samani.py`, commit=fad2e1b, date=2026-03-02
 
 use airspring_barracuda::eco::evapotranspiration::{extraterrestrial_radiation, hargreaves_et0};
-use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_field, parse_benchmark_json};
+use airspring_barracuda::validation::{
+    self, OrExit, ValidationHarness, json_field, parse_benchmark_json,
+};
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/hargreaves/benchmark_hargreaves.json");
 

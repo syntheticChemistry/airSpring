@@ -16,7 +16,9 @@
 //! Run: `python3 control/et0_ensemble/et0_ensemble.py`
 
 use airspring_barracuda::eco::evapotranspiration::{EnsembleInput, et0_ensemble};
-use airspring_barracuda::validation::{self, OrExit, ValidationHarness, json_field, parse_benchmark_json};
+use airspring_barracuda::validation::{
+    self, OrExit, ValidationHarness, json_field, parse_benchmark_json,
+};
 
 const BENCHMARK_JSON: &str =
     include_str!("../../../control/et0_ensemble/benchmark_et0_ensemble.json");

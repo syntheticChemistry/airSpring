@@ -7,6 +7,7 @@ use airspring_barracuda::eco::richards::{
     van_genuchten_theta,
 };
 use airspring_barracuda::error::AirSpringError;
+use airspring_barracuda::tolerances;
 
 const fn sand_params() -> VanGenuchtenParams {
     VanGenuchtenParams {
@@ -22,21 +23,21 @@ const fn sand_params() -> VanGenuchtenParams {
 fn test_van_genuchten_theta_saturation() {
     let p = sand_params();
     let theta = van_genuchten_theta(0.0, p.theta_r, p.theta_s, p.alpha, p.n_vg);
-    assert!((theta - p.theta_s).abs() < 1e-10);
+    assert!((theta - p.theta_s).abs() < tolerances::SENSOR_EXACT.abs_tol);
 }
 
 #[test]
 fn test_van_genuchten_theta_dry() {
     let p = sand_params();
     let theta = van_genuchten_theta(-100.0, p.theta_r, p.theta_s, p.alpha, p.n_vg);
-    assert!((theta - 0.0493).abs() < 0.001);
+    assert!((theta - 0.0493).abs() < tolerances::RICHARDS_STEADY.abs_tol);
 }
 
 #[test]
 fn test_van_genuchten_k_saturation() {
     let p = sand_params();
     let k = van_genuchten_k(0.0, p.ks, p.theta_r, p.theta_s, p.alpha, p.n_vg);
-    assert!((k - p.ks).abs() < 1e-10);
+    assert!((k - p.ks).abs() < tolerances::SENSOR_EXACT.abs_tol);
 }
 
 #[test]
@@ -89,14 +90,14 @@ fn test_van_genuchten_theta_slightly_below_zero() {
 fn test_van_genuchten_theta_positive_h() {
     let p = sand_params();
     let theta = van_genuchten_theta(5.0, p.theta_r, p.theta_s, p.alpha, p.n_vg);
-    assert!((theta - p.theta_s).abs() < 1e-10);
+    assert!((theta - p.theta_s).abs() < tolerances::SENSOR_EXACT.abs_tol);
 }
 
 #[test]
 fn test_van_genuchten_k_below_clip_min() {
     let p = sand_params();
     let k = van_genuchten_k(-15_000.0, p.ks, p.theta_r, p.theta_s, p.alpha, p.n_vg);
-    assert!(k.abs() < f64::EPSILON);
+    assert!(k.abs() < tolerances::SENSOR_EXACT.abs_tol);
 }
 
 #[test]
@@ -110,14 +111,14 @@ fn test_van_genuchten_k_at_clip_min() {
 fn test_van_genuchten_capacity_saturated() {
     let p = sand_params();
     let c = van_genuchten_capacity(0.0, p.theta_r, p.theta_s, p.alpha, p.n_vg);
-    assert!((c - 1e-6).abs() < f64::EPSILON);
+    assert!((c - 1e-6).abs() < tolerances::SENSOR_EXACT.abs_tol);
 }
 
 #[test]
 fn test_van_genuchten_capacity_positive_h() {
     let p = sand_params();
     let c = van_genuchten_capacity(10.0, p.theta_r, p.theta_s, p.alpha, p.n_vg);
-    assert!((c - 1e-6).abs() < f64::EPSILON);
+    assert!((c - 1e-6).abs() < tolerances::SENSOR_EXACT.abs_tol);
 }
 
 #[test]
@@ -200,7 +201,7 @@ fn test_mass_balance_check_empty_profiles() {
     let p = sand_params();
     let profiles: Vec<RichardsProfile> = vec![];
     let err = mass_balance_check(&p, &profiles, -20.0, -10.0, false, 0.01, 5.0);
-    assert!(err.abs() < f64::EPSILON);
+    assert!(err.abs() < tolerances::SENSOR_EXACT.abs_tol);
 }
 
 #[test]
@@ -322,7 +323,7 @@ fn test_inverse_vg_round_trip_silt_loam() {
             inverse_van_genuchten_h(theta, theta_r, theta_s, alpha, n_vg).expect("should invert");
         let theta_check = van_genuchten_theta(h_inv, theta_r, theta_s, alpha, n_vg);
         assert!(
-            (theta_check - theta).abs() < 1e-6,
+            (theta_check - theta).abs() < tolerances::KRIGING_INTERPOLATION.abs_tol,
             "Round-trip θ at h={h_orig}: expected {theta:.6}, got {theta_check:.6}"
         );
     }
@@ -352,7 +353,7 @@ fn test_inverse_vg_multiple_soil_types() {
         if let Some(h_inv) = inverse_van_genuchten_h(theta, theta_r, theta_s, alpha, n_vg) {
             let theta_rt = van_genuchten_theta(h_inv, theta_r, theta_s, alpha, n_vg);
             assert!(
-                (theta_rt - theta).abs() < 1e-5,
+                (theta_rt - theta).abs() < tolerances::CROSS_VALIDATION.abs_tol,
                 "{name}: round-trip fail θ={theta:.6} → h={h_inv:.2} → θ={theta_rt:.6}"
             );
         }

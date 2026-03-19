@@ -2,6 +2,7 @@
 //! JSON-RPC method dispatch and provenance auto-recording.
 
 use airspring_barracuda::ipc::DispatchOutcome;
+use airspring_barracuda::ipc::mcp;
 use airspring_barracuda::{niche, primal_science};
 
 use super::NicheState;
@@ -34,6 +35,14 @@ pub fn dispatch(
         }));
     }
 
+    if method == "tools/list" {
+        return DispatchOutcome::Ok(mcp::list_tools());
+    }
+
+    if method == "tools/call" {
+        return dispatch_mcp_tool(params);
+    }
+
     if let Some(result) = primal_science::dispatch_science(method, params) {
         auto_record_provenance(method, params, &result);
         return DispatchOutcome::Ok(result);
@@ -55,6 +64,34 @@ pub fn dispatch(
         "data.weather" => DispatchOutcome::Ok(handlers::handle_data_weather(params)),
         _ => DispatchOutcome::MethodNotFound(method.to_string()),
     }
+}
+
+fn dispatch_mcp_tool(params: &serde_json::Value) -> DispatchOutcome<serde_json::Value> {
+    let Some(tool_name) = params.get("name").and_then(|v| v.as_str()) else {
+        return DispatchOutcome::InvalidParams {
+            method: "tools/call".to_string(),
+            reason: "missing 'name' parameter".to_string(),
+        };
+    };
+    let Some(rpc_method) = mcp::tool_to_method(tool_name) else {
+        return DispatchOutcome::InvalidParams {
+            method: "tools/call".to_string(),
+            reason: format!("unknown tool: {tool_name}"),
+        };
+    };
+    let arguments = params
+        .get("arguments")
+        .cloned()
+        .unwrap_or_else(|| serde_json::json!({}));
+    let result = primal_science::dispatch_science(rpc_method, &arguments).unwrap_or_else(|| {
+        serde_json::json!({
+            "error": format!("tool '{tool_name}' mapped to '{rpc_method}' but dispatch returned None"),
+        })
+    });
+    DispatchOutcome::Ok(serde_json::json!({
+        "content": [{ "type": "text", "text": result.to_string() }],
+        "isError": result.get("error").is_some(),
+    }))
 }
 
 fn auto_record_provenance(method: &str, params: &serde_json::Value, result: &serde_json::Value) {

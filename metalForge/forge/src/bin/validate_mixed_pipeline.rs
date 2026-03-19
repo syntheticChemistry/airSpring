@@ -205,8 +205,8 @@ fn validate_pcie_bypass_pipeline(v: &mut ValidationHarness) {
         ),
     ];
 
-    let pipe = pipeline::route_pipeline(&workloads, &substrates)
-        .or_exit("3-stage pipeline should route");
+    let pipe =
+        pipeline::route_pipeline(&workloads, &substrates).or_exit("3-stage pipeline should route");
 
     v.check_bool("3-stage pipeline", pipe.stages.len() == 3);
     v.check_bool(
@@ -392,8 +392,8 @@ fn validate_full_eco_pipeline(v: &mut ValidationHarness) {
         Workload::new("weather_ingest", vec![Capability::CpuCompute]),
     ];
 
-    let pipe = pipeline::route_pipeline(&workloads, &substrates)
-        .or_exit("5-stage pipeline should route");
+    let pipe =
+        pipeline::route_pipeline(&workloads, &substrates).or_exit("5-stage pipeline should route");
 
     v.check_bool("5-stage pipeline", pipe.stages.len() == 5);
 

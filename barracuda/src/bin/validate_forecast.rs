@@ -16,6 +16,7 @@
 
 use airspring_barracuda::eco::water_balance;
 use airspring_barracuda::eco::yield_response::{clamp_yield_ratio, yield_ratio_single};
+use airspring_barracuda::tolerances;
 use airspring_barracuda::validation::{self, OrExit, ValidationHarness, parse_benchmark_json};
 
 const BENCHMARK_JSON: &str =
@@ -373,13 +374,14 @@ fn validate_forecast_vs_perfect(
             yg[0].as_f64().or_exit("yield_gap_range[0] f64"),
             yg[1].as_f64().or_exit("yield_gap_range[1] f64")
         ),
-        yield_gap >= yg[0].as_f64().or_exit("yield_gap_range[0] f64") && yield_gap <= yg[1].as_f64().or_exit("yield_gap_range[1] f64"),
+        yield_gap >= yg[0].as_f64().or_exit("yield_gap_range[0] f64")
+            && yield_gap <= yg[1].as_f64().or_exit("yield_gap_range[1] f64"),
     );
 
     v.check_bool("forecast yield > 0", fc.yield_ratio > 0.0);
     v.check_bool(
         "forecast yield <= perfect + 0.01",
-        fc.yield_ratio <= pk.yield_ratio + 0.01,
+        fc.yield_ratio <= pk.yield_ratio + tolerances::DUAL_KC_PRECISION.abs_tol,
     );
 
     let irrig_ratio = if pk.total_irrigation_mm > 0.0 {
@@ -393,7 +395,8 @@ fn validate_forecast_vs_perfect(
             ir[0].as_f64().or_exit("irrigation_ratio_range[0] f64"),
             ir[1].as_f64().or_exit("irrigation_ratio_range[1] f64")
         ),
-        irrig_ratio >= ir[0].as_f64().or_exit("irrigation_ratio_range[0] f64") && irrig_ratio <= ir[1].as_f64().or_exit("irrigation_ratio_range[1] f64"),
+        irrig_ratio >= ir[0].as_f64().or_exit("irrigation_ratio_range[0] f64")
+            && irrig_ratio <= ir[1].as_f64().or_exit("irrigation_ratio_range[1] f64"),
     );
 }
 
@@ -435,6 +438,7 @@ fn validate_horizon_impact(v: &mut ValidationHarness, et0: &[f64], precip: &[f64
         yields.push(result.yield_ratio);
     }
 
+    // Horizon degradation: 0.05 allows forecast noise; no dedicated constant (STRESS_COEFFICIENT rel_tol=0.01 is tighter)
     v.check_bool(
         "3-day forecast >= 1-day - 0.05",
         yields[1] >= yields[0] - 0.05,
@@ -452,7 +456,10 @@ fn validate_mass_balance(v: &mut ValidationHarness, benchmark: &serde_json::Valu
         .as_f64()
         .or_exit("mass_balance_tol_mm f64");
     v.check_abs("mass balance error", fc.mass_balance_error, 0.0, mb_tol);
-    v.check_bool("ETa <= ETc", fc.total_eta_mm <= fc.total_etc_mm + 0.01);
+    v.check_bool(
+        "ETa <= ETc",
+        fc.total_eta_mm <= fc.total_etc_mm + tolerances::WATER_BALANCE_MASS.abs_tol,
+    );
     v.check_bool(
         &format!("eta/etc ratio {:.4} in [0, 1]", fc.eta_etc_ratio),
         fc.eta_etc_ratio >= 0.0 && fc.eta_etc_ratio <= 1.001,
@@ -467,7 +474,7 @@ fn validate_rainfed_comparison(v: &mut ValidationHarness, fc: &SimResult, rainfe
             "forecast yield ({:.3}) >= rainfed ({:.3})",
             fc.yield_ratio, rainfed.yield_ratio
         ),
-        fc.yield_ratio >= rainfed.yield_ratio - 0.001,
+        fc.yield_ratio >= rainfed.yield_ratio - tolerances::SOIL_ROUNDTRIP.abs_tol,
     );
     v.check_bool(
         &format!(
@@ -488,7 +495,9 @@ fn main() {
     };
 
     let season = &benchmark["season_parameters"];
-    let n_days = season["length_days"].as_u64().or_exit("season length_days u64") as usize;
+    let n_days = season["length_days"]
+        .as_u64()
+        .or_exit("season length_days u64") as usize;
 
     let (et0, precip) = generate_michigan_season(n_days);
     let kc = kc_schedule(n_days);
