@@ -1,7 +1,7 @@
 # airSpring Experiments
 
-**Updated**: March 19, 2026
-**Status**: 87 experiments, barraCuda 0.3.5 (wgpu 28), v0.10.0, Edition 2024 (rust-toolchain 1.92). 1284/1284 Python + 911 lib + 311 integration + 61 forge + 22 property + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 parity). 21/21 CPU-GPU parity modules. `#![forbid(unsafe_code)]`, `#![deny(cast_*)]` library-strict, `warn(missing_docs)`, 63 centralized tolerances (Rust + Python mirror), JSON-RPC 2.0 protocol compliant. Zero C dependencies. Zero hardcoded primals. 10 MCP tools wired in primal dispatch (Squirrel AI discoverable). Platform-agnostic IPC (Transport enum: Unix + TCP). Full validation pipeline green (2026-03-19).
+**Updated**: March 23, 2026
+**Status**: 87 experiments, barraCuda 0.3.7 (wgpu 28), v0.10.0, Edition 2024 (rust-toolchain 1.92). 1284/1284 Python + 946 lib + 20 integration + 61 forge + 9 doc + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 parity). 21/21 CPU-GPU parity modules. `#![forbid(unsafe_code)]`, `#![deny(cast_*)]` library-strict, `warn(missing_docs)`, 58 centralized tolerances (Rust + Python mirror), JSON-RPC 2.0 protocol compliant. Zero C dependencies. Zero hardcoded primals. Zero `#[allow()]` in production. 10 MCP tools wired in primal dispatch (Squirrel AI discoverable). Platform-agnostic IPC (Transport enum: Unix + TCP, provenance trio fully migrated). Full validation pipeline green (2026-03-23).
 
 ---
 
@@ -97,7 +97,7 @@
 | 086 | metalForge Mixed Hardware Live NUCLEUS | Hardware | **Complete** | Rust | Live probe (RTX 4070 + Titan V + i9-12900K), NUCLEUS mesh (Tower+Node), 23/27 workload routing, ecology pipeline (3 stages GPU), PCIe bypass, transfer matrix | 17/17 |
 | 087 | NUCLEUS Graph Coordination | Integration | **Complete** | Rust | biomeOS TOML graph parsing, DAG validation, capability refs, dependency ordering, prerequisite checks, Tower/Node atomic detection, 7 primals | 22/22 |
 
-**Grand Total**: 1284 Python + **908 lib + 299 integration + 61 forge + 22 property tests** + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (41 capabilities) + 91 binaries + barraCuda 0.3.5 (wgpu 28, DF64 precision tier) + 14.3× CPU speedup (24/24 parity) + 21/21 CPU-GPU parity modules + 87 experiments (v0.10.0). Zero C deps. Zero hardcoded primals. 4-format `parse_capabilities`. JSON-RPC proptest fuzz. Full validation pipeline green (2026-03-18).
+**Grand Total**: 1284 Python + **946 lib + 20 integration + 61 forge + 9 doc tests** + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (41 capabilities) + 91 binaries + barraCuda 0.3.7 (wgpu 28, DF64 precision tier) + 14.3× CPU speedup (24/24 parity) + 21/21 CPU-GPU parity modules + 87 experiments (v0.10.0). Zero C deps. Zero hardcoded primals. Zero `#[allow()]`. Platform-agnostic IPC (Transport: Unix + TCP). Full validation pipeline green (2026-03-23).
 
 ---
 
@@ -105,16 +105,17 @@
 
 | Category | Tests | Source |
 |----------|:-----:|--------|
-| Barracuda lib (unit + doc) | 908 | `cargo test --lib` |
-| Barracuda integration | 299 | `cargo test --tests` (barracuda/tests/) |
+| Barracuda lib (unit + doc) | 946 | `cargo test --lib --all-features` |
+| Barracuda doctests | 9 | `cargo test --doc` (0 ignored) |
+| Barracuda integration | 20 | `cargo test --tests --all-features` (barracuda/tests/) |
 | Barracuda validation binaries | 91 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
 | Forge | 61 | `metalForge/forge/` (substrate, dispatch, probe, workloads, cross-system routing) |
 | Forge binaries | 6 | `validate_dispatch`, `validate_live_hardware`, `validate_dispatch_routing`, `validate_mixed_pipeline`, `validate_mixed_nucleus_live`, `validate_nucleus_routing` |
-| **Total project tests** | **908 lib + 299 integration + 61 forge** | |
+| **Total project tests** | **946 lib + 20 integration + 61 forge + 9 doc** | |
 | Validation checks | 381/381 | 10 validation binaries |
 | Cross-spring evolution | 146/146 | `bench_cross_spring` (34 provenance entries, 6 origin Springs) |
 | Cross-validation | 33/33 | Python↔Rust match (tol=1e-5) |
-| CPU vs Python parity | 24/24 | `bench_cpu_vs_python` (20.6× geometric mean speedup) |
+| CPU vs Python parity | 24/24 | `bench_cpu_vs_python` (14.3× geometric mean speedup) |
 
 ---
 

@@ -21,7 +21,11 @@
 //! these directly — no `set_var` / `remove_var`, no `unsafe`, no
 //! `#[serial]`.  The top-level wrappers simply delegate:
 //!
-//! ```rust,ignore
+//! ```rust,no_run
+//! # use std::path::PathBuf;
+//! # struct SocketConfig;
+//! # impl SocketConfig { fn from_env() -> Self { Self } }
+//! # fn resolve_socket_dir_with(_: &SocketConfig) -> PathBuf { PathBuf::new() }
 //! pub fn resolve_socket_dir() -> PathBuf {
 //!     resolve_socket_dir_with(&SocketConfig::from_env())
 //! }

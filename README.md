@@ -1,7 +1,7 @@
 # airSpring — Ecological & Agricultural Sciences
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
-**Date**: March 18, 2026
+**Date**: March 23, 2026
 **Version**: 0.10.0
 **License**: AGPL-3.0-or-later
 
@@ -229,7 +229,7 @@ airSpring/
 │   ├── bootstrap_jackknife/     # Bootstrap & Jackknife CI (20/20)
 │   ├── drought_index/           # SPI drought index (20/20)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (911 lib tests, 97 binaries, barraCuda 0.3.5 / wgpu 28, Edition 2024)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (946 lib tests, 91 binaries, barraCuda 0.3.7 / wgpu 28, Edition 2024)
 │   ├── src/
 │   │   ├── biomeos/                # biomeOS socket resolution + primal discovery (3 sub-modules)
 │   │   ├── eco/                 # Domain modules (22 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine + drought_index)
@@ -295,9 +295,11 @@ AGPL-3.0-or-later
 
 ---
 
-*March 22, 2026 — v0.10.0. Deep evolution execution: `GpuDriverProfile`→`DeviceCapabilities`
-migration (barraCuda 0.3.7), rpc.rs smart refactor (834→3 module files by responsibility),
-`#[allow]`→`#[expect]` round 2 (66 files, 75 unfulfilled removed), `f64_i8` NPU cast helper,
-7 proptest invariants (SVP/delta/Hargreaves/TAW/RAW/Ks), `DEFAULT_RPC_TIMEOUT_SECS` named
-constant, `quantize_i8` edge-case fix. 946 lib + 20 integration + 61 forge tests, 0 failures.
-Clippy pedantic+nursery zero warnings. AGPL-3.0-or-later.*
+*March 23, 2026 — v0.10.0. Deep evolution execution complete. Platform-agnostic
+provenance IPC (Unix-only `UnixStream` → `Transport` enum via `rpc::send_to`),
+`#[allow]`→`#[expect]` final sweep (zero remaining in production), 4 doctests
+evolved `ignore`→`no_run` (9/9 pass, 0 ignored), `ProvenanceConfig` evolved to
+transport-based discovery (TCP fallback for cross-platform). Exp 062-087 documented
+in PAPER_REVIEW_QUEUE.md. 946 lib + 20 integration + 61 forge + 9 doc tests,
+0 failures. Clippy pedantic+nursery zero warnings. Zero unsafe. Zero C deps.
+Zero hardcoded primals. AGPL-3.0-or-later.*

@@ -31,7 +31,12 @@
 //!
 //! # Usage
 //!
-//! ```rust,ignore
+//! ```rust,no_run
+//! use airspring_barracuda::gpu::seasonal_pipeline::{SeasonalPipeline, WeatherDay, CropConfig};
+//! use airspring_barracuda::eco::crop::CropType;
+//!
+//! let weather_days: Vec<WeatherDay> = vec![];
+//! let crop_config = CropConfig::standard(CropType::Corn);
 //! let pipeline = SeasonalPipeline::cpu();
 //! let result = pipeline.run_season(&weather_days, &crop_config);
 //! println!("Yield ratio: {:.3}", result.yield_ratio);

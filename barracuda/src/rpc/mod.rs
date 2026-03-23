@@ -295,7 +295,7 @@ pub fn resolve_transport(primal: &str) -> Result<Transport, IpcError> {
 ///
 /// # Examples
 ///
-/// ```ignore
+/// ```rust,no_run
 /// use airspring_barracuda::rpc;
 /// use std::path::Path;
 ///

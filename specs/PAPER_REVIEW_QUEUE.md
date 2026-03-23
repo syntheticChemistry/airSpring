@@ -151,6 +151,32 @@ All 61 completed papers have:
 | 59 | 18/18 | 20/20 (`validate_bootstrap_jackknife`) | `GpuBootstrap` + `GpuJackknife` (S71 shaders) | `bootstrap` + `jackknife` |
 | 60 | 17/17 | 20/20 (`validate_drought_index`) | `BatchedElementwise` (Tier B, op=SPI) | `drought_index` (new) |
 | 61 | — | 36/36 (`validate_cross_spring_modern`) | Provenance + autocorrelation + PrecisionRoutingAdvice | `gpu::autocorrelation` (new) |
+| 62 | 22/22 | 26/26 (`validate_dispatch_experiment`) | toadStool dispatch routing + substrate selection | `rpc` + `gpu::*` (dispatch) |
+| 63 | — | 46/46 (`validate_biome_graph`) | biomeOS graph coordination patterns | `rpc` + `niche` (graphs) |
+| 64 | — | 14/14 (`validate_barrier_skin`) | Barrier tissue model — skin diffusion | `eco::tissue` (barrier) |
+| 65 | — | 18/18 (`validate_cross_species`) | Cross-species diversity metrics | `eco::diversity` (cross-sp) |
+| 66 | — | 12/12 (`validate_cytokine`) | Cytokine signalling pathway validation | `eco::tissue` (cytokine) |
+| 67 | — | 25/25 (`validate_atlas_decade`) | Decade-scale atlas ET₀ streaming (1M+ pts) | `gpu::atlas_stream` (decade) |
+| 68 | — | 18/18 (`validate_nass_real`) | NASS yield vs. real agricultural data | `yield_response` (NASS real) |
+| 69 | — | 22/22 (`validate_ncbi_diversity`) | NCBI 16S diversity benchmark suite | `eco::diversity` (NCBI) |
+| 70 | — | 30/30 (`validate_nucleus_pipeline`) | NUCLEUS mixed metalForge pipeline | forge substrate (NUCLEUS) |
+| 71 | 22/22 | 22/22 (`validate_gpu_pipeline`) | GPU pipeline ET₀→Kc→WB orchestration | `gpu::seasonal_pipeline` (pipeline) |
+| 72 | — | 32/32 (`validate_cross_spring_rewire`) | Cross-spring rewire validation | All springs (provenance) |
+| 73 | — | 68/68 (`validate_cross_spring_provenance`) | Cross-spring provenance full pipeline | All springs (Exp 073) |
+| 74 | — | 79/79 (`validate_paper_chain`) | 28-domain paper reproduction chain | All modules (chain) |
+| 75 | — | 46/46 (`validate_local_gpu`) | Local GPU ops 1-6 CPU/GPU parity | `gpu::*` (6 ops) |
+| 76 | — | 60/60 (`validate_nucleus`) | NUCLEUS modern — 27 workloads | `rpc` + all GPU (NUCLEUS) |
+| 77 | — | 32/32 (`validate_gpu_rewire_benchmark`) | GPU rewire benchmark + provenance | All GPU orchestrators |
+| 78 | — | 146/146 (`validate_cross_spring_evolution`) | S87 deep evolution — 20 ops universal precision | All ops (evolution) |
+| 79 | 12/12 | 26/26 (`validate_mc_et0`) | MC ET₀ uncertainty propagation | `gpu::mc_et0` (UQ) |
+| 80 | 18/18 | 20/20 (`validate_bootstrap_jackknife`) | Bootstrap + Jackknife CI on GPU | `gpu::bootstrap` + `jackknife` |
+| 81 | 17/17 | 20/20 (`validate_drought_index`) | SPI drought classification (Gamma MLE + CDF) | `eco::drought_index` |
+| 82 | — | 36/36 (`validate_cross_spring_modern`) | Modern provenance + `PrecisionRoutingAdvice` | `gpu::autocorrelation` |
+| 83 | — | 43/43 (`validate_nucleus_modern`) | biomeOS NUCLEUS Tower/Node 35 JSON-RPC caps | `rpc` + `primal_science` |
+| 84 | — | 21/21 (`validate_cpu_gpu_comprehensive`) | CPU/GPU parity across 21 modules | All GPU orchestrators |
+| 85 | — | 19/19 (`validate_toadstool_dispatch`) | toadStool dispatch routing 19 workloads | `rpc` + `gpu::*` (dispatch) |
+| 86 | — | 17/17 (`validate_nucleus_graphs`) | NUCLEUS graph coordination 22 patterns | `rpc` + `niche` (graphs) |
+| 87 | — | 22/22 (`validate_climate_scenario`) | Multi-scenario climate projection pipeline | `gpu::seasonal_pipeline` (climate) |
 
 ---
 

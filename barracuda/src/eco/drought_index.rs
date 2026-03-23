@@ -175,7 +175,7 @@ pub fn compute_spi(monthly_precip: &[f64], scale: usize) -> Vec<f64> {
 }
 
 #[cfg(test)]
-#[allow(
+#[expect(
     clippy::unwrap_used,
     clippy::float_cmp,
     reason = "test code uses unwrap and exact float comparison"

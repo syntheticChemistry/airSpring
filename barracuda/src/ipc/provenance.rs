@@ -28,13 +28,10 @@
 //! Pattern: `wateringHole/SPRING_PROVENANCE_TRIO_INTEGRATION_PATTERN.md`
 //! Derived from: ludoSpring V15 `barracuda/src/ipc/provenance.rs`
 
-use std::io::{BufRead, BufReader, Write};
-use std::os::unix::net::UnixStream;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::time::Duration;
 
-const PROVENANCE_TIMEOUT_SECS: u64 = 10;
+use crate::rpc::{self, Transport};
 
 fn niche_did() -> String {
     format!("did:key:{}", crate::niche::NICHE_NAME)
@@ -66,16 +63,25 @@ pub struct ProvenanceCompletion {
     pub status: String,
 }
 
-/// Configuration for provenance socket discovery (DI pattern).
+/// Configuration for provenance transport discovery (DI pattern).
 ///
 /// Production code uses [`ProvenanceConfig::from_env`]; tests construct
 /// directly to avoid environment variable mutation.
+///
+/// Supports platform-agnostic transport (ecoBin standard): Unix domain
+/// sockets on Unix/macOS, TCP on all platforms. Resolution order:
+/// 1. `transport_override` (explicit `Transport`)
+/// 2. `NEURAL_API_SOCKET` env var → Unix socket
+/// 3. `NEURAL_API_ADDRESS` env var → TCP socket
+/// 4. biomeOS socket directory discovery
 #[derive(Debug, Clone, Default)]
 pub struct ProvenanceConfig {
-    /// Explicit socket path override (skips all env/discovery logic).
-    pub socket_override: Option<PathBuf>,
+    /// Explicit transport override (skips all env/discovery logic).
+    pub transport_override: Option<Transport>,
     /// Override for `NEURAL_API_SOCKET` env var.
     pub neural_api_socket: Option<PathBuf>,
+    /// Override for `NEURAL_API_ADDRESS` env var (TCP fallback).
+    pub neural_api_address: Option<std::net::SocketAddr>,
     /// Override for `BIOMEOS_SOCKET_DIR` env var.
     pub biomeos_socket_dir: Option<PathBuf>,
 }
@@ -85,109 +91,96 @@ impl ProvenanceConfig {
     #[must_use]
     pub fn from_env() -> Self {
         Self {
-            socket_override: None,
+            transport_override: None,
             neural_api_socket: std::env::var("NEURAL_API_SOCKET").ok().map(PathBuf::from),
+            neural_api_address: std::env::var("NEURAL_API_ADDRESS")
+                .ok()
+                .and_then(|s| s.parse().ok()),
             biomeos_socket_dir: std::env::var("BIOMEOS_SOCKET_DIR").ok().map(PathBuf::from),
         }
     }
 }
 
-/// Resolve the Neural API socket path using biomeOS discovery.
+/// Resolve the Neural API transport using biomeOS discovery.
 ///
 /// Used internally by provenance operations and by other IPC consumers
 /// (e.g., `NestGateProvider`) that need to route through the Neural API.
-pub(crate) fn neural_api_socket_path() -> Option<PathBuf> {
-    neural_api_socket_path_with(&ProvenanceConfig::from_env())
+///
+/// Returns a platform-agnostic [`Transport`] (Unix or TCP).
+pub(crate) fn resolve_neural_api_transport() -> Option<Transport> {
+    resolve_neural_api_transport_with(&ProvenanceConfig::from_env())
 }
 
-/// Resolve Neural API socket with explicit config (DI variant).
-pub(crate) fn neural_api_socket_path_with(config: &ProvenanceConfig) -> Option<PathBuf> {
-    if let Some(ref override_path) = config.socket_override {
-        return Some(override_path.clone());
+/// Resolve Neural API transport with explicit config (DI variant).
+pub(crate) fn resolve_neural_api_transport_with(config: &ProvenanceConfig) -> Option<Transport> {
+    if let Some(ref transport) = config.transport_override {
+        return Some(transport.clone());
     }
 
+    #[cfg(unix)]
     if let Some(ref path) = config.neural_api_socket
         && path.exists()
     {
-        return Some(path.clone());
+        return Some(Transport::Unix(path.clone()));
     }
 
-    let socket_dir = crate::biomeos::resolve_socket_dir();
-    let family_id = crate::biomeos::get_family_id();
-    let sock_name = format!("{}-{family_id}.sock", crate::primal_names::NEURAL_API);
-
-    let candidate = socket_dir.join(&sock_name);
-    if candidate.exists() {
-        return Some(candidate);
+    if let Some(addr) = config.neural_api_address {
+        return Some(Transport::Tcp(addr));
     }
 
-    if let Some(ref dir) = config.biomeos_socket_dir {
-        let p = PathBuf::from(dir).join(&sock_name);
-        if p.exists() {
-            return Some(p);
+    #[cfg(unix)]
+    {
+        let socket_dir = crate::biomeos::resolve_socket_dir();
+        let family_id = crate::biomeos::get_family_id();
+        let sock_name = format!("{}-{family_id}.sock", crate::primal_names::NEURAL_API);
+
+        let candidate = socket_dir.join(&sock_name);
+        if candidate.exists() {
+            return Some(Transport::Unix(candidate));
+        }
+
+        if let Some(ref dir) = config.biomeos_socket_dir {
+            let p = PathBuf::from(dir).join(&sock_name);
+            if p.exists() {
+                return Some(Transport::Unix(p));
+            }
         }
     }
 
     None
 }
 
-fn ipc_err(msg: impl Into<String>) -> crate::error::AirSpringError {
-    crate::error::AirSpringError::Ipc(crate::rpc::IpcError::EmptyResponse { method: msg.into() })
-}
-
 fn capability_call(
-    socket_path: &Path,
+    transport: &Transport,
     capability: &str,
     operation: &str,
     args: &serde_json::Value,
 ) -> std::result::Result<serde_json::Value, crate::error::AirSpringError> {
-    let request = serde_json::json!({
-        "jsonrpc": "2.0",
-        "method": "capability.call",
-        "params": {
-            "capability": capability,
-            "operation": operation,
-            "args": args,
-        },
-        "id": SESSION_COUNTER.fetch_add(1, Ordering::Relaxed),
+    let params = serde_json::json!({
+        "capability": capability,
+        "operation": operation,
+        "args": args,
     });
 
-    let timeout = Duration::from_secs(PROVENANCE_TIMEOUT_SECS);
-    let mut stream =
-        UnixStream::connect(socket_path).map_err(|e| ipc_err(format!("connect: {e}")))?;
-    stream.set_read_timeout(Some(timeout)).ok();
-    stream.set_write_timeout(Some(timeout)).ok();
+    let response = rpc::send_to(transport, "capability.call", &params)?;
 
-    let payload = serde_json::to_string(&request)?;
-    stream
-        .write_all(payload.as_bytes())
-        .map_err(|e| ipc_err(format!("write: {e}")))?;
-    stream
-        .write_all(b"\n")
-        .map_err(|e| ipc_err(format!("write newline: {e}")))?;
-    stream.flush().map_err(|e| ipc_err(format!("flush: {e}")))?;
-
-    let mut reader = BufReader::new(stream);
-    let mut line = String::new();
-    reader
-        .read_line(&mut line)
-        .map_err(|e| ipc_err(format!("read: {e}")))?;
-
-    let parsed: serde_json::Value = serde_json::from_str(line.trim())?;
-
-    if let Some(err) = parsed.get("error") {
-        return Err(ipc_err(format!(
-            "rpc error: {}",
-            err.get("message")
-                .and_then(|m| m.as_str())
-                .unwrap_or("unknown")
-        )));
+    if let Some(err) = response.get("error") {
+        let msg = err
+            .get("message")
+            .and_then(|m| m.as_str())
+            .unwrap_or("unknown");
+        return Err(crate::error::AirSpringError::Ipc(
+            rpc::IpcError::EmptyResponse {
+                method: format!("capability.call({capability}.{operation}): {msg}"),
+            },
+        ));
     }
 
-    parsed
-        .get("result")
-        .cloned()
-        .ok_or_else(|| ipc_err("no result in response"))
+    response.get("result").cloned().ok_or_else(|| {
+        crate::error::AirSpringError::Ipc(rpc::IpcError::EmptyResponse {
+            method: format!("capability.call({capability}.{operation})"),
+        })
+    })
 }
 
 fn local_session_id() -> String {
@@ -214,7 +207,7 @@ pub fn begin_experiment_session_with(
     experiment_name: &str,
     config: &ProvenanceConfig,
 ) -> ProvenanceResult {
-    let Some(socket) = neural_api_socket_path_with(config) else {
+    let Some(transport) = resolve_neural_api_transport_with(config) else {
         return ProvenanceResult {
             id: local_session_id(),
             available: false,
@@ -233,7 +226,7 @@ pub fn begin_experiment_session_with(
     });
 
     capability_call(
-        &socket,
+        &transport,
         crate::primal_names::domains::DAG,
         "create_session",
         &args,
@@ -276,7 +269,7 @@ pub fn record_experiment_step_with(
     step: &serde_json::Value,
     config: &ProvenanceConfig,
 ) -> ProvenanceResult {
-    let Some(socket) = neural_api_socket_path_with(config) else {
+    let Some(transport) = resolve_neural_api_transport_with(config) else {
         return ProvenanceResult {
             id: "unavailable".to_string(),
             available: false,
@@ -290,7 +283,7 @@ pub fn record_experiment_step_with(
     });
 
     capability_call(
-        &socket,
+        &transport,
         crate::primal_names::domains::DAG,
         "append_event",
         &args,
@@ -337,7 +330,7 @@ pub fn complete_experiment_with(
     session_id: &str,
     config: &ProvenanceConfig,
 ) -> ProvenanceCompletion {
-    let Some(socket) = neural_api_socket_path_with(config) else {
+    let Some(transport) = resolve_neural_api_transport_with(config) else {
         return ProvenanceCompletion {
             merkle_root: String::new(),
             commit_id: String::new(),
@@ -347,7 +340,7 @@ pub fn complete_experiment_with(
     };
 
     let Ok(dehydration) = capability_call(
-        &socket,
+        &transport,
         crate::primal_names::domains::DAG,
         "dehydration.trigger",
         &serde_json::json!({ "session_id": session_id }),
@@ -367,7 +360,7 @@ pub fn complete_experiment_with(
         .to_string();
 
     let Ok(commit_result) = capability_call(
-        &socket,
+        &transport,
         crate::primal_names::domains::COMMIT,
         "session",
         &serde_json::json!({
@@ -391,7 +384,7 @@ pub fn complete_experiment_with(
         .to_string();
 
     let braid_id = capability_call(
-        &socket,
+        &transport,
         crate::primal_names::domains::PROVENANCE,
         "create_braid",
         &serde_json::json!({
@@ -472,11 +465,11 @@ pub fn is_available() -> bool {
 /// DI variant — accepts explicit [`ProvenanceConfig`].
 #[must_use]
 pub fn is_available_with(config: &ProvenanceConfig) -> bool {
-    let Some(socket) = neural_api_socket_path_with(config) else {
+    let Some(transport) = resolve_neural_api_transport_with(config) else {
         return false;
     };
     capability_call(
-        &socket,
+        &transport,
         crate::primal_names::domains::DAG,
         "health",
         &serde_json::json!({}),
@@ -504,8 +497,9 @@ mod tests {
 
     fn no_socket_config() -> ProvenanceConfig {
         ProvenanceConfig {
-            socket_override: None,
+            transport_override: None,
             neural_api_socket: None,
+            neural_api_address: None,
             biomeos_socket_dir: None,
         }
     }
@@ -607,6 +601,6 @@ mod tests {
     #[test]
     fn config_from_env_builds() {
         let config = ProvenanceConfig::from_env();
-        assert!(config.socket_override.is_none());
+        assert!(config.transport_override.is_none());
     }
 }
