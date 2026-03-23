@@ -117,8 +117,7 @@ pub fn compute_thornthwaite_cpu(inputs: &[ThornthwaiteInput]) -> Vec<f64> {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
-#[allow(clippy::expect_used, reason = "test code may use expect")]
+#[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 #[expect(
     clippy::suboptimal_flops,
     reason = "test code matches reference Thornthwaite formula term-by-term"

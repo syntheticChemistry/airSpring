@@ -178,8 +178,7 @@ impl BatchedKcClimate {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
-#[allow(clippy::expect_used, reason = "test code may use expect")]
+#[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
 

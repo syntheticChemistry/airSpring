@@ -54,8 +54,8 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` (barracuda) | **908 passed**, 0 failures |
-| `cargo test --test '*'` (integration) | **299 passed** (17 test files) |
+| `cargo test --lib --all-features` (barracuda) | **946 passed**, 0 failures |
+| `cargo test --tests --all-features` (integration) | **20 passed** (17 test files, GPU-gated) |
 | `cargo test --lib` (metalForge) | **61 passed**, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **95.66% line coverage** |
 | `cargo clippy (pedantic)` | **0 warnings** (pedantic, both crates) |
@@ -237,12 +237,12 @@ airSpring/
 │   │   ├── data/                # Data provider abstraction (HttpProvider, BiomeosProvider, NestGateProvider)
 │   │   ├── ipc/                 # Inter-primal communication (provenance trio integration)
 │   │   ├── nautilus.rs          # bingoCube/nautilus evolutionary reservoir (NautilusBrain v0.1.0)
-│   │   ├── rpc.rs               # JSON-RPC 2.0 inter-primal communication
+│   │   ├── rpc/                 # JSON-RPC 2.0 IPC (error.rs, transport.rs, mod.rs)
 │   │   ├── npu.rs               # BrainChip AKD1000 NPU (feature-gated)
 │   │   ├── tolerances/          # Domain-specific validation tolerances (58 named, 4 submodules)
 │   │   └── bin/                 # validate_*, bench_*, airspring_primal (91 declared)
 │   ├── tests/                   # Integration + property tests (15 files + common/)
-│   └── Cargo.toml               # v0.10.0
+│   └── Cargo.toml               # v0.10.0 (barraCuda 0.3.7, wgpu 28)
 ├── niches/                      # BYOB niche definitions (airspring-ecology.yaml)
 ├── metalForge/                  # Mixed hardware dispatch (CPU+GPU+NPU)
 │   ├── deploy/                  # biomeOS deployment graphs (airspring_deploy.toml)
@@ -295,9 +295,9 @@ AGPL-3.0-or-later
 
 ---
 
-*March 18, 2026 — v0.10.0. Deep audit execution: provenance registry expanded
-(11→63 Python baselines), OrExit zero-panic migration across all 91 validation
-binaries, centralized tolerances, `#[allow]`→`#[expect]` Rust 2024 migration,
-smart refactors (data/provider 781→4 modules, gpu/evolution_gaps→resolved_issues),
-hardcoded primal names→constants, data provenance accession IDs documented.
-911 lib + 311 integration + 61 forge tests, 0 failures. AGPL-3.0-or-later.*
+*March 22, 2026 — v0.10.0. Deep evolution execution: `GpuDriverProfile`→`DeviceCapabilities`
+migration (barraCuda 0.3.7), rpc.rs smart refactor (834→3 module files by responsibility),
+`#[allow]`→`#[expect]` round 2 (66 files, 75 unfulfilled removed), `f64_i8` NPU cast helper,
+7 proptest invariants (SVP/delta/Hargreaves/TAW/RAW/Ks), `DEFAULT_RPC_TIMEOUT_SECS` named
+constant, `quantize_i8` edge-case fix. 946 lib + 20 integration + 61 forge tests, 0 failures.
+Clippy pedantic+nursery zero warnings. AGPL-3.0-or-later.*

@@ -159,7 +159,7 @@ fn platform_fallback_socket_dir() -> PathBuf {
 // ── Tests (zero unsafe, zero #[serial]) ──────────────────────────────
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
+#[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use std::path::PathBuf;
 

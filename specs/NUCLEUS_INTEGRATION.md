@@ -197,7 +197,7 @@ invariant across all deployment modes.
 
 ```bash
 # 1. Build biomeOS
-cd /home/eastgate/Development/ecoPrimals/phase2/biomeOS
+cd "$ECOPRIMALS_ROOT/phase2/biomeOS"
 cargo build --workspace --release
 
 # 2. Create family seed (one-time)
@@ -210,7 +210,7 @@ export XDG_RUNTIME_DIR=/run/user/$(id -u)
 biomeos nucleus --mode tower --node-id eastgate
 
 # 4. Verify: airSpring tests still pass (math is deployment-invariant)
-cd /home/eastgate/Development/ecoPrimals/airSpring/barracuda
+cd "$ECOPRIMALS_ROOT/airSpring/barracuda"
 cargo test --release
 cargo run --release --bin validate_gpu_math
 ```

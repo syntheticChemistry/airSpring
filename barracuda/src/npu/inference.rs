@@ -207,8 +207,6 @@ pub fn load_readout_weights(handle: &mut NpuHandle, weights_i8: &[i8]) -> Result
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
-#[allow(clippy::expect_used, reason = "test code may use expect")]
 mod tests {
     use super::*;
 

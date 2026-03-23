@@ -33,9 +33,10 @@ pub use shader_provenance::{
 
 use std::sync::{Arc, OnceLock};
 
+use barracuda::device::capabilities::DeviceCapabilities;
 use barracuda::device::driver_profile::PrecisionRoutingAdvice;
 use barracuda::device::probe::F64BuiltinCapabilities;
-use barracuda::device::{Fp64Rate, Fp64Strategy, GpuDriverProfile, WgpuDevice};
+use barracuda::device::{Fp64Strategy, WgpuDevice};
 
 /// Process-wide cached GPU device.
 ///
@@ -51,8 +52,6 @@ pub struct DevicePrecisionReport {
     pub adapter_name: String,
     /// f64 throughput strategy.
     pub fp64_strategy: Fp64Strategy,
-    /// Raw f64 rate classification.
-    pub fp64_rate: Fp64Rate,
     /// f64 builtin capabilities.
     pub builtins: F64BuiltinCapabilities,
     /// Whether the device has native f64 shader support.
@@ -72,7 +71,6 @@ impl std::fmt::Display for DevicePrecisionReport {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "GPU: {}", self.adapter_name)?;
         writeln!(f, "  Fp64Strategy:      {:?}", self.fp64_strategy)?;
-        writeln!(f, "  Fp64Rate:          {:?}", self.fp64_rate)?;
         writeln!(f, "  PrecisionRouting:  {:?}", self.precision_routing)?;
         writeln!(f, "  f64 shaders:       {}", self.has_f64_shaders)?;
         writeln!(f, "  SPIR-V pass:       {}", self.has_spirv_passthrough)?;
@@ -100,11 +98,11 @@ impl std::fmt::Display for DevicePrecisionReport {
 
 /// Probe a device and produce a precision report.
 ///
-/// Combines `GpuDriverProfile` (for `Fp64Strategy`) with `probe_f64_builtins`
-/// (for native f64 builtin availability).
+/// Combines `DeviceCapabilities` (for `Fp64Strategy` and precision routing) with
+/// `probe_f64_builtins` (for native f64 builtin availability).
 #[must_use]
 pub fn probe_device(device: &WgpuDevice) -> DevicePrecisionReport {
-    let profile = GpuDriverProfile::from_device(device);
+    let caps = DeviceCapabilities::from_device(device);
     let builtins = barracuda::device::test_pool::tokio_block_on(
         barracuda::device::probe::probe_f64_builtins(device),
     );
@@ -112,9 +110,8 @@ pub fn probe_device(device: &WgpuDevice) -> DevicePrecisionReport {
     let info = device.adapter_info();
     DevicePrecisionReport {
         adapter_name: info.name.clone(),
-        fp64_strategy: profile.fp64_strategy(),
-        fp64_rate: profile.fp64_rate,
-        precision_routing: profile.precision_routing(),
+        fp64_strategy: caps.fp64_strategy(),
+        precision_routing: caps.precision_routing(),
         builtins,
         has_f64_shaders: device.has_f64_shaders(),
         has_spirv_passthrough: device.has_spirv_passthrough(),
@@ -146,8 +143,6 @@ pub fn try_f64_device() -> Option<Arc<WgpuDevice>> {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
-#[allow(clippy::expect_used, reason = "test code may use expect")]
 mod tests {
     use super::*;
 
@@ -156,7 +151,6 @@ mod tests {
         let report = DevicePrecisionReport {
             adapter_name: "Test GPU".to_string(),
             fp64_strategy: Fp64Strategy::Native,
-            fp64_rate: Fp64Rate::Full,
             precision_routing: PrecisionRoutingAdvice::F64Native,
             builtins: F64BuiltinCapabilities {
                 basic_f64: true,
@@ -202,7 +196,6 @@ mod tests {
         let report = DevicePrecisionReport {
             adapter_name: "Test GPU".to_string(),
             fp64_strategy: Fp64Strategy::Native,
-            fp64_rate: Fp64Rate::Full,
             precision_routing: PrecisionRoutingAdvice::F64Native,
             builtins: F64BuiltinCapabilities {
                 basic_f64: true,

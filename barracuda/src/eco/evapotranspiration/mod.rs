@@ -60,8 +60,7 @@ pub use radiation::{
 };
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
-#[allow(clippy::expect_used, reason = "test code may use expect")]
+#[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
 
@@ -392,5 +391,43 @@ mod tests {
             (0.85..=1.25).contains(&ratio),
             "PT/PM ratio should be 0.85-1.25 for humid climate (Uccle): ratio={ratio}"
         );
+    }
+
+    mod property_tests {
+        use proptest::prelude::*;
+
+        proptest! {
+            #[test]
+            fn svp_is_positive_and_monotonic(t in -40.0_f64..60.0) {
+                let es = super::saturation_vapour_pressure(t);
+                prop_assert!(es > 0.0, "SVP must be positive at {t}°C: got {es}");
+            }
+
+            #[test]
+            fn svp_monotonically_increases(t in -39.0_f64..59.0) {
+                let es_lo = super::saturation_vapour_pressure(t);
+                let es_hi = super::saturation_vapour_pressure(t + 1.0);
+                prop_assert!(es_hi > es_lo,
+                    "SVP must increase with temperature: es({t})={es_lo}, es({})={es_hi}",
+                    t + 1.0);
+            }
+
+            #[test]
+            fn delta_is_positive(t in -40.0_f64..60.0) {
+                let d = super::vapour_pressure_slope(t);
+                prop_assert!(d > 0.0, "Δ must be positive at {t}°C: got {d}");
+            }
+
+            #[test]
+            fn hargreaves_non_negative(
+                tmin in -20.0_f64..40.0,
+                delta in 1.0_f64..25.0,
+            ) {
+                let tmax = tmin + delta;
+                let tmean = f64::midpoint(tmin, tmax);
+                let et0 = super::hargreaves_et0(tmean, tmin, tmax);
+                prop_assert!(et0 >= 0.0, "Hargreaves ET₀ must be ≥ 0: got {et0}");
+            }
+        }
     }
 }

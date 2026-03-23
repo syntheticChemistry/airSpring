@@ -230,8 +230,7 @@ fn goodness_of_fit<F: Fn(f64) -> f64>(ce: &[f64], qe: &[f64], predict: F) -> (f6
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
-#[allow(clippy::expect_used, reason = "test code may use expect")]
+#[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
 

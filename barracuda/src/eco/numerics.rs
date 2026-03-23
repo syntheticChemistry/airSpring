@@ -16,7 +16,6 @@ pub fn kahan_sum(values: &[f64]) -> f64 {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
 

@@ -187,8 +187,6 @@ pub fn amc_cn_wet(cn_ii: f64) -> f64 {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
-#[allow(clippy::expect_used, reason = "test code may use expect")]
 #[expect(clippy::float_cmp, reason = "test assertions on runoff values")]
 mod tests {
     use super::*;

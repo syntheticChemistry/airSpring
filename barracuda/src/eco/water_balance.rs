@@ -305,8 +305,6 @@ pub fn mass_balance_check(
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
-#[allow(clippy::expect_used, reason = "test code may use expect")]
 mod tests {
     use super::*;
 
@@ -512,5 +510,43 @@ mod tests {
         assert!((taw - 100.0).abs() < 1e-10);
         let raw = readily_available_water(taw, 0.5);
         assert!((raw - 50.0).abs() < 1e-10);
+    }
+
+    mod property_tests {
+        use proptest::prelude::*;
+
+        proptest! {
+            #[test]
+            fn taw_non_negative(
+                fc in 0.15_f64..0.45,
+                delta in 0.01_f64..0.25,
+                depth in 100.0_f64..2000.0,
+            ) {
+                let wp = fc - delta;
+                let taw = super::total_available_water(fc, wp, depth);
+                prop_assert!(taw >= 0.0, "TAW must be ≥ 0: fc={fc}, wp={wp}, depth={depth}, got {taw}");
+            }
+
+            #[test]
+            fn raw_leq_taw(
+                taw in 10.0_f64..500.0,
+                p in 0.0_f64..1.0,
+            ) {
+                let raw = super::readily_available_water(taw, p);
+                prop_assert!(raw <= taw, "RAW must be ≤ TAW: taw={taw}, p={p}, raw={raw}");
+                prop_assert!(raw >= 0.0, "RAW must be ≥ 0");
+            }
+
+            #[test]
+            fn stress_coefficient_in_unit_interval(
+                depletion in 0.0_f64..200.0,
+                taw in 50.0_f64..200.0,
+                raw in 10.0_f64..100.0,
+            ) {
+                let ks = super::stress_coefficient(depletion, taw, raw);
+                prop_assert!((0.0..=1.0).contains(&ks),
+                    "Ks must be in [0,1]: depletion={depletion}, taw={taw}, raw={raw}, ks={ks}");
+            }
+        }
     }
 }

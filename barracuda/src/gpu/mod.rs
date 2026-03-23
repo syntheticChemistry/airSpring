@@ -50,7 +50,7 @@
 //! | `F32` | Downcast to f32 | Inference-only, low precision OK |
 //! | `F16` | Downcast to f16 | Edge inference |
 //!
-//! `Fp64Strategy` is selected per-device by `GpuDriverProfile::fp64_strategy()`:
+//! `Fp64Strategy` is selected per-device by `DeviceCapabilities::fp64_strategy()`:
 //! - **`Native`**: full f64 throughput (compute GPUs)
 //! - **`Hybrid`**: DF64 for bulk math, native f64 for reductions (consumer GPUs)
 //! - **`Concurrent`**: run f64 + DF64 and cross-validate (NVK reliability verification)

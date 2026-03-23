@@ -99,7 +99,7 @@ pub fn dispatch_science(method: &str, params: &serde_json::Value) -> Option<serd
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
+#[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::dispatch_science;
 

@@ -163,8 +163,12 @@ pub fn npu_available() -> bool {
 /// Maps `[lo, hi]` → `[0, 127]` with clamping.
 #[must_use]
 pub fn quantize_i8(val: f64, lo: f64, hi: f64) -> i8 {
-    let normalized = ((val - lo) / (hi - lo)).clamp(0.0, 1.0);
-    (normalized * 127.0) as i8
+    let range = hi - lo;
+    if range <= 0.0 {
+        return 0;
+    }
+    let normalized = ((val - lo) / range).clamp(0.0, 1.0);
+    crate::cast::f64_i8(normalized * 127.0)
 }
 
 /// Dequantize int8 back to `f64`.
@@ -216,8 +220,6 @@ pub fn npu_summary() -> Result<NpuSummary, Error> {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
-#[allow(clippy::expect_used, reason = "test code may use expect")]
 mod tests {
     use super::*;
 

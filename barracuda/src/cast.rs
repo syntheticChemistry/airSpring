@@ -128,6 +128,21 @@ pub const fn usize_i32(v: usize) -> i32 {
     v as i32
 }
 
+/// `f64` → `i8` via truncation toward zero. For NPU int8 quantization.
+///
+/// # Panics
+///
+/// Debug-panics if `v` is NaN, infinite, or outside i8 range.
+#[inline]
+#[must_use]
+pub fn f64_i8(v: f64) -> i8 {
+    debug_assert!(
+        v.is_finite() && v >= f64::from(i8::MIN) && v <= f64::from(i8::MAX),
+        "f64_i8: {v} out of range"
+    );
+    v as i8
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
