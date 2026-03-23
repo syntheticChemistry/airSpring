@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![expect(
+    clippy::cast_precision_loss,
+    reason = "validation harness: JSON fixture counts and indices; bounded for parity checks"
+)]
+
 //! Validate `IoT` time series parser and statistics.
 //!
 //! Uses deterministic synthetic agricultural sensor data to validate:

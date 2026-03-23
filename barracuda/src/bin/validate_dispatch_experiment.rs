@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![expect(
+    clippy::cast_precision_loss,
+    reason = "validation harness: JSON fixture counts and indices; bounded for parity checks"
+)]
+
 //! Exp 064: Full Dispatch Experiment — CPU vs GPU parity across all domains.
 //!
 //! Comprehensive validation bridging:

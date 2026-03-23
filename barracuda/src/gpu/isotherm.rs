@@ -50,13 +50,14 @@
 use barracuda::optimize;
 
 use crate::eco::isotherm::{self, IsothermFit};
+use crate::tolerances::POSITIVE_DATA_GUARD;
 
 const LANGMUIR_QMAX_BOUNDS: (f64, f64) = (0.1, 1000.0);
 const LANGMUIR_KL_BOUNDS: (f64, f64) = (1e-6, 100.0);
 const FREUNDLICH_KF_BOUNDS: (f64, f64) = (1e-4, 1000.0);
 const FREUNDLICH_N_BOUNDS: (f64, f64) = (0.2, 15.0);
 const NM_MAX_ITER: usize = 2000;
-const NM_TOLERANCE: f64 = 1e-10;
+const NM_TOLERANCE: f64 = POSITIVE_DATA_GUARD;
 
 /// Fit Langmuir model using `barracuda::optimize::nelder_mead`.
 ///

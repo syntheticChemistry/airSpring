@@ -1,4 +1,17 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![expect(
+    clippy::cast_precision_loss,
+    reason = "validation harness: JSON fixture counts and indices; bounded for parity checks"
+)]
+#![expect(
+    clippy::cast_possible_truncation,
+    reason = "validation harness: JSON and harness counts; bounded for test fixtures"
+)]
+#![expect(
+    clippy::cast_sign_loss,
+    reason = "validation harness: JSON-derived fields; signed values non-negative in fixtures"
+)]
+
 //! Exp 038: Pedotransfer → Richards Coupled Simulation.
 //!
 //! Validates the full pipeline: Saxton-Rawls soil texture → Van Genuchten

@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![expect(
+    clippy::cast_precision_loss,
+    reason = "validation harness: JSON fixture counts and indices; bounded for parity checks"
+)]
+
 //! Benchmark airSpring GPU operations vs CPU baselines.
 //!
 //! Measures wall-clock time for all GPU orchestrators and CPU fallbacks across

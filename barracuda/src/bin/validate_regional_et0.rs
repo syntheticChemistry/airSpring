@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![expect(
+    clippy::cast_precision_loss,
+    reason = "validation harness: JSON fixture counts and indices; bounded for parity checks"
+)]
+
 //! Regional ET₀ intercomparison — Rust CPU validation for Experiment 010.
 //!
 //! Cross-station statistical analysis for Michigan microclimates.

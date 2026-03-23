@@ -76,11 +76,13 @@ pub use barracuda::tolerances::{Tolerance, check};
 mod atmospheric;
 mod gpu;
 mod instrument;
+mod numerics;
 mod soil;
 
 pub use atmospheric::*;
 pub use gpu::*;
 pub use instrument::*;
+pub use numerics::*;
 pub use soil::*;
 
 #[cfg(test)]

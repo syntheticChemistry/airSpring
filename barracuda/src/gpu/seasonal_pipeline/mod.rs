@@ -53,6 +53,39 @@ use crate::eco::yield_response;
 use crate::gpu::et0::{BatchedEt0, StationDay};
 use crate::gpu::kc_climate::{BatchedKcClimate, KcClimateDay};
 
+/// Typed errors for [`SeasonalPipeline`] GPU paths and multi-field validation.
+///
+/// Convert to [`crate::error::AirSpringError`] via `?` or [`From`].
+#[derive(Debug, thiserror::Error)]
+pub enum PipelineError {
+    /// GPU device or batched engine initialisation failed (Stages 1–2).
+    #[error("GPU device or pipeline init failed: {0}")]
+    DeviceInit(#[source] barracuda::error::BarracudaError),
+    /// GPU shader dispatch failed (e.g. multi-field water-balance step).
+    #[error("GPU shader dispatch failed: {0}")]
+    ShaderDispatch(#[source] barracuda::error::BarracudaError),
+    /// Invalid caller configuration (e.g. mismatched field lengths).
+    #[error("invalid pipeline configuration: {0}")]
+    InvalidConfig(String),
+    /// Non-GPU error while initialising or dispatching (e.g. I/O).
+    #[error("unexpected pipeline error: {0}")]
+    Unexpected(String),
+}
+
+pub(super) fn map_airspring_device_init(e: crate::error::AirSpringError) -> PipelineError {
+    match e {
+        crate::error::AirSpringError::Barracuda(b) => PipelineError::DeviceInit(b),
+        e => PipelineError::Unexpected(e.to_string()),
+    }
+}
+
+pub(super) fn map_airspring_shader_dispatch(e: crate::error::AirSpringError) -> PipelineError {
+    match e {
+        crate::error::AirSpringError::Barracuda(b) => PipelineError::ShaderDispatch(b),
+        e => PipelineError::Unexpected(e.to_string()),
+    }
+}
+
 /// Daily weather observation for the seasonal pipeline.
 #[derive(Debug, Clone, Copy)]
 pub struct WeatherDay {
@@ -197,8 +230,17 @@ impl SeasonalPipeline {
     ///
     /// Returns an error if the GPU device cannot initialise.
     pub fn gpu(device: Arc<WgpuDevice>) -> crate::error::Result<Self> {
-        let gpu_et0 = BatchedEt0::gpu(Arc::clone(&device))?;
-        let gpu_kc = BatchedKcClimate::gpu(device)?;
+        Self::try_gpu(device).map_err(Into::into)
+    }
+
+    /// Same as [`Self::gpu`], with a [`PipelineError`] for precise matching.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the GPU device cannot initialise.
+    pub fn try_gpu(device: Arc<WgpuDevice>) -> Result<Self, PipelineError> {
+        let gpu_et0 = BatchedEt0::gpu(Arc::clone(&device)).map_err(map_airspring_device_init)?;
+        let gpu_kc = BatchedKcClimate::gpu(device).map_err(map_airspring_device_init)?;
         Ok(Self {
             backend: Backend::GpuPerStage,
             gpu_et0: Some(gpu_et0),
@@ -217,8 +259,17 @@ impl SeasonalPipeline {
     ///
     /// Returns an error if the GPU device cannot initialise.
     pub fn streaming(device: Arc<WgpuDevice>) -> crate::error::Result<Self> {
-        let gpu_et0 = BatchedEt0::gpu(Arc::clone(&device))?;
-        let gpu_kc = BatchedKcClimate::gpu(device)?;
+        Self::try_streaming(device).map_err(Into::into)
+    }
+
+    /// Same as [`Self::streaming`], with a [`PipelineError`] for precise matching.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the GPU device cannot initialise.
+    pub fn try_streaming(device: Arc<WgpuDevice>) -> Result<Self, PipelineError> {
+        let gpu_et0 = BatchedEt0::gpu(Arc::clone(&device)).map_err(map_airspring_device_init)?;
+        let gpu_kc = BatchedKcClimate::gpu(device).map_err(map_airspring_device_init)?;
         Ok(Self {
             backend: Backend::GpuPipelined,
             gpu_et0: Some(gpu_et0),
@@ -602,6 +653,57 @@ mod tests {
         let result = pipeline.run_multi_field(&[], &[]).unwrap();
         assert!(result.fields.is_empty());
         assert_eq!(result.gpu_wb_dispatches, 0);
+    }
+
+    #[test]
+    fn run_multi_field_rejects_mismatched_field_lengths() {
+        let pipeline = SeasonalPipeline::cpu();
+        let w1 = vec![sample_weather_day(1)];
+        let w2 = vec![sample_weather_day(2), sample_weather_day(3)];
+        let configs = [
+            CropConfig::standard(CropType::Corn),
+            CropConfig::standard(CropType::Corn),
+        ];
+        let err = pipeline
+            .run_multi_field(&[&w1, &w2], &configs)
+            .expect_err("expected InvalidConfig");
+        match err {
+            crate::error::AirSpringError::Pipeline(PipelineError::InvalidConfig(ref msg)) => {
+                assert!(msg.contains("same number of days"), "message: {msg}");
+            }
+            e => panic!("unexpected error: {e:?}"),
+        }
+    }
+
+    #[test]
+    fn pipeline_error_invalid_config_display() {
+        let e = PipelineError::InvalidConfig("test reason".into());
+        let s = format!("{e}");
+        assert!(s.contains("invalid pipeline configuration"));
+        assert!(s.contains("test reason"));
+    }
+
+    #[test]
+    fn pipeline_error_device_init_display() {
+        let e =
+            PipelineError::DeviceInit(barracuda::error::BarracudaError::Device("no device".into()));
+        assert!(format!("{e}").contains("init"));
+        assert!(format!("{e}").contains("no device"));
+    }
+
+    #[test]
+    fn pipeline_error_shader_dispatch_display() {
+        let e =
+            PipelineError::ShaderDispatch(barracuda::error::BarracudaError::Gpu("dispatch".into()));
+        let s = format!("{e}");
+        assert!(s.contains("dispatch"));
+        assert!(s.to_lowercase().contains("shader"));
+    }
+
+    #[test]
+    fn pipeline_error_unexpected_display() {
+        let e = PipelineError::Unexpected("io".into());
+        assert!(format!("{e}").contains("unexpected"));
     }
 
     #[test]

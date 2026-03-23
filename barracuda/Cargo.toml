@@ -15,12 +15,13 @@ testutil = []
 npu = ["dep:akida-driver"]
 
 [dependencies]
-# BarraCuda 0.3.5: standalone sovereign math engine (ecoPrimals/barraCuda).
+# BarraCuda 0.3.7: standalone sovereign math engine (ecoPrimals/barraCuda).
 # Extracted from ToadStool S89 — universal math, precision per hardware.
-# v0.3.5: wgpu 28, DF64 precision tier, SpringDomain newtype, F64BuiltinCapabilities DF64 fields.
+# v0.3.7: wgpu 28, DF64 precision tier, nursery linting, bare semantic IPC
+# method naming, GPU pooling resilience, feature-gated special/spectral.
 # airSpring validates that Rust baselines can be faithfully ported to
 # BarraCuda shaders. Used for stats, validation, GPU ops, and PDE primitives.
-barracuda = { path = "../../barraCuda/crates/barracuda" }
+barracuda = { path = "../../barraCuda/crates/barracuda", default-features = false, features = ["gpu", "domain-pde"] }
 
 # JSON parsing: loads benchmark JSON files (control/fao56/*.json, etc.)
 # with full provenance for validation fidelity.
@@ -44,7 +45,7 @@ bingocube-nautilus = { path = "../../primalTools/bingoCube/nautilus", features =
 # Serde: needed for Nautilus brain serialization (observations, shell state).
 serde = { version = "1", features = ["derive"] }
 
-# wgpu 28 — matches barraCuda 0.3.5's pinned version for type compatibility.
+# wgpu 28 — matches barraCuda 0.3.7's pinned version for type compatibility.
 # Used by GPU buffer I/O (bytemuck transmute) and device interaction.
 wgpu = { version = "28", default-features = false, features = ["wgsl", "vulkan", "vulkan-portability"] }
 
@@ -61,16 +62,8 @@ nursery = { level = "warn", priority = -1 }
 module_name_repetitions = "allow"
 must_use_candidate = "allow"
 return_self_not_must_use = "allow"
-# Library code uses #![deny()] in lib.rs and delegates all casts to the
-# cast module (cast::usize_f64, cast::f64_usize, cast::f64_i32, etc.).
-# These crate-level allows cover the 91 validation binaries where raw
-# `i as f64` casts are pervasive for loop counters and sample generation.
-# Evolution: when touching a validation binary, add `use cast::*` and
-# replace raw casts with helpers, then add per-binary #[expect] to
-# progressively tighten. Goal: remove these crate-level allows entirely.
-cast_precision_loss = "allow"
-cast_possible_truncation = "allow"
-cast_sign_loss = "allow"
+# Library code uses #![deny()] in lib.rs and delegates casts to the cast module.
+# Validation binaries use per-file #[expect(clippy::cast_*)] with reasons (wetSpring V132).
 
 [dev-dependencies]
 # Serial test execution for env-var tests (biomeos) to avoid race conditions.

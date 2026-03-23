@@ -34,6 +34,12 @@ import math
 import sys
 from pathlib import Path
 
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_CONTROL_DIR = _SCRIPT_DIR if _SCRIPT_DIR.name == "control" else _SCRIPT_DIR.parent
+if str(_CONTROL_DIR) not in sys.path:
+    sys.path.insert(0, str(_CONTROL_DIR))
+from provenance import attach_provenance
+
 # VG parameters: Carsel & Parrish (1988) — matching barracuda
 SOIL_TYPES = {
     "sand":       {"theta_r": 0.045, "theta_s": 0.43, "alpha": 0.145, "n": 2.68},
@@ -327,6 +333,10 @@ def main():
 
     print(f"\n=== Anderson Coupling: {n_pass}/{n_total} PASS, {n_total - n_pass} FAIL ===")
 
+    attach_provenance(results, {
+        "baseline_script": "control/anderson_coupling/anderson_coupling.py",
+        "experiment": "Exp 045",
+    })
     out_path = Path(__file__).parent / "benchmark_anderson_coupling.json"
     with open(out_path, "w") as f:
         json.dump(results, f, indent=2)

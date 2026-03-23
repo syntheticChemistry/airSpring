@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![expect(
+    clippy::cast_possible_truncation,
+    reason = "validation harness: JSON and harness counts; bounded for test fixtures"
+)]
+
 //! Exp 035: Hamon (1961) Temperature-Based PET Validation.
 //!
 //! Validates the minimal-data Hamon PET method against analytical benchmarks

@@ -27,6 +27,12 @@ import math
 import sys
 from pathlib import Path
 
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_CONTROL_DIR = _SCRIPT_DIR if _SCRIPT_DIR.name == "control" else _SCRIPT_DIR.parent
+if str(_CONTROL_DIR) not in sys.path:
+    sys.path.insert(0, str(_CONTROL_DIR))
+from provenance import attach_provenance
+
 
 # ── FAO-56 Penman-Monteith components ──────────────────────────────
 
@@ -417,6 +423,7 @@ def main():
         "_tolerance_justification": "Deterministic synthetic weather + FAO-56 analytical: mass balance < 0.1 mm"
     }
 
+    attach_provenance(benchmark)
     with open("control/season_water_budget/benchmark_season_wb.json", "w") as f:
         json.dump(benchmark, f, indent=2)
     print(f"Wrote benchmark_season_wb.json")

@@ -1,4 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![expect(
+    clippy::cast_precision_loss,
+    reason = "validation harness: JSON fixture counts and indices; bounded for parity checks"
+)]
+#![expect(
+    clippy::cast_possible_truncation,
+    reason = "validation harness: JSON and harness counts; bounded for test fixtures"
+)]
+
 //! Experiment 029: Funky NPU for Agricultural `IoT`
 //!
 //! Demonstrates advanced AKD1000 capabilities for field-deployed systems —

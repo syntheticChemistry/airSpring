@@ -22,6 +22,8 @@
 use barracuda::special::gamma::regularized_gamma_p as upstream_gamma_p;
 use barracuda::stats::normal::norm_ppf;
 
+use crate::tolerances::POSITIVE_DATA_GUARD;
+
 /// WMO drought classification category.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DroughtClass {
@@ -167,7 +169,7 @@ pub fn compute_spi(monthly_precip: &[f64], scale: usize) -> Vec<f64> {
         } else {
             (1.0 - q).mul_add(gamma_cdf(accum[i], &params), q)
         };
-        let prob_clamped = prob.clamp(1e-10, 1.0 - 1e-10);
+        let prob_clamped = prob.clamp(POSITIVE_DATA_GUARD, 1.0 - POSITIVE_DATA_GUARD);
         spi[i] = norm_ppf(prob_clamped);
     }
 
@@ -175,11 +177,7 @@ pub fn compute_spi(monthly_precip: &[f64], scale: usize) -> Vec<f64> {
 }
 
 #[cfg(test)]
-#[expect(
-    clippy::unwrap_used,
-    clippy::float_cmp,
-    reason = "test code uses unwrap and exact float comparison"
-)]
+#[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
 

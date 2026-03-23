@@ -18,6 +18,7 @@ use barracuda::device::WgpuDevice;
 use barracuda::optimize::brent_gpu::BrentGpu;
 
 use crate::eco::infiltration::{self, GreenAmptParams};
+use crate::tolerances::POSITIVE_DATA_GUARD;
 
 #[cfg(test)]
 use super::device_info::try_f64_device;
@@ -62,7 +63,7 @@ impl BatchedInfiltration {
             return Ok(Vec::new());
         }
 
-        let brent = BrentGpu::new(Arc::clone(&self.device), 100, 1e-10)?;
+        let brent = BrentGpu::new(Arc::clone(&self.device), 100, POSITIVE_DATA_GUARD)?;
 
         let psi_dt = params.psi_cm * params.delta_theta;
         let ks = params.ks_cm_hr;

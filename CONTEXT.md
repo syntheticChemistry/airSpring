@@ -25,17 +25,18 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - **Architecture:** Two workspace crates (`airspring-barracuda` library + `airspring-forge` dispatch)
 - **Communication:** JSON-RPC 2.0 over Unix sockets + TCP (biomeOS capability routing, platform-agnostic Transport)
 - **License:** AGPL-3.0-or-later
-- **Lib tests:** 946 (with all features)
-- **Integration tests:** 20 (17 test files, GPU-gated)
-- **Forge tests:** 61
-- **Validation binaries:** 91 (hardcoded expected values, PASS/FAIL, exit code)
+- **Lib tests:** 938 (barracuda, with all features)
+- **Integration + doc tests:** 316 (barracuda)
+- **Barracuda total:** 1,254 (938 lib + 316 integration/doc)
+- **Forge tests:** 62 (metalForge)
+- **Grand total:** 1,316 (both crates)
+- **Binaries:** 91 (84 validation, 4 bench, 3 operational)
 - **Proptest invariants:** 7 (SVP, delta, Hargreaves, TAW, RAW, Ks)
 - **Line coverage:** ~90% (cargo llvm-cov)
 - **MSRV:** 1.92
 - **Edition:** 2024
 - **Crate count:** 2 workspace crates
 - **GPU backend:** barraCuda 0.3.7 (wgpu 28, Vulkan, DeviceCapabilities API)
-- **Doctests:** 9 (0 ignored, all compile-checked)
 - **Experiments:** 87 (all PASS)
 
 ## Key Capabilities (JSON-RPC methods)

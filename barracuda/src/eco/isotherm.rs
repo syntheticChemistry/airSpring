@@ -11,6 +11,7 @@
 //! - **Separation factor**: RL = 1 / (1 + KL × C0)
 
 use crate::len_f64;
+use crate::tolerances::{LINEAR_SYSTEM_EPSILON, POSITIVE_DATA_GUARD};
 
 /// Langmuir isotherm: qe = qmax * KL * Ce / (1 + KL * Ce)
 #[must_use]
@@ -27,7 +28,7 @@ pub fn langmuir(ce: f64, qmax: f64, kl: f64) -> f64 {
 /// Uses `n_inv = 1/n` as the exponent to avoid division in hot path.
 #[must_use]
 pub fn freundlich(ce: f64, kf: f64, n_inv: f64) -> f64 {
-    let ce_safe = ce.max(1e-10);
+    let ce_safe = ce.max(POSITIVE_DATA_GUARD);
     kf * ce_safe.powf(n_inv)
 }
 
@@ -52,14 +53,6 @@ pub struct IsothermFit {
     pub rmse: f64,
 }
 
-/// Guard against singular matrices in regression.
-const SINGULARITY_GUARD: f64 = 1e-30;
-
-/// Guard against log-domain singularity. Set to 1e-10 because linearized isotherm
-/// fitting uses ln(Ce) and ln(qe) where concentrations are always positive (mg/L);
-/// this floor avoids numerical instability while preserving near-zero data points.
-const LOG_DOMAIN_GUARD: f64 = 1e-10;
-
 /// Fit Langmuir isotherm to (Ce, qe) data using linearized least squares.
 ///
 /// Linearization: Ce/qe = 1/(qmax×KL) + Ce/qmax
@@ -74,7 +67,7 @@ pub fn fit_langmuir(ce: &[f64], qe: &[f64]) -> Option<IsothermFit> {
     let valid: Vec<(f64, f64)> = ce
         .iter()
         .zip(qe)
-        .filter(|&(_, &qi)| qi > LOG_DOMAIN_GUARD)
+        .filter(|&(_, &qi)| qi > POSITIVE_DATA_GUARD)
         .map(|(&ci, &qi)| (ci, qi))
         .collect();
 
@@ -89,12 +82,12 @@ pub fn fit_langmuir(ce: &[f64], qe: &[f64]) -> Option<IsothermFit> {
     let slope = lin.0;
     let intercept = lin.1;
 
-    if slope.abs() < SINGULARITY_GUARD {
+    if slope.abs() < LINEAR_SYSTEM_EPSILON {
         return None;
     }
 
     let qmax = 1.0 / slope;
-    let kl = if (qmax * intercept).abs() < SINGULARITY_GUARD {
+    let kl = if (qmax * intercept).abs() < LINEAR_SYSTEM_EPSILON {
         return None;
     } else {
         1.0 / (qmax * intercept)
@@ -129,7 +122,7 @@ pub fn fit_freundlich(ce: &[f64], qe: &[f64]) -> Option<IsothermFit> {
     let valid: Vec<(f64, f64)> = ce
         .iter()
         .zip(qe)
-        .filter(|&(&ci, &qi)| ci > LOG_DOMAIN_GUARD && qi > LOG_DOMAIN_GUARD)
+        .filter(|&(&ci, &qi)| ci > POSITIVE_DATA_GUARD && qi > POSITIVE_DATA_GUARD)
         .map(|(&ci, &qi)| (ci, qi))
         .collect();
 
@@ -145,7 +138,7 @@ pub fn fit_freundlich(ce: &[f64], qe: &[f64]) -> Option<IsothermFit> {
     let y: Vec<f64> = valid.iter().map(|&(_, qi)| qi.ln()).collect();
     let lin = fit_linear_internal(&x, &y)?;
     let slope = lin.0;
-    if slope.abs() < SINGULARITY_GUARD {
+    if slope.abs() < LINEAR_SYSTEM_EPSILON {
         return None;
     }
     let n_init = 1.0 / slope;
@@ -170,7 +163,7 @@ pub fn fit_freundlich(ce: &[f64], qe: &[f64]) -> Option<IsothermFit> {
             sum_num += qi * c_pow;
             sum_den += c_pow * c_pow;
         }
-        if sum_den < SINGULARITY_GUARD {
+        if sum_den < LINEAR_SYSTEM_EPSILON {
             continue;
         }
         let kf = sum_num / sum_den;

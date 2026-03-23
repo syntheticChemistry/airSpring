@@ -356,7 +356,7 @@ fn lehmer_next(state: &mut u64) -> f64 {
 }
 
 fn box_muller_next(state: &mut u64) -> f64 {
-    let u1 = lehmer_next(state).max(1e-300);
+    let u1 = lehmer_next(state).max(crate::tolerances::LOG_UNIFORM_FLOOR);
     let u2 = lehmer_next(state);
     (-2.0 * u1.ln()).sqrt() * (2.0 * std::f64::consts::PI * u2).cos()
 }

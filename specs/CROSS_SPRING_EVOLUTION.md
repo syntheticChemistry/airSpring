@@ -1,6 +1,6 @@
 # Cross-Spring Shader Evolution — airSpring Provenance
 
-**Updated**: March 19, 2026 (v0.10.0, 911 lib + 311 integration + 61 forge, barraCuda 0.3.5 / wgpu 28, 87 experiments)
+**Updated**: March 19, 2026 (v0.10.0, 911 lib + 311 integration + 61 forge, barraCuda 0.3.7 / wgpu 28, 87 experiments)
 
 ## Summary
 

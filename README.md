@@ -19,7 +19,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,284/1,284 PASS** | 60 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB, MC ET₀ uncertainty, bootstrap/jackknife CI, SPI drought index |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **911 lib + 311 integration** | 97 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
+| Phase 1: Rust validation | **938 lib + 316 integration (1,254 total)** | 91 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (34/34 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -54,11 +54,11 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib --all-features` (barracuda) | **946 passed**, 0 failures |
-| `cargo test --tests --all-features` (integration) | **20 passed** (17 test files, GPU-gated) |
-| `cargo test --lib` (metalForge) | **61 passed**, 0 failures |
+| `cargo test --lib --all-features` (barracuda) | **938 passed**, 0 failures |
+| `cargo test --tests --all-features` (barracuda) | **316 passed** (integration + doc tests) |
+| `cargo test --lib` (metalForge) | **62 passed**, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **95.66% line coverage** |
-| `cargo clippy (pedantic)` | **0 warnings** (pedantic, both crates) |
+| `cargo clippy (pedantic + nursery, -D warnings)` | **0 warnings** (both crates) |
 | `cargo fmt --check` | **Clean** |
 | `cargo doc --no-deps` | **Clean** (both crates) |
 | `cargo-deny check` | **Clean** (AGPL-3.0-or-later) |
@@ -229,7 +229,7 @@ airSpring/
 │   ├── bootstrap_jackknife/     # Bootstrap & Jackknife CI (20/20)
 │   ├── drought_index/           # SPI drought index (20/20)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (946 lib tests, 91 binaries, barraCuda 0.3.7 / wgpu 28, Edition 2024)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (938 lib + 316 integration/doc = 1,254 tests, 91 binaries, barraCuda 0.3.7 / wgpu 28, Edition 2024)
 │   ├── src/
 │   │   ├── biomeos/                # biomeOS socket resolution + primal discovery (3 sub-modules)
 │   │   ├── eco/                 # Domain modules (22 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine + drought_index)
@@ -246,7 +246,7 @@ airSpring/
 ├── niches/                      # BYOB niche definitions (airspring-ecology.yaml)
 ├── metalForge/                  # Mixed hardware dispatch (CPU+GPU+NPU)
 │   ├── deploy/                  # biomeOS deployment graphs (airspring_deploy.toml)
-│   └── forge/                   # airspring-forge (61 tests, 6 binaries, live hardware probe)
+│   └── forge/                   # airspring-forge (62 tests, 6 binaries, live hardware probe)
 ├── specs/                       # Specifications and requirements
 │   ├── PAPER_REVIEW_QUEUE.md    # Paper reproduction queue (87 experiments)
 │   ├── BARRACUDA_REQUIREMENTS.md# GPU + NPU kernel requirements
@@ -300,6 +300,7 @@ provenance IPC (Unix-only `UnixStream` → `Transport` enum via `rpc::send_to`),
 `#[allow]`→`#[expect]` final sweep (zero remaining in production), 4 doctests
 evolved `ignore`→`no_run` (9/9 pass, 0 ignored), `ProvenanceConfig` evolved to
 transport-based discovery (TCP fallback for cross-platform). Exp 062-087 documented
-in PAPER_REVIEW_QUEUE.md. 946 lib + 20 integration + 61 forge + 9 doc tests,
-0 failures. Clippy pedantic+nursery zero warnings. Zero unsafe. Zero C deps.
+in PAPER_REVIEW_QUEUE.md. 938 lib + 316 integration/doc = 1,254 barracuda tests;
+62 forge; 1,316 total tests. 0 failures. Clippy pedantic+nursery zero warnings.
+Zero unsafe. Zero C deps.
 Zero hardcoded primals. AGPL-3.0-or-later.*

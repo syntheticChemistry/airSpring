@@ -27,6 +27,11 @@ import math
 import sys
 from pathlib import Path
 
+_CONTROL_DIR = Path(__file__).resolve().parent.parent
+if str(_CONTROL_DIR) not in sys.path:
+    sys.path.insert(0, str(_CONTROL_DIR))
+from provenance import attach_provenance
+
 import numpy as np
 import pandas as pd
 
@@ -206,11 +211,11 @@ def main():
 
     benchmark = {
         "experiment": "Exp 059: Atlas 80yr Decade Analysis",
-        "_provenance": "Open-Meteo ERA5 + FAO-56 PM ET₀",
         "season": "May 1 – Sep 30 (DOY 121–273)",
         "n_stations": len(results),
         "stations": results,
     }
+    attach_provenance(benchmark, {"source_note": "Open-Meteo ERA5 + FAO-56 PM ET₀"})
 
     out_path = OUT_DIR / "benchmark_atlas_decade.json"
     OUT_DIR.mkdir(parents=True, exist_ok=True)

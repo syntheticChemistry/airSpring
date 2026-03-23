@@ -61,11 +61,12 @@ id = "fetch_weather"
 depends_on = ["check_nestgate"]
 output = "weather_data"
 
+# Canonical niche capability: data.weather (ecology.fetch_weather / open-meteo binding is aspirational until routed here)
 [nodes.operation]
 name = "capability_call"
 
 [nodes.operation.params]
-capability = "ecology.fetch_weather"
+capability = "data.weather"
 params = { source = "open_meteo", latitude = "${LATITUDE}", longitude = "${LONGITUDE}", start_date = "${START_DATE}", end_date = "${END_DATE}", variables = ["temperature_2m_max", "temperature_2m_min", "shortwave_radiation_sum", "wind_speed_10m_max", "relative_humidity_2m_mean", "precipitation_sum"] }
 
 [nodes.constraints]
@@ -75,6 +76,7 @@ timeout_ms = 30000
 # PHASE 3: ET₀ COMPUTATION (7 methods)
 # ═══════════════════════════════════════════════════════════════════════════════
 
+# Canonical: science.et0_fao56. Aspirational: single-call multi-method ecology.et0_compute (pm, pt, hargreaves, …) — use science.et0_* / ecology.et0_* per method when exposed.
 [[nodes]]
 id = "compute_et0"
 depends_on = ["fetch_weather", "check_toadstool"]
@@ -84,7 +86,7 @@ output = "et0_results"
 name = "capability_call"
 
 [nodes.operation.params]
-capability = "ecology.et0_compute"
+capability = "science.et0_fao56"
 params = { weather_input = "${WEATHER_DATA}", methods = ["pm", "pt", "hargreaves", "thornthwaite", "makkink", "turc", "hamon"], elevation_m = "${ELEVATION}", latitude_deg = "${LATITUDE}", use_gpu = true }
 
 [nodes.constraints]

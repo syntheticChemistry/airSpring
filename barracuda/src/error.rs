@@ -31,6 +31,9 @@ pub enum AirSpringError {
     /// IPC errors (socket connect, timeout, protocol).
     #[error("IPC error: {0}")]
     Ipc(#[from] crate::rpc::IpcError),
+    /// Seasonal GPU pipeline (ET₀ → Kc → water balance → yield).
+    #[error("seasonal pipeline error: {0}")]
+    Pipeline(#[from] crate::gpu::seasonal_pipeline::PipelineError),
 }
 
 impl AirSpringError {
@@ -169,5 +172,13 @@ mod tests {
         let barr_err = barracuda::error::BarracudaError::Device("gone".into());
         let err: AirSpringError = barr_err.into();
         assert!(matches!(err, AirSpringError::Barracuda(_)));
+    }
+
+    #[test]
+    fn test_pipeline_error_display() {
+        let pe = crate::gpu::seasonal_pipeline::PipelineError::InvalidConfig("bad".into());
+        let err: AirSpringError = pe.into();
+        assert!(format!("{err}").contains("seasonal pipeline error"));
+        assert!(format!("{err}").contains("bad"));
     }
 }

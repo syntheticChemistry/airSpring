@@ -301,6 +301,38 @@ jobs:
           cargo run --bin validate_paper_chain
           cargo run --bin cross_validate
 
+  validate-release:
+    name: Release-mode validation (FMA/LTO)
+    runs-on: ubuntu-latest
+    needs: [test]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: airSpring
+
+      - uses: actions/checkout@v4
+        with:
+          repository: syntheticChemistry/ecoPrimals
+          path: phase1
+          sparse-checkout: toadstool/crates/barracuda
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Build validation binaries (release)
+        working-directory: airSpring/barracuda
+        run: cargo build --release --bins
+
+      - name: Run release-mode validation binaries
+        working-directory: airSpring/barracuda
+        run: |
+          cargo run --release --bin validate_et0
+          cargo run --release --bin validate_water_balance
+          cargo run --release --bin validate_richards
+          cargo run --release --bin validate_diversity
+          cargo run --release --bin validate_scs_cn
+          cargo run --release --bin validate_mc_et0
+          cargo run --release --bin validate_dual_kc
+
   deny:
     name: Dependency Audit
     runs-on: ubuntu-latest

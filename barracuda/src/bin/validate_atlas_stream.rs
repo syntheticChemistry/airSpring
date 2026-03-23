@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![expect(
+    clippy::cast_precision_loss,
+    reason = "validation harness: JSON fixture counts and indices; bounded for parity checks"
+)]
+
 //! Experiment 046: Atlas Stream — real 80yr data through `SeasonalPipeline` + `AtlasStream`.
 //!
 //! Wires the new GPU-ready orchestrators (`gpu::seasonal_pipeline`, `gpu::atlas_stream`)

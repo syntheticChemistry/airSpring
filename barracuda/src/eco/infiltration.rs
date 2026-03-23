@@ -19,6 +19,8 @@
 //! Rawls WJ, Brakensiek DL, Miller N (1983) *Green-Ampt parameters from soils
 //! data.* J Hydraul Eng 109(1):62-70.
 
+use crate::tolerances::{DIVISION_GUARD, POSITIVE_DATA_GUARD};
+
 /// Green-Ampt soil hydraulic parameters (Rawls et al. 1983).
 #[derive(Debug, Clone, Copy)]
 pub struct GreenAmptParams {
@@ -96,12 +98,12 @@ pub fn cumulative_infiltration(params: &GreenAmptParams, t_hr: f64) -> f64 {
         }
         let g = psi_dt.mul_add(-(f / psi_dt).ln_1p(), ks.mul_add(-t_hr, f));
         let dg = 1.0 - psi_dt / (psi_dt + f);
-        if dg.abs() < 1e-15 {
+        if dg.abs() < DIVISION_GUARD {
             break;
         }
         let f_new = f - g / dg;
         let f_new = if f_new < 0.0 { f * 0.5 } else { f_new };
-        if (f_new - f).abs() < 1e-10 {
+        if (f_new - f).abs() < POSITIVE_DATA_GUARD {
             f = f_new;
             break;
         }

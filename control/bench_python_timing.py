@@ -11,6 +11,13 @@ import json
 import math
 import sys
 import time
+from pathlib import Path
+
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_CONTROL_DIR = _SCRIPT_DIR if _SCRIPT_DIR.name == "control" else _SCRIPT_DIR.parent
+if str(_CONTROL_DIR) not in sys.path:
+    sys.path.insert(0, str(_CONTROL_DIR))
+from provenance import attach_provenance
 
 
 def bench(name, func, n, *args):
@@ -395,6 +402,7 @@ def main():
     results.append(bench("anderson_regime", anderson_regime, N * 10, 5.0, 3.0))
 
     out = {"benchmarks": results}
+    attach_provenance(out)
     json.dump(out, sys.stdout)
 
 

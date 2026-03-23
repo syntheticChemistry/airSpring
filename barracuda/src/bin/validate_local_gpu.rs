@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![expect(
+    clippy::cast_precision_loss,
+    reason = "validation harness: JSON fixture counts and indices; bounded for parity checks"
+)]
+
 //! Exp 075: GPU Compute Parity Validation (upstream `BatchedElementwiseF64`).
 //!
 //! Validates that `BarraCuda` `BatchedElementwiseF64` ops 14-19 produce results

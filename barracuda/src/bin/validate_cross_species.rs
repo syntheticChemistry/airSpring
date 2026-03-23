@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![expect(
+    clippy::cast_possible_truncation,
+    reason = "validation harness: JSON and harness counts; bounded for test fixtures"
+)]
+
 //! Exp 069: Cross-Species Skin Comparison Validation.
 //!
 //! Validates Anderson predictions across species (canine, feline, human).

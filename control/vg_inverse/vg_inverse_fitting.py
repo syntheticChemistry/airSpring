@@ -26,6 +26,12 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
 
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_CONTROL_DIR = _SCRIPT_DIR if _SCRIPT_DIR.name == "control" else _SCRIPT_DIR.parent
+if str(_CONTROL_DIR) not in sys.path:
+    sys.path.insert(0, str(_CONTROL_DIR))
+from provenance import attach_provenance
+
 
 # ── Van Genuchten forward model ─────────────────────────────────────
 
@@ -348,6 +354,7 @@ def main():
         "_tolerance_justification": "Forward VG and round-trip are analytical (< 1e-6). Inverse fitting from noiseless synthetic data recovers α, n within 5% relative."
     }
 
+    attach_provenance(benchmark)
     with open("control/vg_inverse/benchmark_vg_inverse.json", "w") as f:
         json.dump(benchmark, f, indent=2)
     print(f"Wrote benchmark_vg_inverse.json")

@@ -40,6 +40,12 @@ import math
 import sys
 from pathlib import Path
 
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_CONTROL_DIR = _SCRIPT_DIR if _SCRIPT_DIR.name == "control" else _SCRIPT_DIR.parent
+if str(_CONTROL_DIR) not in sys.path:
+    sys.path.insert(0, str(_CONTROL_DIR))
+from provenance import attach_provenance
+
 
 # ── Gamma distribution fitting (MLE via Thom's approximation) ────────
 
@@ -325,23 +331,23 @@ def main():
     print(f"\n  {checks - fails}/{checks} PASS")
 
     # Collect first few SPI values for benchmark comparison
+    prov_merge = {
+        "experiment": "Exp 081",
+        "method": "Standardized Precipitation Index (McKee et al. 1993)",
+        "created": "2026-03-07",
+        "baseline_script": "control/drought_index/drought_index_spi.py",
+        "baseline_command": "python3 control/drought_index/drought_index_spi.py",
+        "baseline_commit": "1c11763",
+        "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+        "repository": "ecoPrimals/airSpring",
+        "references": [
+            "McKee TB et al. (1993) Drought frequency and duration to time scales",
+            "Edwards DC, McKee TB (1997) Characteristics of 20th century drought",
+            "WMO (2012) Standardized Precipitation Index User Guide. WMO-No. 1090"
+        ],
+        "reproduction_note": "Deterministic RNG seed=42; fully reproducible"
+    }
     benchmark = {
-        "_provenance": {
-            "experiment": "Exp 081",
-            "method": "Standardized Precipitation Index (McKee et al. 1993)",
-            "created": "2026-03-07",
-            "baseline_script": "control/drought_index/drought_index_spi.py",
-            "baseline_command": "python3 control/drought_index/drought_index_spi.py",
-            "baseline_commit": "1c11763",
-            "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
-            "repository": "ecoPrimals/airSpring",
-            "references": [
-                "McKee TB et al. (1993) Drought frequency and duration to time scales",
-                "Edwards DC, McKee TB (1997) Characteristics of 20th century drought",
-                "WMO (2012) Standardized Precipitation Index User Guide. WMO-No. 1090"
-            ],
-            "reproduction_note": "Deterministic RNG seed=42; fully reproducible"
-        },
         "monthly_precip_mm": precip,
         "season_params": {
             "n_years": 5,
@@ -395,8 +401,10 @@ def main():
         return obj
 
     out_path = Path(__file__).parent / "benchmark_drought_index.json"
+    sanitized = sanitize_nan(benchmark)
+    attach_provenance(sanitized, prov_merge)
     with open(out_path, "w") as f:
-        json.dump(sanitize_nan(benchmark), f, indent=2)
+        json.dump(sanitized, f, indent=2)
     print(f"\n  Wrote: {out_path}")
 
     return 1 if fails > 0 else 0

@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![expect(
+    clippy::cast_precision_loss,
+    reason = "validation harness: JSON fixture counts and indices; bounded for parity checks"
+)]
+
 //! CPU vs Python benchmark — proves barracuda's pure Rust math is:
 //! 1. Numerically identical to Python controls (parity at 1e-6)
 //! 2. Significantly faster than interpreted Python

@@ -1,20 +1,4 @@
 {
-  "_provenance": {
-    "experiment": "Exp 081",
-    "method": "Standardized Precipitation Index (McKee et al. 1993)",
-    "created": "2026-03-07",
-    "baseline_script": "control/drought_index/drought_index_spi.py",
-    "baseline_command": "python3 control/drought_index/drought_index_spi.py",
-    "baseline_commit": "1c11763",
-    "python_version": "3.13.2",
-    "repository": "ecoPrimals/airSpring",
-    "references": [
-      "McKee TB et al. (1993) Drought frequency and duration to time scales",
-      "Edwards DC, McKee TB (1997) Characteristics of 20th century drought",
-      "WMO (2012) Standardized Precipitation Index User Guide. WMO-No. 1090"
-    ],
-    "reproduction_note": "Deterministic RNG seed=42; fully reproducible"
-  },
   "monthly_precip_mm": [
     57.0,
     23.6,
@@ -393,5 +377,23 @@
       0.5,
       1.5
     ]
+  },
+  "_provenance": {
+    "experiment": "Exp 081",
+    "method": "Standardized Precipitation Index (McKee et al. 1993)",
+    "created": "2026-03-07",
+    "baseline_script": "control/drought_index/drought_index_spi.py",
+    "baseline_command": "python3 control/drought_index/drought_index_spi.py",
+    "baseline_commit": "1c11763",
+    "python_version": "3.13.2 | packaged by Anaconda, Inc. | (main, Feb  6 2025, 18:56:02) [GCC 11.2.0]",
+    "repository": "ecoPrimals/airSpring",
+    "references": [
+      "McKee TB et al. (1993) Drought frequency and duration to time scales",
+      "Edwards DC, McKee TB (1997) Characteristics of 20th century drought",
+      "WMO (2012) Standardized Precipitation Index User Guide. WMO-No. 1090"
+    ],
+    "reproduction_note": "Deterministic RNG seed=42; fully reproducible",
+    "content_sha256": "c8bbbaaf111e6fa2832dab1b32532441bb98ddf109f0d9dde345d2b34e6f3ace",
+    "generation_date": "2026-03-23T17:36:14.423346+00:00"
   }
 }

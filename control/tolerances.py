@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """Shared tolerance vocabulary for airSpring Python control baselines.
 
-Mirrors barracuda/src/tolerances/ (57 named Rust constants) so that
+Mirrors barracuda/src/tolerances/ (58 named Rust constants) so that
 Python scripts use the same names and values as the Rust validation
 pipeline.  Import from here instead of hardcoding thresholds inline.
 

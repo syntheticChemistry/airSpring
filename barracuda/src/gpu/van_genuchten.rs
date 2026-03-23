@@ -20,6 +20,8 @@ use barracuda::ops::batched_elementwise_f64::{
 };
 use barracuda::optimize::brent_gpu::BrentGpu;
 
+use crate::tolerances::POSITIVE_DATA_GUARD;
+
 #[cfg(test)]
 use super::device_info::try_f64_device;
 
@@ -127,7 +129,7 @@ impl BatchedVanGenuchten {
             return Ok(Vec::new());
         }
 
-        let brent = BrentGpu::new(Arc::clone(&self.device), 100, 1e-10)?;
+        let brent = BrentGpu::new(Arc::clone(&self.device), 100, POSITIVE_DATA_GUARD)?;
 
         let lower = vec![-1e6; theta_targets.len()];
         let upper = vec![-1e-6; theta_targets.len()];

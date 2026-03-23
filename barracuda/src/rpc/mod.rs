@@ -47,6 +47,15 @@ pub const INTERNAL_ERROR: i32 = -32603;
 
 // ── Protocol helpers ────────────────────────────────────────────────────────
 
+/// Strip legacy primal namespace prefix from JSON-RPC method names (barraCuda v0.3.7 semantic naming).
+///
+/// Canonical names are `{domain}.{operation}` (for example `science.et0_fao56`). Legacy clients may send
+/// `airspring.science.et0_fao56`; this removes a leading `airspring.` when present.
+#[must_use]
+pub fn normalize_method(method: &str) -> &str {
+    method.strip_prefix("airspring.").unwrap_or(method)
+}
+
 /// Extract a JSON-RPC error code and message from a response.
 ///
 /// Returns `Some((code, message))` if the response contains an `error` object
@@ -374,6 +383,25 @@ mod tests {
         let id1 = req1["id"].as_u64().unwrap();
         let id2 = req2["id"].as_u64().unwrap();
         assert!(id2 > id1);
+    }
+
+    #[test]
+    fn normalize_method_strips_airspring_prefix() {
+        assert_eq!(
+            normalize_method("airspring.science.et0_fao56"),
+            "science.et0_fao56"
+        );
+    }
+
+    #[test]
+    fn normalize_method_leaves_bare_semantic_names_unchanged() {
+        assert_eq!(normalize_method("science.et0_fao56"), "science.et0_fao56");
+        assert_eq!(normalize_method("health"), "health");
+    }
+
+    #[test]
+    fn normalize_method_does_not_strip_partial_prefix() {
+        assert_eq!(normalize_method("airspring"), "airspring");
     }
 
     #[test]

@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+#![expect(
+    clippy::cast_precision_loss,
+    reason = "validation harness: JSON fixture counts and indices; bounded for parity checks"
+)]
+
 //! Exp 063: NUCLEUS Cross-Primal Pipeline Validation
 //!
 //! End-to-end validation that airSpring science flows correctly through

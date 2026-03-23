@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![expect(
+    clippy::cast_precision_loss,
+    reason = "validation harness: JSON fixture counts and indices; bounded for parity checks"
+)]
+
 //! Anderson soil-moisture coupling — Rust CPU validation for Experiment 045.
 //!
 //! Cross-validates the θ → `d_eff` coupling chain against the Python control

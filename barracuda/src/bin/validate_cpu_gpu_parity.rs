@@ -1,4 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![expect(
+    clippy::cast_possible_truncation,
+    reason = "validation harness: JSON and harness counts; bounded for test fixtures"
+)]
+#![expect(
+    clippy::cast_sign_loss,
+    reason = "validation harness: JSON-derived fields; signed values non-negative in fixtures"
+)]
+
 //! Exp 040: CPU vs GPU Parity Validation.
 //!
 //! Validates that barracuda GPU dispatch paths produce identical results

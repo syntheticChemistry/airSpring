@@ -3,20 +3,19 @@
 //!
 //! Routes GPU workloads through toadStool instead of direct `wgpu` access.
 //! Discovery is capability-based: `compute.dispatch.submit` is resolved
-//! at runtime through biomeOS socket scanning.
+//! at runtime through [`crate::rpc::resolve_transport`] (env override or
+//! biomeOS socket scanning on Unix).
 
-use std::path::PathBuf;
-
-use crate::biomeos;
-use crate::rpc::{self, IpcError};
+use crate::primal_names;
+use crate::rpc::{self, IpcError, Transport};
 
 /// Handle to a dispatched compute job.
 #[derive(Debug)]
 pub struct DispatchHandle {
     /// Job identifier returned by toadStool.
     pub job_id: String,
-    /// Socket path of the compute primal.
-    pub socket: PathBuf,
+    /// Transport used to reach the compute primal (Unix or TCP).
+    pub transport: Transport,
 }
 
 /// Errors from compute dispatch operations.
@@ -52,41 +51,26 @@ impl std::error::Error for DispatchError {}
 
 impl From<IpcError> for DispatchError {
     fn from(e: IpcError) -> Self {
-        Self::Ipc(e)
-    }
-}
-
-/// Discover the compute primal socket via capability-based discovery.
-fn discover_compute_socket() -> Result<PathBuf, DispatchError> {
-    if let Ok(path) = std::env::var("AIRSPRING_COMPUTE_PRIMAL") {
-        let p = PathBuf::from(path);
-        if p.exists() {
-            return Ok(p);
+        match e {
+            IpcError::SocketNotFound { .. } => Self::NoComputePrimal,
+            e => Self::Ipc(e),
         }
     }
-
-    biomeos::discover_primal_socket(crate::primal_names::TOADSTOOL)
-        .ok_or(DispatchError::NoComputePrimal)
 }
 
-/// Submit a GPU workload to the compute primal.
-///
-/// Returns a [`DispatchHandle`] for polling results.
-///
-/// # Errors
-///
-/// Returns [`DispatchError::NoComputePrimal`] if no compute primal socket is discovered.
-/// Returns [`DispatchError::Ipc`] on transport failure.
-/// Returns [`DispatchError::MissingJobId`] if the server response lacks `job_id`.
-/// Returns [`DispatchError::RpcError`] if the server returns an RPC error.
-pub fn submit(
+/// Discover the compute primal transport via [`rpc::resolve_transport`] for the
+/// toadStool primal (`TOADSTOOL_SOCKET` / `TOADSTOOL_ADDRESS` / biomeOS discovery).
+fn discover_compute_transport() -> Result<Transport, DispatchError> {
+    rpc::resolve_transport(primal_names::TOADSTOOL).map_err(DispatchError::from)
+}
+
+fn submit_to_transport(
+    transport: &Transport,
     workload_type: &str,
     params: &serde_json::Value,
 ) -> Result<DispatchHandle, DispatchError> {
-    let socket = discover_compute_socket()?;
-
-    let result = rpc::send(
-        &socket,
+    let result = rpc::send_to(
+        transport,
         "compute.dispatch.submit",
         &serde_json::json!({
             "workload": workload_type,
@@ -106,7 +90,28 @@ pub fn submit(
         .ok_or(DispatchError::MissingJobId)?
         .to_owned();
 
-    Ok(DispatchHandle { job_id, socket })
+    Ok(DispatchHandle {
+        job_id,
+        transport: transport.clone(),
+    })
+}
+
+/// Submit a GPU workload to the compute primal.
+///
+/// Returns a [`DispatchHandle`] for polling results.
+///
+/// # Errors
+///
+/// Returns [`DispatchError::NoComputePrimal`] if no compute primal transport can be resolved.
+/// Returns [`DispatchError::Ipc`] on transport failure.
+/// Returns [`DispatchError::MissingJobId`] if the server response lacks `job_id`.
+/// Returns [`DispatchError::RpcError`] if the server returns an RPC error.
+pub fn submit(
+    workload_type: &str,
+    params: &serde_json::Value,
+) -> Result<DispatchHandle, DispatchError> {
+    let transport = discover_compute_transport()?;
+    submit_to_transport(&transport, workload_type, params)
 }
 
 /// Poll for the result of a dispatched compute job.
@@ -116,8 +121,8 @@ pub fn submit(
 /// Returns [`DispatchError::Ipc`] on transport failure.
 /// Returns [`DispatchError::RpcError`] if the server returns an RPC error.
 pub fn result(handle: &DispatchHandle) -> Result<serde_json::Value, DispatchError> {
-    let resp = rpc::send(
-        &handle.socket,
+    let resp = rpc::send_to(
+        &handle.transport,
         "compute.dispatch.result",
         &serde_json::json!({ "job_id": handle.job_id }),
     )?;
@@ -133,14 +138,14 @@ pub fn result(handle: &DispatchHandle) -> Result<serde_json::Value, DispatchErro
 ///
 /// # Errors
 ///
-/// Returns [`DispatchError::NoComputePrimal`] if no compute primal socket is discovered.
+/// Returns [`DispatchError::NoComputePrimal`] if no compute primal transport can be resolved.
 /// Returns [`DispatchError::Ipc`] on transport failure.
 /// Returns [`DispatchError::RpcError`] if the server returns an RPC error.
 pub fn capabilities() -> Result<serde_json::Value, DispatchError> {
-    let socket = discover_compute_socket()?;
+    let transport = discover_compute_transport()?;
 
-    let resp = rpc::send(
-        &socket,
+    let resp = rpc::send_to(
+        &transport,
         "compute.dispatch.capabilities",
         &serde_json::json!({}),
     )?;
@@ -153,13 +158,66 @@ pub fn capabilities() -> Result<serde_json::Value, DispatchError> {
 }
 
 #[cfg(test)]
+#[expect(clippy::expect_used, reason = "test code uses expect for clarity")]
 mod tests {
     use super::*;
+    use std::io::{BufRead, BufReader, Write};
+    use std::net::TcpListener;
 
     #[test]
     fn no_compute_primal_returns_error() {
-        // When no toadstool socket exists (typical in CI), submit must return an error.
+        // When no toadstool transport exists (typical in CI), submit must return an error.
         let result = submit("test_workload", &serde_json::json!({}));
         assert!(result.is_err());
+    }
+
+    /// TCP path: same [`rpc::send_to`] stack used after [`rpc::resolve_transport`] yields
+    /// [`Transport::Tcp`] (e.g. `TOADSTOOL_ADDRESS` on Windows or when set explicitly).
+    #[test]
+    fn tcp_submit_round_trip_via_send_to() {
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind test listener");
+        let addr = listener.local_addr().expect("local addr");
+
+        let server = std::thread::spawn(move || {
+            let (mut stream, _) = listener.accept().expect("accept");
+            let mut reader = BufReader::new(&stream);
+            let mut line = String::new();
+            reader.read_line(&mut line).expect("read request");
+            let req: serde_json::Value = serde_json::from_str(line.trim()).expect("parse json");
+            let id = req.get("id").cloned().unwrap_or(serde_json::Value::Null);
+            let resp = serde_json::json!({
+                "jsonrpc": "2.0",
+                "result": { "job_id": "tcp-test-job" },
+                "id": id,
+            });
+            let mut payload = serde_json::to_vec(&resp).expect("serialize");
+            payload.push(b'\n');
+            stream.write_all(&payload).expect("write");
+            stream.flush().ok();
+        });
+
+        let transport = Transport::Tcp(addr);
+        let outcome = submit_to_transport(&transport, "test_workload", &serde_json::json!({}));
+        server.join().expect("server thread");
+
+        let handle = outcome.expect("submit over TCP");
+        assert_eq!(handle.job_id, "tcp-test-job");
+        match handle.transport {
+            Transport::Tcp(a) => assert_eq!(a, addr),
+            #[cfg(unix)]
+            Transport::Unix(_) => panic!("expected Tcp transport"),
+        }
+    }
+
+    #[test]
+    fn toadstool_dispatch_uses_standard_ecobin_env_keys() {
+        assert_eq!(
+            primal_names::socket_env_var(primal_names::TOADSTOOL),
+            "TOADSTOOL_SOCKET"
+        );
+        assert_eq!(
+            primal_names::address_env_var(primal_names::TOADSTOOL),
+            "TOADSTOOL_ADDRESS"
+        );
     }
 }

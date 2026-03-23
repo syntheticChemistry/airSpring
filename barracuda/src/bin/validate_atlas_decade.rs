@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![expect(
+    clippy::cast_precision_loss,
+    reason = "validation harness: JSON fixture counts and indices; bounded for parity checks"
+)]
+
 //! Experiment 059: Atlas 80-Year Decade Analysis.
 //!
 //! Validates decade-aggregated ET₀ trends across Michigan stations against

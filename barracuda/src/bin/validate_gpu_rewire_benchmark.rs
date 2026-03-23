@@ -1,4 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![expect(
+    clippy::cast_precision_loss,
+    reason = "validation harness: JSON fixture counts and indices; bounded for parity checks"
+)]
+#![expect(
+    clippy::cast_possible_truncation,
+    reason = "validation harness: JSON and harness counts; bounded for test fixtures"
+)]
+
 //! Exp 057: GPU Ops 5-8 Rewire Validation + Cross-Spring Benchmark
 //!
 //! Validates the `BarraCuda` S70+ absorption rewire — all 6 batched elementwise

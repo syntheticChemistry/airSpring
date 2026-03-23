@@ -1,15 +1,4 @@
 {
-  "_provenance": {
-    "method": "Saxton & Rawls (2006) pedotransfer functions",
-    "baseline_script": "control/pedotransfer/saxton_rawls.py",
-    "baseline_commit": "fad2e1b",
-    "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
-    "python_version": "3.13",
-    "created": "2026-02-26",
-    "references": [
-      "Saxton KE, Rawls WJ (2006) SSSAJ 70(5):1569-1578"
-    ]
-  },
   "loam_intermediates": {
     "S": 0.4,
     "C": 0.2,
@@ -132,5 +121,18 @@
       0.25
     ],
     "_tolerance_justification": "Saxton-Rawls regression coefficients have 4 significant digits; intermediate values may accumulate floating-point differences. Ksat tolerance is wider due to exponential amplification."
+  },
+  "_provenance": {
+    "method": "Saxton & Rawls (2006) pedotransfer functions",
+    "baseline_script": "control/pedotransfer/saxton_rawls.py",
+    "baseline_commit": "fad2e1b",
+    "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
+    "python_version": "3.13.2 | packaged by Anaconda, Inc. | (main, Feb  6 2025, 18:56:02) [GCC 11.2.0]",
+    "created": "2026-02-26",
+    "references": [
+      "Saxton KE, Rawls WJ (2006) SSSAJ 70(5):1569-1578"
+    ],
+    "content_sha256": "a20850fb801867b5ad86d404e8b9d3d721885d094e896da42a730b00f9ad13cc",
+    "generation_date": "2026-03-23T17:36:08.443611+00:00"
   }
 }

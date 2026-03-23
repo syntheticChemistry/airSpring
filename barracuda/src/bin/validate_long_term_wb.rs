@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![expect(
+    clippy::cast_precision_loss,
+    reason = "validation harness: JSON fixture counts and indices; bounded for parity checks"
+)]
+
 //! Experiment 015: 60-year water balance validation.
 //!
 //! Validates that the Rust water balance (Exp 004) runs at multi-decade scale

@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![expect(
+    clippy::cast_precision_loss,
+    reason = "validation harness: JSON fixture counts and indices; bounded for parity checks"
+)]
+
 //! v0.7.2+ modern upstream integration: ops 14-19, `PrecisionRoutingAdvice`,
 //! upstream provenance registry, and cross-spring shader evolution timeline.
 

@@ -4,6 +4,17 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [0.10.0] - 2026-03-18
 
+### Changed (2026-03-23)
+
+- Per-site `#[expect(clippy::cast_*)]` with reasons in 54 binaries (wetSpring V132 pattern)
+- Typed `PipelineError` for `seasonal_pipeline` (neuralSpring V121 pattern)
+- `ValidationSink` trait + `JsonSink` for CI-parsable validation output (wetSpring V132)
+- `default-features = false` on barraCuda dependency (only `gpu` + `domain-pde`)
+- `content_sha256` provenance in Python baseline generators (ludoSpring V29)
+- `normalize_method()` for semantic IPC naming (barraCuda 0.3.7)
+- Named numerical guard constants in `tolerances::numerics`
+- Updated barraCuda version refs (0.3.5 → 0.3.7) in specs and docs
+
 ### Cross-Ecosystem Absorption
 
 **MCP Tool Definitions** (from wetSpring pattern):

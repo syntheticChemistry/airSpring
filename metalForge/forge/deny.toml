@@ -36,6 +36,25 @@ confidence-threshold = 0.8
 multiple-versions = "warn"
 wildcards = "deny"
 highlight = "all"
+deny = [
+    # ecoBin: no C/system dependencies in application code.
+    # Cross-compilation and reproducibility require pure Rust.
+    { crate = "openssl-sys", wrappers = [] },
+    { crate = "libz-sys", wrappers = [] },
+    { crate = "ring", wrappers = [] },
+    { crate = "native-tls", wrappers = [] },
+    { crate = "cmake", wrappers = [] },
+    { crate = "cc", wrappers = [] },
+    { crate = "bindgen", wrappers = [] },
+    { crate = "pkg-config", wrappers = [] },
+    { crate = "vcpkg", wrappers = [] },
+    { crate = "libssh2-sys", wrappers = [] },
+    { crate = "libgit2-sys", wrappers = [] },
+    { crate = "curl-sys", wrappers = [] },
+    { crate = "zstd-sys", wrappers = [] },
+    { crate = "bzip2-sys", wrappers = [] },
+    { crate = "lzma-sys", wrappers = [] },
+]
 
 [sources]
 unknown-registry = "deny"

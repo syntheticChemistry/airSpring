@@ -34,11 +34,18 @@
 //! dispatch for large kriging systems, the [`KrigingInterpolator`] wrapper will
 //! automatically benefit.
 
+use std::sync::Arc;
+
+use barracuda::device::WgpuDevice;
+use barracuda::ops::kriging_f64;
+
+use crate::tolerances::POSITIVE_DATA_GUARD;
+
 /// Squared distance below which a prediction point is considered
 /// co-located with a known observation. Set to 0.01 mm² to avoid
 /// division by zero in IDW weights while remaining far below any
 /// physical sensor spacing.
-const COLLOCATED_DIST_SQ: f64 = 1e-10;
+const COLLOCATED_DIST_SQ: f64 = POSITIVE_DATA_GUARD;
 
 /// A soil moisture sensor reading with spatial coordinates.
 #[derive(Debug, Clone, Copy)]
@@ -91,11 +98,6 @@ pub struct InterpolationResult {
     /// Kriging variance at each target point — measures interpolation uncertainty.
     pub variances: Vec<f64>,
 }
-
-use std::sync::Arc;
-
-use barracuda::device::WgpuDevice;
-use barracuda::ops::kriging_f64;
 
 // ── Device-backed Kriging (wraps barracuda::ops::kriging_f64) ────────
 
@@ -291,7 +293,7 @@ pub fn interpolate_soil_moisture(
             nugget
         } else {
             let h = min_dist_sq.sqrt();
-            let range_safe = range.max(1e-10);
+            let range_safe = range.max(POSITIVE_DATA_GUARD);
             sill.mul_add(1.0 - (-h / range_safe).exp(), nugget)
         };
 

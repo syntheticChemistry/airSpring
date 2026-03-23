@@ -3,6 +3,8 @@
 //!
 //! Functions to parse and extract values from compile-time embedded benchmark JSON.
 
+use tracing::error;
+
 /// Load a benchmark JSON file embedded at compile time.
 ///
 /// Returns the parsed `serde_json::Value` tree.
@@ -46,7 +48,7 @@ pub fn json_f64(value: &serde_json::Value, path: &[&str]) -> Option<f64> {
 pub fn json_f64_required(value: &serde_json::Value, path: &[&str]) -> f64 {
     json_f64(value, path).unwrap_or_else(|| {
         let path_str = path.join(".");
-        eprintln!("FATAL: benchmark JSON missing required f64 at: {path_str}");
+        error!(path = %path_str, "benchmark JSON missing required f64");
         std::process::exit(1)
     })
 }
@@ -58,13 +60,13 @@ pub fn json_u64_required(value: &serde_json::Value, path: &[&str]) -> u64 {
     for &key in path {
         current = current.get(key).unwrap_or_else(|| {
             let path_str = path.join(".");
-            eprintln!("FATAL: benchmark JSON missing required u64 path: {path_str}");
+            error!(path = %path_str, "benchmark JSON missing required u64 path");
             std::process::exit(1);
         });
     }
     current.as_u64().unwrap_or_else(|| {
         let path_str = path.join(".");
-        eprintln!("FATAL: benchmark JSON value at {path_str} is not u64");
+        error!(path = %path_str, "benchmark JSON value is not u64");
         std::process::exit(1);
     })
 }
@@ -90,7 +92,7 @@ pub fn json_str_checked<'a>(tc: &'a serde_json::Value, key: &str) -> crate::erro
 #[must_use]
 pub fn json_str<'a>(tc: &'a serde_json::Value, key: &str) -> &'a str {
     json_str_checked(tc, key).unwrap_or_else(|e| {
-        eprintln!("FATAL: {e}");
+        error!(error = %e, "fatal");
         std::process::exit(1)
     })
 }
@@ -117,7 +119,7 @@ pub fn json_field_checked(tc: &serde_json::Value, key: &str) -> crate::error::Re
 #[must_use]
 pub fn json_field(tc: &serde_json::Value, key: &str) -> f64 {
     json_field_checked(tc, key).unwrap_or_else(|e| {
-        eprintln!("FATAL: {e}");
+        error!(error = %e, "fatal");
         std::process::exit(1)
     })
 }
@@ -153,7 +155,7 @@ pub fn json_array_checked<'a>(
 #[must_use]
 pub fn json_array<'a>(value: &'a serde_json::Value, path: &[&str]) -> &'a Vec<serde_json::Value> {
     json_array_checked(value, path).unwrap_or_else(|e| {
-        eprintln!("FATAL: {e}");
+        error!(error = %e, "fatal");
         std::process::exit(1)
     })
 }
@@ -204,7 +206,7 @@ pub fn json_object_required<'a>(
 ) -> &'a serde_json::Map<String, serde_json::Value> {
     json_object_opt(value, path).unwrap_or_else(|| {
         let path_str = path.join(".");
-        eprintln!("FATAL: benchmark JSON missing required object at: {path_str}");
+        error!(path = %path_str, "benchmark JSON missing required object");
         std::process::exit(1);
     })
 }

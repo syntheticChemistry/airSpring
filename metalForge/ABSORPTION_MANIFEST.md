@@ -1,6 +1,6 @@
 # Absorption Manifest — airSpring → barracuda
 
-**Date**: March 19, 2026 (updated v0.10.0 — V010 active handoff, forge evolved to mixed hardware dispatch, 27 workloads, 32/32 dispatch + 21/21 routing + 17/17 mixed hardware, barraCuda 0.3.5 wgpu 28, all 20 ops absorbed upstream, zero C deps). metalForge remains active for dispatch routing and CI validation.
+**Date**: March 23, 2026 (updated v0.10.0 — V010 active handoff, forge evolved to mixed hardware dispatch, 27 workloads, 32/32 dispatch + 21/21 routing + 17/17 mixed hardware, barraCuda 0.3.7 wgpu 28, all 20 ops absorbed upstream, zero C deps). metalForge remains active for dispatch routing and CI validation.
 **Source**: `metalForge/forge/` (airspring-forge v0.1.0)
 **Target**: `barracuda` (ToadStool crate)
 **Absorption Status**: 6/6 absorbed upstream — ALL modules absorbed as of S66
@@ -112,7 +112,7 @@ Linearized initial guess functions remain local in `eco::isotherm` (domain-speci
 The `metalForge/forge/` crate has all 6 modules absorbed upstream into barracuda.
 **metalForge remains active** for dispatch routing (GPU > NPU > CPU) and CI validation.
 The forge crate validates dispatch routing and cross-system hardware probing.
-31 tests covering substrate discovery + capability routing + 4 Tier B local workloads.
+62 tests covering substrate discovery + capability routing + 4 Tier B local workloads.
 
 ---
 
@@ -136,8 +136,8 @@ These workloads auto-activate GPU dispatch upon ToadStool absorption of ops 5-8.
 ```
 cargo fmt   — clean
 cargo clippy --all-targets — zero warnings (pedantic)
-cargo test  — 31/31 pass (forge), 584/584 pass (barracuda lib)
-validate_*  — 48/48 PASS (barracuda) + 3 bench binaries (30/30 cross-spring benchmarks)
+cargo test  — 62/62 pass (forge), 938/938 pass (barracuda lib)
+validate_*  — 84/84 PASS (barracuda) + 3 bench binaries (30/30 cross-spring benchmarks)
 metalForge cross-system routing — 29/29 PASS (18 workloads × dispatch checks)
 ToadStool sync: S68+ (e96576ee) — universal precision, 700 WGSL, 6-Spring provenance
 ```

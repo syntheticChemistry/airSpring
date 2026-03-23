@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![expect(
+    clippy::cast_precision_loss,
+    reason = "validation harness: JSON fixture counts and indices; bounded for parity checks"
+)]
+
 //! Exp 077: Cross-Spring Provenance & CPU↔GPU Benchmark
 //!
 //! Validates all GPU modules, benchmarks CPU vs GPU throughput, and

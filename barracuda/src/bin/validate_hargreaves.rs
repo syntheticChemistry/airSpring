@@ -1,4 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![expect(
+    clippy::cast_possible_truncation,
+    reason = "validation harness: JSON and harness counts; bounded for test fixtures"
+)]
+
 //! Exp 031: Hargreaves-Samani (1985) Temperature-Only ET₀ Validation.
 //!
 //! Standalone validation of the temperature-only ET₀ method — the fallback

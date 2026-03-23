@@ -12,6 +12,8 @@
 
 use barracuda::optimize::brent;
 
+use crate::tolerances::POSITIVE_DATA_GUARD;
+
 /// Maximum absolute head for VG θ(h) input guard (cm).
 const VG_H_ABS_MAX: f64 = 1e4;
 
@@ -27,7 +29,7 @@ const SATURATED_CAPACITY: f64 = 1e-6;
 const CAPACITY_H_MIN: f64 = 0.1;
 
 /// Minimum capacity allowed from VG derivative.
-const CAPACITY_FLOOR: f64 = 1e-10;
+const CAPACITY_FLOOR: f64 = POSITIVE_DATA_GUARD;
 
 /// Maximum capacity (cm⁻¹) — physical upper bound.
 const CAPACITY_CEIL: f64 = 1e2;

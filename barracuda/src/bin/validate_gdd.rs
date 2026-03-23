@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 #![deny(clippy::unwrap_used)]
+#![expect(
+    clippy::cast_possible_truncation,
+    reason = "validation harness: JSON and harness counts; bounded for test fixtures"
+)]
+
 //! Validate Growing Degree Days (GDD) against Python baseline (Exp 022).
 //!
 //! `McMaster` GS, Wilhelm WW (1997) "Growing degree-days: one equation,

@@ -62,11 +62,12 @@ id = "fetch_weather"
 depends_on = ["check_nestgate"]
 output = "weather_data"
 
+# Canonical niche capability: data.weather (ecology.fetch_weather / open-meteo binding is aspirational until routed here)
 [nodes.operation]
 name = "capability_call"
 
 [nodes.operation.params]
-capability = "ecology.fetch_weather"
+capability = "data.weather"
 params = { source = "open_meteo", latitude = "${LATITUDE}", longitude = "${LONGITUDE}", start_date = "${START_DATE}", end_date = "${END_DATE}", variables = ["temperature_2m_max", "temperature_2m_min", "shortwave_radiation_sum", "precipitation_sum", "relative_humidity_2m_mean"] }
 
 [nodes.constraints]
@@ -95,6 +96,7 @@ timeout_ms = 120000
 # PHASE 4: MICROBIAL DIVERSITY UNDER DROUGHT (wetSpring)
 # ═══════════════════════════════════════════════════════════════════════════════
 
+# Canonical: science.shannon_diversity. Aspirational: composite science.diversity (Simpson, multi-metric) not in niche::CAPABILITIES yet.
 [[nodes]]
 id = "diversity_analysis"
 depends_on = ["soil_moisture"]
@@ -104,7 +106,7 @@ output = "diversity_results"
 name = "capability_call"
 
 [nodes.operation.params]
-capability = "science.diversity"
+capability = "science.shannon_diversity"
 params = { input_source = "soil_moisture_coupling", moisture_series = "${MOISTURE_TIME_SERIES}", metrics = ["shannon", "simpson", "bray_curtis"], partition_by = "moisture_regime" }
 
 [nodes.constraints]
@@ -123,7 +125,7 @@ output = "spectral_results"
 name = "capability_call"
 
 [nodes.operation.params]
-capability = "science.anderson"
+capability = "science.anderson_coupling"
 params = { diversity_input = "${DIVERSITY_RESULTS}", lattice_dim = 2, lattice_sizes = [8, 10, 12], n_realizations = 4, use_gpu = true }
 
 [nodes.constraints]

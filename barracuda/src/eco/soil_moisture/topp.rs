@@ -4,6 +4,8 @@
 //! Topp GC, Davis JL, Annan AP (1980) "Electromagnetic determination of soil
 //! water content" Water Resources Research 16(3), 574–582.
 
+use crate::tolerances::DIVISION_GUARD;
+
 /// Topp (1980) polynomial coefficients: θv = A₀ + A₁·ε + A₂·ε² + A₃·ε³.
 /// Source: Topp GC et al. (1980), Water Resources Research 16(3), Table 1.
 const TOPP_A0: f64 = -5.3e-2;
@@ -23,9 +25,6 @@ const INVERSE_TOPP_MAX_ITER: usize = 50;
 
 /// Newton-Raphson convergence tolerance for inverse Topp (ε change < this).
 const INVERSE_TOPP_CONVERGENCE: f64 = 1e-8;
-
-/// Derivative guard: stop if |f'(ε)| drops below this to avoid division by zero.
-const INVERSE_TOPP_DERIV_GUARD: f64 = 1e-15;
 
 /// Topp equation: dielectric permittivity → volumetric water content.
 ///
@@ -53,7 +52,7 @@ pub fn inverse_topp(theta_v: f64) -> f64 {
         let f = topp_equation(e) - theta_v;
         // Derivative: A₁ + 2·A₂·e + 3·A₃·e²
         let df = (3.0 * TOPP_A3).mul_add(e.powi(2), (2.0 * TOPP_A2).mul_add(e, TOPP_A1));
-        if df.abs() < INVERSE_TOPP_DERIV_GUARD {
+        if df.abs() < DIVISION_GUARD {
             break;
         }
         let e_new = e - f / df;

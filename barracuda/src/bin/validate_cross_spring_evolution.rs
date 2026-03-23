@@ -1,4 +1,13 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
+#![expect(
+    clippy::cast_precision_loss,
+    reason = "validation harness: JSON fixture counts and indices; bounded for parity checks"
+)]
+#![expect(
+    clippy::cast_sign_loss,
+    reason = "validation harness: JSON-derived fields; signed values non-negative in fixtures"
+)]
+
 //! Cross-Spring Evolution Validation — `BarraCuda` Universal Precision Benchmark
 //!
 //! Validates the modern `BarraCuda` GPU pipeline with cross-spring provenance

@@ -9,7 +9,7 @@
 use crate::eco::water_balance::{self as wb, DailyInput, DailyOutput, WaterBalanceState};
 use crate::eco::yield_response;
 
-use super::{Backend, CropConfig, SeasonResult, SeasonalPipeline};
+use super::{Backend, CropConfig, PipelineError, SeasonResult, SeasonalPipeline};
 
 /// Multi-field season result for atlas-scale GPU dispatch.
 #[derive(Debug, Clone)]
@@ -31,13 +31,16 @@ impl SeasonalPipeline {
     /// - Stage 3: For each day, GPU batch M fields' depletion update (`gpu_step`)
     /// - Stage 4: CPU yield response per field (trivial arithmetic)
     ///
-    /// # Panics
-    ///
-    /// Panics if `weather_per_field` slices have unequal lengths.
-    ///
     /// # Errors
     ///
-    /// Returns an error if GPU water balance dispatch fails irrecoverably.
+    /// Returns [`InvalidConfig`](crate::gpu::seasonal_pipeline::PipelineError::InvalidConfig) if
+    /// `weather_per_field` slices have unequal lengths, or
+    /// [`ShaderDispatch`](crate::gpu::seasonal_pipeline::PipelineError::ShaderDispatch) if GPU
+    /// water balance dispatch fails irrecoverably.
+    #[expect(
+        clippy::too_many_lines,
+        reason = "multi-field orchestration batches ET₀, Kc, and daily WB without splitting hot path"
+    )]
     pub fn run_multi_field(
         &self,
         weather_per_field: &[&[super::WeatherDay]],
@@ -55,8 +58,14 @@ impl SeasonalPipeline {
         }
 
         let n_days = weather_per_field[0].len();
-        for w in weather_per_field {
-            assert_eq!(w.len(), n_days, "All fields must have same number of days");
+        for (idx, w) in weather_per_field.iter().enumerate() {
+            if w.len() != n_days {
+                return Err(PipelineError::InvalidConfig(format!(
+                    "all fields must have the same number of days (expected {n_days} from field 0, field {idx} has {})",
+                    w.len()
+                ))
+                .into());
+            }
         }
 
         let et0_per_field: Vec<Vec<f64>> = weather_per_field
@@ -110,7 +119,9 @@ impl SeasonalPipeline {
             );
 
             if let Some(ref wb_engine) = wb_gpu {
-                let dr_new = wb_engine.gpu_step(&field_inputs)?;
+                let dr_new = wb_engine
+                    .gpu_step(&field_inputs)
+                    .map_err(super::map_airspring_shader_dispatch)?;
                 gpu_wb_dispatches += 1;
                 apply_gpu_wb_outputs(
                     day,

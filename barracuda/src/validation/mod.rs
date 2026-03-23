@@ -30,7 +30,10 @@
 //! validation failed. CI should distinguish "no GPU" from "validation failure" by
 //! checking whether the harness emitted any check results.
 
+use tracing::error;
+
 pub mod json;
+mod sink;
 
 pub use barracuda::validation::{ValidationHarness, exit_no_gpu, gpu_required};
 pub use json::{
@@ -38,6 +41,7 @@ pub use json::{
     json_field_checked, json_object_opt, json_object_required, json_str, json_str_checked,
     json_str_opt, json_u64_required, parse_benchmark_json,
 };
+pub use sink::{JsonSink, ValidationSink};
 
 /// Zero-panic exit trait for validation binaries.
 ///
@@ -53,7 +57,7 @@ pub trait OrExit<T> {
 impl<T, E: std::fmt::Display> OrExit<T> for Result<T, E> {
     fn or_exit(self, context: &str) -> T {
         self.unwrap_or_else(|e| {
-            eprintln!("FATAL: {context}: {e}");
+            error!(context = %context, error = %e, "fatal");
             std::process::exit(1);
         })
     }
@@ -62,7 +66,7 @@ impl<T, E: std::fmt::Display> OrExit<T> for Result<T, E> {
 impl<T> OrExit<T> for Option<T> {
     fn or_exit(self, context: &str) -> T {
         self.unwrap_or_else(|| {
-            eprintln!("FATAL: {context}");
+            error!(context = %context, "fatal");
             std::process::exit(1);
         })
     }
@@ -321,6 +325,45 @@ mod tests {
         let json: serde_json::Value = serde_json::from_str(r#"{"a": 42}"#).unwrap();
         let v = json_f64(&json, &["a"]).unwrap();
         assert!((v - 42.0).abs() < f64::EPSILON);
+    }
+
+    // ── check_relative / check_abs_or_rel (groundSpring V120-style) ─────────
+    #[test]
+    fn test_check_relative_pass_fail() {
+        let mut v = ValidationHarness::new("Rel");
+        v.check_relative("close", 1.005, 1.0, 0.01);
+        v.check_relative("far", 1.5, 1.0, 0.01);
+        assert_eq!(v.passed_count(), 1);
+        assert_eq!(v.total_count(), 2);
+    }
+
+    #[test]
+    fn test_check_relative_near_zero_expected() {
+        let mut v = ValidationHarness::new("Rel");
+        v.check_relative("near_zero", 1e-16, 0.0, 1e-10);
+        assert_eq!(v.passed_count(), 1);
+    }
+
+    #[test]
+    fn test_check_abs_or_rel_absolute_branch() {
+        let mut v = ValidationHarness::new("AbsOrRel");
+        v.check_abs_or_rel("abs_wins", 100.001, 100.0, 0.01, 1e-10);
+        assert_eq!(v.passed_count(), 1);
+    }
+
+    #[test]
+    fn test_check_abs_or_rel_relative_branch() {
+        let mut v = ValidationHarness::new("AbsOrRel");
+        v.check_abs_or_rel("rel_wins", 1000.5, 1000.0, 0.001, 0.001);
+        assert_eq!(v.passed_count(), 1);
+    }
+
+    #[test]
+    fn test_check_abs_or_rel_fail_both() {
+        let mut v = ValidationHarness::new("AbsOrRel");
+        v.check_abs_or_rel("both_fail", 2.0, 1.0, 0.01, 0.01);
+        assert_eq!(v.passed_count(), 0);
+        assert_eq!(v.total_count(), 1);
     }
 
     // ── check_abs pass, fail, exact boundary ────────────────────────────────

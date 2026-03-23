@@ -36,6 +36,12 @@ import math
 import sys
 from pathlib import Path
 
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_CONTROL_DIR = _SCRIPT_DIR if _SCRIPT_DIR.name == "control" else _SCRIPT_DIR.parent
+if str(_CONTROL_DIR) not in sys.path:
+    sys.path.insert(0, str(_CONTROL_DIR))
+from provenance import attach_provenance
+
 import numpy as np
 import pandas as pd
 
@@ -267,6 +273,7 @@ def generate_benchmark():
             ),
         },
     }
+    attach_provenance(benchmark)
     return benchmark
 
 

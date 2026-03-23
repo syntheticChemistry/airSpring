@@ -29,6 +29,12 @@ import math
 import sys
 from pathlib import Path
 
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_CONTROL_DIR = _SCRIPT_DIR if _SCRIPT_DIR.name == "control" else _SCRIPT_DIR.parent
+if str(_CONTROL_DIR) not in sys.path:
+    sys.path.insert(0, str(_CONTROL_DIR))
+from provenance import attach_provenance
+
 # ── FAO-56 ET₀ (same minimal implementation as mc_et0) ──────────────
 
 def saturation_vapour_pressure(t_c):
@@ -295,6 +301,7 @@ def main():
         }
     }
 
+    attach_provenance(benchmark)
     out_path = Path(__file__).parent / "benchmark_bootstrap_jackknife.json"
     with open(out_path, "w") as f:
         json.dump(benchmark, f, indent=2)
