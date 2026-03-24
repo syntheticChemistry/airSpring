@@ -25,7 +25,7 @@ npu = ["dep:akida-driver"]
 # method naming, GPU pooling resilience, feature-gated special/spectral.
 # airSpring validates that Rust baselines can be faithfully ported to
 # BarraCuda shaders. Used for stats, validation, GPU ops, and PDE primitives.
-barracuda = { path = "../../barraCuda/crates/barracuda", default-features = false, features = ["gpu", "domain-pde"] }
+barracuda = { version = "0.3.7", path = "../../barraCuda/crates/barracuda", default-features = false, features = ["gpu", "domain-pde"] }
 
 # JSON parsing: loads benchmark JSON files (control/fao56/*.json, etc.)
 # with full provenance for validation fidelity.
@@ -44,7 +44,7 @@ tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
 # Nautilus Shell: evolutionary reservoir computing via BingoCube board populations.
 # Domain-agnostic feed-forward reservoir — no temporal recurrence needed.
 # Provides DriftMonitor, EdgeSeeder, NautilusShell, and NautilusBrain APIs.
-bingocube-nautilus = { path = "../../primalTools/bingoCube/nautilus", features = ["json"] }
+bingocube-nautilus = { version = "0.1.0", path = "../../primalTools/bingoCube/nautilus", features = ["json"] }
 
 # Serde: needed for Nautilus brain serialization (observations, shell state).
 serde = { version = "1", features = ["derive"] }

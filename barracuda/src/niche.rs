@@ -320,4 +320,72 @@ mod tests {
         assert_eq!(NICHE_NAME, crate::PRIMAL_NAME);
         assert!(NICHE_NAME.chars().all(|c| c.is_ascii_lowercase()));
     }
+
+    #[test]
+    fn capabilities_count_matches_expected() {
+        assert!(
+            CAPABILITIES.len() >= 40,
+            "expected at least 40 capabilities, found {}",
+            CAPABILITIES.len()
+        );
+    }
+
+    #[test]
+    fn no_duplicate_capabilities() {
+        let mut seen = std::collections::HashSet::new();
+        for cap in CAPABILITIES {
+            assert!(seen.insert(cap), "duplicate capability: {cap}");
+        }
+    }
+
+    #[test]
+    fn operation_dependencies_keys_use_valid_domains() {
+        let deps = operation_dependencies();
+        let map = deps.as_object().unwrap();
+        let valid_prefixes = ["science.", "ecology.", "provenance.", "data."];
+        for key in map.keys() {
+            assert!(
+                valid_prefixes.iter().any(|p| key.starts_with(p)),
+                "dependency key '{key}' should use a recognized domain prefix"
+            );
+        }
+    }
+
+    #[test]
+    fn cost_estimates_have_latency() {
+        let costs = cost_estimates();
+        let map = costs.as_object().unwrap();
+        for (key, val) in map {
+            assert!(
+                val.get("latency_ms").is_some(),
+                "cost estimate for '{key}' missing latency_ms"
+            );
+        }
+    }
+
+    #[test]
+    fn ecology_mappings_values_are_strings() {
+        let mappings = ecology_semantic_mappings();
+        let map = mappings.as_object().unwrap();
+        for (key, val) in map {
+            assert!(
+                val.as_str().is_some(),
+                "ecology mapping '{key}' should be a string"
+            );
+        }
+    }
+
+    #[test]
+    fn health_capabilities_present() {
+        assert!(CAPABILITIES.contains(&"health.liveness"));
+        assert!(CAPABILITIES.contains(&"health.readiness"));
+    }
+
+    #[test]
+    fn provenance_capabilities_present() {
+        assert!(CAPABILITIES.contains(&"provenance.begin"));
+        assert!(CAPABILITIES.contains(&"provenance.record"));
+        assert!(CAPABILITIES.contains(&"provenance.complete"));
+        assert!(CAPABILITIES.contains(&"provenance.status"));
+    }
 }

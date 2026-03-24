@@ -1,6 +1,6 @@
 # Context — airSpring
 
-**Doc sync:** 2026-03-24 (v0.10.0; post–deep-audit facts; test totals current below).
+**Doc sync:** 2026-03-24 (v0.10.0; post–deep-audit execution; all CI gates green).
 
 ## What This Is
 
@@ -9,7 +9,7 @@ It reproduces published results from FAO-56 (irrigation), HYDRUS (soil physics),
 USDA/NASS (crop yield), and field sensor research — then validates that Rust
 implementations match Python baselines to documented tolerances. It is part of
 the ecoPrimals sovereign computing ecosystem: a collection of self-contained
-binaries that coordinate via JSON-RPC 2.0 over Unix sockets, with zero
+binaries that coordinate via JSON-RPC 2.0 over Unix sockets and TCP, with zero
 compile-time coupling between components.
 
 ## Role in the Ecosystem
@@ -27,14 +27,14 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - **Architecture:** Two workspace crates (`airspring-barracuda` library + `airspring-forge` dispatch)
 - **Communication:** JSON-RPC 2.0 over Unix sockets + TCP (biomeOS capability routing, platform-agnostic Transport)
 - **License:** AGPL-3.0-or-later
-- **Lib tests:** 943 (barracuda, `cargo test --lib`)
+- **Lib tests:** 986 (barracuda, `cargo test --lib`)
 - **Integration + doc tests:** 316 (barracuda)
-- **Barracuda total:** 1,259 (943 lib + 316 integration/doc)
+- **Barracuda total:** 1,302 (986 lib + 316 integration/doc)
 - **Forge tests:** 62 (metalForge)
-- **Grand total:** 1,321 (both crates)
+- **Grand total:** 1,364 (both crates)
 - **Binaries:** 91 (84 validation, 4 bench, 3 operational)
 - **Proptest invariants:** 7 (SVP, delta, Hargreaves, TAW, RAW, Ks)
-- **Line coverage:** ~90% (cargo llvm-cov)
+- **Line coverage:** 90.56% (cargo llvm-cov --lib --fail-under-lines 90)
 - **MSRV:** 1.92
 - **Edition:** 2024
 - **Crate count:** 2 workspace crates

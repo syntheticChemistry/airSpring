@@ -536,7 +536,10 @@ fn stage_kc(kc: &CropCoefficients, day_idx: usize, total_days: usize) -> f64 {
 
 #[cfg(test)]
 mod tests {
-    #![expect(clippy::float_cmp, reason = "exact f64 comparisons verify GPU/CPU determinism")]
+    #![expect(
+        clippy::float_cmp,
+        reason = "exact f64 comparisons verify GPU/CPU determinism"
+    )]
     #![expect(clippy::expect_used, clippy::unwrap_used, reason = "test assertions")]
 
     use super::*;

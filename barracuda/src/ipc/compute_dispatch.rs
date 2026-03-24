@@ -220,4 +220,126 @@ mod tests {
             "TOADSTOOL_ADDRESS"
         );
     }
+
+    #[test]
+    fn dispatch_error_display_no_compute_primal() {
+        let e = DispatchError::NoComputePrimal;
+        assert_eq!(format!("{e}"), "no compute primal discovered");
+    }
+
+    #[test]
+    fn dispatch_error_display_missing_job_id() {
+        let e = DispatchError::MissingJobId;
+        assert!(format!("{e}").contains("job_id"));
+    }
+
+    #[test]
+    fn dispatch_error_display_rpc_error() {
+        let e = DispatchError::RpcError {
+            code: -32600,
+            message: "invalid request".to_string(),
+        };
+        let s = format!("{e}");
+        assert!(s.contains("-32600"));
+        assert!(s.contains("invalid request"));
+    }
+
+    #[test]
+    fn dispatch_error_display_ipc() {
+        let inner = IpcError::EmptyResponse {
+            method: "test".to_string(),
+        };
+        let e = DispatchError::Ipc(inner);
+        assert!(format!("{e}").contains("IPC error"));
+    }
+
+    #[test]
+    fn dispatch_error_from_socket_not_found() {
+        let ipc_err = IpcError::SocketNotFound {
+            primal: "toadstool".to_string(),
+        };
+        let e = DispatchError::from(ipc_err);
+        assert!(matches!(e, DispatchError::NoComputePrimal));
+    }
+
+    #[test]
+    fn dispatch_error_from_other_ipc_error() {
+        let ipc_err = IpcError::EmptyResponse {
+            method: "compute.dispatch.submit".to_string(),
+        };
+        let e = DispatchError::from(ipc_err);
+        assert!(matches!(e, DispatchError::Ipc(_)));
+    }
+
+    #[test]
+    fn tcp_submit_rpc_error_extracted() {
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind");
+        let addr = listener.local_addr().expect("addr");
+
+        let server = std::thread::spawn(move || {
+            let (mut stream, _) = listener.accept().expect("accept");
+            let mut reader = BufReader::new(&stream);
+            let mut line = String::new();
+            reader.read_line(&mut line).expect("read");
+            let req: serde_json::Value = serde_json::from_str(line.trim()).expect("parse");
+            let id = req.get("id").cloned().unwrap_or(serde_json::Value::Null);
+            let resp = serde_json::json!({
+                "jsonrpc": "2.0",
+                "error": { "code": -32601, "message": "method not found" },
+                "id": id,
+            });
+            let mut payload = serde_json::to_vec(&resp).expect("serialize");
+            payload.push(b'\n');
+            stream.write_all(&payload).expect("write");
+            stream.flush().ok();
+        });
+
+        let transport = Transport::Tcp(addr);
+        let result = submit_to_transport(&transport, "bad_workload", &serde_json::json!({}));
+        server.join().expect("join");
+
+        match result {
+            Err(DispatchError::RpcError { code, message }) => {
+                assert_eq!(code, -32601);
+                assert_eq!(message, "method not found");
+            }
+            other => panic!("expected RpcError, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn tcp_submit_missing_job_id() {
+        let listener = TcpListener::bind("127.0.0.1:0").expect("bind");
+        let addr = listener.local_addr().expect("addr");
+
+        let server = std::thread::spawn(move || {
+            let (mut stream, _) = listener.accept().expect("accept");
+            let mut reader = BufReader::new(&stream);
+            let mut line = String::new();
+            reader.read_line(&mut line).expect("read");
+            let req: serde_json::Value = serde_json::from_str(line.trim()).expect("parse");
+            let id = req.get("id").cloned().unwrap_or(serde_json::Value::Null);
+            let resp = serde_json::json!({
+                "jsonrpc": "2.0",
+                "result": { "status": "ok" },
+                "id": id,
+            });
+            let mut payload = serde_json::to_vec(&resp).expect("serialize");
+            payload.push(b'\n');
+            stream.write_all(&payload).expect("write");
+            stream.flush().ok();
+        });
+
+        let transport = Transport::Tcp(addr);
+        let result = submit_to_transport(&transport, "test", &serde_json::json!({}));
+        server.join().expect("join");
+
+        assert!(matches!(result, Err(DispatchError::MissingJobId)));
+    }
+
+    #[test]
+    fn dispatch_error_is_error_trait() {
+        let e: Box<dyn std::error::Error> = Box::new(DispatchError::NoComputePrimal);
+        assert!(!e.to_string().is_empty());
+    }
 }

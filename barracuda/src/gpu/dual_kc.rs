@@ -258,7 +258,10 @@ pub struct SeasonFieldSummary {
 
 #[cfg(test)]
 mod tests {
-    #![expect(clippy::float_cmp, reason = "exact f64 comparisons verify GPU/CPU parity")]
+    #![expect(
+        clippy::float_cmp,
+        reason = "exact f64 comparisons verify GPU/CPU parity"
+    )]
     #![expect(clippy::expect_used, clippy::unwrap_used, reason = "test assertions")]
 
     use super::*;

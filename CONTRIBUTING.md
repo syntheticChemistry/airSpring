@@ -37,7 +37,7 @@ validation binaries. Each tolerance constant must have:
 
 - A descriptive name
 - A doc comment explaining the mathematical justification
-- Registration in the appropriate domain submodule (`evapotranspiration.rs`, `hydrology.rs`, `gpu.rs`, `numerics.rs`)
+- Registration in the appropriate domain submodule (`atmospheric.rs`, `soil.rs`, `gpu.rs`, `instrument.rs`, `numerics.rs`)
 
 ## Validation Binaries
 
@@ -76,10 +76,10 @@ socket path, or capability set. Discover at runtime via:
 ## Running the Full Suite
 
 ```bash
-cd barracuda && cargo test --lib              # 943 lib tests
+cd barracuda && cargo test --lib              # 986 lib tests
 cd barracuda && cargo test --tests            # 316 integration tests
 cd metalForge/forge && cargo test             # 62 forge tests
-cd barracuda && cargo llvm-cov --lib          # coverage (≥90%)
-cd barracuda && cargo clippy -- -D warnings   # zero warnings
-cd barracuda && cargo deny check              # dependency audit
+cd barracuda && cargo llvm-cov --lib --fail-under-lines 90  # 90.56% line coverage
+cd barracuda && cargo clippy --all-targets -- -D warnings -W clippy::pedantic -W clippy::nursery
+cd barracuda && cargo deny check              # cargo-deny 0.19 (SPDX, ecoBin bans)
 ```

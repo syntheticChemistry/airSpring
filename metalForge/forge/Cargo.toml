@@ -19,7 +19,7 @@ serde_json = "1"
 toml = "0.8"
 # BarraCuda standalone primal (ecoPrimals/barraCuda) — universal math engine.
 # Aligned with airspring-barracuda: explicit minimal features, no default bloat.
-barracuda = { path = "../../../barraCuda/crates/barracuda", default-features = false, features = ["gpu"] }
+barracuda = { version = "0.3.7", path = "../../../barraCuda/crates/barracuda", default-features = false, features = ["gpu"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
 

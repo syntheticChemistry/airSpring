@@ -7,8 +7,8 @@
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
+| **V0.10.0** | [AIRSPRING_V010_DEEP_AUDIT_EXECUTION_HANDOFF_MAR24_2026.md](handoffs/AIRSPRING_V010_DEEP_AUDIT_EXECUTION_HANDOFF_MAR24_2026.md) | 2026-03-24 | **Deep audit execution** — cargo-deny 0.19 evolution, +43 tests (986 lib / 1,364 total), 90.56% coverage, `const assert` tolerance contracts, SPDX compliance, `blake3` cc wrapper, TCP mock IPC testing pattern |
 | **V0.10.0** | [ecoPrimals handoff](../../../wateringHole/handoffs/AIRSPRING_V010_DEEP_EVOLUTION_ABSORPTION_HANDOFF_MAR23_2026.md) | 2026-03-23 | Cross-primal — per-site casts, `PipelineError`, `ValidationSink`, `default-features=false`, `content_sha256` provenance, TCP transport, numerical guards |
-| **V0.10.0** | [AIRSPRING_V010_ECOSYSTEM_ABSORPTION_PRIMAL_SPRING_HANDOFF_MAR24_2026.md](handoffs/AIRSPRING_V010_ECOSYSTEM_ABSORPTION_PRIMAL_SPRING_HANDOFF_MAR24_2026.md) | 2026-03-24 | **ecosystem absorption** — PRIMAL_REGISTRY, CONTRIBUTING/SECURITY (S174), upstream contract pinning, GPU `test_pool`, deploy `[graph.metadata]`, primal_names in tests, 1,321 total tests |
 | **≤V0.9.0** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 
 ## Cross-Spring Documents
@@ -19,7 +19,7 @@
 | `../specs/BIOMEOS_CAPABILITIES.md` | Ecology capability domain for biomeOS Neural API |
 | `../specs/NUCLEUS_INTEGRATION.md` | NUCLEUS deployment: graphs, workloads, Neural API bridge |
 | `../specs/GPU_PROMOTION_MAP.md` | GPU tier status: 24 Tier A + 2 Tier B + 2 Tier C, with blocker effort estimates |
-| `../specs/TOLERANCE_REGISTRY.md` | 60 centralized `Tolerance` structs across 4 domain submodules (Rust + Python mirror) |
+| `../specs/TOLERANCE_REGISTRY.md` | 58 centralized `Tolerance` structs across 5 domain submodules (Rust + Python mirror) |
 | `../graphs/airspring_eco_pipeline.toml` | biomeOS deployment graph: weather → ET₀ → WB → yield |
 | `../graphs/airspring_provenance_pipeline.toml` | Provenance-tracked experiment: session → science → dehydrate → commit → attribute |
 | `../graphs/airspring_niche_deploy.toml` | Full niche deployment: Tower + Trio + NestGate + ToadStool + airSpring |
@@ -33,6 +33,7 @@
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_V010_ECOSYSTEM_ABSORPTION_PRIMAL_SPRING_HANDOFF_MAR24_2026.md` | v0.10.0: ecosystem absorption — PRIMAL_REGISTRY, CONTRIBUTING/SECURITY, upstream contract pinning, GPU test_pool, deploy metadata, 1,321 tests (superseded by V0.10.0 Mar24 deep audit execution) |
 | `handoffs/archive/AIRSPRING_V010_DEEP_AUDIT_EXECUTION_BARRACUDA_TOADSTOOL_HANDOFF_MAR24_2026.md` | v0.10.0: deep audit execution — three-tier capability discovery, PRIMAL_NAME-derived RPC, provenance headers, forge alignment, doc reconciliation (superseded by V0.10.0 Mar24 ecosystem absorption) |
 | `handoffs/archive/AIRSPRING_V010_DEEP_AUDIT_BARRACUDA_TOADSTOOL_HANDOFF_MAR23_2026.md` | v0.10.0: comprehensive deep audit — lint architecture, ecoBin `deny.toml`, CI symlink strategy, GPU evolution (superseded by V0.10.0 Mar24 execution) |
 | `handoffs/archive/AIRSPRING_V010_PLATFORM_AGNOSTIC_IPC_HANDOFF_MAR23_2026.md` | v0.10.0: platform-agnostic IPC, `#[expect()]` sweep, doctest migration, Exp 062-087 (superseded by V0.10.0 Mar24 execution) |

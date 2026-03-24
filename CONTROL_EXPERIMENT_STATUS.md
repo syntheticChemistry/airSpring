@@ -1197,8 +1197,8 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026 — Updated: March 24, 2026 (v0.10.0)*
-*87 experiments, 1284/1284 Python, 943 lib + 316 integration/doc + 62 forge = 1,321 total tests, 91 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules), barraCuda 0.3.7 (wgpu 28), Rust Edition 2024. biomeOS niche: 45 capabilities, 4 deploy graphs, BYOB niche deployment. Zero unsafe everywhere (DI pattern). 58 tolerances in 4 submodules. Exp 084 CPU/GPU 21/21, Exp 085 toadStool 19/19, Exp 086 metalForge 17/17, Exp 087 graphs 22/22.*
+*Initialized: February 16, 2026 — Updated: March 24, 2026 (v0.10.0, post-audit execution)*
+*87 experiments, 1284/1284 Python, 986 lib + 316 integration/doc + 62 forge = 1,364 total tests, 91 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules), barraCuda 0.3.7 (wgpu 28), Rust Edition 2024. biomeOS niche: 45 capabilities, 4 deploy graphs, BYOB niche deployment. Zero unsafe everywhere (DI pattern). 58 tolerances in 5 submodules. 90.56% line coverage (fail-under-lines 90). cargo-deny 0.19 clean. Exp 084 CPU/GPU 21/21, Exp 085 toadStool 19/19, Exp 086 metalForge 17/17, Exp 087 graphs 22/22.*
 *8 ET₀ methods + SCS-CN runoff + Green-Ampt infiltration + coupled runoff-infiltration + VG inverse + full-season WB + Exp 058 Climate Scenario (46/46).*
 *Niche adapter (45 capabilities, transitional binary → biomeOS graph deployment). Atlas decade 80yr (102/102). NASS real (99/99). NCBI diversity (63/63).*
 *25 Tier A + 6 GPU-local modules. Ops 5-8 GPU-first (ToadStool S87). GPU stats (neuralSpring S69).*

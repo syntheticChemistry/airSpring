@@ -86,6 +86,7 @@ pub use numerics::*;
 pub use soil::*;
 
 /// Every registered [`Tolerance`] constant (upstream contract inventory).
+#[must_use]
 pub const fn all_tolerances() -> &'static [&'static Tolerance] {
     &[
         // ET₀ and atmospheric (FAO-56)
@@ -309,12 +310,12 @@ mod upstream_contract_tests {
 
     #[test]
     fn gpu_cpu_parity_tolerance_is_tighter_than_science() {
-        assert!(
-            GPU_CPU_CROSS.abs_tol <= ET0_REFERENCE.abs_tol,
-            "GPU/CPU parity ({}) should be tighter than science tolerance ({})",
-            GPU_CPU_CROSS.abs_tol,
-            ET0_REFERENCE.abs_tol
-        );
+        const {
+            assert!(
+                GPU_CPU_CROSS.abs_tol <= ET0_REFERENCE.abs_tol,
+                "GPU/CPU parity should be tighter than science tolerance",
+            );
+        }
     }
 
     #[test]

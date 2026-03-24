@@ -40,11 +40,11 @@
 //! | `eco::yield_response` | `gpu::yield_response` | `batched_elementwise_f64.wgsl` (op=18) | Stewart yield | A (GPU-first, absorbed upstream) |
 //! | `eco::evapotranspiration` (Makkink/Turc/Hamon/BC) | `gpu::simple_et0` | `batched_elementwise_f64.wgsl` (ops 14-16, 19) | Simple ET₀ batch | A (GPU-first, absorbed upstream) |
 //!
-//! # Current Inventory (March 7, 2026 — v0.7.5, `barraCuda` HEAD `a898dee`, wgpu 28)
+//! # Current Inventory (March 24, 2026 — v0.10.0, `barraCuda` 0.3.7 HEAD `7a891dd`, wgpu 28)
 //!
 //! ## v0.7.5: Upstream Rewire + biomeOS NUCLEUS Integration
 //!
-//! Synced to barraCuda HEAD (`a898dee`), toadStool S130+, coralReef Phase 10.
+//! Synced to barraCuda 0.3.7 (`7a891dd`), toadStool S130+, coralReef Phase 10.
 //!
 //! - **`eco::drought_index` leaned**: Local `regularized_gamma_p`, `gamma_series`,
 //!   `gamma_cf` (55 lines of duplicated numerical math) replaced with upstream
@@ -554,8 +554,8 @@ pub const GAPS: &[EvolutionGap] = &[
         barracuda_primitive: Some(
             "pde::richards::solve_richards (van Genuchten-Mualem, Picard + CN + Thomas)",
         ),
-        action: "WIRED (v0.4.0): gpu::richards::BatchedRichards wraps barracuda::pde::richards. \
-                 pde::crank_nicolson now f64 + GPU shader for CN cross-validation.",
+        action: "INTEGRATED (v0.4.0): gpu::richards::BatchedRichards wraps barracuda::pde::richards. \
+                 pde::crank_nicolson f64 + GPU shader for CN cross-validation.",
     },
     EvolutionGap {
         id: "tridiagonal_batch",
@@ -583,9 +583,9 @@ pub const GAPS: &[EvolutionGap] = &[
     EvolutionGap {
         id: "isotherm_batch_fitting",
         description: "Batch isotherm fitting via nonlinear optimization",
-        tier: Tier::B,
+        tier: Tier::A,
         barracuda_primitive: Some("optimize::nelder_mead, multi_start_nelder_mead, NelderMeadGpu"),
-        action: "WIRED (v0.4.1): gpu::isotherm::{fit_*_nm, fit_*_global, fit_batch_global}",
+        action: "INTEGRATED (v0.4.1): gpu::isotherm::{fit_*_nm, fit_*_global, fit_batch_global}",
     },
     // ── Tier B (new v0.5.2): Pipeline & streaming orchestrators ──────
     EvolutionGap {

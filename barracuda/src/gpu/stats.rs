@@ -167,7 +167,10 @@ pub fn predict_vwc(coefficients: &[f64], raw_count: f64) -> f64 {
 
 #[cfg(test)]
 mod tests {
-    #![expect(clippy::float_cmp, reason = "exact f64 comparisons verify GPU/CPU parity")]
+    #![expect(
+        clippy::float_cmp,
+        reason = "exact f64 comparisons verify GPU/CPU parity"
+    )]
 
     use super::*;
 

@@ -19,7 +19,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,284/1,284 PASS** | 60 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB, MC ET₀ uncertainty, bootstrap/jackknife CI, SPI drought index |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **943 lib + 316 integration (1,259 barracuda) + 62 forge = 1,321 total** | 91 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
+| Phase 1: Rust validation | **986 lib + 316 integration (1,302 barracuda) + 62 forge = 1,364 total** | 91 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (34/34 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -54,14 +54,14 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` (barracuda) | **943 passed**, 0 failures |
+| `cargo test --lib` (barracuda) | **986 passed**, 0 failures |
 | `cargo test --tests --all-features` (barracuda) | **316 passed** (integration + doc tests) |
 | `cargo test --lib` (metalForge) | **62 passed**, 0 failures |
-| `cargo llvm-cov --lib --fail-under-lines 90` | **95.66% line coverage** |
+| `cargo llvm-cov --lib --fail-under-lines 90` | **90.56% line coverage** |
 | `cargo clippy (pedantic + nursery, -D warnings)` | **0 warnings** (both crates) |
 | `cargo fmt --check` | **Clean** |
 | `cargo doc --no-deps` | **Clean** (both crates) |
-| `cargo-deny check` | **Clean** (AGPL-3.0-or-later) |
+| `cargo-deny check` | **Clean** (AGPL-3.0-or-later, cargo-deny 0.19) |
 | `bench_cross_spring_evolution` | **146/146 PASS** (release, S87 sync) |
 | `validate_cross_spring_provenance` | **32/32 PASS** — CPU↔GPU benchmark, 5-spring shader provenance |
 | `validate_dispatch_experiment` | **51/51 PASS** — CPU/GPU/batch/absorption/pipeline |
@@ -295,12 +295,12 @@ AGPL-3.0-or-later
 
 ---
 
-*March 24, 2026 — v0.10.0. Deep evolution execution complete. Platform-agnostic
-provenance IPC (Unix-only `UnixStream` → `Transport` enum via `rpc::send_to`),
-`#[allow]`→`#[expect]` final sweep (zero remaining in production), 4 doctests
-evolved `ignore`→`no_run` (9/9 pass, 0 ignored), `ProvenanceConfig` evolved to
-transport-based discovery (TCP fallback for cross-platform). Exp 062-087 documented
-in PAPER_REVIEW_QUEUE.md. 943 lib + 316 integration/doc = 1,259 barracuda tests;
-62 forge; 1,321 total tests. 0 failures. Clippy pedantic+nursery zero warnings.
-Zero unsafe. Zero C deps.
+*March 24, 2026 — v0.10.0. Deep audit execution complete. cargo-deny 0.19 evolved
+(SPDX `AGPL-3.0-or-later`, `CC0-1.0` allowance, `blake3` cc wrapper, version-pinned
+path deps). Coverage expanded: `validation/json`, `ipc/provenance`, `ipc/compute_dispatch`,
+`niche` — 90.56% line coverage (fail-under-lines 90 passes). `evolution_gaps.rs` synced
+to v0.10.0 / barraCuda 0.3.7. `#[expect]`→`#[allow]` for shared test infra
+(`tests/common/mod.rs`). `const assert` for compile-time tolerance contract.
+986 lib + 316 integration/doc = 1,302 barracuda tests; 62 forge; 1,364 total tests.
+0 failures. Clippy pedantic+nursery zero warnings. Zero unsafe. Zero C deps.
 Zero hardcoded primals. AGPL-3.0-or-later.*
