@@ -1,9 +1,9 @@
 # airSpring NUCLEUS Integration
 
-**Date:** March 23, 2026
+**Date:** March 24, 2026
 **Status:** Complete — deployment graph + capability spec + Neural API bridge operational, 28/28 pipeline PASS (Exp 084-087)
 **Gate:** Eastgate (i9-12900K, RTX 4070, 32GB DDR5, 2TB NVMe, BrainChip Akida NPU)
-**Invariant:** 947 Rust lib tests + 46/46 GPU math + 75/75 cross-validation + 1393 atlas must pass regardless of deployment mode
+**Invariant:** 943 Rust lib tests + 46/46 GPU math + 75/75 cross-validation + 1393 atlas must pass regardless of deployment mode
 
 ---
 
@@ -183,7 +183,7 @@ Open-Meteo requires no API key. USDA NASS registration is instant and free.
 2. **With local NUCLEUS**: Same tests, but data flows through NestGate
 3. **With Neural API**: `validate_neural_api` confirms JSON round-trip parity (29/29 PASS)
 4. **With Plasmodium**: Same tests, but GPU workloads route to best available gate
-5. **Validation invariant**: All 938 Rust lib tests + 46/46 GPU math portability + 1393 atlas checks must pass regardless of deployment mode
+5. **Validation invariant**: All 943 Rust lib tests + 46/46 GPU math portability + 1393 atlas checks must pass regardless of deployment mode
 
 The compute results are deterministic. NUCLEUS changes *where* the compute runs,
 not *what* it computes. The 75/75 cross-validation match (tol=1e-5) is the

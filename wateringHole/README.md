@@ -8,7 +8,7 @@
 | Version | File | Date | Scope |
 |---------|------|------|-------|
 | **V0.10.0** | [ecoPrimals handoff](../../../wateringHole/handoffs/AIRSPRING_V010_DEEP_EVOLUTION_ABSORPTION_HANDOFF_MAR23_2026.md) | 2026-03-23 | Cross-primal — per-site casts, `PipelineError`, `ValidationSink`, `default-features=false`, `content_sha256` provenance, TCP transport, numerical guards |
-| **V0.10.0** | [AIRSPRING_V010_DEEP_AUDIT_EXECUTION_BARRACUDA_TOADSTOOL_HANDOFF_MAR24_2026.md](handoffs/AIRSPRING_V010_DEEP_AUDIT_EXECUTION_BARRACUDA_TOADSTOOL_HANDOFF_MAR24_2026.md) | 2026-03-24 | **execution** — three-tier capability discovery, PRIMAL_NAME-derived RPC, 47 provenance headers, 8 JSON provenance, forge feature alignment, doc count reconciliation |
+| **V0.10.0** | [AIRSPRING_V010_ECOSYSTEM_ABSORPTION_PRIMAL_SPRING_HANDOFF_MAR24_2026.md](handoffs/AIRSPRING_V010_ECOSYSTEM_ABSORPTION_PRIMAL_SPRING_HANDOFF_MAR24_2026.md) | 2026-03-24 | **ecosystem absorption** — PRIMAL_REGISTRY, CONTRIBUTING/SECURITY (S174), upstream contract pinning, GPU `test_pool`, deploy `[graph.metadata]`, primal_names in tests, 1,321 total tests |
 | **≤V0.9.0** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 
 ## Cross-Spring Documents
@@ -33,6 +33,7 @@
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_V010_DEEP_AUDIT_EXECUTION_BARRACUDA_TOADSTOOL_HANDOFF_MAR24_2026.md` | v0.10.0: deep audit execution — three-tier capability discovery, PRIMAL_NAME-derived RPC, provenance headers, forge alignment, doc reconciliation (superseded by V0.10.0 Mar24 ecosystem absorption) |
 | `handoffs/archive/AIRSPRING_V010_DEEP_AUDIT_BARRACUDA_TOADSTOOL_HANDOFF_MAR23_2026.md` | v0.10.0: comprehensive deep audit — lint architecture, ecoBin `deny.toml`, CI symlink strategy, GPU evolution (superseded by V0.10.0 Mar24 execution) |
 | `handoffs/archive/AIRSPRING_V010_PLATFORM_AGNOSTIC_IPC_HANDOFF_MAR23_2026.md` | v0.10.0: platform-agnostic IPC, `#[expect()]` sweep, doctest migration, Exp 062-087 (superseded by V0.10.0 Mar24 execution) |
 | `handoffs/archive/HANDOFF_AIRSPRING_TO_BARRACUDA_TRANSPORT_ABSORPTION_MAR23_2026.md` | v0.10.0: Transport absorption, dependency health, tolerance architecture (superseded by V0.10.0 Mar24 execution) |

@@ -2,7 +2,7 @@
 
 **Updated**: March 24, 2026
 **Project**: airSpring — Ecological & Agricultural Sciences (v0.10.0)
-**Status**: 87 experiments, 1284/1284 Python + 938 lib + 316 integration + 62 forge + 91 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.7 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (41 capabilities, 4 deploy graphs, BYOB niche deployment) + `#![forbid(unsafe_code)]` both crates + `#![deny(cast_*)]` library-strict + zero clippy pedantic+nursery + `warn(missing_docs)`. 58 tolerances in 4 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies**. Zero-panic validation (91/91 binaries). Zero `#[allow()]` in any code. 10 MCP tools (Squirrel AI, wired in primal dispatch). Platform-agnostic IPC (Transport enum: Unix + TCP, provenance trio migrated). 9/9 doctests pass (0 ignored). Full validation pipeline green (2026-03-24)
+**Status**: 87 experiments, 1284/1284 Python + 943 lib + 316 integration + 62 forge = 1,321 total tests + 91 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.7 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (45 capabilities, 4 deploy graphs, BYOB niche deployment) + `#![forbid(unsafe_code)]` both crates + `#![deny(cast_*)]` library-strict + zero clippy pedantic+nursery + `warn(missing_docs)`. 58 tolerances in 4 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies**. Zero-panic validation (91/91 binaries). Zero `#[allow()]` in any code. 10 MCP tools (Squirrel AI, wired in primal dispatch). Platform-agnostic IPC (Transport enum: Unix + TCP, provenance trio migrated). 9/9 doctests pass (0 ignored). Full validation pipeline green (2026-03-24)
 
 ---
 
@@ -50,13 +50,14 @@ Phase 5.12 Audit execution    — #![deny(cast_*)] library strict, soil_moisture
 Phase 5.13 Deep audit execution — provenance 11→63 baselines, OrExit zero-panic all 91 binaries, centralized tolerances, #[allow]→#[expect] Rust 2024, smart refactors (data/provider→4 modules, evolution_gaps→resolved_issues), primal_names constants, data accession IDs, cast helpers (f64_i32, usize_i32), determinism contract (v0.10.0, 938 lib)
 Phase 5.14 Deep debt evolution — MCP tools/list + tools/call wired in primal dispatch (10 ecology tools discoverable by Squirrel), platform-agnostic IPC Transport enum (Unix + TCP, ecoBin compliant), ValidationHarness migration (validate_cross_spring_modern), 50+ inline tolerances centralized, .expect()→OrExit/Result in binaries, cast_possible_wrap covered, #[expect]→#[allow] for defensive wrappers, doc_markdown fixes, integration test tolerance centralization, metalForge fmt (v0.10.0, 938 lib + 316 integration)
 Phase 5.15 Deep audit execution — zero #[allow()] in entire codebase (all→#[expect(reason)]), blanket pedantic/nursery allows→specific per-lint expects, deny.toml ecoBin enforcement (barracuda+forge, 14 C-dep bans), CI path deps via symlink (ecoPrimals sparse checkout), MSRV 1.92 documented (Rust 2024 #[expect] dependency), todo!→unimplemented! in doc examples, stale doc counts corrected across 12 files, BatchedDualKc→Tier A in cross-spring evolution, NUCLEUS status→Complete, absorbed shader comments updated (v0.10.0, 938 lib + 316 integration + 62 forge)
+Phase 5.16 Ecosystem absorption — PRIMAL_REGISTRY updated (v0.10.0 + barraCuda 0.3.7), CONTRIBUTING.md + SECURITY.md (neuralSpring S174 pattern), upstream contract pinning (5 tolerance invariant tests), GPU test resilience (barraCuda test_pool delegation), deploy graph metadata ([graph.metadata] on all 4 graphs, primalSpring v0.7.0 pattern), primal name constants in test code, 943 lib + 316 integration + 62 forge = 1,321 total tests (v0.10.0)
 ```
 
 ## Faculty Summary
 
 | Faculty | Institution | Track | Papers | Experiments | Checks | Domain |
 |---------|------------|-------|:------:|:-----------:|:------:|--------|
-| Dong | MSU BAE | Irrigation & Soil | 10+ | 87 | 1284+938 | ET₀ (8 methods), soil, IoT, WB, dual Kc, Richards, yield, ensemble, bias correction, GPU parity, GPU math portability, metalForge dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB audit, climate scenario, streaming pipeline, decade analysis, NASS yield, Shannon H' diversity, NUCLEUS primal, cross-primal pipeline, Paper 12 immunological Anderson, local GPU parity (Exp 075), NUCLEUS routing (Exp 076), cross-spring provenance (Exp 077), MC ET₀ uncertainty (Exp 079), Bootstrap/Jackknife CI (Exp 080), SPI drought index (Exp 081), CPU/GPU parity (Exp 084), toadStool dispatch (Exp 085), metalForge NUCLEUS (Exp 086), graph coordination (Exp 087) |
+| Dong | MSU BAE | Irrigation & Soil | 10+ | 87 | 1284+943 | ET₀ (8 methods), soil, IoT, WB, dual Kc, Richards, yield, ensemble, bias correction, GPU parity, GPU math portability, metalForge dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB audit, climate scenario, streaming pipeline, decade analysis, NASS yield, Shannon H' diversity, NUCLEUS primal, cross-primal pipeline, Paper 12 immunological Anderson, local GPU parity (Exp 075), NUCLEUS routing (Exp 076), cross-spring provenance (Exp 077), MC ET₀ uncertainty (Exp 079), Bootstrap/Jackknife CI (Exp 080), SPI drought index (Exp 081), CPU/GPU parity (Exp 084), toadStool dispatch (Exp 085), metalForge NUCLEUS (Exp 086), graph coordination (Exp 087) |
 
 ## Faculty: Younsuk Dong, PhD
 
@@ -189,7 +190,7 @@ Phase 5.15 Deep audit execution — zero #[allow()] in entire codebase (all→#[
 | `validate_bootstrap_jackknife` | 20 | Bootstrap CI + Jackknife variance, seasonal ET₀ |
 | `validate_drought_index` | 20 | SPI-1/3/6/12, gamma MLE, WMO classification |
 | `validate_cross_spring_modern` | 36 | Cross-spring modern systems (provenance, ACF, precision routing) |
-| `validate_nucleus_modern` | 43 | NUCLEUS modern deployment (Tower/Node, 41 caps, SPI/ACF/gamma) |
+| `validate_nucleus_modern` | 43 | NUCLEUS modern deployment (Tower/Node, 45 caps, SPI/ACF/gamma) |
 | `validate_cpu_gpu_comprehensive` | 21 | All 18 GPU modules CPU↔GPU parity (Exp 084) |
 | `validate_toadstool_dispatch` | 19 | 14 JSON-RPC science methods, compute.offload (Exp 085) |
 | `validate_mixed_nucleus_live` | 17 | Live NUCLEUS mesh, ecology pipeline, PCIe bypass (Exp 086, forge) |
@@ -248,7 +249,7 @@ S79 modernization: `libc`→`rustix`, `async-trait`→AFIT, universal f64 precis
 
 ### Next Steps (Dong Lab)
 
-- **Audit execution (v0.9.0)**: `#![deny(cast_*)]` library-strict (all production code uses cast helpers). 3 new helpers: `u32_usize`, `u64_usize`, `u64_f64`. soil_moisture refactored (672 LOC → 4 cohesive submodules: topp, texture, saxton_rawls, water). petalTongue 3-tier discovery wired (`discover_visualization_primal`). 14 primal_dispatch integration tests (health/caps/science/provenance/discovery over Unix sockets). Benchmark JSON provenance for all hardcoded validation values. CI lint config consolidated to Cargo.toml (no CLI flag conflicts). Hardcoded socket paths removed from deployment manifests. 938 lib + 316 integration tests.
+- **Audit execution (v0.9.0)**: `#![deny(cast_*)]` library-strict (all production code uses cast helpers). 3 new helpers: `u32_usize`, `u64_usize`, `u64_f64`. soil_moisture refactored (672 LOC → 4 cohesive submodules: topp, texture, saxton_rawls, water). petalTongue 3-tier discovery wired (`discover_visualization_primal`). 14 primal_dispatch integration tests (health/caps/science/provenance/discovery over Unix sockets). Benchmark JSON provenance for all hardcoded validation values. CI lint config consolidated to Cargo.toml (no CLI flag conflicts). Hardcoded socket paths removed from deployment manifests. 943 lib + 316 integration tests.
 - **Cross-ecosystem evolution (v0.8.9)**: Canonical `PRIMAL_NAME`/`PRIMAL_DOMAIN` constants (healthSpring V34). `OnceLock` GPU probe cache (toadStool S158). `cast` module for safe numeric casts (neuralSpring S162). `DispatchOutcome<T>` library type (wetSpring V126). coralReef/Squirrel capability discovery (healthSpring V34). `mul_add()` FMA at 18 sites (barraCuda Sprint 7). Smart refactors: 4 monoliths → 19 focused modules (evapotranspiration, dual_kc, biomeos, validation). Composition guidance for solo/trio/wider primal combos. 891 lib tests, zero clippy warnings.
 - **Coverage**: target 98%+ (remaining gaps: GPU-dependent code paths)
 - **ToadStool absorption**: All 6 local ops absorbed upstream into `BatchedElementwiseF64` (ops 14-19), `local_dispatch` retired — Write→Absorb→Lean complete (v0.7.2)
@@ -276,7 +277,7 @@ $200 sensor, Open-Meteo weather data, and a $600 GPU running BarraCuda.
 ## Extension Explorations
 
 With 87 experiments validated and the full Python → Rust CPU → Titan V GPU live →
-GPU math portability (13 modules, 46/46) → upstream lean (20 ops, `BatchedElementwiseF64`) → metalForge mixed hardware (27 workloads) → NUCLEUS primal (41 caps, 28/28 cross-primal pipeline + 60/60 NUCLEUS routing) → cross-spring provenance (32/32, 5-spring shader tracking) → `PrecisionRoutingAdvice` wired (v0.7.3) → CPU/GPU parity (21/21, Exp 084) → toadStool dispatch (19/19, Exp 085) → NUCLEUS mesh (17/17, Exp 086) → graph coordination (22/22, Exp 087),
+GPU math portability (13 modules, 46/46) → upstream lean (20 ops, `BatchedElementwiseF64`) → metalForge mixed hardware (27 workloads) → NUCLEUS primal (45 caps, 28/28 cross-primal pipeline + 60/60 NUCLEUS routing) → cross-spring provenance (32/32, 5-spring shader tracking) → `PrecisionRoutingAdvice` wired (v0.7.3) → CPU/GPU parity (21/21, Exp 084) → toadStool dispatch (19/19, Exp 085) → NUCLEUS mesh (17/17, Exp 086) → graph coordination (22/22, Exp 087),
 airSpring can now extend beyond reproduction into new science. These explorations use the validated stack to answer
 questions the original papers did not.
 

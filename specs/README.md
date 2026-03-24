@@ -1,7 +1,7 @@
 # airSpring Specifications
 
-**Last Updated**: March 23, 2026
-**Status**: Phase 0–5 complete — 1284/1284 Python + 938 lib + 316 integration + 62 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 91 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.3.7 (wgpu 28) + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + metalForge 66/66 + niche adapter (41 capabilities, 10 MCP tools) + 87 experiments (v0.10.0). Edition 2024, deep code quality complete. Platform-agnostic IPC. Exp 084-087: 79/79 PASS (CPU/GPU parity, toadStool dispatch, metalForge NUCLEUS, graph coordination)
+**Last Updated**: March 24, 2026
+**Status**: Phase 0–5 complete — 1284/1284 Python + 943 lib + 316 integration + 62 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 91 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.3.7 (wgpu 28) + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + metalForge 66/66 + niche adapter (45 capabilities, 10 MCP tools) + 87 experiments (v0.10.0). Edition 2024, deep code quality complete. Platform-agnostic IPC. Exp 084-087: 79/79 PASS (CPU/GPU parity, toadStool dispatch, metalForge NUCLEUS, graph coordination)
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling, Anderson coupling
 
 ---
@@ -12,7 +12,7 @@
 |--------|-------|
 | Phase 0 (Python) | 1284/1284 PASS — 57 papers reproduced (FAO-56, soil, IoT, WB, dual Kc, cover crops, regional ET₀, Richards, biochar, 60yr WB, yield, CW2D, scheduling, lysimeter, sensitivity, Priestley-Taylor, 3-method intercomparison, Thornthwaite, GDD, pedotransfer, AmeriFlux, Hargreaves, diversity, multi-crop, NPU eco, forecast, SCAN moisture, NASS yield, Anderson coupling, Blaney-Criddle, SCS-CN, Green-Ampt, coupled runoff-infiltration, VG inverse, full-season WB) |
 | Phase 0+ (Real data) | 15,300 station-days, R²=0.967 across 100 Michigan stations |
-| Phase 1 (Rust) | 938 lib + 316 integration + 62 forge tests — 91 barracuda binaries (+ 6 forge) |
+| Phase 1 (Rust) | 943 lib + 316 integration + 62 forge tests — 91 barracuda binaries (+ 6 forge) |
 | Phase 1.5 (CPU benchmark) | 14.3× geometric mean speedup (24/24 algorithms, 21/21 CPU-GPU parity), 13,000× atlas-scale |
 | Phase 2 (Cross-validation) | 75/75 Python↔Rust match within 1e-5; 690 crop-station yield pairs within 0.01 |
 | Phase 2.5 (Tier B→A GPU) | 4 Tier B→A promotions (ops 5-8), `BatchedStatefulF64`, `BatchedNelderMeadGpu` |
@@ -23,7 +23,7 @@
 | Phase 3.2 (Cross-spring rewire) | 68/68 PASS — 5/5 springs validated (Exp 073) |
 | Phase 3.5 (NPU edge) | AKD1000 live, 95/95 NPU checks |
 | Phase 3.8 (Cross-system) | metalForge 27 workloads, 66/66 cross-system (GPU→NPU→CPU) + Exp 076 NUCLEUS routing (60/60) |
-| Phase 3.9 (Niche adapter) | 41 capabilities, ecology domain in biomeOS registry |
+| Phase 3.9 (Niche adapter) | 45 capabilities, ecology domain in biomeOS registry |
 | Phase 4.0 (Cross-primal) | 28/28 PASS — capability.call routing, cross-primal forwarding |
 | Faculty | Dong (BAE, MSU — new lab 2026) |
 | Handoff | V010 in `wateringHole/handoffs/` |

@@ -1,6 +1,6 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: March 23, 2026 (v0.10.0 — Cross-ecosystem absorption: canonical `PRIMAL_NAME`/`PRIMAL_DOMAIN` (healthSpring V34), `OnceLock` GPU probe caching (toadStool S158), `cast` module with safe numeric casts (neuralSpring S162), `DispatchOutcome<T>` as library type (wetSpring V126), coralReef/Squirrel discovery functions (healthSpring V34), `mul_add()` FMA evolution (18 sites, barraCuda Sprint 7), `GemmF64` transpose documented in evolution gaps (groundSpring V113), `ValidationSink` upstream proposal (ludoSpring V23). Zero clippy warnings.)
+**Last Updated**: March 24, 2026 (v0.10.0 — Cross-ecosystem absorption: canonical `PRIMAL_NAME`/`PRIMAL_DOMAIN` (healthSpring V34), `OnceLock` GPU probe caching (toadStool S158), `cast` module with safe numeric casts (neuralSpring S162), `DispatchOutcome<T>` as library type (wetSpring V126), coralReef/Squirrel discovery functions (healthSpring V34), `mul_add()` FMA evolution (18 sites, barraCuda Sprint 7), `GemmF64` transpose documented in evolution gaps (groundSpring V113), `ValidationSink` upstream proposal (ludoSpring V23). Zero clippy warnings.)
 **barraCuda**: v0.3.7 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry, SpringDomain newtype, F64BuiltinCapabilities DF64 fields)
 **ToadStool**: S147+ (20,015 tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient, hw-learn, spirv_codegen_safety)
 **coralReef**: Phase 10 Iteration 44 sovereign Rust GPU compiler (NVIDIA + AMD, 1669+48 tests, VFIO dispatch)
@@ -321,7 +321,7 @@ airSpring handoffs V010–V031 are pending upstream absorption. V032 created to 
 - **Expanded `bench_cross_spring` v0.5.2** — 30 benchmarks (was 16), 16 shader provenance entries (was 10), 45 primitives, 6 origin Springs
 - **New benchmarks**: Hargreaves batch (365/10K), diversity alpha, Bray-Curtis matrix (20 samples), Shannon frequencies, crop Kc stage (180d), Kc from GDD (corn), Anderson coupling chain (10K θ), Anderson regimes
 - **Expanded PROVENANCE** table: added hydrology batch kernel (airSpring), diversity bio kernel (wetSpring), anderson coupling kernel (groundSpring)
-- 938 lib tests, 0 clippy warnings, 0 errors
+- 943 lib tests, 0 clippy warnings, 0 errors
 
 Prior V032 cleanup:
 - Registered `validate_gpu_math` and `validate_ncbi_16s_coupling` in Cargo.toml (were unregistered)
@@ -329,7 +329,7 @@ Prior V032 cleanup:
 - Prior V030-V031: removed `try_gpu` catch_unwind, updated docs for universal precision,
   added `gpu::device_info` (Fp64Strategy probing), added `bench_cross_spring` (16→30 benchmarks)
 
-Revalidation: 1254/1254 tests (938 lib + 316 integration), 0 clippy, 33/33 cross-validation, 1498/1498 atlas, 46/46 GPU math, 29/29 NCBI 16S, 30/30 benchmarks
+Revalidation: 1259/1259 tests (943 lib + 316 integration), 0 clippy, 33/33 cross-validation, 1498/1498 atlas, 46/46 GPU math, 29/29 NCBI 16S, 30/30 benchmarks
 
 ### S89–S93 HEAD Sync — barraCuda Standalone Rewire (March 3, 2026)
 
@@ -412,7 +412,7 @@ metalForge forge migrated from wgpu 22 to wgpu 28 (eliminated duplicate wgpu com
 |------|--------|
 | `cargo fmt --check` | **PASS** (both crates) |
 | `cargo clippy --all-targets -- -W clippy::pedantic -W clippy::nursery -D warnings` | **PASS** — 0 warnings |
-| `cargo test --lib` | **938 lib pass**, 0 fail |
+| `cargo test --lib` | **943 lib pass**, 0 fail |
 | `cargo test --tests` | **316 integration pass**, 0 fail |
 | Cross-spring evolution | **11/11 pass** |
 | CPU vs Python | **24/24 algorithms**, 21.0× geometric mean speedup |

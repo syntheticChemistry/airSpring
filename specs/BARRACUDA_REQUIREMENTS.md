@@ -1,6 +1,6 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: March 23, 2026 (v0.10.0 — 938 lib + 316 integration + 62 forge tests, 91 binaries, 87 experiments, barraCuda 0.3.7 (wgpu 28, DeviceCapabilities API), `GpuDriverProfile`→`DeviceCapabilities` migration complete, ops 0-19 upstream via `BatchedElementwiseF64`, `local_dispatch` retired, `PrecisionRoutingAdvice` wired, upstream provenance registry, 10 MCP tools wired, platform-agnostic IPC. Exp 084: CPU/GPU parity 21/21, Exp 085: toadStool dispatch 19/19)
+**Last Updated**: March 24, 2026 (v0.10.0 — 943 lib + 316 integration + 62 forge tests, 91 binaries, 87 experiments, barraCuda 0.3.7 (wgpu 28, DeviceCapabilities API), `GpuDriverProfile`→`DeviceCapabilities` migration complete, ops 0-19 upstream via `BatchedElementwiseF64`, `local_dispatch` retired, `PrecisionRoutingAdvice` wired, upstream provenance registry, 10 MCP tools wired, platform-agnostic IPC. Exp 084: CPU/GPU parity 21/21, Exp 085: toadStool dispatch 19/19)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
 **ToadStool HEAD**: S94b — barraCuda v0.3.7 standalone (wgpu 28, DeviceCapabilities replaces GpuDriverProfile)
 
@@ -212,7 +212,7 @@ The wateringHole evolution path defines three validation tiers:
 |------|------|---------------------|
 | **Tier 0** (Python) | Correctness reference | **Complete** — 56 benchmark JSONs, 1284/1284 PASS |
 | **Tier 1** (Kokkos/Cabana) | Performance reference (external) | **Not started** — no Kokkos benchmarks |
-| **Tier 2** (BarraCuda) | Sovereign implementation | **Complete** — 938 lib + 316 integration + 62 forge tests, 97 validation binaries |
+| **Tier 2** (BarraCuda) | Sovereign implementation | **Complete** — 943 lib + 316 integration + 62 forge tests, 97 validation binaries |
 
 ### Cross-Spring Kokkos Baselines (groundSpring V74)
 
