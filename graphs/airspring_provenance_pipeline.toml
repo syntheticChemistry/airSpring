@@ -28,6 +28,14 @@ id = "airspring_provenance_pipeline"
 description = "Provenance-tracked ecology experiment via neuralAPI capability routing"
 coordination = "ConditionalDag"
 
+[graph.metadata]
+spring = "airspring"
+version = "0.10.0"
+domain = "ecology"
+license = "AGPL-3.0-or-later"
+updated = "2026-03-24"
+capabilities_required = ["ecology", "storage", "provenance.begin", "provenance.record", "provenance.complete", "provenance.status"]
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # PHASE 1: HEALTH CHECKS (parallel — neuralAPI detects independence)
 # ═══════════════════════════════════════════════════════════════════════════════

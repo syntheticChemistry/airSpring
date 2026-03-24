@@ -235,7 +235,7 @@ mod tests {
         assert!(!deser.is_recoverable());
 
         let not_found = IpcError::SocketNotFound {
-            primal: "nestgate".into(),
+            primal: crate::primal_names::NESTGATE.into(),
         };
         assert!(!not_found.is_recoverable());
 

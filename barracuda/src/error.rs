@@ -120,16 +120,16 @@ mod tests {
     #[test]
     fn test_ipc_display() {
         let err = AirSpringError::Ipc(crate::rpc::IpcError::SocketNotFound {
-            primal: "nestgate".into(),
+            primal: crate::primal_names::NESTGATE.into(),
         });
         assert!(format!("{err}").contains("IPC error"));
-        assert!(format!("{err}").contains("nestgate"));
+        assert!(format!("{err}").contains(crate::primal_names::NESTGATE));
     }
 
     #[test]
     fn test_ipc_source() {
         let err = AirSpringError::Ipc(crate::rpc::IpcError::SocketNotFound {
-            primal: "toadstool".into(),
+            primal: crate::primal_names::TOADSTOOL.into(),
         });
         assert!(std::error::Error::source(&err).is_some());
     }

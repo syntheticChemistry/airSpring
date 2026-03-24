@@ -53,7 +53,7 @@
 //! |--------|----------------------|---------|
 //! | hotSpring | `df64_core`, `math_f64`, erf, gamma, Lanczos, DF64 transcendentals | ALL springs |
 //! | wetSpring | Shannon/Simpson/Bray-Curtis f64, kriging f64, bio ODE f64 | neuralSpring, airSpring |
-//! | neuralSpring | Nelder-Mead, BFGS, ValidationHarness, batch IPR, MatMul | airSpring, groundSpring |
+//! | `neuralSpring` | Nelder-Mead, BFGS, `ValidationHarness`, batch IPR, `MatMul` | `airSpring`, `groundSpring` |
 //! | airSpring | FAO-56 PM, water balance, VG, Richards PDE, hydrology stats | all ops 0-13 |
 //! | groundSpring | MC propagation, bootstrap, jackknife, multinomial | airSpring uncertainty |
 //!

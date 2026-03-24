@@ -24,6 +24,14 @@ description = "Full airSpring ecology niche with neuralAPI capability routing"
 version = "0.10.0"
 coordination = "Sequential"
 
+[graph.metadata]
+spring = "airspring"
+version = "0.10.0"
+domain = "ecology"
+license = "AGPL-3.0-or-later"
+updated = "2026-03-24"
+capabilities_required = ["crypto", "network", "dag", "commit", "provenance", "storage", "compute", "ecology", "data.weather", "science.et0_fao56", "ecology.water_balance", "ecology.yield_response"]
+
 # ── Node 1: BearDog (crypto + key management) ─────────────────────
 [[graph.node]]
 name = "beardog"

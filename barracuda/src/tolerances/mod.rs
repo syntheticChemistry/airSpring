@@ -85,6 +85,89 @@ pub use instrument::*;
 pub use numerics::*;
 pub use soil::*;
 
+/// Every registered [`Tolerance`] constant (upstream contract inventory).
+pub const fn all_tolerances() -> &'static [&'static Tolerance] {
+    &[
+        // ET₀ and atmospheric (FAO-56)
+        &ET0_SAT_VAPOUR_PRESSURE,
+        &ET0_SLOPE_VAPOUR,
+        &ET0_NET_RADIATION,
+        &ET0_REFERENCE,
+        &ET0_VPD,
+        &ET0_COLD_CLIMATE,
+        &PSYCHROMETRIC_CONSTANT,
+        // Water balance and soil moisture
+        &WATER_BALANCE_MASS,
+        &WATER_BALANCE_PER_STEP,
+        &STRESS_COEFFICIENT,
+        &SOIL_HYDRAULIC,
+        &SOIL_ROUNDTRIP,
+        // Richards equation
+        &RICHARDS_STEADY,
+        &RICHARDS_TRANSIENT,
+        // Isotherm fitting
+        &ISOTHERM_PARAMETER,
+        &ISOTHERM_PREDICTION,
+        &ISOTHERM_MEAN_RESIDUAL,
+        // GPU/CPU cross-validation
+        &GPU_CPU_CROSS,
+        &KRIGING_INTERPOLATION,
+        &SEASONAL_REDUCTION,
+        &IOT_STREAM_SMOOTHING,
+        // Sensor calibration
+        &SENSOR_EXACT,
+        &IRRIGATION_DEPTH,
+        // Thornthwaite, GDD, pedotransfer
+        &THORNTHWAITE_ANALYTICAL,
+        &GDD_EXACT,
+        &PEDOTRANSFER_MOISTURE,
+        &PEDOTRANSFER_KSAT,
+        // Per-step and sensor-specific
+        &TOPP_EQUATION,
+        &ANALYTICAL_COMPUTATION,
+        // Statistical quality criteria
+        &IA_CRITERION,
+        &P_SIGNIFICANCE,
+        &WATER_SAVINGS,
+        // Cross-method and cross-station
+        &CROSS_VALIDATION,
+        &ET0_SAT_VAPOUR_PRESSURE_WIDE,
+        &R2_MINIMUM,
+        &RMSE_MAXIMUM,
+        &ET0_CROSS_METHOD_PCT,
+        // Simplified ET₀ methods
+        &BLANEY_CRIDDLE_DAYLIGHT,
+        &SCS_CN_ANALYTICAL,
+        &GREEN_AMPT_ANALYTICAL,
+        &DUAL_KC_PRECISION,
+        // IoT sensor data validation
+        &IOT_TEMPERATURE_MEAN,
+        &IOT_TEMPERATURE_EXTREMES,
+        &IOT_PAR_MAX,
+        &IOT_CSV_ROUNDTRIP,
+        // NPU streaming classification
+        &NPU_SIGMA_FLOOR,
+        // Biodiversity
+        &BIO_DIVERSITY_SHANNON,
+        &BIO_DIVERSITY_SIMPSON,
+        &BIO_BRAY_CURTIS,
+        // Stochastic / Monte Carlo
+        &MC_ET0_PROPAGATION,
+        // Cross-spring analytical
+        &CROSS_SPRING_ANALYTICAL,
+        &CROSS_SPRING_GPU_CPU,
+        &CROSS_SPRING_EVOLUTION,
+        // GPU method-specific parity tiers
+        &GPU_SIMPLIFIED_ET0,
+        &GPU_EMPIRICAL_PET,
+        // NUCLEUS / IPC
+        &NUCLEUS_ROUNDTRIP,
+        &NUCLEUS_PIPELINE,
+        // Bootstrap / jackknife
+        &BOOTSTRAP_JACKKNIFE_KNOWN,
+    ]
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -147,86 +230,7 @@ mod tests {
 
     #[test]
     fn test_all_tolerances_have_justification() {
-        let all_tolerances: &[&Tolerance] = &[
-            // ET₀ and atmospheric (FAO-56)
-            &ET0_SAT_VAPOUR_PRESSURE,
-            &ET0_SLOPE_VAPOUR,
-            &ET0_NET_RADIATION,
-            &ET0_REFERENCE,
-            &ET0_VPD,
-            &ET0_COLD_CLIMATE,
-            &PSYCHROMETRIC_CONSTANT,
-            // Water balance and soil moisture
-            &WATER_BALANCE_MASS,
-            &WATER_BALANCE_PER_STEP,
-            &STRESS_COEFFICIENT,
-            &SOIL_HYDRAULIC,
-            &SOIL_ROUNDTRIP,
-            // Richards equation
-            &RICHARDS_STEADY,
-            &RICHARDS_TRANSIENT,
-            // Isotherm fitting
-            &ISOTHERM_PARAMETER,
-            &ISOTHERM_PREDICTION,
-            &ISOTHERM_MEAN_RESIDUAL,
-            // GPU/CPU cross-validation
-            &GPU_CPU_CROSS,
-            &KRIGING_INTERPOLATION,
-            &SEASONAL_REDUCTION,
-            &IOT_STREAM_SMOOTHING,
-            // Sensor calibration
-            &SENSOR_EXACT,
-            &IRRIGATION_DEPTH,
-            // Thornthwaite, GDD, pedotransfer
-            &THORNTHWAITE_ANALYTICAL,
-            &GDD_EXACT,
-            &PEDOTRANSFER_MOISTURE,
-            &PEDOTRANSFER_KSAT,
-            // Per-step and sensor-specific
-            &TOPP_EQUATION,
-            &ANALYTICAL_COMPUTATION,
-            // Statistical quality criteria
-            &IA_CRITERION,
-            &P_SIGNIFICANCE,
-            &WATER_SAVINGS,
-            // Cross-method and cross-station
-            &CROSS_VALIDATION,
-            &ET0_SAT_VAPOUR_PRESSURE_WIDE,
-            &R2_MINIMUM,
-            &RMSE_MAXIMUM,
-            &ET0_CROSS_METHOD_PCT,
-            // Simplified ET₀ methods
-            &BLANEY_CRIDDLE_DAYLIGHT,
-            &SCS_CN_ANALYTICAL,
-            &GREEN_AMPT_ANALYTICAL,
-            &DUAL_KC_PRECISION,
-            // IoT sensor data validation
-            &IOT_TEMPERATURE_MEAN,
-            &IOT_TEMPERATURE_EXTREMES,
-            &IOT_PAR_MAX,
-            &IOT_CSV_ROUNDTRIP,
-            // NPU streaming classification
-            &NPU_SIGMA_FLOOR,
-            // Biodiversity
-            &BIO_DIVERSITY_SHANNON,
-            &BIO_DIVERSITY_SIMPSON,
-            &BIO_BRAY_CURTIS,
-            // Stochastic / Monte Carlo
-            &MC_ET0_PROPAGATION,
-            // Cross-spring analytical
-            &CROSS_SPRING_ANALYTICAL,
-            &CROSS_SPRING_GPU_CPU,
-            &CROSS_SPRING_EVOLUTION,
-            // GPU method-specific parity tiers
-            &GPU_SIMPLIFIED_ET0,
-            &GPU_EMPIRICAL_PET,
-            // NUCLEUS / IPC
-            &NUCLEUS_ROUNDTRIP,
-            &NUCLEUS_PIPELINE,
-            // Bootstrap / jackknife
-            &BOOTSTRAP_JACKKNIFE_KNOWN,
-        ];
-        for tol in all_tolerances {
+        for tol in all_tolerances() {
             assert!(
                 !tol.name.is_empty(),
                 "tolerance {} must have a name",
@@ -242,7 +246,7 @@ mod tests {
         // 58 Tolerance structs + 1 plain threshold (NPU_STRESS_DEPLETION_THRESHOLD)
         // + 1 plain count (NPU_MIN_ANOMALY_SAMPLES)
         assert_eq!(
-            all_tolerances.len(),
+            all_tolerances().len(),
             58,
             "test must include every Tolerance constant defined in this file"
         );
@@ -250,6 +254,75 @@ mod tests {
         assert!(
             threshold > 0.0 && threshold < 1.0,
             "stress threshold must be a fraction of TAW"
+        );
+    }
+}
+
+#[cfg(test)]
+mod upstream_contract_tests {
+    //! Verify airSpring tolerance constants align with upstream barraCuda contracts.
+    //! Pattern: neuralSpring S174 upstream contract pinning.
+
+    use super::*;
+
+    #[test]
+    fn all_tolerances_have_positive_thresholds() {
+        for tol in all_tolerances() {
+            assert!(
+                tol.abs_tol > 0.0,
+                "{}: abs_tol must be positive, got {}",
+                tol.name,
+                tol.abs_tol
+            );
+            assert!(
+                tol.rel_tol >= 0.0,
+                "{}: rel_tol must be non-negative, got {}",
+                tol.name,
+                tol.rel_tol
+            );
+        }
+    }
+
+    #[test]
+    fn no_duplicate_tolerance_names() {
+        let tols = all_tolerances();
+        let mut seen = std::collections::HashSet::new();
+        for tol in tols {
+            assert!(
+                seen.insert(tol.name),
+                "duplicate tolerance name: {}",
+                tol.name
+            );
+        }
+    }
+
+    #[test]
+    fn all_tolerances_have_justification() {
+        for tol in all_tolerances() {
+            assert!(
+                !tol.justification.is_empty(),
+                "{}: justification must not be empty",
+                tol.name
+            );
+        }
+    }
+
+    #[test]
+    fn gpu_cpu_parity_tolerance_is_tighter_than_science() {
+        assert!(
+            GPU_CPU_CROSS.abs_tol <= ET0_REFERENCE.abs_tol,
+            "GPU/CPU parity ({}) should be tighter than science tolerance ({})",
+            GPU_CPU_CROSS.abs_tol,
+            ET0_REFERENCE.abs_tol
+        );
+    }
+
+    #[test]
+    fn tolerance_count_matches_registry() {
+        let count = all_tolerances().len();
+        assert!(
+            count >= 58,
+            "expected at least 58 tolerances in registry, found {count}"
         );
     }
 }

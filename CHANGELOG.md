@@ -100,6 +100,35 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 **metalForge**:
 - `neural.rs` doc example: `.unwrap()` → `.expect("biomeOS Neural API socket must be discoverable")`
 
+### Ecosystem Absorption Execution (2026-03-24)
+
+**PRIMAL_REGISTRY.md** (P0):
+- Updated airSpring entry: v0.7.6 → v0.10.0 (1,316 tests, 91 binaries, three-tier discovery, zero unsafe/allow/C-deps)
+- Updated barraCuda: v0.3.5 → v0.3.7; hotSpring → v0.6.32; groundSpring → V122; neuralSpring → S174; wetSpring → V135
+- Reconciled capabilities table: 943 lib tests, 1,316 total
+
+**CONTRIBUTING.md + SECURITY.md** (P1 — neuralSpring S174 pattern):
+- `CONTRIBUTING.md`: prerequisites, quality table, tolerance policy, validation binary pattern, barraCuda evolution, IPC coordination, commit conventions, full suite commands
+- `SECURITY.md`: supported versions, security model (pure Rust, cargo-deny, IPC isolation), vulnerability reporting, data provenance
+
+**Upstream contract pinning** (P1 — neuralSpring S174 pattern):
+- `tolerances/mod.rs`: `all_tolerances()` → `const fn` returning `&'static [&'static Tolerance]`
+- New `upstream_contract_tests` module: positive thresholds, no duplicates, justification presence, GPU/CPU parity tighter than science, registry count ≥58
+
+**GPU test resilience** (P2 — barraCuda `test_pool` pattern):
+- `tests/common/mod.rs`: `try_create_device()` delegates to `barracuda::device::test_pool::get_test_device_if_gpu_available()` (retry + exponential backoff + device health)
+- Three `#[allow()]` → `#[expect()]` with reason strings (Rust 2024 complete in test infra)
+
+**Deploy graph metadata** (P2 — primalSpring v0.7.0 pattern):
+- `[graph.metadata]` added to all 4 graphs: `airspring_eco_pipeline`, `airspring_provenance_pipeline`, `airspring_niche_deploy`, `cross_primal_soil_microbiome`
+- Fields: `spring`, `version`, `domain`, `license`, `updated`, `capabilities_required`
+
+**Debt cleanup**:
+- `error.rs`, `ipc/resilience.rs` tests: hardcoded `"nestgate"`/`"toadstool"` → `primal_names::NESTGATE`/`primal_names::TOADSTOOL`
+- `validate_cross_spring_provenance.rs`: backtick-format doc items for clippy `doc_markdown`
+- `validate_npu_funky_eco.rs`: `#[expect(clippy::cast_sign_loss)]` with justification for P99 index calc
+- Zero clippy warnings (pedantic + nursery), 943 lib tests passing, all integration green
+
 ### Deep Audit Execution (2026-03-24)
 
 **Forge feature alignment**:

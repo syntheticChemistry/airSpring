@@ -710,6 +710,10 @@ fn validate_live_npu_funky(v: &mut ValidationHarness) {
 
     let mean_latency_us =
         latencies_ns.iter().sum::<u64>() as f64 / latencies_ns.len() as f64 / 1000.0;
+    #[expect(
+        clippy::cast_sign_loss,
+        reason = "product of len (positive) and 0.99 is always non-negative"
+    )]
     let p99_idx = (latencies_ns.len() as f64 * 0.99) as usize;
     latencies_ns.sort_unstable();
     let p99_latency_us = latencies_ns.get(p99_idx).copied().unwrap_or(0) as f64 / 1000.0;
