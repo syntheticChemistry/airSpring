@@ -17,8 +17,11 @@
 //! metalForge routing validation is separate (104/104 PASS in forge tests).
 //! NUCLEUS cross-primal validation is in `validate_nucleus_pipeline`.
 //!
-//! script=`control/metalforge_dispatch/metalforge_dispatch.py`, commit=dbfb53a, date=2026-03-02
-//! Run: `python3 control/metalforge_dispatch/metalforge_dispatch.py`
+//! Provenance:
+//!   script = `control/metalforge_dispatch/metalforge_dispatch.py`
+//!   commit = dbfb53a
+//!   date   = 2026-03-02
+//!   run    = `python3 control/metalforge_dispatch/metalforge_dispatch.py`
 
 use std::sync::Arc;
 use std::time::Instant;

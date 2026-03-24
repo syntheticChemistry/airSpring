@@ -18,14 +18,18 @@
 //! Output: Per-station, per-crop seasonal water budgets
 //!
 //! Benchmark: `control/atlas/benchmark_atlas.json`
-//! script=`control/atlas/atlas_water_budget.py`, commit=e651409, date=2026-02-26
-//! Run: `python3 control/atlas/atlas_water_budget.py`
 //!
 //! Runtime config via env vars (all optional):
 //!   `ATLAS_DATA_DIR`   — path to Open-Meteo CSVs (default: `data/open_meteo`)
 //!   `ATLAS_YEAR_START` — first year to process (default: 1945)
 //!   `ATLAS_YEAR_END`   — last year to process (default: 2024)
 //!   `ATLAS_OUT_DIR`    — output directory for results (default: `data/atlas_results`)
+//!
+//! Provenance:
+//!   script = `control/atlas/atlas_water_budget.py`
+//!   commit = e651409
+//!   date   = 2026-02-26
+//!   run    = `python3 control/atlas/atlas_water_budget.py`
 
 use airspring_barracuda::eco::{
     crop::CropType,

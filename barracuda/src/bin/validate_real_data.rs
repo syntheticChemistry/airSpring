@@ -7,6 +7,8 @@
 //!
 //! This is the key proof that the Rust pipeline works on real, non-synthetic data.
 //! Uses `ValidationRunner` for structured validation pass/fail and exit codes.
+//!
+//! Provenance: integration validation (no Python baseline)
 
 use airspring_barracuda::eco::{
     evapotranspiration::{self as et, DailyEt0Input},

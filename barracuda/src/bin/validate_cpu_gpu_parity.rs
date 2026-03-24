@@ -26,8 +26,11 @@
 //! Benchmark: `control/cpu_gpu_parity/benchmark_cpu_gpu_parity.json`
 //! Baseline: `control/cpu_gpu_parity/cpu_gpu_parity.py` (22/22 PASS)
 //!
-//! script=`control/cpu_gpu_parity/cpu_gpu_parity.py`, commit=dbfb53a, date=2026-03-02
-//! Run: `python3 control/cpu_gpu_parity/cpu_gpu_parity.py`
+//! Provenance:
+//!   script = `control/cpu_gpu_parity/cpu_gpu_parity.py`
+//!   commit = dbfb53a
+//!   date   = 2026-03-02
+//!   run    = `python3 control/cpu_gpu_parity/cpu_gpu_parity.py`
 
 use airspring_barracuda::eco::evapotranspiration::{
     self as et, DailyEt0Input, actual_vapour_pressure_rh,

@@ -48,6 +48,8 @@
 //!  Titan RTX   Arc
 //!  V     4070  A770
 //! ```
+//!
+//! Provenance: integration validation (no Python baseline)
 
 use std::time::Instant;
 

@@ -6,6 +6,8 @@
 //! - NPU workloads (crop stress, irrigation, anomaly) route to NPU when present
 //! - Fallback behavior is correct (GPU > NPU > CPU)
 //! - No workload is left unroutable with at least a CPU
+//!
+//! Provenance: integration validation (no Python baseline)
 
 use airspring_forge::dispatch::{self, Reason, Workload};
 use airspring_forge::inventory;

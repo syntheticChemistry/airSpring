@@ -12,8 +12,11 @@
 //! - Allen et al. (1998) FAO-56, Crop evapotranspiration
 //! - Wilson et al. (2002) Ag Forest Met 113:223-243
 //!
-//! script=`control/ameriflux_et/ameriflux_et_validation.py`, commit=8c3953b, date=2026-02-27
-//! Run: `python3 control/ameriflux_et/ameriflux_et_validation.py`
+//! Provenance:
+//!   script = `control/ameriflux_et/ameriflux_et_validation.py`
+//!   commit = 8c3953b
+//!   date   = 2026-02-27
+//!   run    = `python3 control/ameriflux_et/ameriflux_et_validation.py`
 
 use airspring_barracuda::validation::{self, ValidationHarness, json_field, parse_benchmark_json};
 

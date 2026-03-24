@@ -100,6 +100,29 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 **metalForge**:
 - `neural.rs` doc example: `.unwrap()` → `.expect("biomeOS Neural API socket must be discoverable")`
 
+### Deep Audit Execution (2026-03-24)
+
+**Forge feature alignment**:
+- `metalForge/forge/Cargo.toml`: barraCuda dependency `default-features = false`, `features = ["gpu"]` — aligns Forge with the same minimal barraCuda surface as barracuda
+
+**RPC naming**:
+- `normalize_method()` derives the primal prefix from `PRIMAL_NAME` — zero hardcoded `"airspring."` strings in the RPC layer
+
+**Capability-based discovery**:
+- `discovery.rs`: three-tier resolution (env override → named socket → capability probe) for compute and data primals
+- `discover_primal_by_capability()` exposed as public API for capability-driven lookup
+
+**Handlers**:
+- `airspring_primal/handlers.rs`: `provenance.status` uses `primal_names::*` and `domains::*`; env hints use centralized constants
+
+**Provenance standardization**:
+- 47 validation binaries: standardized `//! Provenance:` module headers
+- 8 control `benchmark_*.json` files: structured provenance objects (3 upgraded from strings, 5 added from scratch)
+
+**Documentation reconciliation**:
+- Test counts aligned to 938 lib / 316 integration + doc / 62 forge / 1,316 grand total across root docs
+- GPU tier counts: `EVOLUTION_READINESS.md` aligned with `GPU_PROMOTION_MAP`
+
 ## [0.9.0] - 2026-03-18
 
 ### Audit Execution

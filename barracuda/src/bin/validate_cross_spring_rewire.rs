@@ -45,6 +45,8 @@
 //!     ├── bootstrap/jackknife GPU ── Used by: airSpring (uncertainty stack)
 //!     └── batched_multinomial ── Used by: airSpring (stochastic soil sampling)
 //! ```
+//!
+//! Provenance: integration validation (no Python baseline)
 
 use std::sync::Arc;
 use std::time::Instant;

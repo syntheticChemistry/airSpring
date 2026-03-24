@@ -2,8 +2,6 @@
 //! Validate FAO-56 Chapter 7 dual crop coefficient against Python control.
 //!
 //! Benchmark source: `control/dual_kc/benchmark_dual_kc.json`
-//! script=`control/dual_kc/cover_crop_dual_kc.py`, commit=3afc229, date=2026-02-25
-//! Run: `python3 control/dual_kc/cover_crop_dual_kc.py`
 //!
 //! Validates:
 //! 1. Eq. 69 — `ETc` = (`Kcb` × `Ks` + `Ke`) × ET₀
@@ -14,6 +12,12 @@
 //! 6. Table 17 Kcb vs Table 12 Kc consistency
 //! 7. Table 19 TEW > REW for all USDA soils
 //! 8. Multi-day simulations (bare soil drydown, corn mid-season)
+//!
+//! Provenance:
+//!   script = `control/dual_kc/cover_crop_dual_kc.py`
+//!   commit = 3afc229
+//!   date   = 2026-02-25
+//!   run    = `python3 control/dual_kc/cover_crop_dual_kc.py`
 
 use airspring_barracuda::eco::crop::CropType;
 use airspring_barracuda::eco::dual_kc::{self, DualKcInput, EvaporationLayerState};

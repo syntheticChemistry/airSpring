@@ -13,8 +13,11 @@
 //!   USDA-SCS (1972) NEH-4 Section 4.
 //!   Green WH, Ampt GA (1911) J Agr Sci 4(1):1-24.
 //!
-//! script=`control/coupled_runoff_infiltration/coupled_runoff_infiltration.py`, commit=6be822f, date=2026-02-28
-//! Run: `python3 control/coupled_runoff_infiltration/coupled_runoff_infiltration.py`
+//! Provenance:
+//!   script = `control/coupled_runoff_infiltration/coupled_runoff_infiltration.py`
+//!   commit = 6be822f
+//!   date   = 2026-02-28
+//!   run    = `python3 control/coupled_runoff_infiltration/coupled_runoff_infiltration.py`
 
 use airspring_barracuda::eco::infiltration::{GreenAmptParams, cumulative_infiltration};
 use airspring_barracuda::eco::runoff::scs_cn_runoff_standard;

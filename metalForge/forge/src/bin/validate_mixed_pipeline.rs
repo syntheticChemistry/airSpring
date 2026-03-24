@@ -7,6 +7,8 @@
 //! 2. Pipeline routing across mixed substrates
 //! 3. NUCLEUS atomic mesh coordination
 //! 4. CPU roundtrip elimination for multi-stage pipelines
+//!
+//! Provenance: integration validation (no Python baseline)
 
 use airspring_forge::dispatch::Workload;
 use airspring_forge::nucleus::{AtomicKind, NucleusAtomic, NucleusMesh};

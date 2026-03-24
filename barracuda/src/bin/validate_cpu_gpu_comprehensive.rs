@@ -16,6 +16,8 @@
 //! ops plus special GPU modules.
 //!
 //! This is the "pure Rust math" validation — proving GPU kernels match CPU.
+//!
+//! Provenance: integration validation (no Python baseline)
 
 #![expect(
     clippy::expect_used,

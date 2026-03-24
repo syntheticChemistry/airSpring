@@ -29,8 +29,11 @@
 //! - `1e-6` relative for most ops (f64 upstream shader)
 //! - `5e-3` relative + absolute floor for Hamon/BC (daylight pre-computation)
 //!
-//! Validated against CPU baselines: `control/cpu_gpu_parity/cpu_gpu_parity.py`
-//! (commit `dbfb53a`, 2026-03-02).
+//! Provenance:
+//!   script = `control/cpu_gpu_parity/cpu_gpu_parity.py`
+//!   commit = dbfb53a
+//!   date   = 2026-03-02
+//!   run    = `python3 control/cpu_gpu_parity/cpu_gpu_parity.py`
 
 use airspring_barracuda::gpu::device_info::try_f64_device;
 use airspring_barracuda::gpu::runoff::{BatchedRunoff, GpuRunoff, RunoffInput};

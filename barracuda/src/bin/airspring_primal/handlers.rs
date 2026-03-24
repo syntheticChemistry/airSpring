@@ -216,9 +216,9 @@ pub fn handle_provenance_status() -> serde_json::Value {
     serde_json::json!({
         "available": airspring_barracuda::ipc::provenance::is_available(),
         "trio": {
-            "rhizocrypt": "dag.* via capability.call",
-            "loamspine": "commit.* via capability.call",
-            "sweetgrass": "provenance.* via capability.call",
+            (primal_names::RHIZOCRYPT): format!("{}.* via capability.call", primal_names::domains::DAG),
+            (primal_names::LOAMSPINE): format!("{}.* via capability.call", primal_names::domains::COMMIT),
+            (primal_names::SWEETGRASS): format!("{}.* via capability.call", primal_names::domains::PROVENANCE),
         },
         "degradation": "domain logic succeeds without provenance",
     })
@@ -263,7 +263,7 @@ pub fn handle_compute_offload(params: &serde_json::Value) -> serde_json::Value {
         return serde_json::json!({
             "error": "compute primal not found — Node Atomic not running",
             "hint": "start Node Atomic to enable GPU offload",
-            "env_override": "AIRSPRING_COMPUTE_PRIMAL",
+            "env_override": super::discovery::COMPUTE_PRIMAL_ENV,
         });
     };
     let inner = params
@@ -288,7 +288,7 @@ pub fn handle_data_weather(params: &serde_json::Value) -> serde_json::Value {
         return serde_json::json!({
             "error": "data primal not found — using direct HTTP",
             "hint": "start Nest Atomic for content-addressed caching",
-            "env_override": "AIRSPRING_DATA_PRIMAL",
+            "env_override": super::discovery::DATA_PRIMAL_ENV,
             "transport": "standalone",
         });
     };

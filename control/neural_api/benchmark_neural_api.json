@@ -1,4 +1,18 @@
 {
+    "_provenance": {
+        "method": "Round-trip parity: ecology ET\u2080 via direct barracuda vs biomeOS Neural API JSON-RPC (zero numerical drift)",
+        "baseline_script": "control/neural_api/neural_api_parity.py",
+        "baseline_command": "python3 control/neural_api/neural_api_parity.py",
+        "baseline_commit": "97e7533",
+        "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
+        "python_version": "3.13",
+        "created": "2026-02-28",
+        "references": [
+            "biomeOS Neural API Routing Specification",
+            "biomeOS Capability Translation Architecture",
+            "airSpring BIOMEOS_CAPABILITIES.md"
+        ]
+    },
     "experiment": "Exp 036 — biomeOS Neural API Round-Trip Parity",
     "description": "Validate that ecological compute via biomeOS capability.call produces identical results to direct barracuda library calls. This establishes that the orchestration layer introduces zero numerical drift.",
     "method": "Round-trip parity: compute ET₀ via direct Rust call, then via Neural API, compare bit-exact",

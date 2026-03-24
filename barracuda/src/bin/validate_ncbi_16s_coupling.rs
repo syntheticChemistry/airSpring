@@ -12,8 +12,11 @@
 //!
 //! Cross-Spring: airSpring (θ, ET₀, Anderson) × wetSpring (16S) × `NestGate` (NCBI)
 //!
-//! script=`control/ncbi_16s_coupling/ncbi_16s_coupling.py`, commit=4c8546e, date=2026-02-28
-//! Run: `python3 control/ncbi_16s_coupling/ncbi_16s_coupling.py`
+//! Provenance:
+//!   script = `control/ncbi_16s_coupling/ncbi_16s_coupling.py`
+//!   commit = 4c8546e
+//!   date   = 2026-02-28
+//!   run    = `python3 control/ncbi_16s_coupling/ncbi_16s_coupling.py`
 
 use airspring_barracuda::eco::anderson::{self, QsRegime};
 use airspring_barracuda::eco::evapotranspiration as et;

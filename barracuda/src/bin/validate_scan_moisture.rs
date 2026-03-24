@@ -12,8 +12,11 @@
 //! Benchmark: `control/scan_moisture/benchmark_scan_moisture.json`
 //! Python baseline: `control/scan_moisture/scan_moisture_validation.py`
 //!
-//! script=`control/scan_moisture/scan_moisture_validation.py`, commit=8c3953b, date=2026-02-27
-//! Run: `python3 control/scan_moisture/scan_moisture_validation.py`
+//! Provenance:
+//!   script = `control/scan_moisture/scan_moisture_validation.py`
+//!   commit = 8c3953b
+//!   date   = 2026-02-27
+//!   run    = `python3 control/scan_moisture/scan_moisture_validation.py`
 
 use airspring_barracuda::eco::richards::{
     VanGenuchtenParams, solve_richards_1d, van_genuchten_k, van_genuchten_theta,

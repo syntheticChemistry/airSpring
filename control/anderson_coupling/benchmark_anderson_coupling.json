@@ -1,4 +1,20 @@
 {
+  "_provenance": {
+    "method": "VG-Mualem \u03b8 \u2192 S_e \u2192 connectivity \u2192 Anderson d_eff / disorder; seasonal and tillage scenarios vs Python anderson_coupling.py",
+    "baseline_script": "control/anderson_coupling/anderson_coupling.py",
+    "baseline_command": "python3 control/anderson_coupling/anderson_coupling.py",
+    "baseline_commit": "0500398",
+    "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
+    "python_version": "3.13",
+    "created": "2026-02-27",
+    "references": [
+      "van Genuchten (1980) SSSA J 44:892-898",
+      "Mualem (1976) WRR 12:513-522",
+      "Anderson (1958) Phys Rev 109:1492-1505",
+      "Abrahams et al. (1979) J Phys C 12:2585",
+      "airSpring baseCamp Sub-thesis 06"
+    ]
+  },
   "checks": [
     {
       "label": "point(sand, \u03b8=0.35) \u2192 extended",

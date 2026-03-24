@@ -1,4 +1,18 @@
 {
+    "_provenance": {
+        "method": "Synthetic 365-day station weather; FAO-56 PM ET\u2080 via BatchedEt0 GPU path vs Python seasonal_batch_et0.py",
+        "baseline_script": "control/seasonal_batch_et0/seasonal_batch_et0.py",
+        "baseline_command": "python3 control/seasonal_batch_et0/seasonal_batch_et0.py",
+        "baseline_commit": "97e7533",
+        "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
+        "python_version": "3.13",
+        "created": "2026-02-28",
+        "references": [
+            "Allen et al. (1998) FAO-56",
+            "ToadStool BatchedElementwiseF64 (op=0)",
+            "ToadStool FusedMapReduceF64"
+        ]
+    },
     "experiment": "Exp 042 — Seasonal Batch ET₀ at GPU Scale",
     "description": "Validates seasonal ET₀ computation across 365 days × N stations, proving GPU batch dispatch produces correct multi-month aggregates. Tests the full pipeline: station-day input → BatchedEt0 → seasonal reduction → statistics. Uses synthetic seasonal weather curves (sinusoidal temperature/radiation) to verify physical realism of batch outputs.",
     "references": [

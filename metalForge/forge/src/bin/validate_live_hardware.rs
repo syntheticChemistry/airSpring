@@ -6,6 +6,8 @@
 //! against the live inventory. Capability-based: only asserts on hardware
 //! that is actually discovered at runtime. Primal code has self-knowledge
 //! and discovers other substrates dynamically.
+//!
+//! Provenance: integration validation (no Python baseline)
 
 use airspring_forge::dispatch::{self, Reason};
 use airspring_forge::probe;

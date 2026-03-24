@@ -1,6 +1,18 @@
 {
+  "_provenance": {
+    "method": "Decade-mean seasonal ET\u2080 and precip from Open-Meteo ERA5 daily CSVs; FAO-56 Penman-Monteith ET\u2080 (parity with Python control)",
+    "baseline_script": "control/atlas_decade/atlas_decade_analysis.py",
+    "baseline_command": "python3 control/atlas_decade/atlas_decade_analysis.py",
+    "baseline_commit": "88d07c0",
+    "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
+    "python_version": "3.13",
+    "created": "2026-03-01",
+    "references": [
+      "Allen et al. (1998) FAO-56 Penman-Monteith reference evapotranspiration",
+      "Open-Meteo ERA5 reanalysis (historical daily station extracts)"
+    ]
+  },
   "experiment": "Exp 059: Atlas 80yr Decade Analysis",
-  "_provenance": "Open-Meteo ERA5 + FAO-56 PM ET\u2080",
   "season": "May 1 \u2013 Sep 30 (DOY 121\u2013273)",
   "n_stations": 0,
   "stations": []

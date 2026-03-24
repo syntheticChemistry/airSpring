@@ -21,8 +21,11 @@
 //! - Oudin et al. (2005) J Hydrol 303:290-306
 //! - Droogers & Allen (2002) Irrig Drain Syst 16:33-45
 //!
-//! script=`control/et0_ensemble/et0_ensemble.py`, commit=97e7533, date=2026-02-28
-//! Run: `python3 control/et0_ensemble/et0_ensemble.py`
+//! Provenance:
+//!   script = `control/et0_ensemble/et0_ensemble.py`
+//!   commit = 97e7533
+//!   date   = 2026-02-28
+//!   run    = `python3 control/et0_ensemble/et0_ensemble.py`
 
 use airspring_barracuda::eco::evapotranspiration::{EnsembleInput, et0_ensemble};
 use airspring_barracuda::validation::{

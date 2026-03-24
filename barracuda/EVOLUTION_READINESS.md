@@ -4,7 +4,7 @@
 **barraCuda**: v0.3.7 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry, SpringDomain newtype, F64BuiltinCapabilities DF64 fields)
 **ToadStool**: S147+ (20,015 tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient, hw-learn, spirv_codegen_safety)
 **coralReef**: Phase 10 Iteration 44 sovereign Rust GPU compiler (NVIDIA + AMD, 1669+48 tests, VFIO dispatch)
-**Handoff**: V0.8.9 (full validation pipeline green + cross-spring absorption + zero C deps + biomeOS IPC alignment + all-binary zero-panic + compute_dispatch client + zero hardcoded primals + proptest fuzz)
+**Handoff**: V0.10.0 (full validation pipeline green + cross-spring absorption + zero C deps + biomeOS IPC alignment + all-binary zero-panic + compute_dispatch client + zero hardcoded primals + proptest fuzz)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -23,7 +23,7 @@ not through ToadStool.
 
 | Module | Absorbed Into | When | Status |
 |--------|--------------|------|--------|
-| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all 82 binaries use upstream |
+| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all 91 binaries use upstream |
 | `van_genuchten` | `barracuda::pde::richards::SoilParams` | S40 | **Leaning** — `gpu::richards` bridges to upstream |
 | `isotherm NM` | `barracuda::optimize::nelder_mead` | S62 | **Leaning** — `gpu::isotherm` bridges to upstream |
 | `StatefulPipeline` | `barracuda::pipeline::stateful::StatefulPipeline` | S80 | **Leaning** — `WaterBalanceState` day-over-day |
@@ -64,7 +64,11 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 
 ## GPU Evolution Tiers
 
-### Tier A: Integrated (15 modules — GPU primitive wired or CPU batch ready)
+### Tier A: Integrated (24 modules — GPU primitive wired or CPU batch ready)
+> **Note**: Canonical tier counts are in `specs/GPU_PROMOTION_MAP.md` (24 Tier A, 2 Tier B, 2 Tier C).
+> The table below reflects the original 15 core modules; 9 additional modules promoted from Tier B
+> (sensor cal, Hargreaves, Kc climate, dual Kc, VG θ/K, Thornthwaite, GDD, pedotransfer, seasonal)
+> are documented in the promotion map.
 
 | airSpring Module | BarraCuda Primitive | Status |
 |-----------------|--------------------|----|
@@ -84,7 +88,11 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 | `gpu::mc_et0::parametric_ci` | `stats::normal::norm_ppf` | **WIRED** — hotSpring precision lineage |
 | `eco::richards::inverse_van_genuchten_h` | `optimize::brent` | **WIRED** — neuralSpring optimizer lineage |
 
-### Tier B: Upstream Exists, Needs Domain Wiring (14 items, 9 wired)
+### Tier B: Upstream Exists, Needs Domain Wiring (2 active, 9 promoted to Tier A)
+> **Note**: 9 items previously listed here (sensor cal, Hargreaves, Kc climate, dual Kc,
+> seasonal pipeline, atlas stream, MC ET₀, VG batch, CN PDE, Brent VG) have been wired
+> and are now Tier A in `specs/GPU_PROMOTION_MAP.md`. Remaining Tier B: seasonal pipeline
+> (fused GPU) and atlas stream (`UnidirectionalPipeline`).
 
 | Need | Closest Primitive | Effort | Status |
 |------|-------------------|:------:|--------|
@@ -103,7 +111,7 @@ See `metalForge/ABSORPTION_MANIFEST.md` for full signatures and validation detai
 | Adaptive ODE (RK45) | `numerical::rk45_solve` | Low | |
 | m/z tolerance search | `batched_bisection_f64.wgsl` (wetSpring) | Low | |
 
-### Tier C: Needs New Primitive (1 item)
+### Tier C: Needs New Primitive (2 items — see `specs/GPU_PROMOTION_MAP.md`)
 
 | Need | Description |
 |------|-------------|
@@ -141,8 +149,8 @@ BarraCuda (while still embedded in ToadStool) underwent massive evolution since 
 
 | Capability | Module | Wired In | Status |
 |-----------|--------|----------|--------|
-| `barracuda::tolerances` | `tolerances` | v0.3.6 | **LEANING** — re-exported |
-| `barracuda::validation::ValidationHarness` | `validation` | v0.3.6 | **LEANING** — all 63 validation binaries (incl. validate_atlas, 1393 checks) |
+| `barracuda::tolerances` | `tolerances` | v0.3.7 | **LEANING** — re-exported |
+| `barracuda::validation::ValidationHarness` | `validation` | v0.3.7 | **LEANING** — all 91 binaries (84 validation + 4 bench + 3 operational; incl. validate_atlas, 1393 checks) |
 | `pde::richards::solve_richards` | `pde` | v0.4.0 | **WIRED** — `gpu::richards` |
 | `pde::crank_nicolson::CrankNicolson1D` | `pde` | v0.4.4 | **WIRED** — CN f64 diffusion cross-val |
 | `optimize::nelder_mead` | `optimize` | v0.4.1 | **WIRED** — isotherm fitting |
@@ -227,7 +235,7 @@ neuralSpring (architecture), airSpring (domain science).
 | `moving_window_stats` | wetSpring | IoT stream smoothing |
 | `ridge_regression` | wetSpring | Sensor correction pipeline |
 | `nelder_mead`, `multi_start` | neuralSpring | Isotherm fitting |
-| `ValidationHarness` | neuralSpring | All 63 validation binaries |
+| `ValidationHarness` | neuralSpring | All 91 binaries (84 validation + 4 bench + 3 operational) |
 | `norm_ppf` (Moro 1995) | hotSpring | MC ET₀ parametric confidence intervals |
 | `brent` (Brent 1973) | neuralSpring | VG pressure head inversion (θ→h) |
 | `pde::richards` | airSpring → upstream | 1D Richards equation (absorbed S40) |
@@ -357,44 +365,35 @@ Revalidation: 1132/1132 tests, 0 clippy warnings (pedantic), 0 fmt diffs, docs b
 
 | Crate | Version | C deps? | Purpose | Evolution Path |
 |-------|---------|---------|---------|----------------|
-| `barracuda` | 0.3.3 (path) | wgpu 28 (vulkan) | GPU primitives, stats, validation, fused Welford/Pearson | **Core** — standalone primal (`ecoPrimals/barraCuda`) |
+| `barracuda` | 0.3.7 (path) | wgpu 28 (vulkan) | GPU primitives, stats, validation, fused Welford/Pearson | **Core** — standalone primal (`ecoPrimals/barraCuda`) |
 | `bingocube-nautilus` | 0.1.0 (path) | None | Evolutionary reservoir computing | **Core** — stays, pure Rust |
 | `serde` | 1.0 | None | Brain state serialization | **Stays** — pure Rust, ecosystem standard |
 | `serde_json` | 1.0 | None | Benchmark JSON + JSON-RPC | **Stays** — pure Rust, ecosystem standard |
 | `tracing-subscriber` | 0.3 | None | Validation output logging | **Stays** — pure Rust, ecosystem standard |
-| `ureq` | 3.2 | **ring** (C/asm via rustls) | HTTP client (data providers) | **Evolve** → Songbird (sovereign TLS) |
+
+### HTTP / TLS evolution (no embedded `ureq`)
+
+The crate **does not** depend on `ureq`. Open-data HTTP is not wired through an
+in-tree HTTPS client stack here; sovereign paths use **Songbird** relay (JSON-RPC
+`http.request` / TLS via IPC), and capability-based **NestGate** providers supply
+direct HTTP where the platform exposes them — not `ureq` in this `Cargo.toml`.
 
 ### Transitive C/Assembly Dependencies
 
 | Crate | Pulled By | C/ASM? | Sovereignty Risk | Evolution |
 |-------|-----------|--------|-----------------|-----------|
-| `ring` 0.17 | ureq → rustls | **Yes** (C, assembly) | **Medium** — crypto primitives are C/asm | **Evolve**: ureq → Songbird (BearDog pure-Rust TLS 1.3) |
 | `wgpu` (via barracuda) | barracuda | Vulkan driver | **Low** — GPU driver is inherently platform-specific | Stays — hardware interface |
-
-### Evolution Path: `ureq` → Songbird Capability
-
-`ureq` is the only dependency pulling C code (`ring` via `rustls`). The evolution:
-
-1. **Current (standalone)**: `ureq` for direct HTTPS to Open-Meteo, NOAA, etc.
-2. **Sovereign**: `Songbird` pure-Rust TLS 1.3 via BearDog crypto delegation.
-   Route HTTPS through `capability.call("tls", "request", {...})`.
-3. **Discovery**: `data::provider::discover_transport()` already selects Songbird
-   when `SONGBIRD_SOCKET` is set, falling back to ureq otherwise.
-
-The transport tier is already abstracted — when Tower Atomic is running, all
-HTTPS routes through Songbird. No airSpring code changes needed; the dependency
-simply becomes unused.
 
 ### Audit Results
 
 - `cargo deny check`: **Clean** — all dependencies AGPL/MIT/Apache/BSD licensed
 - `#![forbid(unsafe_code)]`: Both crates — no unsafe Rust
 - No `openssl`, `reqwest`, or other heavy C dependencies
-- Pure Rust stack except `ring` (via ureq→rustls) and GPU drivers (via wgpu)
+- Pure Rust application stack aside from GPU drivers (via `wgpu`)
 
-### barraCuda HEAD Sync (post-0.3.3 unreleased, March 5, 2026)
+### barraCuda v0.3.7 sync (March 2026)
 
-airSpring synced to barraCuda HEAD (`15d3774`, 6 commits past v0.3.3).
+airSpring tracks **barraCuda v0.3.7** (pinned path dependency).
 Key upstream features now available:
 
 - **TensorContext** — Pooled buffers, pipeline cache, batched submits (15 ops migrated)
@@ -407,7 +406,7 @@ Key upstream features now available:
 
 metalForge forge migrated from wgpu 22 to wgpu 28 (eliminated duplicate wgpu compilation).
 
-### Quality Gates (v0.7.1 — barraCuda HEAD sync)
+### Quality Gates (v0.7.1 — barraCuda v0.3.7)
 
 | Gate | Result |
 |------|--------|
@@ -418,5 +417,5 @@ metalForge forge migrated from wgpu 22 to wgpu 28 (eliminated duplicate wgpu com
 | Cross-spring evolution | **11/11 pass** |
 | CPU vs Python | **24/24 algorithms**, 21.0× geometric mean speedup |
 | `#![forbid(unsafe_code)]` | **Both crates** |
-| barraCuda source | **`ecoPrimals/barraCuda/crates/barracuda`** HEAD post-0.3.3 (`15d3774`, wgpu 28) |
+| barraCuda source | **`ecoPrimals/barraCuda/crates/barracuda`** v0.3.7 (wgpu 28) |
 | metalForge wgpu | **28** (was 22, eliminated double compilation) |

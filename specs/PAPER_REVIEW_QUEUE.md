@@ -1,8 +1,8 @@
 # airSpring — Paper Review Queue
 
-**Last Updated**: March 17, 2026
+**Last Updated**: March 24, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 87 experiments (1284/1284 Python + 911 Rust lib + 311 integration + 61 forge tests + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.3.7 (wgpu 28), Edition 2024, 97 binaries. 14.3× Rust-vs-Python geometric mean speedup (24/24 algorithms, 21/21 CPU-GPU parity modules). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired. metalForge 66/66 mixed pipeline. V010 handoff. biomeOS niche: 41 capabilities, 4 deploy graphs, 10 MCP tools. Deep code quality complete. Platform-agnostic IPC. Exp 084 CPU/GPU parity (21/21), Exp 085 toadStool dispatch (19/19), Exp 086 metalForge NUCLEUS (17/17), Exp 087 graph coordination (22/22).
+**Status**: 87 experiments (1284/1284 Python + 938 Rust lib + 316 integration + 62 forge tests = 1,316 total + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.3.7 (wgpu 28), Edition 2024, 91 binaries. 14.3× Rust-vs-Python geometric mean speedup (24/24 algorithms, 21/21 CPU-GPU parity modules). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired. metalForge 66/66 mixed pipeline. V010 handoff. biomeOS niche: 41 capabilities, 4 deploy graphs, 10 MCP tools. Deep code quality complete. Platform-agnostic IPC. Exp 084 CPU/GPU parity (21/21), Exp 085 toadStool dispatch (19/19), Exp 086 metalForge NUCLEUS (17/17), Exp 087 graph coordination (22/22).
 
 ---
 
@@ -78,13 +78,13 @@
 All 61 completed papers have:
 - **Digitized benchmarks** in `control/*/benchmark_*.json` (59 benchmark JSONs, 59 control directories)
 - **Python control scripts** that validate against benchmarks (1284/1284 Python checks)
-- **Rust validation binaries** (85 barracuda + 6 forge = 91 binaries) that load the same benchmarks
+- **Rust validation binaries** (91 total: 84 validation + 4 bench + 3 operational) that load the same benchmarks
 - **Open or published data** (no institutional access required)
 - **Cross-validation** (33/33 Python↔Rust match at 1e-5; 690 crop-station yield pairs within 0.01; PT↔PM cross-validated)
 - **GPU wiring**: 25 Tier A modules + fused Welford (SeasonalReducer) + fused Pearson (pairwise_correlation_gpu) + `BrentGpu` (VG inverse) + `RichardsGpu` (Picard)
 - **CPU benchmarks**: 14.3× geometric mean speedup vs Python (24/24 algorithms, 21/21 CPU-GPU parity modules), 13,000× atlas-scale
 - **GPU pipeline**: Local GPU 6/6 ops parity (<0.002 error). 27 GPU dispatch failures (upstream wgpu 28 NVK).
-- **Cross-spring provenance**: 146/146 evolution benchmarks across 5 springs (barraCuda 0.3.3)
+- **Cross-spring provenance**: 146/146 evolution benchmarks across 5 springs (barraCuda 0.3.7)
 
 ### Compute Pipeline Per Paper
 

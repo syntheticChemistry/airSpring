@@ -14,8 +14,11 @@
 //!
 //! If the weather cache does not exist, skips with a message and exits 0.
 //!
-//! script=`control/long_term_wb/long_term_water_balance.py`, commit=5684b1e, date=2026-02-26
-//! Run: `python3 control/long_term_wb/long_term_water_balance.py`
+//! Provenance:
+//!   script = `control/long_term_wb/long_term_water_balance.py`
+//!   commit = 5684b1e
+//!   date   = 2026-02-26
+//!   run    = `python3 control/long_term_wb/long_term_water_balance.py`
 
 use airspring_barracuda::eco::{
     crop::CropType,

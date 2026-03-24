@@ -56,6 +56,8 @@
 //! | neuralSpring | Nelder-Mead, BFGS, ValidationHarness, batch IPR, MatMul | airSpring, groundSpring |
 //! | airSpring | FAO-56 PM, water balance, VG, Richards PDE, hydrology stats | all ops 0-13 |
 //! | groundSpring | MC propagation, bootstrap, jackknife, multinomial | airSpring uncertainty |
+//!
+//! Provenance: integration validation (no Python baseline)
 
 use std::sync::Arc;
 use std::time::Instant;

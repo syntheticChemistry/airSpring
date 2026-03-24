@@ -1,6 +1,18 @@
 {
+  "_provenance": {
+    "method": "Stewart (1977) yield response vs synthetic Michigan corn/soy/wheat time series; season ET\u2080 and precip patterned on Open-Meteo-era growing seasons (validate_nass_real)",
+    "baseline_script": "scripts/download_usda_nass.py",
+    "baseline_command": "python3 scripts/download_usda_nass.py",
+    "baseline_commit": "88d07c0",
+    "reproduction_note": "Canonical Exp 060 expected values are the synthetic rows in this JSON; Re-run validate_nass_real at baseline_commit. For live USDA replacement, run baseline_command when an API key is configured (see benchmark note).",
+    "python_version": "3.13",
+    "created": "2026-03-01",
+    "references": [
+      "Stewart JI et al. (1977) Optimizing Crop Production through Control of Water and Salinity Levels",
+      "USDA NASS Quick Stats (https://quickstats.nass.usda.gov/)"
+    ]
+  },
   "experiment": "Exp 060: NASS Real Yield Comparison",
-  "_provenance": "Synthetic Michigan yields from validated Stewart pipeline + Open-Meteo weather",
   "note": "When USDA NASS API key is available, replace with download_usda_nass.py output",
   "state": "MI",
   "year_range": "2000-2023",

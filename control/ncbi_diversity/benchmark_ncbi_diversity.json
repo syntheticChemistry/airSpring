@@ -1,6 +1,18 @@
 {
+  "_provenance": {
+    "method": "Synthetic 16S OTU abundance tables along soil moisture \u03b8; Shannon H\u2032, Bray-Curtis, Anderson QS regime (PRJNA481146-inspired; validated models)",
+    "baseline_script": "control/ncbi_diversity/ncbi_diversity_analysis.py",
+    "baseline_command": "python3 control/ncbi_diversity/ncbi_diversity_analysis.py",
+    "baseline_commit": "88d07c0",
+    "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
+    "python_version": "3.13",
+    "created": "2026-02-28",
+    "references": [
+      "Levi et al. (2017) Soil tillage effect on 16S rRNA, NCBI BioProject PRJNA481146",
+      "Hartman et al. (2018) PRJNA520952 (temperate gradient cross-check)"
+    ]
+  },
   "experiment": "Exp 061: Cross-Spring Shannon H' Diversity Gradient",
-  "_provenance": "Synthetic 16S OTU tables along soil moisture gradient (validated models)",
   "note": "When NestGate NCBI provider is wired, replace with real SRA amplicon data",
   "source_bioproject": "PRJNA481146 (Ein Harod tillage study)",
   "moisture_gradient": {

@@ -15,6 +15,8 @@
 //! - **Tower**: `BearDog` (crypto) + `Songbird` (mesh discovery)
 //! - **Node**: Tower + `ToadStool` (compute/GPU dispatch)
 //! - **Nest**: Tower + `NestGate` (storage/provenance)
+//!
+//! Provenance: integration validation (no Python baseline)
 
 use airspring_forge::dispatch::{self, Workload};
 use airspring_forge::nucleus::{AtomicKind, NucleusAtomic, NucleusMesh};

@@ -12,6 +12,8 @@
 //! - SCS-CN runoff, Green-Ampt infiltration
 //! - Pedotransfer, Van Genuchten, Richards PDE
 //! - Diversity, Isotherm fitting, Sensor calibration
+//!
+//! Provenance: integration validation (no Python baseline)
 
 use std::sync::Arc;
 use std::time::Instant;

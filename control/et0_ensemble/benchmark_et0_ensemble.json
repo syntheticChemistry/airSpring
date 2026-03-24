@@ -1,4 +1,18 @@
 {
+    "_provenance": {
+        "method": "Equal-weight mean of available daily ET\u2080 methods (PM, PT, Hargreaves, Makkink, Turc, Hamon); data-adaptive gating vs Python et0_ensemble.py",
+        "baseline_script": "control/et0_ensemble/et0_ensemble.py",
+        "baseline_command": "python3 control/et0_ensemble/et0_ensemble.py",
+        "baseline_commit": "97e7533",
+        "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
+        "python_version": "3.13",
+        "created": "2026-02-28",
+        "references": [
+            "Allen et al. (1998) FAO-56 — Penman-Monteith as benchmark",
+            "Oudin et al. (2005) Which potential evapotranspiration input for a lumped rainfall-runoff model? J Hydrol 303:290-306",
+            "Droogers & Allen (2002) Estimating reference evapotranspiration under inaccurate data conditions, Irrig Drain Syst 16:33-45"
+        ]
+    },
     "experiment": "Exp 037 — ET₀ Ensemble Consensus (7-Method Weighted)",
     "description": "Combine 6 daily ET₀ methods into a weighted consensus estimate. Data-adaptive: weights reflect available input data. Thornthwaite excluded (monthly method, requires annual heat index). Full-weather stations use 6 methods; temperature-only stations use 2 (Hargreaves + Hamon).",
     "method": "Equal-weight mean of available daily ET₀ methods, with data-availability gating",

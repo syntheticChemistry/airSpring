@@ -50,10 +50,15 @@ pub const INTERNAL_ERROR: i32 = -32603;
 /// Strip legacy primal namespace prefix from JSON-RPC method names (barraCuda v0.3.7 semantic naming).
 ///
 /// Canonical names are `{domain}.{operation}` (for example `science.et0_fao56`). Legacy clients may send
-/// `airspring.science.et0_fao56`; this removes a leading `airspring.` when present.
+/// `airspring.science.et0_fao56`; this removes a leading `{PRIMAL_NAME}.` when present.
+///
+/// The prefix is derived from [`crate::PRIMAL_NAME`] — no hardcoded primal strings.
 #[must_use]
 pub fn normalize_method(method: &str) -> &str {
-    method.strip_prefix("airspring.").unwrap_or(method)
+    method
+        .strip_prefix(crate::PRIMAL_NAME)
+        .and_then(|rest| rest.strip_prefix('.'))
+        .unwrap_or(method)
 }
 
 /// Extract a JSON-RPC error code and message from a response.

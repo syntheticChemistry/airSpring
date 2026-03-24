@@ -192,7 +192,11 @@ pub fn discover_visualization_primal() -> Option<PathBuf> {
 ///
 /// Scans the socket directory, connects to each primal's `capability.list`,
 /// and checks if any returned capability starts with the given domain prefix.
-fn discover_primal_by_capability(domain: &str) -> Option<PathBuf> {
+///
+/// This is the purest form of capability-based discovery: no primal name
+/// assumption, just "find whoever can do X".
+#[must_use]
+pub fn discover_primal_by_capability(domain: &str) -> Option<PathBuf> {
     let socket_dir = resolve_socket_dir();
     let Ok(entries) = std::fs::read_dir(&socket_dir) else {
         return None;

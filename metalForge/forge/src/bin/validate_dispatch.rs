@@ -7,6 +7,10 @@
 //!
 //! Benchmark: `control/metalforge_dispatch/benchmark_metalforge_dispatch.json`
 //! Baseline: `control/metalforge_dispatch/metalforge_dispatch.py` (14/14 PASS)
+//!
+//! Provenance:
+//!   script = `control/metalforge_dispatch/metalforge_dispatch.py`
+//!   run    = `python3 control/metalforge_dispatch/metalforge_dispatch.py`
 
 use airspring_forge::dispatch::{self, Reason};
 use airspring_forge::substrate::{Capability, Identity, Properties, Substrate, SubstrateKind};

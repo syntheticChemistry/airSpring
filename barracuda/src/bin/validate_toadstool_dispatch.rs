@@ -12,6 +12,8 @@
 //!
 //! Does NOT require `airspring_primal` to be running — exercises the dispatch
 //! functions directly.
+//!
+//! Provenance: integration validation (no Python baseline)
 
 #![expect(
     clippy::expect_used,

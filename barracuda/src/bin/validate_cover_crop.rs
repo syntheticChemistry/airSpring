@@ -10,8 +10,11 @@
 //! 3. No-till vs conventional ET comparison
 //! 4. Cross-validation of mulch Ke against Python at 1e-6
 //!
-//! script=`control/dual_kc/cover_crop_dual_kc.py`, commit=5684b1e, date=2026-02-26
-//! Run: `python3 control/dual_kc/cover_crop_dual_kc.py`
+//! Provenance:
+//!   script = `control/dual_kc/cover_crop_dual_kc.py`
+//!   commit = 5684b1e
+//!   date   = 2026-02-26
+//!   run    = `python3 control/dual_kc/cover_crop_dual_kc.py`
 
 use airspring_barracuda::eco::dual_kc::{
     self, CoverCropType, DualKcInput, EvaporationLayerState, ResidueLevel,

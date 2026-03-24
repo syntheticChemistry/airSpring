@@ -39,8 +39,8 @@ mod discovery;
 pub use capabilities::parse_capabilities;
 pub use discovery::{
     discover_all_primals, discover_all_primals_in, discover_inference_primal,
-    discover_primal_socket, discover_primal_socket_in, discover_shader_compiler,
-    discover_visualization_primal, find_socket, find_socket_in,
+    discover_primal_by_capability, discover_primal_socket, discover_primal_socket_in,
+    discover_shader_compiler, discover_visualization_primal, find_socket, find_socket_in,
 };
 
 /// Explicit configuration for biomeOS socket resolution.

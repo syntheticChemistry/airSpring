@@ -26,8 +26,11 @@
 //! - biomeOS Capability Translation Architecture
 //! - airSpring `specs/BIOMEOS_CAPABILITIES.md`
 //!
-//! script=`control/neural_api/neural_api_parity.py`, commit=97e7533, date=2026-02-28
-//! Run: `python3 control/neural_api/neural_api_parity.py`
+//! Provenance:
+//!   script = `control/neural_api/neural_api_parity.py`
+//!   commit = 97e7533
+//!   date   = 2026-02-28
+//!   run    = `python3 control/neural_api/neural_api_parity.py`
 
 use airspring_barracuda::eco::evapotranspiration::{
     self, DailyEt0Input, hamon_pet, hargreaves_et0, makkink_et0, turc_et0,

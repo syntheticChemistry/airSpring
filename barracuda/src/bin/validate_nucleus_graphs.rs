@@ -10,7 +10,8 @@
 //! 5. Cross-primal graph — soil microbiome graph crosses spring boundaries.
 //! 6. Pipeline ordering — topological sort produces valid execution order.
 //! 7. biomeOS socket discovery — integration with live NUCLEUS mesh.
-
+//!
+//! Provenance: integration validation (no Python baseline)
 
 use std::collections::{HashMap, HashSet};
 

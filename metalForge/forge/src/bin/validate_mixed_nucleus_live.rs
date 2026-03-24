@@ -9,6 +9,8 @@
 //!
 //! Unlike Exp 076 (synthetic inventories), this uses the real `probe` system
 //! to discover what's available and adapts assertions accordingly.
+//!
+//! Provenance: integration validation (no Python baseline)
 
 use airspring_forge::dispatch;
 use airspring_forge::nucleus::{AtomicKind, NucleusAtomic, NucleusMesh};

@@ -1,16 +1,14 @@
 # airSpring wateringHole
 
-**Updated**: March 23, 2026 | **Version**: v0.10.0
+**Updated**: March 24, 2026 | **Version**: v0.10.0
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.10.0** | [AIRSPRING_V010_PLATFORM_AGNOSTIC_IPC_HANDOFF_MAR23_2026.md](handoffs/AIRSPRING_V010_PLATFORM_AGNOSTIC_IPC_HANDOFF_MAR23_2026.md) | 2026-03-23 | **primary** — platform-agnostic IPC (`Transport` enum), `#[allow()]`→`#[expect()]` final sweep, doctest `ignore`→`no_run`, Exp 062-087 documented, deep audit all-clean, 947 lib + 306 integration tests |
-| **V0.10.0** | [HANDOFF_AIRSPRING_TO_BARRACUDA_TRANSPORT_ABSORPTION_MAR23_2026.md](handoffs/HANDOFF_AIRSPRING_TO_BARRACUDA_TRANSPORT_ABSORPTION_MAR23_2026.md) | 2026-03-23 | barraCuda/toadStool evolution — Transport absorption, `#[expect()]` migration, dependency health, tolerance architecture, 947 lib + 306 integration + 61 forge |
-| **V0.10.0** | [AIRSPRING_V010_DEEP_AUDIT_BARRACUDA_TOADSTOOL_HANDOFF_MAR23_2026.md](handoffs/AIRSPRING_V010_DEEP_AUDIT_BARRACUDA_TOADSTOOL_HANDOFF_MAR23_2026.md) | 2026-03-23 | **comprehensive** — lint architecture, ecoBin `deny.toml`, CI symlink strategy, GPU evolution, tolerance architecture, absorption candidates, cross-spring learnings |
 | **V0.10.0** | [ecoPrimals handoff](../../../wateringHole/handoffs/AIRSPRING_V010_DEEP_EVOLUTION_ABSORPTION_HANDOFF_MAR23_2026.md) | 2026-03-23 | Cross-primal — per-site casts, `PipelineError`, `ValidationSink`, `default-features=false`, `content_sha256` provenance, TCP transport, numerical guards |
+| **V0.10.0** | [AIRSPRING_V010_DEEP_AUDIT_EXECUTION_BARRACUDA_TOADSTOOL_HANDOFF_MAR24_2026.md](handoffs/AIRSPRING_V010_DEEP_AUDIT_EXECUTION_BARRACUDA_TOADSTOOL_HANDOFF_MAR24_2026.md) | 2026-03-24 | **execution** — three-tier capability discovery, PRIMAL_NAME-derived RPC, 47 provenance headers, 8 JSON provenance, forge feature alignment, doc count reconciliation |
 | **≤V0.9.0** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 
 ## Cross-Spring Documents
@@ -35,6 +33,9 @@
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_V010_DEEP_AUDIT_BARRACUDA_TOADSTOOL_HANDOFF_MAR23_2026.md` | v0.10.0: comprehensive deep audit — lint architecture, ecoBin `deny.toml`, CI symlink strategy, GPU evolution (superseded by V0.10.0 Mar24 execution) |
+| `handoffs/archive/AIRSPRING_V010_PLATFORM_AGNOSTIC_IPC_HANDOFF_MAR23_2026.md` | v0.10.0: platform-agnostic IPC, `#[expect()]` sweep, doctest migration, Exp 062-087 (superseded by V0.10.0 Mar24 execution) |
+| `handoffs/archive/HANDOFF_AIRSPRING_TO_BARRACUDA_TRANSPORT_ABSORPTION_MAR23_2026.md` | v0.10.0: Transport absorption, dependency health, tolerance architecture (superseded by V0.10.0 Mar24 execution) |
 | `handoffs/archive/AIRSPRING_V084_DEEP_DEBT_EXECUTION_BARRACUDA_TOADSTOOL_HANDOFF_MAR16_2026.md` | v0.8.4: deep debt execution — primal binary refactored, primal_names, Python provenance, CI expanded (superseded by V085) |
 | `handoffs/archive/AIRSPRING_V083_DEEP_DEBT_BARRACUDA_TOADSTOOL_HANDOFF_MAR16_2026.md` | v0.8.3: deep debt resolution — 19 findings, JSON-RPC protocol fix, forbid(unsafe_code), 58 tolerances (superseded by V084) |
 | `handoffs/archive/AIRSPRING_V082_NICHE_ARCHITECTURE_BARRACUDA_TOADSTOOL_HANDOFF_MAR15_2026.md` | v0.8.2: niche architecture, Edition 2024, deep code quality, barraCuda absorption (superseded by V083) |

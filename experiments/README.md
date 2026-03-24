@@ -1,7 +1,7 @@
 # airSpring Experiments
 
-**Updated**: March 23, 2026
-**Status**: 87 experiments, barraCuda 0.3.7 (wgpu 28), v0.10.0, Edition 2024 (rust-toolchain 1.92). 1284/1284 Python + 947 lib + 306 integration + 61 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 parity). 21/21 CPU-GPU parity modules. `#![forbid(unsafe_code)]`, `#![deny(cast_*)]` library-strict, `warn(missing_docs)`, 58 centralized tolerances (Rust + Python mirror), JSON-RPC 2.0 protocol compliant. Zero C dependencies. Zero hardcoded primals. Zero `#[allow()]` in production. 10 MCP tools wired in primal dispatch (Squirrel AI discoverable). Platform-agnostic IPC (Transport enum: Unix + TCP, provenance trio fully migrated). Full validation pipeline green (2026-03-23).
+**Updated**: March 24, 2026
+**Status**: 87 experiments, barraCuda 0.3.7 (wgpu 28), v0.10.0, Edition 2024 (rust-toolchain 1.92). 1284/1284 Python + 938 lib + 316 integration + 62 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 parity). 21/21 CPU-GPU parity modules. `#![forbid(unsafe_code)]`, `#![deny(cast_*)]` library-strict, `warn(missing_docs)`, 58 centralized tolerances (Rust + Python mirror), JSON-RPC 2.0 protocol compliant. Zero C dependencies. Zero hardcoded primals. Zero `#[allow()]` in production. 10 MCP tools wired in primal dispatch (Squirrel AI discoverable). Platform-agnostic IPC (Transport enum: Unix + TCP, provenance trio fully migrated). **Deep audit execution**: provenance standardization (47 headers, 8 JSON), capability-based discovery (three-tier). Full validation pipeline green (2026-03-24).
 
 ---
 

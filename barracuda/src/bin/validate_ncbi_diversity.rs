@@ -18,9 +18,12 @@
 //!   synthetic tables with real SRA amplicon data (PRJNA481146, PRJNA520952).
 //!   Accession PRJNA520952 (Hartman et al. 2018) adds a temperate climate
 //!   gradient for cross-validation.
-//! - Provenance: script=`control/ncbi_diversity/ncbi_diversity_analysis.py`,
-//!   commit=88d07c0, date=2026-02-28.
-//! - Run: `python3 control/ncbi_diversity/ncbi_diversity_analysis.py`
+//!
+//! Provenance:
+//!   script = `control/ncbi_diversity/ncbi_diversity_analysis.py`
+//!   commit = 88d07c0
+//!   date   = 2026-02-28
+//!   run    = `python3 control/ncbi_diversity/ncbi_diversity_analysis.py`
 
 use airspring_barracuda::eco::anderson;
 use airspring_barracuda::eco::diversity;
