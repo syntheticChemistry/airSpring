@@ -1,10 +1,13 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # cargo-deny configuration for airspring-barracuda
 # Run: cargo deny check (requires cargo install cargo-deny)
+#
+# Mirrors metalForge/forge/deny.toml — ecoBin v3.0 compliance.
+# Zero C dependencies in application code.
 
 [graph]
 targets = []
-all-features = true
+all-features = false
 
 [advisories]
 db-path = "~/.cargo/advisory-db"
@@ -14,17 +17,18 @@ unmaintained = "warn"
 yanked = "deny"
 
 [licenses]
-unlicensed = "deny"
 allow = [
     "AGPL-3.0",
+    "AGPL-3.0+",
     "Apache-2.0",
     "Apache-2.0 WITH LLVM-exception",
+    "MIT",
     "BSD-2-Clause",
     "BSD-3-Clause",
     "BSL-1.0",
     "ISC",
-    "MIT",
     "MPL-2.0",
+    "OpenSSL",
     "Unicode-3.0",
     "Unicode-DFS-2016",
     "Zlib",
@@ -35,25 +39,25 @@ confidence-threshold = 0.8
 multiple-versions = "warn"
 wildcards = "deny"
 highlight = "all"
-
-# ecoBin: zero C dependencies in application code.
-# These crates pull in C compilers or system libraries that break
-# cross-compilation and sovereign binary reproducibility.
 deny = [
+    # ecoBin: no C/system dependencies in application code.
+    # Cross-compilation and reproducibility require pure Rust.
     { crate = "openssl-sys", wrappers = [] },
-    { crate = "openssl", wrappers = [] },
     { crate = "libz-sys", wrappers = [] },
-    { crate = "zlib-ng-sys", wrappers = [] },
+    { crate = "ring", wrappers = [] },
+    { crate = "native-tls", wrappers = [] },
+    { crate = "cmake", wrappers = [] },
+    { crate = "cc", wrappers = [] },
+    { crate = "bindgen", wrappers = [] },
+    { crate = "pkg-config", wrappers = [] },
+    { crate = "vcpkg", wrappers = [] },
+    { crate = "libssh2-sys", wrappers = [] },
+    { crate = "libgit2-sys", wrappers = [] },
+    { crate = "curl-sys", wrappers = [] },
+    { crate = "zstd-sys", wrappers = [] },
     { crate = "bzip2-sys", wrappers = [] },
     { crate = "lzma-sys", wrappers = [] },
-    { crate = "zstd-sys", wrappers = [] },
-    { crate = "libgit2-sys", wrappers = [] },
-    { crate = "libssh2-sys", wrappers = [] },
-    { crate = "curl-sys", wrappers = [] },
-    { crate = "libdbus-sys", wrappers = [] },
-    { crate = "libsqlite3-sys", wrappers = [] },
-    { crate = "native-tls", wrappers = [] },
-    { crate = "ring", wrappers = [] },
+    { crate = "sysinfo", wrappers = [] },
 ]
 
 [sources]

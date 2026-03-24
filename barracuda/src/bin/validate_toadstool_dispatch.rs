@@ -13,7 +13,10 @@
 //! Does NOT require `airspring_primal` to be running — exercises the dispatch
 //! functions directly.
 
-#![allow(clippy::unwrap_used, clippy::expect_used)]
+#![expect(
+    clippy::expect_used,
+    reason = "validation binary: fail-fast on dispatch and primal science errors"
+)]
 
 use airspring_barracuda::biomeos;
 use airspring_barracuda::primal_names;

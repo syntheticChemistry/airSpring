@@ -78,7 +78,7 @@ documented with binary name, GPU path, and check counts.
 - `cargo fmt --check`: PASS
 - `cargo clippy --all-features -- -D warnings`: PASS (zero warnings)
 - `cargo check --all-features`: PASS
-- `cargo test --all-features`: 946 passed, 0 failed, 0 ignored
+- `cargo test --all-features`: 947 passed, 0 failed, 0 ignored
 - `cargo test --doc`: 9 passed, 0 failed, 0 ignored
 
 ---

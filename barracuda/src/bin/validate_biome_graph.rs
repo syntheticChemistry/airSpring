@@ -1,16 +1,23 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::pedantic, clippy::nursery)]
+#![expect(
+    clippy::cast_precision_loss,
+    reason = "capability counts and pipeline stats cast to f64 for ValidationHarness"
+)]
+#![expect(
+    clippy::suboptimal_flops,
+    reason = "synthetic weather generators use readable a + b * sin(x) form for clarity"
+)]
 //! Exp 065: biomeOS Graph Experiment — ecology pipeline via NUCLEUS coordination.
 //!
 //! Validates the full ecology pipeline as deployed by `airspring_deploy.toml`:
 //!
 //! 1. **Graph topology**: verifies the 4-node sequential graph
-//!    (BearDog → Songbird → BarraCuda → airSpring).
-//! 2. **Capability registry**: all 30 ecology.* + science.* capabilities mapped.
+//!    (`BearDog` → `Songbird` → `BarraCuda` → airSpring).
+//! 2. **Capability registry**: all 30 `ecology.*` + `science.*` capabilities mapped.
 //! 3. **Offline pipeline**: Exercises the full seasonal ecology pipeline
 //!    (ET₀ → Kc → WB → Yield → Stats) without requiring live primals.
 //! 4. **metalForge coordination**: Validates workload routing through substrate mesh.
-//! 5. **Evolution manifest**: BarraCuda absorption readiness report.
+//! 5. **Evolution manifest**: `BarraCuda` absorption readiness report.
 //!
 //! This experiment runs **standalone** (no live primals needed). It simulates
 //! the biomeOS graph coordination by exercising each pipeline stage locally

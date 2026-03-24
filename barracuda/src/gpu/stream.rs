@@ -15,7 +15,7 @@
 //!
 //! ```rust,no_run
 //! # fn main() -> Result<(), Box<dyn std::error::Error>> {
-//! # let device = todo!("requires GPU device");
+//! # let device = unimplemented!("omitted: see gpu::device_info::try_f64_device()");
 //! # let temperature_data: Vec<f64> = vec![];
 //! use airspring_barracuda::gpu::stream::StreamSmoother;
 //!

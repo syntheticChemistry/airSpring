@@ -21,7 +21,10 @@
 //!
 //! Provenance: biomeOS NUCLEUS v0.7.5 modern deployment validation
 
-#![allow(clippy::unwrap_used, clippy::expect_used)]
+#![expect(
+    clippy::expect_used,
+    reason = "validation binary: fail-fast on IPC/JSON-RPC errors (live primal required)"
+)]
 
 use airspring_barracuda::biomeos;
 use airspring_barracuda::eco::drought_index;

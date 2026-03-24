@@ -482,7 +482,7 @@ pub fn all_workloads() -> Vec<EcoWorkload> {
         tissue_diversity(),
         cytokine_brain(),
         ad_flare_classifier(),
-        // Local WGSL shaders (pending BarraCuda absorption)
+        // BatchedElementwiseF64 ops 14-19 (absorbed upstream v0.7.2)
         scs_cn_batch(),
         stewart_yield_batch(),
         makkink_et0_batch(),

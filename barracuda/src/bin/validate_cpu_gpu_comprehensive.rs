@@ -17,7 +17,10 @@
 //!
 //! This is the "pure Rust math" validation — proving GPU kernels match CPU.
 
-#![allow(clippy::unwrap_used, clippy::expect_used)]
+#![expect(
+    clippy::expect_used,
+    reason = "validation binary: fail-fast on GPU device/shader errors during parity checks"
+)]
 
 use std::sync::Arc;
 

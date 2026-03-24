@@ -166,8 +166,8 @@ The Write → Absorb → Lean cycle is **complete** for airSpring.
 
 | Metric | Value |
 |---|---|
-| Lib tests | 946 |
-| Integration tests | 20 |
+| Lib tests | 947 |
+| Integration tests | 306 |
 | Forge tests | 61 |
 | Doctests | 9 (0 ignored) |
 | Validation binaries | 91 |

@@ -1,6 +1,6 @@
 # Cross-Spring Shader Evolution — airSpring Provenance
 
-**Updated**: March 19, 2026 (v0.10.0, 911 lib + 311 integration + 61 forge, barraCuda 0.3.7 / wgpu 28, 87 experiments)
+**Updated**: March 23, 2026 (v0.10.0, 947 lib + 306 integration + 61 forge, barraCuda 0.3.7 / wgpu 28, 87 experiments)
 
 ## Summary
 
@@ -197,7 +197,7 @@ module now wires `nelder_mead` for nonlinear isotherm fitting (v0.4.0).
 | `gpu::reduce::SeasonalReducer` | `ops::fused_map_reduce_f64` | wetSpring | GPU N≥1024 |
 | `gpu::stream::StreamSmoother` | `ops::moving_window_stats` | wetSpring S28+ | **WIRED** (new) |
 | `eco::correction::fit_ridge` | `linalg::ridge::ridge_regression` | wetSpring ESN | **WIRED** (new) |
-| `gpu::dual_kc::BatchedDualKc` | CPU path (Tier B → GPU pending) | airSpring | **CPU-STEP** |
+| `gpu::dual_kc::BatchedDualKc` | `BatchedElementwiseF64` (op=8) | airSpring | **GPU-FIRST** (Tier A, S70+) |
 | `gpu::richards::BatchedRichards` | `pde::richards::solve_richards` | airSpring v0.4.0 | **WIRED** (new) |
 | `gpu::isotherm::fit_*_nm` | `optimize::nelder_mead` | airSpring v0.4.0 | **WIRED** (new) |
 | `validation` | `validation::ValidationHarness` | neuralSpring | ABSORBED |

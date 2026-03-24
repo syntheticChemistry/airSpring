@@ -2,6 +2,10 @@
 name = "airspring-barracuda"
 version = "0.10.0"
 edition = "2024"
+# MSRV 1.92: required for Edition 2024 `#[expect()]` with `reason`, `gen` keyword
+# avoidance, and improved const-eval. Intentionally stricter than the ecosystem
+# floor (1.87) — airSpring uses #[expect()] pervasively (100+ sites) and
+# benefits from 1.92 diagnostics for unused expects.
 rust-version = "1.92"
 authors = ["Squirrel Team"]
 license = "AGPL-3.0-or-later"

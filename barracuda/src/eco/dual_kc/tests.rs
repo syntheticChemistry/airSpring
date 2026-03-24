@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! Unit tests for dual Kc module.
 
-#![allow(clippy::unwrap_used, clippy::expect_used)]
 #![expect(clippy::float_cmp, reason = "test assertions on ET values")]
 
 use super::*;

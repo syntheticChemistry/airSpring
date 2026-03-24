@@ -1,15 +1,17 @@
 # airSpring wateringHole
 
-**Updated**: March 18, 2026 | **Version**: v0.10.0
+**Updated**: March 23, 2026 | **Version**: v0.10.0
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.10.0** | [AIRSPRING_V010_DEEP_DEBT_EVOLUTION_HANDOFF_MAR19_2026.md](handoffs/AIRSPRING_V010_DEEP_DEBT_EVOLUTION_HANDOFF_MAR19_2026.md) | 2026-03-19 | **primary** — MCP tools/list + tools/call wired, `ValidationHarness` migration, platform-agnostic IPC (`Transport` enum), inline tolerance centralization (50+ sites), `.expect()` → `OrExit`/`Result`, zero clippy warnings (pedantic+nursery), 911 lib + 311 integration tests, 1222 total |
-| **V0.10.0** | [../../../wateringHole/handoffs/AIRSPRING_V010_BARRACUDA_TOADSTOOL_EVOLUTION_HANDOFF_MAR19_2026.md](../../../wateringHole/handoffs/AIRSPRING_V010_BARRACUDA_TOADSTOOL_EVOLUTION_HANDOFF_MAR19_2026.md) | 2026-03-19 | barraCuda/toadStool evolution — absorption candidates, Transport trait, ecosystem learnings |
-| **≤V0.8.9** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
+| **V0.10.0** | [AIRSPRING_V010_PLATFORM_AGNOSTIC_IPC_HANDOFF_MAR23_2026.md](handoffs/AIRSPRING_V010_PLATFORM_AGNOSTIC_IPC_HANDOFF_MAR23_2026.md) | 2026-03-23 | **primary** — platform-agnostic IPC (`Transport` enum), `#[allow()]`→`#[expect()]` final sweep, doctest `ignore`→`no_run`, Exp 062-087 documented, deep audit all-clean, 947 lib + 306 integration tests |
+| **V0.10.0** | [HANDOFF_AIRSPRING_TO_BARRACUDA_TRANSPORT_ABSORPTION_MAR23_2026.md](handoffs/HANDOFF_AIRSPRING_TO_BARRACUDA_TRANSPORT_ABSORPTION_MAR23_2026.md) | 2026-03-23 | barraCuda/toadStool evolution — Transport absorption, `#[expect()]` migration, dependency health, tolerance architecture, 947 lib + 306 integration + 61 forge |
+| **V0.10.0** | [AIRSPRING_V010_DEEP_AUDIT_BARRACUDA_TOADSTOOL_HANDOFF_MAR23_2026.md](handoffs/AIRSPRING_V010_DEEP_AUDIT_BARRACUDA_TOADSTOOL_HANDOFF_MAR23_2026.md) | 2026-03-23 | **comprehensive** — lint architecture, ecoBin `deny.toml`, CI symlink strategy, GPU evolution, tolerance architecture, absorption candidates, cross-spring learnings |
+| **V0.10.0** | [ecoPrimals handoff](../../../wateringHole/handoffs/AIRSPRING_V010_DEEP_EVOLUTION_ABSORPTION_HANDOFF_MAR23_2026.md) | 2026-03-23 | Cross-primal — per-site casts, `PipelineError`, `ValidationSink`, `default-features=false`, `content_sha256` provenance, TCP transport, numerical guards |
+| **≤V0.9.0** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 
 ## Cross-Spring Documents
 

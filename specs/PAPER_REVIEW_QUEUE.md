@@ -168,15 +168,11 @@ All 61 completed papers have:
 | 76 | — | 60/60 (`validate_nucleus`) | NUCLEUS modern — 27 workloads | `rpc` + all GPU (NUCLEUS) |
 | 77 | — | 32/32 (`validate_gpu_rewire_benchmark`) | GPU rewire benchmark + provenance | All GPU orchestrators |
 | 78 | — | 146/146 (`validate_cross_spring_evolution`) | S87 deep evolution — 20 ops universal precision | All ops (evolution) |
-| 79 | 12/12 | 26/26 (`validate_mc_et0`) | MC ET₀ uncertainty propagation | `gpu::mc_et0` (UQ) |
-| 80 | 18/18 | 20/20 (`validate_bootstrap_jackknife`) | Bootstrap + Jackknife CI on GPU | `gpu::bootstrap` + `jackknife` |
-| 81 | 17/17 | 20/20 (`validate_drought_index`) | SPI drought classification (Gamma MLE + CDF) | `eco::drought_index` |
-| 82 | — | 36/36 (`validate_cross_spring_modern`) | Modern provenance + `PrecisionRoutingAdvice` | `gpu::autocorrelation` |
-| 83 | — | 43/43 (`validate_nucleus_modern`) | biomeOS NUCLEUS Tower/Node 35 JSON-RPC caps | `rpc` + `primal_science` |
-| 84 | — | 21/21 (`validate_cpu_gpu_comprehensive`) | CPU/GPU parity across 21 modules | All GPU orchestrators |
-| 85 | — | 19/19 (`validate_toadstool_dispatch`) | toadStool dispatch routing 19 workloads | `rpc` + `gpu::*` (dispatch) |
-| 86 | — | 17/17 (`validate_nucleus_graphs`) | NUCLEUS graph coordination 22 patterns | `rpc` + `niche` (graphs) |
-| 87 | — | 22/22 (`validate_climate_scenario`) | Multi-scenario climate projection pipeline | `gpu::seasonal_pipeline` (climate) |
+| 79 | — | 43/43 (`validate_nucleus_modern`) | biomeOS NUCLEUS Tower/Node 35 JSON-RPC caps | `rpc` + `primal_science` |
+| 80 | — | 21/21 (`validate_cpu_gpu_comprehensive`) | CPU/GPU parity across 21 modules | All GPU orchestrators |
+| 81 | — | 19/19 (`validate_toadstool_dispatch`) | toadStool dispatch routing 19 workloads | `rpc` + `gpu::*` (dispatch) |
+| 82 | — | 17/17 (`validate_nucleus_graphs`) | NUCLEUS graph coordination 22 patterns | `rpc` + `niche` (graphs) |
+| 83 | — | 22/22 (`validate_climate_scenario`) | Multi-scenario climate projection pipeline | `gpu::seasonal_pipeline` (climate) |
 
 ---
 
@@ -285,7 +281,7 @@ wetSpring 16S pipeline (OTU table, Shannon H′) → airSpring Anderson coupling
 - Queue items 23-24 (Tier 4) are longer-horizon explorations (evolutionary optimization, microbiome)
 - All 41 paper reproductions use **open data** — zero institutional access, zero proprietary sensors
 - Every completed paper has been validated through the full pipeline: Python → Rust CPU → GPU/NPU
-- Three compute tiers verified: 40+ control dirs, 67 Rust binaries, 17 Tier A + 7 Tier B GPU modules, 3 NPU experiments
+- Three compute tiers verified: 40+ control dirs, 91 Rust binaries, 24 Tier A + 2 Tier B GPU modules, 3 NPU experiments
 - CPU parity chain: Paper → Python control → Barracuda CPU → Barracuda GPU → Pure GPU workload → metalForge cross-system
 - ET₀ method coverage: PM (FAO-56), Priestley-Taylor, Hargreaves, Thornthwaite, Makkink, Turc, Hamon, Blaney-Criddle — 8 independent methods
 - GPU math portability: all 13 GPU orchestrator modules validated (Exp 047, 46/46 checks)

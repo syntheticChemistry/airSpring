@@ -11,7 +11,6 @@
 //! 6. Pipeline ordering — topological sort produces valid execution order.
 //! 7. biomeOS socket discovery — integration with live NUCLEUS mesh.
 
-#![allow(clippy::unwrap_used, clippy::expect_used)]
 
 use std::collections::{HashMap, HashSet};
 

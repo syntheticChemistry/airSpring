@@ -28,7 +28,10 @@
 //!
 //! Provenance: `biomeOS` NUCLEUS mixed-hardware pipeline validation
 
-#![allow(clippy::unwrap_used, clippy::expect_used)]
+#![expect(
+    clippy::expect_used,
+    reason = "validation binary: fail-fast on IPC/JSON-RPC errors (live primal required)"
+)]
 
 use std::path::PathBuf;
 

@@ -1,9 +1,9 @@
 # airSpring NUCLEUS Integration
 
 **Date:** March 23, 2026
-**Status:** Experimental — deployment graph + capability spec + Neural API bridge operational
+**Status:** Complete — deployment graph + capability spec + Neural API bridge operational, 28/28 pipeline PASS (Exp 084-087)
 **Gate:** Eastgate (i9-12900K, RTX 4070, 32GB DDR5, 2TB NVMe, BrainChip Akida NPU)
-**Invariant:** 938 Rust lib tests + 46/46 GPU math + 75/75 cross-validation + 1393 atlas must pass regardless of deployment mode
+**Invariant:** 947 Rust lib tests + 46/46 GPU math + 75/75 cross-validation + 1393 atlas must pass regardless of deployment mode
 
 ---
 
@@ -17,7 +17,7 @@ airSpring (Spring — validation consumer)
     │       └── NestGate providers (Open-Meteo, NOAA, USDA NASS)
     │               download → ZFS store with provenance
     │
-    ├── barracuda/ (Rust validation, 938 lib tests, 91 binaries)
+    ├── barracuda/ (Rust validation, 947 lib tests, 91 binaries)
     │       │
     │       ├── eco:: modules (CPU validated, 14 domain modules)
     │       │
@@ -27,7 +27,7 @@ airSpring (Spring — validation consumer)
     │       │
     │       └── npu:: module (AKD1000 edge inference, feature-gated)
     │
-    ├── metalForge/ (mixed hardware dispatch: CPU+GPU+NPU+Neural, 62 tests + 6 binaries)
+    ├── metalForge/ (mixed hardware dispatch: CPU+GPU+NPU+Neural, 61 tests + 6 binaries)
     │       │
     │       └── neural:: module (biomeOS capability.call over Unix socket)
     │
