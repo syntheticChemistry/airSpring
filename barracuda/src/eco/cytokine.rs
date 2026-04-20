@@ -53,6 +53,7 @@ impl Default for CytokineBrainConfig {
                     n_targets: N_CYTOKINE_TARGETS,
                     ridge_lambda: 1e-4,
                     input_dim: 7,
+                    ..ShellConfig::default()
                 },
                 generations_per_cycle: 20,
                 min_training_points: 5,
