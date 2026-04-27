@@ -270,7 +270,9 @@ fn validate_green_ampt_cpu_gpu(
     if let Some(dev) = device {
         let solver = BatchedInfiltration::new(dev);
         let t_start = Instant::now();
-        let gpu = solver.cumulative_gpu(&params, &times).unwrap();
+        let gpu = solver
+            .cumulative_gpu(&params, &times)
+            .expect("GPU cumulative infiltration dispatch failed");
         let t_gpu = t_start.elapsed();
 
         let max_diff = cpu

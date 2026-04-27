@@ -4,25 +4,8 @@
     reason = "validation harness: JSON fixture counts and indices; bounded for parity checks"
 )]
 
-//! Individual benchmark functions for CPU vs Python parity testing.
-//!
-//! Each function follows the pattern:
-//! 1. Set up inputs (deterministic, matching Python control scripts)
-//! 2. Time N iterations of the Rust implementation
-//! 3. Compare output against `python_ref` (the value produced by the
-//!    corresponding Python control script at the documented commit)
-//! 4. Return `(elapsed_secs, output_value, parity_detail_string)`
-//!
-//! # Reference Value Provenance
-//!
-//! | Value | Source script | Commit | Command |
-//! |-------|--------------|--------|---------|
-//! | `5.152_603_881_624_521` (ET₀) | `control/fao56/penman_monteith.py` | `94cc51d` | `python3 control/fao56/penman_monteith.py` |
-//! | `98.774_974_121_825_71` (WB Dr) | `control/water_balance/fao56_water_balance.py` | `94cc51d` | `python3 control/water_balance/fao56_water_balance.py` |
-//! | `0.1323` (Topp VWC) | `control/soil_sensors/calibration_dong2020.py` | `94cc51d` | Topp(1980) at ε=10000 |
-//! | Richards θ(surface) | `control/richards/richards_1d.py` | `3afc229` | `python3 control/richards/richards_1d.py` |
-//! | Langmuir qmax/KL | `control/biochar/biochar_isotherms.py` | `3afc229` | `python3 control/biochar/biochar_isotherms.py` |
-//! | Shannon H' | `control/diversity/diversity_indices.py` | `fad2e1b` | `python3 control/diversity/diversity_indices.py` |
+//! CPU vs Python parity benchmarks: deterministic inputs, timed loops, compare to
+//! control scripts under `control/` (see repo docs for commit IDs and commands).
 
 use std::f64::consts::PI;
 use std::hint::black_box;
@@ -43,7 +26,7 @@ use airspring_barracuda::eco::van_genuchten;
 use airspring_barracuda::eco::water_balance;
 use airspring_barracuda::eco::yield_response;
 
-use super::BenchEntry;
+use super::{BenchEntry, BenchFn};
 
 pub fn bench_fao56_et0(n: usize) -> (f64, f64, String) {
     let e_s_max: f64 = 0.6108 * (17.27_f64 * 34.8 / (34.8 + 237.3)).exp();
@@ -650,155 +633,36 @@ pub fn bench_anderson_regime(n_iter: usize) -> (f64, f64, String) {
     )
 }
 
-#[expect(
-    clippy::too_many_lines,
-    reason = "validation binary sequentially checks many baseline comparisons"
-)]
 pub fn build_benchmarks() -> Vec<BenchEntry> {
+    macro_rules! entry {
+        ($id:literal, $title:literal, $n:expr, $f:ident) => {
+            ($id, $title, $n, Box::new($f) as BenchFn)
+        };
+    }
     vec![
-        (
-            "fao56_et0",
-            "FAO-56 PM ET₀",
-            10_000,
-            Box::new(bench_fao56_et0),
-        ),
-        (
-            "thornthwaite",
-            "Thornthwaite PET",
-            10_000,
-            Box::new(bench_thornthwaite),
-        ),
-        (
-            "hargreaves",
-            "Hargreaves-Samani",
-            10_000,
-            Box::new(bench_hargreaves),
-        ),
-        (
-            "van_genuchten",
-            "Van Genuchten θ(h)",
-            100_000,
-            Box::new(bench_van_genuchten),
-        ),
-        (
-            "water_balance_step",
-            "Water Balance Step",
-            10_000,
-            Box::new(bench_water_balance_step),
-        ),
-        (
-            "anderson_coupling",
-            "Anderson Coupling",
-            100_000,
-            Box::new(bench_anderson_coupling),
-        ),
-        (
-            "shannon_diversity",
-            "Shannon Diversity",
-            10_000,
-            Box::new(bench_shannon_diversity),
-        ),
-        (
-            "season_simulation",
-            "Season Sim (153d)",
-            1_000,
-            Box::new(bench_season_simulation),
-        ),
-        (
-            "scs_cn_runoff",
-            "SCS-CN Runoff",
-            100_000,
-            Box::new(bench_scs_cn_runoff),
-        ),
-        (
-            "green_ampt",
-            "Green-Ampt Infiltration",
-            100_000,
-            Box::new(bench_green_ampt),
-        ),
-        (
-            "saxton_rawls",
-            "Saxton-Rawls Pedotransfer",
-            100_000,
-            Box::new(bench_saxton_rawls),
-        ),
-        (
-            "langmuir_fit",
-            "Langmuir Isotherm Fit",
-            10_000,
-            Box::new(bench_langmuir_fit),
-        ),
-        (
-            "priestley_taylor",
-            "Priestley-Taylor ET₀",
-            10_000,
-            Box::new(bench_priestley_taylor),
-        ),
-        (
-            "richards_1d",
-            "Richards 1D (20 nodes)",
-            1_000,
-            Box::new(bench_richards_1d),
-        ),
-        (
-            "yield_response",
-            "Stewart Yield Response",
-            100_000,
-            Box::new(bench_yield_response),
-        ),
-        (
-            "dual_kc_step",
-            "Dual Kc (7-day sim)",
-            10_000,
-            Box::new(bench_dual_kc_step),
-        ),
-        (
-            "makkink_et0",
-            "Makkink ET₀",
-            100_000,
-            Box::new(bench_makkink_et0),
-        ),
-        (
-            "blaney_criddle",
-            "Blaney-Criddle ET₀",
-            100_000,
-            Box::new(bench_blaney_criddle),
-        ),
-        (
-            "sensor_cal",
-            "SensorCal VWC (op=5)",
-            100_000,
-            Box::new(bench_sensor_cal),
-        ),
-        (
-            "kc_climate_adjust",
-            "Kc Climate Adj (op=7)",
-            100_000,
-            Box::new(bench_kc_climate_adjust),
-        ),
-        (
-            "seasonal_pipeline",
-            "Seasonal Pipeline (153d)",
-            1_000,
-            Box::new(bench_seasonal_pipeline),
-        ),
-        (
-            "tissue_w",
-            "Tissue Anderson W (P12)",
-            100_000,
-            Box::new(bench_tissue_w),
-        ),
-        (
-            "barrier_d_eff",
-            "Barrier d_eff (P12)",
-            100_000,
-            Box::new(bench_barrier_d_eff),
-        ),
-        (
-            "anderson_regime",
-            "Anderson Regime (P12)",
-            100_000,
-            Box::new(bench_anderson_regime),
-        ),
+        entry!("fao56_et0", "FAO-56 PM ET₀", 10_000, bench_fao56_et0),
+        entry!("thornthwaite", "Thornthwaite PET", 10_000, bench_thornthwaite),
+        entry!("hargreaves", "Hargreaves-Samani", 10_000, bench_hargreaves),
+        entry!("van_genuchten", "Van Genuchten θ(h)", 100_000, bench_van_genuchten),
+        entry!("water_balance_step", "Water Balance Step", 10_000, bench_water_balance_step),
+        entry!("anderson_coupling", "Anderson Coupling", 100_000, bench_anderson_coupling),
+        entry!("shannon_diversity", "Shannon Diversity", 10_000, bench_shannon_diversity),
+        entry!("season_simulation", "Season Sim (153d)", 1_000, bench_season_simulation),
+        entry!("scs_cn_runoff", "SCS-CN Runoff", 100_000, bench_scs_cn_runoff),
+        entry!("green_ampt", "Green-Ampt Infiltration", 100_000, bench_green_ampt),
+        entry!("saxton_rawls", "Saxton-Rawls Pedotransfer", 100_000, bench_saxton_rawls),
+        entry!("langmuir_fit", "Langmuir Isotherm Fit", 10_000, bench_langmuir_fit),
+        entry!("priestley_taylor", "Priestley-Taylor ET₀", 10_000, bench_priestley_taylor),
+        entry!("richards_1d", "Richards 1D (20 nodes)", 1_000, bench_richards_1d),
+        entry!("yield_response", "Stewart Yield Response", 100_000, bench_yield_response),
+        entry!("dual_kc_step", "Dual Kc (7-day sim)", 10_000, bench_dual_kc_step),
+        entry!("makkink_et0", "Makkink ET₀", 100_000, bench_makkink_et0),
+        entry!("blaney_criddle", "Blaney-Criddle ET₀", 100_000, bench_blaney_criddle),
+        entry!("sensor_cal", "SensorCal VWC (op=5)", 100_000, bench_sensor_cal),
+        entry!("kc_climate_adjust", "Kc Climate Adj (op=7)", 100_000, bench_kc_climate_adjust),
+        entry!("seasonal_pipeline", "Seasonal Pipeline (153d)", 1_000, bench_seasonal_pipeline),
+        entry!("tissue_w", "Tissue Anderson W (P12)", 100_000, bench_tissue_w),
+        entry!("barrier_d_eff", "Barrier d_eff (P12)", 100_000, bench_barrier_d_eff),
+        entry!("anderson_regime", "Anderson Regime (P12)", 100_000, bench_anderson_regime),
     ]
 }

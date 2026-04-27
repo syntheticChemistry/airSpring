@@ -111,55 +111,64 @@ binary = "airspring_primal"
 order = 7
 required = true
 depends_on = ["beardog", "songbird"]
-health_method = "health.check"
+health_method = "health.liveness"
 by_capability = "ecology"
 capabilities = [
-    # ET₀ methods (9)
-    "ecology.et0.penman_monteith",
-    "ecology.et0.hargreaves",
-    "ecology.et0.priestley_taylor",
-    "ecology.et0.makkink",
-    "ecology.et0.turc",
-    "ecology.et0.hamon",
-    "ecology.et0.blaney_criddle",
-    "ecology.et0.thornthwaite",
-    "ecology.et0.ensemble",
-    "ecology.et0.bias_correct",
-    # Water balance (2)
-    "ecology.water_balance.daily_step",
-    "ecology.water_balance.simulate_season",
-    # Crop (4)
-    "ecology.dual_kc.compute",
-    "ecology.crop.gdd",
-    "ecology.crop.yield_response",
-    "ecology.crop.kc_schedule",
-    # Soil (3)
-    "ecology.soil.pedotransfer",
-    "ecology.soil.topp_equation",
-    "ecology.sensor.soilwatch10_calibrate",
-    # Hydrology (3)
-    "ecology.runoff.scs_cn",
-    "ecology.infiltration.green_ampt",
-    "ecology.richards.solve_1d",
-    # Diversity (3)
-    "ecology.diversity.shannon",
-    "ecology.diversity.simpson",
-    "ecology.diversity.bray_curtis",
-    # Physics (1)
-    "ecology.anderson.coupling_chain",
-    # Provenance trio (biomeOS composition)
+    # ET₀ methods
+    "science.et0_fao56",
+    "science.et0_hargreaves",
+    "science.et0_priestley_taylor",
+    "science.et0_makkink",
+    "science.et0_turc",
+    "science.et0_hamon",
+    "science.et0_blaney_criddle",
+    "science.thornthwaite",
+    # Water balance & yield
+    "science.water_balance",
+    "science.yield_response",
+    # Soil physics
+    "science.richards_1d",
+    "science.scs_cn_runoff",
+    "science.green_ampt_infiltration",
+    "science.soil_moisture_topp",
+    "science.pedotransfer_saxton_rawls",
+    # Crop & irrigation
+    "science.dual_kc",
+    "science.sensor_calibration",
+    "science.gdd",
+    # Biodiversity
+    "science.shannon_diversity",
+    "science.bray_curtis",
+    # Geophysics
+    "science.anderson_coupling",
+    # Stochastic / drought
+    "science.spi_drought_index",
+    "science.autocorrelation",
+    "science.gamma_cdf",
+    # Ecology aliases
+    "ecology.et0_fao56",
+    "ecology.et0_hargreaves",
+    "ecology.water_balance",
+    "ecology.yield_response",
+    "ecology.full_pipeline",
+    "ecology.spi_drought_index",
+    "ecology.autocorrelation",
+    # Provenance trio
     "provenance.begin",
     "provenance.record",
     "provenance.complete",
     "provenance.status",
-    # Cross-primal discovery + coordination
+    # Cross-spring & coordination
+    "science.timeseries",
     "capability.list",
-    "discovery.resolve",
     "data.cross_spring_weather",
-    "science.health",
     "science.version",
+    "health.liveness",
+    "health.readiness",
     "compute.offload",
     "data.weather",
+    "primal.forward",
+    "primal.discover",
 ]
 
 [graph.node.env]

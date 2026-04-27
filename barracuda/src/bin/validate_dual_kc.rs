@@ -14,10 +14,10 @@
 //! 8. Multi-day simulations (bare soil drydown, corn mid-season)
 //!
 //! Provenance:
-//!   script = `control/dual_kc/cover_crop_dual_kc.py`
-//!   commit = 3afc229
+//!   script = `control/dual_kc/dual_crop_coefficient.py`
+//!   commit = 94cc51d
 //!   date   = 2026-02-25
-//!   run    = `python3 control/dual_kc/cover_crop_dual_kc.py`
+//!   run    = `python control/dual_kc/dual_crop_coefficient.py`
 
 use airspring_barracuda::eco::crop::CropType;
 use airspring_barracuda::eco::dual_kc::{self, DualKcInput, EvaporationLayerState};

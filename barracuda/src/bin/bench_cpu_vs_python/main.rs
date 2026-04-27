@@ -15,9 +15,9 @@ mod benchmarks;
 
 use std::process::Command;
 
-type BenchFn = Box<dyn Fn(usize) -> (f64, f64, String)>;
+pub type BenchFn = Box<dyn Fn(usize) -> (f64, f64, String)>;
 
-type BenchEntry = (&'static str, &'static str, usize, BenchFn);
+pub type BenchEntry = (&'static str, &'static str, usize, BenchFn);
 
 struct BenchResult {
     name: &'static str,

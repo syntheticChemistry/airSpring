@@ -1,7 +1,7 @@
 # airSpring Specifications
 
-**Last Updated**: March 24, 2026
-**Status**: Phase 0–5 complete — 1284/1284 Python + 943 lib + 316 integration + 62 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 91 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.3.7 (wgpu 28) + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + metalForge 66/66 + niche adapter (45 capabilities, 10 MCP tools) + 87 experiments (v0.10.0). Edition 2024, deep code quality complete. Platform-agnostic IPC. Exp 084-087: 79/79 PASS (CPU/GPU parity, toadStool dispatch, metalForge NUCLEUS, graph coordination)
+**Last Updated**: April 27, 2026
+**Status**: Phase 0–5 complete — 1284/1284 Python + 943 lib + 316 integration + 62 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 91 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.3.7 (wgpu 28) + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + metalForge 66/66 + niche adapter (45 capabilities, 10 MCP tools) + 87 experiments (v0.10.0). **Deep debt evolution pass** (60 centralized tolerances, `TOLERANCE_REGISTRY` alignment). Edition 2024, deep code quality complete. Platform-agnostic IPC. Exp 084-087: 79/79 PASS (CPU/GPU parity, toadStool dispatch, metalForge NUCLEUS, graph coordination)
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling, Anderson coupling
 
 ---
@@ -68,7 +68,8 @@ Python baselines were generated across five commits as experiments expanded:
 | `3afc229` | Phase 2 | Richards equation, biochar isotherms, 60-year water balance | 2026-02-25 |
 | `5684b1e` | Phase 2+ | Scheduling, sensitivity, lysimeter | 2026-02-26 |
 | `af1eb97` | Phase 2+ | Yield response, CW2D Richards | 2026-02-26 |
-| `cb59873` | Phase 0+ | Atlas (100 stations), compute_et0_real_data, simulate_real_data, regional_et0_intercomparison | 2026-02-26 |
+| `fad2e1b` | Phase 0+ | Atlas (100 stations) | 2026-02-26 |
+| `cb59873` | Phase 0+ | compute_et0_real_data, simulate_real_data, regional_et0_intercomparison | 2026-02-26 |
 | `9a84ae5` | Phase 2+ | Priestley-Taylor ET₀, 3-method intercomparison | 2026-02-26 |
 
 Each benchmark JSON embeds its provenance (script, commit, command, date).

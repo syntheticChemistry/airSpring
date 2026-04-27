@@ -261,7 +261,8 @@ fn bench_isotherm() {
         let mut r2 = 0.0;
         let (cpu_us, _) = time_fn(
             || {
-                let fit = isotherm::fit_langmuir(&ce_wood, &qe_wood).unwrap();
+                let fit = isotherm::fit_langmuir(&ce_wood, &qe_wood)
+                    .expect("Langmuir linearized fit failed");
                 r2 = fit.r_squared;
                 fit.r_squared
             },
@@ -279,7 +280,8 @@ fn bench_isotherm() {
         let mut r2 = 0.0;
         let (cpu_us, _) = time_fn(
             || {
-                let fit = gpu_iso::fit_langmuir_nm(&ce_wood, &qe_wood).unwrap();
+                let fit = gpu_iso::fit_langmuir_nm(&ce_wood, &qe_wood)
+                    .expect("Langmuir Nelder-Mead fit failed");
                 r2 = fit.r_squared;
                 fit.r_squared
             },
@@ -297,7 +299,8 @@ fn bench_isotherm() {
         let mut r2 = 0.0;
         let (cpu_us, _) = time_fn(
             || {
-                let fit = gpu_iso::fit_langmuir_global(&ce_wood, &qe_wood, 8).unwrap();
+                let fit = gpu_iso::fit_langmuir_global(&ce_wood, &qe_wood, 8)
+                    .expect("Langmuir multi-start fit failed");
                 r2 = fit.r_squared;
                 fit.r_squared
             },
@@ -447,7 +450,8 @@ fn bench_regression() {
         let mut r2 = 0.0;
         let (cpu_us, _) = time_fn(
             || {
-                let fit = barracuda::stats::regression::fit_linear(&x, &y).unwrap();
+                let fit = barracuda::stats::regression::fit_linear(&x, &y)
+                    .expect("Linear regression fit failed");
                 r2 = fit.r_squared;
                 fit.r_squared
             },

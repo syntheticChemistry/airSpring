@@ -1,3 +1,7 @@
+# Superseded for CI: effective cargo-deny configuration lives next to each crate
+# (e.g. barracuda/deny.toml, metalForge/forge when wired). This file is kept for
+# reference; CI runs per-crate deny checks, not this root file.
+#
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Workspace-level cargo-deny configuration for airSpring.
 # Applies to barracuda/ and metalForge/forge/ crates.

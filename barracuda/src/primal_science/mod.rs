@@ -93,6 +93,12 @@ pub fn dispatch_science(method: &str, params: &serde_json::Value) -> Option<serd
             drought_stats::autocorrelation_handler(params)
         }
         "science.gamma_cdf" => drought_stats::gamma_cdf_handler(params),
+        "science.timeseries" | "ecology.timeseries" => {
+            match crate::ipc::timeseries::handle_timeseries(params) {
+                Ok(v) => v,
+                Err(e) => serde_json::json!({ "error": e.to_string() }),
+            }
+        }
         _ => return None,
     };
     Some(result)
@@ -135,6 +141,7 @@ mod tests {
             "science.spi_drought_index",
             "science.autocorrelation",
             "science.gamma_cdf",
+            "science.timeseries",
         ];
         for method in science_methods {
             let params_for_method = if method == "science.shannon_diversity" {
@@ -143,6 +150,9 @@ mod tests {
                 serde_json::json!({"sample_a": [1.0, 2.0, 3.0], "sample_b": [2.0, 3.0, 4.0]})
             } else if method == "science.thornthwaite" {
                 serde_json::json!({"monthly_temps_c": [5.0, 6.0, 8.0, 12.0, 16.0, 20.0, 22.0, 21.0, 18.0, 13.0, 8.0, 6.0]})
+            } else if method == "science.timeseries" {
+                let ts = crate::ipc::timeseries::build_time_series("test", "mm", &["t1".into()], &[1.0], None);
+                serde_json::json!({ "time_series": ts })
             } else {
                 params.clone()
             };
@@ -168,9 +178,16 @@ mod tests {
             "ecology.water_balance",
             "ecology.yield_response",
             "ecology.full_pipeline",
+            "ecology.timeseries",
         ];
         for method in ecology_methods {
-            let result = dispatch_science(method, &params);
+            let call_params = if method == "ecology.timeseries" {
+                let ts = crate::ipc::timeseries::build_time_series("test", "mm", &["t1".into()], &[1.0], None);
+                serde_json::json!({ "time_series": ts })
+            } else {
+                params.clone()
+            };
+            let result = dispatch_science(method, &call_params);
             assert!(
                 result.is_some(),
                 "dispatch_science should return Some for {method}"

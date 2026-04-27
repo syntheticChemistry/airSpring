@@ -1,6 +1,6 @@
 # Tolerance Registry — airSpring v0.10.0
 
-58 named `Tolerance` structs used in airSpring's Rust validation pipeline
+60 named `Tolerance` structs used in airSpring's Rust validation pipeline
 and Python control baselines. Each tolerance is defined once in
 `barracuda/src/tolerances/` (Rust) and mirrored in `control/tolerances.py`
 (Python). Tolerances are never hardcoded inline.
@@ -10,10 +10,10 @@ and Python control baselines. Each tolerance is defined once in
 | Domain | Module | Count |
 |--------|--------|-------|
 | Atmospheric | `tolerances/atmospheric.rs` | 15 |
-| Soil | `tolerances/soil.rs` | 19 |
+| Soil | `tolerances/soil.rs` | 21 |
 | GPU | `tolerances/gpu.rs` | 11 |
 | Instrument | `tolerances/instrument.rs` | 13 |
-| **Total (Tolerance structs)** | | **58** |
+| **Total (Tolerance structs)** | | **60** |
 
 ## Atmospheric (15)
 
@@ -35,7 +35,7 @@ and Python control baselines. Each tolerance is defined once in
 | `r2_minimum` | 0.85 | 0.0 | FAO-56 PM R² > 0.90; 0.85 allows ERA5 noise |
 | `rmse_maximum` | 1.5 | 0.0 | Doorenbos & Pruitt: ±1.5 mm/day |
 
-## Soil (19)
+## Soil (21)
 
 | Name | abs_tol | rel_tol | Justification |
 |------|---------|---------|---------------|
@@ -58,6 +58,8 @@ and Python control baselines. Each tolerance is defined once in
 | `pedotransfer_ksat` | 0.5 | 0.05 | Exponential regression error |
 | `gdd_exact` | 1e-10 | 1e-10 | f64-exact integer arithmetic |
 | `irrigation_depth` | 0.01 | 0.01 | (FC − VWC) × depth |
+| `atlas_annual_et0` | 1.0 | 0.1 | Multi-station ERA5: microclimate and reanalysis bias |
+| `atlas_yield_ratio` | 0.001 | 0.01 | Stewart Y/Ym precision to 3 decimal places |
 
 ## GPU (11)
 

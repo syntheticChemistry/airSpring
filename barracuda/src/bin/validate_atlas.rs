@@ -27,7 +27,7 @@
 //!
 //! Provenance:
 //!   script = `control/atlas/atlas_water_budget.py`
-//!   commit = e651409
+//!   commit = fad2e1b
 //!   date   = 2026-02-26
 //!   run    = `python3 control/atlas/atlas_water_budget.py`
 
@@ -599,7 +599,7 @@ fn validate_against_benchmark(results: &[StationResult], v: &mut ValidationHarne
                 &format!("{} annual ET₀ vs benchmark", result.station),
                 result.mean_annual_et0,
                 benchmark_et0,
-                1.0,
+                tolerances::ATLAS_ANNUAL_ET0.abs_tol,
             );
         }
 
@@ -608,7 +608,6 @@ fn validate_against_benchmark(results: &[StationResult], v: &mut ValidationHarne
                 station_json,
                 &["crops", crop.crop_name.as_str(), "mean_yield_ratio"],
             ) {
-                // 0.001: yield ratio benchmark cross-check; no atlas-specific tolerance
                 v.check_abs(
                     &format!(
                         "{}/{} yield ratio vs benchmark",
@@ -616,7 +615,7 @@ fn validate_against_benchmark(results: &[StationResult], v: &mut ValidationHarne
                     ),
                     crop.mean_yield_ratio,
                     benchmark_yield,
-                    0.001,
+                    tolerances::ATLAS_YIELD_RATIO.abs_tol,
                 );
             }
         }

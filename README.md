@@ -1,7 +1,7 @@
 # airSpring — Ecological & Agricultural Sciences
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
-**Date**: March 24, 2026
+**Date**: April 27, 2026
 **Version**: 0.10.0
 **License**: AGPL-3.0-or-later
 
@@ -239,7 +239,7 @@ airSpring/
 │   │   ├── nautilus.rs          # bingoCube/nautilus evolutionary reservoir (NautilusBrain v0.1.0)
 │   │   ├── rpc/                 # JSON-RPC 2.0 IPC (error.rs, transport.rs, mod.rs)
 │   │   ├── npu.rs               # BrainChip AKD1000 NPU (feature-gated)
-│   │   ├── tolerances/          # Domain-specific validation tolerances (58 named, 4 submodules)
+│   │   ├── tolerances/          # Domain-specific validation tolerances (60 named, 4 submodules)
 │   │   └── bin/                 # validate_*, bench_*, airspring_primal (91 declared)
 │   ├── tests/                   # Integration + property tests (15 files + common/)
 │   └── Cargo.toml               # v0.10.0 (barraCuda 0.3.7, wgpu 28)
@@ -251,6 +251,7 @@ airSpring/
 │   ├── PAPER_REVIEW_QUEUE.md    # Paper reproduction queue (87 experiments)
 │   ├── BARRACUDA_REQUIREMENTS.md# GPU + NPU kernel requirements
 │   └── CROSS_SPRING_EVOLUTION.md # Cross-spring shader provenance (S87)
+├── docs/                       # Gap tracking and evolution docs (PRIMAL_GAPS.md)
 ├── whitePaper/                  # Methodology and study documentation
 │   └── baseCamp/                # Per-faculty research briefings + baseCamp extensions
 ├── experiments/                 # Experiment protocols and results (87 experiments)
@@ -288,6 +289,7 @@ airSpring/
 | `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (87 experiments) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
 | `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V010 current) |
+| `docs/PRIMAL_GAPS.md` | Primal composition gaps for primalSpring handback |
 
 ## License
 
@@ -295,12 +297,11 @@ AGPL-3.0-or-later
 
 ---
 
-*March 24, 2026 — v0.10.0. Deep audit execution complete. cargo-deny 0.19 evolved
-(SPDX `AGPL-3.0-or-later`, `CC0-1.0` allowance, `blake3` cc wrapper, version-pinned
-path deps). Coverage expanded: `validation/json`, `ipc/provenance`, `ipc/compute_dispatch`,
-`niche` — 90.56% line coverage (fail-under-lines 90 passes). `evolution_gaps.rs` synced
-to v0.10.0 / barraCuda 0.3.7. `#[expect]`→`#[allow]` for shared test infra
-(`tests/common/mod.rs`). `const assert` for compile-time tolerance contract.
-986 lib + 316 integration/doc = 1,302 barracuda tests; 62 forge; 1,364 total tests.
-0 failures. Clippy pedantic+nursery zero warnings. Zero unsafe. Zero C deps.
-Zero hardcoded primals. AGPL-3.0-or-later.*
+*April 27, 2026 — v0.10.0 deep debt evolution. Capability naming converged (niche.rs
+canonical → metalForge deploy + plasmidBin cell aligned). 60 named tolerances (2 new:
+atlas_annual_et0, atlas_yield_ratio — zero inline magic numbers). All 44 IPC capabilities
+routable (science.timeseries gap closed). Provenance commit drift fixed (Atlas, Dual Kc).
+Large files refactored (validate_gpu_rewire_benchmark 829→45+774, benchmarks 804→668).
+CI toolchain pinned to 1.92 (was @stable). 7 unwrap()→expect() in bins. docs/PRIMAL_GAPS.md
+created (11 gaps tracked, gS Level 0→1 path documented). guideStone Level 0 — primal
+composition evolution next. AGPL-3.0-or-later.*

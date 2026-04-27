@@ -332,12 +332,17 @@ fn phase_3_batch_scaling(v: &mut ValidationHarness) {
         latitude: 42.727,
         doy: 200,
     };
-    let ref_val = batcher.compute_gpu(&[station]).unwrap().et0_values[0];
+    let ref_val = batcher
+        .compute_gpu(&[station])
+        .expect("GPU ET₀ reference computation failed")
+        .et0_values[0];
 
     for n in [10, 100, 1000, 10_000] {
         let batch: Vec<StationDay> = vec![station; n];
         let t0 = Instant::now();
-        let result = batcher.compute_gpu(&batch).unwrap();
+        let result = batcher
+            .compute_gpu(&batch)
+            .expect("GPU ET₀ batch computation failed");
         let elapsed_ms = t0.elapsed().as_secs_f64() * 1000.0;
         let all_match = result
             .et0_values

@@ -157,3 +157,20 @@ pub const IRRIGATION_DEPTH: Tolerance = Tolerance {
     rel_tol: 0.01,
     justification: "Depth precision: (FC − VWC) × root_zone_m × 100; ±0.01 cm",
 };
+
+/// Atlas mean annual ET₀: cross-station validation with ERA5 reanalysis.
+/// Wide tolerance reflects input data heterogeneity across 100 Michigan stations.
+pub const ATLAS_ANNUAL_ET0: Tolerance = Tolerance {
+    name: "atlas_annual_et0",
+    abs_tol: 1.0,
+    rel_tol: 0.1,
+    justification: "Multi-station ERA5 data: ±1.0 mm/day covers microclimate and reanalysis bias across 100 Michigan stations",
+};
+
+/// Atlas yield ratio: crop-specific benchmark cross-check.
+pub const ATLAS_YIELD_RATIO: Tolerance = Tolerance {
+    name: "atlas_yield_ratio",
+    abs_tol: 0.001,
+    rel_tol: 0.01,
+    justification: "Stewart yield equation: yield ratio Y/Ym precision to 3 decimal places",
+};

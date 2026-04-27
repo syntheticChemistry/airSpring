@@ -1,12 +1,13 @@
 # airSpring wateringHole
 
-**Updated**: March 24, 2026 | **Version**: v0.10.0
+**Updated**: April 27, 2026 | **Version**: v0.10.0
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
+| **V0.10.0** | [AIRSPRING_V010_DEEP_DEBT_EVOLUTION_HANDOFF_APR27_2026.md](handoffs/AIRSPRING_V010_DEEP_DEBT_EVOLUTION_HANDOFF_APR27_2026.md) | 2026-04-27 | **Deep debt evolution** — 60 centralized tolerances (registry alignment), technical-debt follow-through, barraCuda validation / GPU-rewire checks |
 | **V0.10.0** | [AIRSPRING_V010_DEEP_AUDIT_EXECUTION_HANDOFF_MAR24_2026.md](handoffs/AIRSPRING_V010_DEEP_AUDIT_EXECUTION_HANDOFF_MAR24_2026.md) | 2026-03-24 | **Deep audit execution** — cargo-deny 0.19 evolution, +43 tests (986 lib / 1,364 total), 90.56% coverage, `const assert` tolerance contracts, SPDX compliance, `blake3` cc wrapper, TCP mock IPC testing pattern |
 | **V0.10.0** | [ecoPrimals handoff](../../../wateringHole/handoffs/AIRSPRING_V010_DEEP_EVOLUTION_ABSORPTION_HANDOFF_MAR23_2026.md) | 2026-03-23 | Cross-primal — per-site casts, `PipelineError`, `ValidationSink`, `default-features=false`, `content_sha256` provenance, TCP transport, numerical guards |
 | **≤V0.9.0** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
@@ -19,7 +20,7 @@
 | `../specs/BIOMEOS_CAPABILITIES.md` | Ecology capability domain for biomeOS Neural API |
 | `../specs/NUCLEUS_INTEGRATION.md` | NUCLEUS deployment: graphs, workloads, Neural API bridge |
 | `../specs/GPU_PROMOTION_MAP.md` | GPU tier status: 24 Tier A + 2 Tier B + 2 Tier C, with blocker effort estimates |
-| `../specs/TOLERANCE_REGISTRY.md` | 58 centralized `Tolerance` structs across 5 domain submodules (Rust + Python mirror) |
+| `../specs/TOLERANCE_REGISTRY.md` | 60 centralized `Tolerance` structs across 5 domain submodules (Rust + Python mirror) |
 | `../graphs/airspring_eco_pipeline.toml` | biomeOS deployment graph: weather → ET₀ → WB → yield |
 | `../graphs/airspring_provenance_pipeline.toml` | Provenance-tracked experiment: session → science → dehydrate → commit → attribute |
 | `../graphs/airspring_niche_deploy.toml` | Full niche deployment: Tower + Trio + NestGate + ToadStool + airSpring |

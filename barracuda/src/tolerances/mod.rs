@@ -140,6 +140,8 @@ pub const fn all_tolerances() -> &'static [&'static Tolerance] {
         &BLANEY_CRIDDLE_DAYLIGHT,
         &SCS_CN_ANALYTICAL,
         &GREEN_AMPT_ANALYTICAL,
+        &ATLAS_ANNUAL_ET0,
+        &ATLAS_YIELD_RATIO,
         &DUAL_KC_PRECISION,
         // IoT sensor data validation
         &IOT_TEMPERATURE_MEAN,
@@ -244,11 +246,11 @@ mod tests {
             );
             assert!(tol.abs_tol > 0.0, "{}: abs_tol must be positive", tol.name);
         }
-        // 58 Tolerance structs + 1 plain threshold (NPU_STRESS_DEPLETION_THRESHOLD)
+        // 60 Tolerance structs + 1 plain threshold (NPU_STRESS_DEPLETION_THRESHOLD)
         // + 1 plain count (NPU_MIN_ANOMALY_SAMPLES)
         assert_eq!(
             all_tolerances().len(),
-            58,
+            60,
             "test must include every Tolerance constant defined in this file"
         );
         let threshold = NPU_STRESS_DEPLETION_THRESHOLD;
@@ -322,8 +324,8 @@ mod upstream_contract_tests {
     fn tolerance_count_matches_registry() {
         let count = all_tolerances().len();
         assert!(
-            count >= 58,
-            "expected at least 58 tolerances in registry, found {count}"
+            count >= 60,
+            "expected at least 60 tolerances in registry, found {count}"
         );
     }
 }

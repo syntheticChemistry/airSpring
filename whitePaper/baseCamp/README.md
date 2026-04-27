@@ -1,8 +1,10 @@
 # baseCamp: Per-Faculty Research Briefings
 
-**Updated**: March 24, 2026
+**Updated**: April 27, 2026
 **Project**: airSpring — Ecological & Agricultural Sciences (v0.10.0)
 **Status**: 87 experiments, 1284/1284 Python + 986 lib + 316 integration + 62 forge = 1,364 total tests + 91 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.7 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (45 capabilities, 4 deploy graphs, BYOB niche deployment) + `#![forbid(unsafe_code)]` both crates + `#![deny(cast_*)]` library-strict + zero clippy pedantic+nursery + `warn(missing_docs)`. 58 tolerances in 5 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies**. Zero-panic validation (91/91 binaries). Zero `#[allow()]` in any code. 10 MCP tools (Squirrel AI, wired in primal dispatch). Platform-agnostic IPC (Transport enum: Unix + TCP, provenance trio migrated). 90.56% line coverage (fail-under-lines 90). cargo-deny 0.19 clean. Full validation pipeline green (2026-03-24)
+
+**April 27, 2026 evolution**: 60 tolerances (2 new atlas), 44/44 IPC capabilities routable, provenance drift fixed, capability naming converged, docs/PRIMAL_GAPS.md created (11 gaps, gS Level 0→1 path), CI pinned to 1.92, all files <800 LOC.
 
 ---
 
@@ -52,6 +54,7 @@ Phase 5.14 Deep debt evolution — MCP tools/list + tools/call wired in primal d
 Phase 5.15 Deep audit execution — zero #[allow()] in entire codebase (all→#[expect(reason)]), blanket pedantic/nursery allows→specific per-lint expects, deny.toml ecoBin enforcement (barracuda+forge, 14 C-dep bans), CI path deps via symlink (ecoPrimals sparse checkout), MSRV 1.92 documented (Rust 2024 #[expect] dependency), todo!→unimplemented! in doc examples, stale doc counts corrected across 12 files, BatchedDualKc→Tier A in cross-spring evolution, NUCLEUS status→Complete, absorbed shader comments updated (v0.10.0, 938 lib + 316 integration + 62 forge)
 Phase 5.16 Ecosystem absorption — PRIMAL_REGISTRY updated (v0.10.0 + barraCuda 0.3.7), CONTRIBUTING.md + SECURITY.md (neuralSpring S174 pattern), upstream contract pinning (5 tolerance invariant tests), GPU test resilience (barraCuda test_pool delegation), deploy graph metadata ([graph.metadata] on all 4 graphs, primalSpring v0.7.0 pattern), primal name constants in test code, 943 lib + 316 integration + 62 forge = 1,321 total tests (v0.10.0)
 Phase 5.17 Deep audit execution — cargo-deny 0.19 evolution (SPDX AGPL-3.0-or-later, CC0-1.0, blake3 cc wrapper, version-pinned path deps), +43 lib tests (986 lib total), 90.56% coverage (gated at 90), `const { assert!() }` compile-time tolerance contracts, `#[must_use]` on tolerance registry, `#[allow()]` for shared test infra (replaces `#[expect()]` in multi-binary context), evolution_gaps header + tier assignments corrected (v0.10.0, 986 lib + 316 integration + 62 forge = 1,364 total tests)
+Phase 5.18 Deep debt evolution — 60 tolerances (atlas_annual_et0, atlas_yield_ratio centralized), 44/44 IPC capabilities routable (science.timeseries gap closed), capability naming converged (niche.rs canonical → metalForge/plasmidBin aligned), provenance commit drift fixed (Atlas fad2e1b, Dual Kc 94cc51d), large files refactored (829→45+774, 804→668), 7 unwrap()→expect(), CI 1.92 pinned, docs/PRIMAL_GAPS.md (11 gaps, AG-001 through AG-011), guideStone Level 0 (composition next)
 ```
 
 ## Faculty Summary
