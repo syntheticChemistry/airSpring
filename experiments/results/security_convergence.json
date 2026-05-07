@@ -1,0 +1,60 @@
+{
+  "_provenance": {
+    "spring": "airSpring",
+    "version": "0.10.0",
+    "generated": "2026-05-07",
+    "source": "Cargo.toml lints, deny.toml, CI workflows, docs/PRIMAL_GAPS.md"
+  },
+  "rust_safety": {
+    "forbid_unsafe_code": true,
+    "deny_cast_lints": true,
+    "deny_clippy_unwrap": true,
+    "deny_clippy_expect": true,
+    "warn_missing_docs": true,
+    "zero_allow_attributes": true,
+    "expect_with_reason": true,
+    "edition": "2024"
+  },
+  "dependency_security": {
+    "cargo_deny_version": "0.19",
+    "cargo_deny_clean": true,
+    "license": "AGPL-3.0-or-later",
+    "c_dependencies": 0,
+    "ecobin_compliant": true,
+    "pure_rust_stack": true
+  },
+  "ipc_security": {
+    "protocol": "JSON-RPC 2.0",
+    "transports": ["unix_socket", "tcp"],
+    "btsp_implemented": false,
+    "btsp_note": "AG: BearDog BTSP handshake not yet wired — plain UDS currently",
+    "capability_based_discovery": true,
+    "three_tier_discovery": true,
+    "family_aware_sockets": false
+  },
+  "validation_integrity": {
+    "zero_panic_binaries": 91,
+    "or_exit_pattern": true,
+    "determinism_contract": true,
+    "provenance_baselines": 63,
+    "named_tolerances": 60,
+    "python_tolerance_mirror": true,
+    "blake3_checksums": false,
+    "note": "BLAKE3 blocked on primalspring dependency (AG-002)"
+  },
+  "ci_gates": [
+    "cargo test --lib (barracuda)",
+    "cargo test --tests --all-features (barracuda)",
+    "cargo test --lib (metalForge/forge)",
+    "cargo clippy -D warnings (pedantic + nursery)",
+    "cargo fmt --check",
+    "cargo doc --no-deps",
+    "cargo-deny check (barracuda)",
+    "cargo llvm-cov --fail-under-lines 90",
+    "dtolnay/rust-toolchain@master (1.92)"
+  ],
+  "open_security_gaps": [
+    {"id": "AG-001", "description": "primalSpring manifest not read"},
+    {"id": "AG-002", "description": "No primalspring crate dependency for BLAKE3 checksums"}
+  ]
+}

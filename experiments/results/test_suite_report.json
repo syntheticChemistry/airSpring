@@ -1,0 +1,71 @@
+{
+  "_provenance": {
+    "spring": "airSpring",
+    "version": "0.10.0",
+    "generated": "2026-05-07",
+    "source": "cargo test output + llvm-cov",
+    "rust_toolchain": "1.92",
+    "edition": "2024"
+  },
+  "summary": {
+    "total_rust_tests": 1364,
+    "total_python_checks": 1284,
+    "total_validation_binaries": 91,
+    "line_coverage_pct": 90.56,
+    "coverage_gate": 90,
+    "clippy_warnings": 0,
+    "unsafe_blocks": 0,
+    "c_dependencies": 0,
+    "allow_attributes": 0
+  },
+  "crates": {
+    "barracuda": {
+      "lib_tests": 986,
+      "integration_tests": 316,
+      "total": 1302,
+      "version": "0.10.0",
+      "barracuda_dep": "0.3.7",
+      "wgpu_dep": "28"
+    },
+    "metalforge": {
+      "lib_tests": 62,
+      "total": 62,
+      "version": "0.10.0"
+    }
+  },
+  "validation_binaries": {
+    "total": 91,
+    "zero_panic": 91,
+    "cross_spring_evolution": 146,
+    "cross_spring_provenance": 32,
+    "cross_validation": 33,
+    "dispatch_experiment": 51,
+    "biome_graph": 35
+  },
+  "quality_gates": {
+    "forbid_unsafe_code": true,
+    "deny_cast_lints": true,
+    "warn_missing_docs": true,
+    "cargo_deny_clean": true,
+    "cargo_deny_version": "0.19",
+    "fmt_clean": true,
+    "doc_clean": true,
+    "edition": "2024",
+    "msrv": "1.92"
+  },
+  "tolerances": {
+    "total_named": 60,
+    "submodules": 5,
+    "python_mirror": true,
+    "inline_magic_numbers": 0
+  },
+  "categories": [
+    {"name": "lib_unit", "count": 986, "crate": "barracuda"},
+    {"name": "integration", "count": 316, "crate": "barracuda"},
+    {"name": "forge_unit", "count": 62, "crate": "metalforge"},
+    {"name": "python_baselines", "count": 1284, "crate": "control"},
+    {"name": "validation_binary_checks", "count": 381, "crate": "barracuda"},
+    {"name": "cross_spring_evolution", "count": 146, "crate": "barracuda"},
+    {"name": "cross_validation", "count": 33, "crate": "barracuda"}
+  ]
+}

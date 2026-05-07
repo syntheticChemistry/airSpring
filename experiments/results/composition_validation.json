@@ -1,0 +1,65 @@
+{
+  "_provenance": {
+    "spring": "airSpring",
+    "version": "0.10.0",
+    "generated": "2026-05-07",
+    "source": "niche.rs, metalForge/deploy/*.toml, graphs/*.toml, docs/PRIMAL_GAPS.md"
+  },
+  "primal_capabilities": {
+    "total": 44,
+    "routable": 44,
+    "science_methods": 27,
+    "ecology_aliases": 7,
+    "provenance_methods": 4,
+    "coordination_methods": 6
+  },
+  "capability_categories": {
+    "et0": ["science.et0_fao56", "science.et0_hargreaves", "science.et0_priestley_taylor", "science.et0_makkink", "science.et0_turc", "science.et0_hamon", "science.et0_blaney_criddle", "science.thornthwaite"],
+    "water_balance": ["science.water_balance", "science.yield_response"],
+    "soil_physics": ["science.richards_1d", "science.scs_cn_runoff", "science.green_ampt_infiltration", "science.soil_moisture_topp", "science.pedotransfer_saxton_rawls"],
+    "crop_irrigation": ["science.dual_kc", "science.sensor_calibration", "science.gdd"],
+    "biodiversity": ["science.shannon_diversity", "science.bray_curtis"],
+    "geophysics": ["science.anderson_coupling"],
+    "stochastic": ["science.spi_drought_index", "science.autocorrelation", "science.gamma_cdf"],
+    "ecology_aliases": ["ecology.et0_fao56", "ecology.et0_hargreaves", "ecology.water_balance", "ecology.yield_response", "ecology.full_pipeline", "ecology.spi_drought_index", "ecology.autocorrelation"],
+    "provenance": ["provenance.begin", "provenance.record", "provenance.complete", "provenance.status"],
+    "coordination": ["science.timeseries", "capability.list", "data.cross_spring_weather", "science.version", "health.liveness", "health.readiness"]
+  },
+  "deploy_graphs": {
+    "total": 4,
+    "graphs": [
+      {"name": "airspring_eco_pipeline", "nodes": 5, "purpose": "ecology science pipeline"},
+      {"name": "airspring_provenance_pipeline", "nodes": 4, "purpose": "provenance trio integration"},
+      {"name": "airspring_niche_deploy", "nodes": 3, "purpose": "niche deployment graph"},
+      {"name": "airspring_cross_primal", "nodes": 4, "purpose": "cross-primal data exchange"}
+    ]
+  },
+  "primal_composition": {
+    "node_primals": ["toadStool", "barraCuda", "coralReef"],
+    "nest_primals": ["NestGate", "rhizoCrypt", "loamSpine", "sweetGrass"],
+    "tower_primals": ["BearDog", "Songbird"],
+    "meta_primals": ["biomeOS", "Squirrel", "petalTongue"],
+    "ipc_wired": ["toadStool", "barraCuda", "biomeOS", "NestGate", "Squirrel"],
+    "graph_level_only": ["petalTongue", "coralReef", "rhizoCrypt", "loamSpine", "sweetGrass", "BearDog", "Songbird"]
+  },
+  "guidestone": {
+    "current_level": 0,
+    "target_level": 1,
+    "blockers": ["AG-001: primalSpring manifest not read", "AG-002: no primalspring crate dependency"]
+  },
+  "gaps": {
+    "total": 11,
+    "open": 9,
+    "resolved": 2,
+    "ids": ["AG-001", "AG-002", "AG-003", "AG-004", "AG-005", "AG-006", "AG-007", "AG-008", "AG-009", "AG-010", "AG-011"]
+  },
+  "mcp_tools": {
+    "total": 10,
+    "tools": [
+      "airspring_et0", "airspring_hargreaves", "airspring_water_balance",
+      "airspring_soil_moisture", "airspring_dual_kc", "airspring_richards",
+      "airspring_yield_response", "airspring_spi_drought", "airspring_diversity",
+      "airspring_pedotransfer"
+    ]
+  }
+}

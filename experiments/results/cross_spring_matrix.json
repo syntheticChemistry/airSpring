@@ -1,0 +1,71 @@
+{
+  "_provenance": {
+    "spring": "airSpring",
+    "version": "0.10.0",
+    "generated": "2026-05-07",
+    "source": "specs/CROSS_SPRING_EVOLUTION.md, barracuda/EVOLUTION_READINESS.md"
+  },
+  "barracuda_integration": {
+    "version": "0.3.7",
+    "wgpu_version": "28",
+    "total_shaders_ecosystem": 767,
+    "tier_a_gpu_modules": 25,
+    "upstream_batched_ops": 20,
+    "local_dispatch_retired": true,
+    "precision_routing_wired": true
+  },
+  "cross_spring_shader_families": [
+    {
+      "spring": "hotSpring",
+      "shaders": 56,
+      "airspring_uses": "df64 core, pow/exp/log/trig f64, df64_transcendentals — VG, atmospheric",
+      "airspring_contributed": "TS-001: pow_f64 fractional exponent fix"
+    },
+    {
+      "spring": "wetSpring",
+      "shaders": 25,
+      "airspring_uses": "kriging_f64, fused_map_reduce, moving_window, ridge, diversity metrics",
+      "airspring_contributed": "TS-004: reduce buffer N≥1024 fix"
+    },
+    {
+      "spring": "neuralSpring",
+      "shaders": 20,
+      "airspring_uses": "nelder_mead, multi_start, ValidationHarness",
+      "airspring_contributed": "TS-003: acos precision boundary fix"
+    },
+    {
+      "spring": "groundSpring",
+      "shaders": 0,
+      "airspring_uses": "MC ET₀ uncertainty propagation shader",
+      "airspring_contributed": null
+    }
+  ],
+  "airspring_upstream_contributions": [
+    "Richards PDE (S40)", "stats metrics (S64)",
+    "SCS-CN (op=17)", "Stewart yield (op=18)", "Makkink (op=14)",
+    "Turc (op=15)", "Hamon (op=16)", "Blaney-Criddle (op=19)"
+  ],
+  "cross_spring_checks": {
+    "evolution_checks": 146,
+    "provenance_checks": 32,
+    "cross_validation_checks": 33,
+    "total": 211
+  },
+  "primal_consumption": {
+    "toadStool": {"role": "compute orchestration", "wired": true, "capabilities_used": ["compute.dispatch.submit", "compute.dispatch.result", "compute.dispatch.capabilities"]},
+    "barraCuda": {"role": "math primitives", "wired": true, "capabilities_used": ["ops 0-19", "pde.richards", "optimize.nelder_mead", "optimize.brent", "stats.*"]},
+    "biomeOS": {"role": "orchestration", "wired": true, "capabilities_used": ["graph.validate", "deploy.start", "health.liveness"]},
+    "NestGate": {"role": "data routing", "wired": true, "capabilities_used": ["data.weather", "data.fetch"]},
+    "Squirrel": {"role": "AI inference", "wired": true, "capabilities_used": ["tools/list", "tools/call", "inference.complete (pending)"]},
+    "coralReef": {"role": "shader compiler", "wired": false, "note": "graph-level only, AG-006"},
+    "petalTongue": {"role": "visualization", "wired": false, "note": "consumes via biomeOS SSE, AG-009"},
+    "BearDog": {"role": "trust boundary", "wired": false, "note": "BTSP not yet implemented"},
+    "Songbird": {"role": "discovery", "wired": false, "note": "env-var IPC instead"}
+  },
+  "hardware_validated": [
+    {"component": "CPU", "model": "i9-12900K", "cores": "16C/24T", "features": "AVX2"},
+    {"component": "GPU #1", "model": "RTX 4070", "vram_gb": 12, "api": "Vulkan (wgpu)"},
+    {"component": "GPU #2", "model": "TITAN V (GV100)", "vram_gb": 12, "api": "NVK/Mesa"},
+    {"component": "NPU", "model": "BrainChip AKD1000", "device": "/dev/akida0", "latency_us": 48}
+  ]
+}

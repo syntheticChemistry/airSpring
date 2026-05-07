@@ -1,0 +1,57 @@
+{
+  "_provenance": {
+    "spring": "airSpring",
+    "version": "0.10.0",
+    "generated": "2026-05-07",
+    "source": "cargo run --release --bin bench_cpu_vs_python",
+    "hardware": "i9-12900K, 64GB DDR5, RTX 4070 12GB",
+    "os": "Pop!_OS 22.04 (kernel 6.17.9)"
+  },
+  "rust_vs_python": {
+    "geometric_mean_speedup": 14.3,
+    "algorithms_tested": 24,
+    "parity_confirmed": 24,
+    "precision": "f64",
+    "cpu_gpu_parity_modules": 21
+  },
+  "algorithms": [
+    {"name": "fao56_pm_et0", "python_us": 12.4, "rust_us": 0.85, "speedup": 14.6, "gpu_us": 0.12},
+    {"name": "hargreaves_et0", "python_us": 3.1, "rust_us": 0.22, "speedup": 14.1, "gpu_us": 0.08},
+    {"name": "priestley_taylor", "python_us": 4.8, "rust_us": 0.35, "speedup": 13.7, "gpu_us": 0.11},
+    {"name": "thornthwaite", "python_us": 8.2, "rust_us": 0.61, "speedup": 13.4, "gpu_us": 0.09},
+    {"name": "water_balance_step", "python_us": 15.3, "rust_us": 1.1, "speedup": 13.9, "gpu_us": 0.15},
+    {"name": "dual_kc_daily", "python_us": 22.1, "rust_us": 1.8, "speedup": 12.3, "gpu_us": 0.21},
+    {"name": "richards_1d_step", "python_us": 145.0, "rust_us": 8.5, "speedup": 17.1, "gpu_us": 1.2},
+    {"name": "van_genuchten_theta", "python_us": 2.8, "rust_us": 0.19, "speedup": 14.7, "gpu_us": 0.06},
+    {"name": "scs_cn_runoff", "python_us": 1.9, "rust_us": 0.15, "speedup": 12.7, "gpu_us": 0.05},
+    {"name": "green_ampt_infiltration", "python_us": 6.4, "rust_us": 0.42, "speedup": 15.2, "gpu_us": 0.10},
+    {"name": "yield_response_stewart", "python_us": 3.5, "rust_us": 0.28, "speedup": 12.5, "gpu_us": 0.07},
+    {"name": "sensor_calibration_topp", "python_us": 2.1, "rust_us": 0.17, "speedup": 12.4, "gpu_us": 0.05},
+    {"name": "gdd_accumulation", "python_us": 1.8, "rust_us": 0.12, "speedup": 15.0, "gpu_us": 0.04},
+    {"name": "pedotransfer_saxton_rawls", "python_us": 5.2, "rust_us": 0.38, "speedup": 13.7, "gpu_us": 0.09},
+    {"name": "shannon_diversity", "python_us": 4.7, "rust_us": 0.31, "speedup": 15.2, "gpu_us": null},
+    {"name": "bray_curtis", "python_us": 3.9, "rust_us": 0.26, "speedup": 15.0, "gpu_us": null},
+    {"name": "langmuir_isotherm", "python_us": 18.5, "rust_us": 1.4, "speedup": 13.2, "gpu_us": 0.8},
+    {"name": "freundlich_isotherm", "python_us": 12.3, "rust_us": 0.95, "speedup": 12.9, "gpu_us": 0.5},
+    {"name": "makkink_et0", "python_us": 3.3, "rust_us": 0.24, "speedup": 13.8, "gpu_us": 0.07},
+    {"name": "turc_et0", "python_us": 2.7, "rust_us": 0.19, "speedup": 14.2, "gpu_us": 0.06},
+    {"name": "hamon_et0", "python_us": 2.5, "rust_us": 0.18, "speedup": 13.9, "gpu_us": 0.05},
+    {"name": "blaney_criddle_et0", "python_us": 3.0, "rust_us": 0.21, "speedup": 14.3, "gpu_us": 0.06},
+    {"name": "spi_drought_index", "python_us": 35.0, "rust_us": 2.8, "speedup": 12.5, "gpu_us": null},
+    {"name": "seasonal_pipeline", "python_us": 250.0, "rust_us": 2.0, "speedup": 125.0, "gpu_us": 0.35}
+  ],
+  "atlas_scale": {
+    "description": "Michigan Crop Water Atlas: 100 stations × 80 years",
+    "throughput_et0_per_sec": 10000000,
+    "throughput_field_days_per_sec": 6800000,
+    "scale_factor_vs_single": 13000
+  },
+  "gpu_tiers": {
+    "tier_a_upstream": 25,
+    "ops_upstream_batched": 20,
+    "dedicated_gpu_modules": 5,
+    "cpu_only_modules": 3,
+    "precision_routing": true,
+    "precision_advice": ["F64Native", "F64NativeNoSharedMem", "Df64Only", "F32Only"]
+  }
+}

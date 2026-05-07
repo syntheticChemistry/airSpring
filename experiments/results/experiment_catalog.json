@@ -1,0 +1,96 @@
+{
+  "_provenance": {
+    "spring": "airSpring",
+    "version": "0.10.0",
+    "generated": "2026-05-07",
+    "source": "experiments/README.md + CONTROL_EXPERIMENT_STATUS.md"
+  },
+  "total_experiments": 87,
+  "status_breakdown": {
+    "complete": 86,
+    "active": 1
+  },
+  "categories": [
+    {
+      "name": "Evapotranspiration",
+      "experiments": [1, 10, 17, 19, 20, 21],
+      "methods": ["FAO-56 PM", "Hargreaves", "Priestley-Taylor", "Makkink", "Turc", "Hamon", "Blaney-Criddle", "Thornthwaite"],
+      "total_checks": 380
+    },
+    {
+      "name": "Soil Physics",
+      "experiments": [2, 6, 26],
+      "methods": ["Topp equation", "Richards 1D", "van Genuchten-Mualem", "Saxton-Rawls pedotransfer"],
+      "total_checks": 175
+    },
+    {
+      "name": "Irrigation & Water Balance",
+      "experiments": [3, 4, 8, 9, 11, 14, 15, 16, 24, 25, 27],
+      "methods": ["FAO-56 Ch 7 dual Kc", "FAO-56 Ch 8 water balance", "Stewart yield response", "scheduling optimization"],
+      "total_checks": 520
+    },
+    {
+      "name": "Environmental Systems",
+      "experiments": [7, 12, 13],
+      "methods": ["Langmuir/Freundlich isotherms", "CW2D Richards", "biochar adsorption"],
+      "total_checks": 90
+    },
+    {
+      "name": "Atlas & Integration",
+      "experiments": [5, 18, 20],
+      "methods": ["Michigan 100-station ET₀", "80-year reconstruction", "multi-crop water budget"],
+      "total_checks": 1500
+    },
+    {
+      "name": "GPU Evolution",
+      "experiments": [55, 64, 70, 72, 73, 74, 75, 78, 84],
+      "methods": ["BatchedElementwiseF64 ops 0-19", "BrentGpu VG", "RichardsGpu Picard", "seasonal pipeline"],
+      "total_checks": 480
+    },
+    {
+      "name": "NPU Edge",
+      "experiments": [28, 29],
+      "methods": ["AKD1000 inference", "streaming evolution", "LOCOMOS power budget"],
+      "total_checks": 95
+    },
+    {
+      "name": "metalForge & NUCLEUS",
+      "experiments": [76, 85, 86, 87],
+      "methods": ["mixed-hardware dispatch", "NUCLEUS mesh routing", "PCIe P2P bypass", "graph coordination"],
+      "total_checks": 120
+    },
+    {
+      "name": "Cross-Spring & Provenance",
+      "experiments": [77],
+      "methods": ["5-spring shader provenance", "CPU↔GPU benchmark"],
+      "total_checks": 32
+    },
+    {
+      "name": "Stochastic & Drought",
+      "experiments": [79, 80, 81],
+      "methods": ["MC ET₀ uncertainty", "bootstrap/jackknife CI", "SPI drought index"],
+      "total_checks": 85
+    },
+    {
+      "name": "Immunological Anderson",
+      "experiments": [66, 67, 68, 69],
+      "methods": ["tissue diversity", "CytokineBrain", "barrier state", "cross-species Anderson coupling"],
+      "total_checks": 60
+    },
+    {
+      "name": "Composition & Deployment",
+      "experiments": [63, 65],
+      "methods": ["cross-primal pipeline", "biomeOS graph offline validation"],
+      "total_checks": 63
+    }
+  ],
+  "key_experiments": [
+    {"id": 1, "name": "FAO-56 PM ET₀", "checks": 95, "status": "complete", "track": "irrigation"},
+    {"id": 5, "name": "Real Data Pipeline (100 MI stations)", "checks": 15300, "status": "complete", "track": "integration", "note": "R²=0.967"},
+    {"id": 18, "name": "Michigan Crop Water Atlas", "checks": 1354, "status": "active", "track": "integration"},
+    {"id": 55, "name": "GPU Live Dispatch", "checks": 78, "status": "complete", "track": "gpu"},
+    {"id": 72, "name": "Pure GPU End-to-End", "checks": 46, "status": "complete", "track": "gpu"},
+    {"id": 76, "name": "NUCLEUS Mesh Routing", "checks": 60, "status": "complete", "track": "nucleus"},
+    {"id": 84, "name": "CPU/GPU Parity (21/21 modules)", "checks": 21, "status": "complete", "track": "gpu"}
+  ]
+}
