@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-03-24 (v0.10.0 — 87 experiments, barraCuda 0.3.7 (wgpu 28), 1284/1284 Python + 943 lib + 316 integration + 62 forge = 1,321 total tests + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 algorithms, 21/21 CPU-GPU parity modules). Audit execution: `#![deny(cast_*)]` library-strict, soil_moisture refactored, petalTongue 3-tier discovery, 14 primal dispatch tests, benchmark JSON provenance. + MCP tools, provenance registry, kahan_sum, f64::total_cmp, assert→Result, ecoBin deny.toml. **Deep audit (2026-03-24):** Forge barraCuda `default-features = false` + `gpu`; RPC `normalize_method` from `PRIMAL_NAME`; three-tier capability discovery + public `discover_primal_by_capability`; handlers use `primal_names`/`domains`; 47 `//! Provenance` headers; 8 benchmark JSON provenance fixes; doc test counts and GPU tier lists reconciled.)
+**Updated**: 2026-05-08 (v0.10.0 — 90 experiments (87 numbered + 3 composition crates), barraCuda 0.3.7 (wgpu 28), 1284/1284 Python + 986 lib + 316 integration + 62 forge = 1,364 total tests + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 algorithms, 21/21 CPU-GPU parity modules). **44 centralized method constants** (`methods.rs`). 3 composition experiment crates (exp001: 55/55, exp002: 10/10, exp003: 4/4). 3 largest files refactored (provenance 747→496, rpc 650→341, seasonal_pipeline 738→539). guideStone Level 2 (IPC-wired). 44/44 capabilities routable. `capability_registry.toml` + `deny.toml` at workspace root. 25 publishable notebooks (20 paper + 5 sporePrint). foundation thread06 (36 targets, 6 workloads). Platform-agnostic IPC.)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -1123,7 +1123,7 @@ routing.
 Track 1 (Precision Agriculture):
   Phase 0  [COMPLETE]: Python baselines — 1284/1284 PASS (57 experiments)
   Phase 0+ [COMPLETE]: Real data pipeline — 15,300 station-days, ET₀ R²=0.97
-  Phase 1  [COMPLETE]: Rust validation — 943 lib + 316 integration/doc (1,259 barracuda) + 62 forge = 1,321 total tests, 91 binaries
+  Phase 1  [COMPLETE]: Rust validation — 986 lib + 316 integration/doc (1,302 barracuda) + 62 forge = 1,364 total tests, 91 binaries
   Phase 1.5[COMPLETE]: CPU benchmark — Rust 14.3× faster than Python (24/24 parity)
   Phase 2  [COMPLETE]: Cross-validation — 75/75 MATCH (Python↔Rust, tol=1e-5)
   Phase 2.5[COMPLETE]: Ops 5-8 GPU-first — 4 orchestrators rewired (ToadStool S70+ absorbed)
@@ -1197,10 +1197,10 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026 — Updated: March 24, 2026 (v0.10.0, post-audit execution)*
-*87 experiments, 1284/1284 Python, 986 lib + 316 integration/doc + 62 forge = 1,364 total tests, 91 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules), barraCuda 0.3.7 (wgpu 28), Rust Edition 2024. biomeOS niche: 45 capabilities, 4 deploy graphs, BYOB niche deployment. Zero unsafe everywhere (DI pattern). 58 tolerances in 5 submodules. 90.56% line coverage (fail-under-lines 90). cargo-deny 0.19 clean. Exp 084 CPU/GPU 21/21, Exp 085 toadStool 19/19, Exp 086 metalForge 17/17, Exp 087 graphs 22/22.*
+*Initialized: February 16, 2026 — Updated: May 8, 2026 (v0.10.0, deep debt evolution)*
+*90 experiments (87 + 3 composition crates), 1284/1284 Python, 986 lib + 316 integration/doc + 62 forge = 1,364 total tests, 91 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules), barraCuda 0.3.7 (wgpu 28), Rust Edition 2024. biomeOS niche: 44 capabilities, 4 deploy graphs. 44 centralized method constants (methods.rs). guideStone Level 2 (IPC-wired). 60 tolerances in 5 submodules. 90.56% line coverage (fail-under-lines 90). cargo-deny 0.19 clean. 25 notebooks (20 paper + 5 sporePrint). exp001: 55/55, exp002: 10/10, exp003: 4/4. capability_registry.toml + deny.toml at workspace root.*
 *8 ET₀ methods + SCS-CN runoff + Green-Ampt infiltration + coupled runoff-infiltration + VG inverse + full-season WB + Exp 058 Climate Scenario (46/46).*
-*Niche adapter (45 capabilities, transitional binary → biomeOS graph deployment). Atlas decade 80yr (102/102). NASS real (99/99). NCBI diversity (63/63).*
+*Niche adapter (44 capabilities, transitional binary → biomeOS graph deployment). Atlas decade 80yr (102/102). NASS real (99/99). NCBI diversity (63/63).*
 *25 Tier A + 6 GPU-local modules. Ops 5-8 GPU-first (ToadStool S87). GPU stats (neuralSpring S69).*
 *Seasonal pipeline GPU Stages 1-3. 73/73 atlas PASS (12 stations, 4800 results). 146/146 + 32/32 cross-spring benchmarks (Exp 077). Exp 064-069 immunological Anderson (Paper 12).*
 *metalForge 27 workloads, 29/29 cross-system. AKD1000 NPU live (3 experiments).*

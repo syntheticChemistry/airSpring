@@ -270,17 +270,18 @@ pub fn list_tools() -> Value {
 /// Map an MCP tool name to the corresponding JSON-RPC method.
 #[must_use]
 pub fn tool_to_method(tool_name: &str) -> Option<&'static str> {
+    use crate::methods as m;
     match tool_name {
-        "airspring_et0" => Some("science.et0_fao56"),
-        "airspring_hargreaves" => Some("science.et0_hargreaves"),
-        "airspring_water_balance" => Some("science.water_balance"),
-        "airspring_soil_moisture" => Some("science.soil_moisture_topp"),
-        "airspring_dual_kc" => Some("science.dual_kc"),
-        "airspring_richards" => Some("science.richards_1d"),
-        "airspring_yield_response" => Some("science.yield_response"),
-        "airspring_spi_drought" => Some("science.spi_drought_index"),
-        "airspring_diversity" => Some("science.shannon_diversity"),
-        "airspring_pedotransfer" => Some("science.pedotransfer_saxton_rawls"),
+        "airspring_et0" => Some(m::ET0_FAO56),
+        "airspring_hargreaves" => Some(m::ET0_HARGREAVES),
+        "airspring_water_balance" => Some(m::WATER_BALANCE),
+        "airspring_soil_moisture" => Some(m::SOIL_MOISTURE_TOPP),
+        "airspring_dual_kc" => Some(m::DUAL_KC),
+        "airspring_richards" => Some(m::RICHARDS_1D),
+        "airspring_yield_response" => Some(m::YIELD_RESPONSE),
+        "airspring_spi_drought" => Some(m::SPI_DROUGHT_INDEX),
+        "airspring_diversity" => Some(m::SHANNON_DIVERSITY),
+        "airspring_pedotransfer" => Some(m::PEDOTRANSFER),
         _ => None,
     }
 }

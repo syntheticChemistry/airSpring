@@ -1,7 +1,7 @@
 # airSpring Specifications
 
-**Last Updated**: April 27, 2026
-**Status**: Phase 0–5 complete — 1284/1284 Python + 943 lib + 316 integration + 62 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 91 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.3.7 (wgpu 28) + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + metalForge 66/66 + niche adapter (45 capabilities, 10 MCP tools) + 87 experiments (v0.10.0). **Deep debt evolution pass** (60 centralized tolerances, `TOLERANCE_REGISTRY` alignment). Edition 2024, deep code quality complete. Platform-agnostic IPC. Exp 084-087: 79/79 PASS (CPU/GPU parity, toadStool dispatch, metalForge NUCLEUS, graph coordination)
+**Last Updated**: May 8, 2026
+**Status**: Phase 0–5 complete — 1284/1284 Python + 986 lib + 316 integration + 62 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 91 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.3.7 (wgpu 28) + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + metalForge 66/66 + niche adapter (44 capabilities, 10 MCP tools) + 90 experiments (v0.10.0). **Deep debt evolution pass** (44 centralized method constants, 60 tolerances, 3 composition experiment crates). Edition 2024, guideStone L2. Platform-agnostic IPC. Exp 084-087: 79/79 PASS + exp001-003: 69/69 PASS
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling, Anderson coupling
 
 ---
@@ -23,7 +23,7 @@
 | Phase 3.2 (Cross-spring rewire) | 68/68 PASS — 5/5 springs validated (Exp 073) |
 | Phase 3.5 (NPU edge) | AKD1000 live, 95/95 NPU checks |
 | Phase 3.8 (Cross-system) | metalForge 27 workloads, 66/66 cross-system (GPU→NPU→CPU) + Exp 076 NUCLEUS routing (60/60) |
-| Phase 3.9 (Niche adapter) | 45 capabilities, ecology domain in biomeOS registry |
+| Phase 3.9 (Niche adapter) | 44 capabilities, ecology domain in biomeOS registry |
 | Phase 4.0 (Cross-primal) | 28/28 PASS — capability.call routing, cross-primal forwarding |
 | Faculty | Dong (BAE, MSU — new lab 2026) |
 | Handoff | V010 in `wateringHole/handoffs/` |
@@ -50,7 +50,7 @@
 |----------|----------|-------------|
 | CONTROL_EXPERIMENT_STATUS.md | `../` | Detailed experiment logs and check counts |
 | CHANGELOG.md | `../` | Evolution history (Keep a Changelog format) |
-| experiments/README.md | `../experiments/` | Experiment index (87 completed) |
+| experiments/README.md | `../experiments/` | Experiment index (90 completed) |
 | whitePaper/baseCamp/README.md | `../whitePaper/baseCamp/` | Per-faculty research briefings |
 | whitePaper/STUDY.md | `../whitePaper/` | Full study results |
 | whitePaper/METHODOLOGY.md | `../whitePaper/` | Multi-phase validation protocol |

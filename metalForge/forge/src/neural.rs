@@ -274,26 +274,33 @@ fn resolve_socket() -> Option<PathBuf> {
     None
 }
 
+/// Linux-specific `/proc/self/status` path for UID discovery.
+/// On non-Linux platforms, `uid_from_runtime_dir` falls back to `NOBODY_UID`.
+#[cfg(target_os = "linux")]
 const PROC_STATUS_PATH: &str = "/proc/self/status";
 
 /// Extract real UID from `/proc/self/status` (safe, no libc).
 ///
-/// Falls back to `nobody` (65534) rather than assuming a specific user.
-/// A hardcoded UID like 1000 is fragile — different distros assign different
-/// first-user UIDs.  65534 is the POSIX `nobody` sentinel and will fail
-/// visibly rather than silently resolve to the wrong user's runtime dir.
+/// Falls back to `nobody` (65534) on non-Linux platforms or when `/proc`
+/// is not readable. A hardcoded UID like 1000 is fragile — different
+/// distros assign different first-user UIDs.
 fn uid_from_runtime_dir() -> u32 {
     const NOBODY_UID: u32 = 65534;
-    std::fs::read_to_string(PROC_STATUS_PATH)
-        .ok()
-        .and_then(|status| {
-            status.lines().find_map(|line| {
-                line.strip_prefix("Uid:")
-                    .and_then(|rest| rest.split_whitespace().next())
-                    .and_then(|s| s.parse::<u32>().ok())
+    #[cfg(target_os = "linux")]
+    {
+        std::fs::read_to_string(PROC_STATUS_PATH)
+            .ok()
+            .and_then(|status| {
+                status.lines().find_map(|line| {
+                    line.strip_prefix("Uid:")
+                        .and_then(|rest| rest.split_whitespace().next())
+                        .and_then(|s| s.parse::<u32>().ok())
+                })
             })
-        })
-        .unwrap_or(NOBODY_UID)
+            .unwrap_or(NOBODY_UID)
+    }
+    #[cfg(not(target_os = "linux"))]
+    NOBODY_UID
 }
 
 fn parse_response(response: &serde_json::Value) -> Result<CallResult, NeuralError> {

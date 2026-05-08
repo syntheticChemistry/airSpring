@@ -58,13 +58,19 @@ pub fn probe_gpus() -> Vec<Substrate> {
     gpus
 }
 
-/// Probe CPU via `/proc/cpuinfo` and `/proc/meminfo`.
+/// Probe CPU via `/proc/cpuinfo` and `/proc/meminfo` (Linux) or platform stubs.
 #[must_use]
 pub fn probe_cpu() -> Substrate {
-    let cpuinfo = fs::read_to_string("/proc/cpuinfo").unwrap_or_default();
+    #[cfg(target_os = "linux")]
+    let (cpuinfo, meminfo_raw) = (
+        fs::read_to_string("/proc/cpuinfo").unwrap_or_default(),
+        fs::read_to_string("/proc/meminfo").unwrap_or_default(),
+    );
+    #[cfg(not(target_os = "linux"))]
+    let (cpuinfo, meminfo_raw) = (String::new(), String::new());
+
     let (model, cores, threads, cache_kb, has_avx2) = parse_cpuinfo(&cpuinfo);
-    let meminfo = fs::read_to_string("/proc/meminfo").unwrap_or_default();
-    let mem_bytes = parse_meminfo(&meminfo);
+    let mem_bytes = parse_meminfo(&meminfo_raw);
 
     let name = model.unwrap_or_else(|| String::from("Unknown CPU"));
 

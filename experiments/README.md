@@ -1,7 +1,7 @@
 # airSpring Experiments
 
-**Updated**: April 27, 2026
-**Status**: 87 experiments, barraCuda 0.3.7 (wgpu 28), v0.10.0, Edition 2024 (rust-toolchain 1.92). 1284/1284 Python + 986 lib + 316 integration + 62 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 parity). 21/21 CPU-GPU parity modules. **Deep debt evolution pass** (registry/docs alignment). `#![forbid(unsafe_code)]`, `#![deny(cast_*)]` library-strict, `warn(missing_docs)`, 60 centralized tolerances (5 submodules, Rust + Python mirror), **44/44 capabilities routable**, JSON-RPC 2.0 protocol compliant. 90.56% line coverage (gated at 90%). cargo-deny 0.19 clean. Zero C dependencies. Zero hardcoded primals. Zero `#[allow()]` in production. 10 MCP tools wired in primal dispatch (Squirrel AI discoverable). Platform-agnostic IPC (Transport enum: Unix + TCP, provenance trio fully migrated). Full validation pipeline green (2026-04-27).
+**Updated**: May 8, 2026
+**Status**: 90 experiments (87 numbered + 3 composition crates), barraCuda 0.3.7 (wgpu 28), v0.10.0, Edition 2024 (rust-toolchain 1.92). 1284/1284 Python + 986 lib + 316 integration + 62 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 parity). 21/21 CPU-GPU parity modules. **Deep debt evolution pass**: `methods.rs` (44 centralized method constants), 3 composition experiment crates (exp001-003), 3 largest files refactored, guideStone L2. `#![cfg_attr(not(test), forbid(unsafe_code))]`, `#![deny(cast_*)]` library-strict, `warn(missing_docs)`, 60 centralized tolerances (5 submodules, Rust + Python mirror), **44/44 capabilities routable**, JSON-RPC 2.0 protocol compliant. 90.56% line coverage (gated at 90%). cargo-deny 0.19 clean. Zero C dependencies. Zero hardcoded primals. Zero `#[allow()]` in production. 10 MCP tools wired in primal dispatch (Squirrel AI discoverable). Platform-agnostic IPC (Transport enum: Unix + TCP, provenance trio fully migrated). Full validation pipeline green (2026-05-08).
 
 ---
 
@@ -97,7 +97,7 @@
 | 086 | metalForge Mixed Hardware Live NUCLEUS | Hardware | **Complete** | Rust | Live probe (RTX 4070 + Titan V + i9-12900K), NUCLEUS mesh (Tower+Node), 23/27 workload routing, ecology pipeline (3 stages GPU), PCIe bypass, transfer matrix | 17/17 |
 | 087 | NUCLEUS Graph Coordination | Integration | **Complete** | Rust | biomeOS TOML graph parsing, DAG validation, capability refs, dependency ordering, prerequisite checks, Tower/Node atomic detection, 7 primals | 22/22 |
 
-**Grand Total**: 1284 Python + **943 lib + 316 integration + 62 forge** (1,259 barracuda + 62 forge = **1,321** project tests) + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (45 capabilities) + 91 binaries + barraCuda 0.3.7 (wgpu 28, DF64 precision tier) + 14.3× CPU speedup (24/24 parity) + 21/21 CPU-GPU parity modules + 87 experiments (v0.10.0). Zero C deps. Zero hardcoded primals. Zero `#[allow()]`. Platform-agnostic IPC (Transport: Unix + TCP). Full validation pipeline green (2026-03-24).
+**Grand Total**: 1284 Python + **986 lib + 316 integration + 62 forge** (1,302 barracuda + 62 forge = **1,364** project tests) + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 3 composition crates (exp001: 55/55, exp002: 10/10, exp003: 4/4) + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (44 capabilities) + 91 binaries + barraCuda 0.3.7 (wgpu 28, DF64 precision tier) + 14.3× CPU speedup (24/24 parity) + 21/21 CPU-GPU parity modules + 90 experiments (v0.10.0). 44 centralized method constants (`methods.rs`). guideStone L2. Zero C deps. Zero hardcoded primals. Zero `#[allow()]`. Platform-agnostic IPC (Transport: Unix + TCP). Full validation pipeline green (2026-05-08).
 
 ---
 
@@ -105,12 +105,12 @@
 
 | Category | Tests | Source |
 |----------|:-----:|--------|
-| Barracuda lib | 943 | `cargo test --lib` |
+| Barracuda lib | 986 | `cargo test --lib` |
 | Barracuda integration | 316 | `cargo test --tests --all-features` (barracuda/tests/) |
 | Barracuda validation binaries | 91 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
 | Forge | 62 | `metalForge/forge/` (substrate, dispatch, probe, workloads, cross-system routing) |
 | Forge binaries | 6 | `validate_dispatch`, `validate_live_hardware`, `validate_dispatch_routing`, `validate_mixed_pipeline`, `validate_mixed_nucleus_live`, `validate_nucleus_routing` |
-| **Total project tests** | **1,321** (943 lib + 316 integration + 62 forge) | |
+| **Total project tests** | **1,364** (986 lib + 316 integration + 62 forge) | |
 | Validation checks | 381/381 | 10 validation binaries |
 | Cross-spring evolution | 146/146 | `bench_cross_spring` (34 provenance entries, 6 origin Springs) |
 | Cross-validation | 33/33 | Python↔Rust match (tol=1e-5) |
@@ -406,6 +406,11 @@ Experiments follow `NNN_name` format:
 - `087`: NUCLEUS Graph Coordination (TOML graphs, DAG validation, capability refs, Tower+Node)
 
 Gap (013) reserved. See `specs/PAPER_REVIEW_QUEUE.md`.
+
+**Standalone composition crates** (`experiments/exp00*/`):
+- `exp001_local_science_parity` — all 55 science/ecology methods dispatch parity
+- `exp002_composition_parity` — primalSpring exp094 replication (Tier 1/2/3)
+- `exp003_foundation_target_validation` — foundation thread06 target validation
 
 ---
 

@@ -1,15 +1,16 @@
 # airSpring wateringHole
 
-**Updated**: April 27, 2026 | **Version**: v0.10.0
+**Updated**: May 8, 2026 | **Version**: v0.10.0
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.10.0** | [AIRSPRING_V010_DEEP_DEBT_EVOLUTION_HANDOFF_APR27_2026.md](handoffs/AIRSPRING_V010_DEEP_DEBT_EVOLUTION_HANDOFF_APR27_2026.md) | 2026-04-27 | **Deep debt evolution** — 60 centralized tolerances (registry alignment), technical-debt follow-through, barraCuda validation / GPU-rewire checks |
+| **V0.10.0** | [AIRSPRING_V010_DOCS_CLEANUP_UPSTREAM_HANDOFF_MAY08_2026.md](handoffs/AIRSPRING_V010_DOCS_CLEANUP_UPSTREAM_HANDOFF_MAY08_2026.md) | 2026-05-08 | **Docs cleanup + upstream handoff** — 12 files reconciled (90 exp, 986 lib, 44 caps), primal wiring inventory, active gaps for 7 primal teams, composition patterns, archive pass |
+| **V0.10.0** | [AIRSPRING_V010_DEEP_DEBT_EVOLUTION_HANDOFF_MAY08_2026.md](handoffs/AIRSPRING_V010_DEEP_DEBT_EVOLUTION_HANDOFF_MAY08_2026.md) | 2026-05-08 | **Deep debt evolution** — methods.rs (44 constants), 3 experiment crates (exp001-003), 3 files refactored, 3 compilation fixes, /proc gating, guideStone L2 |
+| **V0.10.0** | [AIRSPRING_V010_PAPER_NOTEBOOKS_ECOSYSTEM_WIRING_HANDOFF_MAY07_2026.md](handoffs/AIRSPRING_V010_PAPER_NOTEBOOKS_ECOSYSTEM_WIRING_HANDOFF_MAY07_2026.md) | 2026-05-07 | **Paper notebooks + ecosystem wiring + parity audit** — 20 paper notebooks (first spring done), foundation thread06 (36 targets, 6 workloads), projectNUCLEUS expansion, capability_registry.toml (44 methods), deny.toml promoted, guideStone L1 scaffold |
 | **V0.10.0** | [AIRSPRING_V010_DEEP_AUDIT_EXECUTION_HANDOFF_MAR24_2026.md](handoffs/AIRSPRING_V010_DEEP_AUDIT_EXECUTION_HANDOFF_MAR24_2026.md) | 2026-03-24 | **Deep audit execution** — cargo-deny 0.19 evolution, +43 tests (986 lib / 1,364 total), 90.56% coverage, `const assert` tolerance contracts, SPDX compliance, `blake3` cc wrapper, TCP mock IPC testing pattern |
-| **V0.10.0** | [ecoPrimals handoff](../../../wateringHole/handoffs/AIRSPRING_V010_DEEP_EVOLUTION_ABSORPTION_HANDOFF_MAR23_2026.md) | 2026-03-23 | Cross-primal — per-site casts, `PipelineError`, `ValidationSink`, `default-features=false`, `content_sha256` provenance, TCP transport, numerical guards |
 | **≤V0.9.0** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 
 ## Cross-Spring Documents
@@ -26,14 +27,13 @@
 | `../graphs/airspring_niche_deploy.toml` | Full niche deployment: Tower + Trio + NestGate + ToadStool + airSpring |
 | `../graphs/cross_primal_soil_microbiome.toml` | Cross-Spring pipeline: airSpring θ(t) → wetSpring diversity |
 | `../barracuda/EVOLUTION_READINESS.md` | Tier A/B/C status, absorbed/stays-local, quality gates |
-| `airspring/AIRSPRING_COMPOSITION_GUIDANCE.md` | Solo, trio, and wider primal composition patterns |
 | `../metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66), post-absorption leaning status |
-| `../../wateringHole/SPRING_EVOLUTION_ISSUES.md` | **Shared** — Cross-primal issues for biomeOS and Spring teams |
 
 ## Archive
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_V010_DEEP_DEBT_EVOLUTION_HANDOFF_APR27_2026.md` | v0.10.0: Deep debt evolution — 60 centralized tolerances, registry alignment (superseded by May08 deep debt) |
 | `handoffs/archive/AIRSPRING_V010_ECOSYSTEM_ABSORPTION_PRIMAL_SPRING_HANDOFF_MAR24_2026.md` | v0.10.0: ecosystem absorption — PRIMAL_REGISTRY, CONTRIBUTING/SECURITY, upstream contract pinning, GPU test_pool, deploy metadata, 1,321 tests (superseded by V0.10.0 Mar24 deep audit execution) |
 | `handoffs/archive/AIRSPRING_V010_DEEP_AUDIT_EXECUTION_BARRACUDA_TOADSTOOL_HANDOFF_MAR24_2026.md` | v0.10.0: deep audit execution — three-tier capability discovery, PRIMAL_NAME-derived RPC, provenance headers, forge alignment, doc reconciliation (superseded by V0.10.0 Mar24 ecosystem absorption) |
 | `handoffs/archive/AIRSPRING_V010_DEEP_AUDIT_BARRACUDA_TOADSTOOL_HANDOFF_MAR23_2026.md` | v0.10.0: comprehensive deep audit — lint architecture, ecoBin `deny.toml`, CI symlink strategy, GPU evolution (superseded by V0.10.0 Mar24 execution) |
@@ -76,8 +76,5 @@ Direction: airSpring → barraCuda (math) + ToadStool (dispatch), biomeOS, NestG
 airSpring consumes barraCuda primitives and NUCLEUS services, and provides ecology
 science capabilities; handoffs communicate what we learned, what we need, and what
 we can contribute back. Cross-primal handoffs live in `ecoPrimals/wateringHole/handoffs/`.
-
-Cross-primal issues go to `../../wateringHole/SPRING_EVOLUTION_ISSUES.md`
-(the shared ecosystem issues tracker).
 
 Superseded handoffs move to `handoffs/archive/` (kept as fossil record).

@@ -146,8 +146,8 @@ pub fn bench_s87_deep_evolution(v: &mut ValidationHarness) {
     );
 
     v.check_bool(
-        "S87: FHE shader arithmetic (NTT/INTT) corrected",
-        std::any::type_name::<barracuda::ops::fhe_ntt::FheNtt>().contains("FheNtt"),
+        "S87: FHE shader arithmetic (NTT/INTT) available",
+        cfg!(feature = "domain-fhe"),
     );
 
     println!("  S87 deep evolution: {:.1?}", t0.elapsed());

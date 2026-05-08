@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![forbid(unsafe_code)]
+// `forbid(unsafe_code)` is lifted under `cfg(test)` so Rust 2024 test cleanup can
+// call `unsafe` `env::set_var` / `remove_var`; release builds remain forbid.
+#![cfg_attr(not(test), forbid(unsafe_code))]
 #![deny(clippy::unwrap_used, clippy::expect_used)]
 #![deny(
     clippy::cast_precision_loss,
@@ -105,6 +107,7 @@ pub mod error;
 pub mod gpu;
 pub mod io;
 pub mod ipc;
+pub mod methods;
 pub mod nautilus;
 pub mod niche;
 #[cfg(feature = "npu")]

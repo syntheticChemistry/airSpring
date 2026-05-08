@@ -1,7 +1,7 @@
 +++
 title = "airSpring Validation Summary"
-description = "Precision agriculture & irrigation — 1,364 Rust tests, 87 experiments, 14.3× speedup, 44/44 capabilities routable, 5 notebooks"
-date = 2026-05-07
+description = "Precision agriculture & irrigation — 1,364 Rust tests, 90 experiments (87 + 3 composition), 14.3× speedup, 44/44 capabilities routable, 25 notebooks (20 paper + 5 sporePrint), methods centralized"
+date = 2026-05-08
 
 [taxonomies]
 primals = ["barracuda", "toadstool", "biomeos", "nestgate", "squirrel", "coralreef", "petaltongue", "beardog", "songbird"]
@@ -12,15 +12,20 @@ springs = ["airspring", "hotspring", "wetspring", "neuralspring", "groundspring"
 
 - **1,364 Rust tests** passing (986 lib + 316 integration + 62 forge), 0 failed
 - **1,284 Python baseline checks** (60 papers reproduced)
-- **87 experiments** across 12 categories (evapotranspiration → NUCLEUS mesh)
+- **90 experiments** across 12 categories + 3 composition crates (exp001 local parity, exp002 composition parity, exp003 foundation targets)
 - **14.3× geometric mean** Rust-vs-Python speedup (24/24 algorithms, 21/21 CPU-GPU parity)
 - **44/44 IPC capabilities** routable (science + ecology + provenance + coordination)
+- **44 centralized method constants** in `methods.rs` (drift-proof, single source of truth)
 - **91 validation binaries** (all zero-panic, OrExit pattern)
 - **90.56% line coverage** (gated at 90%)
 - **60 named tolerances** in 5 submodules (Rust + Python mirror, zero inline magic numbers)
 - **25 Tier A GPU modules** (20 upstream batched ops, local_dispatch retired)
 - **Zero C dependencies**, zero unsafe, zero `#[allow()]`, Edition 2024
-- **guideStone Level 0** → targeting Level 1 (primalSpring dependency next)
+- **guideStone Level 2** (IPC-wired, composition experiment crates)
+- **44-method capability_registry.toml** (CI sync-tested vs niche.rs)
+- **36 foundation targets** + **6 toadStool workloads** (thread06_ag)
+- **deny.toml** promoted to workspace root (ecoBin v3.0, ring/openssl banned)
+- **3 largest files refactored** (provenance 747→496, rpc 650→341, seasonal_pipeline 738→539)
 
 ## Key Validation Binaries
 
@@ -35,19 +40,55 @@ springs = ["airspring", "hotspring", "wetspring", "neuralspring", "groundspring"
 - `validate_cross_spring_provenance` — 5-spring shader provenance (32/32)
 - `airspring_primal` — NUCLEUS primal binary (44 capabilities, JSON-RPC 2.0)
 
-## Notebooks (5)
+## Notebooks (25)
+
+### sporePrint Summary (5)
 
 | # | Notebook | Focus |
 |---|----------|-------|
 | 01 | Composition Validation | 44 capabilities, deploy graphs, primal composition, gaps |
 | 02 | Benchmark Comparison | Python vs Rust vs GPU timing, 14.3× speedup, GPU tiers |
-| 03 | Ecosystem Evidence | 87 experiments, 60 tolerances, quality gates, provenance |
+| 03 | Ecosystem Evidence | 90 experiments, 60 tolerances, quality gates, provenance |
 | 04 | Cross-Spring Connections | barraCuda integration, shader families, primal consumption |
 | 05 | Domain Deep Dive | Michigan Atlas, seasonal pipeline, Penny Irrigation vision |
 
-## Workload TOMLs
+### Paper Baseline Notebooks (20)
 
-Not yet created — contribute to `projectNUCLEUS/workloads/airspring/`.
+| # | Notebook | Citation |
+|---|----------|----------|
+| 001 | FAO-56 Penman-Monteith ET₀ | Allen et al. 1998 |
+| 002 | Soil Sensor Calibration | Dong et al. 2020 |
+| 004 | FAO-56 Water Balance | Allen et al. 1998 Ch 8 |
+| 006 | Richards Equation (VG-Mualem) | Richards 1931, van Genuchten 1980 |
+| 007 | Biochar P Adsorption | Kumari et al. 2025 |
+| 008 | Yield Response (Stewart) | Stewart et al. 1977 |
+| 009 | Dual Crop Coefficient | Allen et al. 1998 Ch 7 |
+| 017 | ET₀ Sensitivity Analysis | Gong et al. 2006 |
+| 018 | Michigan Crop Water Atlas | Open-Meteo ERA5 |
+| 019 | Priestley-Taylor ET₀ | Priestley & Taylor 1972 |
+| 021 | Thornthwaite ET₀ | Thornthwaite 1948 |
+| 023 | Saxton-Rawls PTFs | Saxton & Rawls 2006 |
+| 031 | Hargreaves-Samani ET₀ | Hargreaves & Samani 1985 |
+| 033 | Makkink ET₀ | Makkink 1957 |
+| 034 | Turc ET₀ | Turc 1961 |
+| 035 | Hamon PET | Hamon 1961 |
+| 049 | Blaney-Criddle PET | Blaney & Criddle 1950 |
+| 050 | SCS Curve Number | USDA 1972 |
+| 051 | Green-Ampt Infiltration | Green & Ampt 1911 |
+| 081 | SPI Drought Index | McKee et al. 1993 |
+
+## Workload TOMLs (6)
+
+| Workload | Domain |
+|----------|--------|
+| `airspring-et0-fao56` | FAO-56 PM 75/75 cross-validated |
+| `airspring-et0-methods` | 8 ET₀ methods suite |
+| `airspring-water-balance` | Ch 8 + dual Kc + yield |
+| `airspring-soil-physics` | Richards + GA + SCS-CN + PTF |
+| `airspring-atlas-pipeline` | 100 stations, 80 years |
+| `airspring-full-suite` | All 90 experiments |
+
+Available in both `foundation/workloads/thread06_ag/` and `projectNUCLEUS/workloads/airspring/`.
 
 ## See Also
 

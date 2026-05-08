@@ -1,0 +1,313 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# airSpring capability registry — biomeOS ecology / agriculture science primal.
+#
+# Declares the capabilities this niche registers with Songbird for
+# capability-based discovery. Self-knowledge only: no references to
+# other primals' capabilities.
+#
+# Canonical source: niche.rs CAPABILITIES array.
+# CI sync: tests/capabilities_match_registry.rs checks this file
+# matches the Rust constant exactly.
+
+[primal]
+name = "airspring"
+version = "0.10.0"
+domain = "ecology"
+license = "AGPL-3.0-or-later"
+description = "Ecological & agricultural science pipelines — ET₀, irrigation, soil physics, crop yield via barraCuda"
+
+# ── Evapotranspiration (7 methods) ──
+
+[capabilities.et0_fao56]
+method = "science.et0_fao56"
+domain = "ecology.evapotranspiration"
+description = "FAO-56 Penman-Monteith reference evapotranspiration (Allen et al. 1998)"
+gpu_accelerated = true
+
+[capabilities.et0_hargreaves]
+method = "science.et0_hargreaves"
+domain = "ecology.evapotranspiration"
+description = "Hargreaves-Samani temperature-based ET₀ (1985)"
+gpu_accelerated = true
+
+[capabilities.et0_priestley_taylor]
+method = "science.et0_priestley_taylor"
+domain = "ecology.evapotranspiration"
+description = "Priestley-Taylor radiation-based ET₀ (1972)"
+gpu_accelerated = false
+
+[capabilities.et0_makkink]
+method = "science.et0_makkink"
+domain = "ecology.evapotranspiration"
+description = "Makkink radiation-based ET₀ (1957)"
+gpu_accelerated = false
+
+[capabilities.et0_turc]
+method = "science.et0_turc"
+domain = "ecology.evapotranspiration"
+description = "Turc temperature-radiation ET₀ (1961)"
+gpu_accelerated = false
+
+[capabilities.et0_hamon]
+method = "science.et0_hamon"
+domain = "ecology.evapotranspiration"
+description = "Hamon temperature-based PET (1961)"
+gpu_accelerated = false
+
+[capabilities.et0_blaney_criddle]
+method = "science.et0_blaney_criddle"
+domain = "ecology.evapotranspiration"
+description = "Blaney-Criddle temperature-based PET (1950)"
+gpu_accelerated = false
+
+# ── Water balance & yield ──
+
+[capabilities.water_balance]
+method = "science.water_balance"
+domain = "ecology.irrigation"
+description = "FAO-56 Chapter 8 daily soil water balance scheduling"
+gpu_accelerated = true
+
+[capabilities.yield_response]
+method = "science.yield_response"
+domain = "ecology.crop"
+description = "Stewart (1977) yield response to water stress"
+gpu_accelerated = true
+
+# ── Soil physics ──
+
+[capabilities.richards_1d]
+method = "science.richards_1d"
+domain = "ecology.soil_physics"
+description = "Richards equation 1D (van Genuchten-Mualem retention + Picard iteration)"
+gpu_accelerated = true
+
+[capabilities.scs_cn_runoff]
+method = "science.scs_cn_runoff"
+domain = "ecology.hydrology"
+description = "SCS curve number rainfall-runoff (USDA 1972)"
+gpu_accelerated = true
+
+[capabilities.green_ampt_infiltration]
+method = "science.green_ampt_infiltration"
+domain = "ecology.hydrology"
+description = "Green-Ampt infiltration with Newton-Raphson (1911)"
+gpu_accelerated = false
+
+[capabilities.soil_moisture_topp]
+method = "science.soil_moisture_topp"
+domain = "ecology.sensors"
+description = "Topp equation soil moisture from dielectric permittivity"
+gpu_accelerated = true
+
+[capabilities.pedotransfer_saxton_rawls]
+method = "science.pedotransfer_saxton_rawls"
+domain = "ecology.soil_physics"
+description = "Saxton-Rawls 2006 pedotransfer functions (texture → hydraulic properties)"
+gpu_accelerated = true
+
+# ── Crop & irrigation ──
+
+[capabilities.dual_kc]
+method = "science.dual_kc"
+domain = "ecology.irrigation"
+description = "FAO-56 Chapter 7 dual crop coefficient (Kcb + Ke partitioning)"
+gpu_accelerated = true
+
+[capabilities.sensor_calibration]
+method = "science.sensor_calibration"
+domain = "ecology.sensors"
+description = "CS616/EC5/SoilWatch 10 sensor calibration (Dong et al. 2020/2024)"
+gpu_accelerated = true
+
+[capabilities.gdd]
+method = "science.gdd"
+domain = "ecology.crop"
+description = "Growing degree days accumulation and Kc-from-GDD mapping"
+gpu_accelerated = true
+
+# ── Biodiversity ──
+
+[capabilities.shannon_diversity]
+method = "science.shannon_diversity"
+domain = "ecology.diversity"
+description = "Shannon H' diversity index with evenness"
+gpu_accelerated = true
+
+[capabilities.bray_curtis]
+method = "science.bray_curtis"
+domain = "ecology.diversity"
+description = "Bray-Curtis dissimilarity for community comparison"
+gpu_accelerated = true
+
+# ── Geophysics coupling ──
+
+[capabilities.anderson_coupling]
+method = "science.anderson_coupling"
+domain = "ecology.geophysics"
+description = "Anderson localization coupling (θ → S_e → d_eff → QS regime)"
+gpu_accelerated = false
+
+# ── Monthly ET ──
+
+[capabilities.thornthwaite]
+method = "science.thornthwaite"
+domain = "ecology.evapotranspiration"
+description = "Thornthwaite monthly ET₀ from temperature heat index (1948)"
+gpu_accelerated = true
+
+# ── Drought & Stochastic ──
+
+[capabilities.spi_drought_index]
+method = "science.spi_drought_index"
+domain = "ecology.climatology"
+description = "Standardized Precipitation Index (gamma MLE → normal quantile)"
+gpu_accelerated = false
+
+[capabilities.autocorrelation]
+method = "science.autocorrelation"
+domain = "ecology.timeseries"
+description = "Autocorrelation function for time series analysis"
+gpu_accelerated = false
+
+[capabilities.gamma_cdf]
+method = "science.gamma_cdf"
+domain = "ecology.statistics"
+description = "Gamma CDF via regularized incomplete gamma function"
+gpu_accelerated = false
+
+# ── Ecology aliases ──
+
+[capabilities.ecology_et0_fao56]
+method = "ecology.et0_fao56"
+domain = "ecology.evapotranspiration"
+description = "Alias: FAO-56 PM ET₀ via ecology domain"
+gpu_accelerated = true
+
+[capabilities.ecology_et0_hargreaves]
+method = "ecology.et0_hargreaves"
+domain = "ecology.evapotranspiration"
+description = "Alias: Hargreaves-Samani ET₀ via ecology domain"
+gpu_accelerated = true
+
+[capabilities.ecology_water_balance]
+method = "ecology.water_balance"
+domain = "ecology.irrigation"
+description = "Alias: water balance via ecology domain"
+gpu_accelerated = true
+
+[capabilities.ecology_yield_response]
+method = "ecology.yield_response"
+domain = "ecology.crop"
+description = "Alias: Stewart yield response via ecology domain"
+gpu_accelerated = true
+
+[capabilities.ecology_full_pipeline]
+method = "ecology.full_pipeline"
+domain = "ecology.pipeline"
+description = "Full ecology pipeline: weather → ET₀ → Kc → WB → yield"
+gpu_accelerated = true
+
+[capabilities.ecology_spi_drought]
+method = "ecology.spi_drought_index"
+domain = "ecology.climatology"
+description = "Alias: SPI drought index via ecology domain"
+gpu_accelerated = false
+
+[capabilities.ecology_autocorrelation]
+method = "ecology.autocorrelation"
+domain = "ecology.timeseries"
+description = "Alias: autocorrelation via ecology domain"
+gpu_accelerated = false
+
+# ── Provenance trio (biomeOS composition) ──
+
+[capabilities.provenance_begin]
+method = "provenance.begin"
+domain = "provenance"
+description = "Start a provenance session for experiment tracking"
+gpu_accelerated = false
+
+[capabilities.provenance_record]
+method = "provenance.record"
+domain = "provenance"
+description = "Record a step in the provenance chain"
+gpu_accelerated = false
+
+[capabilities.provenance_complete]
+method = "provenance.complete"
+domain = "provenance"
+description = "Complete and seal a provenance session"
+gpu_accelerated = false
+
+[capabilities.provenance_status]
+method = "provenance.status"
+domain = "provenance"
+description = "Query provenance session status"
+gpu_accelerated = false
+
+# ── Cross-spring time series ──
+
+[capabilities.timeseries]
+method = "science.timeseries"
+domain = "ecology.timeseries"
+description = "Cross-spring time series exchange (weather, soil moisture)"
+gpu_accelerated = false
+
+# ── Cross-primal ──
+
+[capabilities.primal_forward]
+method = "primal.forward"
+domain = "coordination"
+description = "Forward requests to upstream primals by capability"
+gpu_accelerated = false
+
+[capabilities.primal_discover]
+method = "primal.discover"
+domain = "coordination"
+description = "Discover available primals and their capabilities"
+gpu_accelerated = false
+
+# ── Health probes (biomeOS orchestration) ──
+
+[capabilities.health_liveness]
+method = "health.liveness"
+domain = "health"
+description = "biomeOS liveness probe"
+gpu_accelerated = false
+
+[capabilities.health_readiness]
+method = "health.readiness"
+domain = "health"
+description = "biomeOS readiness probe"
+gpu_accelerated = false
+
+# ── Niche deployment (biomeOS graph composition) ──
+
+[capabilities.capability_list]
+method = "capability.list"
+domain = "coordination"
+description = "List all capabilities this niche provides"
+gpu_accelerated = false
+
+[capabilities.data_cross_spring_weather]
+method = "data.cross_spring_weather"
+domain = "data"
+description = "Cross-spring weather data exchange"
+gpu_accelerated = false
+
+# ── Compute offload (Node Atomic) ──
+
+[capabilities.compute_offload]
+method = "compute.offload"
+domain = "compute"
+description = "Offload compute to toadStool via Node Atomic"
+gpu_accelerated = true
+
+# ── Data (Nest Atomic routing) ──
+
+[capabilities.data_weather]
+method = "data.weather"
+domain = "data"
+description = "Weather data retrieval via NestGate"
+gpu_accelerated = false

@@ -28,67 +28,70 @@ use tracing::{info, warn};
 pub const NICHE_NAME: &str = crate::PRIMAL_NAME;
 
 /// All capabilities this niche exposes to biomeOS.
+///
+/// Built from [`crate::methods`] constants — the single source of truth
+/// for all capability method strings in the codebase.
 pub const CAPABILITIES: &[&str] = &[
     // ── Evapotranspiration (7 methods) ──
-    "science.et0_fao56",
-    "science.et0_hargreaves",
-    "science.et0_priestley_taylor",
-    "science.et0_makkink",
-    "science.et0_turc",
-    "science.et0_hamon",
-    "science.et0_blaney_criddle",
+    crate::methods::ET0_FAO56,
+    crate::methods::ET0_HARGREAVES,
+    crate::methods::ET0_PRIESTLEY_TAYLOR,
+    crate::methods::ET0_MAKKINK,
+    crate::methods::ET0_TURC,
+    crate::methods::ET0_HAMON,
+    crate::methods::ET0_BLANEY_CRIDDLE,
     // ── Water balance & yield ──
-    "science.water_balance",
-    "science.yield_response",
+    crate::methods::WATER_BALANCE,
+    crate::methods::YIELD_RESPONSE,
     // ── Soil physics ──
-    "science.richards_1d",
-    "science.scs_cn_runoff",
-    "science.green_ampt_infiltration",
-    "science.soil_moisture_topp",
-    "science.pedotransfer_saxton_rawls",
+    crate::methods::RICHARDS_1D,
+    crate::methods::SCS_CN_RUNOFF,
+    crate::methods::GREEN_AMPT,
+    crate::methods::SOIL_MOISTURE_TOPP,
+    crate::methods::PEDOTRANSFER,
     // ── Crop & irrigation ──
-    "science.dual_kc",
-    "science.sensor_calibration",
-    "science.gdd",
+    crate::methods::DUAL_KC,
+    crate::methods::SENSOR_CALIBRATION,
+    crate::methods::GDD,
     // ── Biodiversity ──
-    "science.shannon_diversity",
-    "science.bray_curtis",
+    crate::methods::SHANNON_DIVERSITY,
+    crate::methods::BRAY_CURTIS,
     // ── Geophysics coupling ──
-    "science.anderson_coupling",
+    crate::methods::ANDERSON_COUPLING,
     // ── Monthly ET ──
-    "science.thornthwaite",
+    crate::methods::THORNTHWAITE,
     // ── Drought & Stochastic ──
-    "science.spi_drought_index",
-    "science.autocorrelation",
-    "science.gamma_cdf",
+    crate::methods::SPI_DROUGHT_INDEX,
+    crate::methods::AUTOCORRELATION,
+    crate::methods::GAMMA_CDF,
     // ── Ecology aliases ──
-    "ecology.et0_fao56",
-    "ecology.et0_hargreaves",
-    "ecology.water_balance",
-    "ecology.yield_response",
-    "ecology.full_pipeline",
-    "ecology.spi_drought_index",
-    "ecology.autocorrelation",
+    crate::methods::ECO_ET0_FAO56,
+    crate::methods::ECO_ET0_HARGREAVES,
+    crate::methods::ECO_WATER_BALANCE,
+    crate::methods::ECO_YIELD_RESPONSE,
+    crate::methods::ECO_FULL_PIPELINE,
+    crate::methods::ECO_SPI_DROUGHT_INDEX,
+    crate::methods::ECO_AUTOCORRELATION,
     // ── Provenance trio (biomeOS composition) ──
-    "provenance.begin",
-    "provenance.record",
-    "provenance.complete",
-    "provenance.status",
+    crate::methods::PROVENANCE_BEGIN,
+    crate::methods::PROVENANCE_RECORD,
+    crate::methods::PROVENANCE_COMPLETE,
+    crate::methods::PROVENANCE_STATUS,
     // ── Cross-spring time series ──
-    "science.timeseries",
+    crate::methods::TIMESERIES,
     // ── Cross-primal ──
-    "primal.forward",
-    "primal.discover",
+    crate::methods::PRIMAL_FORWARD,
+    crate::methods::PRIMAL_DISCOVER,
     // ── Health probes (biomeOS orchestration) ──
-    "health.liveness",
-    "health.readiness",
+    crate::methods::HEALTH_LIVENESS,
+    crate::methods::HEALTH_READINESS,
     // ── Niche deployment (biomeOS graph composition) ──
-    "capability.list",
-    "data.cross_spring_weather",
+    crate::methods::CAPABILITY_LIST,
+    crate::methods::DATA_CROSS_SPRING_WEATHER,
     // ── Compute offload (Node Atomic) ──
-    "compute.offload",
+    crate::methods::COMPUTE_OFFLOAD,
     // ── Data (Nest Atomic routing) ──
-    "data.weather",
+    crate::methods::DATA_WEATHER,
 ];
 
 /// Operation dependency hints for biomeOS Pathway Learner parallelization.

@@ -1,10 +1,14 @@
 # baseCamp: Per-Faculty Research Briefings
 
-**Updated**: April 27, 2026
+**Updated**: May 8, 2026
 **Project**: airSpring — Ecological & Agricultural Sciences (v0.10.0)
-**Status**: 87 experiments, 1284/1284 Python + 986 lib + 316 integration + 62 forge = 1,364 total tests + 91 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.7 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (45 capabilities, 4 deploy graphs, BYOB niche deployment) + `#![forbid(unsafe_code)]` both crates + `#![deny(cast_*)]` library-strict + zero clippy pedantic+nursery + `warn(missing_docs)`. 58 tolerances in 5 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies**. Zero-panic validation (91/91 binaries). Zero `#[allow()]` in any code. 10 MCP tools (Squirrel AI, wired in primal dispatch). Platform-agnostic IPC (Transport enum: Unix + TCP, provenance trio migrated). 90.56% line coverage (fail-under-lines 90). cargo-deny 0.19 clean. Full validation pipeline green (2026-03-24)
+**Status**: 90 experiments (87 + 3 composition crates), 1284/1284 Python + 986 lib + 316 integration + 62 forge = 1,364 total tests + 91 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.7 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (44 capabilities, 4 deploy graphs) + `#![cfg_attr(not(test), forbid(unsafe_code))]` + `#![deny(cast_*)]` library-strict + zero clippy pedantic+nursery + `warn(missing_docs)`. 60 tolerances in 5 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies**. Zero-panic validation (91/91 binaries). Zero `#[allow()]` in production. 10 MCP tools (Squirrel AI, wired in primal dispatch). Platform-agnostic IPC (Transport enum: Unix + TCP, provenance trio migrated). 90.56% line coverage (fail-under-lines 90). cargo-deny 0.19 clean. 44 centralized method constants (`methods.rs`). guideStone Level 2. 25 notebooks (20 paper + 5 sporePrint). Full validation pipeline green (2026-05-08)
 
 **April 27, 2026 evolution**: 60 tolerances (2 new atlas), 44/44 IPC capabilities routable, provenance drift fixed, capability naming converged, docs/PRIMAL_GAPS.md created (11 gaps, gS Level 0→1 path), CI pinned to 1.92, all files <800 LOC.
+
+**May 7-8, 2026 evolution**: First spring with publishable paper notebooks (20 core papers in `notebooks/papers/`). 25 total notebooks (20 paper + 5 sporePrint). Foundation thread06 wired (36 validation targets + 6 toadStool workloads). projectNUCLEUS airspring workload catalog expanded (6 workloads, `${AIRSPRING_ROOT}` portable paths). guideStone Level 0→1 (standalone manifest reader, 16/16 PASS). Provenance drift fully reconciled. PRIMAL_GAPS updated (15 gaps, 5 resolved). Parity audit response: `capability_registry.toml` created (44 methods, CI sync test), `deny.toml` promoted to workspace root (ecoBin v3.0, ring/openssl banned). primalSpring Phase 60 parity score: NEEDS WORK → addressing all targets.
+
+**May 8, 2026 deep debt evolution**: `methods.rs` centralized 44 capability constants (eliminates method string drift across niche.rs, primal_science, ipc/mcp.rs). 3 composition experiment crates created (exp001: 55/55 local science parity, exp002: 10/10 composition parity with graceful IPC skip, exp003: 4/4 foundation target validation). 3 largest library files refactored by test extraction (provenance 747→496, rpc 650→341, seasonal_pipeline 738→539). 3 pre-existing compilation errors fixed (autobins for support modules, NestGateProvider→capability-based IPC, fhe_ntt feature gate). Missing docs added (DailyWeather, Station, YieldRecord, HttpResponse, DataError). `/proc/*` paths gated behind `cfg(target_os = "linux")` in metalForge. All 401 `.unwrap()` calls confirmed test-only. All 145 `#[expect()]` suppressions validated. guideStone Level 1→2 (IPC-wired, experiment crates).
 
 ---
 
@@ -61,7 +65,7 @@ Phase 5.18 Deep debt evolution — 60 tolerances (atlas_annual_et0, atlas_yield_
 
 | Faculty | Institution | Track | Papers | Experiments | Checks | Domain |
 |---------|------------|-------|:------:|:-----------:|:------:|--------|
-| Dong | MSU BAE | Irrigation & Soil | 10+ | 87 | 1284+943 | ET₀ (8 methods), soil, IoT, WB, dual Kc, Richards, yield, ensemble, bias correction, GPU parity, GPU math portability, metalForge dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB audit, climate scenario, streaming pipeline, decade analysis, NASS yield, Shannon H' diversity, NUCLEUS primal, cross-primal pipeline, Paper 12 immunological Anderson, local GPU parity (Exp 075), NUCLEUS routing (Exp 076), cross-spring provenance (Exp 077), MC ET₀ uncertainty (Exp 079), Bootstrap/Jackknife CI (Exp 080), SPI drought index (Exp 081), CPU/GPU parity (Exp 084), toadStool dispatch (Exp 085), metalForge NUCLEUS (Exp 086), graph coordination (Exp 087) |
+| Dong | MSU BAE | Irrigation & Soil | 10+ | 90 | 1284+986 | ET₀ (8 methods), soil, IoT, WB, dual Kc, Richards, yield, ensemble, bias correction, GPU parity, GPU math portability, metalForge dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB audit, climate scenario, streaming pipeline, decade analysis, NASS yield, Shannon H' diversity, NUCLEUS primal, cross-primal pipeline, Paper 12 immunological Anderson, local GPU parity (Exp 075), NUCLEUS routing (Exp 076), cross-spring provenance (Exp 077), MC ET₀ uncertainty (Exp 079), Bootstrap/Jackknife CI (Exp 080), SPI drought index (Exp 081), CPU/GPU parity (Exp 084), toadStool dispatch (Exp 085), metalForge NUCLEUS (Exp 086), graph coordination (Exp 087) |
 
 ## Faculty: Younsuk Dong, PhD
 
@@ -280,7 +284,7 @@ $200 sensor, Open-Meteo weather data, and a $600 GPU running BarraCuda.
 
 ## Extension Explorations
 
-With 87 experiments validated and the full Python → Rust CPU → Titan V GPU live →
+With 90 experiments validated and the full Python → Rust CPU → Titan V GPU live →
 GPU math portability (13 modules, 46/46) → upstream lean (20 ops, `BatchedElementwiseF64`) → metalForge mixed hardware (27 workloads) → NUCLEUS primal (45 caps, 28/28 cross-primal pipeline + 60/60 NUCLEUS routing) → cross-spring provenance (32/32, 5-spring shader tracking) → `PrecisionRoutingAdvice` wired (v0.7.3) → CPU/GPU parity (21/21, Exp 084) → toadStool dispatch (19/19, Exp 085) → NUCLEUS mesh (17/17, Exp 086) → graph coordination (22/22, Exp 087),
 airSpring can now extend beyond reproduction into new science. These explorations use the validated stack to answer
 questions the original papers did not.

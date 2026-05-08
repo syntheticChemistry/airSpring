@@ -2,6 +2,7 @@
 name = "airspring-barracuda"
 version = "0.10.0"
 edition = "2024"
+autobins = false
 # MSRV 1.92: required for Edition 2024 `#[expect()]` with `reason`, `gen` keyword
 # avoidance, and improved const-eval. Intentionally stricter than the ecosystem
 # floor (1.87) — airSpring uses #[expect()] pervasively (100+ sites) and
@@ -17,6 +18,8 @@ description = "Ecological & agricultural science pipelines — Rust + GPU + NPU 
 default = ["testutil"]
 testutil = []
 npu = ["dep:akida-driver"]
+guidestone = ["dep:primalspring"]
+standalone-http = []
 
 [dependencies]
 # BarraCuda 0.3.7: standalone sovereign math engine (ecoPrimals/barraCuda).
@@ -59,6 +62,11 @@ bytemuck = { version = "1", features = ["derive"] }
 # BrainChip AKD1000 NPU driver — pure Rust, optional.
 akida-driver = { path = "../../../primals/toadStool/crates/neuromorphic/akida-driver", optional = true }
 thiserror = "2.0.18"
+
+# primalSpring composition context — feature-gated for guidestone L3+.
+# Provides CompositionContext, discover_by_capability(), validate_liveness().
+# Not a default dep — only needed when validating against live NUCLEUS.
+primalspring = { version = "0.9.25", path = "../../primalSpring/ecoPrimal", optional = true }
 
 [lints.clippy]
 pedantic = { level = "warn", priority = -1 }
@@ -336,6 +344,9 @@ path = "src/bin/validate_cross_spring_rewire.rs"
 name = "validate_gpu_rewire_benchmark"
 path = "src/bin/validate_gpu_rewire_benchmark.rs"
 
+# validate_gpu_rewire_support.rs is a support module for validate_gpu_rewire_benchmark,
+# not a standalone binary. It is included via #[path] from the benchmark entrypoint.
+
 [[bin]]
 name = "validate_climate_scenario"
 path = "src/bin/validate_climate_scenario.rs"
@@ -439,3 +450,7 @@ path = "src/bin/validate_toadstool_dispatch.rs"
 [[bin]]
 name = "validate_nucleus_graphs"
 path = "src/bin/validate_nucleus_graphs.rs"
+
+[[bin]]
+name = "airspring_guidestone"
+path = "src/bin/airspring_guidestone.rs"

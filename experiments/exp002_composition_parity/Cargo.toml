@@ -1,0 +1,13 @@
+[package]
+name = "airspring-exp002-composition-parity"
+version = "0.1.0"
+edition = "2024"
+publish = false
+license = "AGPL-3.0-or-later"
+description = "Replication of primalSpring exp094 — Tower/Node/Nest composition parity for airSpring niche"
+
+[workspace]
+
+[dependencies]
+airspring-barracuda = { path = "../../barracuda" }
+serde_json = "1"

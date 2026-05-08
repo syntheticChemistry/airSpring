@@ -2,6 +2,40 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased] - 2026-05-08
+
+### Deep Debt Evolution (2026-05-08)
+
+- **`methods.rs`**: Centralized 44 capability method constants — single source of truth for all `science.*`, `ecology.*`, `provenance.*`, `primal.*`, `health.*`, `capability.*`, and `data.*` strings. Wired into `niche.rs`, `primal_science/mod.rs`, `ipc/mcp.rs`
+- **3 composition experiment crates**: `exp001_local_science_parity` (55/55), `exp002_composition_parity` (10/10 with graceful IPC skip), `exp003_foundation_target_validation` (4/4 against `foundation/data/targets/thread06_ag_targets.toml`)
+- **3 largest files refactored**: Test extraction — `ipc/provenance.rs` (747→496 LOC), `rpc/mod.rs` (650→341 LOC), `gpu/seasonal_pipeline/mod.rs` (738→539 LOC)
+- **3 compilation errors fixed**: `autobins = false` for support modules, `NestGateProvider`→capability-based IPC routing, `fhe_ntt`→`cfg!(feature = "domain-fhe")`
+- **`/proc/*` paths gated**: `#[cfg(target_os = "linux")]` in `metalForge/forge/src/probe.rs` and `neural.rs`
+- **Rust 2024 unsafe**: `#![forbid(unsafe_code)]`→`#![cfg_attr(not(test), forbid(unsafe_code))]` for `std::env::set_var`/`remove_var` in tests
+- **Missing docs**: `DailyWeather`, `Station`, `YieldRecord`, `HttpResponse`, `DataError` struct fields
+- **`standalone-http` feature**: Declared in `barracuda/Cargo.toml` to resolve cfg warnings
+- **`resolve_neural_api_transport`**: `pub(crate)`→`pub` to resolve dead code warning
+- **guideStone Level 1→2** (IPC-wired, composition experiment crates)
+
+### Paper Notebooks & Ecosystem Wiring (2026-05-07)
+
+- **20 paper baseline notebooks** in `notebooks/papers/` — first spring with full publishable paper notebook set
+- **5 sporePrint summary notebooks** with frozen JSON data from `experiments/results/`
+- **`capability_registry.toml`**: 44 methods, CI sync-tested vs `niche.rs`
+- **`deny.toml`**: Promoted to workspace root (ecoBin v3.0, ring/openssl banned)
+- **Foundation thread06**: 36 validation targets + 6 toadStool workloads wired
+- **projectNUCLEUS**: airspring workload catalog expanded (6 workloads, `${AIRSPRING_ROOT}` portable paths)
+- **guideStone Level 0→1** (standalone manifest reader, 16/16 PASS)
+
+### Tolerance & Capability Evolution (2026-04-27)
+
+- **60 tolerances**: 2 new atlas tolerances centralized (`atlas_annual_et0`, `atlas_yield_ratio`)
+- **44/44 IPC capabilities routable**: `science.timeseries` gap closed
+- **Capability naming**: `niche.rs` canonical → metalForge/plasmidBin aligned
+- **Provenance drift**: Atlas (`fad2e1b`), Dual Kc (`94cc51d`) commit references fixed
+- **Large files**: 829→45+774, 804→668 LOC refactors
+- **`docs/PRIMAL_GAPS.md`**: Created with 11 gaps (AG-001 through AG-011)
+
 ## [0.10.0] - 2026-03-18
 
 ### Changed (2026-03-23)

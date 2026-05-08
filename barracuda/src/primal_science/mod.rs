@@ -57,43 +57,40 @@ fn u32_p(params: &serde_json::Value, key: &str) -> Option<u32> {
 /// `None` if it should be handled elsewhere (cross-primal, lifecycle, etc.).
 #[must_use]
 pub fn dispatch_science(method: &str, params: &serde_json::Value) -> Option<serde_json::Value> {
+    use crate::methods as m;
     let result = match method {
-        "science.et0_fao56" | "ecology.et0_fao56" => et0::et0_fao56(params),
-        "science.et0_hargreaves" | "ecology.et0_hargreaves" => et0::et0_hargreaves(params),
-        "science.et0_priestley_taylor" | "ecology.et0_priestley_taylor" => {
+        m::ET0_FAO56 | m::ECO_ET0_FAO56 => et0::et0_fao56(params),
+        m::ET0_HARGREAVES | m::ECO_ET0_HARGREAVES => et0::et0_hargreaves(params),
+        m::ET0_PRIESTLEY_TAYLOR | m::ECO_ET0_PRIESTLEY_TAYLOR => {
             et0::et0_priestley_taylor(params)
         }
-        "science.et0_makkink" | "ecology.et0_makkink" => et0::et0_makkink(params),
-        "science.et0_turc" | "ecology.et0_turc" => et0::et0_turc(params),
-        "science.et0_hamon" | "ecology.et0_hamon" => et0::et0_hamon(params),
-        "science.et0_blaney_criddle" | "ecology.et0_blaney_criddle" => {
+        m::ET0_MAKKINK | m::ECO_ET0_MAKKINK => et0::et0_makkink(params),
+        m::ET0_TURC | m::ECO_ET0_TURC => et0::et0_turc(params),
+        m::ET0_HAMON | m::ECO_ET0_HAMON => et0::et0_hamon(params),
+        m::ET0_BLANEY_CRIDDLE | m::ECO_ET0_BLANEY_CRIDDLE => {
             et0::et0_blaney_criddle(params)
         }
-        "science.water_balance" | "ecology.water_balance" => water_balance::water_balance(params),
-        "science.yield_response" | "ecology.yield_response" => {
-            water_balance::yield_response(params)
-        }
-        "ecology.full_pipeline" => water_balance::full_pipeline(params),
-        "science.richards_1d" => soil::richards_1d(params),
-        "science.scs_cn_runoff" => soil::scs_cn_runoff(params),
-        "science.green_ampt_infiltration" => soil::green_ampt(params),
-        "science.soil_moisture_topp" => soil::soil_moisture_topp(params),
-        "science.pedotransfer_saxton_rawls" => soil::pedotransfer(params),
-        "science.dual_kc" => crop::dual_kc_handler(params),
-        "science.sensor_calibration" => crop::sensor_cal(params),
-        "science.gdd" => crop::gdd(params),
-        "science.shannon_diversity" => biodiversity::shannon_diversity(params),
-        "science.bray_curtis" => biodiversity::bray_curtis(params),
-        "science.anderson_coupling" => drought_stats::anderson_coupling(params),
-        "science.thornthwaite" => drought_stats::thornthwaite_handler(params),
-        "science.spi_drought_index" | "ecology.spi_drought_index" => {
-            drought_stats::spi_drought(params)
-        }
-        "science.autocorrelation" | "ecology.autocorrelation" => {
+        m::WATER_BALANCE | m::ECO_WATER_BALANCE => water_balance::water_balance(params),
+        m::YIELD_RESPONSE | m::ECO_YIELD_RESPONSE => water_balance::yield_response(params),
+        m::ECO_FULL_PIPELINE => water_balance::full_pipeline(params),
+        m::RICHARDS_1D => soil::richards_1d(params),
+        m::SCS_CN_RUNOFF => soil::scs_cn_runoff(params),
+        m::GREEN_AMPT => soil::green_ampt(params),
+        m::SOIL_MOISTURE_TOPP => soil::soil_moisture_topp(params),
+        m::PEDOTRANSFER => soil::pedotransfer(params),
+        m::DUAL_KC => crop::dual_kc_handler(params),
+        m::SENSOR_CALIBRATION => crop::sensor_cal(params),
+        m::GDD => crop::gdd(params),
+        m::SHANNON_DIVERSITY => biodiversity::shannon_diversity(params),
+        m::BRAY_CURTIS => biodiversity::bray_curtis(params),
+        m::ANDERSON_COUPLING => drought_stats::anderson_coupling(params),
+        m::THORNTHWAITE => drought_stats::thornthwaite_handler(params),
+        m::SPI_DROUGHT_INDEX | m::ECO_SPI_DROUGHT_INDEX => drought_stats::spi_drought(params),
+        m::AUTOCORRELATION | m::ECO_AUTOCORRELATION => {
             drought_stats::autocorrelation_handler(params)
         }
-        "science.gamma_cdf" => drought_stats::gamma_cdf_handler(params),
-        "science.timeseries" | "ecology.timeseries" => {
+        m::GAMMA_CDF => drought_stats::gamma_cdf_handler(params),
+        m::TIMESERIES | m::ECO_TIMESERIES => {
             match crate::ipc::timeseries::handle_timeseries(params) {
                 Ok(v) => v,
                 Err(e) => serde_json::json!({ "error": e.to_string() }),

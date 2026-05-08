@@ -1,8 +1,8 @@
 # airSpring — Paper Review Queue
 
-**Last Updated**: March 24, 2026
+**Last Updated**: May 8, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 87 experiments (1284/1284 Python + 943 Rust lib + 316 integration + 62 forge tests = 1,321 total + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.3.7 (wgpu 28), Edition 2024, 91 binaries. 14.3× Rust-vs-Python geometric mean speedup (24/24 algorithms, 21/21 CPU-GPU parity modules). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired. metalForge 66/66 mixed pipeline. V010 handoff. biomeOS niche: 45 capabilities, 4 deploy graphs, 10 MCP tools. Deep code quality complete. Platform-agnostic IPC. Exp 084 CPU/GPU parity (21/21), Exp 085 toadStool dispatch (19/19), Exp 086 metalForge NUCLEUS (17/17), Exp 087 graph coordination (22/22).
+**Status**: 90 experiments (1284/1284 Python + 986 Rust lib + 316 integration + 62 forge tests = 1,364 total + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.3.7 (wgpu 28), Edition 2024, 91 binaries. 14.3× Rust-vs-Python geometric mean speedup (24/24 algorithms, 21/21 CPU-GPU parity modules). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired. metalForge 66/66 mixed pipeline. V010 handoff. biomeOS niche: 44 capabilities, 4 deploy graphs, 10 MCP tools. 44 centralized method constants (`methods.rs`). 3 composition experiment crates (exp001-003). guideStone L2. Platform-agnostic IPC.
 
 ---
 

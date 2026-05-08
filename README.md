@@ -1,7 +1,7 @@
 # airSpring — Ecological & Agricultural Sciences
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
-**Date**: April 27, 2026
+**Date**: May 8, 2026
 **Version**: 0.10.0
 **License**: AGPL-3.0-or-later
 
@@ -33,7 +33,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | Phase 3.5: NPU edge | **AKD1000 live** | 3 experiments, 95/95 NPU checks, ~48µs inference |
 | Phase 3.7: metalForge live | **5 substrates discovered** | RTX 4070 + Titan V + AKD1000 + i9-12900K, 27 workloads route |
 | Phase 3.8: Mixed-hardware pipeline | **66/66 PASS** | 7-stage GPU→NPU PCIe bypass, NUCLEUS mesh routing (Exp 076: 60/60) |
-| Phase 3.9: NUCLEUS primal | **45 capabilities** | airSpring biomeOS primal, 45 capabilities (science + provenance + cross-spring), JSON-RPC |
+| Phase 3.9: NUCLEUS primal | **44 capabilities** | airSpring biomeOS primal, 44 capabilities (science + provenance + cross-spring), JSON-RPC |
 | Phase 4.0: Cross-primal pipeline | **28/28 PASS** | ecology domain, capability.call routing, cross-primal forwarding |
 | Phase 4.1: Full dispatch experiment | **51/51 PASS** | CPU vs GPU parity across all domains (Exp 064) |
 | Phase 4.2: biomeOS graph experiment | **35/35 PASS** | Offline ecology pipeline, deployment graph validated (Exp 065) |
@@ -229,7 +229,7 @@ airSpring/
 │   ├── bootstrap_jackknife/     # Bootstrap & Jackknife CI (20/20)
 │   ├── drought_index/           # SPI drought index (20/20)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (943 lib + 316 integration/doc = 1,259 tests, 91 binaries, barraCuda 0.3.7 / wgpu 28, Edition 2024)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (986 lib + 316 integration/doc = 1,302 tests, 91 binaries, barraCuda 0.3.7 / wgpu 28, Edition 2024)
 │   ├── src/
 │   │   ├── biomeos/                # biomeOS socket resolution + primal discovery (3 sub-modules)
 │   │   ├── eco/                 # Domain modules (22 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine + drought_index)
@@ -248,13 +248,17 @@ airSpring/
 │   ├── deploy/                  # biomeOS deployment graphs (airspring_deploy.toml)
 │   └── forge/                   # airspring-forge (62 tests, 6 binaries, live hardware probe)
 ├── specs/                       # Specifications and requirements
-│   ├── PAPER_REVIEW_QUEUE.md    # Paper reproduction queue (87 experiments)
+│   ├── PAPER_REVIEW_QUEUE.md    # Paper reproduction queue (90 experiments)
 │   ├── BARRACUDA_REQUIREMENTS.md# GPU + NPU kernel requirements
 │   └── CROSS_SPRING_EVOLUTION.md # Cross-spring shader provenance (S87)
 ├── docs/                       # Gap tracking and evolution docs (PRIMAL_GAPS.md)
 ├── whitePaper/                  # Methodology and study documentation
 │   └── baseCamp/                # Per-faculty research briefings + baseCamp extensions
-├── experiments/                 # Experiment protocols and results (87 experiments)
+├── experiments/                 # Experiment protocols and results (90 experiments)
+├── notebooks/                  # Publishable notebooks (25 total)
+│   ├── papers/                 # 20 paper baseline notebooks (Batch 1)
+│   └── *.ipynb                 # 5 sporePrint summary notebooks
+├── capability_registry.toml    # 44 capabilities (synced with niche.rs, CI tested)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
 │   └── handoffs/                # Versioned handoffs (V010 current)
 ├── graphs/                      # biomeOS deployment graphs (eco pipeline, provenance pipeline, niche deploy, cross-primal)
@@ -281,15 +285,19 @@ airSpring/
 | Document | Purpose |
 |----------|---------|
 | `CHANGELOG.md` | Versioned change history |
-| `CONTROL_EXPERIMENT_STATUS.md` | Detailed experiment results (87 experiments) |
+| `CONTROL_EXPERIMENT_STATUS.md` | Detailed experiment results (90 experiments) |
 | `barracuda/EVOLUTION_READINESS.md` | Tier A/B/C GPU evolution, absorbed/stays-local |
 | `metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66), 27 workloads |
 | `metalForge/forge/` | Mixed hardware dispatch: live probe + capability routing |
 | `specs/CROSS_SPRING_EVOLUTION.md` | Cross-spring shader provenance (S87) |
-| `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (87 experiments) |
+| `specs/PAPER_REVIEW_QUEUE.md` | Paper reproduction queue (90 experiments) |
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
 | `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V010 current) |
 | `docs/PRIMAL_GAPS.md` | Primal composition gaps for primalSpring handback |
+| `capability_registry.toml` | 44 capabilities — Songbird/biomeOS discovery (sync-tested vs niche.rs) |
+| `notebooks/papers/PAPER_NOTEBOOK_PATTERN.md` | Paper baseline notebook template |
+| `notebooks/papers/*.ipynb` | 20 publishable paper baseline notebooks |
+| `notebooks/*.ipynb` | 5 sporePrint summary notebooks |
 
 ## License
 
@@ -297,11 +305,10 @@ AGPL-3.0-or-later
 
 ---
 
-*April 27, 2026 — v0.10.0 deep debt evolution. Capability naming converged (niche.rs
-canonical → metalForge deploy + plasmidBin cell aligned). 60 named tolerances (2 new:
-atlas_annual_et0, atlas_yield_ratio — zero inline magic numbers). All 44 IPC capabilities
-routable (science.timeseries gap closed). Provenance commit drift fixed (Atlas, Dual Kc).
-Large files refactored (validate_gpu_rewire_benchmark 829→45+774, benchmarks 804→668).
-CI toolchain pinned to 1.92 (was @stable). 7 unwrap()→expect() in bins. docs/PRIMAL_GAPS.md
-created (11 gaps tracked, gS Level 0→1 path documented). guideStone Level 0 — primal
-composition evolution next. AGPL-3.0-or-later.*
+*May 8, 2026 — Deep debt evolution. methods.rs centralized 44 capability constants
+(drift-proof single source of truth). 3 composition experiment crates (exp001 55/55 local
+science parity, exp002 10/10 composition parity, exp003 4/4 foundation target validation).
+3 largest library files refactored (provenance 747→496, rpc 650→341, seasonal_pipeline
+738→539). 3 compilation errors fixed (autobins, NestGateProvider→IPC, fhe_ntt cfg).
+/proc paths gated behind cfg(target_os = "linux"). guideStone L1→L2 (IPC-wired).
+Zero production .unwrap() confirmed. All 145 #[expect()] suppressions valid. AGPL-3.0-or-later.*
