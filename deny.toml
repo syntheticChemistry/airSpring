@@ -61,6 +61,8 @@ deny = [
     { crate = "bzip2-sys", wrappers = [] },
     { crate = "lzma-sys", wrappers = [] },
     { crate = "sysinfo", wrappers = [] },
+    { crate = "aws-lc-sys", wrappers = [] },
+    { crate = "aws-lc-rs", wrappers = [] },
 ]
 
 [sources]

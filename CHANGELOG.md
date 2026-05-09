@@ -2,7 +2,19 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased] - 2026-05-08
+## [Unreleased] - 2026-05-09
+
+### Interstadial Eukaryotic Evolution (2026-05-09)
+
+- **UniBin binary**: `airspring` — single binary with `certify`, `validate`, `serve`, `status`, `version` subcommands (clap 4). Absorbs guidestone and experiment runners into one eukaryotic cell.
+- **`certification/` organelle**: Absorbed guidestone into `barracuda/src/certification/` (bare.rs, health.rs). Layered validation L0-L4 (bare → discovery → health → parity → provenance roundtrip).
+- **`validation/scenarios/` module**: Scenario registry with `ScenarioMeta` (id, track, tier, provenance), `Tier` (Rust/Live/Both), `Track` (ScienceDispatch/Composition/Foundation/Provenance). 3 absorbed scenarios from exp001-003.
+- **`deny.toml` evolution**: Added `aws-lc-sys` + `aws-lc-rs` bans to both workspace-root and barracuda deny.toml files (ecosystem posture alignment).
+- **Lint cleanup**: All 3 bare `#[allow()]` in test files → `#[expect(…, reason = "…")]` (stats_integration, determinism, cross_spring_absorption).
+- **Unfulfilled expect removed**: `clippy::unwrap_used` on determinism.rs (no unwrap calls present).
+- **Pre-existing test fix**: Removed `BiomeosProvider`/`SongbirdHttpProvider`/`WeatherResponse` references from nucleus_integration.rs (types removed during sovereignty evolution).
+- **`PRIMAL_PROOF_IPC_MAPPING.md`**: Full mapping of 44 library calls → JSON-RPC methods, cross-primal routing, discovery stack.
+- **`fossilRecord/`**: Created with `experiments_prokaryotic_may2026/` provenance README for absorbed experiment crates.
 
 ### Deep Debt Evolution (2026-05-08)
 

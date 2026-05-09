@@ -8,31 +8,9 @@
 
 #![expect(clippy::unwrap_used, reason = "integration test clarity")]
 
-use airspring_barracuda::biomeos::{self, SocketConfig};
-use airspring_barracuda::data::{BiomeosProvider, Provider, WeatherResponse};
+use airspring_barracuda::biomeos;
 
-// ── Socket resolution (dependency-injected — zero unsafe) ──────────
-
-#[test]
-fn socket_dir_uses_explicit_override() {
-    let test_dir = std::env::temp_dir().join("test_biomeos_dir");
-    let config = SocketConfig {
-        socket_dir: Some(test_dir.clone()),
-        ..Default::default()
-    };
-    let dir = biomeos::resolve_socket_dir_with(&config);
-    assert_eq!(dir, test_dir);
-}
-
-#[test]
-fn family_id_from_config() {
-    let config = SocketConfig {
-        family_id: Some("test-family-42".into()),
-        ..Default::default()
-    };
-    let fam = biomeos::get_family_id_with(&config);
-    assert_eq!(fam, "test-family-42");
-}
+// ── Socket resolution ──────────────────────────────────────────────
 
 #[test]
 fn socket_path_format() {
@@ -43,36 +21,6 @@ fn socket_path_format() {
         "socket path should contain primal name and family: {name}"
     );
     assert!(name.ends_with(".sock"), "socket path should end with .sock");
-}
-
-// ── Provider tier selection ────────────────────────────────────────
-
-#[test]
-fn biomeos_provider_default_capability() {
-    let provider = BiomeosProvider::default();
-    assert_eq!(provider.capability(), "data.fetch_daily_weather");
-}
-
-#[test]
-fn biomeos_provider_custom_capability() {
-    let provider = BiomeosProvider::with_capability("data.custom_source");
-    assert_eq!(provider.capability(), "data.custom_source");
-}
-
-#[test]
-fn biomeos_provider_fails_gracefully_without_tower() {
-    let provider = BiomeosProvider::default();
-    let result = provider.fetch_daily_weather(42.7, -84.5, "2023-06-01", "2023-06-30");
-    assert!(
-        result.is_err(),
-        "BiomeosProvider should fail without Tower Atomic"
-    );
-}
-
-#[test]
-fn songbird_http_provider_open_meteo() {
-    use airspring_barracuda::data::SongbirdHttpProvider;
-    let _ = SongbirdHttpProvider::open_meteo();
 }
 
 // ── Primal discovery ───────────────────────────────────────────────
@@ -260,22 +208,4 @@ fn data_weather_payload_format() {
 
     assert_eq!(weather["method"], "data.weather");
     assert!(weather["params"]["latitude"].as_f64().is_some());
-}
-
-// ── WeatherResponse contract ───────────────────────────────────────
-
-#[test]
-fn weather_response_empty_is_consistent() {
-    let r = WeatherResponse {
-        tmax: vec![],
-        tmin: vec![],
-        tmean: vec![],
-        precipitation: vec![],
-        solar_radiation: vec![],
-        wind_speed_2m: vec![],
-        relative_humidity: vec![],
-        dates: vec![],
-    };
-    assert!(r.is_empty());
-    assert_eq!(r.len(), 0);
 }

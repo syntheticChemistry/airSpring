@@ -33,6 +33,7 @@
 use tracing::error;
 
 pub mod json;
+pub mod scenarios;
 mod sink;
 
 pub use barracuda::validation::{ValidationHarness, exit_no_gpu, gpu_required};

@@ -62,6 +62,7 @@ bytemuck = { version = "1", features = ["derive"] }
 # BrainChip AKD1000 NPU driver — pure Rust, optional.
 akida-driver = { path = "../../../primals/toadStool/crates/neuromorphic/akida-driver", optional = true }
 thiserror = "2.0.18"
+clap = { version = "4", features = ["derive"] }
 
 # primalSpring composition context — feature-gated for guidestone L3+.
 # Provides CompositionContext, discover_by_capability(), validate_liveness().
@@ -454,3 +455,7 @@ path = "src/bin/validate_nucleus_graphs.rs"
 [[bin]]
 name = "airspring_guidestone"
 path = "src/bin/airspring_guidestone.rs"
+
+[[bin]]
+name = "airspring"
+path = "src/bin/airspring/main.rs"

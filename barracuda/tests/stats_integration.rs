@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::cast_precision_loss)]
+#![expect(
+    clippy::cast_precision_loss,
+    reason = "integration tests cast small indices to f64"
+)]
 //! Statistical primitives integration tests for airSpring `BarraCuda`.
 //!
 //! Cross-validates `airSpring` testutil and `csv_ts::column_stats` against

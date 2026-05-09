@@ -18,8 +18,8 @@ mod validate_gpu_rewire_support;
 
 use std::sync::Arc;
 
-use barracuda::device::WgpuDevice;
 use airspring_barracuda::validation::{self, ValidationHarness};
+use barracuda::device::WgpuDevice;
 
 use validate_gpu_rewire_support::{run_cpu_only_validation, run_gpu_validation};
 

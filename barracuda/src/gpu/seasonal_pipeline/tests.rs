@@ -152,16 +152,14 @@ fn pipeline_error_invalid_config_display() {
 
 #[test]
 fn pipeline_error_device_init_display() {
-    let e =
-        PipelineError::DeviceInit(barracuda::error::BarracudaError::Device("no device".into()));
+    let e = PipelineError::DeviceInit(barracuda::error::BarracudaError::Device("no device".into()));
     assert!(format!("{e}").contains("init"));
     assert!(format!("{e}").contains("no device"));
 }
 
 #[test]
 fn pipeline_error_shader_dispatch_display() {
-    let e =
-        PipelineError::ShaderDispatch(barracuda::error::BarracudaError::Gpu("dispatch".into()));
+    let e = PipelineError::ShaderDispatch(barracuda::error::BarracudaError::Gpu("dispatch".into()));
     let s = format!("{e}");
     assert!(s.contains("dispatch"));
     assert!(s.to_lowercase().contains("shader"));

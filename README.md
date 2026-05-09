@@ -1,8 +1,8 @@
 # airSpring — Ecological & Agricultural Sciences
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
-**Date**: May 8, 2026
-**Version**: 0.10.0
+**Date**: May 9, 2026
+**Version**: 0.10.0 (eukaryotic UniBin)
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -240,9 +240,11 @@ airSpring/
 │   │   ├── rpc/                 # JSON-RPC 2.0 IPC (error.rs, transport.rs, mod.rs)
 │   │   ├── npu.rs               # BrainChip AKD1000 NPU (feature-gated)
 │   │   ├── tolerances/          # Domain-specific validation tolerances (60 named, 4 submodules)
-│   │   └── bin/                 # validate_*, bench_*, airspring_primal (91 declared)
+│   │   ├── certification/       # Absorbed guidestone organelle (L0-L4 layered certification)
+│   │   ├── validation/scenarios/ # Absorbed experiment scenarios (ScenarioRegistry, 3 scenarios)
+│   │   └── bin/                 # validate_*, bench_*, airspring UniBin, airspring_primal (92 declared)
 │   ├── tests/                   # Integration + property tests (15 files + common/)
-│   └── Cargo.toml               # v0.10.0 (barraCuda 0.3.7, wgpu 28)
+│   └── Cargo.toml               # v0.10.0 (barraCuda 0.3.7, wgpu 28, clap 4)
 ├── niches/                      # BYOB niche definitions (airspring-ecology.yaml)
 ├── metalForge/                  # Mixed hardware dispatch (CPU+GPU+NPU)
 │   ├── deploy/                  # biomeOS deployment graphs (airspring_deploy.toml)
@@ -251,7 +253,8 @@ airSpring/
 │   ├── PAPER_REVIEW_QUEUE.md    # Paper reproduction queue (90 experiments)
 │   ├── BARRACUDA_REQUIREMENTS.md# GPU + NPU kernel requirements
 │   └── CROSS_SPRING_EVOLUTION.md # Cross-spring shader provenance (S87)
-├── docs/                       # Gap tracking and evolution docs (PRIMAL_GAPS.md)
+├── docs/                       # Gap tracking and evolution docs (PRIMAL_GAPS.md, PRIMAL_PROOF_IPC_MAPPING.md)
+├── fossilRecord/               # Pre-extinction snapshots (prokaryotic experiment crates)
 ├── whitePaper/                  # Methodology and study documentation
 │   └── baseCamp/                # Per-faculty research briefings + baseCamp extensions
 ├── experiments/                 # Experiment protocols and results (90 experiments)

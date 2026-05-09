@@ -61,15 +61,11 @@ pub fn dispatch_science(method: &str, params: &serde_json::Value) -> Option<serd
     let result = match method {
         m::ET0_FAO56 | m::ECO_ET0_FAO56 => et0::et0_fao56(params),
         m::ET0_HARGREAVES | m::ECO_ET0_HARGREAVES => et0::et0_hargreaves(params),
-        m::ET0_PRIESTLEY_TAYLOR | m::ECO_ET0_PRIESTLEY_TAYLOR => {
-            et0::et0_priestley_taylor(params)
-        }
+        m::ET0_PRIESTLEY_TAYLOR | m::ECO_ET0_PRIESTLEY_TAYLOR => et0::et0_priestley_taylor(params),
         m::ET0_MAKKINK | m::ECO_ET0_MAKKINK => et0::et0_makkink(params),
         m::ET0_TURC | m::ECO_ET0_TURC => et0::et0_turc(params),
         m::ET0_HAMON | m::ECO_ET0_HAMON => et0::et0_hamon(params),
-        m::ET0_BLANEY_CRIDDLE | m::ECO_ET0_BLANEY_CRIDDLE => {
-            et0::et0_blaney_criddle(params)
-        }
+        m::ET0_BLANEY_CRIDDLE | m::ECO_ET0_BLANEY_CRIDDLE => et0::et0_blaney_criddle(params),
         m::WATER_BALANCE | m::ECO_WATER_BALANCE => water_balance::water_balance(params),
         m::YIELD_RESPONSE | m::ECO_YIELD_RESPONSE => water_balance::yield_response(params),
         m::ECO_FULL_PIPELINE => water_balance::full_pipeline(params),
@@ -148,7 +144,13 @@ mod tests {
             } else if method == "science.thornthwaite" {
                 serde_json::json!({"monthly_temps_c": [5.0, 6.0, 8.0, 12.0, 16.0, 20.0, 22.0, 21.0, 18.0, 13.0, 8.0, 6.0]})
             } else if method == "science.timeseries" {
-                let ts = crate::ipc::timeseries::build_time_series("test", "mm", &["t1".into()], &[1.0], None);
+                let ts = crate::ipc::timeseries::build_time_series(
+                    "test",
+                    "mm",
+                    &["t1".into()],
+                    &[1.0],
+                    None,
+                );
                 serde_json::json!({ "time_series": ts })
             } else {
                 params.clone()
@@ -179,7 +181,13 @@ mod tests {
         ];
         for method in ecology_methods {
             let call_params = if method == "ecology.timeseries" {
-                let ts = crate::ipc::timeseries::build_time_series("test", "mm", &["t1".into()], &[1.0], None);
+                let ts = crate::ipc::timeseries::build_time_series(
+                    "test",
+                    "mm",
+                    &["t1".into()],
+                    &[1.0],
+                    None,
+                );
                 serde_json::json!({ "time_series": ts })
             } else {
                 params.clone()

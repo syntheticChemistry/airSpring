@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-#![allow(clippy::unwrap_used)]
-#![allow(clippy::float_cmp)]
+#![expect(
+    clippy::float_cmp,
+    reason = "determinism tests assert bit-exact equality"
+)]
 //! Determinism tests: rerun-identical with fixed seeds.
 //!
 //! These tests run each computation twice with identical inputs and assert

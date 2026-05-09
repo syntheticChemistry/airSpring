@@ -29,6 +29,7 @@ dependencies = [
  "barracuda",
  "bingocube-nautilus",
  "bytemuck",
+ "clap",
  "primalspring",
  "proptest",
  "serde",

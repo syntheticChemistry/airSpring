@@ -144,9 +144,9 @@ pub const HEALTH_READINESS: &str = "health.readiness";
 
 /// List all registered capabilities.
 pub const CAPABILITY_LIST: &str = "capability.list";
-/// Cross-spring weather data routing via NestGate.
+/// Cross-spring weather data routing via `NestGate`.
 pub const DATA_CROSS_SPRING_WEATHER: &str = "data.cross_spring_weather";
-/// ToadStool compute offload.
+/// `ToadStool` compute offload.
 pub const COMPUTE_OFFLOAD: &str = "compute.offload";
 /// Weather data via Nest Atomic routing.
 pub const DATA_WEATHER: &str = "data.weather";

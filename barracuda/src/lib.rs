@@ -101,6 +101,7 @@ pub mod biomeos;
     reason = "cast module centralizes all numeric casts with documented safety"
 )]
 pub mod cast;
+pub mod certification;
 pub mod data;
 pub mod eco;
 pub mod error;
