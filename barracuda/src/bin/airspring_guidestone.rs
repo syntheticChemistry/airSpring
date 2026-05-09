@@ -15,6 +15,7 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use airspring_barracuda::niche;
+use airspring_barracuda::primal_names;
 use airspring_barracuda::validation::{self, ValidationHarness};
 use tracing_subscriber::EnvFilter;
 
@@ -104,12 +105,12 @@ fn validate_fragments(v: &mut ValidationHarness, entry: &ManifestEntry) {
 fn validate_dependencies(v: &mut ValidationHarness, entry: &ManifestEntry) {
     validation::section("P3: Dependency Coverage");
     for dep in [
-        "beardog",
-        "songbird",
-        "coralreef",
-        "toadstool",
+        primal_names::BEARDOG,
+        primal_names::SONGBIRD,
+        primal_names::CORALREEF,
+        primal_names::TOADSTOOL,
         "barracuda",
-        "nestgate",
+        primal_names::NESTGATE,
     ] {
         v.check_bool(
             &format!("depends_on:{dep}"),

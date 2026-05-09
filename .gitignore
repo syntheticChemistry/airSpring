@@ -20,7 +20,9 @@ venv/
 env/
 
 # Data (downloaded from APIs, computed — not tracked)
-data/
+# Anchored to root to avoid ignoring barracuda/src/data/ source code.
+/data/
+control/**/data/
 *.csv.gz
 *.nc
 

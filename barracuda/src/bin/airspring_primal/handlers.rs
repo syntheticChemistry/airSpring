@@ -242,17 +242,14 @@ pub fn handle_cross_spring_weather(params: &serde_json::Value) -> serde_json::Va
         .and_then(|v| v.as_str())
         .unwrap_or("2025-12-31");
 
-    let transport = match airspring_barracuda::rpc::resolve_transport(
-        airspring_barracuda::primal_names::NESTGATE,
-    ) {
-        Ok(t) => t,
-        Err(_) => {
-            return serde_json::json!({
-                "error": "NestGate not available — weather routing requires NUCLEUS",
-                "schema": "ecoPrimals/time-series/v1",
-                "degradation": "nestgate_unavailable",
-            });
-        }
+    let Ok(transport) =
+        airspring_barracuda::rpc::resolve_transport(airspring_barracuda::primal_names::NESTGATE)
+    else {
+        return serde_json::json!({
+            "error": "NestGate not available — weather routing requires NUCLEUS",
+            "schema": "ecoPrimals/time-series/v1",
+            "degradation": "nestgate_unavailable",
+        });
     };
 
     let rpc_params = serde_json::json!({
@@ -267,22 +264,26 @@ pub fn handle_cross_spring_weather(params: &serde_json::Value) -> serde_json::Va
     });
 
     match airspring_barracuda::rpc::send_to(&transport, "capability.call", &rpc_params) {
-        Ok(resp) => {
-            if let Some(result) = resp.get("result") {
+        Ok(resp) => resp.get("result").map_or_else(
+            || {
+                resp.get("error").map_or_else(
+                    || resp.clone(),
+                    |err| {
+                        serde_json::json!({
+                            "error": err,
+                            "schema": "ecoPrimals/time-series/v1",
+                        })
+                    },
+                )
+            },
+            |result| {
                 serde_json::json!({
                     "data": result,
                     "provider": "nestgate_routed",
                     "schema": "ecoPrimals/time-series/v1",
                 })
-            } else if let Some(err) = resp.get("error") {
-                serde_json::json!({
-                    "error": err,
-                    "schema": "ecoPrimals/time-series/v1",
-                })
-            } else {
-                resp
-            }
-        }
+            },
+        ),
         Err(e) => serde_json::json!({
             "error": format!("NestGate IPC failed: {e}"),
             "schema": "ecoPrimals/time-series/v1",

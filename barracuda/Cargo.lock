@@ -28,7 +28,6 @@ dependencies = [
  "akida-driver",
  "barracuda",
  "bingocube-nautilus",
- "bytemuck",
  "clap",
  "primalspring",
  "proptest",

@@ -633,12 +633,13 @@ pub fn bench_anderson_regime(n_iter: usize) -> (f64, f64, String) {
     )
 }
 
-pub fn build_benchmarks() -> Vec<BenchEntry> {
-    macro_rules! entry {
-        ($id:literal, $title:literal, $n:expr, $f:ident) => {
-            ($id, $title, $n, Box::new($f) as BenchFn)
-        };
-    }
+macro_rules! entry {
+    ($id:literal, $title:literal, $n:expr, $f:ident) => {
+        ($id, $title, $n, Box::new($f) as BenchFn)
+    };
+}
+
+fn et0_benchmarks() -> Vec<BenchEntry> {
     vec![
         entry!("fao56_et0", "FAO-56 PM ET₀", 10_000, bench_fao56_et0),
         entry!(
@@ -649,34 +650,57 @@ pub fn build_benchmarks() -> Vec<BenchEntry> {
         ),
         entry!("hargreaves", "Hargreaves-Samani", 10_000, bench_hargreaves),
         entry!(
+            "priestley_taylor",
+            "Priestley-Taylor ET₀",
+            10_000,
+            bench_priestley_taylor
+        ),
+        entry!("makkink_et0", "Makkink ET₀", 100_000, bench_makkink_et0),
+        entry!(
+            "blaney_criddle",
+            "Blaney-Criddle ET₀",
+            100_000,
+            bench_blaney_criddle
+        ),
+    ]
+}
+
+fn soil_benchmarks() -> Vec<BenchEntry> {
+    vec![
+        entry!(
             "van_genuchten",
             "Van Genuchten θ(h)",
             100_000,
             bench_van_genuchten
         ),
         entry!(
+            "saxton_rawls",
+            "Saxton-Rawls Pedotransfer",
+            100_000,
+            bench_saxton_rawls
+        ),
+        entry!(
+            "richards_1d",
+            "Richards 1D (20 nodes)",
+            1_000,
+            bench_richards_1d
+        ),
+        entry!(
+            "langmuir_fit",
+            "Langmuir Isotherm Fit",
+            10_000,
+            bench_langmuir_fit
+        ),
+    ]
+}
+
+fn hydrology_benchmarks() -> Vec<BenchEntry> {
+    vec![
+        entry!(
             "water_balance_step",
             "Water Balance Step",
             10_000,
             bench_water_balance_step
-        ),
-        entry!(
-            "anderson_coupling",
-            "Anderson Coupling",
-            100_000,
-            bench_anderson_coupling
-        ),
-        entry!(
-            "shannon_diversity",
-            "Shannon Diversity",
-            10_000,
-            bench_shannon_diversity
-        ),
-        entry!(
-            "season_simulation",
-            "Season Sim (153d)",
-            1_000,
-            bench_season_simulation
         ),
         entry!(
             "scs_cn_runoff",
@@ -690,48 +714,22 @@ pub fn build_benchmarks() -> Vec<BenchEntry> {
             100_000,
             bench_green_ampt
         ),
-        entry!(
-            "saxton_rawls",
-            "Saxton-Rawls Pedotransfer",
-            100_000,
-            bench_saxton_rawls
-        ),
-        entry!(
-            "langmuir_fit",
-            "Langmuir Isotherm Fit",
-            10_000,
-            bench_langmuir_fit
-        ),
-        entry!(
-            "priestley_taylor",
-            "Priestley-Taylor ET₀",
-            10_000,
-            bench_priestley_taylor
-        ),
-        entry!(
-            "richards_1d",
-            "Richards 1D (20 nodes)",
-            1_000,
-            bench_richards_1d
-        ),
-        entry!(
-            "yield_response",
-            "Stewart Yield Response",
-            100_000,
-            bench_yield_response
-        ),
+    ]
+}
+
+fn crop_benchmarks() -> Vec<BenchEntry> {
+    vec![
         entry!(
             "dual_kc_step",
             "Dual Kc (7-day sim)",
             10_000,
             bench_dual_kc_step
         ),
-        entry!("makkink_et0", "Makkink ET₀", 100_000, bench_makkink_et0),
         entry!(
-            "blaney_criddle",
-            "Blaney-Criddle ET₀",
+            "yield_response",
+            "Stewart Yield Response",
             100_000,
-            bench_blaney_criddle
+            bench_yield_response
         ),
         entry!(
             "sensor_cal",
@@ -745,11 +743,22 @@ pub fn build_benchmarks() -> Vec<BenchEntry> {
             100_000,
             bench_kc_climate_adjust
         ),
+    ]
+}
+
+fn ecology_benchmarks() -> Vec<BenchEntry> {
+    vec![
         entry!(
-            "seasonal_pipeline",
-            "Seasonal Pipeline (153d)",
-            1_000,
-            bench_seasonal_pipeline
+            "shannon_diversity",
+            "Shannon Diversity",
+            10_000,
+            bench_shannon_diversity
+        ),
+        entry!(
+            "anderson_coupling",
+            "Anderson Coupling",
+            100_000,
+            bench_anderson_coupling
         ),
         entry!(
             "tissue_w",
@@ -770,4 +779,32 @@ pub fn build_benchmarks() -> Vec<BenchEntry> {
             bench_anderson_regime
         ),
     ]
+}
+
+fn pipeline_benchmarks() -> Vec<BenchEntry> {
+    vec![
+        entry!(
+            "season_simulation",
+            "Season Sim (153d)",
+            1_000,
+            bench_season_simulation
+        ),
+        entry!(
+            "seasonal_pipeline",
+            "Seasonal Pipeline (153d)",
+            1_000,
+            bench_seasonal_pipeline
+        ),
+    ]
+}
+
+pub fn build_benchmarks() -> Vec<BenchEntry> {
+    let mut all = Vec::with_capacity(24);
+    all.extend(et0_benchmarks());
+    all.extend(soil_benchmarks());
+    all.extend(hydrology_benchmarks());
+    all.extend(crop_benchmarks());
+    all.extend(ecology_benchmarks());
+    all.extend(pipeline_benchmarks());
+    all
 }

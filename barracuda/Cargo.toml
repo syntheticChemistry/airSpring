@@ -19,7 +19,6 @@ default = ["testutil"]
 testutil = []
 npu = ["dep:akida-driver"]
 guidestone = ["dep:primalspring"]
-standalone-http = []
 
 [dependencies]
 # BarraCuda 0.3.7: standalone sovereign math engine (ecoPrimals/barraCuda).
@@ -53,11 +52,7 @@ bingocube-nautilus = { version = "0.1.0", path = "../../primalTools/bingoCube/na
 serde = { version = "1", features = ["derive"] }
 
 # wgpu 28 — matches barraCuda 0.3.7's pinned version for type compatibility.
-# Used by GPU buffer I/O (bytemuck transmute) and device interaction.
 wgpu = { version = "28", default-features = false, features = ["wgsl", "vulkan", "vulkan-portability"] }
-
-# bytemuck: safe transmute for GPU buffer I/O (f32 ↔ bytes).
-bytemuck = { version = "1", features = ["derive"] }
 
 # BrainChip AKD1000 NPU driver — pure Rust, optional.
 akida-driver = { path = "../../../primals/toadStool/crates/neuromorphic/akida-driver", optional = true }

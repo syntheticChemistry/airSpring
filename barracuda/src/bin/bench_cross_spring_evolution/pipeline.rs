@@ -145,9 +145,11 @@ pub fn bench_s87_deep_evolution(v: &mut ValidationHarness) {
         true,
     );
 
+    #[allow(unexpected_cfgs)]
+    let fhe_available = cfg!(feature = "domain-fhe");
     v.check_bool(
         "S87: FHE shader arithmetic (NTT/INTT) available",
-        cfg!(feature = "domain-fhe"),
+        fhe_available,
     );
 
     println!("  S87 deep evolution: {:.1?}", t0.elapsed());
