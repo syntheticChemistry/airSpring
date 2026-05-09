@@ -19,7 +19,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,284/1,284 PASS** | 60 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB, MC ET₀ uncertainty, bootstrap/jackknife CI, SPI drought index |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **986 lib + 316 integration (1,302 barracuda) + 62 forge = 1,364 total** | 91 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
+| Phase 1: Rust validation | **1,008 lib + 316 integration (1,324 barracuda) + 62 forge = 1,386 total** | 93 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (34/34 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -54,7 +54,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` (barracuda) | **986 passed**, 0 failures |
+| `cargo test --lib` (barracuda) | **1,008 passed**, 0 failures |
 | `cargo test --tests --all-features` (barracuda) | **316 passed** (integration + doc tests) |
 | `cargo test --lib` (metalForge) | **62 passed**, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **90.56% line coverage** |
@@ -229,12 +229,12 @@ airSpring/
 │   ├── bootstrap_jackknife/     # Bootstrap & Jackknife CI (20/20)
 │   ├── drought_index/           # SPI drought index (20/20)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (986 lib + 316 integration/doc = 1,302 tests, 91 binaries, barraCuda 0.3.7 / wgpu 28, Edition 2024)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (1,008 lib + 316 integration/doc = 1,324 tests, 93 binaries, barraCuda 0.3.7 / wgpu 28, Edition 2024)
 │   ├── src/
 │   │   ├── biomeos/                # biomeOS socket resolution + primal discovery (3 sub-modules)
 │   │   ├── eco/                 # Domain modules (22 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine + drought_index)
 │   │   ├── gpu/                 # ToadStool/BarraCuda GPU bridge (25 Tier A, ops 0-19 upstream + BrentGpu + RichardsGpu)
-│   │   ├── data/                # Data provider abstraction (HttpProvider, BiomeosProvider, NestGateProvider)
+│   │   ├── data/                # Data provider abstraction (Songbird sovereign transport)
 │   │   ├── ipc/                 # Inter-primal communication (provenance trio integration)
 │   │   ├── nautilus.rs          # bingoCube/nautilus evolutionary reservoir (NautilusBrain v0.1.0)
 │   │   ├── rpc/                 # JSON-RPC 2.0 IPC (error.rs, transport.rs, mod.rs)
@@ -242,7 +242,7 @@ airSpring/
 │   │   ├── tolerances/          # Domain-specific validation tolerances (60 named, 4 submodules)
 │   │   ├── certification/       # Absorbed guidestone organelle (L0-L4 layered certification)
 │   │   ├── validation/scenarios/ # Absorbed experiment scenarios (ScenarioRegistry, 3 scenarios)
-│   │   └── bin/                 # validate_*, bench_*, airspring UniBin, airspring_primal (92 declared)
+│   │   └── bin/                 # validate_*, bench_*, airspring UniBin (93 declared)
 │   ├── tests/                   # Integration + property tests (15 files + common/)
 │   └── Cargo.toml               # v0.10.0 (barraCuda 0.3.7, wgpu 28, clap 4)
 ├── niches/                      # BYOB niche definitions (airspring-ecology.yaml)
@@ -308,10 +308,10 @@ AGPL-3.0-or-later
 
 ---
 
-*May 8, 2026 — Deep debt evolution. methods.rs centralized 44 capability constants
-(drift-proof single source of truth). 3 composition experiment crates (exp001 55/55 local
-science parity, exp002 10/10 composition parity, exp003 4/4 foundation target validation).
-3 largest library files refactored (provenance 747→496, rpc 650→341, seasonal_pipeline
-738→539). 3 compilation errors fixed (autobins, NestGateProvider→IPC, fhe_ntt cfg).
-/proc paths gated behind cfg(target_os = "linux"). guideStone L1→L2 (IPC-wired).
-Zero production .unwrap() confirmed. All 145 #[expect()] suppressions valid. AGPL-3.0-or-later.*
+*May 9, 2026 — Deep debt resolution + eukaryotic evolution. Dead standalone-http feature
+removed (ureq code paths, broken dep). Unused bytemuck dep removed. .gitignore data/ bug
+fixed (was silently ignoring barracuda/src/data/ source). 6 pre-existing test failures fixed
+(provider constructors → try_new). Hardcoded primal names → primal_names:: constants.
+build_benchmarks refactored into domain groups. Zero clippy warnings. UniBin consolidation
+(certify/validate/serve/status/version). Certification organelle (L0-L4). Scenario registry
+(3 absorbed). 1,008 lib tests, 0 failures. 93 binaries. guideStone L2. AGPL-3.0-or-later.*

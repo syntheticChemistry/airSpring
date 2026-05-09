@@ -4,6 +4,21 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [Unreleased] - 2026-05-09
 
+### Deep Debt Resolution — Zero Warnings, Zero Failures (2026-05-09)
+
+- **Dead `standalone-http` feature removed**: Broken feature (no `ureq` dep ever in Cargo.toml) + all `UreqTransport` code + cfg branches. Sovereign-only transport via Songbird.
+- **Unused `bytemuck` dependency removed**: Zero imports anywhere in codebase.
+- **`.gitignore` `data/` bug fixed**: Pattern was silently ignoring `barracuda/src/data/` (5 Rust source files). Anchored to root `/data/`, added `control/**/data/`.
+- **6 pre-existing test failures fixed**: `data::open_meteo` + `data::usda_nass` tests now use `try_new`/`with_transport` instead of panicking `new()`.
+- **`NassProvider::from_env`/`from_file`**: Evolved from `new()` to `try_new()` — no panic on missing transport.
+- **Hardcoded primal names → `primal_names::*`**: `certification/bare.rs`, `airspring_guidestone.rs`.
+- **`build_benchmarks()` refactored**: 136→8 lines — split into domain groups (et0, soil, hydrology, crop, ecology, pipeline).
+- **All clippy warnings resolved**: `let-else`, `option_if_let_else`, `unexpected_cfgs`, `too_many_lines`.
+- **Duplicate `# Panics` doc sections**: Cleaned in `open_meteo.rs`, `usda_nass.rs`.
+- **Bare `#[allow(clippy::...)]`→`#[expect(..., reason)]`**: `data` test modules.
+- **Data module docs**: Updated to reflect sovereign-only transport (no ureq references).
+- **Test result**: 1,008 lib tests PASS, 0 failures, 0 clippy warnings.
+
 ### Interstadial Eukaryotic Evolution (2026-05-09)
 
 - **UniBin binary**: `airspring` — single binary with `certify`, `validate`, `serve`, `status`, `version` subcommands (clap 4). Absorbs guidestone and experiment runners into one eukaryotic cell.

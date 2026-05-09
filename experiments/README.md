@@ -1,7 +1,7 @@
 # airSpring Experiments
 
-**Updated**: May 8, 2026
-**Status**: 90 experiments (87 numbered + 3 composition crates), barraCuda 0.3.7 (wgpu 28), v0.10.0, Edition 2024 (rust-toolchain 1.92). 1284/1284 Python + 986 lib + 316 integration + 62 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 parity). 21/21 CPU-GPU parity modules. **Deep debt evolution pass**: `methods.rs` (44 centralized method constants), 3 composition experiment crates (exp001-003), 3 largest files refactored, guideStone L2. `#![cfg_attr(not(test), forbid(unsafe_code))]`, `#![deny(cast_*)]` library-strict, `warn(missing_docs)`, 60 centralized tolerances (5 submodules, Rust + Python mirror), **44/44 capabilities routable**, JSON-RPC 2.0 protocol compliant. 90.56% line coverage (gated at 90%). cargo-deny 0.19 clean. Zero C dependencies. Zero hardcoded primals. Zero `#[allow()]` in production. 10 MCP tools wired in primal dispatch (Squirrel AI discoverable). Platform-agnostic IPC (Transport enum: Unix + TCP, provenance trio fully migrated). Full validation pipeline green (2026-05-08).
+**Updated**: May 9, 2026
+**Status**: 90 experiments (87 numbered + 3 composition crates), barraCuda 0.3.7 (wgpu 28), v0.10.0, Edition 2024 (rust-toolchain 1.92). 1284/1284 Python + 1,008 lib + 316 integration + 62 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 parity). 21/21 CPU-GPU parity modules. UniBin eukaryotic evolution: `airspring` binary with `certify`/`validate`/`serve`/`status`/`version`. Composition experiments (exp001-003) absorbed into `barracuda/src/validation/scenarios/` — originals kept as reference. guideStone L2. 93 binaries. Zero clippy warnings. Zero test failures. cargo-deny 0.19 clean. Zero C dependencies. Full validation pipeline green (2026-05-09).
 
 ---
 

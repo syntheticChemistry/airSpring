@@ -7,6 +7,7 @@
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
+| **V0.10.0** | [AIRSPRING_V010_DEEP_DEBT_UPSTREAM_HANDOFF_MAY09_2026.md](handoffs/AIRSPRING_V010_DEEP_DEBT_UPSTREAM_HANDOFF_MAY09_2026.md) | 2026-05-09 | **Deep debt + upstream handoff** — dead features removed, 6 test failures fixed, .gitignore bug fixed, 14 docs reconciled (1,008 lib / 93 bins), primal evolution review, upstream gaps, composition patterns, downstream absorption patterns |
 | **V0.10.0** | [AIRSPRING_V010_INTERSTADIAL_EUKARYOTIC_HANDOFF_MAY09_2026.md](handoffs/AIRSPRING_V010_INTERSTADIAL_EUKARYOTIC_HANDOFF_MAY09_2026.md) | 2026-05-09 | **Interstadial eukaryotic evolution** — UniBin (certify/validate/serve/status/version), certification/ organelle (L0-L4), validation/scenarios/ (3 absorbed), deny.toml aws-lc-sys ban, fossilRecord/, IPC mapping, zero bare #[allow] |
 | **V0.10.0** | [AIRSPRING_V010_DOCS_CLEANUP_UPSTREAM_HANDOFF_MAY08_2026.md](handoffs/AIRSPRING_V010_DOCS_CLEANUP_UPSTREAM_HANDOFF_MAY08_2026.md) | 2026-05-08 | **Docs cleanup + upstream handoff** — 12 files reconciled (90 exp, 986 lib, 44 caps), primal wiring inventory, active gaps for 7 primal teams, composition patterns, archive pass |
 | **V0.10.0** | [AIRSPRING_V010_DEEP_DEBT_EVOLUTION_HANDOFF_MAY08_2026.md](handoffs/AIRSPRING_V010_DEEP_DEBT_EVOLUTION_HANDOFF_MAY08_2026.md) | 2026-05-08 | **Deep debt evolution** — methods.rs (44 constants), 3 experiment crates (exp001-003), 3 files refactored, 3 compilation fixes, /proc gating, guideStone L2 |

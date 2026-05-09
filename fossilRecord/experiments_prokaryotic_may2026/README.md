@@ -1,29 +1,26 @@
-# Fossil Record: Prokaryotic Experiment Binaries
+# Fossil: Prokaryotic Experiment Crates (May 2026)
 
-**What**: Standalone experiment crates (`exp001_local_science_parity`,
-`exp002_composition_parity`, `exp003_foundation_target_validation`) from the
-prokaryotic era of separate validation binaries.
+**Fossilized**: 2026-05-09
+**Superseded by**: `barracuda/src/validation/scenarios/` (UniBin eukaryotic)
 
-**When**: Pre-interstadial (before May 2026 eukaryotic evolution).
+## What was absorbed
 
-**Why fossilized**: These experiment crates are absorbed into the UniBin as
-`validation/scenarios/` modules (`s_local_science_parity`, `s_composition_parity`,
-`s_foundation_targets`). The standalone crates are no longer the primary
-validation path — the UniBin's `airspring validate` command replaces them.
+| Crate | Scenarios | UniBin scenario |
+|-------|-----------|-----------------|
+| `experiments/exp001_local_science_parity/` | 55/55 local science dispatch | `s_local_science_parity.rs` |
+| `experiments/exp002_composition_parity/` | 10/10 NUCLEUS niche parity | `s_composition_parity.rs` |
+| `experiments/exp003_foundation_target_validation/` | 4/4 foundation thread06 targets | `s_foundation_targets.rs` |
 
-**What supersedes**:
-- `exp001` → `barracuda/src/validation/scenarios/s_local_science_parity.rs`
-- `exp002` → `barracuda/src/validation/scenarios/s_composition_parity.rs`
-- `exp003` → `barracuda/src/validation/scenarios/s_foundation_targets.rs`
+## Why fossilized
 
-**Original locations**:
-- `experiments/exp001_local_science_parity/`
-- `experiments/exp002_composition_parity/`
-- `experiments/exp003_foundation_target_validation/`
+The interstadial eukaryotic evolution wave (primalSpring v0.9.25) directed
+springs to absorb standalone experiment crates into the UniBin's
+`validation/scenarios/` module. This eliminates separate Cargo workspaces,
+unifies the validation registry, and enables `airspring validate --tier rust`
+to run all scenarios from a single binary.
 
-The standalone crates remain in `experiments/` as build artifacts for CI
-backward compatibility. They share the same validation logic as the absorbed
-scenarios but execute as independent binaries rather than through the
-UniBin scenario runner.
+## Originals
 
-**Provenance**: airSpring v0.10.0, interstadial transition, May 2026.
+The standalone crate sources remain in `experiments/exp00{1,2,3}_*/` as
+reference. They compile independently but are no longer the canonical runners.
+The canonical path is `airspring validate`.
