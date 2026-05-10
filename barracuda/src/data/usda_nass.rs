@@ -13,7 +13,11 @@ use crate::data::provider::{
     DataError, HttpTransport, YieldProvider, YieldRecord, discover_transport,
 };
 
-const API_BASE: &str = "https://quickstats.nass.usda.gov/api/api_GET/";
+const DEFAULT_API_BASE: &str = "https://quickstats.nass.usda.gov/api/api_GET/";
+
+fn api_base() -> String {
+    std::env::var("NASS_API_BASE").unwrap_or_else(|_| DEFAULT_API_BASE.to_owned())
+}
 
 /// USDA NASS Quick Stats API provider.
 pub struct NassProvider {
@@ -95,8 +99,9 @@ impl YieldProvider for NassProvider {
         year_start: u32,
         year_end: u32,
     ) -> Result<Vec<YieldRecord>, DataError> {
+        let base = api_base();
         let url = format!(
-            "{API_BASE}?key={key}\
+            "{base}?key={key}\
              &source_desc=SURVEY\
              &sector_desc=CROPS\
              &commodity_desc={commodity}\

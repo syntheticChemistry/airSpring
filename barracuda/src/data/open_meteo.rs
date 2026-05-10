@@ -18,7 +18,11 @@
 use crate::data::provider::{DataError, HttpTransport, WeatherProvider, discover_transport};
 use crate::data::weather::DailyWeather;
 
-const ARCHIVE_URL: &str = "https://archive-api.open-meteo.com/v1/archive";
+const DEFAULT_ARCHIVE_URL: &str = "https://archive-api.open-meteo.com/v1/archive";
+
+fn archive_url() -> String {
+    std::env::var("OPEN_METEO_ARCHIVE_URL").unwrap_or_else(|_| DEFAULT_ARCHIVE_URL.to_owned())
+}
 
 const DAILY_VARS: &str = "temperature_2m_max,temperature_2m_min,temperature_2m_mean,\
 relative_humidity_2m_max,relative_humidity_2m_min,\
@@ -174,8 +178,9 @@ impl WeatherProvider for OpenMeteoProvider {
         start_date: &str,
         end_date: &str,
     ) -> Result<Vec<DailyWeather>, DataError> {
+        let base = archive_url();
         let url = format!(
-            "{ARCHIVE_URL}?latitude={lat}&longitude={lon}\
+            "{base}?latitude={lat}&longitude={lon}\
              &start_date={start_date}&end_date={end_date}\
              &daily={DAILY_VARS}\
              &timezone=America%2FDetroit\

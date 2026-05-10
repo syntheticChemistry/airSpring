@@ -11,6 +11,7 @@
 //! Runs the same algorithms at the same scale as `control/bench_python_timing.py`,
 //! then shells out to Python for timing comparison.
 
+mod bench_fns;
 mod benchmarks;
 
 use std::process::Command;

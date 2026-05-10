@@ -16,6 +16,8 @@
 //! Endosymbiosed into the library at the interstadial transition.
 
 pub mod bare;
+#[cfg(feature = "guidestone")]
+pub mod composition;
 pub mod health;
 
 use crate::validation::{ValidationHarness, banner, section};
