@@ -57,7 +57,7 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 
 ## Key Capabilities (JSON-RPC methods)
 
-44 methods registered in `capability_registry.toml`:
+45 methods registered in `capability_registry.toml`:
 
 - **Evapotranspiration (7):** `science.et0_fao56`, `science.et0_hargreaves`,
   `science.et0_priestley_taylor`, `science.et0_makkink`, `science.et0_turc`,
@@ -77,6 +77,7 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
   `ecology.spi_drought_index`, `ecology.autocorrelation`
 - **Provenance (4):** `provenance.begin`, `provenance.record`,
   `provenance.complete`, `provenance.status`
+- **Composition (1):** `composition.status`
 - **Infrastructure (6):** `health.liveness`, `health.readiness`,
   `capability.list`, `compute.offload`, `data.weather`, `data.cross_spring_weather`
 - **Cross-primal (2):** `primal.forward`, `primal.discover`

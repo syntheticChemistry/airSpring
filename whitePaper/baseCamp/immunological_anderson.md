@@ -1,6 +1,6 @@
 # airSpring Contributions to Paper 12: Immunological Anderson
 
-**Updated**: March 5, 2026 (v0.7.0)
+**Updated**: May 10, 2026 (v0.10.0)
 **Parent**: `gen3/baseCamp/12_immunological_anderson.md`
 **Status**: All 4 experiments validated (Exp 066-069) — tissue diversity, CytokineBrain, barrier state, cross-species
 

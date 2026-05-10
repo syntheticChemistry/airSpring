@@ -1,7 +1,7 @@
 +++
 title = "airSpring Validation Summary"
 description = "Precision agriculture & irrigation — 1,386 Rust tests, 90 experiments (87 + 3 composition), 14.3× speedup, 45/45 capabilities routable, 25 notebooks, UniBin eukaryotic, zero failures"
-date = 2026-05-09
+date = 2026-05-10
 
 [taxonomies]
 primals = ["barracuda", "toadstool", "biomeos", "nestgate", "squirrel", "coralreef", "petaltongue", "beardog", "songbird"]
@@ -14,15 +14,15 @@ springs = ["airspring", "hotspring", "wetspring", "neuralspring", "groundspring"
 - **1,284 Python baseline checks** (60 papers reproduced)
 - **90 experiments** across 12 categories + 3 composition crates (exp001 local parity, exp002 composition parity, exp003 foundation targets)
 - **14.3× geometric mean** Rust-vs-Python speedup (24/24 algorithms, 21/21 CPU-GPU parity)
-- **44/44 IPC capabilities** routable (science + ecology + provenance + coordination)
-- **44 centralized method constants** in `methods.rs` (drift-proof, single source of truth)
+- **45/45 IPC capabilities** routable (science + ecology + provenance + composition + coordination)
+- **45 centralized method constants** in `methods.rs` (drift-proof, single source of truth)
 - **93 validation binaries** (all zero-panic, OrExit pattern, UniBin consolidation)
 - **90.56% line coverage** (gated at 90%)
 - **60 named tolerances** in 5 submodules (Rust + Python mirror, zero inline magic numbers)
 - **25 Tier A GPU modules** (20 upstream batched ops, local_dispatch retired)
 - **Zero C dependencies**, zero unsafe, zero `#[allow()]`, Edition 2024
 - **guideStone Level 2** (IPC-wired, composition experiment crates)
-- **44-method capability_registry.toml** (CI sync-tested vs niche.rs)
+- **45-method capability_registry.toml** (CI sync-tested vs niche.rs + canonical cross-sync)
 - **36 foundation targets** + **6 toadStool workloads** (thread06_ag)
 - **deny.toml** promoted to workspace root (ecoBin v3.0, ring/openssl banned)
 - **3 largest files refactored** (provenance 747→496, rpc 650→341, seasonal_pipeline 738→539)

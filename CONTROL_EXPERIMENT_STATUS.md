@@ -1197,10 +1197,10 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 
 ---
 
-*Initialized: February 16, 2026 — Updated: May 8, 2026 (v0.10.0, deep debt evolution)*
-*90 experiments (87 + 3 composition crates), 1284/1284 Python, 986 lib + 316 integration/doc + 62 forge = 1,364 total tests, 91 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules), barraCuda 0.3.7 (wgpu 28), Rust Edition 2024. biomeOS niche: 44 capabilities, 4 deploy graphs. 44 centralized method constants (methods.rs). guideStone Level 2 (IPC-wired). 60 tolerances in 5 submodules. 90.56% line coverage (fail-under-lines 90). cargo-deny 0.19 clean. 25 notebooks (20 paper + 5 sporePrint). exp001: 55/55, exp002: 10/10, exp003: 4/4. capability_registry.toml + deny.toml at workspace root.*
+*Initialized: February 16, 2026 — Updated: May 10, 2026 (v0.10.0, post-interstadial evolution)*
+*90 experiments (87 + 3 composition crates), 1284/1284 Python, 1,008 lib + 316 integration/doc + 62 forge = 1,386 total tests, 93 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules), barraCuda 0.3.7 (wgpu 28), Rust Edition 2024. biomeOS niche: 45 capabilities, 4 deploy graphs (incl. skunkBat). 45 centralized method constants (methods.rs). guideStone Level 2 (IPC-wired). 60 tolerances in 5 submodules. 90.56% line coverage (fail-under-lines 90). cargo-deny 0.19 clean. 25 notebooks (20 paper + 5 sporePrint). exp001: 55/55, exp002: 10/10, exp003: 4/4. capability_registry.toml + deny.toml at workspace root.*
 *8 ET₀ methods + SCS-CN runoff + Green-Ampt infiltration + coupled runoff-infiltration + VG inverse + full-season WB + Exp 058 Climate Scenario (46/46).*
-*Niche adapter (44 capabilities, transitional binary → biomeOS graph deployment). Atlas decade 80yr (102/102). NASS real (99/99). NCBI diversity (63/63).*
+*Niche adapter (45 capabilities, transitional binary → biomeOS graph deployment). Atlas decade 80yr (102/102). NASS real (99/99). NCBI diversity (63/63).*
 *25 Tier A + 6 GPU-local modules. Ops 5-8 GPU-first (ToadStool S87). GPU stats (neuralSpring S69).*
 *Seasonal pipeline GPU Stages 1-3. 73/73 atlas PASS (12 stations, 4800 results). 146/146 + 32/32 cross-spring benchmarks (Exp 077). Exp 064-069 immunological Anderson (Paper 12).*
 *metalForge 27 workloads, 29/29 cross-system. AKD1000 NPU live (3 experiments).*

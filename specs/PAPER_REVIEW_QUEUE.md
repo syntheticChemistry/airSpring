@@ -281,7 +281,7 @@ wetSpring 16S pipeline (OTU table, Shannon H′) → airSpring Anderson coupling
 - Queue items 23-24 (Tier 4) are longer-horizon explorations (evolutionary optimization, microbiome)
 - All 41 paper reproductions use **open data** — zero institutional access, zero proprietary sensors
 - Every completed paper has been validated through the full pipeline: Python → Rust CPU → GPU/NPU
-- Three compute tiers verified: 40+ control dirs, 91 Rust binaries, 24 Tier A + 2 Tier B GPU modules, 3 NPU experiments
+- Three compute tiers verified: 40+ control dirs, 93 Rust binaries, 25 Tier A + 2 Tier B GPU modules, 3 NPU experiments
 - CPU parity chain: Paper → Python control → Barracuda CPU → Barracuda GPU → Pure GPU workload → metalForge cross-system
 - ET₀ method coverage: PM (FAO-56), Priestley-Taylor, Hargreaves, Thornthwaite, Makkink, Turc, Hamon, Blaney-Criddle — 8 independent methods
 - GPU math portability: all 13 GPU orchestrator modules validated (Exp 047, 46/46 checks)

@@ -1,8 +1,8 @@
 # Local NUCLEUS Deployment on Eastgate
 
-**Date**: March 17, 2026
-**Status**: Planning — prerequisite for all baseCamp extensions
-**Hardware**: Eastgate (i9-12900K, RTX 4070, AKD1000, 32 GB DDR5, 2 TB NVMe)
+**Date**: May 10, 2026 (updated from March 17)
+**Status**: Steps 0-2 complete, Step 3 next — prerequisite for all baseCamp extensions
+**Hardware**: Eastgate (i9-12900K, RTX 4070, AKD1000, 64 GB DDR5-5101, 2 TB NVMe)
 
 ---
 
@@ -18,7 +18,7 @@ the minimum viable orchestration layer without requiring LAN HPC.
 | Step | Status | What |
 |------|--------|------|
 | 0 | DONE | metalForge cross-system routing (GPU+NPU+CPU, 27 workloads) |
-| 1 | DONE | airSpring NUCLEUS primal (41 caps, 28/28 cross-primal pipeline) |
+| 1 | DONE | airSpring NUCLEUS primal (45 caps, 28/28 cross-primal pipeline) |
 | 2 | DONE | Local NUCLEUS Tower on Eastgate (7 primals discovered) |
 | 3 | NEXT | NestGate weather provider (replace direct HTTP) |
 | 4 | NEXT | NestGate NCBI 16S (baseCamp 06 extension) |

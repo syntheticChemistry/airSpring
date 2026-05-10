@@ -1,18 +1,18 @@
 # airSpring wateringHole
 
-**Updated**: May 9, 2026 | **Version**: v0.10.0 (eukaryotic UniBin)
+**Updated**: May 10, 2026 | **Version**: v0.10.0 (post-interstadial, 45 capabilities)
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
+| **V0.10.0** | [AIRSPRING_V010_POST_INTERSTADIAL_UPSTREAM_HANDOFF_MAY10_2026.md](handoffs/AIRSPRING_V010_POST_INTERSTADIAL_UPSTREAM_HANDOFF_MAY10_2026.md) | 2026-05-10 | **Post-interstadial upstream handoff** — composition.status wired, skunkBat in deploy graph, capability cross-sync vs canonical 403, guidestone feature anchored, env-overridable URLs, 14+ docs reconciled (45 caps), primal gaps + patterns for all teams |
 | **V0.10.0** | [AIRSPRING_V010_DEEP_DEBT_UPSTREAM_HANDOFF_MAY09_2026.md](handoffs/AIRSPRING_V010_DEEP_DEBT_UPSTREAM_HANDOFF_MAY09_2026.md) | 2026-05-09 | **Deep debt + upstream handoff** — dead features removed, 6 test failures fixed, .gitignore bug fixed, 14 docs reconciled (1,008 lib / 93 bins), primal evolution review, upstream gaps, composition patterns, downstream absorption patterns |
 | **V0.10.0** | [AIRSPRING_V010_INTERSTADIAL_EUKARYOTIC_HANDOFF_MAY09_2026.md](handoffs/AIRSPRING_V010_INTERSTADIAL_EUKARYOTIC_HANDOFF_MAY09_2026.md) | 2026-05-09 | **Interstadial eukaryotic evolution** — UniBin (certify/validate/serve/status/version), certification/ organelle (L0-L4), validation/scenarios/ (3 absorbed), deny.toml aws-lc-sys ban, fossilRecord/, IPC mapping, zero bare #[allow] |
 | **V0.10.0** | [AIRSPRING_V010_DOCS_CLEANUP_UPSTREAM_HANDOFF_MAY08_2026.md](handoffs/AIRSPRING_V010_DOCS_CLEANUP_UPSTREAM_HANDOFF_MAY08_2026.md) | 2026-05-08 | **Docs cleanup + upstream handoff** — 12 files reconciled (90 exp, 986 lib, 44 caps), primal wiring inventory, active gaps for 7 primal teams, composition patterns, archive pass |
 | **V0.10.0** | [AIRSPRING_V010_DEEP_DEBT_EVOLUTION_HANDOFF_MAY08_2026.md](handoffs/AIRSPRING_V010_DEEP_DEBT_EVOLUTION_HANDOFF_MAY08_2026.md) | 2026-05-08 | **Deep debt evolution** — methods.rs (44 constants), 3 experiment crates (exp001-003), 3 files refactored, 3 compilation fixes, /proc gating, guideStone L2 |
 | **V0.10.0** | [AIRSPRING_V010_PAPER_NOTEBOOKS_ECOSYSTEM_WIRING_HANDOFF_MAY07_2026.md](handoffs/AIRSPRING_V010_PAPER_NOTEBOOKS_ECOSYSTEM_WIRING_HANDOFF_MAY07_2026.md) | 2026-05-07 | **Paper notebooks + ecosystem wiring + parity audit** — 20 paper notebooks (first spring done), foundation thread06 (36 targets, 6 workloads), projectNUCLEUS expansion, capability_registry.toml (44 methods), deny.toml promoted, guideStone L1 scaffold |
-| **V0.10.0** | [AIRSPRING_V010_DEEP_AUDIT_EXECUTION_HANDOFF_MAR24_2026.md](handoffs/AIRSPRING_V010_DEEP_AUDIT_EXECUTION_HANDOFF_MAR24_2026.md) | 2026-03-24 | **Deep audit execution** — cargo-deny 0.19 evolution, +43 tests (986 lib / 1,364 total), 90.56% coverage, `const assert` tolerance contracts, SPDX compliance, `blake3` cc wrapper, TCP mock IPC testing pattern |
 | **≤V0.9.0** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 
 ## Cross-Spring Documents
@@ -35,6 +35,7 @@
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_V010_DEEP_AUDIT_EXECUTION_HANDOFF_MAR24_2026.md` | v0.10.0: Deep audit execution — cargo-deny, +43 tests (986 lib), 90.56% coverage, tolerance contracts (superseded by May09 deep debt upstream) |
 | `handoffs/archive/AIRSPRING_V010_DEEP_DEBT_EVOLUTION_HANDOFF_APR27_2026.md` | v0.10.0: Deep debt evolution — 60 centralized tolerances, registry alignment (superseded by May08 deep debt) |
 | `handoffs/archive/AIRSPRING_V010_ECOSYSTEM_ABSORPTION_PRIMAL_SPRING_HANDOFF_MAR24_2026.md` | v0.10.0: ecosystem absorption — PRIMAL_REGISTRY, CONTRIBUTING/SECURITY, upstream contract pinning, GPU test_pool, deploy metadata, 1,321 tests (superseded by V0.10.0 Mar24 deep audit execution) |
 | `handoffs/archive/AIRSPRING_V010_DEEP_AUDIT_EXECUTION_BARRACUDA_TOADSTOOL_HANDOFF_MAR24_2026.md` | v0.10.0: deep audit execution — three-tier capability discovery, PRIMAL_NAME-derived RPC, provenance headers, forge alignment, doc reconciliation (superseded by V0.10.0 Mar24 ecosystem absorption) |
