@@ -31,6 +31,8 @@ pub const LOAMSPINE: &str = "loamspine";
 pub const SWEETGRASS: &str = "sweetgrass";
 /// Visualization / interactive exploration primal.
 pub const PETALTONGUE: &str = "petaltongue";
+/// Defensive network security primal (metadata-only recon, graduated defense).
+pub const SKUNKBAT: &str = "skunkbat";
 /// Neural API / capability routing primal (provenance trio gateway).
 pub const NEURAL_API: &str = "neural-api";
 
@@ -90,6 +92,7 @@ mod tests {
             LOAMSPINE,
             SWEETGRASS,
             PETALTONGUE,
+            SKUNKBAT,
             NEURAL_API,
         ] {
             assert_eq!(name, name.to_lowercase(), "{name} must be lowercase");

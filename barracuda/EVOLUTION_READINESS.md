@@ -1,10 +1,10 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: March 24, 2026 (v0.10.0 — Cross-ecosystem absorption: canonical `PRIMAL_NAME`/`PRIMAL_DOMAIN` (healthSpring V34), `OnceLock` GPU probe caching (toadStool S158), `cast` module with safe numeric casts (neuralSpring S162), `DispatchOutcome<T>` as library type (wetSpring V126), coralReef/Squirrel discovery functions (healthSpring V34), `mul_add()` FMA evolution (18 sites, barraCuda Sprint 7), `GemmF64` transpose documented in evolution gaps (groundSpring V113), `ValidationSink` upstream proposal (ludoSpring V23). Zero clippy warnings.)
+**Last Updated**: May 10, 2026 (v0.10.0 — Eukaryotic UniBin evolution, deep debt resolution, post-interstadial. Certification organelle (L0-L4), scenario registry (3 absorbed), dead standalone-http removed, 6 test failures fixed, hardcoded primals→constants, zero clippy warnings.)
 **barraCuda**: v0.3.7 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry, SpringDomain newtype, F64BuiltinCapabilities DF64 fields)
 **ToadStool**: S147+ (20,015 tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient, hw-learn, spirv_codegen_safety)
 **coralReef**: Phase 10 Iteration 44 sovereign Rust GPU compiler (NVIDIA + AMD, 1669+48 tests, VFIO dispatch)
-**Handoff**: V0.10.0 (full validation pipeline green + cross-spring absorption + zero C deps + biomeOS IPC alignment + all-binary zero-panic + compute_dispatch client + zero hardcoded primals + proptest fuzz)
+**Handoff**: V0.10.0 (eukaryotic UniBin + deep debt zero-warnings + certification organelle + scenario registry + deny.toml aws-lc-sys ban + 1,008 lib tests)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -150,7 +150,7 @@ BarraCuda (while still embedded in ToadStool) underwent massive evolution since 
 | Capability | Module | Wired In | Status |
 |-----------|--------|----------|--------|
 | `barracuda::tolerances` | `tolerances` | v0.3.7 | **LEANING** — re-exported |
-| `barracuda::validation::ValidationHarness` | `validation` | v0.3.7 | **LEANING** — all 91 binaries (84 validation + 4 bench + 3 operational; incl. validate_atlas, 1393 checks) |
+| `barracuda::validation::ValidationHarness` | `validation` | v0.3.7 | **LEANING** — all 93 binaries (84 validation + 4 bench + 3 operational + 1 UniBin + 1 guidestone; incl. validate_atlas, 1393 checks) |
 | `pde::richards::solve_richards` | `pde` | v0.4.0 | **WIRED** — `gpu::richards` |
 | `pde::crank_nicolson::CrankNicolson1D` | `pde` | v0.4.4 | **WIRED** — CN f64 diffusion cross-val |
 | `optimize::nelder_mead` | `optimize` | v0.4.1 | **WIRED** — isotherm fitting |
@@ -235,7 +235,7 @@ neuralSpring (architecture), airSpring (domain science).
 | `moving_window_stats` | wetSpring | IoT stream smoothing |
 | `ridge_regression` | wetSpring | Sensor correction pipeline |
 | `nelder_mead`, `multi_start` | neuralSpring | Isotherm fitting |
-| `ValidationHarness` | neuralSpring | All 91 binaries (84 validation + 4 bench + 3 operational) |
+| `ValidationHarness` | neuralSpring | All 93 binaries (84 validation + 4 bench + 3 operational + 1 UniBin + 1 guidestone) |
 | `norm_ppf` (Moro 1995) | hotSpring | MC ET₀ parametric confidence intervals |
 | `brent` (Brent 1973) | neuralSpring | VG pressure head inversion (θ→h) |
 | `pde::richards` | airSpring → upstream | 1D Richards equation (absorbed S40) |
@@ -412,7 +412,7 @@ metalForge forge migrated from wgpu 22 to wgpu 28 (eliminated duplicate wgpu com
 |------|--------|
 | `cargo fmt --check` | **PASS** (both crates) |
 | `cargo clippy --all-targets -- -W clippy::pedantic -W clippy::nursery -D warnings` | **PASS** — 0 warnings |
-| `cargo test --lib` | **943 lib pass**, 0 fail |
+| `cargo test --lib` | **1,008 lib pass**, 0 fail |
 | `cargo test --tests` | **316 integration pass**, 0 fail |
 | Cross-spring evolution | **11/11 pass** |
 | CPU vs Python | **24/24 algorithms**, 21.0× geometric mean speedup |

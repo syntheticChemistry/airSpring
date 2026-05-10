@@ -366,6 +366,41 @@ pub fn handle_primal_forward(params: &serde_json::Value) -> serde_json::Value {
     )
 }
 
+/// biomeOS `composition.status` — reports active users, primal health,
+/// and resource pressure for the Pathway Learner and neuralAPI dashboard.
+pub fn handle_composition_status(state: &NicheState) -> serde_json::Value {
+    let trio_available = airspring_barracuda::ipc::provenance::is_available();
+    let nestgate = discover_data_primal().is_some();
+    let toadstool = discover_compute_primal().is_some();
+    let skunkbat = biomeos::discover_primal_socket(primal_names::SKUNKBAT).is_some();
+
+    let healthy_count = u32::from(trio_available)
+        + u32::from(nestgate)
+        + u32::from(toadstool)
+        + u32::from(skunkbat);
+    let total_optional = 4_u32;
+    let health_ratio = f64::from(healthy_count) / f64::from(total_optional);
+
+    serde_json::json!({
+        "niche": niche::NICHE_NAME,
+        "version": env!("CARGO_PKG_VERSION"),
+        "active_users": state.requests_served.load(Ordering::Relaxed),
+        "primal_health": {
+            "ratio": health_ratio,
+            "healthy": healthy_count,
+            "total_optional": total_optional,
+            "provenance_trio": trio_available,
+            (primal_names::NESTGATE): nestgate,
+            (primal_names::TOADSTOOL): toadstool,
+            (primal_names::SKUNKBAT): skunkbat,
+        },
+        "resource_pressure": {
+            "uptime_secs": state.start_time.elapsed().as_secs(),
+            "capabilities": niche::CAPABILITIES.len(),
+        },
+    })
+}
+
 pub fn handle_primal_discover() -> serde_json::Value {
     let socket_dir = biomeos::resolve_socket_dir();
     let primals = biomeos::discover_all_primals();

@@ -1,7 +1,7 @@
 # airSpring — Ecological & Agricultural Sciences
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
-**Date**: May 9, 2026
+**Date**: May 10, 2026
 **Version**: 0.10.0 (eukaryotic UniBin)
 **License**: AGPL-3.0-or-later
 
@@ -33,12 +33,12 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | Phase 3.5: NPU edge | **AKD1000 live** | 3 experiments, 95/95 NPU checks, ~48µs inference |
 | Phase 3.7: metalForge live | **5 substrates discovered** | RTX 4070 + Titan V + AKD1000 + i9-12900K, 27 workloads route |
 | Phase 3.8: Mixed-hardware pipeline | **66/66 PASS** | 7-stage GPU→NPU PCIe bypass, NUCLEUS mesh routing (Exp 076: 60/60) |
-| Phase 3.9: NUCLEUS primal | **44 capabilities** | airSpring biomeOS primal, 44 capabilities (science + provenance + cross-spring), JSON-RPC |
+| Phase 3.9: NUCLEUS primal | **45 capabilities** | airSpring biomeOS primal, 45 capabilities (science + provenance + composition + cross-spring), JSON-RPC |
 | Phase 4.0: Cross-primal pipeline | **28/28 PASS** | ecology domain, capability.call routing, cross-primal forwarding |
 | Phase 4.1: Full dispatch experiment | **51/51 PASS** | CPU vs GPU parity across all domains (Exp 064) |
 | Phase 4.2: biomeOS graph experiment | **35/35 PASS** | Offline ecology pipeline, deployment graph validated (Exp 065) |
 | Phase 4.3: Paper 12 immunological Anderson | **4 experiments** | Tissue diversity, CytokineBrain, barrier state, cross-species (Exp 066-069) |
-| Phase 4.5: biomeOS composition | **4 graphs** | Provenance trio, NestGate routing, niche deploy, cross-spring data exchange |
+| Phase 4.5: biomeOS composition | **4 graphs + skunkBat** | Provenance trio, NestGate routing, niche deploy (9 nodes incl. skunkBat), cross-spring data exchange |
 | Phase 4.6: neuralAPI integration | **3 enhancements** | Structured metrics, operation dependencies, cost estimates — Pathway Learner ready |
 | Phase 4.7: Penny Irrigation | Vision | Sovereign, consumer hardware |
 | Phase 5.6: Deep debt resolution | **All findings resolved** | v0.8.4: cast lint evolution, eprintln→tracing, hardcoded primal names→constants, deny.toml wildcards=deny, Blaney-Criddle p→benchmark JSON, primal binary refactored (4 modules), Python provenance standardized (20 scripts), CI expanded (cross-compile, metalForge deny, 11 more validation binaries) |
@@ -261,7 +261,7 @@ airSpring/
 ├── notebooks/                  # Publishable notebooks (25 total)
 │   ├── papers/                 # 20 paper baseline notebooks (Batch 1)
 │   └── *.ipynb                 # 5 sporePrint summary notebooks
-├── capability_registry.toml    # 44 capabilities (synced with niche.rs, CI tested)
+├── capability_registry.toml    # 45 capabilities (synced with niche.rs, CI tested + cross-sync vs canonical 403)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
 │   └── handoffs/                # Versioned handoffs (V010 current)
 ├── graphs/                      # biomeOS deployment graphs (eco pipeline, provenance pipeline, niche deploy, cross-primal)
@@ -297,7 +297,7 @@ airSpring/
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
 | `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V010 current) |
 | `docs/PRIMAL_GAPS.md` | Primal composition gaps for primalSpring handback |
-| `capability_registry.toml` | 44 capabilities — Songbird/biomeOS discovery (sync-tested vs niche.rs) |
+| `capability_registry.toml` | 45 capabilities — Songbird/biomeOS discovery (sync-tested vs niche.rs + cross-sync vs canonical 403) |
 | `notebooks/papers/PAPER_NOTEBOOK_PATTERN.md` | Paper baseline notebook template |
 | `notebooks/papers/*.ipynb` | 20 publishable paper baseline notebooks |
 | `notebooks/*.ipynb` | 5 sporePrint summary notebooks |
@@ -308,7 +308,9 @@ AGPL-3.0-or-later
 
 ---
 
-*May 9, 2026 — Deep debt resolution + eukaryotic evolution. Dead standalone-http feature
+*May 10, 2026 — Post-interstadial evolution. composition.status wired, skunkBat deploy graph,
+capability cross-sync vs canonical 403, CONTEXT.md reconciled, EVOLUTION_READINESS.md refreshed.
+May 9 — Deep debt resolution + eukaryotic evolution. Dead standalone-http feature
 removed (ureq code paths, broken dep). Unused bytemuck dep removed. .gitignore data/ bug
 fixed (was silently ignoring barracuda/src/data/ source). 6 pre-existing test failures fixed
 (provider constructors → try_new). Hardcoded primal names → primal_names:: constants.

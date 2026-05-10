@@ -1,6 +1,6 @@
 # Context — airSpring
 
-**Doc sync:** 2026-03-24 (v0.10.0; post–deep-audit execution; all CI gates green).
+**Doc sync:** 2026-05-10 (v0.10.0; eukaryotic UniBin; post-interstadial; all CI gates green).
 
 ## What This Is
 
@@ -21,36 +21,65 @@ agriculture, environmental hydrology, and land-water-energy interactions.
 Its validated Rust modules feed into GPU acceleration via barraCuda shaders
 and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 
+## Architecture
+
+- **Eukaryotic UniBin** — single `airspring` binary with `certify`, `validate`,
+  `serve`, `status`, `version` subcommands. Pre-extinction experiment crates
+  fossilized in `fossilRecord/`.
+- **Certification organelle** — `certification/` library module (L0-L4 layered
+  guidestone validation, absorbed from standalone binary).
+- **Scenario registry** — `validation/scenarios/` modules (3 absorbed composition
+  experiments: local science parity, composition parity, foundation target).
+
 ## Technical Facts
 
 - **Language:** 100% Rust, zero C dependencies
 - **Architecture:** Two workspace crates (`airspring-barracuda` library + `airspring-forge` dispatch)
-- **Communication:** JSON-RPC 2.0 over Unix sockets + TCP (biomeOS capability routing, platform-agnostic Transport)
+- **Communication:** JSON-RPC 2.0 over Unix sockets + TCP (biomeOS capability routing, Songbird sovereign transport)
 - **License:** AGPL-3.0-or-later
-- **Lib tests:** 986 (barracuda, `cargo test --lib`)
+- **Lib tests:** 1,008 (barracuda, `cargo test --lib`)
 - **Integration + doc tests:** 316 (barracuda)
-- **Barracuda total:** 1,302 (986 lib + 316 integration/doc)
+- **Barracuda total:** 1,324 (1,008 lib + 316 integration/doc)
 - **Forge tests:** 62 (metalForge)
-- **Grand total:** 1,364 (both crates)
-- **Binaries:** 91 (84 validation, 4 bench, 3 operational)
+- **Grand total:** 1,386 (both crates)
+- **Binaries:** 93 (84 validation, 4 bench, 3 operational, 1 UniBin, 1 guidestone)
 - **Proptest invariants:** 7 (SVP, delta, Hargreaves, TAW, RAW, Ks)
 - **Line coverage:** 90.56% (cargo llvm-cov --lib --fail-under-lines 90)
 - **MSRV:** 1.92
 - **Edition:** 2024
 - **Crate count:** 2 workspace crates
 - **GPU backend:** barraCuda 0.3.7 (wgpu 28, Vulkan, DeviceCapabilities API)
-- **Experiments:** 87 (all PASS)
+- **Experiments:** 90 (all PASS)
+- **Capabilities:** 45 (science + ecology + provenance + composition + coordination + health)
+- **Deploy graphs:** 4 (provenance trio, NestGate routing, niche deploy w/ 9 nodes incl. skunkBat, cross-spring)
+- **GuideStone level:** L2 (IPC-wired, 3 composition scenarios)
+- **deny.toml:** workspace-root, `aws-lc-sys` + `aws-lc-rs` banned
 
 ## Key Capabilities (JSON-RPC methods)
 
-- `eco.daily_et0` — FAO-56 Penman-Monteith reference evapotranspiration
-- `eco.et0_multi_method` — 8-method ET₀ ensemble (PM, Hargreaves, Priestley-Taylor, Makkink, Turc, Hamon, Blaney-Criddle, Thornthwaite)
-- `eco.water_balance_season` — Full-season field water budget
-- `eco.richards_1d` — Unsaturated flow (Richards equation)
-- `eco.soil_calibration` — Dielectric sensor VWC calibration
-- `eco.crop_coefficient` — FAO-56 Kc with climate adjustment
-- `eco.diversity_indices` — Shannon, Simpson, Bray-Curtis biodiversity
-- `eco.drought_index` — Standardized Precipitation Index (SPI)
+44 methods registered in `capability_registry.toml`:
+
+- **Evapotranspiration (7):** `science.et0_fao56`, `science.et0_hargreaves`,
+  `science.et0_priestley_taylor`, `science.et0_makkink`, `science.et0_turc`,
+  `science.et0_hamon`, `science.et0_blaney_criddle`
+- **Water/yield (2):** `science.water_balance`, `science.yield_response`
+- **Soil physics (5):** `science.richards_1d`, `science.scs_cn_runoff`,
+  `science.green_ampt_infiltration`, `science.soil_moisture_topp`,
+  `science.pedotransfer_saxton_rawls`
+- **Crop/irrigation (3):** `science.dual_kc`, `science.sensor_calibration`, `science.gdd`
+- **Biodiversity (2):** `science.shannon_diversity`, `science.bray_curtis`
+- **Geophysics (1):** `science.anderson_coupling`
+- **Monthly ET/drought (4):** `science.thornthwaite`, `science.spi_drought_index`,
+  `science.autocorrelation`, `science.gamma_cdf`
+- **Time series (1):** `science.timeseries`
+- **Ecology aliases (7):** `ecology.et0_fao56`, `ecology.et0_hargreaves`,
+  `ecology.water_balance`, `ecology.yield_response`, `ecology.full_pipeline`,
+  `ecology.spi_drought_index`, `ecology.autocorrelation`
+- **Provenance (4):** `provenance.begin`, `provenance.record`,
+  `provenance.complete`, `provenance.status`
+- **Infrastructure (6):** `health.liveness`, `health.readiness`,
+  `capability.list`, `compute.offload`, `data.weather`, `data.cross_spring_weather`
+- **Cross-primal (2):** `primal.forward`, `primal.discover`
 
 ## What This Does NOT Do
 
@@ -59,12 +88,30 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - Does not handle cryptography, networking, or storage (those are BearDog, Songbird, NestGate)
 - Does not provide ML training — uses bingoCube/nautilus for evolutionary reservoir computing only
 
+## Primal Dependencies (runtime, zero compile-time coupling)
+
+| Primal | Role | Discovery |
+|--------|------|-----------|
+| **barraCuda** | GPU math primitives (ops 0-19, PDE, optimize, stats) | `barracuda` crate (path dep, Tier 4 target: optional + IPC-first) |
+| **biomeOS** | Orchestration, socket resolution, primal discovery | `biomeos::find_socket()` |
+| **toadStool** | Hardware discovery, compute dispatch | `compute.offload` IPC |
+| **bearDog** | TLS, key management | Sovereign TLS for transport |
+| **songbird** | NAT traversal, sovereign HTTP relay | `SongbirdTransport` IPC |
+| **nestGate** | Data routing, weather data provider | `data.weather` IPC |
+| **coralReef** | Shader compilation (WGSL → SPIR-V) | Discovery only |
+| **squirrel** | AI coordination | Discovery only |
+| **sweetGrass** | Provenance braiding | `provenance.*` IPC |
+| **rhizoCrypt** | DAG storage | Via provenance trio |
+| **loamSpine** | Configuration | Via biomeOS |
+
 ## Related Repositories
 
 - [wateringHole](https://github.com/ecoPrimals/wateringHole) — ecosystem standards and registry
-- [barraCuda](https://github.com/ecoPrimals/barraCuda) — GPU math library (800+ WGSL shaders)
+- [barraCuda](https://github.com/ecoPrimals/barraCuda) — GPU math library (767+ WGSL shaders)
 - [toadStool](https://github.com/ecoPrimals/toadStool) — hardware discovery and compute orchestration
 - [bingoCube](https://github.com/ecoPrimals/primalTools/bingoCube) — evolutionary reservoir computing
+- [projectNUCLEUS](https://github.com/sporeGarden/projectNUCLEUS) — deployable NUCLEUS infrastructure
+- [foundation](https://github.com/sporeGarden/foundation) — scientific knowledge layer
 
 ## Design Philosophy
 

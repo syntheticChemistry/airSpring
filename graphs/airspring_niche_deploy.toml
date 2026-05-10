@@ -29,8 +29,8 @@ spring = "airspring"
 version = "0.10.0"
 domain = "ecology"
 license = "AGPL-3.0-or-later"
-updated = "2026-03-24"
-capabilities_required = ["crypto", "network", "dag", "commit", "provenance", "storage", "compute", "ecology", "data.weather", "science.et0_fao56", "ecology.water_balance", "ecology.yield_response"]
+updated = "2026-05-10"
+capabilities_required = ["crypto", "network", "security", "dag", "commit", "provenance", "storage", "compute", "ecology", "data.weather", "science.et0_fao56", "ecology.water_balance", "ecology.yield_response"]
 
 # ── Node 1: BearDog (crypto + key management) ─────────────────────
 [[graph.node]]
@@ -62,12 +62,30 @@ capabilities = [
     "network.dns_resolve",
 ]
 
-# ── Node 3: rhizoCrypt (ephemeral DAG sessions) ───────────────────
+# ── Node 3: skunkBat (defensive network security) ─────────────────
+# Metadata-only reconnaissance, graduated defense. JH-5 forwarding unblocked.
+# Audit events forward to rhizoCrypt DAG + sweetGrass braid when Phase 3 ships.
+[[graph.node]]
+name = "skunkbat"
+binary = "skunkbat_primal"
+order = 3
+required = false
+depends_on = ["beardog", "songbird"]
+health_method = "security.health"
+by_capability = "security"
+capabilities = [
+    "security.monitor",
+    "security.quarantine",
+    "security.audit",
+    "security.health",
+]
+
+# ── Node 4: rhizoCrypt (ephemeral DAG sessions) ───────────────────
 # Pathway Learner hint: can start in parallel with loamSpine once BearDog is up.
 [[graph.node]]
 name = "rhizocrypt"
 binary = "rhizocrypt_primal"
-order = 3
+order = 4
 required = false
 depends_on = ["beardog"]
 health_method = "dag.health"
@@ -80,12 +98,12 @@ capabilities = [
     "health.check",
 ]
 
-# ── Node 4: loamSpine (immutable linear ledger) ───────────────────
+# ── Node 5: loamSpine (immutable linear ledger) ───────────────────
 # Pathway Learner hint: batching appends gives 10x speedup.
 [[graph.node]]
 name = "loamspine"
 binary = "loamspine_primal"
-order = 4
+order = 5
 required = false
 depends_on = ["beardog", "rhizocrypt"]
 health_method = "commit.health"
@@ -96,12 +114,12 @@ capabilities = [
     "commit.health",
 ]
 
-# ── Node 5: sweetGrass (semantic provenance braids) ────────────────
+# ── Node 6: sweetGrass (semantic provenance braids) ────────────────
 # Pathway Learner hint: attribution can run in parallel with NestGate store.
 [[graph.node]]
 name = "sweetgrass"
 binary = "sweetgrass_primal"
-order = 5
+order = 6
 required = false
 depends_on = ["beardog", "loamspine"]
 health_method = "provenance.health"
@@ -114,12 +132,12 @@ capabilities = [
     "provenance.health",
 ]
 
-# ── Node 6: NestGate (content-addressed storage) ──────────────────
+# ── Node 7: NestGate (content-addressed storage) ──────────────────
 # Pathway Learner hint: prewarming cache gives faster first-read.
 [[graph.node]]
 name = "nestgate"
 binary = "nestgate_primal"
-order = 6
+order = 7
 required = false
 depends_on = ["beardog", "songbird"]
 health_method = "health"
@@ -131,11 +149,11 @@ capabilities = [
     "storage.health",
 ]
 
-# ── Node 7: ToadStool (GPU/CPU compute dispatch) ──────────────────
+# ── Node 8: ToadStool (GPU/CPU compute dispatch) ──────────────────
 [[graph.node]]
 name = "toadstool"
 binary = "toadstool_primal"
-order = 7
+order = 8
 required = false
 depends_on = ["beardog", "songbird"]
 health_method = "compute.health"
@@ -152,13 +170,13 @@ capabilities = [
 TOADSTOOL_PRECISION = "auto"
 TOADSTOOL_MULTI_DEVICE = "true"
 
-# ── Node 8: airSpring (ecology + agriculture science) ──────────────
+# ── Node 9: airSpring (ecology + agriculture science) ──────────────
 # Reports composition status + operation dependencies via capability.list
 # so biomeOS Pathway Learner can optimize graph execution.
 [[graph.node]]
 name = "airspring"
 binary = "airspring_primal"
-order = 8
+order = 9
 required = true
 depends_on = ["beardog", "songbird"]
 health_method = "health.check"

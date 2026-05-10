@@ -82,6 +82,8 @@ pub const CAPABILITIES: &[&str] = &[
     // ── Cross-primal ──
     crate::methods::PRIMAL_FORWARD,
     crate::methods::PRIMAL_DISCOVER,
+    // ── Composition (biomeOS orchestration) ──
+    crate::methods::COMPOSITION_STATUS,
     // ── Health probes (biomeOS orchestration) ──
     crate::methods::HEALTH_LIVENESS,
     crate::methods::HEALTH_READINESS,

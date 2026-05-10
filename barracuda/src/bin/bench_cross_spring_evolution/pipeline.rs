@@ -145,7 +145,10 @@ pub fn bench_s87_deep_evolution(v: &mut ValidationHarness) {
         true,
     );
 
-    #[allow(unexpected_cfgs)]
+    #[expect(
+        unexpected_cfgs,
+        reason = "domain-fhe is an upstream barraCuda feature, not locally defined"
+    )]
     let fhe_available = cfg!(feature = "domain-fhe");
     v.check_bool(
         "S87: FHE shader arithmetic (NTT/INTT) available",

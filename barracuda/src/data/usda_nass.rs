@@ -42,7 +42,10 @@ impl NassProvider {
     /// Panics if no HTTP transport is available. Prefer [`Self::try_new`]
     /// for fallible construction.
     #[must_use]
-    #[allow(clippy::expect_used)]
+    #[expect(
+        clippy::expect_used,
+        reason = "panicking ctor retained for API compat; prefer try_new()"
+    )]
     pub fn new(api_key: String) -> Self {
         Self::try_new(api_key).expect("no HTTP transport available")
     }

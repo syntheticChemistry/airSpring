@@ -60,6 +60,7 @@ pub fn dispatch(
         }
         "primal.forward" => DispatchOutcome::Ok(handlers::handle_primal_forward(params)),
         "primal.discover" => DispatchOutcome::Ok(handlers::handle_primal_discover()),
+        "composition.status" => DispatchOutcome::Ok(handlers::handle_composition_status(state)),
         "compute.offload" => DispatchOutcome::Ok(handlers::handle_compute_offload(params)),
         "data.weather" => DispatchOutcome::Ok(handlers::handle_data_weather(params)),
         _ => DispatchOutcome::MethodNotFound(method.to_string()),

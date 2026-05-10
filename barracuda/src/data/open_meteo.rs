@@ -63,7 +63,10 @@ impl OpenMeteoProvider {
     /// Panics if no HTTP transport is available. Prefer [`Self::try_new`]
     /// for fallible construction.
     #[must_use]
-    #[allow(clippy::expect_used)]
+    #[expect(
+        clippy::expect_used,
+        reason = "panicking ctor retained for API compat; prefer try_new()"
+    )]
     pub fn new() -> Self {
         Self::try_new().expect("no HTTP transport available")
     }

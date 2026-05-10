@@ -22,7 +22,7 @@ spring = "airspring"
 version = "0.10.0"
 domain = "ecology"
 license = "AGPL-3.0-or-later"
-updated = "2026-03-24"
+updated = "2026-05-10"
 capabilities_required = ["data.weather", "ecology.water_balance", "science.shannon_diversity", "science.anderson_coupling", "storage", "compute"]
 
 # ═══════════════════════════════════════════════════════════════════════════════
