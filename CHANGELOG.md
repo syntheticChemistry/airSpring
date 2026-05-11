@@ -6,7 +6,9 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ### Tier 4 rewiring, certification layers L5–L6, Tier 4 math scenario (2026-05-11)
 
-- **Tier 4 — `barracuda` optional:** `barracuda` is now `optional = true` with a **`local`** feature (**default on**). The **`gpu`** module is feature-gated. New **`math.rs`** provides dual-path dispatch with **pure-Rust fallbacks** when barraCuda is off. **`ipc/barracuda_route.rs`** adds IPC forwarding for barraCuda-backed routes. The library **builds without the barraCuda source tree** when using **`--no-default-features`**.
+- **Tier 4 IPC-first — empty default features:** `[features].default = []` (was **`["local", "testutil"]`**). Opt in with **`--features local`** for in-tree barraCuda + wgpu; **`testutil`** remains as a convenience alias over `local`. Validation and bench **`[[bin]]` targets** declare **`required-features = ["local"]`** so **`cargo test`** / default builds do not compile them without explicit features.
+- **Tier 4 — `barracuda` optional:** `barracuda` remains **`optional = true`** behind **`local`**. The **`gpu`** module is feature-gated. **`math.rs`** provides dual-path dispatch with **pure-Rust fallbacks** when barraCuda is off. **`ipc/barracuda_route.rs`** adds IPC forwarding for barraCuda-backed routes. With **no features**, the library links **without** barraCuda.
+- **Deploy graphs:** **7** TOML graphs in `graphs/` (**was 4**): existing eco / provenance / niche / cross-primal pipelines plus **GPU batch**, **sovereign data**, and **uncertainty** deploy manifests.
 - **Certification engine — guideStone L5–L6 layers:** Layers **L0–L6** (was L0–L4 framing in older docs): **L5** NUCLEUS composition — `composition.status`, `method.register`, `compute.dispatch`; **L6** cross-spring pipeline — deploy graphs, capability registry, scenario registry. Current guideStone posture documented as **L4**, targeting **L6** with live NUCLEUS.
 - **Validation scenarios —** added **`s_tier4_math_parity`**; **10** UniBin validation scenarios total (was 9).
 

@@ -38,7 +38,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | Phase 4.1: Full dispatch experiment | **51/51 PASS** | CPU vs GPU parity across all domains (Exp 064) |
 | Phase 4.2: biomeOS graph experiment | **35/35 PASS** | Offline ecology pipeline, deployment graph validated (Exp 065) |
 | Phase 4.3: Paper 12 immunological Anderson | **4 experiments** | Tissue diversity, CytokineBrain, barrier state, cross-species (Exp 066-069) |
-| Phase 4.5: biomeOS composition | **4 graphs + skunkBat** | Provenance trio, NestGate routing, niche deploy (9 nodes incl. skunkBat), cross-spring data exchange |
+| Phase 4.5: biomeOS composition | **7 deploy graphs + skunkBat** | Provenance trio, NestGate routing, niche deploy (9 nodes incl. skunkBat), cross-spring data exchange, GPU batch, sovereign data, uncertainty |
 | Phase 4.6: neuralAPI integration | **3 enhancements** | Structured metrics, operation dependencies, cost estimates — Pathway Learner ready |
 | Phase 4.7: Penny Irrigation | Vision | Sovereign, consumer hardware |
 | Phase 5.6: Deep debt resolution | **All findings resolved** | v0.8.4: cast lint evolution, eprintln→tracing, hardcoded primal names→constants, deny.toml wildcards=deny, Blaney-Criddle p→benchmark JSON, primal binary refactored (4 modules), Python provenance standardized (20 scripts), CI expanded (cross-compile, metalForge deny, 11 more validation binaries) |
@@ -49,14 +49,14 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | Phase 5.11: Cross-ecosystem evolution | **All absorbed** | v0.8.9: Canonical `PRIMAL_NAME`/`PRIMAL_DOMAIN`, `OnceLock` GPU probe cache, `cast` module (safe numeric casts), `DispatchOutcome<T>` library type, coralReef/Squirrel discovery, `mul_add()` FMA (18 sites), smart refactors (4 monoliths → 19 modules: evapotranspiration, dual_kc, biomeos, validation), composition guidance |
 | Phase 5.12: Audit execution | **All findings resolved** | v0.9.0: `#![deny(cast_*)]` library strict, 3 new cast helpers (u32_usize, u64_usize, u64_f64), soil_moisture refactored (672→4 submodules), petalTongue 3-tier discovery, primal_dispatch integration tests (14), benchmark JSON provenance for all hardcoded values, CI lint config via Cargo.toml only, hardcoded socket paths removed |
 | Phase 5.13: Deep audit execution | **All debt resolved** | v0.10.0: Provenance registry 11→63 baselines, OrExit zero-panic across all 93 binaries, centralized tolerances (R², RMSE, IA, bio-diversity), `#[allow]`→`#[expect]` Rust 2024, smart refactors (data/provider→4 modules, evolution_gaps→resolved_issues), hardcoded primal names→`primal_names::*` constants, data accession IDs, cast helpers (f64_i32, usize_i32), determinism contract documented |
-| Phase 5.14: Tier 4 barracuda rewiring | **Complete** | `barracuda` optional with `local` feature (default on); `gpu` feature-gated; `math.rs` dual-path dispatch (pure-Rust fallbacks); `ipc/barracuda_route.rs` IPC forwarding; builds with `--no-default-features` without barraCuda source tree |
+| Phase 5.14: Tier 4 barracuda rewiring | **Complete** | Tier 4 IPC-first: `[features].default = []` (opt in with `--features local`); `barracuda` optional; `gpu` feature-gated; `math.rs` dual-path dispatch (pure-Rust fallbacks); `ipc/barracuda_route.rs` IPC forwarding; validation binaries `required-features = ["local"]`; IPC-only build without barraCuda source tree |
 
 ### Code Quality
 
 | Check | Status |
 |-------|--------|
-| `cargo test --lib` (barracuda) | **1,011 passed**, 0 failures |
-| `cargo test --tests --all-features` (barracuda) | **316 passed** (integration + doc tests) |
+| `cargo test -p airspring-barracuda --features local,testutil --lib` | **1,011 passed**, 0 failures |
+| `cargo test -p airspring-barracuda --tests --all-features` (or `--features local,testutil` for default-feature-aligned runs) | **316 passed** (integration + doc tests) |
 | `cargo test --lib` (metalForge) | **62 passed**, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **90.56% line coverage** |
 | `cargo clippy (pedantic + nursery, -D warnings)` | **0 warnings** (both crates) |
@@ -175,12 +175,12 @@ python scripts/download_open_meteo.py --all-stations --growing-season 2023
 bash run_all_baselines.sh
 
 # Rust validation (Phase 1)
-cd barracuda && cargo test
-cargo run --release --bin validate_et0
+cd barracuda && cargo test --features local,testutil --lib
+cargo run --release --features local --bin validate_et0
 
 # Benchmarks
-cargo run --release --bin bench_cpu_vs_python
-cargo run --release --bin bench_airspring_gpu
+cargo run --release --features local --bin bench_cpu_vs_python
+cargo run --release --features local --bin bench_airspring_gpu
 ```
 
 No institutional access required. Zero synthetic data in the default pipeline.
@@ -265,7 +265,7 @@ airSpring/
 ├── capability_registry.toml    # 46 capabilities (synced with niche.rs, CI tested + cross-sync vs canonical 413)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
 │   └── handoffs/                # Versioned handoffs (V010 current)
-├── graphs/                      # biomeOS deployment graphs (eco pipeline, provenance pipeline, niche deploy, cross-primal)
+├── graphs/                      # biomeOS deployment graphs (7 TOML: eco, provenance, niche, cross-primal, GPU batch, sovereign data, uncertainty)
 ├── CHANGELOG.md                 # Keep-a-Changelog versioned history
 ├── CONTROL_EXPERIMENT_STATUS.md # Detailed experiment log
 └── LICENSE                      # AGPL-3.0-or-later
@@ -309,7 +309,7 @@ AGPL-3.0-or-later
 
 ---
 
-*May 11, 2026 — Post-interstadial evolution. New IPC: **`method.register`**, **`composition.status`**, skunkBat deploy-graph path; capability cross-sync vs canonical **413**; CONTEXT.md reconciled; EVOLUTION_READINESS.md refreshed. **Tier 4 rewiring**: barraCuda `optional = true` with `local` (default), `math.rs` dual-path dispatch, `ipc/barracuda_route.rs`, `--no-default-features` without barraCuda source tree. Certification engine **L0–L6** (L4 cross-atomic provenance; L5 NUCLEUS composition; L6 cross-spring pipeline). Scenario registry **10** UniBin validation scenarios (incl. **`s_tier4_math_parity`**).
+*May 11, 2026 — Post-interstadial evolution. New IPC: **`method.register`**, **`composition.status`**, skunkBat deploy-graph path; capability cross-sync vs canonical **413**; CONTEXT.md reconciled; EVOLUTION_READINESS.md refreshed. **Tier 4 IPC-first**: `[features].default = []`, opt in `--features local`; barraCuda `optional = true`, `math.rs` dual-path dispatch, `ipc/barracuda_route.rs`, validation binaries `required-features = ["local"]`. Certification engine **L0–L6** (L4 cross-atomic provenance; L5 NUCLEUS composition; L6 cross-spring pipeline). Scenario registry **10** UniBin validation scenarios (incl. **`s_tier4_math_parity`**).
 May 9 — Deep debt resolution + eukaryotic evolution. Dead standalone-http feature
 removed (ureq code paths, broken dep). Unused bytemuck dep removed. .gitignore data/ bug
 fixed (was silently ignoring barracuda/src/data/ source). 6 pre-existing test failures fixed

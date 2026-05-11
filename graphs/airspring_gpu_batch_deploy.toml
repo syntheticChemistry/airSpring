@@ -1,0 +1,111 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# airSpring Deploy Graph — GPU Batch Compute
+#
+# Specialized graph for GPU-accelerated ecological science workloads:
+# ET₀ batched computation, seasonal pipeline (multi-field), atlas-scale
+# processing, and CPU-GPU parity validation. Routes through toadStool
+# compute.offload to barraCuda GPU dispatch.
+#
+# Tower + barraCuda + toadStool required; NestGate optional for data.
+# skunkBat optional for audit logging of GPU compute events.
+#
+# Usage: biomeos deploy --graph graphs/airspring_gpu_batch_deploy.toml
+
+[graph]
+name = "airspring_gpu_batch_deploy"
+description = "GPU batch ecology: ET₀ batched, seasonal pipeline, atlas stream via barraCuda/toadStool"
+version = "0.10.0"
+coordination = "sequential"
+
+[graph.metadata]
+security_model = "btsp_enforced"
+transport = "uds_only"
+tcp_ports = 0
+owner = "airSpring"
+pattern = "deploy"
+proto_nucleate = "primalSpring/graphs/downstream/downstream_manifest.toml"
+science_domain = "ecology_gpu"
+composition_model = "nucleated"
+fragments = ["tower_atomic", "compute_layer"]
+
+[graph.bonding_policy]
+bond_type = "Metallic"
+trust_model = "InternalNucleus"
+tower_internal = "covalent"
+nucleus_internal = "weak"
+encryption_tiers.tower = "full"
+
+# Tower Atomic
+[[graph.nodes]]
+name = "beardog"
+binary = "beardog"
+order = 1
+required = true
+spawn = false
+health_method = "health.liveness"
+by_capability = "security"
+
+[[graph.nodes]]
+name = "songbird"
+binary = "songbird"
+order = 2
+required = true
+spawn = false
+depends_on = ["beardog"]
+health_method = "health.liveness"
+by_capability = "discovery"
+
+# GPU math engine
+[[graph.nodes]]
+name = "barracuda"
+binary = "barracuda"
+order = 3
+required = true
+spawn = false
+depends_on = ["beardog"]
+health_method = "health.liveness"
+by_capability = "math"
+
+# Compute dispatch (GPU workload routing)
+[[graph.nodes]]
+name = "toadstool"
+binary = "toadstool"
+order = 4
+required = true
+spawn = false
+depends_on = ["beardog", "barracuda"]
+health_method = "health.liveness"
+by_capability = "compute"
+
+# Defense / Audit
+[[graph.nodes]]
+name = "skunkbat"
+binary = "skunkbat"
+order = 5
+required = false
+spawn = false
+depends_on = ["beardog"]
+health_method = "health.liveness"
+by_capability = "defense"
+
+# airSpring application (GPU batch mode)
+[[graph.nodes]]
+name = "airspring"
+binary = "airspring_primal"
+order = 6
+required = true
+spawn = true
+depends_on = ["beardog", "songbird", "barracuda", "toadstool"]
+health_method = "health.liveness"
+by_capability = "ecology"
+capabilities = [
+    "science.et0_fao56",
+    "science.water_balance",
+    "science.yield_response",
+    "ecology.full_pipeline",
+    "compute.offload",
+    "health.liveness",
+    "health.readiness",
+    "capability.list",
+]

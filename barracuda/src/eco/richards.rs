@@ -103,18 +103,23 @@ fn tridiag_solve(a: &[f64], b: &[f64], c: &[f64], d: &[f64], x: &mut [f64]) -> b
     }
     #[cfg(not(feature = "local"))]
     {
-        match local_tridiagonal_solve(sub, b, sup, d) {
-            Some(sol) => {
-                x[..n].copy_from_slice(&sol);
-                true
-            }
-            None => false,
-        }
+        #[expect(
+            clippy::unnecessary_map_or,
+            reason = "clippy 1.92 prefers is_some_and; keep map_or for explicit symmetry"
+        )]
+        local_tridiagonal_solve(sub, b, sup, d).map_or(false, |sol| {
+            x[..n].copy_from_slice(&sol);
+            true
+        })
     }
 }
 
 /// Thomas algorithm (matches `barracuda::linalg::tridiagonal_solve` contract).
 #[cfg(not(feature = "local"))]
+#[expect(
+    clippy::many_single_char_names,
+    reason = "a/b/c/d are standard tridiagonal matrix notation"
+)]
 fn local_tridiagonal_solve(a: &[f64], b: &[f64], c: &[f64], d: &[f64]) -> Option<Vec<f64>> {
     let n = b.len();
     if n == 0 {

@@ -143,7 +143,7 @@ pub fn fit_linear(x: &[f64], y: &[f64]) -> Option<FittedModel> {
 /// IPC-only stub: curve fitting requires barraCuda regression primitives.
 #[must_use]
 #[cfg(not(feature = "local"))]
-pub fn fit_linear(_x: &[f64], _y: &[f64]) -> Option<FittedModel> {
+pub const fn fit_linear(_x: &[f64], _y: &[f64]) -> Option<FittedModel> {
     None
 }
 
@@ -160,7 +160,7 @@ pub fn fit_quadratic(xs: &[f64], ys: &[f64]) -> Option<FittedModel> {
 /// IPC-only stub: curve fitting requires barraCuda regression primitives.
 #[must_use]
 #[cfg(not(feature = "local"))]
-pub fn fit_quadratic(_xs: &[f64], _ys: &[f64]) -> Option<FittedModel> {
+pub const fn fit_quadratic(_xs: &[f64], _ys: &[f64]) -> Option<FittedModel> {
     None
 }
 
@@ -178,7 +178,7 @@ pub fn fit_exponential(x: &[f64], y: &[f64]) -> Option<FittedModel> {
 /// IPC-only stub: curve fitting requires barraCuda regression primitives.
 #[must_use]
 #[cfg(not(feature = "local"))]
-pub fn fit_exponential(_x: &[f64], _y: &[f64]) -> Option<FittedModel> {
+pub const fn fit_exponential(_x: &[f64], _y: &[f64]) -> Option<FittedModel> {
     None
 }
 
@@ -196,7 +196,7 @@ pub fn fit_logarithmic(x: &[f64], y: &[f64]) -> Option<FittedModel> {
 /// IPC-only stub: curve fitting requires barraCuda regression primitives.
 #[must_use]
 #[cfg(not(feature = "local"))]
-pub fn fit_logarithmic(_x: &[f64], _y: &[f64]) -> Option<FittedModel> {
+pub const fn fit_logarithmic(_x: &[f64], _y: &[f64]) -> Option<FittedModel> {
     None
 }
 
@@ -241,7 +241,7 @@ pub fn fit_ridge(x: &[f64], y: &[f64], regularization: f64) -> Option<FittedMode
 /// IPC-only stub: ridge regression requires barraCuda `linalg::ridge`.
 #[must_use]
 #[cfg(not(feature = "local"))]
-pub fn fit_ridge(_x: &[f64], _y: &[f64], _regularization: f64) -> Option<FittedModel> {
+pub const fn fit_ridge(_x: &[f64], _y: &[f64], _regularization: f64) -> Option<FittedModel> {
     None
 }
 

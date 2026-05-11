@@ -24,6 +24,9 @@
 | `../graphs/airspring_provenance_pipeline.toml` | Provenance-tracked experiment: session → science → dehydrate → commit → attribute |
 | `../graphs/airspring_niche_deploy.toml` | Full niche deployment: Tower + Trio + NestGate + ToadStool + airSpring |
 | `../graphs/cross_primal_soil_microbiome.toml` | Cross-Spring pipeline: airSpring θ(t) → wetSpring diversity |
+| `../graphs/airspring_gpu_batch_deploy.toml` | GPU batch deployment graph (BarraCuda / batched dispatch stages) |
+| `../graphs/airspring_sovereign_data_deploy.toml` | Sovereign data pathing (NestGate / Songbird-aligned routing) |
+| `../graphs/airspring_uncertainty_deploy.toml` | Uncertainty / UQ pipeline deploy (bootstrap, jackknife, MC layers) |
 | `../barracuda/EVOLUTION_READINESS.md` | Tier A/B/C status, absorbed/stays-local, quality gates |
 | `../metalForge/ABSORPTION_MANIFEST.md` | 6/6 modules absorbed upstream (S64+S66), post-absorption leaning status |
 

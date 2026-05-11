@@ -121,7 +121,7 @@ fn validate_graph_dir(v: &mut ValidationHarness, dir: &std::path::Path) {
             }
         }
     }
-    v.check_bool("at least 4 deploy graphs", graph_count >= 4);
+    v.check_bool("at least 7 deploy graphs", graph_count >= 7);
 }
 
 fn validate_capability_registry(v: &mut ValidationHarness) {

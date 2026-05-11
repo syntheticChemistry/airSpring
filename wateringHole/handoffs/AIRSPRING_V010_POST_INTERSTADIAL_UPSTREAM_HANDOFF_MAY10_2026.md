@@ -19,7 +19,7 @@
 
 ### Tier 4 barracuda rewiring (May 11)
 
-- **`barracuda` optional dependency** — `optional = true` with **`local`** feature **default on**; the library compiles **without** the barraCuda source tree when building **`--no-default-features`**.
+- **`barracuda` optional dependency** — `optional = true` with **`local`** behind explicit **`--features local`** (Tier 4 IPC-first: **`[features].default = []`**, was `["local", "testutil"]`). Validation and bench targets use **`required-features = ["local"]`**. The library compiles **without** linking barraCuda until `local` is enabled.
 - **`gpu` module** — feature-gated; pure-Rust paths remain available when GPU stack is off.
 - **`math.rs`** — dual-path dispatch: barraCuda-backed routes when enabled, **pure-Rust fallbacks** otherwise.
 - **`ipc/barracuda_route.rs`** — IPC forwarding for barraCuda-backed operations when the in-tree crate is absent.
@@ -42,7 +42,8 @@
 - `cargo build` — clean
 - `cargo fmt --check` — clean
 - `cargo clippy --workspace --all-targets` — zero warnings
-- `cargo test --workspace --lib --tests` — 1,011 lib + 316 integration PASS
+- `cargo test -p airspring-barracuda --features local,testutil --lib` — 1,011 lib PASS
+- `cargo test -p airspring-barracuda --tests --all-features` — 316 integration PASS
 - `cargo test --test capability_cross_sync` — 3/3 PASS
 - `cargo check --features guidestone` — clean
 
@@ -58,7 +59,7 @@
 | **Total tests** | **1,389** |
 | Binaries | 93 |
 | Capabilities | 46 |
-| Deploy graphs | 4 (incl. skunkBat, 9-node niche) |
+| Deploy graphs | 7 (incl. skunkBat, 9-node niche; + GPU batch, sovereign data, uncertainty) |
 | Experiments | 90 (all PASS) |
 | guideStone | **L4** (targeting **L6**; IPC-wired, **10** UniBin scenarios) |
 | CPU speedup | 14.3× (24/24 parity) |
@@ -94,7 +95,7 @@ These 10 methods exist in airSpring's local `capability_registry.toml` but not i
 
 | Primal | What airSpring Learned | Action |
 |--------|------------------------|--------|
-| **barraCuda** | 24 CPU benchmarks at parity, 21 GPU modules validated. **Tier 4 (2026-05-11):** `optional = true` + `local` default; `math.rs` dual-path; `ipc/barracuda_route.rs`; `--no-default-features` without barraCuda tree — **AG-015 resolved**. | Further trait polish for IPC-only deployments if desired. |
+| **barraCuda** | 24 CPU benchmarks at parity, 21 GPU modules validated. **Tier 4 (2026-05-11):** `optional = true` + `local` opt-in (`default = []`); `math.rs` dual-path; `ipc/barracuda_route.rs`; validation bins **`required-features = ["local"]`** — **AG-015 resolved**. | Further trait polish for IPC-only deployments if desired. |
 | **toadStool** | `compute.offload` works for ecology workloads. `compute.dispatch` returns opaque JSON (AG-007). `toadstool.validate` not yet available (AG-012). | Typed response contracts for domain-specific dispatch. Live Science API for notebook-driven validation. |
 | **NestGate** | `data.weather` handler works. `data.open_meteo_weather` is non-standard (AG-008). airSpring URLs now env-overridable for NestGate routing. | Ecosystem weather data standard method name. |
 | **coralReef** | `discover_shader_compiler()` hook exists but no active usage (AG-006). All GPU dispatch goes through barraCuda direct. | Low priority — sovereign shader compile when coralReef matures. |
@@ -153,7 +154,7 @@ airSpring's validated composition patterns for NUCLEUS deployment via biomeOS Ne
 
 ## What's Next for airSpring
 
-1. ~~**Tier 4 barraCuda rewiring**~~ — **Done (2026-05-11):** `optional = true` with `local` (default on); `gpu` gated; `math.rs` dual-path; `ipc/barracuda_route.rs`; build `--no-default-features` without barraCuda source tree.
+1. ~~**Tier 4 barraCuda rewiring**~~ — **Done (2026-05-11):** `optional = true` with `local` opt-in (**`default = []`**); `gpu` gated; `math.rs` dual-path; `ipc/barracuda_route.rs`; validation bins **`required-features = ["local"]`**; IPC-only build without barraCuda linkage.
 2. **guideStone L6 / live NUCLEUS** — deploy NUCLEUS from plasmidBin; certification engine now spans **L0–L6** (L5: `composition.status`, `method.register`, `compute.dispatch`; L6: deploy graphs, capability registry, scenario registry). Validate against live primals via `CompositionContext` and cross-spring pipeline.
 3. **Phase 4.7 Penny Irrigation** — sovereign scheduling on consumer hardware
 4. **Paper queue** — 5 pending papers awaiting field data (Dong lab 2026)
@@ -164,7 +165,7 @@ airSpring's validated composition patterns for NUCLEUS deployment via biomeOS Ne
 
 - **6 toadStool workloads** available in `foundation/workloads/thread06_ag/` and `projectNUCLEUS/workloads/airspring/`
 - **36 foundation targets** for Thread 6 (Agricultural Science) validated
-- **4 deploy graphs** ready for biomeOS orchestration
+- **7 deploy graphs** ready for biomeOS orchestration
 - airSpring IPC-composes cleanly with NestGate/storage and compute paths
 - All 46 capabilities routable through biomeOS Neural API
 

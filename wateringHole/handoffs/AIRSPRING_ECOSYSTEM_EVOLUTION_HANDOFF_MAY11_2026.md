@@ -25,7 +25,7 @@ Phase 2   25 Tier A GPU modules, 21/21 CPU-GPU parity, 767+ WGSL shaders consume
   ↓
 Phase 3   Titan V live, AKD1000 NPU, metalForge mixed hardware (5 substrates)
   ↓
-Phase 4   46 capabilities, 4 deploy graphs, JSON-RPC science via biomeOS Neural API
+Phase 4   46 capabilities, 7 deploy graphs, JSON-RPC science via biomeOS Neural API
   ↓
 Phase 5   UniBin eukaryotic evolution, certification L0–L6, 10 validation scenarios
   ↓
@@ -72,15 +72,13 @@ startup → discover biomeOS socket → method.register(46 capabilities) → rea
 ### Pattern 2: Dual-Path Dispatch (Tier 4)
 
 Making `barraCuda` optional required:
-1. `optional = true` in Cargo.toml with a `local` feature (default on)
+1. `optional = true` in Cargo.toml with a `local` feature (Tier 4 IPC-first: **`[features].default = []`** — opt in with `--features local`)
 2. Feature-gated imports: `#[cfg(feature = "local")]` on all `barracuda::` imports
 3. `math.rs` with pure-Rust fallbacks for core primitives (`mean`, `pearson_r`, `std_dev`)
 4. `ipc/barracuda_route.rs` for IPC forwarding when library is absent
 5. Local shims for types (`Tolerance`, error variants)
 
-**The result**: `cargo build --no-default-features` compiles without the barraCuda
-source tree. Science correctness is preserved via pure-Rust paths. GPU dispatch
-re-enables when the `local` feature is on.
+**The result**: With **no default features**, the crate does not link barraCuda until you pass **`--features local`**. Science correctness is preserved via pure-Rust paths. GPU dispatch re-enables when the `local` feature is on.
 
 **Pattern for other springs**: Any spring with a barraCuda dependency should follow
 this model. The math must work without GPU. GPU is an accelerator, not a requirement.
@@ -120,11 +118,14 @@ into the composition.
 
 ### Pattern 6: Deploy Graph + Niche Architecture
 
-airSpring defines 4 TOML deploy graphs:
+airSpring defines 7 TOML deploy graphs:
 1. `airspring_eco_pipeline.toml` — weather → ET₀ → WB → yield
 2. `airspring_provenance_pipeline.toml` — session → science → dehydrate → commit
 3. `airspring_niche_deploy.toml` — full niche (9 nodes incl. skunkBat)
 4. `cross_primal_soil_microbiome.toml` — airSpring θ(t) → wetSpring diversity
+5. `airspring_gpu_batch_deploy.toml` — GPU batch dispatch topology
+6. `airspring_sovereign_data_deploy.toml` — sovereign data pathing
+7. `airspring_uncertainty_deploy.toml` — uncertainty / UQ pipeline deploy
 
 The niche self-knowledge module (`niche.rs`) declares all capabilities, deploy
 graphs, and primal dependencies. The `capability_registry.toml` is the single
@@ -281,7 +282,7 @@ and production sovereign compute. Specific needs:
 | **Total tests** | **1,389** |
 | Binaries | 93 |
 | Capabilities | 46 |
-| Deploy graphs | 4 |
+| Deploy graphs | 7 |
 | Experiments | 90 (all PASS) |
 | guideStone | **L4** (targeting **L6**) |
 | Validation scenarios | 10 (UniBin) |

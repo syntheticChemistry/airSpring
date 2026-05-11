@@ -16,7 +16,7 @@ pub fn mean(data: &[f64]) -> f64 {
         if data.is_empty() {
             return 0.0;
         }
-        data.iter().sum::<f64>() / data.len() as f64
+        data.iter().sum::<f64>() / crate::len_f64(data)
     }
 }
 
@@ -29,7 +29,7 @@ pub fn pearson_r(x: &[f64], y: &[f64]) -> f64 {
     }
     #[cfg(not(feature = "local"))]
     {
-        let n = x.len() as f64;
+        let n = crate::len_f64(x);
         let mx = x.iter().sum::<f64>() / n;
         let my = y.iter().sum::<f64>() / n;
         let mut cov = 0.0;
@@ -57,7 +57,7 @@ pub fn std_dev(data: &[f64]) -> f64 {
     #[cfg(not(feature = "local"))]
     {
         let m = mean(data);
-        let var = data.iter().map(|&x| (x - m).powi(2)).sum::<f64>() / data.len() as f64;
+        let var = data.iter().map(|&x| (x - m).powi(2)).sum::<f64>() / crate::len_f64(data);
         var.sqrt()
     }
 }

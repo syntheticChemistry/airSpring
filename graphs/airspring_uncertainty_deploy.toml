@@ -1,0 +1,132 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# airSpring Deploy Graph — Stochastic Uncertainty Pipeline
+#
+# Monte Carlo ET₀ propagation, bootstrap/jackknife confidence intervals,
+# and SPI drought index analysis. These workloads are embarrassingly
+# parallel and benefit from GPU dispatch for large sample counts.
+#
+# Tower + barraCuda required. toadStool optional for GPU acceleration.
+# Provenance trio optional for experiment tracking.
+#
+# Usage: biomeos deploy --graph graphs/airspring_uncertainty_deploy.toml
+
+[graph]
+name = "airspring_uncertainty_deploy"
+description = "Stochastic uncertainty: MC ET₀, bootstrap/jackknife CI, SPI drought via GPU"
+version = "0.10.0"
+coordination = "sequential"
+
+[graph.metadata]
+security_model = "btsp_enforced"
+transport = "uds_only"
+tcp_ports = 0
+owner = "airSpring"
+pattern = "deploy"
+proto_nucleate = "primalSpring/graphs/downstream/downstream_manifest.toml"
+science_domain = "ecology_uncertainty"
+composition_model = "nucleated"
+fragments = ["tower_atomic", "stochastic_layer"]
+
+[graph.bonding_policy]
+bond_type = "Metallic"
+trust_model = "InternalNucleus"
+tower_internal = "covalent"
+nucleus_internal = "weak"
+encryption_tiers.tower = "full"
+
+# Tower Atomic
+[[graph.nodes]]
+name = "beardog"
+binary = "beardog"
+order = 1
+required = true
+spawn = false
+health_method = "health.liveness"
+by_capability = "security"
+
+[[graph.nodes]]
+name = "songbird"
+binary = "songbird"
+order = 2
+required = true
+spawn = false
+depends_on = ["beardog"]
+health_method = "health.liveness"
+by_capability = "discovery"
+
+# GPU math engine (MC sampling, bootstrap, jackknife)
+[[graph.nodes]]
+name = "barracuda"
+binary = "barracuda"
+order = 3
+required = true
+spawn = false
+depends_on = ["beardog"]
+health_method = "health.liveness"
+by_capability = "math"
+
+# Compute dispatch (GPU parallelism for MC/bootstrap)
+[[graph.nodes]]
+name = "toadstool"
+binary = "toadstool"
+order = 4
+required = false
+spawn = false
+depends_on = ["beardog", "barracuda"]
+health_method = "health.liveness"
+by_capability = "compute"
+
+# Defense / Audit
+[[graph.nodes]]
+name = "skunkbat"
+binary = "skunkbat"
+order = 5
+required = false
+spawn = false
+depends_on = ["beardog"]
+health_method = "health.liveness"
+by_capability = "defense"
+
+# Provenance (experiment tracking for uncertainty analysis)
+[[graph.nodes]]
+name = "rhizocrypt"
+binary = "rhizocrypt"
+order = 6
+required = false
+spawn = false
+depends_on = ["beardog"]
+health_method = "health.liveness"
+by_capability = "dag_storage"
+
+[[graph.nodes]]
+name = "sweetgrass"
+binary = "sweetgrass"
+order = 7
+required = false
+spawn = false
+depends_on = ["beardog"]
+health_method = "health.liveness"
+by_capability = "provenance"
+
+# airSpring application (uncertainty analysis)
+[[graph.nodes]]
+name = "airspring"
+binary = "airspring_primal"
+order = 8
+required = true
+spawn = true
+depends_on = ["beardog", "songbird", "barracuda"]
+health_method = "health.liveness"
+by_capability = "ecology"
+capabilities = [
+    "science.spi_drought_index",
+    "science.autocorrelation",
+    "science.gamma_cdf",
+    "science.bootstrap_ci",
+    "science.jackknife_ci",
+    "science.et0_fao56",
+    "health.liveness",
+    "health.readiness",
+    "capability.list",
+]

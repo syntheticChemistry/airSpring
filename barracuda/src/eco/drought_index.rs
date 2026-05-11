@@ -132,7 +132,7 @@ pub fn gamma_cdf(x: f64, params: &GammaParams) -> f64 {
 /// IPC-only build: gamma special functions require barraCuda linkage.
 #[cfg(not(feature = "local"))]
 #[must_use]
-pub fn gamma_cdf(_x: f64, _params: &GammaParams) -> f64 {
+pub const fn gamma_cdf(_x: f64, _params: &GammaParams) -> f64 {
     f64::NAN
 }
 

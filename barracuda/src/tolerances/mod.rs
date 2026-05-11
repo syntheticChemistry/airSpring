@@ -91,6 +91,10 @@ mod local_tolerance {
 
     /// Check whether `computed` matches `expected` within the tolerance.
     #[must_use]
+    #[expect(
+        clippy::float_cmp,
+        reason = "intentional exact equality check for zero-tolerance cases"
+    )]
     pub fn check(computed: f64, expected: f64, tol: &Tolerance) -> bool {
         if !computed.is_finite() || !expected.is_finite() {
             return computed == expected;

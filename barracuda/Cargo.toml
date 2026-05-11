@@ -15,9 +15,10 @@ description = "Ecological & agricultural science pipelines — Rust + GPU + NPU 
 [workspace]
 
 [features]
-default = ["local", "testutil"]
+default = []
 testutil = ["local"]
 # Direct barraCuda library linkage (CPU math + GPU). Disable for pure IPC-only binary.
+# Tier 4 IPC-first: not in default. Opt in with: cargo build --features local
 local = ["dep:barracuda", "dep:wgpu"]
 gpu = ["local"]
 npu = ["dep:akida-driver"]
@@ -25,13 +26,13 @@ guidestone = ["dep:primalspring"]
 primal-proof = []
 
 [dependencies]
-# BarraCuda 0.3.7: standalone sovereign math engine (ecoPrimals/barraCuda).
+# BarraCuda 0.3.13: standalone sovereign math engine (ecoPrimals/barraCuda).
 # Extracted from ToadStool S89 — universal math, precision per hardware.
-# v0.3.7: wgpu 28, DF64 precision tier, nursery linting, bare semantic IPC
-# method naming, GPU pooling resilience, feature-gated special/spectral.
+# v0.3.13: wgpu 28, DF64 precision tier, linalg module, MethodGate pattern,
+# MLP training, Nautilus server sessions, GPU pooling resilience.
 # airSpring validates that Rust baselines can be faithfully ported to
 # BarraCuda shaders. Used for stats, validation, GPU ops, and PDE primitives.
-barracuda = { version = "0.3.7", path = "../../../primals/barraCuda/crates/barracuda", default-features = false, features = ["gpu", "domain-pde", "domain-genomics"], optional = true }
+barracuda = { version = "0.3.13", path = "../../../primals/barraCuda/crates/barracuda", default-features = false, features = ["gpu", "domain-pde", "domain-genomics"], optional = true }
 
 # JSON parsing: loads benchmark JSON files (control/fao56/*.json, etc.)
 # with full provenance for validation fidelity.
@@ -87,262 +88,327 @@ proptest = "1"
 [[bin]]
 name = "validate_et0"
 path = "src/bin/validate_et0.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_soil"
 path = "src/bin/validate_soil.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_iot"
 path = "src/bin/validate_iot.rs"
+required-features = ["local", "testutil"]
 
 [[bin]]
 name = "validate_water_balance"
 path = "src/bin/validate_water_balance.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_sensor_calibration"
 path = "src/bin/validate_sensor_calibration.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_real_data"
 path = "src/bin/validate_real_data.rs"
+required-features = ["local", "testutil"]
 
 [[bin]]
 name = "cross_validate"
 path = "src/bin/cross_validate.rs"
+required-features = ["local", "testutil"]
 
 [[bin]]
 name = "simulate_season"
 path = "src/bin/simulate_season.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_dual_kc"
 path = "src/bin/validate_dual_kc.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_cover_crop"
 path = "src/bin/validate_cover_crop.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_regional_et0"
 path = "src/bin/validate_regional_et0.rs"
+required-features = ["local", "testutil"]
 
 [[bin]]
 name = "bench_cpu_vs_python"
 path = "src/bin/bench_cpu_vs_python/main.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "bench_airspring_gpu"
 path = "src/bin/bench_airspring_gpu.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_long_term_wb"
 path = "src/bin/validate_long_term_wb.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_biochar"
 path = "src/bin/validate_biochar.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_richards"
 path = "src/bin/validate_richards.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_yield"
 path = "src/bin/validate_yield.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_cw2d"
 path = "src/bin/validate_cw2d.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_scheduling"
 path = "src/bin/validate_scheduling.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_lysimeter"
 path = "src/bin/validate_lysimeter.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_sensitivity"
 path = "src/bin/validate_sensitivity.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_atlas"
 path = "src/bin/validate_atlas.rs"
+required-features = ["local", "testutil"]
 
 [[bin]]
 name = "validate_priestley_taylor"
 path = "src/bin/validate_priestley_taylor.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_et0_intercomparison"
 path = "src/bin/validate_et0_intercomparison.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_thornthwaite"
 path = "src/bin/validate_thornthwaite.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_gdd"
 path = "src/bin/validate_gdd.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_pedotransfer"
 path = "src/bin/validate_pedotransfer.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_nass_yield"
 path = "src/bin/validate_nass_yield.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_forecast"
 path = "src/bin/validate_forecast.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_scan_moisture"
 path = "src/bin/validate_scan_moisture.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_multicrop"
 path = "src/bin/validate_multicrop.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_npu_eco"
 path = "src/bin/validate_npu_eco.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_npu_funky_eco"
 path = "src/bin/validate_npu_funky_eco.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_npu_high_cadence"
 path = "src/bin/validate_npu_high_cadence.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_ameriflux"
 path = "src/bin/validate_ameriflux.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_hargreaves"
 path = "src/bin/validate_hargreaves.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_diversity"
 path = "src/bin/validate_diversity.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_makkink"
 path = "src/bin/validate_makkink.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_turc"
 path = "src/bin/validate_turc.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_hamon"
 path = "src/bin/validate_hamon.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_neural_api"
 path = "src/bin/validate_neural_api.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_et0_ensemble"
 path = "src/bin/validate_et0_ensemble.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_pedotransfer_richards"
 path = "src/bin/validate_pedotransfer_richards.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_et0_bias"
 path = "src/bin/validate_et0_bias.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_cpu_gpu_parity"
 path = "src/bin/validate_cpu_gpu_parity.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_seasonal_batch"
 path = "src/bin/validate_seasonal_batch.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_pure_gpu"
 path = "src/bin/validate_pure_gpu.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_gpu_live"
 path = "src/bin/validate_gpu_live.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_anderson"
 path = "src/bin/validate_anderson.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_atlas_stream"
 path = "src/bin/validate_atlas_stream.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_gpu_math"
 path = "src/bin/validate_gpu_math.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_ncbi_16s_coupling"
 path = "src/bin/validate_ncbi_16s_coupling.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_blaney_criddle"
 path = "src/bin/validate_blaney_criddle.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_scs_cn"
 path = "src/bin/validate_scs_cn.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_green_ampt"
 path = "src/bin/validate_green_ampt.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_coupled_runoff"
 path = "src/bin/validate_coupled_runoff.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_vg_inverse"
 path = "src/bin/validate_vg_inverse.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_season_wb"
 path = "src/bin/validate_season_wb.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "bench_cross_spring"
 path = "src/bin/bench_cross_spring/main.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_gpu_pipeline"
 path = "src/bin/validate_gpu_pipeline.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_gpu_streaming_multi_field"
 path = "src/bin/validate_gpu_streaming_multi_field.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_cpu_parity_benchmark"
 path = "src/bin/validate_cpu_parity_benchmark.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_pure_gpu_multi_field"
 path = "src/bin/validate_pure_gpu_multi_field.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_cross_spring_rewire"
 path = "src/bin/validate_cross_spring_rewire.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_gpu_rewire_benchmark"
 path = "src/bin/validate_gpu_rewire_benchmark.rs"
+required-features = ["local"]
 
 # validate_gpu_rewire_support.rs is a support module for validate_gpu_rewire_benchmark,
 # not a standalone binary. It is included via #[path] from the benchmark entrypoint.
@@ -350,18 +416,22 @@ path = "src/bin/validate_gpu_rewire_benchmark.rs"
 [[bin]]
 name = "validate_climate_scenario"
 path = "src/bin/validate_climate_scenario.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_atlas_decade"
 path = "src/bin/validate_atlas_decade.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_nass_real"
 path = "src/bin/validate_nass_real.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_ncbi_diversity"
 path = "src/bin/validate_ncbi_diversity.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "airspring_primal"
@@ -370,90 +440,112 @@ path = "src/bin/airspring_primal/main.rs"
 [[bin]]
 name = "validate_nucleus"
 path = "src/bin/validate_nucleus.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_nucleus_pipeline"
 path = "src/bin/validate_nucleus_pipeline.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "bench_cross_spring_evolution"
 path = "src/bin/bench_cross_spring_evolution/main.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_dispatch_experiment"
 path = "src/bin/validate_dispatch_experiment.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_biome_graph"
 path = "src/bin/validate_biome_graph.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_barrier_skin"
 path = "src/bin/validate_barrier_skin.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_cross_species"
 path = "src/bin/validate_cross_species.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_cytokine"
 path = "src/bin/validate_cytokine.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_tissue"
 path = "src/bin/validate_tissue.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_paper_chain"
 path = "src/bin/validate_paper_chain.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_local_gpu"
 path = "src/bin/validate_local_gpu.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_cross_spring_provenance"
 path = "src/bin/validate_cross_spring_provenance.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_cross_spring_evolution"
 path = "src/bin/validate_cross_spring_evolution.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_mc_et0"
 path = "src/bin/validate_mc_et0.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_bootstrap_jackknife"
 path = "src/bin/validate_bootstrap_jackknife.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_drought_index"
 path = "src/bin/validate_drought_index.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_cross_spring_modern"
 path = "src/bin/validate_cross_spring_modern.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_nucleus_modern"
 path = "src/bin/validate_nucleus_modern.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_cpu_gpu_comprehensive"
 path = "src/bin/validate_cpu_gpu_comprehensive.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_toadstool_dispatch"
 path = "src/bin/validate_toadstool_dispatch.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "validate_nucleus_graphs"
 path = "src/bin/validate_nucleus_graphs.rs"
+required-features = ["local"]
 
 [[bin]]
 name = "airspring_guidestone"
 path = "src/bin/airspring_guidestone.rs"
+required-features = ["guidestone"]
 
 [[bin]]
 name = "airspring"

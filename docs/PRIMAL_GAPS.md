@@ -40,7 +40,7 @@ Format follows wetSpring/hotSpring `PRIMAL_GAPS.md` pattern.
 
 | ID | Primal | Gap | Resolution | Date |
 |----|--------|-----|------------|------|
-| AG-015 | barraCuda | barraCuda still mandatory path dep | **Tier 4 rewiring (2026-05-11):** `optional = true` with `local` (default on); `gpu` feature-gated; `math.rs` dual-path + `ipc/barracuda_route.rs`; builds `--no-default-features` without barraCuda source tree | 2026-05-11 |
+| AG-015 | barraCuda | barraCuda still mandatory path dep | **Tier 4 IPC-first (2026-05-11):** `optional = true` behind `local`; **`[features].default = []`** (was `["local", "testutil"]`); validation binaries **`required-features = ["local"]`**; `gpu` feature-gated; `math.rs` dual-path + `ipc/barracuda_route.rs`; default build without linking barraCuda | 2026-05-11 |
 | AG-002 | primalSpring | Path dep deprecated | Standalone manifest reader via `toml` crate — no primalspring crate dep needed | 2026-05-07 |
 | AG-003 | biomeOS | `health_method` inconsistency | Aligned metalForge deploy to `health.liveness` | 2026-04-27 |
 | AG-004 | biomeOS | Capability naming drift | Converged metalForge deploy to niche.rs canonical names | 2026-04-27 |
@@ -64,7 +64,7 @@ These are not primal gaps but internal reconciliation items:
 ## guideStone Evolution Path
 
 ```
-Current:  gS Level 4 (certification L0–L6 engine; **10 UniBin validation scenarios**; Tier 4 barracuda optional complete)
+Current:  gS Level 4 (certification L0–L6 engine; **10 UniBin validation scenarios**; Tier 4 IPC-first: **`default = []`**, barraCuda behind `local`, validation bins gated)
 Target:   gS Level 6 (cross-spring pipeline, live NUCLEUS — deploy graphs, registries)
 Next:     Deploy NUCLEUS from plasmidBin; validate live `composition.status` / `method.register` / `compute.dispatch` against running primals
 ```
@@ -101,7 +101,7 @@ Next:     Deploy NUCLEUS from plasmidBin; validate live `composition.status` / `
 - [x] skunkBat added to niche deploy graph (9 nodes)
 - [x] Zero `#[allow]` in production code (`#[expect]` with reason throughout)
 - [x] benchmarks.rs refactored (810→148 + 607 bench_fns.rs, zero >800L files)
-- [x] barraCuda optional = true (`local` default, `math.rs` fallbacks, `ipc/barracuda_route.rs`)
+- [x] barraCuda optional = true (Tier 4 IPC-first `default = []`, `local` opt-in, `math.rs` fallbacks, `ipc/barracuda_route.rs`, validation `required-features = ["local"]`)
 - [ ] guideStone L6 / live NUCLEUS validation (deploy NUCLEUS from plasmidBin)
 
 ---

@@ -38,7 +38,7 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - **Architecture:** Two workspace crates (`airspring-barracuda` library + `airspring-forge` dispatch)
 - **Communication:** JSON-RPC 2.0 over Unix sockets + TCP (biomeOS capability routing, Songbird sovereign transport)
 - **License:** AGPL-3.0-or-later
-- **Lib tests:** 1,011 (barracuda, `cargo test --lib`)
+- **Lib tests:** 1,011 (barracuda, `cargo test --features local,testutil --lib`)
 - **Integration + doc tests:** 316 (barracuda)
 - **Barracuda total:** 1,327 (1,011 lib + 316 integration/doc)
 - **Forge tests:** 62 (metalForge)
@@ -52,9 +52,9 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - **GPU backend:** barraCuda 0.3.7 (wgpu 28, Vulkan, DeviceCapabilities API)
 - **Experiments:** 90 (all PASS)
 - **Capabilities:** 46 (science + ecology + provenance + composition + coordination + health)
-- **Deploy graphs:** 4 (provenance trio, NestGate routing, niche deploy w/ 9 nodes incl. skunkBat, cross-spring)
+- **Deploy graphs:** 7 (eco + provenance + niche + cross-primal + GPU batch + sovereign data + uncertainty)
 - **GuideStone level:** L4 (targeting L6 with live NUCLEUS; **10 UniBin validation scenarios**)
-- **Tier 4 rewiring:** `barracuda` is `optional = true` with `local` feature (default on); `gpu` is feature-gated; `math.rs` dual-path dispatch; `ipc/barracuda_route.rs` IPC forwarding; `cargo build -p airspring-barracuda --no-default-features` builds without the barraCuda source tree.
+- **Tier 4 IPC-first:** `[features].default = []` (was `["local", "testutil"]`). Opt in with **`--features local`** for in-tree barraCuda + GPU; **`testutil`** extends `local` for dev helpers. All validation binaries use **`required-features = ["local"]`**. `gpu` is feature-gated; `math.rs` dual-path dispatch; `ipc/barracuda_route.rs` IPC forwarding. Default feature set builds without linking barraCuda.
 - **deny.toml:** workspace-root, `aws-lc-sys` + `aws-lc-rs` banned
 
 ## Key Capabilities (JSON-RPC methods)
@@ -95,7 +95,7 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 
 | Primal | Role | Discovery |
 |--------|------|-----------|
-| **barraCuda** | GPU math primitives (ops 0-19, PDE, optimize, stats) | `barracuda` crate (optional path dep; `local` default; Tier 4: IPC + pure-Rust fallbacks) |
+| **barraCuda** | GPU math primitives (ops 0-19, PDE, optimize, stats) | `barracuda` crate (optional path dep; Tier 4 IPC-first: enable `local`; pure-Rust fallbacks when absent) |
 | **biomeOS** | Orchestration, socket resolution, primal discovery | `biomeos::find_socket()` |
 | **toadStool** | Hardware discovery, compute dispatch | `compute.offload` IPC |
 | **bearDog** | TLS, key management | Sovereign TLS for transport |

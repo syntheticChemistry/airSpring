@@ -15,15 +15,15 @@ or advance GPU evolution are welcome.
 
 ## Quality Standards
 
-Every change must maintain these invariants:
+Every change must maintain these invariants (run `cargo test` / `cargo clippy` / `cargo llvm-cov` for `airspring-barracuda` from `barracuda/`, or pass `-p airspring-barracuda` after `cd barracuda`):
 
 | Standard | Requirement |
 |----------|-------------|
 | `cargo clippy --workspace --all-features` | Zero warnings (pedantic + nursery) |
 | `cargo fmt --check` | Zero formatting drift |
 | `cargo doc --workspace --no-deps` | Zero warnings (`-D warnings`) |
-| `cargo test --workspace --lib` | All pass |
-| `cargo llvm-cov --workspace --lib` | ≥ 90% line coverage |
+| `cargo test --features local,testutil --lib` | All pass |
+| `cargo llvm-cov --lib` | ≥ 90% line coverage |
 | `cargo deny check` | Zero advisories, license, or source violations |
 | `#![forbid(unsafe_code)]` | Zero unsafe in application code |
 | `#[allow()]` | Zero in production — use `#[expect(lint, reason = "...")]` |
@@ -75,9 +75,12 @@ socket path, or capability set. Discover at runtime via:
 
 ## Running the Full Suite
 
+Tier 4 IPC-first: barracuda is opt-in via `--features local` (validation binaries are gated). From `barracuda/`:
+
 ```bash
-cd barracuda && cargo test --lib              # 1,011 lib tests
-cd barracuda && cargo test --tests            # 316 integration tests
+cd barracuda && cargo test --features local,testutil --lib              # 1,011 lib tests
+cd barracuda && cargo test --features local,testutil --tests            # 316 integration tests
+# or: cd barracuda && cargo test --all-features
 cd metalForge/forge && cargo test             # 62 forge tests
 cd barracuda && cargo llvm-cov --lib --fail-under-lines 90  # 90.56% line coverage
 cd barracuda && cargo clippy --all-targets -- -D warnings -W clippy::pedantic -W clippy::nursery
