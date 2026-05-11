@@ -23,6 +23,7 @@ pub enum AirSpringError {
     #[error("Invalid input: {0}")]
     InvalidInput(String),
     /// Errors propagated from barracuda primitives (preserves source chain).
+    #[cfg(feature = "local")]
     #[error("barracuda error: {0}")]
     Barracuda(#[from] barracuda::error::BarracudaError),
     /// NPU errors (discovery, DMA, inference).
@@ -32,6 +33,7 @@ pub enum AirSpringError {
     #[error("IPC error: {0}")]
     Ipc(#[from] crate::rpc::IpcError),
     /// Seasonal GPU pipeline (ET₀ → Kc → water balance → yield).
+    #[cfg(feature = "local")]
     #[error("seasonal pipeline error: {0}")]
     Pipeline(#[from] crate::gpu::seasonal_pipeline::PipelineError),
 }
@@ -39,8 +41,15 @@ pub enum AirSpringError {
 impl AirSpringError {
     /// Wrap a string as a barracuda error (for cases where the original
     /// error type is not available, e.g. formatted NPU driver messages).
+    #[cfg(feature = "local")]
     pub fn barracuda_msg(msg: impl Into<String>) -> Self {
         Self::Barracuda(barracuda::error::BarracudaError::Internal(msg.into()))
+    }
+
+    /// When barraCuda is not linked, map the message to [`InvalidInput`].
+    #[cfg(not(feature = "local"))]
+    pub fn barracuda_msg(msg: impl Into<String>) -> Self {
+        Self::InvalidInput(format!("barracuda (IPC-only build): {}", msg.into()))
     }
 }
 
@@ -79,6 +88,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "local")]
     fn test_barracuda_display() {
         let err = AirSpringError::from(barracuda::error::BarracudaError::Gpu("GPU fail".into()));
         assert!(format!("{err}").contains("barracuda error"));
@@ -149,6 +159,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "local")]
     fn test_barracuda_source() {
         let err = AirSpringError::from(barracuda::error::BarracudaError::Gpu("x".into()));
         assert!(std::error::Error::source(&err).is_some());
@@ -161,6 +172,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "local")]
     fn test_debug_format() {
         let err = AirSpringError::from(barracuda::error::BarracudaError::Internal("test".into()));
         let debug = format!("{err:?}");
@@ -168,6 +180,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "local")]
     fn test_from_barracuda_error() {
         let barr_err = barracuda::error::BarracudaError::Device("gone".into());
         let err: AirSpringError = barr_err.into();
@@ -175,6 +188,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "local")]
     fn test_pipeline_error_display() {
         let pe = crate::gpu::seasonal_pipeline::PipelineError::InvalidConfig("bad".into());
         let err: AirSpringError = pe.into();

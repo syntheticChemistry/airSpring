@@ -1,6 +1,6 @@
 +++
 title = "airSpring Validation Summary"
-description = "Precision agriculture & irrigation — 1,389 Rust tests, 90 experiments (87 + 3 composition), 9 UniBin validation scenarios, 14.3× speedup, 46/46 capabilities routable, 25 notebooks, UniBin eukaryotic, zero failures"
+description = "Precision agriculture & irrigation — 1,389 Rust tests, 90 experiments (87 + 3 composition), 10 UniBin validation scenarios, 14.3× speedup, 46/46 capabilities routable, 25 notebooks, UniBin eukaryotic, zero failures"
 date = 2026-05-11
 
 [taxonomies]
@@ -21,7 +21,7 @@ springs = ["airspring", "hotspring", "wetspring", "neuralspring", "groundspring"
 - **60 named tolerances** in 5 submodules (Rust + Python mirror, zero inline magic numbers)
 - **25 Tier A GPU modules** (20 upstream batched ops, local_dispatch retired)
 - **Zero C dependencies**, zero unsafe, zero `#[allow()]`, Edition 2024
-- **guideStone Level 2+** (IPC-wired, **9 UniBin validation scenarios**)
+- **guideStone Level 4** (targeting L6 with live NUCLEUS; IPC-wired, **10 UniBin validation scenarios**)
 - **46-method capability_registry.toml** (CI sync-tested vs niche.rs + canonical cross-sync)
 - **36 foundation targets** + **6 toadStool workloads** (thread06_ag)
 - **deny.toml** promoted to workspace root (ecoBin v3.0, ring/openssl banned)

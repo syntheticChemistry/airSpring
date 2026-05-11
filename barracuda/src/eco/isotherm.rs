@@ -196,14 +196,38 @@ pub fn fit_freundlich(ce: &[f64], qe: &[f64]) -> Option<IsothermFit> {
 }
 
 /// Linear regression via barracuda, returning (slope, intercept).
+#[cfg(feature = "local")]
 fn fit_linear_internal(x: &[f64], y: &[f64]) -> Option<(f64, f64)> {
     let fit = barracuda::stats::regression::fit_linear(x, y)?;
     Some((fit.params[0], fit.params[1]))
 }
 
+/// Pure-Rust OLS when barraCuda is not linked.
+#[cfg(not(feature = "local"))]
+fn fit_linear_internal(x: &[f64], y: &[f64]) -> Option<(f64, f64)> {
+    let n = x.len();
+    if n < 2 || x.len() != y.len() {
+        return None;
+    }
+    let mx = crate::math::mean(x);
+    let my = crate::math::mean(y);
+    let mut num = 0.0;
+    let mut den = 0.0;
+    for i in 0..n {
+        let dx = x[i] - mx;
+        num += dx * (y[i] - my);
+        den += dx * dx;
+    }
+    if den.abs() < LINEAR_SYSTEM_EPSILON {
+        return None;
+    }
+    let slope = num / den;
+    Some((slope, my - slope * mx))
+}
+
 fn goodness_of_fit<F: Fn(f64) -> f64>(ce: &[f64], qe: &[f64], predict: F) -> (f64, f64) {
     let n = len_f64(qe);
-    let mean_qe: f64 = barracuda::stats::mean(qe);
+    let mean_qe: f64 = crate::math::mean(qe);
 
     let ss_res: f64 = ce
         .iter()

@@ -10,6 +10,7 @@
 //! - van Genuchten (1980) SSSA J 44:892-898
 //! - Carsel & Parrish (1988) WRR 24:755-769
 
+#[cfg(feature = "local")]
 use barracuda::optimize::brent;
 
 use crate::tolerances::POSITIVE_DATA_GUARD;
@@ -140,6 +141,7 @@ pub fn van_genuchten_capacity(h: f64, theta_r: f64, theta_s: f64, alpha: f64, n_
 /// iterations since the retention curve is smooth and monotone on (−∞, 0).
 ///
 /// Returns `None` if `θ_target` is outside \[θr, θs\] or Brent fails.
+#[cfg(feature = "local")]
 #[must_use]
 pub fn inverse_van_genuchten_h(
     theta_target: f64,
@@ -166,6 +168,53 @@ pub fn inverse_van_genuchten_h(
     )
     .ok()
     .map(|r| r.root)
+}
+
+/// IPC-only fallback: bisection on `[H_CLIP_MIN, BRENT_INVERSE_UPPER]` (monotone θ(h)).
+#[cfg(not(feature = "local"))]
+#[must_use]
+pub fn inverse_van_genuchten_h(
+    theta_target: f64,
+    theta_r: f64,
+    theta_s: f64,
+    alpha: f64,
+    n_vg: f64,
+) -> Option<f64> {
+    if theta_target >= theta_s {
+        return Some(0.0);
+    }
+    if theta_target <= theta_r {
+        return None;
+    }
+
+    let f = |h: f64| van_genuchten_theta(h, theta_r, theta_s, alpha, n_vg) - theta_target;
+
+    let mut lo = H_CLIP_MIN;
+    let mut hi = BRENT_INVERSE_UPPER;
+    let mut flo = f(lo);
+    let fhi = f(hi);
+    if !(flo.is_finite() && fhi.is_finite()) {
+        return None;
+    }
+    if flo * fhi > 0.0 {
+        return None;
+    }
+
+    let mut mid = lo;
+    for _ in 0..BRENT_INVERSE_MAX_ITER {
+        mid = 0.5 * (lo + hi);
+        let fm = f(mid);
+        if fm.abs() < BRENT_INVERSE_TOL {
+            return Some(mid);
+        }
+        if flo * fm <= 0.0 {
+            hi = mid;
+        } else {
+            lo = mid;
+            flo = fm;
+        }
+    }
+    Some(mid)
 }
 
 #[cfg(test)]

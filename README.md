@@ -49,6 +49,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | Phase 5.11: Cross-ecosystem evolution | **All absorbed** | v0.8.9: Canonical `PRIMAL_NAME`/`PRIMAL_DOMAIN`, `OnceLock` GPU probe cache, `cast` module (safe numeric casts), `DispatchOutcome<T>` library type, coralReef/Squirrel discovery, `mul_add()` FMA (18 sites), smart refactors (4 monoliths → 19 modules: evapotranspiration, dual_kc, biomeos, validation), composition guidance |
 | Phase 5.12: Audit execution | **All findings resolved** | v0.9.0: `#![deny(cast_*)]` library strict, 3 new cast helpers (u32_usize, u64_usize, u64_f64), soil_moisture refactored (672→4 submodules), petalTongue 3-tier discovery, primal_dispatch integration tests (14), benchmark JSON provenance for all hardcoded values, CI lint config via Cargo.toml only, hardcoded socket paths removed |
 | Phase 5.13: Deep audit execution | **All debt resolved** | v0.10.0: Provenance registry 11→63 baselines, OrExit zero-panic across all 93 binaries, centralized tolerances (R², RMSE, IA, bio-diversity), `#[allow]`→`#[expect]` Rust 2024, smart refactors (data/provider→4 modules, evolution_gaps→resolved_issues), hardcoded primal names→`primal_names::*` constants, data accession IDs, cast helpers (f64_i32, usize_i32), determinism contract documented |
+| Phase 5.14: Tier 4 barracuda rewiring | **Complete** | `barracuda` optional with `local` feature (default on); `gpu` feature-gated; `math.rs` dual-path dispatch (pure-Rust fallbacks); `ipc/barracuda_route.rs` IPC forwarding; builds with `--no-default-features` without barraCuda source tree |
 
 ### Code Quality
 
@@ -240,8 +241,8 @@ airSpring/
 │   │   ├── rpc/                 # JSON-RPC 2.0 IPC (error.rs, transport.rs, mod.rs)
 │   │   ├── npu.rs               # BrainChip AKD1000 NPU (feature-gated)
 │   │   ├── tolerances/          # Domain-specific validation tolerances (60 named, 4 submodules)
-│   │   ├── certification/       # Absorbed guidestone organelle (L0-L4 layered certification)
-│   │   ├── validation/scenarios/ # UniBin validation scenarios (ScenarioRegistry, 9 scenarios)
+│   │   ├── certification/       # Certification engine (L0–L6 layers, targeting live NUCLEUS)
+│   │   ├── validation/scenarios/ # UniBin validation scenarios (ScenarioRegistry, 10 scenarios)
 │   │   └── bin/                 # validate_*, bench_*, airspring UniBin (93 declared)
 │   ├── tests/                   # Integration + property tests (15 files + common/)
 │   └── Cargo.toml               # v0.10.0 (barraCuda 0.3.7, wgpu 28, clap 4)
@@ -308,11 +309,11 @@ AGPL-3.0-or-later
 
 ---
 
-*May 11, 2026 — Post-interstadial evolution. New IPC: **`method.register`**, **`composition.status`**, skunkBat deploy-graph path; capability cross-sync vs canonical **413**; CONTEXT.md reconciled; EVOLUTION_READINESS.md refreshed.
+*May 11, 2026 — Post-interstadial evolution. New IPC: **`method.register`**, **`composition.status`**, skunkBat deploy-graph path; capability cross-sync vs canonical **413**; CONTEXT.md reconciled; EVOLUTION_READINESS.md refreshed. **Tier 4 rewiring**: barraCuda `optional = true` with `local` (default), `math.rs` dual-path dispatch, `ipc/barracuda_route.rs`, `--no-default-features` without barraCuda source tree. Certification engine **L0–L6** (L4 cross-atomic provenance; L5 NUCLEUS composition; L6 cross-spring pipeline). Scenario registry **10** UniBin validation scenarios (incl. **`s_tier4_math_parity`**).
 May 9 — Deep debt resolution + eukaryotic evolution. Dead standalone-http feature
 removed (ureq code paths, broken dep). Unused bytemuck dep removed. .gitignore data/ bug
 fixed (was silently ignoring barracuda/src/data/ source). 6 pre-existing test failures fixed
 (provider constructors → try_new). Hardcoded primal names → primal_names:: constants.
 build_benchmarks refactored into domain groups. Zero clippy warnings. UniBin consolidation
-(certify/validate/serve/status/version). Certification organelle (L0-L4). Scenario registry
-(**9 absorbed** UniBin validation scenarios). **1,011** lib tests, 0 failures. 93 binaries. guideStone **L2+**. AGPL-3.0-or-later.*
+(certify/validate/serve/status/version). Certification organelle (L0–L6). Scenario registry
+(**10** UniBin validation scenarios). **1,011** lib tests, 0 failures. 93 binaries. guideStone **L4** (targeting **L6** with live NUCLEUS). AGPL-3.0-or-later.*

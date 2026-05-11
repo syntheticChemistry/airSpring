@@ -19,10 +19,12 @@
 //! - WMO (2012) SPI User Guide. WMO-No. 1090.
 //! - Thom HCS (1958) A note on the gamma distribution. Monthly Weather Rev 86(4).
 
-use barracuda::special::gamma::regularized_gamma_p as upstream_gamma_p;
-use barracuda::stats::normal::norm_ppf;
-
+#[cfg(feature = "local")]
 use crate::tolerances::POSITIVE_DATA_GUARD;
+#[cfg(feature = "local")]
+use barracuda::special::gamma::regularized_gamma_p as upstream_gamma_p;
+#[cfg(feature = "local")]
+use barracuda::stats::normal::norm_ppf;
 
 /// WMO drought classification category.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -118,12 +120,20 @@ pub fn gamma_mle_fit(data: &[f64]) -> Option<GammaParams> {
 ///
 /// Delegates to `barracuda::special::gamma::regularized_gamma_p` (upstream).
 /// Local `gamma_series`/`gamma_cf` removed in v0.7.5 (Write→Absorb→Lean).
+#[cfg(feature = "local")]
 #[must_use]
 pub fn gamma_cdf(x: f64, params: &GammaParams) -> f64 {
     if x <= 0.0 {
         return 0.0;
     }
     upstream_gamma_p(params.alpha, x / params.beta).unwrap_or(0.0)
+}
+
+/// IPC-only build: gamma special functions require barraCuda linkage.
+#[cfg(not(feature = "local"))]
+#[must_use]
+pub fn gamma_cdf(_x: f64, _params: &GammaParams) -> f64 {
+    f64::NAN
 }
 
 /// Compute SPI at a given time scale.
@@ -133,6 +143,7 @@ pub fn gamma_cdf(x: f64, params: &GammaParams) -> f64 {
 ///
 /// Returns a vector of SPI values; `f64::NAN` for months with insufficient
 /// history (first `scale - 1` months).
+#[cfg(feature = "local")]
 #[must_use]
 pub fn compute_spi(monthly_precip: &[f64], scale: usize) -> Vec<f64> {
     let n = monthly_precip.len();
@@ -176,6 +187,13 @@ pub fn compute_spi(monthly_precip: &[f64], scale: usize) -> Vec<f64> {
     spi
 }
 
+/// IPC-only: quantile mapping requires barraCuda normal/gamma specials.
+#[cfg(not(feature = "local"))]
+#[must_use]
+pub fn compute_spi(monthly_precip: &[f64], _scale: usize) -> Vec<f64> {
+    vec![f64::NAN; monthly_precip.len()]
+}
+
 #[cfg(test)]
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
@@ -199,6 +217,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "local")]
     fn test_gamma_cdf_bounds() {
         let params = GammaParams {
             alpha: 2.0,
@@ -210,6 +229,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "local")]
     fn test_spi_basic() {
         let precip = vec![50.0; 24];
         let spi = compute_spi(&precip, 1);
@@ -220,6 +240,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "local")]
     fn test_spi_scale_nan_prefix() {
         let precip = vec![50.0; 12];
         let spi3 = compute_spi(&precip, 3);

@@ -3,7 +3,7 @@
 **Date**: May 10, 2026
 **From**: airSpring (ecology / agriculture)
 **To**: primalSpring, all primal teams, all spring teams
-**guideStone Level**: 2+ (IPC-wired, 46 capabilities, composition.status + **`method.register`** + skunkBat IPC wired, 9 UniBin validation scenarios)
+**guideStone Level**: **L4** (cross-atomic pipeline / provenance tier; targeting **L6** cross-spring pipeline with live NUCLEUS) (IPC-wired, 46 capabilities, composition.status + **`method.register`** + skunkBat IPC wired, **10** UniBin validation scenarios)
 
 ---
 
@@ -17,10 +17,17 @@
 ### Cross-Sync Validation
 - **`capability_cross_sync.rs`** — new integration test validates airSpring's shared-domain methods (`health.*`, `capability.*`, `compute.*`) align with primalSpring's canonical 413. Documents 9 "extending" methods (`provenance.*`, `primal.*`, `data.*`, `composition.*`, `method.*`) that are airSpring-local but tracked for upstream registration.
 
+### Tier 4 barracuda rewiring (May 11)
+
+- **`barracuda` optional dependency** — `optional = true` with **`local`** feature **default on**; the library compiles **without** the barraCuda source tree when building **`--no-default-features`**.
+- **`gpu` module** — feature-gated; pure-Rust paths remain available when GPU stack is off.
+- **`math.rs`** — dual-path dispatch: barraCuda-backed routes when enabled, **pure-Rust fallbacks** otherwise.
+- **`ipc/barracuda_route.rs`** — IPC forwarding for barraCuda-backed operations when the in-tree crate is absent.
+
 ### IPC Wiring (May 11)
 - **`method.register` IPC module** — `ipc/method_register.rs` sends `method.register` RPC to biomeOS at startup, registering all 46 niche capabilities dynamically. Dispatch handler processes inbound `method.register` calls.
 - **skunkBat audit module** — `ipc/skunkbat.rs` emits `security.audit_log` events for certification, startup, and ad-hoc audit. Discovery via standard socket path (`/tmp/skunkbat.sock` or `SKUNKBAT_SOCKET`).
-- **9 UniBin validation scenarios** — `validation/scenarios/` expanded from 3 to 9: `fao56-et0`, `et0-methods`, `soil-physics`, `water-balance`, `atlas-pipeline`, `paper-chain` added alongside existing `local-science-parity`, `composition-parity`, `full-regression`. All wired to `airspring validate --scenario <id>`.
+- **10 UniBin validation scenarios** — `validation/scenarios/` expanded (incl. **`s_tier4_math_parity`**): `fao56-et0`, `et0-methods`, `soil-physics`, `water-balance`, `atlas-pipeline`, `paper-chain` added alongside existing `local-science-parity`, `composition-parity`, `full-regression`. All wired to `airspring validate --scenario <id>`.
 - **plasmidBin release binaries** — `airspring` (3.0M) and `airspring_primal` (2.4M) built, stripped, and deployed to `infra/plasmidBin/springs/`.
 - **foundation seeded** — 36/36 thread06_ag targets validated, provenance manifest + sweetGrass braid published. All 6 workloads migrated to UniBin `airspring validate` pattern.
 
@@ -53,7 +60,7 @@
 | Capabilities | 46 |
 | Deploy graphs | 4 (incl. skunkBat, 9-node niche) |
 | Experiments | 90 (all PASS) |
-| guideStone | L2+ (IPC-wired, 9 UniBin scenarios) |
+| guideStone | **L4** (targeting **L6**; IPC-wired, **10** UniBin scenarios) |
 | CPU speedup | 14.3× (24/24 parity) |
 | Coverage | 90.56% |
 | C dependencies | 0 |
@@ -87,7 +94,7 @@ These 10 methods exist in airSpring's local `capability_registry.toml` but not i
 
 | Primal | What airSpring Learned | Action |
 |--------|------------------------|--------|
-| **barraCuda** | 24 CPU benchmarks at parity, 21 GPU modules validated. Path dep is mandatory — `MathBackend` trait abstraction needed for IPC-only deployment (AG-015). | Consider trait-based math dispatch for sovereign NUCLEUS. |
+| **barraCuda** | 24 CPU benchmarks at parity, 21 GPU modules validated. **Tier 4 (2026-05-11):** `optional = true` + `local` default; `math.rs` dual-path; `ipc/barracuda_route.rs`; `--no-default-features` without barraCuda tree — **AG-015 resolved**. | Further trait polish for IPC-only deployments if desired. |
 | **toadStool** | `compute.offload` works for ecology workloads. `compute.dispatch` returns opaque JSON (AG-007). `toadstool.validate` not yet available (AG-012). | Typed response contracts for domain-specific dispatch. Live Science API for notebook-driven validation. |
 | **NestGate** | `data.weather` handler works. `data.open_meteo_weather` is non-standard (AG-008). airSpring URLs now env-overridable for NestGate routing. | Ecosystem weather data standard method name. |
 | **coralReef** | `discover_shader_compiler()` hook exists but no active usage (AG-006). All GPU dispatch goes through barraCuda direct. | Low priority — sovereign shader compile when coralReef matures. |
@@ -108,7 +115,7 @@ These 10 methods exist in airSpring's local `capability_registry.toml` but not i
 | AG-010 | barraCuda | `TensorSession`/`TensorContext` not available | Open |
 | AG-011 | barraCuda | Anderson coupling needs WGSL shader | Open |
 | AG-012 | toadStool | Live Science API not implemented | Open |
-| AG-015 | barraCuda | Still mandatory path dep (needs `MathBackend`) | Documented |
+| AG-015 | barraCuda | ~~Still mandatory path dep~~ | **Resolved** (Tier 4 optional + fallbacks, 2026-05-11) |
 
 ---
 
@@ -146,8 +153,8 @@ airSpring's validated composition patterns for NUCLEUS deployment via biomeOS Ne
 
 ## What's Next for airSpring
 
-1. **Tier 4 barraCuda rewiring** — `optional = true` with IPC-first defaults (requires `MathBackend` trait, ecosystem coordination)
-2. **guideStone L3+** — deploy NUCLEUS from plasmidBin, validate against live primals via `CompositionContext`
+1. ~~**Tier 4 barraCuda rewiring**~~ — **Done (2026-05-11):** `optional = true` with `local` (default on); `gpu` gated; `math.rs` dual-path; `ipc/barracuda_route.rs`; build `--no-default-features` without barraCuda source tree.
+2. **guideStone L6 / live NUCLEUS** — deploy NUCLEUS from plasmidBin; certification engine now spans **L0–L6** (L5: `composition.status`, `method.register`, `compute.dispatch`; L6: deploy graphs, capability registry, scenario registry). Validate against live primals via `CompositionContext` and cross-spring pipeline.
 3. **Phase 4.7 Penny Irrigation** — sovereign scheduling on consumer hardware
 4. **Paper queue** — 5 pending papers awaiting field data (Dong lab 2026)
 

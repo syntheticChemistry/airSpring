@@ -105,9 +105,11 @@ pub mod certification;
 pub mod data;
 pub mod eco;
 pub mod error;
+#[cfg(feature = "local")]
 pub mod gpu;
 pub mod io;
 pub mod ipc;
+pub mod math;
 pub mod methods;
 pub mod nautilus;
 pub mod niche;

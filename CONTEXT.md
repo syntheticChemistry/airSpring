@@ -26,9 +26,10 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - **Eukaryotic UniBin** — single `airspring` binary with `certify`, `validate`,
   `serve`, `status`, `version` subcommands. Pre-extinction experiment crates
   fossilized in `fossilRecord/`.
-- **Certification organelle** — `certification/` library module (L0-L4 layered
-  guidestone validation, absorbed from standalone binary).
-- **Scenario registry** — `validation/scenarios/` modules (**9 UniBin validation
+- **Certification organelle** — `certification/` library module (**L0–L6** layered
+  guidestone validation: bare → discovery → health → capability parity → cross-atomic
+  pipeline → NUCLEUS composition → cross-spring pipeline; absorbed from standalone binary).
+- **Scenario registry** — `validation/scenarios/` modules (**10 UniBin validation
   scenarios**, absorbed from composition experiments + expanded registry coverage).
 
 ## Technical Facts
@@ -52,7 +53,8 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - **Experiments:** 90 (all PASS)
 - **Capabilities:** 46 (science + ecology + provenance + composition + coordination + health)
 - **Deploy graphs:** 4 (provenance trio, NestGate routing, niche deploy w/ 9 nodes incl. skunkBat, cross-spring)
-- **GuideStone level:** L2+ (IPC-wired, **9 UniBin validation scenarios**)
+- **GuideStone level:** L4 (targeting L6 with live NUCLEUS; **10 UniBin validation scenarios**)
+- **Tier 4 rewiring:** `barracuda` is `optional = true` with `local` feature (default on); `gpu` is feature-gated; `math.rs` dual-path dispatch; `ipc/barracuda_route.rs` IPC forwarding; `cargo build -p airspring-barracuda --no-default-features` builds without the barraCuda source tree.
 - **deny.toml:** workspace-root, `aws-lc-sys` + `aws-lc-rs` banned
 
 ## Key Capabilities (JSON-RPC methods)
@@ -93,7 +95,7 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 
 | Primal | Role | Discovery |
 |--------|------|-----------|
-| **barraCuda** | GPU math primitives (ops 0-19, PDE, optimize, stats) | `barracuda` crate (path dep, Tier 4 target: optional + IPC-first) |
+| **barraCuda** | GPU math primitives (ops 0-19, PDE, optimize, stats) | `barracuda` crate (optional path dep; `local` default; Tier 4: IPC + pure-Rust fallbacks) |
 | **biomeOS** | Orchestration, socket resolution, primal discovery | `biomeos::find_socket()` |
 | **toadStool** | Hardware discovery, compute dispatch | `compute.offload` IPC |
 | **bearDog** | TLS, key management | Sovereign TLS for transport |

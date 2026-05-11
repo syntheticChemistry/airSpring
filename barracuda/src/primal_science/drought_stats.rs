@@ -2,8 +2,10 @@
 //! Drought index, autocorrelation, gamma CDF, and monthly ET handlers.
 
 use crate::eco::anderson;
+#[cfg(feature = "local")]
 use crate::eco::drought_index;
 use crate::eco::thornthwaite;
+#[cfg(feature = "local")]
 use crate::gpu::autocorrelation;
 use serde_json::Value;
 
@@ -36,6 +38,7 @@ pub(super) fn thornthwaite_handler(params: &Value) -> Value {
     serde_json::json!({"monthly_et0_mm": m.to_vec(), "annual_et0_mm": m.iter().sum::<f64>(), "method": "thornthwaite_1948"})
 }
 
+#[cfg(feature = "local")]
 pub(super) fn spi_drought(params: &Value) -> Value {
     let monthly_precip: Vec<f64> = params
         .get("monthly_precip_mm")
@@ -73,6 +76,14 @@ pub(super) fn spi_drought(params: &Value) -> Value {
     })
 }
 
+#[cfg(not(feature = "local"))]
+pub(super) fn spi_drought(_params: &Value) -> Value {
+    serde_json::json!({
+        "error": "SPI drought index requires `local` feature (barraCuda gamma/normal primitives or IPC to a barraCuda primal)"
+    })
+}
+
+#[cfg(feature = "local")]
 pub(super) fn autocorrelation_handler(params: &Value) -> Value {
     let data: Vec<f64> = params
         .get("data")
@@ -98,6 +109,14 @@ pub(super) fn autocorrelation_handler(params: &Value) -> Value {
     })
 }
 
+#[cfg(not(feature = "local"))]
+pub(super) fn autocorrelation_handler(_params: &Value) -> Value {
+    serde_json::json!({
+        "error": "autocorrelation requires `local` feature (GPU/CPU spectral path) or route via a barraCuda primal"
+    })
+}
+
+#[cfg(feature = "local")]
 pub(super) fn gamma_cdf_handler(params: &Value) -> Value {
     let x = f64_p(params, "x").unwrap_or(1.0);
     let alpha = f64_p(params, "alpha").unwrap_or(2.0);
@@ -110,5 +129,12 @@ pub(super) fn gamma_cdf_handler(params: &Value) -> Value {
         "alpha": alpha,
         "beta": beta,
         "upstream": "barracuda::special::gamma::regularized_gamma_p"
+    })
+}
+
+#[cfg(not(feature = "local"))]
+pub(super) fn gamma_cdf_handler(_params: &Value) -> Value {
+    serde_json::json!({
+        "error": "gamma CDF requires `local` feature (barraCuda specials) or IPC to barraCuda"
     })
 }

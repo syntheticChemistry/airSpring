@@ -94,10 +94,64 @@ fn tridiag_solve(a: &[f64], b: &[f64], c: &[f64], d: &[f64], x: &mut [f64]) -> b
     }
     let sub = &a[1..];
     let sup = &c[..n - 1];
-    barracuda::linalg::tridiagonal_solve(sub, b, sup, d).is_ok_and(|sol| {
-        x[..n].copy_from_slice(&sol);
-        true
-    })
+    #[cfg(feature = "local")]
+    {
+        barracuda::linalg::tridiagonal_solve(sub, b, sup, d).is_ok_and(|sol| {
+            x[..n].copy_from_slice(&sol);
+            true
+        })
+    }
+    #[cfg(not(feature = "local"))]
+    {
+        match local_tridiagonal_solve(sub, b, sup, d) {
+            Some(sol) => {
+                x[..n].copy_from_slice(&sol);
+                true
+            }
+            None => false,
+        }
+    }
+}
+
+/// Thomas algorithm (matches `barracuda::linalg::tridiagonal_solve` contract).
+#[cfg(not(feature = "local"))]
+fn local_tridiagonal_solve(a: &[f64], b: &[f64], c: &[f64], d: &[f64]) -> Option<Vec<f64>> {
+    let n = b.len();
+    if n == 0 {
+        return Some(Vec::new());
+    }
+    if a.len() != n - 1 || c.len() != n - 1 || d.len() != n {
+        return None;
+    }
+    if n == 1 {
+        if b[0].abs() < 1e-15 {
+            return None;
+        }
+        return Some(vec![d[0] / b[0]]);
+    }
+    let mut c_prime = vec![0.0; n - 1];
+    let mut d_prime = vec![0.0; n];
+    if b[0].abs() < 1e-15 {
+        return None;
+    }
+    c_prime[0] = c[0] / b[0];
+    d_prime[0] = d[0] / b[0];
+    for i in 1..n {
+        let denom = a[i - 1].mul_add(-c_prime[i - 1], b[i]);
+        if denom.abs() < 1e-15 {
+            return None;
+        }
+        if i < n - 1 {
+            c_prime[i] = c[i] / denom;
+        }
+        d_prime[i] = a[i - 1].mul_add(-d_prime[i - 1], d[i]) / denom;
+    }
+    let mut out = vec![0.0; n];
+    out[n - 1] = d_prime[n - 1];
+    for i in (0..n - 1).rev() {
+        out[i] = c_prime[i].mul_add(-out[i + 1], d_prime[i]);
+    }
+    Some(out)
 }
 
 /// Compute flux divergence dh/dt from Richards RHS (for explicit step).

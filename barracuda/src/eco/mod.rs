@@ -4,7 +4,9 @@
 pub mod anderson;
 pub mod correction;
 pub mod crop;
+#[cfg(feature = "local")]
 pub mod cytokine;
+#[cfg(feature = "local")]
 pub mod diversity;
 pub mod drought_index;
 pub mod dual_kc;
@@ -20,6 +22,7 @@ pub mod simple_et0;
 pub mod soil_moisture;
 pub mod solar;
 pub mod thornthwaite;
+#[cfg(feature = "local")]
 pub mod tissue;
 pub mod van_genuchten;
 pub mod water_balance;

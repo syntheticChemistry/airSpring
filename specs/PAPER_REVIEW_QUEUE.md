@@ -2,7 +2,7 @@
 
 **Last Updated**: May 11, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 90 experiments (1284/1284 Python + 1,011 Rust lib + 316 integration + 62 forge tests = 1,389 total + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.3.7 (wgpu 28), Edition 2024, 93 binaries. 14.3× Rust-vs-Python geometric mean speedup (24/24 algorithms, 21/21 CPU-GPU parity modules). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired. metalForge 66/66 mixed pipeline. V010 handoff. biomeOS niche: 46 capabilities, 4 deploy graphs, 10 MCP tools. 46 centralized method constants (`methods.rs`). 9 validation scenarios (UniBin). guideStone L2+. Platform-agnostic IPC. `method.register` + skunkBat IPC wired.
+**Status**: 90 experiments (1284/1284 Python + 1,011 Rust lib + 316 integration + 62 forge tests = 1,389 total + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.3.7 (wgpu 28), Edition 2024, 93 binaries. 14.3× Rust-vs-Python geometric mean speedup (24/24 algorithms, 21/21 CPU-GPU parity modules). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired. metalForge 66/66 mixed pipeline. V010 handoff. biomeOS niche: 46 capabilities, 4 deploy graphs, 10 MCP tools. 46 centralized method constants (`methods.rs`). 10 validation scenarios (UniBin). guideStone L4 (targeting L6). Platform-agnostic IPC. `method.register` + skunkBat IPC wired.
 
 ---
 

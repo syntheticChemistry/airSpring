@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! Biodiversity and diversity index handlers for the airSpring primal.
 
+#[cfg(feature = "local")]
 use crate::eco::diversity;
 use serde_json::Value;
 
+#[cfg(feature = "local")]
 pub(super) fn shannon_diversity(params: &Value) -> Value {
     let counts: Vec<f64> = params
         .get("counts")
@@ -17,6 +19,12 @@ pub(super) fn shannon_diversity(params: &Value) -> Value {
     serde_json::json!({"shannon": a.shannon, "simpson": a.simpson, "pielou": a.evenness, "observed_species": a.observed, "chao1": a.chao1, "method": "shannon_simpson_chao1"})
 }
 
+#[cfg(not(feature = "local"))]
+pub(super) fn shannon_diversity(_params: &Value) -> Value {
+    serde_json::json!({"error": "diversity metrics require `local` feature (barraCuda stats) or IPC"})
+}
+
+#[cfg(feature = "local")]
 pub(super) fn bray_curtis(params: &Value) -> Value {
     let parse = |k: &str| -> Vec<f64> {
         params
@@ -31,4 +39,9 @@ pub(super) fn bray_curtis(params: &Value) -> Value {
     }
     let bc = diversity::bray_curtis(&a, &b);
     serde_json::json!({"bray_curtis_dissimilarity": bc, "similarity": 1.0 - bc, "method": "bray_curtis"})
+}
+
+#[cfg(not(feature = "local"))]
+pub(super) fn bray_curtis(_params: &Value) -> Value {
+    serde_json::json!({"error": "Bray-Curtis requires `local` feature (barraCuda stats) or IPC"})
 }

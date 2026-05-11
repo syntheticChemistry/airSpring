@@ -112,10 +112,12 @@ pub fn evaluate(model: &FittedModel, x: f64) -> f64 {
     }
 }
 
+#[cfg(feature = "local")]
 use crate::len_f64;
 
 // ── Least-squares fitting (R-S66-001: delegates to barracuda::stats::regression) ──
 
+#[cfg(feature = "local")]
 fn fit_result_to_fitted_model(
     r: barracuda::stats::FitResult,
     model_type: ModelType,
@@ -133,17 +135,33 @@ fn fit_result_to_fitted_model(
 /// Delegates to `barracuda::stats::regression::fit_linear` (R-S66-001).
 /// Returns `Some(FittedModel)` or `None` if the system is singular.
 #[must_use]
+#[cfg(feature = "local")]
 pub fn fit_linear(x: &[f64], y: &[f64]) -> Option<FittedModel> {
     barracuda::stats::fit_linear(x, y).map(|r| fit_result_to_fitted_model(r, ModelType::Linear))
+}
+
+/// IPC-only stub: curve fitting requires barraCuda regression primitives.
+#[must_use]
+#[cfg(not(feature = "local"))]
+pub fn fit_linear(_x: &[f64], _y: &[f64]) -> Option<FittedModel> {
+    None
 }
 
 /// Fit a quadratic model y = a·x² + b·x + c using normal equations.
 ///
 /// Delegates to `barracuda::stats::regression::fit_quadratic` (R-S66-001).
 #[must_use]
+#[cfg(feature = "local")]
 pub fn fit_quadratic(xs: &[f64], ys: &[f64]) -> Option<FittedModel> {
     barracuda::stats::fit_quadratic(xs, ys)
         .map(|r| fit_result_to_fitted_model(r, ModelType::Quadratic))
+}
+
+/// IPC-only stub: curve fitting requires barraCuda regression primitives.
+#[must_use]
+#[cfg(not(feature = "local"))]
+pub fn fit_quadratic(_xs: &[f64], _ys: &[f64]) -> Option<FittedModel> {
+    None
 }
 
 /// Fit an exponential model y = a·exp(b·x) via log-linearized least squares.
@@ -151,9 +169,17 @@ pub fn fit_quadratic(xs: &[f64], ys: &[f64]) -> Option<FittedModel> {
 /// Delegates to `barracuda::stats::regression::fit_exponential` (R-S66-001).
 /// Transforms to ln(y) = ln(a) + b·x and fits linear. Requires all y > 0.
 #[must_use]
+#[cfg(feature = "local")]
 pub fn fit_exponential(x: &[f64], y: &[f64]) -> Option<FittedModel> {
     barracuda::stats::fit_exponential(x, y)
         .map(|r| fit_result_to_fitted_model(r, ModelType::Exponential))
+}
+
+/// IPC-only stub: curve fitting requires barraCuda regression primitives.
+#[must_use]
+#[cfg(not(feature = "local"))]
+pub fn fit_exponential(_x: &[f64], _y: &[f64]) -> Option<FittedModel> {
+    None
 }
 
 /// Fit a logarithmic model y = a·ln(x) + b via linearized least squares.
@@ -161,9 +187,17 @@ pub fn fit_exponential(x: &[f64], y: &[f64]) -> Option<FittedModel> {
 /// Delegates to `barracuda::stats::regression::fit_logarithmic` (R-S66-001).
 /// Transforms to y = a·z + b where z = ln(x). Requires all x > 0.
 #[must_use]
+#[cfg(feature = "local")]
 pub fn fit_logarithmic(x: &[f64], y: &[f64]) -> Option<FittedModel> {
     barracuda::stats::fit_logarithmic(x, y)
         .map(|r| fit_result_to_fitted_model(r, ModelType::Logarithmic))
+}
+
+/// IPC-only stub: curve fitting requires barraCuda regression primitives.
+#[must_use]
+#[cfg(not(feature = "local"))]
+pub fn fit_logarithmic(_x: &[f64], _y: &[f64]) -> Option<FittedModel> {
+    None
 }
 
 /// Fit a regularized linear model using upstream `barracuda::linalg::ridge`.
@@ -175,6 +209,7 @@ pub fn fit_logarithmic(x: &[f64], y: &[f64]) -> Option<FittedModel> {
 /// Returns `Some(FittedModel)` with `ModelType::Linear` and the ridge-fit
 /// coefficients [slope, intercept], or `None` if the fit fails.
 #[must_use]
+#[cfg(feature = "local")]
 pub fn fit_ridge(x: &[f64], y: &[f64], regularization: f64) -> Option<FittedModel> {
     if x.len() < 2 || x.len() != y.len() {
         return None;
@@ -201,6 +236,13 @@ pub fn fit_ridge(x: &[f64], y: &[f64], regularization: f64) -> Option<FittedMode
         r_squared: r2,
         rmse,
     })
+}
+
+/// IPC-only stub: ridge regression requires barraCuda `linalg::ridge`.
+#[must_use]
+#[cfg(not(feature = "local"))]
+pub fn fit_ridge(_x: &[f64], _y: &[f64], _regularization: f64) -> Option<FittedModel> {
+    None
 }
 
 /// Fit all four correction models and return those that converge.
@@ -232,9 +274,10 @@ pub fn fit_correction_equations(
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
+#[cfg(feature = "local")]
 fn goodness_of_fit<F: Fn(f64) -> f64>(x: &[f64], y: &[f64], predict: F) -> (f64, f64) {
     let n = len_f64(y);
-    let mean_y: f64 = barracuda::stats::mean(y);
+    let mean_y: f64 = crate::math::mean(y);
 
     let ss_res: f64 = x
         .iter()

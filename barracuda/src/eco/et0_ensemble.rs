@@ -176,7 +176,7 @@ pub fn et0_ensemble(input: &EnsembleInput) -> EnsembleResult {
         };
     }
 
-    let consensus = barracuda::stats::mean(&valid);
+    let consensus = crate::math::mean(&valid);
     let min_v = valid.iter().copied().fold(f64::INFINITY, f64::min);
     let max_v = valid.iter().copied().fold(f64::NEG_INFINITY, f64::max);
 

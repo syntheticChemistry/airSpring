@@ -191,7 +191,19 @@ pub fn crop_coefficient_stage(
     day_in_stage: u32,
     stage_length: u32,
 ) -> f64 {
-    barracuda::stats::crop_coefficient(kc_prev, kc_next, day_in_stage, stage_length)
+    #[cfg(feature = "local")]
+    {
+        barracuda::stats::crop_coefficient(kc_prev, kc_next, day_in_stage, stage_length)
+    }
+    #[cfg(not(feature = "local"))]
+    {
+        if stage_length == 0 {
+            kc_prev
+        } else {
+            let frac = f64::from(day_in_stage) / f64::from(stage_length);
+            (kc_next - kc_prev).mul_add(frac, kc_prev)
+        }
+    }
 }
 
 // ── Growing Degree Days (GDD) ────────────────────────────────────────

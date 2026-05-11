@@ -336,6 +336,30 @@ pub fn send(
     }
 }
 
+/// Extract the JSON-RPC `result` from a Unix socket call.
+///
+/// # Errors
+///
+/// Returns [`IpcError`] on transport failure, JSON-RPC `error`, or missing `result`.
+pub fn call_unix(
+    socket_path: &Path,
+    method: &str,
+    params: &serde_json::Value,
+) -> Result<serde_json::Value, IpcError> {
+    let resp = send(socket_path, method, params)?;
+    if let Some((code, message)) = extract_rpc_error(&resp) {
+        return Err(IpcError::RpcError {
+            code: i32::try_from(code).unwrap_or(INTERNAL_ERROR),
+            message,
+        });
+    }
+    resp.get("result")
+        .cloned()
+        .ok_or_else(|| IpcError::EmptyResponse {
+            method: method.to_string(),
+        })
+}
+
 #[cfg(test)]
 #[path = "tests.rs"]
 mod tests;

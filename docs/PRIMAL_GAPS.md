@@ -2,7 +2,7 @@
 
 **Date**: May 11, 2026 (post-interstadial evolution)
 **Spring**: airSpring (ecology / agriculture)
-**guideStone Level**: L2+ (IPC-wired, 46 capabilities, composition.status) → targeting 3+
+**guideStone Level**: **L4** (cross-atomic pipeline / provenance tier) → targeting **L6** (cross-spring pipeline, live NUCLEUS)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -10,7 +10,8 @@
 ## Purpose
 
 This document tracks gaps discovered during airSpring's evolution from
-validated Rust science (L2) toward primal composition (L3–L5). Each gap
+validated Rust science toward primal composition and **L4–L6** guideStone
+(certification layers L0–L6: structural through cross-spring pipeline). Each gap
 is a missing capability, wire contract issue, or primal behavior that
 blocks or complicates composition. Gaps are handed back to primalSpring
 for ecosystem-wide refinement.
@@ -32,7 +33,6 @@ Format follows wetSpring/hotSpring `PRIMAL_GAPS.md` pattern.
 | AG-010 | barraCuda | `TensorSession` / `TensorContext` not available | Seasonal GPU pipeline blocked on persistent buffer pooling; documented in `evolution_gaps.rs` | **Open** — barraCuda roadmap item |
 | AG-011 | barraCuda | Anderson coupling needs new WGSL shader | `science.anderson_coupling` runs CPU-only; no upstream shader exists | **Open** — Tier C in GPU promotion map |
 | AG-012 | toadStool | Live Science API not implemented | `toadstool.validate` JSON-RPC method (projectNUCLEUS `LIVE_SCIENCE_API.md`) not yet available — notebooks cannot call validation directly | **Open** — toadStool evolution item |
-| AG-015 | barraCuda | barraCuda still mandatory path dep | Parity audit: should be `optional = true` with IPC-first for sovereign NUCLEUS deployment; blocks deployment where only primals are present | **Documented** — requires trait abstraction layer (MathBackend) to decouple science from barraCuda types; ecosystem-wide coordination needed |
 
 ---
 
@@ -40,6 +40,7 @@ Format follows wetSpring/hotSpring `PRIMAL_GAPS.md` pattern.
 
 | ID | Primal | Gap | Resolution | Date |
 |----|--------|-----|------------|------|
+| AG-015 | barraCuda | barraCuda still mandatory path dep | **Tier 4 rewiring (2026-05-11):** `optional = true` with `local` (default on); `gpu` feature-gated; `math.rs` dual-path + `ipc/barracuda_route.rs`; builds `--no-default-features` without barraCuda source tree | 2026-05-11 |
 | AG-002 | primalSpring | Path dep deprecated | Standalone manifest reader via `toml` crate — no primalspring crate dep needed | 2026-05-07 |
 | AG-003 | biomeOS | `health_method` inconsistency | Aligned metalForge deploy to `health.liveness` | 2026-04-27 |
 | AG-004 | biomeOS | Capability naming drift | Converged metalForge deploy to niche.rs canonical names | 2026-04-27 |
@@ -63,9 +64,9 @@ These are not primal gaps but internal reconciliation items:
 ## guideStone Evolution Path
 
 ```
-Current:  gS Level 2+ (IPC-wired, **9 UniBin validation scenarios**, methods centralized)
-Target:   gS Level 3+ (live NUCLEUS validation)
-Next:     Deploy NUCLEUS from plasmidBin, validate Tier 3 experiments
+Current:  gS Level 4 (certification L0–L6 engine; **10 UniBin validation scenarios**; Tier 4 barracuda optional complete)
+Target:   gS Level 6 (cross-spring pipeline, live NUCLEUS — deploy graphs, registries)
+Next:     Deploy NUCLEUS from plasmidBin; validate live `composition.status` / `method.register` / `compute.dispatch` against running primals
 ```
 
 ### Prerequisites for gS Level 1 (DONE)
@@ -89,7 +90,7 @@ Next:     Deploy NUCLEUS from plasmidBin, validate Tier 3 experiments
 - [x] capability_registry.toml created (46 methods, sync test + cross-sync vs canonical **413**)
 - [x] deny.toml promoted to workspace root (ecoBin v3.0, ring/openssl + aws-lc-sys banned)
 - [x] `methods.rs` centralized constants module (46 methods, drift-proof)
-- [x] **9 UniBin validation scenarios** (`validation/scenarios/`; exp001–exp003 absorbed plus expanded ScenarioRegistry coverage)
+- [x] **10 UniBin validation scenarios** (`validation/scenarios/`; exp001–exp003 absorbed plus expanded ScenarioRegistry coverage + **`s_tier4_math_parity`**)
 - [x] Test extraction: provenance.rs (747→496), rpc/mod.rs (650→341), seasonal_pipeline (738→539)
 - [x] 3 compilation errors fixed (autobins, NestGateProvider→IPC, fhe_ntt cfg)
 - [x] Missing docs resolved (DailyWeather, Station, YieldRecord, HttpResponse, DataError)
@@ -100,8 +101,8 @@ Next:     Deploy NUCLEUS from plasmidBin, validate Tier 3 experiments
 - [x] skunkBat added to niche deploy graph (9 nodes)
 - [x] Zero `#[allow]` in production code (`#[expect]` with reason throughout)
 - [x] benchmarks.rs refactored (810→148 + 607 bench_fns.rs, zero >800L files)
-- [ ] barraCuda optional = true (ecosystem-wide, requires MathBackend trait)
-- [ ] guidestone L3+ (deploy NUCLEUS from plasmidBin)
+- [x] barraCuda optional = true (`local` default, `math.rs` fallbacks, `ipc/barracuda_route.rs`)
+- [ ] guideStone L6 / live NUCLEUS validation (deploy NUCLEUS from plasmidBin)
 
 ---
 

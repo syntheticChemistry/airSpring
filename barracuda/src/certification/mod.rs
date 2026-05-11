@@ -11,6 +11,8 @@
 //! | 2     | Health | discovered primals respond to `health.liveness` |
 //! | 3     | Capability Parity | science IPC calls produce correct results |
 //! | 4     | Cross-Atomic Pipeline | provenance trio roundtrip |
+//! | 5     | NUCLEUS Composition | `composition.status`, `method.register`, `compute.dispatch` |
+//! | 6     | Cross-Spring Pipeline | deploy graphs, capability registry, scenario registry |
 //!
 //! Originally evolved as the `airspring_guidestone` binary.
 //! Endosymbiosed into the library at the interstadial transition.
@@ -19,11 +21,12 @@ pub mod bare;
 #[cfg(feature = "guidestone")]
 pub mod composition;
 pub mod health;
+pub mod nucleus;
 
 use crate::validation::{ValidationHarness, banner, section};
 
 /// Maximum certification layer (inclusive).
-pub const MAX_LAYER: u8 = 4;
+pub const MAX_LAYER: u8 = 6;
 
 /// Run the full certification engine up to the specified layer.
 ///
@@ -81,6 +84,22 @@ pub fn certify(max_layer: u8) -> ValidationHarness {
 
     section("Layer 4: Cross-Atomic Pipeline");
     health::validate_provenance_roundtrip(&mut v);
+
+    if max_layer < 5 {
+        print_summary(&v);
+        return v;
+    }
+
+    section("Layer 5: NUCLEUS Composition");
+    nucleus::validate_composition(&mut v);
+
+    if max_layer < 6 {
+        print_summary(&v);
+        return v;
+    }
+
+    section("Layer 6: Cross-Spring Pipeline");
+    nucleus::validate_cross_spring(&mut v);
 
     print_summary(&v);
     v

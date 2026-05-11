@@ -2,7 +2,13 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased] - 2026-05-09
+## [Unreleased] - 2026-05-11
+
+### Tier 4 rewiring, certification layers L5–L6, Tier 4 math scenario (2026-05-11)
+
+- **Tier 4 — `barracuda` optional:** `barracuda` is now `optional = true` with a **`local`** feature (**default on**). The **`gpu`** module is feature-gated. New **`math.rs`** provides dual-path dispatch with **pure-Rust fallbacks** when barraCuda is off. **`ipc/barracuda_route.rs`** adds IPC forwarding for barraCuda-backed routes. The library **builds without the barraCuda source tree** when using **`--no-default-features`**.
+- **Certification engine — guideStone L5–L6 layers:** Layers **L0–L6** (was L0–L4 framing in older docs): **L5** NUCLEUS composition — `composition.status`, `method.register`, `compute.dispatch`; **L6** cross-spring pipeline — deploy graphs, capability registry, scenario registry. Current guideStone posture documented as **L4**, targeting **L6** with live NUCLEUS.
+- **Validation scenarios —** added **`s_tier4_math_parity`**; **10** UniBin validation scenarios total (was 9).
 
 ### Deep Debt Resolution — Zero Warnings, Zero Failures (2026-05-09)
 
@@ -22,8 +28,8 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 ### Interstadial Eukaryotic Evolution (2026-05-09)
 
 - **UniBin binary**: `airspring` — single binary with `certify`, `validate`, `serve`, `status`, `version` subcommands (clap 4). Absorbs guidestone and experiment runners into one eukaryotic cell.
-- **`certification/` organelle**: Absorbed guidestone into `barracuda/src/certification/` (bare.rs, health.rs). Layered validation L0-L4 (bare → discovery → health → parity → provenance roundtrip).
-- **`validation/scenarios/` module**: Scenario registry with `ScenarioMeta` (id, track, tier, provenance), `Tier` (Rust/Live/Both), `Track` (ScienceDispatch/Composition/Foundation/Provenance). 9 validation scenarios (3 absorbed from exp001-003 + 6 expanded: fao56-et0, et0-methods, soil-physics, water-balance, atlas-pipeline, paper-chain).
+- **`certification/` organelle**: Absorbed guidestone into `barracuda/src/certification/` (bare.rs, health.rs). Layered validation **L0–L6** (L0 structural → L1 discovery → L2 health → L3 capability parity → L4 cross-atomic provenance → L5 NUCLEUS composition → L6 cross-spring pipeline).
+- **`validation/scenarios/` module**: Scenario registry with `ScenarioMeta` (id, track, tier, provenance), `Tier` (Rust/Live/Both), `Track` (ScienceDispatch/Composition/Foundation/Provenance). **10** validation scenarios as of 2026-05-11 (3 absorbed from exp001-003 + 6 expanded + **`s_tier4_math_parity`**): fao56-et0, et0-methods, soil-physics, water-balance, atlas-pipeline, paper-chain, etc.
 - **`deny.toml` evolution**: Added `aws-lc-sys` + `aws-lc-rs` bans to both workspace-root and barracuda deny.toml files (ecosystem posture alignment).
 - **Lint cleanup**: All 3 bare `#[allow()]` in test files → `#[expect(…, reason = "…")]` (stats_integration, determinism, cross_spring_absorption).
 - **Unfulfilled expect removed**: `clippy::unwrap_used` on determinism.rs (no unwrap calls present).

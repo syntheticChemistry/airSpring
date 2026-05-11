@@ -23,7 +23,7 @@
 //! harness.finish();
 //! ```
 
-use barracuda::validation::{Check, ValidationHarness};
+use super::{Check, ValidationHarness};
 
 /// Receives completed validation results for alternative output formats.
 pub trait ValidationSink {

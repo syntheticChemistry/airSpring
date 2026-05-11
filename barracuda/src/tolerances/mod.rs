@@ -71,7 +71,41 @@
 //! | ET₀ cross-method % | (literature) | — | — | Hargreaves vs PM 10–30% divergence; Great Lakes 25% |
 //! | P significance | (convention) | — | — | Standard two-tailed α = 0.05; no Python baseline needed |
 
+#[cfg(feature = "local")]
 pub use barracuda::tolerances::{Tolerance, check};
+
+#[cfg(not(feature = "local"))]
+mod local_tolerance {
+    /// Tolerance descriptor with absolute and relative bounds plus justification.
+    #[derive(Debug, Clone, Copy)]
+    pub struct Tolerance {
+        /// Identifier for this tolerance.
+        pub name: &'static str,
+        /// Absolute tolerance threshold.
+        pub abs_tol: f64,
+        /// Relative tolerance threshold.
+        pub rel_tol: f64,
+        /// Mathematical justification for the chosen values.
+        pub justification: &'static str,
+    }
+
+    /// Check whether `computed` matches `expected` within the tolerance.
+    #[must_use]
+    pub fn check(computed: f64, expected: f64, tol: &Tolerance) -> bool {
+        if !computed.is_finite() || !expected.is_finite() {
+            return computed == expected;
+        }
+        let abs = (computed - expected).abs();
+        if abs <= tol.abs_tol {
+            return true;
+        }
+        let scale = expected.abs().max(1.0);
+        abs <= tol.rel_tol * scale
+    }
+}
+
+#[cfg(not(feature = "local"))]
+pub use local_tolerance::{Tolerance, check};
 
 mod atmospheric;
 mod gpu;

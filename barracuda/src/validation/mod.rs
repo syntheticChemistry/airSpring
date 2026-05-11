@@ -36,7 +36,16 @@ pub mod json;
 pub mod scenarios;
 mod sink;
 
-pub use barracuda::validation::{ValidationHarness, exit_no_gpu, gpu_required};
+#[cfg(feature = "local")]
+pub use barracuda::validation::{
+    Check, ToleranceMode, ValidationHarness, exit_no_gpu, gpu_required,
+};
+
+#[cfg(not(feature = "local"))]
+mod harness_local;
+
+#[cfg(not(feature = "local"))]
+pub use harness_local::{Check, ToleranceMode, ValidationHarness, exit_no_gpu, gpu_required};
 pub use json::{
     json_array, json_array_checked, json_array_opt, json_f64, json_f64_required, json_field,
     json_field_checked, json_object_opt, json_object_required, json_str, json_str_checked,

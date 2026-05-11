@@ -19,6 +19,7 @@ pub mod s_foundation_targets;
 pub mod s_local_science_parity;
 pub mod s_paper_chain;
 pub mod s_soil_physics;
+pub mod s_tier4_math_parity;
 pub mod s_water_balance;
 
 /// Build the canonical scenario registry with all absorbed scenarios.
@@ -34,5 +35,6 @@ pub fn build_registry() -> ScenarioRegistry {
     r.register(s_water_balance::SCENARIO);
     r.register(s_atlas_pipeline::SCENARIO);
     r.register(s_paper_chain::SCENARIO);
+    r.register(s_tier4_math_parity::SCENARIO);
     r
 }

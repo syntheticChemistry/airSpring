@@ -1,6 +1,6 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: May 11, 2026 (v0.10.0 — Eukaryotic UniBin evolution, deep debt resolution, post-interstadial. Certification organelle (L0-L4), scenario registry (**9 UniBin validation scenarios**), dead standalone-http removed, 6 test failures fixed, hardcoded primals→constants, zero clippy warnings.)
+**Last Updated**: May 11, 2026 (v0.10.0 — Eukaryotic UniBin evolution, deep debt resolution, post-interstadial. Certification engine **L0–L6** (L4+ cross-atomic provenance; L5 NUCLEUS composition; L6 cross-spring pipeline), scenario registry (**10 UniBin validation scenarios** incl. **`s_tier4_math_parity`**), **Tier 4 rewiring complete** (`barracuda` optional + `local` default, `math.rs` dual-path, `ipc/barracuda_route.rs`, `--no-default-features` without barraCuda tree). Dead standalone-http removed, 6 test failures fixed, hardcoded primals→constants, zero clippy warnings. **guideStone L4+** (targeting L6).)
 **barraCuda**: v0.3.7 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry, SpringDomain newtype, F64BuiltinCapabilities DF64 fields)
 **ToadStool**: S147+ (20,015 tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient, hw-learn, spirv_codegen_safety)
 **coralReef**: Phase 10 Iteration 44 sovereign Rust GPU compiler (NVIDIA + AMD, 1669+48 tests, VFIO dispatch)
@@ -18,6 +18,8 @@ validate against papers, hand off to barraCuda, lean on upstream.
 "math is universal, precision is silicon." ToadStool dispatches across hardware;
 barraCuda provides universal math primitives. Springs depend on barraCuda directly,
 not through ToadStool.
+
+**Tier 4 rewiring (2026-05-11) — airSpring**: The workspace `barracuda` crate is now an **optional** path dependency with a **`local`** feature (**default on**). The **`gpu`** module is feature-gated; **`math.rs`** implements dual-path dispatch with **pure-Rust fallbacks** when barraCuda/GPU paths are off; **`ipc/barracuda_route.rs`** forwards IPC for barraCuda-backed calls when needed. **`cargo build -p airspring-barracuda --no-default-features`** compiles **without** the barraCuda source tree.
 
 ### Already Absorbed (Lean)
 

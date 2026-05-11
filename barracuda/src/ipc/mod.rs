@@ -14,6 +14,7 @@
 //! | [`resilience`] | Circuit breaker + retry with exponential backoff |
 //! | [`timeseries`] | Cross-spring time series exchange (`ecoPrimals/time-series/v1`) |
 
+pub mod barracuda_route;
 pub mod compute_dispatch;
 pub mod dispatch_outcome;
 pub mod mcp;
