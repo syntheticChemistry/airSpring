@@ -11,6 +11,8 @@
 
 /// Hardware discovery and GPU compute orchestration.
 pub const TOADSTOOL: &str = "toadstool";
+/// Spring orchestration / capability graph primal (airSpring barracuda layer).
+pub const BARRACUDA: &str = "barracuda";
 /// Security primal (Ed25519 signing, encryption, key generation).
 pub const BEARDOG: &str = "beardog";
 /// Ecosystem orchestrator.
@@ -82,6 +84,7 @@ mod tests {
     fn all_names_are_lowercase() {
         for name in [
             TOADSTOOL,
+            BARRACUDA,
             BEARDOG,
             BIOMEOS,
             SONGBIRD,

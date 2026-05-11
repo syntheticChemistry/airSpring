@@ -26,7 +26,7 @@ pub fn validate_cross_spring(v: &mut ValidationHarness) {
 }
 
 fn validate_composition_status(v: &mut ValidationHarness) {
-    let biomeos_socket = biomeos::discover_primal_socket("biomeos");
+    let biomeos_socket = biomeos::discover_primal_socket(crate::primal_names::BIOMEOS);
     let Some(socket) = biomeos_socket else {
         println!("  SKIP: biomeOS not available for composition.status");
         return;
@@ -44,7 +44,7 @@ fn validate_composition_status(v: &mut ValidationHarness) {
 }
 
 fn validate_method_register(v: &mut ValidationHarness) {
-    let biomeos_socket = biomeos::discover_primal_socket("biomeos");
+    let biomeos_socket = biomeos::discover_primal_socket(crate::primal_names::BIOMEOS);
     let Some(socket) = biomeos_socket else {
         println!("  SKIP: biomeOS not available for method.register");
         return;

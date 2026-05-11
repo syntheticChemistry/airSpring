@@ -86,7 +86,7 @@ pub fn resolve_socket_dir_with(config: &SocketConfig) -> PathBuf {
         return dir.clone();
     }
     if let Some(xdg) = &config.xdg_runtime_dir {
-        return xdg.join("biomeos");
+        return xdg.join(crate::primal_names::BIOMEOS);
     }
     platform_fallback_socket_dir()
 }
@@ -157,7 +157,7 @@ fn platform_fallback_socket_dir() -> PathBuf {
             }
         }
     }
-    std::env::temp_dir().join("biomeos")
+    std::env::temp_dir().join(crate::primal_names::BIOMEOS)
 }
 
 // ── Tests (zero unsafe, zero #[serial]) ──────────────────────────────

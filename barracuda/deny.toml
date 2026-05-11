@@ -16,6 +16,7 @@ unmaintained = "workspace"
 yanked = "deny"
 
 [licenses]
+version = 2
 allow = [
     "AGPL-3.0-only",
     "AGPL-3.0-or-later",
@@ -43,6 +44,7 @@ deny = [
     # ecoBin: no C/system dependencies in application code.
     # Cross-compilation and reproducibility require pure Rust.
     { crate = "openssl-sys", wrappers = [] },
+    { crate = "openssl", wrappers = [] },
     { crate = "libz-sys", wrappers = [] },
     { crate = "ring", wrappers = [] },
     { crate = "native-tls", wrappers = [] },

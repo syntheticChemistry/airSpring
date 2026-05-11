@@ -112,7 +112,7 @@ fn validate_dependencies(v: &mut ValidationHarness, entry: &ManifestEntry) {
         primal_names::SONGBIRD,
         primal_names::CORALREEF,
         primal_names::TOADSTOOL,
-        "barracuda",
+        airspring_barracuda::primal_names::BARRACUDA,
         primal_names::NESTGATE,
     ] {
         v.check_bool(
