@@ -285,3 +285,15 @@ wetSpring 16S pipeline (OTU table, Shannon H′) → airSpring Anderson coupling
 - CPU parity chain: Paper → Python control → Barracuda CPU → Barracuda GPU → Pure GPU workload → metalForge cross-system
 - ET₀ method coverage: PM (FAO-56), Priestley-Taylor, Hargreaves, Thornthwaite, Makkink, Turc, Hamon, Blaney-Criddle — 8 independent methods
 - GPU math portability: all 13 GPU orchestrator modules validated (Exp 047, 46/46 checks)
+
+---
+
+## LTEE GuideStone Queue (Eaves/Woldring)
+
+Targeted paper reproductions for the LTEE Targeted GuideStone artifact — a USB-deployable
+validation subsystem of projectNUCLEUS. See `infra/whitePaper/gen4/architecture/GUIDESTONE_LTEE.md`
+and `infra/whitePaper/attsi/non-anon/contact/eaves/PAPER_REVIEW_AND_SPRING_TARGETS.md`.
+
+| ID | Paper | What to Reproduce | Exp | Status |
+|----|-------|-------------------|-----|--------|
+| E3 | Dolgikh et al. 2025 "Tuning Yeast Glycosylation for FLS2" *bioRxiv* | FLS2 plant immunity sentinel: glycosylation effects on receptor binding as environmental sensor; airSpring monitors via soil-plant immune signaling | TBD | QUEUED |
