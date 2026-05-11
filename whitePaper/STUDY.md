@@ -140,7 +140,7 @@ All mass balances close to 0.0000 mm. Water savings of 53-72% are consistent wit
 
 ---
 
-## 4. Phase 1: Rust BarraCuda (943 lib + 316 integration + 62 forge tests, 91 binaries)
+## 4. Phase 1: Rust BarraCuda (1,011 lib + 316 integration + 62 forge = 1,389 tests, 93 binaries)
 
 ### 4.1 Module Structure
 
@@ -155,9 +155,9 @@ All mass balances close to 0.0000 mm. Water savings of 53-72% are consistent wit
 | `error` | AirSpringError enum (Io, CsvParse, JsonParse, InvalidInput, Barracuda) | — | — |
 | `testutil` | RMSE, MBE, R², IA, NSE, synthetic data generators | — | 6 |
 | **Integration tests** | Cross-module pipelines, determinism, error paths, crop↔balance | — | 316 |
-| **Forge** | metalForge absorbed upstream (6/6 modules) | — | — |
-| **Doc-tests** | Inline documentation examples | — | 10 |
-| **Total** | — | — | 1259 |
+| **Forge** | metalForge mixed-hardware dispatch (6/6 modules absorbed) | — | 62 |
+| **Doc-tests** | Inline documentation examples | — | incl. above |
+| **Total** | — | — | **1,389** |
 
 ### 4.2 Python-Rust Parity
 
@@ -206,7 +206,7 @@ monthly soil heat flux.
 
 ### 4.5 Phase 3: GPU-FIRST (LIVE)
 
-GPU acceleration is operational. Eleven Tier A modules are wired (8 orchestrators plus barracuda delegations): BatchedEt0, BatchedWaterBalance, BatchedDualKc, KrigingInterpolator, SeasonalReducer, StreamSmoother, BatchedRichards, fit_nm (isotherms). All 4/4 ToadStool issues are resolved; GPU determinism has been verified. Cross-validation now loads from benchmark JSON as the single source of truth.
+GPU acceleration is fully operational with **25 Tier A modules** wired (ops 0-19 all upstream via `BatchedElementwiseF64`) plus jackknife/bootstrap/diversity uncertainty stack: BatchedEt0, BatchedWaterBalance, BatchedDualKc, BatchedHargreaves, BatchedKcClimate, BatchedSensorCal, BatchedVanGenuchten, BatchedThornthwaite, BatchedGdd, BatchedPedotransfer, GpuJackknife, GpuBootstrap, GpuDiversity, KrigingInterpolator, SeasonalReducer, StreamSmoother, BatchedRichards, fit_nm, mc_et0_gpu, plus 6 elementwise ops (14-19, all absorbed upstream). `local_dispatch` retired (Write→Absorb→Lean complete). `PrecisionRoutingAdvice` wired for per-hardware f64 dispatch. Cross-validation loads from benchmark JSON as the single source of truth. **Tier 4 IPC-first**: `[features].default = []` — barraCuda is optional, pure-Rust fallbacks when absent.
 
 ---
 
@@ -251,18 +251,19 @@ The same BarraCuda/ToadStool infrastructure supports both domains. The key share
 - ~~4/4 ToadStool issues resolved, GPU determinism verified~~ — **Done**
 - ~~Spatial interpolation (kriging)~~ — **Done** (KrigingInterpolator)
 
-### Near Term (Phase 3 continued)
-- Coverage: 97.45% → target 98%+ (remaining gaps: GPU-dependent code paths)
-- metalForge mixed hardware: CPU+GPU+NPU dispatch demonstration
+### Current (Post-Interstadial)
+- **Coverage**: 90.56% (gated at 90%, remaining gaps: GPU-dependent code paths)
+- **metalForge**: 27 workloads, CPU+GPU+NPU dispatch proven (66/66 PASS)
+- **NUCLEUS**: 46 capabilities, 10 UniBin validation scenarios, guideStone L4 (targeting L6)
+- **Tier 4 IPC-first**: `default = []`, all deny.toml synced, primal_names:: constants
+- **NestGate not live** — HIGH PRIORITY upstream blocker for full data chains
 
 ### Long Term (Phase 4: Penny Irrigation)
 - Sovereign irrigation scheduling on consumer hardware ($600 GPU)
 - Sub-field spatial resolution from cheap sensor networks
 - Model-predictive control with weather forecast integration
-- Open alternative to $5000/field proprietary systems
+- Full data + compute chains via NestGate + NUCLEUS
 
 ---
 
-*March 24, 2026 — 1284 Python + 943 lib + 316 integration + 62 forge tests, 91 binaries all pass,
-15,300 station-days (100 stations) real data, 75/75 cross-validation match, 14.3× Rust-vs-Python speedup (24/24 algorithms, 21/21 CPU-GPU parity modules), zero synthetic.
-v0.10.0: niche architecture, Edition 2024, 46 capabilities (method.register + skunkBat IPC + composition.status), 10 UniBin validation scenarios, deep code quality, zero #[allow()]. AGPL-3.0-or-later.*
+*May 11, 2026 — 1,284 Python + 1,011 lib + 316 integration + 62 forge = 1,389 total tests, 93 binaries, 46 capabilities, 7 deploy graphs, 10 UniBin validation scenarios, guideStone L4 (targeting L6). 15,300 station-days (100 stations) real data, 75/75 cross-validation match, 14.3× Rust-vs-Python speedup (24/24 algorithms, 21/21 CPU-GPU parity modules), zero synthetic. barraCuda 0.3.13 (wgpu 28), Tier 4 IPC-first (`default = []`), Edition 2024 (MSRV 1.92), zero C deps, zero `#[allow()]`, primal_names:: constants. AGPL-3.0-or-later.*

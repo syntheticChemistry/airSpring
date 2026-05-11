@@ -9,11 +9,11 @@ Every paper reproduced in airSpring follows the same path:
 
 1. **Python baseline** — digitize paper benchmarks, implement equations, validate (1,284/1,284 PASS)
 2. **Rust proof** — cross-validate to 1e-5, 14.3× speedup, 93 zero-panic binaries (1,011 lib + 316 integration + 62 forge = 1,389 total tests)
-3. **GPU acceleration** — barraCuda 0.3.7 (25 Tier A modules, 21/21 CPU-GPU parity, 767+ WGSL shaders)
+3. **GPU acceleration** — barraCuda 0.3.13 (25 Tier A modules, 21/21 CPU-GPU parity, 767+ WGSL shaders)
 4. **Primal composition** — 46 JSON-RPC capabilities via biomeOS Neural API, 7 deploy graphs, NUCLEUS atomics
 5. **UniBin eukaryotic** — single `airspring` binary (certify/validate/serve/status/version), 10 validation scenarios, guideStone **L4** (targeting L6)
 
-**Status**: 90 experiments, barraCuda 0.3.7 (wgpu 28, DF64), Edition 2024 (rust-toolchain 1.92), all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired, niche architecture (46 capabilities, 7 deploy graphs), `#![cfg_attr(not(test), forbid(unsafe_code))]` + `#![deny(cast_*)]` library-strict + zero clippy pedantic+nursery + `warn(missing_docs)`. 60 tolerances in 5 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies**. Zero `#[allow()]` in production. Platform-agnostic IPC (Transport enum: Unix + TCP). Tier 4 IPC-first: **`[features].default = []`**, barraCuda via `--features local`, validation binaries `required-features = ["local"]`, pure-Rust fallbacks. 90.56% line coverage. cargo-deny 0.19 clean. Full validation pipeline green (2026-05-11)
+**Status**: 90 experiments, barraCuda 0.3.13 (wgpu 28, DF64), Edition 2024 (rust-toolchain 1.92), all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired, niche architecture (46 capabilities, 7 deploy graphs), `#![cfg_attr(not(test), forbid(unsafe_code))]` + `#![deny(cast_*)]` library-strict + zero clippy pedantic+nursery + `warn(missing_docs)`. 60 tolerances in 5 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies**. Zero `#[allow()]` in production. Platform-agnostic IPC (Transport enum: Unix + TCP). Tier 4 IPC-first: **`[features].default = []`**, barraCuda via `--features local`, validation binaries `required-features = ["local"]`, pure-Rust fallbacks. 90.56% line coverage. cargo-deny 0.19 clean. Full validation pipeline green (2026-05-11)
 
 **April 27, 2026 evolution**: 60 tolerances (2 new atlas), 46/46 IPC capabilities routable, provenance drift fixed, capability naming converged, docs/PRIMAL_GAPS.md created (11 gaps, gS Level 0→1 path), CI pinned to 1.92, all files <800 LOC.
 
@@ -40,7 +40,7 @@ Phase 3   GPU live dispatch     — Titan V validated (24/24 PASS, 0.04% seasona
 Phase 3.5 NPU edge             — AKD1000 live: 3 experiments, ~48µs inference, LOCOMOS power budget
 Phase 3.7 metalForge live      — RTX 4070 + Titan V + AKD1000 + i9-12900K discovered, 18 workloads route
 Phase 3.8 Cross-system routing — GPU+NPU+CPU dispatch proven (29/29 PASS), NUCLEUS atomic ready
-Phase 3.9 NUCLEUS primal        — airSpring registered as science primal, 9 capabilities, 29/29 parity
+Phase 3.9 NUCLEUS primal        — airSpring registered as science primal, 46 capabilities, 29/29 parity
 Phase 4.0 Cross-primal pipeline — ecology domain, capability_call routing, 28/28 PASS (Exp 063)
 Phase 4.1 Penny Irrigation      — sovereign scheduling on consumer hardware ($600 GPU + $99 NPU)
 Phase 4.2 Nautilus reservoir     — bingoCube/nautilus evolutionary ET₀ prediction + drift detect
@@ -204,7 +204,7 @@ Phase 5.18 Deep debt evolution — 60 tolerances (atlas_annual_et0, atlas_yield_
 | `validate_ncbi_diversity` | 63 | Shannon H', Pielou, Bray-Curtis, Anderson coupling |
 | `validate_nucleus` | 29 | NUCLEUS JSON-RPC science parity (7 ET₀ + WB + yield) |
 | `validate_nucleus_pipeline` | 28 | NUCLEUS cross-primal pipeline (ecology domain, neural-api routing) |
-| `airspring_primal` | — | biomeOS NUCLEUS primal (16 capabilities, cross-primal forwarding) |
+| `airspring_primal` | — | biomeOS NUCLEUS primal (46 capabilities, cross-primal forwarding) |
 | `validate_mc_et0` | 26 | MC ET₀ uncertainty propagation, Lehmer LCG, Box-Muller |
 | `validate_bootstrap_jackknife` | 20 | Bootstrap CI + Jackknife variance, seasonal ET₀ |
 | `validate_drought_index` | 20 | SPI-1/3/6/12, gamma MLE, WMO classification |
@@ -447,7 +447,7 @@ with 3-tier routing. Pipeline designed but not wired end-to-end.
 
 ```
 Step 0: ✓ DONE — metalForge cross-system routing (GPU+NPU+CPU, 18 workloads, 29/29)
-Step 1: ✓ DONE — airSpring NUCLEUS primal (16 caps, 28/28 cross-primal pipeline, Exp 063)
+Step 1: ✓ DONE — airSpring NUCLEUS primal (46 caps, 28/28 cross-primal pipeline, Exp 063)
         ecology domain in biomeOS capability_registry.toml
         capability.call routing via neural-api (semantic ecology.et0_fao56 → airSpring)
         Cross-primal forwarding: airSpring → ToadStool/BearDog/Songbird

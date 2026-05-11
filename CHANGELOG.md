@@ -4,6 +4,13 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [Unreleased] - 2026-05-11
 
+### Deep debt resolution, deny.toml sync, primal_names evolution (2026-05-11)
+
+- **Hardcoded primal name strings → `primal_names::` constants**: `"biomeos"` replaced with `crate::primal_names::BIOMEOS` in `certification/nucleus.rs`, `biomeos/mod.rs` (socket path construction); `"barracuda"` replaced with `primal_names::BARRACUDA` in `certification/bare.rs`, `bin/airspring_guidestone.rs`. New `primal_names::BARRACUDA` constant added.
+- **`deny.toml` sync**: `metalForge/forge/deny.toml` and `barracuda/deny.toml` synced with workspace root — added `openssl`, `sysinfo`, `aws-lc-sys`, `aws-lc-rs` bans + `licenses.version = 2`.
+- **Forge barraCuda version**: `metalForge/forge/Cargo.toml` bumped `barracuda` path dep version `0.3.7 → 0.3.13`.
+- **Documentation sweep**: barraCuda version 0.3.7→0.3.13 across README, CONTEXT, STUDY, experiments, baseCamp, specs; stale test counts reconciled (STUDY §4 total 1259→1,389, section header 943→1,011); METHODOLOGY Rust version 1.80+→1.92+; capability counts 9/16→46 in baseCamp; CROSS_SPRING_EVOLUTION summary block v0.8.8→v0.10.0.
+
 ### Tier 4 rewiring, certification layers L5–L6, Tier 4 math scenario (2026-05-11)
 
 - **Tier 4 IPC-first — empty default features:** `[features].default = []` (was **`["local", "testutil"]`**). Opt in with **`--features local`** for in-tree barraCuda + wgpu; **`testutil`** remains as a convenience alias over `local`. Validation and bench **`[[bin]]` targets** declare **`required-features = ["local"]`** so **`cargo test`** / default builds do not compile them without explicit features.

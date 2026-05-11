@@ -230,7 +230,7 @@ airSpring/
 │   ├── bootstrap_jackknife/     # Bootstrap & Jackknife CI (20/20)
 │   ├── drought_index/           # SPI drought index (20/20)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (1,011 lib + 316 integration/doc = 1,327 tests, 93 binaries, barraCuda 0.3.7 / wgpu 28, Edition 2024)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (1,011 lib + 316 integration/doc = 1,327 tests, 93 binaries, barraCuda 0.3.13 / wgpu 28, Edition 2024)
 │   ├── src/
 │   │   ├── biomeos/                # biomeOS socket resolution + primal discovery (3 sub-modules)
 │   │   ├── eco/                 # Domain modules (22 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine + drought_index)
@@ -245,7 +245,7 @@ airSpring/
 │   │   ├── validation/scenarios/ # UniBin validation scenarios (ScenarioRegistry, 10 scenarios)
 │   │   └── bin/                 # validate_*, bench_*, airspring UniBin (93 declared)
 │   ├── tests/                   # Integration + property tests (15 files + common/)
-│   └── Cargo.toml               # v0.10.0 (barraCuda 0.3.7, wgpu 28, clap 4)
+│   └── Cargo.toml               # v0.10.0 (barraCuda 0.3.13, wgpu 28, clap 4)
 ├── niches/                      # BYOB niche definitions (airspring-ecology.yaml)
 ├── metalForge/                  # Mixed hardware dispatch (CPU+GPU+NPU)
 │   ├── deploy/                  # biomeOS deployment graphs (airspring_deploy.toml)
@@ -309,7 +309,7 @@ AGPL-3.0-or-later
 
 ---
 
-*May 11, 2026 — Post-interstadial evolution. New IPC: **`method.register`**, **`composition.status`**, skunkBat deploy-graph path; capability cross-sync vs canonical **413**; CONTEXT.md reconciled; EVOLUTION_READINESS.md refreshed. **Tier 4 IPC-first**: `[features].default = []`, opt in `--features local`; barraCuda `optional = true`, `math.rs` dual-path dispatch, `ipc/barracuda_route.rs`, validation binaries `required-features = ["local"]`. Certification engine **L0–L6** (L4 cross-atomic provenance; L5 NUCLEUS composition; L6 cross-spring pipeline). Scenario registry **10** UniBin validation scenarios (incl. **`s_tier4_math_parity`**).
+*May 11, 2026 — Deep debt resolution: hardcoded primal name strings → `primal_names::` constants, all three `deny.toml` files synced (openssl, sysinfo, aws-lc-sys, aws-lc-rs bans), forge barraCuda version `0.3.7→0.3.13`, `primal_names::BARRACUDA` added. Tier 4 IPC-first defaults + guideStone convergence (L2+→L4): `default = []`, 7 deploy graphs (GPU batch, sovereign data, uncertainty added), `required-features` on 93 binaries, IPC-only clippy clean. Post-interstadial evolution: **`method.register`**, **`composition.status`**, skunkBat deploy-graph, capability cross-sync vs canonical **413**, CONTEXT.md reconciled, certification engine **L0–L6** (L4 cross-atomic; L5 NUCLEUS composition; L6 cross-spring pipeline), **10 UniBin validation scenarios** (incl. `s_tier4_math_parity`).
 May 9 — Deep debt resolution + eukaryotic evolution. Dead standalone-http feature
 removed (ureq code paths, broken dep). Unused bytemuck dep removed. .gitignore data/ bug
 fixed (was silently ignoring barracuda/src/data/ source). 6 pre-existing test failures fixed
