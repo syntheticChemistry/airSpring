@@ -1,7 +1,7 @@
 # Primal Proof IPC Mapping — airSpring
 
 **Date**: May 11, 2026
-**Status**: 46 capabilities IPC-exposed, UniBin eukaryotic, guideStone L2→L4 target; new IPC: **`method.register`**, **`composition.status`**, skunkBat deploy-graph path.
+**Status**: 46 capabilities IPC-exposed, UniBin eukaryotic, guideStone L4 (targeting L6); new IPC: **`method.register`**, **`composition.status`**, skunkBat deploy-graph path.
 
 Maps each airSpring domain computation to its JSON-RPC equivalent for
 primal-proof validation. When NUCLEUS primals are deployed, all science
@@ -121,20 +121,20 @@ Atomic's responsibility.
 
 ## Discovery Stack
 
-airSpring uses the 5-tier IPC discovery pattern:
-
+airSpring uses the **5-tier primal IPC discovery pattern**, plus a **`barracuda_route`** step for Tier 4 optional-deps barraCuda forwarding:
 1. **Songbird capability registry** — `discover_primal_by_capability()`
 2. **Neural API** — `NEURAL_API_SOCKET` / `NEURAL_API_ADDRESS` env vars
 3. **UDS convention** — `{socket_dir}/{name}-{family}.sock`
 4. **Socket directory scan** — `biomeos::discover_all_primals()`
 5. **Env override** — `{PRIMAL}_SOCKET` / `{PRIMAL}_ADDRESS` per-primal vars
+6. **`barracuda_route`** — `ipc/barracuda_route.rs` forwards IPC for barraCuda-backed calls when the `barracuda` crate is optional/off-tree (Tier 4 wiring)
 
 ## Evolution Path
 
 ```
-Current (L2):  Direct library calls + IPC for cross-primal
+Current (L4):  Direct library calls + IPC for cross-primal
 Target  (L3):  CompositionContext for all live calls
-Target  (L4+): Live NUCLEUS-backed guidestone certification
+Target (L6): Live NUCLEUS-backed guidestone certification
 ```
 
 When `CompositionContext` from primalSpring v0.9.25 is wired (via the

@@ -1,8 +1,19 @@
-# baseCamp: Per-Faculty Research Briefings
+# baseCamp: Peer-Reviewed Science Validation — Python → Rust (UniBin) → Primal (NUCLEUS)
 
 **Updated**: May 11, 2026
 **Project**: airSpring — Ecological & Agricultural Sciences (v0.10.0)
-**Status**: 90 experiments (87 + 3 composition crates), 1284/1284 Python + 1,011 lib + 316 integration + 62 forge = 1,389 total tests + 93 binaries + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + barraCuda 0.3.7 (wgpu 28, DF64 precision tier) + Edition 2024 (rust-toolchain 1.92) + all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired + niche architecture (46 capabilities, 4 deploy graphs) + **`10 UniBin validation scenarios`** (`validation/scenarios/`, incl. `s_tier4_math_parity`) + `#![cfg_attr(not(test), forbid(unsafe_code))]` + `#![deny(cast_*)]` library-strict + zero clippy pedantic+nursery + `warn(missing_docs)`. 60 tolerances in 5 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies**. Zero-panic validation (93/93 binaries). Zero `#[allow()]` in production. 10 MCP tools (Squirrel AI, wired in primal dispatch). Platform-agnostic IPC (Transport enum: Unix + TCP, provenance trio migrated). 90.56% line coverage (fail-under-lines 90). cargo-deny 0.19 clean. 46 centralized method constants (`methods.rs`). guideStone Level **L4** (targeting L6). Tier 4: barraCuda as `optional = true`. 25 notebooks (20 paper + 5 sporePrint). Full validation pipeline green (2026-05-11)
+
+## Validation Evolution
+
+Every paper reproduced in airSpring follows the same path:
+
+1. **Python baseline** — digitize paper benchmarks, implement equations, validate (1,284/1,284 PASS)
+2. **Rust proof** — cross-validate to 1e-5, 14.3× speedup, 93 zero-panic binaries (1,011 lib + 316 integration + 62 forge = 1,389 total tests)
+3. **GPU acceleration** — barraCuda 0.3.7 (25 Tier A modules, 21/21 CPU-GPU parity, 767+ WGSL shaders)
+4. **Primal composition** — 46 JSON-RPC capabilities via biomeOS Neural API, 4 deploy graphs, NUCLEUS atomics
+5. **UniBin eukaryotic** — single `airspring` binary (certify/validate/serve/status/version), 10 validation scenarios, guideStone **L4** (targeting L6)
+
+**Status**: 90 experiments, barraCuda 0.3.7 (wgpu 28, DF64), Edition 2024 (rust-toolchain 1.92), all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired, niche architecture (46 capabilities, 4 deploy graphs), `#![cfg_attr(not(test), forbid(unsafe_code))]` + `#![deny(cast_*)]` library-strict + zero clippy pedantic+nursery + `warn(missing_docs)`. 60 tolerances in 5 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies**. Zero `#[allow()]` in production. Platform-agnostic IPC (Transport enum: Unix + TCP). Tier 4: barraCuda as `optional = true` with pure-Rust fallbacks. 90.56% line coverage. cargo-deny 0.19 clean. Full validation pipeline green (2026-05-11)
 
 **April 27, 2026 evolution**: 60 tolerances (2 new atlas), 46/46 IPC capabilities routable, provenance drift fixed, capability naming converged, docs/PRIMAL_GAPS.md created (11 gaps, gS Level 0→1 path), CI pinned to 1.92, all files <800 LOC.
 

@@ -76,7 +76,7 @@ socket path, or capability set. Discover at runtime via:
 ## Running the Full Suite
 
 ```bash
-cd barracuda && cargo test --lib              # 986 lib tests
+cd barracuda && cargo test --lib              # 1,011 lib tests
 cd barracuda && cargo test --tests            # 316 integration tests
 cd metalForge/forge && cargo test             # 62 forge tests
 cd barracuda && cargo llvm-cov --lib --fail-under-lines 90  # 90.56% line coverage

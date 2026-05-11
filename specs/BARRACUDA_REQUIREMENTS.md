@@ -1,6 +1,6 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: May 8, 2026 (v0.10.0 — 986 lib + 316 integration + 62 forge tests, 91 binaries, 90 experiments, barraCuda 0.3.7 (wgpu 28, DeviceCapabilities API), ops 0-19 upstream via `BatchedElementwiseF64`, `PrecisionRoutingAdvice` wired, 44 centralized method constants (`methods.rs`), 3 composition crates, guideStone L2. Exp 084: CPU/GPU parity 21/21, Exp 085: toadStool dispatch 19/19)
+**Last Updated**: May 11, 2026 (v0.10.0 — 1,011 lib + 316 integration + 62 forge tests, 93 binaries, 90 experiments, barraCuda 0.3.7 (wgpu 28, DeviceCapabilities API), ops 0-19 upstream via `BatchedElementwiseF64`, `PrecisionRoutingAdvice` wired, 46 centralized method constants (`methods.rs`), 3 composition crates, guideStone L4. Exp 084: CPU/GPU parity 21/21, Exp 085: toadStool dispatch 19/19)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
 **ToadStool HEAD**: S94b — barraCuda v0.3.7 standalone (wgpu 28, DeviceCapabilities replaces GpuDriverProfile)
 
