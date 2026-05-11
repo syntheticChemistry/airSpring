@@ -24,7 +24,6 @@ Format follows wetSpring/hotSpring `PRIMAL_GAPS.md` pattern.
 
 | ID | Primal | Gap | Impact | Status |
 |----|--------|-----|--------|--------|
-| AG-001 | primalSpring | `downstream_manifest.toml` not read by airSpring | Cannot validate proto-nucleate composition; niche.rs capabilities defined independently | **In progress** — primalSpring at `springs/primalSpring/`, `airspring_guidestone` binary reads manifest directly (16/16 PASS) |
 | AG-005 | Squirrel | `inference.*` not exercised in science path | airspring_cell.toml includes Squirrel but no science code calls `inference.complete` or `inference.embed` | **Open** — waiting for neuralSpring WGSL inference evolution |
 | AG-006 | coralReef | Sovereign shader compile not wired | `discover_shader_compiler()` hook exists but no active usage; all GPU dispatch through barraCuda direct | **Open** — coralReef integration is roadmap |
 | AG-007 | ToadStool | `compute.dispatch` returns opaque results | airSpring `compute.offload` forwards raw JSON; no typed response contract for ecology workloads | **Open** — need wire standard for domain-specific dispatch results |
@@ -40,6 +39,7 @@ Format follows wetSpring/hotSpring `PRIMAL_GAPS.md` pattern.
 
 | ID | Primal | Gap | Resolution | Date |
 |----|--------|-----|------------|------|
+| AG-001 | primalSpring | `downstream_manifest.toml` not read by airSpring | **Resolved:** `certification/bare.rs` reads manifest via `AIRSPRING_MANIFEST_PATH` / `ECOPRIMALS_ROOT` / relative path. Validates identity, fragments, dependencies, capabilities, health caps (16/16 PASS). Proto-nucleation gate met. | 2026-05-11 |
 | AG-015 | barraCuda | barraCuda still mandatory path dep | **Tier 4 IPC-first (2026-05-11):** `optional = true` behind `local`; **`[features].default = []`** (was `["local", "testutil"]`); validation binaries **`required-features = ["local"]`**; `gpu` feature-gated; `math.rs` dual-path + `ipc/barracuda_route.rs`; default build without linking barraCuda | 2026-05-11 |
 | AG-002 | primalSpring | Path dep deprecated | Standalone manifest reader via `toml` crate — no primalspring crate dep needed | 2026-05-07 |
 | AG-003 | biomeOS | `health_method` inconsistency | Aligned metalForge deploy to `health.liveness` | 2026-04-27 |

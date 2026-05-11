@@ -2,7 +2,7 @@
 
 **Last Updated**: May 11, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 90 experiments (1284/1284 Python + 1,011 Rust lib + 316 integration + 62 forge tests = 1,389 total + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.3.7 (wgpu 28), Edition 2024, 93 binaries. 14.3× Rust-vs-Python geometric mean speedup (24/24 algorithms, 21/21 CPU-GPU parity modules). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired. metalForge 66/66 mixed pipeline. V010 handoff. biomeOS niche: 46 capabilities, 4 deploy graphs, 10 MCP tools. 46 centralized method constants (`methods.rs`). 10 validation scenarios (UniBin). guideStone L4 (targeting L6). Platform-agnostic IPC. `method.register` + skunkBat IPC wired.
+**Status**: 90 experiments (1284/1284 Python + 1,011 Rust lib + 316 integration + 62 forge tests = 1,389 total + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.3.13 (wgpu 28), Edition 2024 (MSRV 1.92), 93 binaries. 14.3× Rust-vs-Python geometric mean speedup (24/24 algorithms, 21/21 CPU-GPU parity modules). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired. metalForge 66/66 mixed pipeline. biomeOS niche: 46 capabilities, **7 deploy graphs**, 10 MCP tools. 46 centralized method constants (`methods.rs`). 10 validation scenarios (UniBin). guideStone **L4** (targeting L6). Tier 4 IPC-first: `default = []`. `primal_names::` constants (zero hardcoded strings). All `deny.toml` synced. `method.register` + skunkBat IPC wired. AG-001 manifest read resolved (proto-nucleation). LTEE E3 (FLS2) queued.
 
 ---
 
@@ -296,4 +296,4 @@ and `infra/whitePaper/attsi/non-anon/contact/eaves/PAPER_REVIEW_AND_SPRING_TARGE
 
 | ID | Paper | What to Reproduce | Exp | Status |
 |----|-------|-------------------|-----|--------|
-| E3 | Dolgikh et al. 2025 "Tuning Yeast Glycosylation for FLS2" *bioRxiv* | FLS2 plant immunity sentinel: glycosylation effects on receptor binding as environmental sensor; airSpring monitors via soil-plant immune signaling | TBD | QUEUED |
+| E3 | Dolgikh et al. 2025 "Tuning Yeast Glycosylation for FLS2" *bioRxiv* | FLS2 plant immunity sentinel: glycosylation effects on receptor binding as environmental sensor; airSpring monitors via soil-plant immune signaling. Binding models (Langmuir/Hill/two-site), Kd recovery, glycosylation sensitivity ratio, soil-immune coupling (moisture + temp → flagellin exposure) | Exp E3 | **Python 12/12 PASS** — `control/ltee_fls2_plant_immunity/`, Rust validation TBD |

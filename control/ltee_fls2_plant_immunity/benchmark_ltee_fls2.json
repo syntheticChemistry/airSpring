@@ -1,0 +1,111 @@
+{
+  "checks": [
+    {
+      "name": "fit_langmuir_r2",
+      "value": 0.9901373449535443,
+      "status": "PASS"
+    },
+    {
+      "name": "fit_hill_r2",
+      "value": 0.9907893687696522,
+      "status": "PASS"
+    },
+    {
+      "name": "fit_two_site_r2",
+      "value": 0.9906907030541136,
+      "status": "PASS"
+    },
+    {
+      "name": "langmuir_aic_best",
+      "status": "PASS"
+    },
+    {
+      "name": "kd_recovery",
+      "value": 28.14158560416931,
+      "expected": 28.0,
+      "tolerance": 5.0,
+      "status": "PASS"
+    },
+    {
+      "name": "glycosylation_sensitivity_ratio",
+      "value": 1.8666666666666667,
+      "status": "PASS"
+    },
+    {
+      "name": "soil_coupling_dry_cool",
+      "value": 0.043478260869565195,
+      "status": "PASS"
+    },
+    {
+      "name": "soil_coupling_optimal",
+      "value": 0.6521739130434782,
+      "status": "PASS"
+    },
+    {
+      "name": "soil_coupling_wet_warm",
+      "value": 1.4142135623730951,
+      "status": "PASS"
+    },
+    {
+      "name": "soil_coupling_saturated_hot",
+      "value": 2.0,
+      "status": "PASS"
+    },
+    {
+      "name": "flagellin_moisture_monotonic",
+      "status": "PASS"
+    },
+    {
+      "name": "flagellin_temp_monotonic",
+      "status": "PASS"
+    }
+  ],
+  "pass_count": 12,
+  "fail_count": 0,
+  "model_fits": {
+    "langmuir": {
+      "params": {
+        "bmax": 1.0050477484599085,
+        "kd": 28.14158560416931
+      },
+      "rss": 0.015009614629278687,
+      "r_squared": 0.9901373449535443,
+      "aic": -52.003423995925175,
+      "bic": -50.72530933669466,
+      "k": 2
+    },
+    "hill": {
+      "params": {
+        "bmax": 1.040899428690545,
+        "kd": 30.716545726648857,
+        "n": 0.9095200879172523
+      },
+      "rss": 0.014017323388959344,
+      "r_squared": 0.9907893687696522,
+      "aic": -50.96098229607671,
+      "bic": -49.043810307230935,
+      "k": 3
+    },
+    "two_site": {
+      "params": {
+        "b1": 0.9591434188196079,
+        "k1": 25.62049370823851,
+        "b2": 12268.95981369033,
+        "k2": 101912893.293744
+      },
+      "rss": 0.014167479139148426,
+      "r_squared": 0.9906907030541136,
+      "aic": -48.81180967800215,
+      "bic": -46.25558035954111,
+      "k": 4
+    }
+  },
+  "glycosylation_shift": {
+    "kd_native_nm": 28.0,
+    "kd_engineered_nm": 15.0,
+    "sensitivity_ratio": 1.8666666666666667,
+    "ec50_native_nm": 28.0,
+    "ec50_engineered_nm": 15.0,
+    "activation_improvement_pct": 86.66666666666667
+  }
+}

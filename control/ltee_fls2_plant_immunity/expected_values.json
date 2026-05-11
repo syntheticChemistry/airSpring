@@ -1,0 +1,23 @@
+{
+  "_provenance": {
+    "paper": "Dolgikh et al. 2025, bioRxiv",
+    "spring": "airSpring",
+    "ltee_id": "E3",
+    "domain": "plant_immunity_fls2",
+    "generated_by": "ltee_fls2_plant_immunity.py"
+  },
+  "kd_true_nm": 28.0,
+  "kd_engineered_nm": 15.0,
+  "bmax_true": 1.0,
+  "noise_fraction": 0.03,
+  "seed": 20250511,
+  "n_concentrations": 14,
+  "models": [
+    "langmuir",
+    "hill",
+    "two_site"
+  ],
+  "expected_best_model": "langmuir",
+  "expected_kd_tolerance_nm": 5.0,
+  "expected_r2_minimum": 0.95
+}
