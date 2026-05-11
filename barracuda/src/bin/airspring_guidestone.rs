@@ -63,7 +63,7 @@ fn parse_airspring_entry(content: &str) -> Option<ManifestEntry> {
 
     for entry in downstreams {
         let spring_name = entry.get("spring_name")?.as_str()?;
-        if spring_name != "airspring" {
+        if spring_name != airspring_barracuda::PRIMAL_NAME {
             continue;
         }
         let domain = entry
@@ -85,7 +85,10 @@ fn parse_airspring_entry(content: &str) -> Option<ManifestEntry> {
 
 fn validate_identity(v: &mut ValidationHarness, entry: &ManifestEntry) {
     validation::section("P1: Identity");
-    v.check_bool("spring_name == airspring", entry.spring_name == "airspring");
+    v.check_bool(
+        "spring_name == airspring",
+        entry.spring_name == airspring_barracuda::PRIMAL_NAME,
+    );
     v.check_bool(
         "domain == ecology_agriculture",
         entry.domain == "ecology_agriculture",

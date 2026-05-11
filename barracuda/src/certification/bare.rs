@@ -56,7 +56,7 @@ fn parse_airspring_entry(content: &str) -> Option<ManifestEntry> {
 
     for entry in downstreams {
         let spring_name = entry.get("spring_name")?.as_str()?;
-        if spring_name != "airspring" {
+        if spring_name != crate::PRIMAL_NAME {
             continue;
         }
         let domain = entry
@@ -100,7 +100,10 @@ pub fn validate_bare_properties(v: &mut ValidationHarness) {
 }
 
 fn validate_identity(v: &mut ValidationHarness, entry: &ManifestEntry) {
-    v.check_bool("spring_name == airspring", entry.spring_name == "airspring");
+    v.check_bool(
+        "spring_name == airspring",
+        entry.spring_name == crate::PRIMAL_NAME,
+    );
     v.check_bool(
         "domain == ecology_agriculture",
         entry.domain == "ecology_agriculture",

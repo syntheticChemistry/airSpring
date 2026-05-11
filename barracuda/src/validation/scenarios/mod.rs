@@ -11,9 +11,15 @@ mod registry;
 
 pub use registry::{Scenario, ScenarioMeta, ScenarioRegistry, Tier, Track};
 
+pub mod s_atlas_pipeline;
 pub mod s_composition_parity;
+pub mod s_et0_methods;
+pub mod s_fao56_et0;
 pub mod s_foundation_targets;
 pub mod s_local_science_parity;
+pub mod s_paper_chain;
+pub mod s_soil_physics;
+pub mod s_water_balance;
 
 /// Build the canonical scenario registry with all absorbed scenarios.
 #[must_use]
@@ -22,5 +28,11 @@ pub fn build_registry() -> ScenarioRegistry {
     r.register(s_local_science_parity::SCENARIO);
     r.register(s_composition_parity::SCENARIO);
     r.register(s_foundation_targets::SCENARIO);
+    r.register(s_fao56_et0::SCENARIO);
+    r.register(s_et0_methods::SCENARIO);
+    r.register(s_soil_physics::SCENARIO);
+    r.register(s_water_balance::SCENARIO);
+    r.register(s_atlas_pipeline::SCENARIO);
+    r.register(s_paper_chain::SCENARIO);
     r
 }

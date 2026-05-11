@@ -147,11 +147,11 @@ fn dispatch_serve(
     match method {
         "health.liveness" | "lifecycle.health" | "health" | "health.check" => rpc::success(
             id,
-            &serde_json::json!({"status": "ok", "primal": "airspring"}),
+            &serde_json::json!({"status": "ok", "primal": niche::NICHE_NAME}),
         ),
         "health.readiness" => rpc::success(
             id,
-            &serde_json::json!({"status": "ok", "primal": "airspring", "ready": true}),
+            &serde_json::json!({"status": "ok", "primal": niche::NICHE_NAME, "ready": true}),
         ),
         "capability.list" => {
             let caps: Vec<&str> = niche::CAPABILITIES.to_vec();

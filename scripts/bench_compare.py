@@ -39,7 +39,8 @@ def run_rust_benchmark():
         sys.exit(1)
 
     rust_results = {}
-    for line in result.stdout.splitlines():
+    output = result.stdout + result.stderr
+    for line in output.splitlines():
         m = re.match(
             r"\s+(.+?)\s+(\d+)\s+items\s+\S+/iter\s+([\d.]+)\s+items/s",
             line,
