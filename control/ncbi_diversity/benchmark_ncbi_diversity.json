@@ -1,10 +1,10 @@
 {
   "_provenance": {
     "method": "Synthetic 16S OTU abundance tables along soil moisture \u03b8; Shannon H\u2032, Bray-Curtis, Anderson QS regime (PRJNA481146-inspired; validated models)",
-    "baseline_script": "control/ncbi_diversity/ncbi_diversity_analysis.py",
+    "baseline_script": "control/ncbi_diversity/ncbi_diversity_analysis.py (lost in refactor; see baseline_commit)",
     "baseline_command": "python3 control/ncbi_diversity/ncbi_diversity_analysis.py",
     "baseline_commit": "88d07c0",
-    "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
+    "reproduction_note": "Original Python baseline script missing from tree. Expected values in this JSON are analytically derived and validated by Rust validator. Restore script from git history at baseline_commit if needed.",
     "python_version": "3.13",
     "created": "2026-02-28",
     "references": [

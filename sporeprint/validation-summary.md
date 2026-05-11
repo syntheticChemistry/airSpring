@@ -1,7 +1,7 @@
 +++
 title = "airSpring Validation Summary"
-description = "Precision agriculture & irrigation — 1,386 Rust tests, 90 experiments (87 + 3 composition), 14.3× speedup, 46/46 capabilities routable, 25 notebooks, UniBin eukaryotic, zero failures"
-date = 2026-05-10
+description = "Precision agriculture & irrigation — 1,389 Rust tests, 90 experiments (87 + 3 composition), 9 UniBin validation scenarios, 14.3× speedup, 46/46 capabilities routable, 25 notebooks, UniBin eukaryotic, zero failures"
+date = 2026-05-11
 
 [taxonomies]
 primals = ["barracuda", "toadstool", "biomeos", "nestgate", "squirrel", "coralreef", "petaltongue", "beardog", "songbird"]
@@ -10,7 +10,7 @@ springs = ["airspring", "hotspring", "wetspring", "neuralspring", "groundspring"
 
 ## Status
 
-- **1,386 Rust tests** passing (1,008 lib + 316 integration + 62 forge), 0 failed
+- **1,389 Rust tests** passing (1,011 lib + 316 integration + 62 forge), 0 failed
 - **1,284 Python baseline checks** (60 papers reproduced)
 - **90 experiments** across 12 categories + 3 composition crates (exp001 local parity, exp002 composition parity, exp003 foundation targets)
 - **14.3× geometric mean** Rust-vs-Python speedup (24/24 algorithms, 21/21 CPU-GPU parity)
@@ -21,7 +21,7 @@ springs = ["airspring", "hotspring", "wetspring", "neuralspring", "groundspring"
 - **60 named tolerances** in 5 submodules (Rust + Python mirror, zero inline magic numbers)
 - **25 Tier A GPU modules** (20 upstream batched ops, local_dispatch retired)
 - **Zero C dependencies**, zero unsafe, zero `#[allow()]`, Edition 2024
-- **guideStone Level 2** (IPC-wired, composition experiment crates)
+- **guideStone Level 2+** (IPC-wired, **9 UniBin validation scenarios**)
 - **46-method capability_registry.toml** (CI sync-tested vs niche.rs + canonical cross-sync)
 - **36 foundation targets** + **6 toadStool workloads** (thread06_ag)
 - **deny.toml** promoted to workspace root (ecoBin v3.0, ring/openssl banned)

@@ -1,10 +1,10 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: May 10, 2026 (v0.10.0 — Eukaryotic UniBin evolution, deep debt resolution, post-interstadial. Certification organelle (L0-L4), scenario registry (3 absorbed), dead standalone-http removed, 6 test failures fixed, hardcoded primals→constants, zero clippy warnings.)
+**Last Updated**: May 11, 2026 (v0.10.0 — Eukaryotic UniBin evolution, deep debt resolution, post-interstadial. Certification organelle (L0-L4), scenario registry (**9 UniBin validation scenarios**), dead standalone-http removed, 6 test failures fixed, hardcoded primals→constants, zero clippy warnings.)
 **barraCuda**: v0.3.7 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry, SpringDomain newtype, F64BuiltinCapabilities DF64 fields)
 **ToadStool**: S147+ (20,015 tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient, hw-learn, spirv_codegen_safety)
 **coralReef**: Phase 10 Iteration 44 sovereign Rust GPU compiler (NVIDIA + AMD, 1669+48 tests, VFIO dispatch)
-**Handoff**: V0.10.0 (eukaryotic UniBin + deep debt zero-warnings + certification organelle + scenario registry + deny.toml aws-lc-sys ban + 1,008 lib tests)
+**Handoff**: V0.10.0 (eukaryotic UniBin + deep debt zero-warnings + certification organelle + scenario registry + deny.toml aws-lc-sys ban + **1,011 lib tests**)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -23,7 +23,7 @@ not through ToadStool.
 
 | Module | Absorbed Into | When | Status |
 |--------|--------------|------|--------|
-| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all 91 binaries use upstream |
+| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all **93 binaries** use upstream |
 | `van_genuchten` | `barracuda::pde::richards::SoilParams` | S40 | **Leaning** — `gpu::richards` bridges to upstream |
 | `isotherm NM` | `barracuda::optimize::nelder_mead` | S62 | **Leaning** — `gpu::isotherm` bridges to upstream |
 | `StatefulPipeline` | `barracuda::pipeline::stateful::StatefulPipeline` | S80 | **Leaning** — `WaterBalanceState` day-over-day |
@@ -412,7 +412,7 @@ metalForge forge migrated from wgpu 22 to wgpu 28 (eliminated duplicate wgpu com
 |------|--------|
 | `cargo fmt --check` | **PASS** (both crates) |
 | `cargo clippy --all-targets -- -W clippy::pedantic -W clippy::nursery -D warnings` | **PASS** — 0 warnings |
-| `cargo test --lib` | **1,008 lib pass**, 0 fail |
+| `cargo test --lib` | **1,011 lib pass**, 0 fail |
 | `cargo test --tests` | **316 integration pass**, 0 fail |
 | Cross-spring evolution | **11/11 pass** |
 | CPU vs Python | **24/24 algorithms**, 21.0× geometric mean speedup |

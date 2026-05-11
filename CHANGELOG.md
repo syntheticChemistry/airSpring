@@ -17,13 +17,13 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 - **Duplicate `# Panics` doc sections**: Cleaned in `open_meteo.rs`, `usda_nass.rs`.
 - **Bare `#[allow(clippy::...)]`→`#[expect(..., reason)]`**: `data` test modules.
 - **Data module docs**: Updated to reflect sovereign-only transport (no ureq references).
-- **Test result**: 1,008 lib tests PASS, 0 failures, 0 clippy warnings.
+- **Test result**: 1,011 lib tests PASS, 0 failures, 0 clippy warnings.
 
 ### Interstadial Eukaryotic Evolution (2026-05-09)
 
 - **UniBin binary**: `airspring` — single binary with `certify`, `validate`, `serve`, `status`, `version` subcommands (clap 4). Absorbs guidestone and experiment runners into one eukaryotic cell.
 - **`certification/` organelle**: Absorbed guidestone into `barracuda/src/certification/` (bare.rs, health.rs). Layered validation L0-L4 (bare → discovery → health → parity → provenance roundtrip).
-- **`validation/scenarios/` module**: Scenario registry with `ScenarioMeta` (id, track, tier, provenance), `Tier` (Rust/Live/Both), `Track` (ScienceDispatch/Composition/Foundation/Provenance). 3 absorbed scenarios from exp001-003.
+- **`validation/scenarios/` module**: Scenario registry with `ScenarioMeta` (id, track, tier, provenance), `Tier` (Rust/Live/Both), `Track` (ScienceDispatch/Composition/Foundation/Provenance). 9 validation scenarios (3 absorbed from exp001-003 + 6 expanded: fao56-et0, et0-methods, soil-physics, water-balance, atlas-pipeline, paper-chain).
 - **`deny.toml` evolution**: Added `aws-lc-sys` + `aws-lc-rs` bans to both workspace-root and barracuda deny.toml files (ecosystem posture alignment).
 - **Lint cleanup**: All 3 bare `#[allow()]` in test files → `#[expect(…, reason = "…")]` (stats_integration, determinism, cross_spring_absorption).
 - **Unfulfilled expect removed**: `clippy::unwrap_used` on determinism.rs (no unwrap calls present).

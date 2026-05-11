@@ -3,7 +3,7 @@
 **Date**: May 10, 2026
 **From**: airSpring (ecology / agriculture)
 **To**: primalSpring, all primal teams, all spring teams
-**guideStone Level**: 2 (IPC-wired, 46 capabilities, composition.status + **`method.register`** wired)
+**guideStone Level**: 2+ (IPC-wired, 46 capabilities, composition.status + **`method.register`** + skunkBat IPC wired, 9 UniBin validation scenarios)
 
 ---
 
@@ -15,7 +15,14 @@
 - **`composition.status`** registered in `capability_registry.toml` and `niche::CAPABILITIES`. **`method.register`** added as the additional capability (46 total) for biomeOS dynamic method registration.
 
 ### Cross-Sync Validation
-- **`capability_cross_sync.rs`** — new integration test validates airSpring's shared-domain methods (`health.*`, `capability.*`, `compute.*`) align with primalSpring's canonical 403. Documents 9 "extending" methods (`provenance.*`, `primal.*`, `data.*`, `composition.*`) that are airSpring-local but tracked for upstream registration.
+- **`capability_cross_sync.rs`** — new integration test validates airSpring's shared-domain methods (`health.*`, `capability.*`, `compute.*`) align with primalSpring's canonical 413. Documents 9 "extending" methods (`provenance.*`, `primal.*`, `data.*`, `composition.*`, `method.*`) that are airSpring-local but tracked for upstream registration.
+
+### IPC Wiring (May 11)
+- **`method.register` IPC module** — `ipc/method_register.rs` sends `method.register` RPC to biomeOS at startup, registering all 46 niche capabilities dynamically. Dispatch handler processes inbound `method.register` calls.
+- **skunkBat audit module** — `ipc/skunkbat.rs` emits `security.audit_log` events for certification, startup, and ad-hoc audit. Discovery via standard socket path (`/tmp/skunkbat.sock` or `SKUNKBAT_SOCKET`).
+- **9 UniBin validation scenarios** — `validation/scenarios/` expanded from 3 to 9: `fao56-et0`, `et0-methods`, `soil-physics`, `water-balance`, `atlas-pipeline`, `paper-chain` added alongside existing `local-science-parity`, `composition-parity`, `full-regression`. All wired to `airspring validate --scenario <id>`.
+- **plasmidBin release binaries** — `airspring` (3.0M) and `airspring_primal` (2.4M) built, stripped, and deployed to `infra/plasmidBin/springs/`.
+- **foundation seeded** — 36/36 thread06_ag targets validated, provenance manifest + sweetGrass braid published. All 6 workloads migrated to UniBin `airspring validate` pattern.
 
 ### Deep Debt Resolution
 - **benchmarks.rs refactored** (810L → 197L + 634L `bench_fns.rs`) — zero files >800 lines remain.
@@ -28,7 +35,7 @@
 - `cargo build` — clean
 - `cargo fmt --check` — clean
 - `cargo clippy --workspace --all-targets` — zero warnings
-- `cargo test --workspace --lib --tests` — 1,008 lib + 316 integration PASS
+- `cargo test --workspace --lib --tests` — 1,011 lib + 316 integration PASS
 - `cargo test --test capability_cross_sync` — 3/3 PASS
 - `cargo check --features guidestone` — clean
 
@@ -38,15 +45,15 @@
 
 | Metric | Value |
 |--------|-------|
-| Lib tests | 1,008 |
+| Lib tests | 1,011 |
 | Integration tests | 316 |
 | Forge tests | 62 |
-| **Total tests** | **1,386** |
+| **Total tests** | **1,389** |
 | Binaries | 93 |
 | Capabilities | 46 |
 | Deploy graphs | 4 (incl. skunkBat, 9-node niche) |
 | Experiments | 90 (all PASS) |
-| guideStone | L2 (IPC-wired) |
+| guideStone | L2+ (IPC-wired, 9 UniBin scenarios) |
 | CPU speedup | 14.3× (24/24 parity) |
 | Coverage | 90.56% |
 | C dependencies | 0 |
@@ -57,9 +64,9 @@
 
 ## For Primal Teams
 
-### Methods airSpring Extends Beyond Canonical 403
+### Methods airSpring Extends Beyond Canonical 413
 
-These 9 methods exist in airSpring's local `capability_registry.toml` but not in primalSpring's canonical registry. They are documented and tracked for upstream registration:
+These 10 methods exist in airSpring's local `capability_registry.toml` but not in primalSpring's canonical registry. They are documented and tracked for upstream registration:
 
 | Method | Domain | Description |
 |--------|--------|-------------|
@@ -72,8 +79,9 @@ These 9 methods exist in airSpring's local `capability_registry.toml` but not in
 | `data.cross_spring_weather` | data | Cross-spring weather data exchange |
 | `data.weather` | data | Weather data via NestGate |
 | `composition.status` | composition | biomeOS v3.51 health/status |
+| `method.register` | method | biomeOS v3.51 dynamic method registration |
 
-**Recommendation**: Register `composition.status` and `provenance.*` in the canonical registry — these are ecosystem-wide patterns, not spring-specific.
+**Recommendation**: Register `composition.status`, `method.register`, and `provenance.*` in the canonical registry — these are ecosystem-wide patterns, not spring-specific.
 
 ### What Each Primal Team Should Know
 
@@ -108,7 +116,7 @@ These 9 methods exist in airSpring's local `capability_registry.toml` but not in
 
 ### Patterns Worth Absorbing
 
-1. **`capability_cross_sync.rs` test pattern** — validates shared-domain methods against primalSpring canonical 403. Distinguishes spring-local domains (exempt), aligned domains (must match), and extending domains (tracked). Other springs should replicate this.
+1. **`capability_cross_sync.rs` test pattern** — validates shared-domain methods against primalSpring canonical 413. Distinguishes spring-local domains (exempt), aligned domains (must match), and extending domains (tracked). Other springs should replicate this.
 
 2. **Env-overridable endpoints** — `OPEN_METEO_ARCHIVE_URL`, `NASS_API_BASE` allow sovereign routing without code changes. Any spring with hardcoded external URLs should adopt this pattern.
 

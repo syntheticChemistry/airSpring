@@ -1,6 +1,6 @@
 # Context — airSpring
 
-**Doc sync:** 2026-05-10 (v0.10.0; eukaryotic UniBin; post-interstadial; all CI gates green).
+**Doc sync:** 2026-05-11 (v0.10.0; eukaryotic UniBin; post-interstadial; all CI gates green).
 
 ## What This Is
 
@@ -28,8 +28,8 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
   fossilized in `fossilRecord/`.
 - **Certification organelle** — `certification/` library module (L0-L4 layered
   guidestone validation, absorbed from standalone binary).
-- **Scenario registry** — `validation/scenarios/` modules (3 absorbed composition
-  experiments: local science parity, composition parity, foundation target).
+- **Scenario registry** — `validation/scenarios/` modules (**9 UniBin validation
+  scenarios**, absorbed from composition experiments + expanded registry coverage).
 
 ## Technical Facts
 
@@ -37,11 +37,11 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - **Architecture:** Two workspace crates (`airspring-barracuda` library + `airspring-forge` dispatch)
 - **Communication:** JSON-RPC 2.0 over Unix sockets + TCP (biomeOS capability routing, Songbird sovereign transport)
 - **License:** AGPL-3.0-or-later
-- **Lib tests:** 1,008 (barracuda, `cargo test --lib`)
+- **Lib tests:** 1,011 (barracuda, `cargo test --lib`)
 - **Integration + doc tests:** 316 (barracuda)
-- **Barracuda total:** 1,324 (1,008 lib + 316 integration/doc)
+- **Barracuda total:** 1,327 (1,011 lib + 316 integration/doc)
 - **Forge tests:** 62 (metalForge)
-- **Grand total:** 1,386 (both crates)
+- **Grand total:** 1,389 (both crates)
 - **Binaries:** 93 (84 validation, 4 bench, 3 operational, 1 UniBin, 1 guidestone)
 - **Proptest invariants:** 7 (SVP, delta, Hargreaves, TAW, RAW, Ks)
 - **Line coverage:** 90.56% (cargo llvm-cov --lib --fail-under-lines 90)
@@ -52,7 +52,7 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - **Experiments:** 90 (all PASS)
 - **Capabilities:** 46 (science + ecology + provenance + composition + coordination + health)
 - **Deploy graphs:** 4 (provenance trio, NestGate routing, niche deploy w/ 9 nodes incl. skunkBat, cross-spring)
-- **GuideStone level:** L2 (IPC-wired, 3 composition scenarios)
+- **GuideStone level:** L2+ (IPC-wired, **9 UniBin validation scenarios**)
 - **deny.toml:** workspace-root, `aws-lc-sys` + `aws-lc-rs` banned
 
 ## Key Capabilities (JSON-RPC methods)

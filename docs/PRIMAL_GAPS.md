@@ -1,8 +1,8 @@
 # Primal Gaps — airSpring v0.10.0
 
-**Date**: May 10, 2026 (post-interstadial evolution)
+**Date**: May 11, 2026 (post-interstadial evolution)
 **Spring**: airSpring (ecology / agriculture)
-**guideStone Level**: 2 (IPC-wired, 46 capabilities, composition.status) → targeting 3+
+**guideStone Level**: L2+ (IPC-wired, 46 capabilities, composition.status) → targeting 3+
 **License**: AGPL-3.0-or-later
 
 ---
@@ -63,7 +63,7 @@ These are not primal gaps but internal reconciliation items:
 ## guideStone Evolution Path
 
 ```
-Current:  gS Level 2 (IPC-wired, 3 experiment crates, methods centralized)
+Current:  gS Level 2+ (IPC-wired, **9 UniBin validation scenarios**, methods centralized)
 Target:   gS Level 3+ (live NUCLEUS validation)
 Next:     Deploy NUCLEUS from plasmidBin, validate Tier 3 experiments
 ```
@@ -86,16 +86,16 @@ Next:     Deploy NUCLEUS from plasmidBin, validate Tier 3 experiments
 11. Document remaining gaps → hand back
 
 ### Deep Debt Evolution (May 8 2026)
-- [x] capability_registry.toml created (46 methods, sync test + cross-sync vs canonical 403)
+- [x] capability_registry.toml created (46 methods, sync test + cross-sync vs canonical **413**)
 - [x] deny.toml promoted to workspace root (ecoBin v3.0, ring/openssl + aws-lc-sys banned)
 - [x] `methods.rs` centralized constants module (46 methods, drift-proof)
-- [x] 3 composition experiment crates (exp001 55/55, exp002 10/10, exp003 4/4)
+- [x] **9 UniBin validation scenarios** (`validation/scenarios/`; exp001–exp003 absorbed plus expanded ScenarioRegistry coverage)
 - [x] Test extraction: provenance.rs (747→496), rpc/mod.rs (650→341), seasonal_pipeline (738→539)
 - [x] 3 compilation errors fixed (autobins, NestGateProvider→IPC, fhe_ntt cfg)
 - [x] Missing docs resolved (DailyWeather, Station, YieldRecord, HttpResponse, DataError)
 - [x] `/proc/*` paths gated behind `cfg(target_os = "linux")`
 - [x] primalSpring feature-gated dep (guidestone feature)
-- [x] CONTEXT.md reconciled with README.md (single source of truth, May 10)
+- [x] CONTEXT.md reconciled with README.md (single source of truth, May 11)
 - [x] composition.status handler wired (biomeOS v3.51 contract)
 - [x] skunkBat added to niche deploy graph (9 nodes)
 - [x] Zero `#[allow]` in production code (`#[expect]` with reason throughout)

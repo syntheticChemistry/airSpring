@@ -1,7 +1,7 @@
 # Primal Proof IPC Mapping — airSpring
 
-**Date**: May 9, 2026
-**Status**: 46 capabilities IPC-exposed, UniBin eukaryotic, guideStone L2→L4 target
+**Date**: May 11, 2026
+**Status**: 46 capabilities IPC-exposed, UniBin eukaryotic, guideStone L2→L4 target; new IPC: **`method.register`**, **`composition.status`**, skunkBat deploy-graph path.
 
 Maps each airSpring domain computation to its JSON-RPC equivalent for
 primal-proof validation. When NUCLEUS primals are deployed, all science
@@ -95,6 +95,8 @@ should route through IPC rather than direct `barracuda::` library calls.
 | Liveness | `health.liveness` | biomeOS health check |
 | Readiness | `health.readiness` | biomeOS deployment readiness |
 | Capability list | `capability.list` | Songbird service discovery |
+| Method registration | `method.register` | Runtime method/capability registration (Squirrel + discovery) |
+| Composition status | `composition.status` | biomeOS composition wire / status |
 
 ## Not Yet IPC-Exposed (library-only)
 
