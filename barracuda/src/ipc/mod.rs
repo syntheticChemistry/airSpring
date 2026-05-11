@@ -7,6 +7,8 @@
 //!
 //! | Module | Purpose |
 //! |--------|---------|
+//! | [`method_register`] | biomeOS v3.51 `method.register` for dynamic semantic routing |
+//! | [`skunkbat`] | Audit event emission via `security.audit_log` (JH-5 forwarding) |
 //! | [`mcp`] | MCP tool definitions for Squirrel AI integration (10 ecology tools) |
 //! | [`provenance`] | Provenance trio (rhizoCrypt + loamSpine + sweetGrass) |
 //! | [`resilience`] | Circuit breaker + retry with exponential backoff |
@@ -15,8 +17,10 @@
 pub mod compute_dispatch;
 pub mod dispatch_outcome;
 pub mod mcp;
+pub mod method_register;
 pub mod provenance;
 pub mod resilience;
+pub mod skunkbat;
 pub mod timeseries;
 
 pub use dispatch_outcome::DispatchOutcome;

@@ -138,6 +138,11 @@ pub const PRIMAL_DISCOVER: &str = "primal.discover";
 /// biomeOS composition status (`active_users`, `primal_health`, `resource_pressure`).
 pub const COMPOSITION_STATUS: &str = "composition.status";
 
+// ── Method registration (biomeOS v3.51) ──────────────────────────
+
+/// Dynamic method registration for semantic routing.
+pub const METHOD_REGISTER: &str = "method.register";
+
 // ── Health probes ──────────────────────────────────────────────────
 
 /// biomeOS liveness probe.

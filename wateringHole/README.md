@@ -1,13 +1,13 @@
 # airSpring wateringHole
 
-**Updated**: May 10, 2026 | **Version**: v0.10.0 (post-interstadial, 45 capabilities)
+**Updated**: May 10, 2026 | **Version**: v0.10.0 (post-interstadial, 46 capabilities)
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.10.0** | [AIRSPRING_V010_POST_INTERSTADIAL_UPSTREAM_HANDOFF_MAY10_2026.md](handoffs/AIRSPRING_V010_POST_INTERSTADIAL_UPSTREAM_HANDOFF_MAY10_2026.md) | 2026-05-10 | **Post-interstadial upstream handoff** — composition.status wired, skunkBat in deploy graph, capability cross-sync vs canonical 403, guidestone feature anchored, env-overridable URLs, 14+ docs reconciled (45 caps), primal gaps + patterns for all teams |
+| **V0.10.0** | [AIRSPRING_V010_POST_INTERSTADIAL_UPSTREAM_HANDOFF_MAY10_2026.md](handoffs/AIRSPRING_V010_POST_INTERSTADIAL_UPSTREAM_HANDOFF_MAY10_2026.md) | 2026-05-10 | **Post-interstadial upstream handoff** — composition.status wired, skunkBat in deploy graph, capability cross-sync vs canonical 403, guidestone feature anchored, env-overridable URLs, 14+ docs reconciled (46 caps), primal gaps + patterns for all teams |
 | **V0.10.0** | [AIRSPRING_V010_DEEP_DEBT_UPSTREAM_HANDOFF_MAY09_2026.md](handoffs/AIRSPRING_V010_DEEP_DEBT_UPSTREAM_HANDOFF_MAY09_2026.md) | 2026-05-09 | **Deep debt + upstream handoff** — dead features removed, 6 test failures fixed, .gitignore bug fixed, 14 docs reconciled (1,008 lib / 93 bins), primal evolution review, upstream gaps, composition patterns, downstream absorption patterns |
 | **V0.10.0** | [AIRSPRING_V010_INTERSTADIAL_EUKARYOTIC_HANDOFF_MAY09_2026.md](handoffs/AIRSPRING_V010_INTERSTADIAL_EUKARYOTIC_HANDOFF_MAY09_2026.md) | 2026-05-09 | **Interstadial eukaryotic evolution** — UniBin (certify/validate/serve/status/version), certification/ organelle (L0-L4), validation/scenarios/ (3 absorbed), deny.toml aws-lc-sys ban, fossilRecord/, IPC mapping, zero bare #[allow] |
 | **V0.10.0** | [AIRSPRING_V010_DOCS_CLEANUP_UPSTREAM_HANDOFF_MAY08_2026.md](handoffs/AIRSPRING_V010_DOCS_CLEANUP_UPSTREAM_HANDOFF_MAY08_2026.md) | 2026-05-08 | **Docs cleanup + upstream handoff** — 12 files reconciled (90 exp, 986 lib, 44 caps), primal wiring inventory, active gaps for 7 primal teams, composition patterns, archive pass |

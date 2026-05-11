@@ -50,14 +50,14 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - **Crate count:** 2 workspace crates
 - **GPU backend:** barraCuda 0.3.7 (wgpu 28, Vulkan, DeviceCapabilities API)
 - **Experiments:** 90 (all PASS)
-- **Capabilities:** 45 (science + ecology + provenance + composition + coordination + health)
+- **Capabilities:** 46 (science + ecology + provenance + composition + coordination + health)
 - **Deploy graphs:** 4 (provenance trio, NestGate routing, niche deploy w/ 9 nodes incl. skunkBat, cross-spring)
 - **GuideStone level:** L2 (IPC-wired, 3 composition scenarios)
 - **deny.toml:** workspace-root, `aws-lc-sys` + `aws-lc-rs` banned
 
 ## Key Capabilities (JSON-RPC methods)
 
-45 methods registered in `capability_registry.toml`:
+46 methods registered in `capability_registry.toml`:
 
 - **Evapotranspiration (7):** `science.et0_fao56`, `science.et0_hargreaves`,
   `science.et0_priestley_taylor`, `science.et0_makkink`, `science.et0_turc`,
@@ -78,8 +78,8 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - **Provenance (4):** `provenance.begin`, `provenance.record`,
   `provenance.complete`, `provenance.status`
 - **Composition (1):** `composition.status`
-- **Infrastructure (6):** `health.liveness`, `health.readiness`,
-  `capability.list`, `compute.offload`, `data.weather`, `data.cross_spring_weather`
+- **Infrastructure (7):** `health.liveness`, `health.readiness`,
+  `capability.list`, `method.register`, `compute.offload`, `data.weather`, `data.cross_spring_weather`
 - **Cross-primal (2):** `primal.forward`, `primal.discover`
 
 ## What This Does NOT Do

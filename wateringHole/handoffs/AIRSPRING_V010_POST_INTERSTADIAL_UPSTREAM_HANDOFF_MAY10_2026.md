@@ -3,7 +3,7 @@
 **Date**: May 10, 2026
 **From**: airSpring (ecology / agriculture)
 **To**: primalSpring, all primal teams, all spring teams
-**guideStone Level**: 2 (IPC-wired, 45 capabilities, composition.status wired)
+**guideStone Level**: 2 (IPC-wired, 46 capabilities, composition.status + **`method.register`** wired)
 
 ---
 
@@ -12,7 +12,7 @@
 ### Composition & Security Wiring
 - **`composition.status` handler** — airSpring now responds to `composition.status` JSON-RPC calls per biomeOS v3.51 contract, reporting `active_users`, `primal_health` (ratio across provenance trio, NestGate, ToadStool, skunkBat), and `resource_pressure`.
 - **skunkBat integration** — `SKUNKBAT` constant added to `primal_names.rs`. Niche deploy graph expanded from 8 → 9 nodes with optional `skunkbat` node (provides `security.monitor`, `security.quarantine`, `security.audit`, `security.health`).
-- **`composition.status`** registered in `capability_registry.toml` (45th capability) and `niche::CAPABILITIES`.
+- **`composition.status`** registered in `capability_registry.toml` and `niche::CAPABILITIES`. **`method.register`** added as the additional capability (46 total) for biomeOS dynamic method registration.
 
 ### Cross-Sync Validation
 - **`capability_cross_sync.rs`** — new integration test validates airSpring's shared-domain methods (`health.*`, `capability.*`, `compute.*`) align with primalSpring's canonical 403. Documents 9 "extending" methods (`provenance.*`, `primal.*`, `data.*`, `composition.*`) that are airSpring-local but tracked for upstream registration.
@@ -43,7 +43,7 @@
 | Forge tests | 62 |
 | **Total tests** | **1,386** |
 | Binaries | 93 |
-| Capabilities | 45 |
+| Capabilities | 46 |
 | Deploy graphs | 4 (incl. skunkBat, 9-node niche) |
 | Experiments | 90 (all PASS) |
 | guideStone | L2 (IPC-wired) |
@@ -84,7 +84,7 @@ These 9 methods exist in airSpring's local `capability_registry.toml` but not in
 | **NestGate** | `data.weather` handler works. `data.open_meteo_weather` is non-standard (AG-008). airSpring URLs now env-overridable for NestGate routing. | Ecosystem weather data standard method name. |
 | **coralReef** | `discover_shader_compiler()` hook exists but no active usage (AG-006). All GPU dispatch goes through barraCuda direct. | Low priority — sovereign shader compile when coralReef matures. |
 | **Squirrel** | 10 MCP tools registered in primal dispatch. `inference.*` not exercised in science path (AG-005). | Wait for neuralSpring WGSL inference evolution. |
-| **biomeOS** | `composition.status` wired. `method.register` not yet wired. Socket discovery via `biomeos::discover_*` works well. | `method.register` absorption is next for dynamic capability registration. |
+| **biomeOS** | `composition.status` and **`method.register`** wired (46-cap registry); socket discovery via `biomeos::discover_*` works well. | Further Neural API ergonomics as biomeOS evolves. |
 | **skunkBat** | Added to niche deploy graph (order 3, optional). `SKUNKBAT` primal name constant. Security capabilities declared but not exercised in science path. | When Phase 3 ships, we get audit forwarding to rhizoCrypt DAG + sweetGrass braid. |
 | **bearDog + songbird** | Sovereign TLS via Songbird working. Required nodes in niche deploy. | No action needed. |
 
@@ -132,17 +132,16 @@ airSpring's validated composition patterns for NUCLEUS deployment via biomeOS Ne
 
 ### Graph node note
 
-`ecology.experiment` appears on the niche deploy graph `airspring` node but is NOT in the 45-capability registration set. Upstream orchestrators should reconcile graph node capability lists with `niche.rs` / `capability_registry.toml` sources.
+`ecology.experiment` appears on the niche deploy graph `airspring` node but is NOT in the 46-capability registration set. Upstream orchestrators should reconcile graph node capability lists with `niche.rs` / `capability_registry.toml` sources.
 
 ---
 
 ## What's Next for airSpring
 
-1. **`method.register` absorption** — biomeOS v3.51 dynamic method registration
-2. **Tier 4 barraCuda rewiring** — `optional = true` with IPC-first defaults (requires `MathBackend` trait, ecosystem coordination)
-3. **guideStone L3+** — deploy NUCLEUS from plasmidBin, validate against live primals via `CompositionContext`
-4. **Phase 4.7 Penny Irrigation** — sovereign scheduling on consumer hardware
-5. **Paper queue** — 5 pending papers awaiting field data (Dong lab 2026)
+1. **Tier 4 barraCuda rewiring** — `optional = true` with IPC-first defaults (requires `MathBackend` trait, ecosystem coordination)
+2. **guideStone L3+** — deploy NUCLEUS from plasmidBin, validate against live primals via `CompositionContext`
+3. **Phase 4.7 Penny Irrigation** — sovereign scheduling on consumer hardware
+4. **Paper queue** — 5 pending papers awaiting field data (Dong lab 2026)
 
 ---
 
@@ -152,7 +151,7 @@ airSpring's validated composition patterns for NUCLEUS deployment via biomeOS Ne
 - **36 foundation targets** for Thread 6 (Agricultural Science) validated
 - **4 deploy graphs** ready for biomeOS orchestration
 - airSpring IPC-composes cleanly with NestGate/storage and compute paths
-- All 45 capabilities routable through biomeOS Neural API
+- All 46 capabilities routable through biomeOS Neural API
 
 ---
 

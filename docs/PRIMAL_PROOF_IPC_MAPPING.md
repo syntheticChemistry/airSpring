@@ -1,7 +1,7 @@
 # Primal Proof IPC Mapping — airSpring
 
 **Date**: May 9, 2026
-**Status**: 45 capabilities IPC-exposed, UniBin eukaryotic, guideStone L2→L4 target
+**Status**: 46 capabilities IPC-exposed, UniBin eukaryotic, guideStone L2→L4 target
 
 Maps each airSpring domain computation to its JSON-RPC equivalent for
 primal-proof validation. When NUCLEUS primals are deployed, all science

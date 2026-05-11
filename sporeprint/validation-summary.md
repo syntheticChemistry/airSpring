@@ -1,6 +1,6 @@
 +++
 title = "airSpring Validation Summary"
-description = "Precision agriculture & irrigation — 1,386 Rust tests, 90 experiments (87 + 3 composition), 14.3× speedup, 45/45 capabilities routable, 25 notebooks, UniBin eukaryotic, zero failures"
+description = "Precision agriculture & irrigation — 1,386 Rust tests, 90 experiments (87 + 3 composition), 14.3× speedup, 46/46 capabilities routable, 25 notebooks, UniBin eukaryotic, zero failures"
 date = 2026-05-10
 
 [taxonomies]
@@ -14,15 +14,15 @@ springs = ["airspring", "hotspring", "wetspring", "neuralspring", "groundspring"
 - **1,284 Python baseline checks** (60 papers reproduced)
 - **90 experiments** across 12 categories + 3 composition crates (exp001 local parity, exp002 composition parity, exp003 foundation targets)
 - **14.3× geometric mean** Rust-vs-Python speedup (24/24 algorithms, 21/21 CPU-GPU parity)
-- **45/45 IPC capabilities** routable (science + ecology + provenance + composition + coordination)
-- **45 centralized method constants** in `methods.rs` (drift-proof, single source of truth)
+- **46/46 IPC capabilities** routable (science + ecology + provenance + composition + coordination)
+- **46 centralized method constants** in `methods.rs` (drift-proof, single source of truth)
 - **93 validation binaries** (all zero-panic, OrExit pattern, UniBin consolidation)
 - **90.56% line coverage** (gated at 90%)
 - **60 named tolerances** in 5 submodules (Rust + Python mirror, zero inline magic numbers)
 - **25 Tier A GPU modules** (20 upstream batched ops, local_dispatch retired)
 - **Zero C dependencies**, zero unsafe, zero `#[allow()]`, Edition 2024
 - **guideStone Level 2** (IPC-wired, composition experiment crates)
-- **45-method capability_registry.toml** (CI sync-tested vs niche.rs + canonical cross-sync)
+- **46-method capability_registry.toml** (CI sync-tested vs niche.rs + canonical cross-sync)
 - **36 foundation targets** + **6 toadStool workloads** (thread06_ag)
 - **deny.toml** promoted to workspace root (ecoBin v3.0, ring/openssl banned)
 - **3 largest files refactored** (provenance 747→496, rpc 650→341, seasonal_pipeline 738→539)
@@ -38,7 +38,7 @@ springs = ["airspring", "hotspring", "wetspring", "neuralspring", "groundspring"
 - `validate_dispatch_experiment` — CPU/GPU/batch parity (51/51)
 - `bench_cross_spring_evolution` — 146/146 cross-spring checks
 - `validate_cross_spring_provenance` — 5-spring shader provenance (32/32)
-- `airspring_primal` — NUCLEUS primal binary (45 capabilities, JSON-RPC 2.0)
+- `airspring_primal` — NUCLEUS primal binary (46 capabilities, JSON-RPC 2.0)
 
 ## Notebooks (25)
 
@@ -46,7 +46,7 @@ springs = ["airspring", "hotspring", "wetspring", "neuralspring", "groundspring"
 
 | # | Notebook | Focus |
 |---|----------|-------|
-| 01 | Composition Validation | 45 capabilities, deploy graphs, primal composition, gaps |
+| 01 | Composition Validation | 46 capabilities, deploy graphs, primal composition, gaps |
 | 02 | Benchmark Comparison | Python vs Rust vs GPU timing, 14.3× speedup, GPU tiers |
 | 03 | Ecosystem Evidence | 90 experiments, 60 tolerances, quality gates, provenance |
 | 04 | Cross-Spring Connections | barraCuda integration, shader families, primal consumption |

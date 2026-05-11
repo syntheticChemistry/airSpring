@@ -401,6 +401,30 @@ pub fn handle_composition_status(state: &NicheState) -> serde_json::Value {
     })
 }
 
+/// biomeOS v3.51 dynamic method registration acknowledgement.
+///
+/// Accepts inbound `method.register` calls from other primals that want
+/// to register their methods through this niche.
+pub fn handle_method_register(params: &serde_json::Value) -> serde_json::Value {
+    let method_name = params.get("method").and_then(|v| v.as_str()).unwrap_or("");
+    let methods = params
+        .get("methods")
+        .and_then(|v| v.as_array())
+        .map_or_else(|| usize::from(!method_name.is_empty()), Vec::len);
+    tracing::info!(
+        target: "biomeos",
+        method = method_name,
+        count = methods,
+        "method.register received"
+    );
+    serde_json::json!({
+        "registered": true,
+        "method": method_name,
+        "count": methods,
+        "primal": niche::NICHE_NAME,
+    })
+}
+
 pub fn handle_primal_discover() -> serde_json::Value {
     let socket_dir = biomeos::resolve_socket_dir();
     let primals = biomeos::discover_all_primals();

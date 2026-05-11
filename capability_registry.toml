@@ -290,6 +290,12 @@ domain = "composition"
 description = "biomeOS composition status: active_users, primal_health, resource_pressure"
 gpu_accelerated = false
 
+[capabilities.method_register]
+method = "method.register"
+domain = "composition"
+description = "biomeOS v3.51 dynamic method registration for semantic routing"
+gpu_accelerated = false
+
 # ── Niche deployment (biomeOS graph composition) ──
 
 [capabilities.capability_list]

@@ -147,7 +147,7 @@ Extracting `#[cfg(test)]` blocks into `_tests.rs` sibling modules halved the LOC
 
 | File | Changes |
 |------|---------|
-| `README.md` | 45→44 capabilities, 943→986 lib, 87→90 experiments |
+| `README.md` | Capability count **46** (incl. `method.register`; registry + docs aligned), 943→986 lib, 87→90 experiments |
 | `CHANGELOG.md` | Added `[Unreleased]` section covering May 2026 work |
 | `CONTROL_EXPERIMENT_STATUS.md` | Updated header (90 exp, 986 lib, 1,364 total, 44 caps) and footer |
 | `experiments/README.md` | Added composition crates table, fixed test breakdown counts |

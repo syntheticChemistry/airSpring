@@ -84,6 +84,7 @@ pub const CAPABILITIES: &[&str] = &[
     crate::methods::PRIMAL_DISCOVER,
     // ── Composition (biomeOS orchestration) ──
     crate::methods::COMPOSITION_STATUS,
+    crate::methods::METHOD_REGISTER,
     // ── Health probes (biomeOS orchestration) ──
     crate::methods::HEALTH_LIVENESS,
     crate::methods::HEALTH_READINESS,

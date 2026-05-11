@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! Cross-sync: validates airSpring shared-domain method strings against
-//! the primalSpring canonical capability registry (403 methods).
+//! the primalSpring canonical capability registry (413 methods).
 //!
 //! Spring-specific domains (`science.*`, `ecology.*`) are exempt — those are
 //! airSpring-local methods. Shared ecosystem domains (`health`, `capability`,
@@ -55,7 +55,7 @@ const SPRING_LOCAL_DOMAINS: &[&str] = &["science", "ecology"];
 
 const ALIGNED_DOMAINS: &[&str] = &["health", "capability", "compute"];
 
-const EXTENDING_DOMAINS: &[&str] = &["provenance", "primal", "data", "composition"];
+const EXTENDING_DOMAINS: &[&str] = &["provenance", "primal", "data", "composition", "method"];
 
 fn domain_of(method: &str) -> &str {
     method.split('.').next().unwrap_or(method)
@@ -80,8 +80,8 @@ fn shared_methods_align_with_canonical() {
     let local = extract_methods(&local_content);
 
     assert!(
-        canonical.len() >= 400,
-        "canonical registry should have ~403 methods, found {}",
+        canonical.len() >= 410,
+        "canonical registry should have ~413 methods, found {}",
         canonical.len()
     );
 
@@ -140,6 +140,7 @@ fn document_extending_methods() {
         "data.cross_spring_weather",
         "data.weather",
         "composition.status",
+        "method.register",
     ];
 
     for ext in &extensions {
@@ -165,8 +166,8 @@ fn local_capability_count() {
 
     assert_eq!(
         local.len(),
-        45,
-        "expected 45 capabilities, found {}",
+        46,
+        "expected 46 capabilities, found {}",
         local.len()
     );
 }

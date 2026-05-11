@@ -97,7 +97,7 @@
 | 086 | metalForge Mixed Hardware Live NUCLEUS | Hardware | **Complete** | Rust | Live probe (RTX 4070 + Titan V + i9-12900K), NUCLEUS mesh (Tower+Node), 23/27 workload routing, ecology pipeline (3 stages GPU), PCIe bypass, transfer matrix | 17/17 |
 | 087 | NUCLEUS Graph Coordination | Integration | **Complete** | Rust | biomeOS TOML graph parsing, DAG validation, capability refs, dependency ordering, prerequisite checks, Tower/Node atomic detection, 7 primals | 22/22 |
 
-**Grand Total**: 1284 Python + **1,008 lib + 316 integration + 62 forge** (1,324 barracuda + 62 forge = **1,386** project tests) + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 3 composition crates (exp001: 55/55, exp002: 10/10, exp003: 4/4) + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (45 capabilities) + 93 binaries + barraCuda 0.3.7 (wgpu 28, DF64 precision tier) + 14.3× CPU speedup (24/24 parity) + 21/21 CPU-GPU parity modules + 90 experiments (v0.10.0). 45 centralized method constants (`methods.rs`). guideStone L2. Zero C deps. Zero hardcoded primals. Zero `#[allow()]`. Platform-agnostic IPC (Transport: Unix + TCP). Full validation pipeline green (2026-05-10).
+**Grand Total**: 1284 Python + **1,008 lib + 316 integration + 62 forge** (1,324 barracuda + 62 forge = **1,386** project tests) + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 3 composition crates (exp001: 55/55, exp002: 10/10, exp003: 4/4) + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (46 capabilities) + 93 binaries + barraCuda 0.3.7 (wgpu 28, DF64 precision tier) + 14.3× CPU speedup (24/24 parity) + 21/21 CPU-GPU parity modules + 90 experiments (v0.10.0). 46 centralized method constants (`methods.rs`). guideStone L2. Zero C deps. Zero hardcoded primals. Zero `#[allow()]`. Platform-agnostic IPC (Transport: Unix + TCP). Full validation pipeline green (2026-05-10).
 
 ---
 
@@ -399,7 +399,7 @@ Experiments follow `NNN_name` format:
 - `080`: Bootstrap & Jackknife CI for seasonal ET₀ (deterministic resampling)
 - `081`: Standardized Precipitation Index (SPI) drought analysis (gamma MLE + normal quantile)
 - `082`: Cross-Spring Modern Systems Validation (provenance, autocorrelation, PrecisionRoutingAdvice)
-- `083`: NUCLEUS Modern Deployment Validation (biomeOS, Tower/Node, 45 JSON-RPC, SPI/ACF/gamma_cdf)
+- `083`: NUCLEUS Modern Deployment Validation (biomeOS, Tower/Node, 46 JSON-RPC, SPI/ACF/gamma_cdf)
 - `084`: CPU vs GPU Comprehensive Parity (18 modules, all GPU ops, tolerance-aware)
 - `085`: toadStool Compute Dispatch (14 methods, compute.offload, 7 primals discovered)
 - `086`: metalForge Mixed Hardware Live NUCLEUS (live probe, NUCLEUS mesh, ecology pipeline)
@@ -577,7 +577,7 @@ pipeline, cross-primal discovery, and GPU precision routing.
 **Phase 1 (Rust — 43/43 PASS):**
 - [x] NUCLEUS atomic detection: Tower (BearDog+Songbird) LIVE, Node (+ToadStool) LIVE
 - [x] Primal socket discovery and health check (v0.7.5)
-- [x] v0.7.5 capability enumeration: 45 capabilities (SPI, ACF, gamma_cdf + ecology aliases)
+- [x] v0.7.5 capability enumeration: 46 capabilities (SPI, ACF, gamma_cdf + ecology aliases; incl. `method.register`)
 - [x] SPI drought index via JSON-RPC: parity direct-Rust vs RPC, upstream provenance
 - [x] Autocorrelation via JSON-RPC: cross-spring provenance (hotSpring→neuralSpring→airSpring)
 - [x] Gamma CDF via JSON-RPC: upstream `regularized_gamma_p` lean confirmed
@@ -589,7 +589,7 @@ pipeline, cross-primal discovery, and GPU precision routing.
 **Binary**: `validate_nucleus_modern`
 
 **Key Result**: biomeOS NUCLEUS integration fully operational. airSpring primal
-serves 45 JSON-RPC capabilities with live Tower/Node Atomic. New v0.7.5
+serves 46 JSON-RPC capabilities with live Tower/Node Atomic. New v0.7.5
 endpoints (SPI, autocorrelation, gamma_cdf) all pass parity with direct Rust calls.
 
 ### Exp 084: CPU vs GPU Comprehensive Parity
