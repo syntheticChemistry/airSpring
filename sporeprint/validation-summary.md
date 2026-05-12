@@ -1,6 +1,6 @@
 +++
 title = "airSpring Validation Summary"
-description = "Precision agriculture & irrigation — 1,389 Rust tests, 90 experiments (87 + 3 composition), 10 UniBin validation scenarios, 14.3× speedup, 46/46 capabilities routable, 25 notebooks, UniBin eukaryotic, zero failures"
+description = "Precision agriculture & irrigation — 1,405 Rust tests, 90 experiments (87 + 3 composition), 10 UniBin validation scenarios, 14.3× speedup, 46/46 capabilities routable, 25 notebooks, UniBin eukaryotic, zero failures"
 date = 2026-05-11
 
 [taxonomies]
@@ -10,12 +10,12 @@ springs = ["airspring", "hotspring", "wetspring", "neuralspring", "groundspring"
 
 ## Status
 
-- **1,389 Rust tests** passing (1,011 lib + 316 integration + 62 forge), 0 failed
+- **1,405 Rust tests** passing (1,027 lib + 316 integration + 62 forge), 0 failed
 - **1,284 Python baseline checks** (60 papers reproduced)
 - **90 experiments** across 12 categories + 3 composition crates (exp001 local parity, exp002 composition parity, exp003 foundation targets)
 - **14.3× geometric mean** Rust-vs-Python speedup (24/24 algorithms, 21/21 CPU-GPU parity)
 - **46/46 IPC capabilities** routable (science + ecology + provenance + composition + coordination)
-- **46 centralized method constants** in `methods.rs` (drift-proof, single source of truth)
+- **49 centralized method constants** in `methods.rs` (drift-proof, single source of truth)
 - **94 validation binaries** (all zero-panic, OrExit pattern, UniBin consolidation)
 - **90.56% line coverage** (gated at 90%)
 - **60 named tolerances** in 5 submodules (Rust + Python mirror, zero inline magic numbers)

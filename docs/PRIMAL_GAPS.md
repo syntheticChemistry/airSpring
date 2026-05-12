@@ -31,7 +31,6 @@ Format follows wetSpring/hotSpring `PRIMAL_GAPS.md` pattern.
 | AG-009 | petalTongue | No direct IPC wiring from airSpring | Cell graph includes petalTongue but airspring_primal has no visualization dispatch; petalTongue integration is graph-level only | **Open** — low priority; petalTongue consumes via biomeOS SSE; Tier 3 convergence item |
 | AG-010 | barraCuda | `TensorSession` / `TensorContext` not available | Seasonal GPU pipeline blocked on persistent buffer pooling; documented in `evolution_gaps.rs` | **Open** — barraCuda roadmap item |
 | AG-011 | barraCuda | Anderson coupling needs new WGSL shader | `science.anderson_coupling` runs CPU-only; no upstream shader exists | **Open** — Tier C in GPU promotion map |
-| AG-012 | toadStool | Live Science API not implemented | `toadstool.validate` JSON-RPC method not yet available — notebooks cannot call validation directly; `toadstool.list_workloads` IS wired (S245+) | **Open** — Pass 14 convergence item; all 8 springs' Tier 2 depends on this |
 
 ---
 
@@ -51,6 +50,7 @@ Format follows wetSpring/hotSpring `PRIMAL_GAPS.md` pattern.
 | AG-018 | airSpring | GPU capability_registry.toml drift (7 methods) | **COMPLETE:** Makkink, Turc, Hamon, Blaney-Criddle, Green-Ampt, autocorrelation, ecology.autocorrelation corrected to `gpu_accelerated = true` | 2026-05-12 |
 | AG-019 | airSpring | projectNUCLEUS workloads incomplete (1/6) | **COMPLETE:** 6 workload TOMLs created in `projectNUCLEUS/workloads/airspring/` (et0-validation, et0-methods, soil-physics, water-balance, atlas-pipeline, full-suite) | 2026-05-12 |
 | AG-020 | foundation | Thread 4 expression missing | **COMPLETE:** `ENVIRONMENTAL_GENOMICS.md` authored — soil-immune coupling, Anderson QS, sentinel microbes, field science; FLS2 target added (13 total) | 2026-05-12 |
+| AG-012 | toadStool | Live Science API not implemented | **RESOLVED:** `toadstool.validate` implemented upstream (S250) + wired in airSpring `ipc::toadstool_validate`; `precision.route` implemented + wired in `ipc::precision_route`; composition-parity scenario exercises both; Tier 2 unblocked | 2026-05-12 |
 
 ---
 
@@ -76,17 +76,20 @@ Next:     gS Level 6 (cross-spring pipeline — deploy graphs, capability regist
 
 ### L5 Readiness Assessment (May 12, 2026)
 
-airSpring has **all three L5 RPC handlers wired and structurally tested**:
+airSpring has **all five L5 RPC handlers wired and structurally tested**:
 - `composition.status` — wired (biomeOS v3.51 contract)
 - `method.register` — wired (46 capabilities registered)
 - `compute.dispatch` — wired (toadStool identity_f64 shader)
+- `toadstool.validate` — **NEW** wired via `ipc::toadstool_validate` (Tier 2 pre-flight)
+- `precision.route` — **NEW** wired via `ipc::precision_route` (Tier 2 precision advisory)
 
-**Blocker**: L5 requires **live primals** (biomeOS + toadStool at minimum).
+**Tier 2 unblocked**: `toadstool.validate` (S250) and `barracuda.precision.route`
+are both implemented upstream. airSpring wires them in the composition-parity
+scenario with graceful skip when primals are absent.
+
+**Remaining L5 blocker**: Live primals (biomeOS + toadStool at minimum).
 Without running primals, the L5 certification probes print `SKIP`.
-This is a shared blocker across all springs — see Pass 14 (`toadstool.validate`).
-
-**What we can do now**: structural L5 validation with mock responses is in place
-via UniBin scenario `s_composition_parity`. Live L5 awaits biomeOS orchestration.
+Structural L5 validation with TCP mock round-trip tests passes (1,027 lib tests).
 
 ### Prerequisites for gS Level 1 (DONE)
 1. ~~Clone primalSpring beside springs/~~ — primalSpring at `springs/primalSpring/`

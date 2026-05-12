@@ -8,7 +8,7 @@
 Every paper reproduced in airSpring follows the same path:
 
 1. **Python baseline** — digitize paper benchmarks, implement equations, validate (1,284/1,284 PASS)
-2. **Rust proof** — cross-validate to 1e-5, 14.3× speedup, 94 zero-panic binaries (1,011 lib + 316 integration + 62 forge = 1,389 total tests)
+2. **Rust proof** — cross-validate to 1e-5, 14.3× speedup, 94 zero-panic binaries (1,027 lib + 316 integration + 62 forge = 1,405 total tests)
 3. **GPU acceleration** — barraCuda 0.4.0 (25 Tier A modules, 21/21 CPU-GPU parity, 767+ WGSL shaders)
 4. **Primal composition** — 46 JSON-RPC capabilities via biomeOS Neural API, 7 deploy graphs, NUCLEUS atomics
 5. **UniBin eukaryotic** — single `airspring` binary (certify/validate/serve/status/version), 10 validation scenarios, guideStone **L4** (targeting L6)
@@ -28,7 +28,7 @@ Every paper reproduced in airSpring follows the same path:
 ```
 Phase 0   Python/R baselines    — reproduce paper results with original tools (1284/1284)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (1,011 lib + 1498 atlas, 94 binaries + 146/146 + 32/32 cross-spring benchmarks)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (1,027 lib + 1498 atlas, 94 binaries + 146/146 + 32/32 cross-spring benchmarks)
 Phase 1.5 CPU benchmark         — 14.3× Rust-vs-Python geometric mean (24/24 algorithms, 21/21 CPU-GPU parity modules)
 Phase 2   BarraCuda GPU bridge  — 25 Tier A + 6 GPU-local modules wired (cross-spring S87 fully rewired)
 Phase 2.5 Ops 5-8 GPU-first   — Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed

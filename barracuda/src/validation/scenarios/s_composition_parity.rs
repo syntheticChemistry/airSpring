@@ -9,6 +9,7 @@
 use crate::validation::ValidationHarness;
 use crate::validation::scenarios::registry::{Scenario, ScenarioMeta, Tier, Track};
 use crate::{biomeos, ipc, methods as m, niche, primal_names, rpc};
+use crate::ipc::{precision_route, toadstool_validate};
 
 /// Scenario metadata and entry point.
 pub const SCENARIO: Scenario = Scenario {
@@ -17,7 +18,7 @@ pub const SCENARIO: Scenario = Scenario {
         track: Track::Composition,
         tier: Tier::Both,
         provenance_crate: "exp002_composition_parity",
-        provenance_date: "2026-05-09",
+        provenance_date: "2026-05-12",
         description: "NUCLEUS composition parity — local + IPC + provenance roundtrip",
     },
     run,
@@ -74,6 +75,48 @@ fn tier2_ipc(v: &mut ValidationHarness) {
                 Err(_) => println!("  SKIP: {name} reachable but health failed"),
             },
             Err(_) => println!("  SKIP: {name} not available"),
+        }
+    }
+
+    tier2_toadstool_validate(v);
+    tier2_precision_route(v);
+}
+
+fn tier2_toadstool_validate(v: &mut ValidationHarness) {
+    match toadstool_validate::validate("workloads/airspring/airspring-et0-validation.toml", true) {
+        Ok(vr) => {
+            v.check_bool("toadstool.validate: responds", true);
+            v.check_bool("toadstool.validate: valid field present", true);
+            println!(
+                "  toadstool.validate: valid={}, gpu={}, tier={}, est_ms={}",
+                vr.valid, vr.gpu_available, vr.precision_tier, vr.estimated_dispatch_time_ms
+            );
+        }
+        Err(toadstool_validate::ValidateError::NoPrimal) => {
+            println!("  SKIP: toadstool.validate — toadStool not available");
+        }
+        Err(e) => {
+            println!("  SKIP: toadstool.validate — {e}");
+        }
+    }
+}
+
+fn tier2_precision_route(v: &mut ValidationHarness) {
+    match precision_route::route("hydrology") {
+        Ok(pa) => {
+            v.check_bool("precision.route: responds", true);
+            let valid_tier = ["f32", "f64", "df64"].contains(&pa.recommended_tier.as_str());
+            v.check_bool("precision.route: valid tier", valid_tier);
+            println!(
+                "  precision.route: tier={}, fma_safe={}, hw={}",
+                pa.recommended_tier, pa.fma_safe, pa.hardware_hint
+            );
+        }
+        Err(precision_route::PrecisionError::NoPrimal) => {
+            println!("  SKIP: precision.route — barraCuda primal not available");
+        }
+        Err(e) => {
+            println!("  SKIP: precision.route — {e}");
         }
     }
 }

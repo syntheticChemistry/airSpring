@@ -13,15 +13,19 @@
 //! | [`provenance`] | Provenance trio (rhizoCrypt + loamSpine + sweetGrass) |
 //! | [`resilience`] | Circuit breaker + retry with exponential backoff |
 //! | [`timeseries`] | Cross-spring time series exchange (`ecoPrimals/time-series/v1`) |
+//! | [`toadstool_validate`] | Tier 2: `toadstool.validate` workload pre-flight |
+//! | [`precision_route`] | Tier 2: `precision.route` GPU precision advisory |
 
 pub mod barracuda_route;
 pub mod compute_dispatch;
 pub mod dispatch_outcome;
 pub mod mcp;
 pub mod method_register;
+pub mod precision_route;
 pub mod provenance;
 pub mod resilience;
 pub mod skunkbat;
 pub mod timeseries;
+pub mod toadstool_validate;
 
 pub use dispatch_outcome::DispatchOutcome;

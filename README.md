@@ -19,7 +19,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,284/1,284 PASS** | 60 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB, MC ET₀ uncertainty, bootstrap/jackknife CI, SPI drought index |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **1,011 lib + 316 integration (1,327 barracuda) + 62 forge = 1,389 total** | 94 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
+| Phase 1: Rust validation | **1,027 lib + 316 integration (1,343 barracuda) + 62 forge = 1,405 total** | 94 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (34/34 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -55,7 +55,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test -p airspring-barracuda --features local,testutil --lib` | **1,011 passed**, 0 failures |
+| `cargo test -p airspring-barracuda --features local,testutil --lib` | **1,027 passed**, 0 failures |
 | `cargo test -p airspring-barracuda --tests --all-features` (or `--features local,testutil` for default-feature-aligned runs) | **316 passed** (integration + doc tests) |
 | `cargo test --lib` (metalForge) | **62 passed**, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **90.56% line coverage** |
@@ -230,7 +230,7 @@ airSpring/
 │   ├── bootstrap_jackknife/     # Bootstrap & Jackknife CI (20/20)
 │   ├── drought_index/           # SPI drought index (20/20)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (1,011 lib + 316 integration/doc = 1,327 tests, 94 binaries, barraCuda 0.4.0 / wgpu 28, Edition 2024)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (1,027 lib + 316 integration/doc = 1,343 tests, 94 binaries, barraCuda 0.4.0 / wgpu 28, Edition 2024)
 │   ├── src/
 │   │   ├── biomeos/                # biomeOS socket resolution + primal discovery (3 sub-modules)
 │   │   ├── eco/                 # Domain modules (22 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine + drought_index)
@@ -309,11 +309,11 @@ AGPL-3.0-or-later
 
 ---
 
-*May 12, 2026 — Deep debt resolution: **barraCuda 0.4.0** upstream absorption (workspace + Forge; from 0.3.13); 12 hardcoded primal tracing targets → `primal_names::` constants; **`primal_names::socket_filename()`** replaces `"biomeos.sock"` path literals; dead **`primal-proof`** Cargo feature removed; zero hardcoded primal name strings in production; **1,011** lib tests, **0** clippy. Earlier same day: hardcoded primal strings scrub, all three `deny.toml` files synced (openssl, sysinfo, aws-lc-sys, aws-lc-rs bans), Forge barraCuda progression **`0.3.7→0.4.0`**, `primal_names::BARRACUDA` added. Tier 4 IPC-first defaults + guideStone convergence (L2+→L4): `default = []`, 7 deploy graphs (GPU batch, sovereign data, uncertainty added), `required-features` on 94 binaries, IPC-only clippy clean. **LTEE E3** Python **12/12** + Rust **29/29** PASS (`validate_ltee_fls2`). UniBin **`validate --format json`** for Tier 2 projectNUCLEUS ingestion. Post-interstadial evolution: **`method.register`**, **`composition.status`**, skunkBat deploy-graph, capability cross-sync vs canonical **413**, CONTEXT.md reconciled, certification engine **L0–L6** (L4 cross-atomic; L5 NUCLEUS composition; L6 cross-spring pipeline), **10 UniBin validation scenarios** (incl. `s_tier4_math_parity`).
+*May 12, 2026 — Deep debt resolution: **barraCuda 0.4.0** upstream absorption (workspace + Forge; from 0.3.13); 12 hardcoded primal tracing targets → `primal_names::` constants; **`primal_names::socket_filename()`** replaces `"biomeos.sock"` path literals; dead **`primal-proof`** Cargo feature removed; zero hardcoded primal name strings in production; **1,027** lib tests, **0** clippy. Earlier same day: hardcoded primal strings scrub, all three `deny.toml` files synced (openssl, sysinfo, aws-lc-sys, aws-lc-rs bans), Forge barraCuda progression **`0.3.7→0.4.0`**, `primal_names::BARRACUDA` added. Tier 4 IPC-first defaults + guideStone convergence (L2+→L4): `default = []`, 7 deploy graphs (GPU batch, sovereign data, uncertainty added), `required-features` on 94 binaries, IPC-only clippy clean. **LTEE E3** Python **12/12** + Rust **29/29** PASS (`validate_ltee_fls2`). UniBin **`validate --format json`** for Tier 2 projectNUCLEUS ingestion. Post-interstadial evolution: **`method.register`**, **`composition.status`**, skunkBat deploy-graph, capability cross-sync vs canonical **413**, CONTEXT.md reconciled, certification engine **L0–L6** (L4 cross-atomic; L5 NUCLEUS composition; L6 cross-spring pipeline), **10 UniBin validation scenarios** (incl. `s_tier4_math_parity`). **Tier 2 IPC wiring:** `ipc::toadstool_validate` + `ipc::precision_route` (16 TCP round-trip lib tests); **AG-012** resolved (Tier 2 unblocked); `TOADSTOOL_VALIDATE`, `TOADSTOOL_LIST_WORKLOADS`, `PRECISION_ROUTE` in `methods.rs`; composition-parity scenario extended with Tier 2 probes.
 May 9 — Deep debt resolution + eukaryotic evolution. Dead standalone-http feature
 removed (ureq code paths, broken dep). Unused bytemuck dep removed. .gitignore data/ bug
 fixed (was silently ignoring barracuda/src/data/ source). 6 pre-existing test failures fixed
 (provider constructors → try_new). Hardcoded primal names → primal_names:: constants.
 build_benchmarks refactored into domain groups. Zero clippy warnings. UniBin consolidation
 (certify/validate/serve/status/version). Certification organelle (L0–L6). Scenario registry
-(**10** UniBin validation scenarios). **1,011** lib tests, 0 failures. 94 binaries. guideStone **L4** (targeting **L6** with live NUCLEUS). AGPL-3.0-or-later.*
+(**10** UniBin validation scenarios). **1,027** lib tests, 0 failures. 94 binaries. guideStone **L4** (targeting **L6** with live NUCLEUS). AGPL-3.0-or-later.*

@@ -160,3 +160,12 @@ pub const DATA_CROSS_SPRING_WEATHER: &str = "data.cross_spring_weather";
 pub const COMPUTE_OFFLOAD: &str = "compute.offload";
 /// Weather data via Nest Atomic routing.
 pub const DATA_WEATHER: &str = "data.weather";
+
+// ── Tier 2 — Live Science API ───────────────────────────────────────────────
+
+/// `toadStool` workload pre-flight validation.
+pub const TOADSTOOL_VALIDATE: &str = "toadstool.validate";
+/// `toadStool` list available workloads.
+pub const TOADSTOOL_LIST_WORKLOADS: &str = "toadstool.list_workloads";
+/// `barraCuda` precision routing advisory.
+pub const PRECISION_ROUTE: &str = "precision.route";

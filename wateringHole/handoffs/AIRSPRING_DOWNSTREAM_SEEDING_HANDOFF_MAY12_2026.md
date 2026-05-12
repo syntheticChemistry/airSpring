@@ -11,10 +11,10 @@
 
 | Metric | Value |
 |--------|-------|
-| Lib tests | **1,011** (`cargo test --features local,testutil --lib`) |
+| Lib tests | **1,027** (`cargo test --features local,testutil --lib`) |
 | Integration + doc tests | **316** (barracuda) |
 | Forge tests | **62** (metalForge) |
-| **Grand total** | **1,389** |
+| **Grand total** | **1,405** |
 | Binaries | **94** (85 validation, 4 bench, 3 operational, 1 UniBin, 1 guidestone) |
 | Capabilities | **46** (science + ecology + provenance + composition + infrastructure + cross-primal) |
 | Deploy graphs | **7** (eco + provenance + niche + cross-primal + GPU batch + sovereign data + uncertainty) |
@@ -101,6 +101,14 @@ All use `${SPRINGS_ROOT:-...}` path convention with `isolation_level = "process"
 - **Last hardcoded primal name**: `"toadstool"` in `compute_dispatch.rs` test → `primal_names::TOADSTOOL`
 - **Last `#[allow()]`**: 3 instances in `tests/common/mod.rs` → `#[expect()]`
 - **Comprehensive audit results**: 0 large files (>800L), 0 unsafe in production, 0 TODO/FIXME, 0 stale mocks, all deps pure Rust, `.unwrap()`/`.expect()` library-denied
+
+### 6. Tier 2 IPC wiring (TCP round-trip probes + composition scenario)
+
+- **`ipc::toadstool_validate`** (8 TCP round-trip lib tests): typed JSON-RPC plumbing for **`toadstool.validate`** workload pre-flight.
+- **`ipc::precision_route`** (8 TCP round-trip lib tests): typed coverage for **`barracuda.precision.route`** precision advisory (`PRECISION_ROUTE` constant).
+- **`methods.rs`**: **`TOADSTOOL_VALIDATE`**, **`TOADSTOOL_LIST_WORKLOADS`**, **`PRECISION_ROUTE`** added (49 centralized method constants total).
+- **AG-012 resolved**: Tier 2 IPC path unblocked end-to-end in-tree (typed IPC clients exercised in tests).
+- **Composition-parity** UniBin scenario extended with Tier 2 probes (`validation/scenarios/s_composition_parity.rs`).
 
 ---
 
@@ -193,4 +201,4 @@ Codebase is clean. No new debris to archive:
 
 ---
 
-*May 12, 2026 — 94 binaries, 1,011 lib tests, 1,389 total, 46 capabilities, 7 deploy graphs, 10 UniBin scenarios, guideStone L4 (targeting L5+). LTEE E3 Python 12/12 + Rust 29/29 PASS. `--format json` for Tier 2 ingestion. 6 projectNUCLEUS workload TOMLs. Foundation Thread 6 complete (36/36). barraCuda 0.4.0, Tier 4 IPC-first, Edition 2024, MSRV 1.92. Zero debt. AGPL-3.0-or-later.*
+*May 12, 2026 — 94 binaries, 1,027 lib tests, 1,405 total, 46 capabilities, 7 deploy graphs, 10 UniBin scenarios, guideStone L4 (targeting L5+). LTEE E3 Python 12/12 + Rust 29/29 PASS. `--format json` for Tier 2 ingestion; Tier 2 IPC wired (`ipc::toadstool_validate`, `ipc::precision_route`, AG-012 resolved). 6 projectNUCLEUS workload TOMLs. Foundation Thread 6 complete (36/36). barraCuda 0.4.0, Tier 4 IPC-first, Edition 2024, MSRV 1.92. Zero debt. AGPL-3.0-or-later.*

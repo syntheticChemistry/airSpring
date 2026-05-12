@@ -4,6 +4,10 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [Unreleased] - 2026-05-12
 
+### Tier 2 IPC wiring (2026-05-12 evening)
+
+- **Tier 2 IPC wiring**: `ipc::toadstool_validate` + `ipc::precision_route` — typed clients for `toadstool.validate` workload pre-flight and `barracuda.precision.route` precision advisory; 16 new tests (8 TCP round-trip each); composition-parity scenario extended; AG-012 resolved; 3 method constants added (`TOADSTOOL_VALIDATE`, `TOADSTOOL_LIST_WORKLOADS`, `PRECISION_ROUTE`)
+
 ### LTEE E3, validate JSON output, capability registry drift, primal hygiene (2026-05-12)
 
 - **`validate_ltee_fls2`**: LTEE E3 Rust validator (**29/29 PASS**) — Langmuir/Hill/two-site binding models, glycosylation Kd shift, soil-immune coupling
