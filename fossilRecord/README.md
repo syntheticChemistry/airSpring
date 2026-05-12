@@ -1,23 +1,13 @@
-# airSpring Fossil Record
+# fossilRecord — Moved to Dedicated Repository
 
-Historical snapshots preserving the evolution of airSpring through major
-transitions. Each directory contains dated provenance and the original
-source that was superseded.
+All fossilRecord content has been consolidated into the canonical repository:
 
-## Eras
+**https://github.com/ecoPrimals/fossilRecord**
 
-| Directory | Era | What |
-|-----------|-----|------|
-| `experiments_prokaryotic_may2026/` | Pre-interstadial | Standalone experiment crates absorbed into UniBin `validation/scenarios/` |
+The airSpring content lives under `springs/airSpring/` in that repository.
 
-## Convention
+To clone: `git clone git@github.com:ecoPrimals/fossilRecord.git`
 
-```
-fossilRecord/
-  {name}_{era}_may2026/
-    README.md   # what, when, why, what supersedes
-    src/        # snapshot (optional — may reference originals in experiments/)
-```
+---
 
-Follows the `primalSpring/fossilRecord/` pattern established during the
-interstadial primordial extinction wave.
+*Consolidated May 12, 2026. 1 documents moved.*
