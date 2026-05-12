@@ -244,7 +244,7 @@ fn cmd_serve() {
     use std::sync::Arc;
     use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 
-    use airspring_barracuda::{biomeos, niche};
+    use airspring_barracuda::{biomeos, niche, primal_names};
 
     let family_id = biomeos::get_family_id();
     let socket_path = biomeos::resolve_socket_path(niche::NICHE_NAME, &family_id);
@@ -278,7 +278,7 @@ fn cmd_serve() {
     );
 
     niche::register_with_target(
-        &biomeos::resolve_socket_dir().join("biomeos.sock"),
+        &biomeos::resolve_socket_dir().join(primal_names::socket_filename(primal_names::BIOMEOS)),
         &socket_path,
     );
 
@@ -307,13 +307,14 @@ fn spawn_heartbeat(
 ) {
     use std::sync::atomic::Ordering;
 
-    use airspring_barracuda::{biomeos, niche, rpc};
+    use airspring_barracuda::{biomeos, niche, primal_names, rpc};
 
     let sock = socket_path.to_path_buf();
     std::thread::spawn(move || {
         while running.load(Ordering::Relaxed) {
             std::thread::sleep(std::time::Duration::from_secs(30));
-            let orchestrator = biomeos::resolve_socket_dir().join("biomeos.sock");
+            let orchestrator = biomeos::resolve_socket_dir()
+                .join(primal_names::socket_filename(primal_names::BIOMEOS));
             if orchestrator.exists() {
                 let _ = rpc::send(
                     &orchestrator,

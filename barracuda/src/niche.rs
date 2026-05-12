@@ -195,9 +195,9 @@ pub fn register_with_target(target: &Path, our_socket: &Path) {
     );
 
     if reg_result.is_ok() {
-        info!(target: "biomeos", "registered with lifecycle manager");
+        info!(target: crate::primal_names::BIOMEOS, "registered with lifecycle manager");
     } else {
-        warn!(target: "biomeos", "lifecycle.register failed (non-fatal)");
+        warn!(target: crate::primal_names::BIOMEOS, "lifecycle.register failed (non-fatal)");
     }
 
     let sock_str = our_socket.to_string_lossy().to_string();
@@ -254,12 +254,12 @@ pub fn register_with_target(target: &Path, our_socket: &Path) {
         {
             registered += 1;
         } else {
-            warn!(target: "biomeos", capability = cap, "capability.register failed (non-fatal)");
+            warn!(target: crate::primal_names::BIOMEOS, capability = cap, "capability.register failed (non-fatal)");
         }
     }
 
     info!(
-        target: "biomeos",
+        target: crate::primal_names::BIOMEOS,
         registered,
         total = CAPABILITIES.len(),
         domains = domains.len(),

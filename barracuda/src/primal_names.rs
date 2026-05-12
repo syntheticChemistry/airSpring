@@ -38,6 +38,15 @@ pub const SKUNKBAT: &str = "skunkbat";
 /// Neural API / capability routing primal (provenance trio gateway).
 pub const NEURAL_API: &str = "neural-api";
 
+/// Derive the socket filename for a primal.
+///
+/// Convention: `{primal}.sock`, e.g. `socket_filename("biomeos")` →
+/// `"biomeos.sock"`.
+#[must_use]
+pub fn socket_filename(primal: &str) -> String {
+    format!("{primal}.sock")
+}
+
 /// Derive the environment variable name for a primal's socket override.
 ///
 /// Convention: `{PRIMAL_UPPER}_SOCKET`, e.g. `socket_env_var("toadstool")` →

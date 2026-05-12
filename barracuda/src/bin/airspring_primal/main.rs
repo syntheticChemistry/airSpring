@@ -41,18 +41,18 @@ struct NicheState {
 fn register_with_biomeos(our_socket: &Path) {
     if let Some(orchestrator) = discovery::discover_orchestrator_socket() {
         info!(
-            target: "biomeos",
+            target: primal_names::BIOMEOS,
             socket = %orchestrator.display(),
             "registering with orchestrator"
         );
         niche::register_with_target(&orchestrator, our_socket);
         return;
     }
-    info!(target: "biomeos", "no orchestrator discovered, trying fallback");
+    info!(target: primal_names::BIOMEOS, "no orchestrator discovered, trying fallback");
     if let Some(fallback_name) = biomeos::fallback_registration_primal() {
         if let Some(ref fallback_sock) = biomeos::discover_primal_socket(&fallback_name) {
             info!(
-                target: "biomeos",
+                target: primal_names::BIOMEOS,
                 fallback = fallback_name,
                 socket = %fallback_sock.display(),
                 "registering via fallback"
@@ -61,12 +61,12 @@ fn register_with_biomeos(our_socket: &Path) {
             return;
         }
         warn!(
-            target: "biomeos",
+            target: primal_names::BIOMEOS,
             fallback = fallback_name,
             "fallback primal not found — fully standalone"
         );
     }
-    info!(target: "biomeos", "running standalone (no orchestrator, no fallback)");
+    info!(target: primal_names::BIOMEOS, "running standalone (no orchestrator, no fallback)");
 }
 
 #[expect(

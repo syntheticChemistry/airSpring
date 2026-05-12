@@ -23,16 +23,15 @@ local = ["dep:barracuda", "dep:wgpu"]
 gpu = ["local"]
 npu = ["dep:akida-driver"]
 guidestone = ["dep:primalspring"]
-primal-proof = []
 
 [dependencies]
 # BarraCuda 0.3.13: standalone sovereign math engine (ecoPrimals/barraCuda).
 # Extracted from ToadStool S89 — universal math, precision per hardware.
-# v0.3.13: wgpu 28, DF64 precision tier, linalg module, MethodGate pattern,
+# v0.4.0: wgpu 28, DF64 precision tier, linalg module, MethodGate pattern,
 # MLP training, Nautilus server sessions, GPU pooling resilience.
 # airSpring validates that Rust baselines can be faithfully ported to
 # BarraCuda shaders. Used for stats, validation, GPU ops, and PDE primitives.
-barracuda = { version = "0.3.13", path = "../../../primals/barraCuda/crates/barracuda", default-features = false, features = ["gpu", "domain-pde", "domain-genomics"], optional = true }
+barracuda = { version = "0.4.0", path = "../../../primals/barraCuda/crates/barracuda", default-features = false, features = ["gpu", "domain-pde", "domain-genomics"], optional = true }
 
 # JSON parsing: loads benchmark JSON files (control/fao56/*.json, etc.)
 # with full provenance for validation fidelity.

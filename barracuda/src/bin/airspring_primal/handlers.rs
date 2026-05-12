@@ -412,7 +412,7 @@ pub fn handle_method_register(params: &serde_json::Value) -> serde_json::Value {
         .and_then(|v| v.as_array())
         .map_or_else(|| usize::from(!method_name.is_empty()), Vec::len);
     tracing::info!(
-        target: "biomeos",
+        target: primal_names::BIOMEOS,
         method = method_name,
         count = methods,
         "method.register received"

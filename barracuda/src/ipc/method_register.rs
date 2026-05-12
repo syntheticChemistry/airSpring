@@ -39,7 +39,7 @@ pub fn register_methods(biomeos_socket: &Path, our_socket: &Path) -> Option<u32>
                 .unwrap_or(0);
             let count = u32::try_from(registered).unwrap_or(0);
             info!(
-                target: "biomeos",
+                target: crate::primal_names::BIOMEOS,
                 registered = count,
                 total = methods.len(),
                 "method.register accepted"
@@ -48,7 +48,7 @@ pub fn register_methods(biomeos_socket: &Path, our_socket: &Path) -> Option<u32>
         }
         Err(e) => {
             warn!(
-                target: "biomeos",
+                target: crate::primal_names::BIOMEOS,
                 error = %e,
                 "method.register failed (non-fatal)"
             );

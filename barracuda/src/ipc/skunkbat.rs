@@ -51,7 +51,7 @@ pub fn audit_log_to(
         Ok(resp) => Some(resp),
         Err(e) => {
             warn!(
-                target: "skunkbat",
+                target: crate::primal_names::SKUNKBAT,
                 error = %e,
                 event_type,
                 "audit_log failed (non-fatal)"
