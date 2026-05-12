@@ -2,7 +2,16 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased] - 2026-05-11
+## [Unreleased] - 2026-05-12
+
+### LTEE E3, validate JSON output, capability registry drift, primal hygiene (2026-05-12)
+
+- **`validate_ltee_fls2`**: LTEE E3 Rust validator (**29/29 PASS**) — Langmuir/Hill/two-site binding models, glycosylation Kd shift, soil-immune coupling
+- **`--format json` on `validate` subcommand**: `OutputFormat` enum, `harness_to_json()` for Tier 2 projectNUCLEUS ingestion
+- **`capability_registry.toml`**: 7 GPU flags corrected (Makkink, Turc, Hamon, Blaney-Criddle, Green-Ampt, autocorrelation)
+- **Primal names scrub**: last `"toadstool"` literal replaced
+- **`#[allow()]` → `#[expect()]`** in `tests/common/mod.rs`
+- **projectNUCLEUS workload TOMLs**: 6 (was 1)
 
 ### Deep debt resolution, deny.toml sync, primal_names evolution (2026-05-11)
 

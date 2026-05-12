@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-05-11 (v0.10.0 — 90 experiments (87 numbered + 3 composition crates), barraCuda 0.3.7 (wgpu 28), 1284/1284 Python + 1,011 lib + 316 integration + 62 forge = 1,389 total tests + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 algorithms, 21/21 CPU-GPU parity modules). **46 centralized method constants** (`methods.rs`). **10 UniBin validation scenarios** (`validation/scenarios/`). 3 largest files refactored (provenance 747→496, rpc 650→341, seasonal_pipeline 738→539). guideStone Level 4 (targeting L6, certification L0-L6). **46/46 capabilities** routable. New IPC: `method.register`, skunkBat deploy path, `composition.status`. `capability_registry.toml` + `deny.toml` at workspace root. 25 publishable notebooks (20 paper + 5 sporePrint). foundation thread06 (36 targets, 6 workloads). Platform-agnostic IPC.)
+**Updated**: 2026-05-11 (v0.10.0 — 90 experiments (87 numbered + 3 composition crates), barraCuda 0.3.13 (wgpu 28), 1284/1284 Python + 1,011 lib + 316 integration + 62 forge = 1,389 total tests + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (24/24 algorithms, 21/21 CPU-GPU parity modules). **46 centralized method constants** (`methods.rs`). **10 UniBin validation scenarios** (`validation/scenarios/`). 3 largest files refactored (provenance 747→496, rpc 650→341, seasonal_pipeline 738→539). guideStone Level 4 (targeting L6, certification L0-L6). **46/46 capabilities** routable. New IPC: `method.register`, skunkBat deploy path, `composition.status`. `capability_registry.toml` + `deny.toml` at workspace root. 25 publishable notebooks (20 paper + 5 sporePrint). foundation thread06 (36 targets, 6 workloads). Platform-agnostic IPC.)
 **Gate**: Eastgate (i9-12900K, 64 GB DDR5, RTX 4070 12GB, Pop!_OS 22.04)
 **License**: AGPL-3.0-or-later
 
@@ -59,7 +59,7 @@ bash run_all_baselines.sh
 #    Cached to: control/long_term_wb/data/wooster_era5_1960_2023.json
 python control/long_term_wb/long_term_water_balance.py
 
-# 7. Run Rust validation binaries (863+1498 checks across 93 binaries)
+# 7. Run Rust validation binaries (863+1498 checks across 94 binaries)
 cd barracuda
 for bin in validate_et0 validate_soil validate_iot validate_water_balance \
   validate_sensor_calibration validate_real_data cross_validate \
@@ -1123,7 +1123,7 @@ routing.
 Track 1 (Precision Agriculture):
   Phase 0  [COMPLETE]: Python baselines — 1284/1284 PASS (57 experiments)
   Phase 0+ [COMPLETE]: Real data pipeline — 15,300 station-days, ET₀ R²=0.97
-  Phase 1  [COMPLETE]: Rust validation — 1,011 lib + 316 integration/doc (1,327 barracuda) + 62 forge = 1,389 total tests, 93 binaries
+  Phase 1  [COMPLETE]: Rust validation — 1,011 lib + 316 integration/doc (1,327 barracuda) + 62 forge = 1,389 total tests, 94 binaries
   Phase 1.5[COMPLETE]: CPU benchmark — Rust 14.3× faster than Python (24/24 parity)
   Phase 2  [COMPLETE]: Cross-validation — 75/75 MATCH (Python↔Rust, tol=1e-5)
   Phase 2.5[COMPLETE]: Ops 5-8 GPU-first — 4 orchestrators rewired (ToadStool S70+ absorbed)
@@ -1198,7 +1198,7 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 ---
 
 *Initialized: February 16, 2026 — Updated: May 11, 2026 (v0.10.0, post-interstadial evolution)*
-*90 experiments (87 + 3 composition crates), 1284/1284 Python, 1,011 lib + 316 integration/doc + 62 forge = 1,389 total tests, 93 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules), barraCuda 0.3.7 (wgpu 28), Rust Edition 2024. biomeOS niche: 46 capabilities, 4 deploy graphs (incl. skunkBat). 46 centralized method constants (methods.rs). **10 UniBin validation scenarios.** guideStone Level 4 (targeting L6, certification L0-L6). New IPC: `method.register`, skunkBat path, `composition.status`. 60 tolerances in 5 submodules. 90.56% line coverage (fail-under-lines 90). cargo-deny 0.19 clean. 25 notebooks (20 paper + 5 sporePrint). exp001: 55/55, exp002: 10/10, exp003: 4/4. capability_registry.toml + deny.toml at workspace root.*
+*90 experiments (87 + 3 composition crates), 1284/1284 Python, 1,011 lib + 316 integration/doc + 62 forge = 1,389 total tests, 94 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules), barraCuda 0.3.13 (wgpu 28), Rust Edition 2024. biomeOS niche: 46 capabilities, 4 deploy graphs (incl. skunkBat). 46 centralized method constants (methods.rs). **10 UniBin validation scenarios.** guideStone Level 4 (targeting L6, certification L0-L6). New IPC: `method.register`, skunkBat path, `composition.status`. 60 tolerances in 5 submodules. 90.56% line coverage (fail-under-lines 90). cargo-deny 0.19 clean. 25 notebooks (20 paper + 5 sporePrint). exp001: 55/55, exp002: 10/10, exp003: 4/4. capability_registry.toml + deny.toml at workspace root.*
 *8 ET₀ methods + SCS-CN runoff + Green-Ampt infiltration + coupled runoff-infiltration + VG inverse + full-season WB + Exp 058 Climate Scenario (46/46).*
 *Niche adapter (46 capabilities, transitional binary → biomeOS graph deployment). Atlas decade 80yr (102/102). NASS real (99/99). NCBI diversity (63/63).*
 *25 Tier A + 6 GPU-local modules. Ops 5-8 GPU-first (ToadStool S87). GPU stats (neuralSpring S69).*

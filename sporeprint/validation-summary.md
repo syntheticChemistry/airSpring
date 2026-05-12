@@ -16,7 +16,7 @@ springs = ["airspring", "hotspring", "wetspring", "neuralspring", "groundspring"
 - **14.3× geometric mean** Rust-vs-Python speedup (24/24 algorithms, 21/21 CPU-GPU parity)
 - **46/46 IPC capabilities** routable (science + ecology + provenance + composition + coordination)
 - **46 centralized method constants** in `methods.rs` (drift-proof, single source of truth)
-- **93 validation binaries** (all zero-panic, OrExit pattern, UniBin consolidation)
+- **94 validation binaries** (all zero-panic, OrExit pattern, UniBin consolidation)
 - **90.56% line coverage** (gated at 90%)
 - **60 named tolerances** in 5 submodules (Rust + Python mirror, zero inline magic numbers)
 - **25 Tier A GPU modules** (20 upstream batched ops, local_dispatch retired)

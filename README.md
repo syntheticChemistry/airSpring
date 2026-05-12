@@ -1,7 +1,7 @@
 # airSpring — Ecological & Agricultural Sciences
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
-**Date**: May 11, 2026
+**Date**: May 12, 2026
 **Version**: v0.10.0 (eukaryotic UniBin)
 **License**: AGPL-3.0-or-later
 
@@ -19,7 +19,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,284/1,284 PASS** | 60 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB, MC ET₀ uncertainty, bootstrap/jackknife CI, SPI drought index |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **1,011 lib + 316 integration (1,327 barracuda) + 62 forge = 1,389 total** | 93 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
+| Phase 1: Rust validation | **1,011 lib + 316 integration (1,327 barracuda) + 62 forge = 1,389 total** | 94 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (34/34 parity) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -48,7 +48,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | Phase 5.10: Cross-ecosystem absorption | **Health probes, circuit breaker** | v0.8.8: health probes, circuit breaker, OrExit, thiserror, socket_env_var, structured tracing, `IpcError::is_recoverable` |
 | Phase 5.11: Cross-ecosystem evolution | **All absorbed** | v0.8.9: Canonical `PRIMAL_NAME`/`PRIMAL_DOMAIN`, `OnceLock` GPU probe cache, `cast` module (safe numeric casts), `DispatchOutcome<T>` library type, coralReef/Squirrel discovery, `mul_add()` FMA (18 sites), smart refactors (4 monoliths → 19 modules: evapotranspiration, dual_kc, biomeos, validation), composition guidance |
 | Phase 5.12: Audit execution | **All findings resolved** | v0.9.0: `#![deny(cast_*)]` library strict, 3 new cast helpers (u32_usize, u64_usize, u64_f64), soil_moisture refactored (672→4 submodules), petalTongue 3-tier discovery, primal_dispatch integration tests (14), benchmark JSON provenance for all hardcoded values, CI lint config via Cargo.toml only, hardcoded socket paths removed |
-| Phase 5.13: Deep audit execution | **All debt resolved** | v0.10.0: Provenance registry 11→63 baselines, OrExit zero-panic across all 93 binaries, centralized tolerances (R², RMSE, IA, bio-diversity), `#[allow]`→`#[expect]` Rust 2024, smart refactors (data/provider→4 modules, evolution_gaps→resolved_issues), hardcoded primal names→`primal_names::*` constants, data accession IDs, cast helpers (f64_i32, usize_i32), determinism contract documented |
+| Phase 5.13: Deep audit execution | **All debt resolved** | v0.10.0: Provenance registry 11→63 baselines, OrExit zero-panic across all 94 binaries, centralized tolerances (R², RMSE, IA, bio-diversity), `#[allow]`→`#[expect]` Rust 2024, smart refactors (data/provider→4 modules, evolution_gaps→resolved_issues), hardcoded primal names→`primal_names::*` constants, data accession IDs, cast helpers (f64_i32, usize_i32), determinism contract documented |
 | Phase 5.14: Tier 4 barracuda rewiring | **Complete** | Tier 4 IPC-first: `[features].default = []` (opt in with `--features local`); `barracuda` optional; `gpu` feature-gated; `math.rs` dual-path dispatch (pure-Rust fallbacks); `ipc/barracuda_route.rs` IPC forwarding; validation binaries `required-features = ["local"]`; IPC-only build without barraCuda source tree |
 
 ### Code Quality
@@ -230,7 +230,7 @@ airSpring/
 │   ├── bootstrap_jackknife/     # Bootstrap & Jackknife CI (20/20)
 │   ├── drought_index/           # SPI drought index (20/20)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (1,011 lib + 316 integration/doc = 1,327 tests, 93 binaries, barraCuda 0.3.13 / wgpu 28, Edition 2024)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (1,011 lib + 316 integration/doc = 1,327 tests, 94 binaries, barraCuda 0.3.13 / wgpu 28, Edition 2024)
 │   ├── src/
 │   │   ├── biomeos/                # biomeOS socket resolution + primal discovery (3 sub-modules)
 │   │   ├── eco/                 # Domain modules (22 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine + drought_index)
@@ -243,7 +243,7 @@ airSpring/
 │   │   ├── tolerances/          # Domain-specific validation tolerances (60 named, 4 submodules)
 │   │   ├── certification/       # Certification engine (L0–L6 layers, targeting live NUCLEUS)
 │   │   ├── validation/scenarios/ # UniBin validation scenarios (ScenarioRegistry, 10 scenarios)
-│   │   └── bin/                 # validate_*, bench_*, airspring UniBin (93 declared)
+│   │   └── bin/                 # validate_*, bench_*, airspring UniBin (94 declared)
 │   ├── tests/                   # Integration + property tests (15 files + common/)
 │   └── Cargo.toml               # v0.10.0 (barraCuda 0.3.13, wgpu 28, clap 4)
 ├── niches/                      # BYOB niche definitions (airspring-ecology.yaml)
@@ -309,11 +309,11 @@ AGPL-3.0-or-later
 
 ---
 
-*May 11, 2026 — Deep debt resolution: hardcoded primal name strings → `primal_names::` constants, all three `deny.toml` files synced (openssl, sysinfo, aws-lc-sys, aws-lc-rs bans), forge barraCuda version `0.3.7→0.3.13`, `primal_names::BARRACUDA` added. Tier 4 IPC-first defaults + guideStone convergence (L2+→L4): `default = []`, 7 deploy graphs (GPU batch, sovereign data, uncertainty added), `required-features` on 93 binaries, IPC-only clippy clean. Post-interstadial evolution: **`method.register`**, **`composition.status`**, skunkBat deploy-graph, capability cross-sync vs canonical **413**, CONTEXT.md reconciled, certification engine **L0–L6** (L4 cross-atomic; L5 NUCLEUS composition; L6 cross-spring pipeline), **10 UniBin validation scenarios** (incl. `s_tier4_math_parity`).
+*May 12, 2026 — Deep debt resolution: hardcoded primal name strings → `primal_names::` constants, all three `deny.toml` files synced (openssl, sysinfo, aws-lc-sys, aws-lc-rs bans), forge barraCuda version `0.3.7→0.3.13`, `primal_names::BARRACUDA` added. Tier 4 IPC-first defaults + guideStone convergence (L2+→L4): `default = []`, 7 deploy graphs (GPU batch, sovereign data, uncertainty added), `required-features` on 94 binaries, IPC-only clippy clean. **LTEE E3** Python **12/12** + Rust **29/29** PASS (`validate_ltee_fls2`). UniBin **`validate --format json`** for Tier 2 projectNUCLEUS ingestion. Post-interstadial evolution: **`method.register`**, **`composition.status`**, skunkBat deploy-graph, capability cross-sync vs canonical **413**, CONTEXT.md reconciled, certification engine **L0–L6** (L4 cross-atomic; L5 NUCLEUS composition; L6 cross-spring pipeline), **10 UniBin validation scenarios** (incl. `s_tier4_math_parity`).
 May 9 — Deep debt resolution + eukaryotic evolution. Dead standalone-http feature
 removed (ureq code paths, broken dep). Unused bytemuck dep removed. .gitignore data/ bug
 fixed (was silently ignoring barracuda/src/data/ source). 6 pre-existing test failures fixed
 (provider constructors → try_new). Hardcoded primal names → primal_names:: constants.
 build_benchmarks refactored into domain groups. Zero clippy warnings. UniBin consolidation
 (certify/validate/serve/status/version). Certification organelle (L0–L6). Scenario registry
-(**10** UniBin validation scenarios). **1,011** lib tests, 0 failures. 93 binaries. guideStone **L4** (targeting **L6** with live NUCLEUS). AGPL-3.0-or-later.*
+(**10** UniBin validation scenarios). **1,011** lib tests, 0 failures. 94 binaries. guideStone **L4** (targeting **L6** with live NUCLEUS). AGPL-3.0-or-later.*

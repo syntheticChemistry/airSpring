@@ -1,12 +1,13 @@
 # airSpring wateringHole
 
-**Updated**: May 11, 2026 | **Version**: v0.10.0 (post-interstadial, 46 capabilities)
+**Updated**: May 12, 2026 | **Version**: v0.10.0 (post-interstadial, 46 capabilities)
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
+| **V0.10.0** | [AIRSPRING_DOWNSTREAM_SEEDING_HANDOFF_MAY12_2026.md](handoffs/AIRSPRING_DOWNSTREAM_SEEDING_HANDOFF_MAY12_2026.md) | 2026-05-12 | **Downstream seeding sprint** — LTEE E3 Rust 29/29 PASS, `--format json` for Tier 2 ingestion, 6 projectNUCLEUS workload TOMLs, GPU registry drift fix (7 methods), 94 binaries, per-primal recommendations, downstream product alignment |
 | **V0.10.0** | [AIRSPRING_DEEP_DEBT_TIER4_HANDOFF_MAY11_2026.md](handoffs/AIRSPRING_DEEP_DEBT_TIER4_HANDOFF_MAY11_2026.md) | 2026-05-11 | **Deep debt + Tier 4 completion** — primal_names:: constants, deny.toml sync, IPC-first `default=[]`, guideStone L4 (7 graphs), barraCuda 0.3.13, zero remaining debt, composition patterns codified, per-primal needs, lessons for all teams |
 | **V0.10.0** | [AIRSPRING_ECOSYSTEM_EVOLUTION_HANDOFF_MAY11_2026.md](handoffs/AIRSPRING_ECOSYSTEM_EVOLUTION_HANDOFF_MAY11_2026.md) | 2026-05-11 | **Ecosystem evolution handoff** — Python→Rust→Primal journey, composition patterns (method.register, Tier 4 dual-path, 5-tier discovery, graceful degradation), NUCLEUS deployment via Neural API, **NestGate high priority**, next-round data+compute chain requirements |
 | **V0.10.0** | [AIRSPRING_V010_POST_INTERSTADIAL_UPSTREAM_HANDOFF_MAY10_2026.md](handoffs/AIRSPRING_V010_POST_INTERSTADIAL_UPSTREAM_HANDOFF_MAY10_2026.md) | 2026-05-10 | **Post-interstadial technical inventory** — Tier 4 rewiring, L5-L6 certification, 10 UniBin scenarios, plasmidBin binaries, foundation 36/36, cross-sync vs canonical 413, 46 caps, per-primal gap table |

@@ -8,7 +8,7 @@
 Every paper reproduced in airSpring follows the same path:
 
 1. **Python baseline** — digitize paper benchmarks, implement equations, validate (1,284/1,284 PASS)
-2. **Rust proof** — cross-validate to 1e-5, 14.3× speedup, 93 zero-panic binaries (1,011 lib + 316 integration + 62 forge = 1,389 total tests)
+2. **Rust proof** — cross-validate to 1e-5, 14.3× speedup, 94 zero-panic binaries (1,011 lib + 316 integration + 62 forge = 1,389 total tests)
 3. **GPU acceleration** — barraCuda 0.3.13 (25 Tier A modules, 21/21 CPU-GPU parity, 767+ WGSL shaders)
 4. **Primal composition** — 46 JSON-RPC capabilities via biomeOS Neural API, 7 deploy graphs, NUCLEUS atomics
 5. **UniBin eukaryotic** — single `airspring` binary (certify/validate/serve/status/version), 10 validation scenarios, guideStone **L4** (targeting L6)
@@ -28,7 +28,7 @@ Every paper reproduced in airSpring follows the same path:
 ```
 Phase 0   Python/R baselines    — reproduce paper results with original tools (1284/1284)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (1,011 lib + 1498 atlas, 93 binaries + 146/146 + 32/32 cross-spring benchmarks)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (1,011 lib + 1498 atlas, 94 binaries + 146/146 + 32/32 cross-spring benchmarks)
 Phase 1.5 CPU benchmark         — 14.3× Rust-vs-Python geometric mean (24/24 algorithms, 21/21 CPU-GPU parity modules)
 Phase 2   BarraCuda GPU bridge  — 25 Tier A + 6 GPU-local modules wired (cross-spring S87 fully rewired)
 Phase 2.5 Ops 5-8 GPU-first   — Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed
@@ -67,7 +67,7 @@ Phase 5.12 Audit execution    — #![deny(cast_*)] library strict, soil_moisture
 Phase 5.13 Deep audit execution — provenance 11→63 baselines, OrExit zero-panic all 91 binaries, centralized tolerances, #[allow]→#[expect] Rust 2024, smart refactors (data/provider→4 modules, evolution_gaps→resolved_issues), primal_names constants, data accession IDs, cast helpers (f64_i32, usize_i32), determinism contract (v0.10.0, 938 lib)
 Phase 5.14 Deep debt evolution — MCP tools/list + tools/call wired in primal dispatch (10 ecology tools discoverable by Squirrel), platform-agnostic IPC Transport enum (Unix + TCP, ecoBin compliant), ValidationHarness migration (validate_cross_spring_modern), 50+ inline tolerances centralized, .expect()→OrExit/Result in binaries, cast_possible_wrap covered, #[expect]→#[allow] for defensive wrappers, doc_markdown fixes, integration test tolerance centralization, metalForge fmt (v0.10.0, 938 lib + 316 integration)
 Phase 5.15 Deep audit execution — zero #[allow()] in entire codebase (all→#[expect(reason)]), blanket pedantic/nursery allows→specific per-lint expects, deny.toml ecoBin enforcement (barracuda+forge, 14 C-dep bans), CI path deps via symlink (ecoPrimals sparse checkout), MSRV 1.92 documented (Rust 2024 #[expect] dependency), todo!→unimplemented! in doc examples, stale doc counts corrected across 12 files, BatchedDualKc→Tier A in cross-spring evolution, NUCLEUS status→Complete, absorbed shader comments updated (v0.10.0, 938 lib + 316 integration + 62 forge)
-Phase 5.16 Ecosystem absorption — PRIMAL_REGISTRY updated (v0.10.0 + barraCuda 0.3.7), CONTRIBUTING.md + SECURITY.md (neuralSpring S174 pattern), upstream contract pinning (5 tolerance invariant tests), GPU test resilience (barraCuda test_pool delegation), deploy graph metadata ([graph.metadata] on all 7 graphs, primalSpring v0.7.0 pattern), primal name constants in test code, 943 lib + 316 integration + 62 forge = 1,321 total tests (v0.10.0)
+Phase 5.16 Ecosystem absorption — PRIMAL_REGISTRY updated (v0.10.0 + barraCuda 0.3.13), CONTRIBUTING.md + SECURITY.md (neuralSpring S174 pattern), upstream contract pinning (5 tolerance invariant tests), GPU test resilience (barraCuda test_pool delegation), deploy graph metadata ([graph.metadata] on all 7 graphs, primalSpring v0.7.0 pattern), primal name constants in test code, 943 lib + 316 integration + 62 forge = 1,321 total tests (v0.10.0)
 Phase 5.17 Deep audit execution — cargo-deny 0.19 evolution (SPDX AGPL-3.0-or-later, CC0-1.0, blake3 cc wrapper, version-pinned path deps), +43 lib tests (986 lib total), 90.56% coverage (gated at 90), `const { assert!() }` compile-time tolerance contracts, `#[must_use]` on tolerance registry, `#[allow()]` for shared test infra (replaces `#[expect()]` in multi-binary context), evolution_gaps header + tier assignments corrected (v0.10.0, 986 lib + 316 integration + 62 forge = 1,364 total tests)
 Phase 5.18 Deep debt evolution — 60 tolerances (atlas_annual_et0, atlas_yield_ratio centralized), **46/46 IPC** capabilities routable (science.timeseries gap closed), capability naming converged (niche.rs canonical → metalForge/plasmidBin aligned), provenance commit drift fixed (Atlas fad2e1b, Dual Kc 94cc51d), large files refactored (829→45+774, 804→668), 7 unwrap()→expect(), CI 1.92 pinned, docs/PRIMAL_GAPS.md (11 gaps, AG-001 through AG-011), guideStone Level 0 (composition next)
 ```
@@ -154,7 +154,7 @@ Phase 5.18 Deep debt evolution — 60 tolerances (atlas_annual_et0, atlas_yield_
 | 65 | Bootstrap & Jackknife CI for Seasonal ET₀ — Exp 080 | 0→CPU | 20+20 | Deterministic bootstrap resampling + jackknife LOO variance |
 | 66 | Standardized Precipitation Index (SPI) — Exp 081 | 0→CPU | 20+20 | Gamma MLE + regularized incomplete gamma + normal quantile, multi-scale drought |
 
-### Rust Validation (Phase 1+3+5) — 93 binaries + 146/146 + 32/32 cross-spring benchmarks
+### Rust Validation (Phase 1+3+5) — 94 binaries + 146/146 + 32/32 cross-spring benchmarks
 
 | Binary | Checks | Modules Exercised |
 |--------|:------:|-------------------|

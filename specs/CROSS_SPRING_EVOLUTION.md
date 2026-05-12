@@ -15,7 +15,7 @@ WGSL ops absorbed upstream into `BatchedElementwiseF64` (ops 14-19), `local_disp
 retired (v0.7.2). `PrecisionRoutingAdvice` wired and upstream provenance registry
 integrated (v0.7.3).
 
-v0.10.0: **25 Tier A** orchestrators (ops 0-19 all upstream), **1,011** lib + 316 integration + 62 forge = **1,389** tests, 93 binaries.
+v0.10.0: **25 Tier A** orchestrators (ops 0-19 all upstream), **1,011** lib + 316 integration + 62 forge = **1,389** tests, 94 binaries.
 `PrecisionRoutingAdvice` for per-hardware f64 dispatch routing. 27 metalForge workloads,
 NUCLEUS mesh routing (Exp 076: 60/60). BrentGpu, RichardsGpu, StatefulPipeline.
 Exp 084: CPU/GPU parity (18 modules, 21/21). Exp 085: toadStool dispatch (14 methods, 19/19).

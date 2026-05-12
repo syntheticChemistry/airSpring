@@ -1,6 +1,6 @@
 # Context — airSpring
 
-**Doc sync:** 2026-05-11 (v0.10.0; eukaryotic UniBin; post-interstadial; all CI gates green).
+**Doc sync:** 2026-05-12 (v0.10.0; eukaryotic UniBin; post-interstadial; all CI gates green).
 
 ## What This Is
 
@@ -43,7 +43,7 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - **Barracuda total:** 1,327 (1,011 lib + 316 integration/doc)
 - **Forge tests:** 62 (metalForge)
 - **Grand total:** 1,389 (both crates)
-- **Binaries:** 93 (84 validation, 4 bench, 3 operational, 1 UniBin, 1 guidestone)
+- **Binaries:** 94 (85 validation, 4 bench, 3 operational, 1 UniBin, 1 guidestone)
 - **Proptest invariants:** 7 (SVP, delta, Hargreaves, TAW, RAW, Ks)
 - **Line coverage:** 90.56% (cargo llvm-cov --lib --fail-under-lines 90)
 - **MSRV:** 1.92
