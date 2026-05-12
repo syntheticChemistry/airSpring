@@ -40,11 +40,11 @@
 //! | `eco::yield_response` | `gpu::yield_response` | `batched_elementwise_f64.wgsl` (op=18) | Stewart yield | A (GPU-first, absorbed upstream) |
 //! | `eco::evapotranspiration` (Makkink/Turc/Hamon/BC) | `gpu::simple_et0` | `batched_elementwise_f64.wgsl` (ops 14-16, 19) | Simple ET₀ batch | A (GPU-first, absorbed upstream) |
 //!
-//! # Current Inventory (March 24, 2026 — v0.10.0, `barraCuda` 0.3.7 HEAD `7a891dd`, wgpu 28)
+//! # Current Inventory (March 24, 2026 — v0.10.0, `barraCuda` 0.4.0 HEAD `7a891dd`, wgpu 28)
 //!
 //! ## v0.7.5: Upstream Rewire + biomeOS NUCLEUS Integration
 //!
-//! Synced to barraCuda 0.3.7 (`7a891dd`), toadStool S130+, coralReef Phase 10.
+//! Synced to barraCuda 0.4.0 (`7a891dd`), toadStool S130+, coralReef Phase 10.
 //!
 //! - **`eco::drought_index` leaned**: Local `regularized_gamma_p`, `gamma_series`,
 //!   `gamma_cf` (55 lines of duplicated numerical math) replaced with upstream

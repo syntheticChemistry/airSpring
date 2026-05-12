@@ -109,9 +109,9 @@ Structural L5 validation with TCP mock round-trip tests passes (1,027 lib tests)
 11. Document remaining gaps → hand back
 
 ### Deep Debt Evolution (May 8 2026)
-- [x] capability_registry.toml created (46 methods, sync test + cross-sync vs canonical **413**)
+- [x] capability_registry.toml created (49 methods, sync test + cross-sync vs canonical **413**)
 - [x] deny.toml promoted to workspace root (ecoBin v3.0, ring/openssl + aws-lc-sys banned)
-- [x] `methods.rs` centralized constants module (46 methods, drift-proof)
+- [x] `methods.rs` centralized constants module (49 methods, drift-proof)
 - [x] **10 UniBin validation scenarios** (`validation/scenarios/`; exp001–exp003 absorbed plus expanded ScenarioRegistry coverage + **`s_tier4_math_parity`**)
 - [x] Test extraction: provenance.rs (747→496), rpc/mod.rs (650→341), seasonal_pipeline (738→539)
 - [x] 3 compilation errors fixed (autobins, NestGateProvider→IPC, fhe_ntt cfg)

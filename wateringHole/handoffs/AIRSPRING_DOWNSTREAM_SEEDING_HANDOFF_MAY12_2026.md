@@ -98,9 +98,9 @@ All use `${SPRINGS_ROOT:-...}` path convention with `isolation_level = "process"
 
 ### 5. Deep Debt Final Sweep
 
-- **Last hardcoded primal name**: `"toadstool"` in `compute_dispatch.rs` test → `primal_names::TOADSTOOL`
+- **Last hardcoded primal name**: `"toadstool"` in `compute_dispatch.rs` test → `primal_names::TOADSTOOL`; then 6 remaining `"songbird"` literals in `data/provider.rs` → `primal_names::SONGBIRD` + `socket_filename()` + `socket_env_var()`
 - **Last `#[allow()]`**: 3 instances in `tests/common/mod.rs` → `#[expect()]`
-- **Comprehensive audit results**: 0 large files (>800L), 0 unsafe in production, 0 TODO/FIXME, 0 stale mocks, all deps pure Rust, `.unwrap()`/`.expect()` library-denied
+- **Comprehensive audit results**: 0 large files (>800L, largest 774L), 0 unsafe in production (`#![forbid(unsafe_code)]` on non-test), 0 `todo!()`/`FIXME`/`HACK`/`XXX`, 0 stale mocks, 0 `#[allow()]`, all deps pure Rust (wgpu wraps Vulkan drivers), `.unwrap()`/`.expect()` library-denied. Zero hardcoded primal name strings in all 263 `.rs` production files.
 
 ### 6. Tier 2 IPC wiring (TCP round-trip probes + composition scenario)
 

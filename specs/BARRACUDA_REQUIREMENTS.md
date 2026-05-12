@@ -212,7 +212,7 @@ The wateringHole evolution path defines three validation tiers:
 |------|------|---------------------|
 | **Tier 0** (Python) | Correctness reference | **Complete** — 56 benchmark JSONs, 1284/1284 PASS |
 | **Tier 1** (Kokkos/Cabana) | Performance reference (external) | **Not started** — no Kokkos benchmarks |
-| **Tier 2** (BarraCuda) | Sovereign implementation | **Complete** — 943 lib + 316 integration + 62 forge tests, 97 validation binaries |
+| **Tier 2** (BarraCuda) | Sovereign implementation | **Complete** — 1,027 lib + 316 integration + 62 forge tests, 94 validation binaries |
 
 ### Cross-Spring Kokkos Baselines (groundSpring V74)
 
