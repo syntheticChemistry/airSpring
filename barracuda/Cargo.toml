@@ -543,6 +543,11 @@ path = "src/bin/validate_nucleus_graphs.rs"
 required-features = ["local"]
 
 [[bin]]
+name = "validate_ltee_fls2"
+path = "src/bin/validate_ltee_fls2.rs"
+required-features = ["local"]
+
+[[bin]]
 name = "airspring_guidestone"
 path = "src/bin/airspring_guidestone.rs"
 required-features = ["guidestone"]

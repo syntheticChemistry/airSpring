@@ -23,7 +23,7 @@ pub fn try_create_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevic
 
 /// Catch panics from upstream shader regressions. Returns `None` on panic,
 /// letting the test SKIP rather than FAIL.
-#[allow(
+#[expect(
     dead_code,
     reason = "shared helper: compiled into multiple test binaries, not all use it"
 )]
@@ -38,7 +38,7 @@ pub fn try_gpu_dispatch<T>(f: impl FnOnce() -> T) -> Option<T> {
 }
 
 /// Get a device or skip the test.
-#[allow(
+#[expect(
     unused_macros,
     reason = "shared helper: compiled into multiple test binaries, not all use it"
 )]
@@ -54,7 +54,7 @@ macro_rules! device_or_skip {
     };
 }
 
-#[allow(
+#[expect(
     unused_imports,
     reason = "shared helper: compiled into multiple test binaries, not all use it"
 )]

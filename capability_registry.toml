@@ -40,25 +40,25 @@ gpu_accelerated = false
 method = "science.et0_makkink"
 domain = "ecology.evapotranspiration"
 description = "Makkink radiation-based ET₀ (1957)"
-gpu_accelerated = false
+gpu_accelerated = true
 
 [capabilities.et0_turc]
 method = "science.et0_turc"
 domain = "ecology.evapotranspiration"
 description = "Turc temperature-radiation ET₀ (1961)"
-gpu_accelerated = false
+gpu_accelerated = true
 
 [capabilities.et0_hamon]
 method = "science.et0_hamon"
 domain = "ecology.evapotranspiration"
 description = "Hamon temperature-based PET (1961)"
-gpu_accelerated = false
+gpu_accelerated = true
 
 [capabilities.et0_blaney_criddle]
 method = "science.et0_blaney_criddle"
 domain = "ecology.evapotranspiration"
 description = "Blaney-Criddle temperature-based PET (1950)"
-gpu_accelerated = false
+gpu_accelerated = true
 
 # ── Water balance & yield ──
 
@@ -92,7 +92,7 @@ gpu_accelerated = true
 method = "science.green_ampt_infiltration"
 domain = "ecology.hydrology"
 description = "Green-Ampt infiltration with Newton-Raphson (1911)"
-gpu_accelerated = false
+gpu_accelerated = true
 
 [capabilities.soil_moisture_topp]
 method = "science.soil_moisture_topp"
@@ -168,7 +168,7 @@ gpu_accelerated = false
 method = "science.autocorrelation"
 domain = "ecology.timeseries"
 description = "Autocorrelation function for time series analysis"
-gpu_accelerated = false
+gpu_accelerated = true
 
 [capabilities.gamma_cdf]
 method = "science.gamma_cdf"
@@ -218,7 +218,7 @@ gpu_accelerated = false
 method = "ecology.autocorrelation"
 domain = "ecology.timeseries"
 description = "Alias: autocorrelation via ecology domain"
-gpu_accelerated = false
+gpu_accelerated = true
 
 # ── Provenance trio (biomeOS composition) ──
 

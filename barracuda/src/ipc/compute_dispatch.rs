@@ -256,7 +256,7 @@ mod tests {
     #[test]
     fn dispatch_error_from_socket_not_found() {
         let ipc_err = IpcError::SocketNotFound {
-            primal: "toadstool".to_string(),
+            primal: crate::primal_names::TOADSTOOL.to_string(),
         };
         let e = DispatchError::from(ipc_err);
         assert!(matches!(e, DispatchError::NoComputePrimal));

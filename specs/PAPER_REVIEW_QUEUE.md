@@ -296,4 +296,4 @@ and `infra/whitePaper/attsi/non-anon/contact/eaves/PAPER_REVIEW_AND_SPRING_TARGE
 
 | ID | Paper | What to Reproduce | Exp | Status |
 |----|-------|-------------------|-----|--------|
-| E3 | Dolgikh et al. 2025 "Tuning Yeast Glycosylation for FLS2" *bioRxiv* | FLS2 plant immunity sentinel: glycosylation effects on receptor binding as environmental sensor; airSpring monitors via soil-plant immune signaling. Binding models (Langmuir/Hill/two-site), Kd recovery, glycosylation sensitivity ratio, soil-immune coupling (moisture + temp → flagellin exposure) | Exp E3 | **Python 12/12 PASS** — `control/ltee_fls2_plant_immunity/`, Rust validation TBD |
+| E3 | Dolgikh et al. 2025 "Tuning Yeast Glycosylation for FLS2" *bioRxiv* | FLS2 plant immunity sentinel: glycosylation effects on receptor binding as environmental sensor; airSpring monitors via soil-plant immune signaling. Binding models (Langmuir/Hill/two-site), Kd recovery, glycosylation sensitivity ratio, soil-immune coupling (moisture + temp → flagellin exposure) | Exp E3 | **Python 12/12 PASS, Rust 29/29 PASS** — `control/ltee_fls2_plant_immunity/`, `validate_ltee_fls2` |
