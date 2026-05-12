@@ -7,11 +7,8 @@
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.10.0** | [AIRSPRING_DOWNSTREAM_SEEDING_HANDOFF_MAY12_2026.md](handoffs/AIRSPRING_DOWNSTREAM_SEEDING_HANDOFF_MAY12_2026.md) | 2026-05-12 | **Downstream seeding sprint** — LTEE E3 Rust 29/29 PASS, `--format json` for Tier 2 ingestion, 6 projectNUCLEUS workload TOMLs, GPU registry drift fix (7 methods), 94 binaries, per-primal recommendations, downstream product alignment |
-| **V0.10.0** | [AIRSPRING_DEEP_DEBT_TIER4_HANDOFF_MAY11_2026.md](handoffs/AIRSPRING_DEEP_DEBT_TIER4_HANDOFF_MAY11_2026.md) | 2026-05-11 | **Deep debt + Tier 4 completion** — primal_names:: constants, deny.toml sync, IPC-first `default=[]`, guideStone L4 (7 graphs), barraCuda 0.3.13, zero remaining debt, composition patterns codified, per-primal needs, lessons for all teams |
-| **V0.10.0** | [AIRSPRING_ECOSYSTEM_EVOLUTION_HANDOFF_MAY11_2026.md](handoffs/AIRSPRING_ECOSYSTEM_EVOLUTION_HANDOFF_MAY11_2026.md) | 2026-05-11 | **Ecosystem evolution handoff** — Python→Rust→Primal journey, composition patterns (method.register, Tier 4 dual-path, 5-tier discovery, graceful degradation), NUCLEUS deployment via Neural API, **NestGate high priority**, next-round data+compute chain requirements |
-| **V0.10.0** | [AIRSPRING_V010_POST_INTERSTADIAL_UPSTREAM_HANDOFF_MAY10_2026.md](handoffs/AIRSPRING_V010_POST_INTERSTADIAL_UPSTREAM_HANDOFF_MAY10_2026.md) | 2026-05-10 | **Post-interstadial technical inventory** — Tier 4 rewiring, L5-L6 certification, 10 UniBin scenarios, plasmidBin binaries, foundation 36/36, cross-sync vs canonical 413, 46 caps, per-primal gap table |
-| **≤V0.9.0** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
+| **V0.10.0** | [AIRSPRING_DOWNSTREAM_SEEDING_HANDOFF_MAY12_2026.md](handoffs/AIRSPRING_DOWNSTREAM_SEEDING_HANDOFF_MAY12_2026.md) | 2026-05-12 | **Canonical** — LTEE E3 Rust 29/29 PASS, `--format json`, 6 projectNUCLEUS workloads, GPU registry fix, barraCuda 0.4.0, primal_names:: zero hardcoded strings, deep debt clean, guideStone L5-ready, 94 binaries |
+| **≤V0.10.0** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 
 ## Cross-Spring Documents
 
@@ -36,6 +33,9 @@
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_V010_POST_INTERSTADIAL_UPSTREAM_HANDOFF_MAY10_2026.md` | v0.10.0: Post-interstadial technical inventory — Tier 4, L5-L6 cert, 10 UniBin scenarios, foundation 36/36 (superseded by May12 downstream seeding) |
+| `handoffs/archive/AIRSPRING_DEEP_DEBT_TIER4_HANDOFF_MAY11_2026.md` | v0.10.0: Deep debt + Tier 4 — primal_names, deny.toml, IPC-first, guideStone L4, barraCuda 0.4.0 (superseded by May12 downstream seeding) |
+| `handoffs/archive/AIRSPRING_ECOSYSTEM_EVOLUTION_HANDOFF_MAY11_2026.md` | v0.10.0: Ecosystem evolution — Python→Rust→Primal, composition patterns, NUCLEUS/Neural API, NestGate priority (superseded by May12 downstream seeding) |
 | `handoffs/archive/AIRSPRING_V010_DEEP_DEBT_UPSTREAM_HANDOFF_MAY09_2026.md` | v0.10.0: Deep debt + upstream handoff — dead features removed, 6 test failures fixed, 14 docs reconciled (superseded by May10 post-interstadial) |
 | `handoffs/archive/AIRSPRING_V010_INTERSTADIAL_EUKARYOTIC_HANDOFF_MAY09_2026.md` | v0.10.0: Interstadial eukaryotic evolution — UniBin, certification/ organelle, deny.toml, fossilRecord/ (superseded by May10 post-interstadial) |
 | `handoffs/archive/AIRSPRING_V010_DOCS_CLEANUP_UPSTREAM_HANDOFF_MAY08_2026.md` | v0.10.0: Docs cleanup + upstream handoff — 12 files reconciled, primal wiring, composition patterns (superseded by May10 post-interstadial) |

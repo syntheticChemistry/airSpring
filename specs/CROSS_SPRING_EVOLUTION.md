@@ -1,6 +1,6 @@
 # Cross-Spring Shader Evolution — airSpring Provenance
 
-**Updated**: May 11, 2026 (v0.10.0, 1,011 lib + 316 integration + 62 forge = 1,389 tests, barraCuda 0.3.13 / wgpu 28, 90 experiments, Tier 4 IPC-first)
+**Updated**: May 12, 2026 (v0.10.0, 1,011 lib + 316 integration + 62 forge = 1,389 tests, barraCuda 0.4.0 / wgpu 28, 90 experiments, Tier 4 IPC-first)
 
 ## Summary
 
@@ -20,7 +20,7 @@ v0.10.0: **25 Tier A** orchestrators (ops 0-19 all upstream), **1,011** lib + 31
 NUCLEUS mesh routing (Exp 076: 60/60). BrentGpu, RichardsGpu, StatefulPipeline.
 Exp 084: CPU/GPU parity (18 modules, 21/21). Exp 085: toadStool dispatch (14 methods, 19/19).
 Exp 086: metalForge NUCLEUS mesh (17/17). Exp 087: graph coordination (22/22).
-**Tier 4 IPC-first**: `[features].default = []`, barraCuda 0.3.13 (was 0.3.7), `primal_names::` constants, all deny.toml synced.
+**Tier 4 IPC-first**: `[features].default = []`, barraCuda 0.4.0 (was 0.3.7), `primal_names::` constants, all deny.toml synced.
 
 ### Paper 12 — Immunological Anderson Infrastructure (NEW)
 

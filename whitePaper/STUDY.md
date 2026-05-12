@@ -266,4 +266,4 @@ The same BarraCuda/ToadStool infrastructure supports both domains. The key share
 
 ---
 
-*May 11, 2026 — 1,284 Python + 1,011 lib + 316 integration + 62 forge = 1,389 total tests, 94 binaries, 46 capabilities, 7 deploy graphs, 10 UniBin validation scenarios, guideStone L4 (targeting L6). 15,300 station-days (100 stations) real data, 75/75 cross-validation match, 14.3× Rust-vs-Python speedup (24/24 algorithms, 21/21 CPU-GPU parity modules), zero synthetic. barraCuda 0.3.13 (wgpu 28), Tier 4 IPC-first (`default = []`), Edition 2024 (MSRV 1.92), zero C deps, zero `#[allow()]`, primal_names:: constants. AGPL-3.0-or-later.*
+*May 12, 2026 — 1,284 Python + 1,011 lib + 316 integration + 62 forge = 1,389 total tests, 94 binaries, 46 capabilities, 7 deploy graphs, 10 UniBin validation scenarios, guideStone L4 (targeting L6). 15,300 station-days (100 stations) real data, 75/75 cross-validation match, 14.3× Rust-vs-Python speedup (24/24 algorithms, 21/21 CPU-GPU parity modules), zero synthetic. barraCuda 0.4.0 (wgpu 28), Tier 4 IPC-first (`default = []`), Edition 2024 (MSRV 1.92), zero C deps, zero `#[allow()]`, primal_names:: constants. AGPL-3.0-or-later.*

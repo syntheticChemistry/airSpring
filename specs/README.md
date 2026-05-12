@@ -1,7 +1,7 @@
 # airSpring Specifications
 
 **Last Updated**: May 11, 2026
-**Status**: Phase 0–5 complete — 1284/1284 Python + 1,011 lib + 316 integration + 62 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 94 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.3.13 (wgpu 28) + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + metalForge 66/66 + niche adapter (46 capabilities, 10 MCP tools) + 90 experiments (v0.10.0). **Deep debt evolution pass** (46 centralized method constants, 60 tolerances, **10 UniBin validation scenarios** incl. **`s_tier4_math_parity`**). Edition 2024, **guideStone L4** (targeting **L6**). **Tier 4 rewiring:** `barracuda` optional with `local` (default), `math.rs` dual-path, `ipc/barracuda_route.rs`, `--no-default-features` without barraCuda source tree. Platform-agnostic IPC. method.register + skunkBat IPC + composition.status wired. Cross-sync vs canonical 413
+**Status**: Phase 0–5 complete — 1284/1284 Python + 1,011 lib + 316 integration + 62 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 94 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.4.0 (wgpu 28) + 14.3× CPU speedup (24/24 algorithms, 21/21 CPU-GPU parity modules) + metalForge 66/66 + niche adapter (46 capabilities, 10 MCP tools) + 90 experiments (v0.10.0). **Deep debt evolution pass** (46 centralized method constants, 60 tolerances, **10 UniBin validation scenarios** incl. **`s_tier4_math_parity`**). Edition 2024, **guideStone L4** (targeting **L6**). **Tier 4 rewiring:** `barracuda` optional with `local` (default), `math.rs` dual-path, `ipc/barracuda_route.rs`, `--no-default-features` without barraCuda source tree. Platform-agnostic IPC. method.register + skunkBat IPC + composition.status wired. Cross-sync vs canonical 413
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling, Anderson coupling
 
 ---
@@ -27,7 +27,7 @@
 | Phase 4.0 (Cross-primal) | 28/28 PASS — capability.call routing, cross-primal forwarding |
 | Faculty | Dong (BAE, MSU — new lab 2026) |
 | Handoff | V010 in `wateringHole/handoffs/` |
-| ToadStool | S147+ — barraCuda v0.3.13 standalone (wgpu 28) |
+| ToadStool | S147+ — barraCuda v0.4.0 standalone (wgpu 28) |
 
 ---
 

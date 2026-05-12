@@ -20,7 +20,7 @@
 | Deploy graphs | **7** (eco + provenance + niche + cross-primal + GPU batch + sovereign data + uncertainty) |
 | GuideStone level | **L4** (targeting L6 with live NUCLEUS) |
 | UniBin scenarios | **10** (incl. `s_tier4_math_parity`) |
-| barraCuda version | **0.3.13** (wgpu 28, Vulkan) |
+| barraCuda version | **0.4.0** (wgpu 28, Vulkan) |
 | Features default | **`[]`** (Tier 4 IPC-first) |
 | Clippy | **0 warnings** (both IPC-only and full-feature builds) |
 | `#[allow()]` in production | **0** (all use `#[expect(reason)]`) |
@@ -159,7 +159,7 @@ biomeOS → neural-api → capability.call("ecology.et0_fao56", params)
 | **P1** | sweetGrass/rhizoCrypt/loamSpine live (provenance trio) | Deploy graph wired | Provenance teams |
 | **P2** | L5 NUCLEUS composition validation | Certification ready | Live biomeOS |
 | **P2** | L6 cross-spring pipeline validation | Certification ready | Live NUCLEUS |
-| **P3** | LTEE E3 — FLS2 plant immunity paper | Queued (low priority) | lithoSpore |
+| **P3** | LTEE E3 — FLS2 plant immunity paper | **COMPLETE** (Python 12/12 + Rust 29/29 PASS; May 12) | lithoSpore |
 
 ---
 
@@ -172,7 +172,7 @@ biomeOS → neural-api → capability.call("ecology.et0_fao56", params)
 | **sweetGrass** | Provenance.begin/record/complete live | Scientific provenance |
 | **biomeOS** | composition.status + method.register live | L5 certification |
 | **toadStool** | compute.offload IPC (already wired) | GPU dispatch via NUCLEUS |
-| **barraCuda** | Stay at 0.3.13+ | Stability |
+| **barraCuda** | Stay at 0.4.0+ | Stability |
 
 ---
 

@@ -1,6 +1,6 @@
 # Absorption Manifest — airSpring → barracuda
 
-**Date**: March 24, 2026 (updated v0.10.0 — V010 active handoff, forge evolved to mixed hardware dispatch, 27 workloads, 32/32 dispatch + 21/21 routing + 17/17 mixed hardware, barraCuda 0.3.7 wgpu 28, all 20 ops absorbed upstream, zero C deps). metalForge remains active for dispatch routing and CI validation.
+**Date**: March 24, 2026 (updated v0.10.0 — V010 active handoff, forge evolved to mixed hardware dispatch, 27 workloads, 32/32 dispatch + 21/21 routing + 17/17 mixed hardware, barraCuda 0.4.0 wgpu 28, all 20 ops absorbed upstream, zero C deps). metalForge remains active for dispatch routing and CI validation.
 **Source**: `metalForge/forge/` (airspring-forge v0.1.0)
 **Target**: `barracuda` (ToadStool crate)
 **Absorption Status**: 6/6 absorbed upstream — ALL modules absorbed as of S66

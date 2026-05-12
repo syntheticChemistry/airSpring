@@ -20,7 +20,7 @@
 | Deploy graphs | **7** (eco + provenance + niche + cross-primal + GPU batch + sovereign data + uncertainty) |
 | GuideStone level | **L4** (targeting L5+) |
 | UniBin scenarios | **10** (incl. `s_tier4_math_parity`) |
-| barraCuda version | **0.3.13** (wgpu 28, Vulkan) |
+| barraCuda version | **0.4.0** (wgpu 28, Vulkan) |
 | Features default | **`[]`** (Tier 4 IPC-first) |
 | Clippy | **0 warnings** (IPC-only + full-feature builds) |
 | `#[allow()]` in production | **0** (all use `#[expect(reason)]`) |
@@ -193,4 +193,4 @@ Codebase is clean. No new debris to archive:
 
 ---
 
-*May 12, 2026 — 94 binaries, 1,011 lib tests, 1,389 total, 46 capabilities, 7 deploy graphs, 10 UniBin scenarios, guideStone L4 (targeting L5+). LTEE E3 Python 12/12 + Rust 29/29 PASS. `--format json` for Tier 2 ingestion. 6 projectNUCLEUS workload TOMLs. Foundation Thread 6 complete (36/36). barraCuda 0.3.13, Tier 4 IPC-first, Edition 2024, MSRV 1.92. Zero debt. AGPL-3.0-or-later.*
+*May 12, 2026 — 94 binaries, 1,011 lib tests, 1,389 total, 46 capabilities, 7 deploy graphs, 10 UniBin scenarios, guideStone L4 (targeting L5+). LTEE E3 Python 12/12 + Rust 29/29 PASS. `--format json` for Tier 2 ingestion. 6 projectNUCLEUS workload TOMLs. Foundation Thread 6 complete (36/36). barraCuda 0.4.0, Tier 4 IPC-first, Edition 2024, MSRV 1.92. Zero debt. AGPL-3.0-or-later.*

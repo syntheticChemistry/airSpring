@@ -49,7 +49,7 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - **MSRV:** 1.92
 - **Edition:** 2024
 - **Crate count:** 2 workspace crates
-- **GPU backend:** barraCuda 0.3.13 (wgpu 28, Vulkan, DeviceCapabilities API)
+- **GPU backend:** barraCuda 0.4.0 (wgpu 28, Vulkan, DeviceCapabilities API)
 - **Experiments:** 90 (all PASS)
 - **Capabilities:** 46 (science + ecology + provenance + composition + coordination + health)
 - **Deploy graphs:** 7 (eco + provenance + niche + cross-primal + GPU batch + sovereign data + uncertainty)

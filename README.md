@@ -230,7 +230,7 @@ airSpring/
 │   ├── bootstrap_jackknife/     # Bootstrap & Jackknife CI (20/20)
 │   ├── drought_index/           # SPI drought index (20/20)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (1,011 lib + 316 integration/doc = 1,327 tests, 94 binaries, barraCuda 0.3.13 / wgpu 28, Edition 2024)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (1,011 lib + 316 integration/doc = 1,327 tests, 94 binaries, barraCuda 0.4.0 / wgpu 28, Edition 2024)
 │   ├── src/
 │   │   ├── biomeos/                # biomeOS socket resolution + primal discovery (3 sub-modules)
 │   │   ├── eco/                 # Domain modules (22 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine + drought_index)
@@ -245,7 +245,7 @@ airSpring/
 │   │   ├── validation/scenarios/ # UniBin validation scenarios (ScenarioRegistry, 10 scenarios)
 │   │   └── bin/                 # validate_*, bench_*, airspring UniBin (94 declared)
 │   ├── tests/                   # Integration + property tests (15 files + common/)
-│   └── Cargo.toml               # v0.10.0 (barraCuda 0.3.13, wgpu 28, clap 4)
+│   └── Cargo.toml               # v0.10.0 (barraCuda 0.4.0, wgpu 28, clap 4)
 ├── niches/                      # BYOB niche definitions (airspring-ecology.yaml)
 ├── metalForge/                  # Mixed hardware dispatch (CPU+GPU+NPU)
 │   ├── deploy/                  # biomeOS deployment graphs (airspring_deploy.toml)
@@ -309,7 +309,7 @@ AGPL-3.0-or-later
 
 ---
 
-*May 12, 2026 — Deep debt resolution: hardcoded primal name strings → `primal_names::` constants, all three `deny.toml` files synced (openssl, sysinfo, aws-lc-sys, aws-lc-rs bans), forge barraCuda version `0.3.7→0.3.13`, `primal_names::BARRACUDA` added. Tier 4 IPC-first defaults + guideStone convergence (L2+→L4): `default = []`, 7 deploy graphs (GPU batch, sovereign data, uncertainty added), `required-features` on 94 binaries, IPC-only clippy clean. **LTEE E3** Python **12/12** + Rust **29/29** PASS (`validate_ltee_fls2`). UniBin **`validate --format json`** for Tier 2 projectNUCLEUS ingestion. Post-interstadial evolution: **`method.register`**, **`composition.status`**, skunkBat deploy-graph, capability cross-sync vs canonical **413**, CONTEXT.md reconciled, certification engine **L0–L6** (L4 cross-atomic; L5 NUCLEUS composition; L6 cross-spring pipeline), **10 UniBin validation scenarios** (incl. `s_tier4_math_parity`).
+*May 12, 2026 — Deep debt resolution: **barraCuda 0.4.0** upstream absorption (workspace + Forge; from 0.3.13); 12 hardcoded primal tracing targets → `primal_names::` constants; **`primal_names::socket_filename()`** replaces `"biomeos.sock"` path literals; dead **`primal-proof`** Cargo feature removed; zero hardcoded primal name strings in production; **1,011** lib tests, **0** clippy. Earlier same day: hardcoded primal strings scrub, all three `deny.toml` files synced (openssl, sysinfo, aws-lc-sys, aws-lc-rs bans), Forge barraCuda progression **`0.3.7→0.4.0`**, `primal_names::BARRACUDA` added. Tier 4 IPC-first defaults + guideStone convergence (L2+→L4): `default = []`, 7 deploy graphs (GPU batch, sovereign data, uncertainty added), `required-features` on 94 binaries, IPC-only clippy clean. **LTEE E3** Python **12/12** + Rust **29/29** PASS (`validate_ltee_fls2`). UniBin **`validate --format json`** for Tier 2 projectNUCLEUS ingestion. Post-interstadial evolution: **`method.register`**, **`composition.status`**, skunkBat deploy-graph, capability cross-sync vs canonical **413**, CONTEXT.md reconciled, certification engine **L0–L6** (L4 cross-atomic; L5 NUCLEUS composition; L6 cross-spring pipeline), **10 UniBin validation scenarios** (incl. `s_tier4_math_parity`).
 May 9 — Deep debt resolution + eukaryotic evolution. Dead standalone-http feature
 removed (ureq code paths, broken dep). Unused bytemuck dep removed. .gitignore data/ bug
 fixed (was silently ignoring barracuda/src/data/ source). 6 pre-existing test failures fixed

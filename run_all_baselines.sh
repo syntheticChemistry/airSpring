@@ -26,7 +26,7 @@ run_python() {
 
 run_rust() {
     echo "── Rust:   $1"
-    if cargo run --release --bin "$1" --manifest-path barracuda/Cargo.toml 2>/dev/null; then
+    if cargo run --release --features local --bin "$1" --manifest-path barracuda/Cargo.toml 2>/dev/null; then
         echo "  PASS"
     else
         echo "  FAIL"
@@ -74,6 +74,7 @@ run_python control/anderson_coupling/anderson_coupling.py
 run_python control/gpu_math_portability/gpu_math_portability.py
 run_python control/ncbi_16s_coupling/ncbi_16s_coupling.py
 run_python control/blaney_criddle/blaney_criddle_et0.py
+run_python control/ltee_fls2_plant_immunity/ltee_fls2_plant_immunity.py
 run_python control/scs_curve_number/scs_curve_number.py
 run_python control/green_ampt/green_ampt_infiltration.py
 run_python control/coupled_runoff_infiltration/coupled_runoff_infiltration.py
@@ -125,6 +126,7 @@ run_rust validate_green_ampt
 run_rust validate_coupled_runoff
 run_rust validate_vg_inverse
 run_rust validate_season_wb
+run_rust validate_ltee_fls2
 
 echo ""
 echo "━━━ Phase 1+: Data-Dependent Validations ━━━"
@@ -140,14 +142,14 @@ echo ""
 echo "━━━ Phase 1++: metalForge Validation ━━━"
 echo ""
 echo "── Rust:   validate_dispatch (metalForge)"
-if cargo run --release --bin validate_dispatch --manifest-path metalForge/forge/Cargo.toml 2>/dev/null; then
+if cargo run --release --features local --bin validate_dispatch --manifest-path metalForge/forge/Cargo.toml 2>/dev/null; then
     echo "  PASS"
 else
     echo "  FAIL"
     FAIL=1
 fi
 echo "── Rust:   validate_live_hardware (metalForge — live probe)"
-if cargo run --release --bin validate_live_hardware --manifest-path metalForge/forge/Cargo.toml 2>/dev/null; then
+if cargo run --release --features local --bin validate_live_hardware --manifest-path metalForge/forge/Cargo.toml 2>/dev/null; then
     echo "  PASS"
 else
     echo "  FAIL"
@@ -165,7 +167,7 @@ run_rust validate_cpu_gpu_comprehensive
 run_rust validate_toadstool_dispatch
 run_rust validate_nucleus_graphs
 echo "── Rust:   validate_mixed_nucleus_live (metalForge — Exp 086)"
-if cargo run --release --bin validate_mixed_nucleus_live --manifest-path metalForge/forge/Cargo.toml 2>/dev/null; then
+if cargo run --release --features local --bin validate_mixed_nucleus_live --manifest-path metalForge/forge/Cargo.toml 2>/dev/null; then
     echo "  PASS"
 else
     echo "  FAIL"
@@ -176,7 +178,7 @@ echo ""
 echo "━━━ Phase 3: GPU Live Dispatch (Titan V) ━━━"
 echo ""
 echo "── Rust:   validate_gpu_live (barracuda — Titan V GPU)"
-if BARRACUDA_GPU_ADAPTER=titan cargo run --release --bin validate_gpu_live --manifest-path barracuda/Cargo.toml 2>/dev/null; then
+if BARRACUDA_GPU_ADAPTER=titan cargo run --release --features local --bin validate_gpu_live --manifest-path barracuda/Cargo.toml 2>/dev/null; then
     echo "  PASS"
 else
     echo "  FAIL (GPU may not be available)"

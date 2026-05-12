@@ -1,7 +1,7 @@
 # airSpring BarraCuda — Evolution Readiness
 
 **Last Updated**: May 12, 2026 (v0.10.0 — 94 binaries, LTEE E3 29/29 PASS, `--format json` on validate, GPU registry drift fixed, 6 projectNUCLEUS workloads, Thread 4 expression authored. Certification engine **L0–L6** (L4 achieved; L5 structurally ready, blocked on live primals). **Tier 4 IPC-first** (`default = []`, barraCuda optional). **guideStone L4** (targeting L5+).)
-**barraCuda**: v0.3.13 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry, SpringDomain newtype, F64BuiltinCapabilities DF64 fields)
+**barraCuda**: v0.4.0 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry, SpringDomain newtype, F64BuiltinCapabilities DF64 fields)
 **ToadStool**: S147+ (20,015 tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient, hw-learn, spirv_codegen_safety)
 **coralReef**: Phase 10 Iteration 44 sovereign Rust GPU compiler (NVIDIA + AMD, 1669+48 tests, VFIO dispatch)
 **Handoff**: V0.10.0 (eukaryotic UniBin + deep debt zero-warnings + certification organelle + scenario registry + deny.toml aws-lc-sys ban + **1,011 lib tests**)
@@ -151,8 +151,8 @@ BarraCuda (while still embedded in ToadStool) underwent massive evolution since 
 
 | Capability | Module | Wired In | Status |
 |-----------|--------|----------|--------|
-| `barracuda::tolerances` | `tolerances` | v0.3.7 | **LEANING** — re-exported |
-| `barracuda::validation::ValidationHarness` | `validation` | v0.3.13 | **LEANING** — all 94 binaries (85 validation + 4 bench + 3 operational + 1 UniBin + 1 guidestone; incl. validate_atlas, validate_ltee_fls2) |
+| `barracuda::tolerances` | `tolerances` | v0.4.0 | **LEANING** — re-exported |
+| `barracuda::validation::ValidationHarness` | `validation` | v0.4.0 | **LEANING** — all 94 binaries (85 validation + 4 bench + 3 operational + 1 UniBin + 1 guidestone; incl. validate_atlas, validate_ltee_fls2) |
 | `pde::richards::solve_richards` | `pde` | v0.4.0 | **WIRED** — `gpu::richards` |
 | `pde::crank_nicolson::CrankNicolson1D` | `pde` | v0.4.4 | **WIRED** — CN f64 diffusion cross-val |
 | `optimize::nelder_mead` | `optimize` | v0.4.1 | **WIRED** — isotherm fitting |
@@ -367,7 +367,7 @@ Revalidation: 1132/1132 tests, 0 clippy warnings (pedantic), 0 fmt diffs, docs b
 
 | Crate | Version | C deps? | Purpose | Evolution Path |
 |-------|---------|---------|---------|----------------|
-| `barracuda` | 0.3.7 (path) | wgpu 28 (vulkan) | GPU primitives, stats, validation, fused Welford/Pearson | **Core** — standalone primal (`ecoPrimals/barraCuda`) |
+| `barracuda` | 0.4.0 (path) | wgpu 28 (vulkan) | GPU primitives, stats, validation, fused Welford/Pearson | **Core** — standalone primal (`ecoPrimals/barraCuda`) |
 | `bingocube-nautilus` | 0.1.0 (path) | None | Evolutionary reservoir computing | **Core** — stays, pure Rust |
 | `serde` | 1.0 | None | Brain state serialization | **Stays** — pure Rust, ecosystem standard |
 | `serde_json` | 1.0 | None | Benchmark JSON + JSON-RPC | **Stays** — pure Rust, ecosystem standard |

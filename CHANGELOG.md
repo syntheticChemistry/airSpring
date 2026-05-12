@@ -13,6 +13,14 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 - **`#[allow()]` → `#[expect()]`** in `tests/common/mod.rs`
 - **projectNUCLEUS workload TOMLs**: 6 (was 1)
 
+### barraCuda 0.4.0 absorption, primal tracing cleanup (2026-05-12 afternoon)
+
+- **barraCuda 0.3.13→0.4.0**: Upstream absorption (`barracuda` + `metalForge/forge` path deps).
+- **Hardcoded tracing targets removed**: 12 production literals (`"biomeos"`, `"skunkbat"`, …) → `primal_names::BIOMEOS`, `primal_names::SKUNKBAT`, and related constants.
+- **`primal_names::socket_filename()`**: New helper; `"biomeos.sock"` path literals replaced with derived socket filenames.
+- **Dead `primal-proof` feature removed** from `barracuda/Cargo.toml`.
+- **Validation**: 1,011 lib tests PASS, 0 clippy warnings; zero hardcoded primal name strings remaining in production code.
+
 ### Deep debt resolution, deny.toml sync, primal_names evolution (2026-05-11)
 
 - **Hardcoded primal name strings → `primal_names::` constants**: `"biomeos"` replaced with `crate::primal_names::BIOMEOS` in `certification/nucleus.rs`, `biomeos/mod.rs` (socket path construction); `"barracuda"` replaced with `primal_names::BARRACUDA` in `certification/bare.rs`, `bin/airspring_guidestone.rs`. New `primal_names::BARRACUDA` constant added.

@@ -194,7 +194,7 @@ All experiments run on a single consumer workstation:
 | pandas | 2.0+ | Data handling |
 | pyet | 1.4+ | FAO-56 PM cross-reference |
 | R | 4.3.1 (paper match) | One-way ANOVA (planned) |
-| Rust | stable (1.92+) | BarraCuda 0.3.13, edition 2024, zero unsafe |
+| Rust | stable (1.92+) | BarraCuda 0.4.0, edition 2024, zero unsafe |
 | serde | 1.x | Rust serialization |
 | serde_json | 1.x | Benchmark JSON + cross-validation |
 | OS | Pop!_OS 22.04 | Linux 6.17 |

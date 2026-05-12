@@ -46,7 +46,7 @@ Format follows wetSpring/hotSpring `PRIMAL_GAPS.md` pattern.
 | AG-004 | biomeOS | Capability naming drift | Converged metalForge deploy to niche.rs canonical names | 2026-04-27 |
 | AG-013 | projectNUCLEUS | Workload paths hardcoded to ironGate | Migrated to `${AIRSPRING_ROOT}` convention | 2026-05-07 |
 | AG-014 | foundation | Thread 6 targets/workloads missing | 36 targets + 6 workloads created | 2026-05-07 |
-| AG-016 | airSpring | LTEE E3 not started | **COMPLETE:** `validate_ltee_fls2` binary — Python 12/12 + Rust 29/29 PASS (Langmuir/Hill/two-site binding, glycosylation Kd shift, soil-immune coupling) | 2026-05-12 |
+| AG-016 | airSpring | LTEE E3 (Dolgikh FLS2) | **COMPLETE:** `validate_ltee_fls2` binary — Python 12/12 + Rust 29/29 PASS (Langmuir/Hill/two-site binding, glycosylation Kd shift, soil-immune coupling) | 2026-05-12 |
 | AG-017 | airSpring | `--format json` not available on validate | **COMPLETE:** `OutputFormat` enum + `harness_to_json()` — structured JSON output for Tier 2 projectNUCLEUS ingestion | 2026-05-12 |
 | AG-018 | airSpring | GPU capability_registry.toml drift (7 methods) | **COMPLETE:** Makkink, Turc, Hamon, Blaney-Criddle, Green-Ampt, autocorrelation, ecology.autocorrelation corrected to `gpu_accelerated = true` | 2026-05-12 |
 | AG-019 | airSpring | projectNUCLEUS workloads incomplete (1/6) | **COMPLETE:** 6 workload TOMLs created in `projectNUCLEUS/workloads/airspring/` (et0-validation, et0-methods, soil-physics, water-balance, atlas-pipeline, full-suite) | 2026-05-12 |
