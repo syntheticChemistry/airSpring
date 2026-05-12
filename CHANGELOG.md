@@ -4,9 +4,11 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [Unreleased] - 2026-05-12
 
-### Tier 2 IPC wiring (2026-05-12 evening)
+### Deep debt audit: Songbird hardcoding + Tier 2 (2026-05-12 evening)
 
 - **Tier 2 IPC wiring**: `ipc::toadstool_validate` + `ipc::precision_route` — typed clients for `toadstool.validate` workload pre-flight and `barracuda.precision.route` precision advisory; 16 new tests (8 TCP round-trip each); composition-parity scenario extended; AG-012 resolved; 3 method constants added (`TOADSTOOL_VALIDATE`, `TOADSTOOL_LIST_WORKLOADS`, `PRECISION_ROUTE`)
+- **Songbird hardcoded strings eliminated**: 6 literals (`"songbird"` paths/diagnostics) in `data/provider.rs` → `primal_names::SONGBIRD` + `socket_filename()` + `socket_env_var()`. Zero hardcoded primal name strings remain in production code.
+- **Deep debt audit (comprehensive)**: Zero files >800L, zero `unsafe` in production, zero `todo!()`/`FIXME`/`HACK`/`XXX`, zero `#[allow()]` (all evolved to `#[expect()]`), zero mocks in production, zero `.unwrap()` in lib. `#![forbid(unsafe_code)]` on non-test builds confirmed.
 
 ### LTEE E3, validate JSON output, capability registry drift, primal hygiene (2026-05-12)
 

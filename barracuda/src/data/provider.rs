@@ -15,6 +15,7 @@
 //! arrays, annual yield tables), not streaming endpoints.
 
 use crate::data::weather::DailyWeather;
+use crate::primal_names;
 use std::fmt;
 
 /// Unified error for data acquisition.
@@ -168,22 +169,30 @@ impl SongbirdTransport {
     /// 3. `/tmp/songbird-{FAMILY_ID}.sock`
     #[must_use]
     pub fn discover() -> Option<Self> {
-        if let Ok(path) = std::env::var("SONGBIRD_SOCKET") {
+        let env_key = primal_names::socket_env_var(primal_names::SONGBIRD);
+        if let Ok(path) = std::env::var(&env_key) {
             let p = std::path::PathBuf::from(&path);
             if p.exists() {
                 return Some(Self { socket_path: p });
             }
         }
 
+        let sock_name = primal_names::socket_filename(primal_names::SONGBIRD);
         if let Ok(xdg) = std::env::var("XDG_RUNTIME_DIR") {
-            let p = std::path::PathBuf::from(xdg).join("primal/songbird/songbird.sock");
+            let p = std::path::PathBuf::from(xdg)
+                .join("primal")
+                .join(primal_names::SONGBIRD)
+                .join(&sock_name);
             if p.exists() {
                 return Some(Self { socket_path: p });
             }
         }
 
         if let Ok(fam) = std::env::var("FAMILY_ID") {
-            let p = std::path::PathBuf::from(format!("/tmp/songbird-{fam}.sock"));
+            let p = std::path::PathBuf::from(format!(
+                "/tmp/{}-{fam}.sock",
+                primal_names::SONGBIRD
+            ));
             if p.exists() {
                 return Some(Self { socket_path: p });
             }
@@ -195,7 +204,7 @@ impl SongbirdTransport {
 
 impl HttpTransport for SongbirdTransport {
     fn tier(&self) -> &'static str {
-        "sovereign/songbird"
+        "sovereign"
     }
 
     fn get(&self, url: &str) -> Result<HttpResponse, DataError> {
@@ -215,7 +224,7 @@ impl HttpTransport for SongbirdTransport {
         let mut stream = UnixStream::connect(&self.socket_path).map_err(|e| {
             DataError::Io(std::io::Error::new(
                 e.kind(),
-                format!("songbird socket {}: {e}", self.socket_path.display()),
+                format!("{} socket {}: {e}", primal_names::SONGBIRD, self.socket_path.display()),
             ))
         })?;
 
@@ -224,7 +233,7 @@ impl HttpTransport for SongbirdTransport {
         stream.write_all(&payload).map_err(|e| {
             DataError::Io(std::io::Error::new(
                 e.kind(),
-                format!("write to songbird: {e}"),
+                format!("write to {}: {e}", primal_names::SONGBIRD),
             ))
         })?;
         stream
@@ -235,12 +244,12 @@ impl HttpTransport for SongbirdTransport {
         stream.read_to_string(&mut buf).map_err(|e| {
             DataError::Io(std::io::Error::new(
                 e.kind(),
-                format!("read from songbird: {e}"),
+                format!("read from {}: {e}", primal_names::SONGBIRD),
             ))
         })?;
 
         let resp: serde_json::Value = serde_json::from_str(&buf)
-            .map_err(|e| DataError::Parse(format!("songbird response: {e}")))?;
+            .map_err(|e| DataError::Parse(format!("{} response: {e}", primal_names::SONGBIRD)))?;
 
         if let Some(err) = resp.get("error") {
             let msg = err["message"].as_str().unwrap_or("unknown");
@@ -379,7 +388,7 @@ mod tests {
         let t = SongbirdTransport {
             socket_path: std::path::PathBuf::from("/nonexistent"),
         };
-        assert_eq!(t.tier(), "sovereign/songbird");
+        assert_eq!(t.tier(), "sovereign");
     }
 
     #[test]
