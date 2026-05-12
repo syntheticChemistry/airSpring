@@ -1,8 +1,8 @@
 # Primal Gaps — airSpring v0.10.0
 
-**Date**: May 11, 2026 (post-interstadial evolution)
+**Date**: May 12, 2026 (downstream seeding sprint)
 **Spring**: airSpring (ecology / agriculture)
-**guideStone Level**: **L4** (cross-atomic pipeline / provenance tier) → targeting **L6** (cross-spring pipeline, live NUCLEUS)
+**guideStone Level**: **L4** (cross-atomic pipeline / provenance tier) → targeting **L5+** (NUCLEUS composition, live primals)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -24,14 +24,14 @@ Format follows wetSpring/hotSpring `PRIMAL_GAPS.md` pattern.
 
 | ID | Primal | Gap | Impact | Status |
 |----|--------|-----|--------|--------|
-| AG-005 | Squirrel | `inference.*` not exercised in science path | airspring_cell.toml includes Squirrel but no science code calls `inference.complete` or `inference.embed` | **Open** — waiting for neuralSpring WGSL inference evolution |
-| AG-006 | coralReef | Sovereign shader compile not wired | `discover_shader_compiler()` hook exists but no active usage; all GPU dispatch through barraCuda direct | **Open** — coralReef integration is roadmap |
-| AG-007 | ToadStool | `compute.dispatch` returns opaque results | airSpring `compute.offload` forwards raw JSON; no typed response contract for ecology workloads | **Open** — need wire standard for domain-specific dispatch results |
-| AG-008 | NestGate | `data.open_meteo_weather` not a standard NestGate method | airSpring's `data.weather` handler calls NestGate with a non-standard method name; should use capability-based weather data routing | **Open** — needs ecosystem weather data standard |
-| AG-009 | petalTongue | No direct IPC wiring from airSpring | Cell graph includes petalTongue but airspring_primal has no visualization dispatch; petalTongue integration is graph-level only | **Open** — low priority; petalTongue consumes via biomeOS SSE |
+| AG-005 | Squirrel | `inference.*` not exercised in science path | airspring_cell.toml includes Squirrel but no science code calls `inference.complete` or `inference.embed` | **Open** — blocked on neuralSpring WGSL inference evolution; Squirrel is CLEAR upstream (MethodGate, RemoteComputeProvider shipped) |
+| AG-006 | coralReef | Sovereign shader compile not wired | `discover_shader_compiler()` hook exists but no active usage; all GPU dispatch through barraCuda direct | **Open** — coralReef stability items in Pass 12 (bind_stat timeout, FECS cold init, naga::Module ingest) |
+| AG-007 | ToadStool | `compute.dispatch` returns opaque results | airSpring `compute.offload` forwards raw JSON; no typed response contract for ecology workloads | **Open** — need wire standard; toadStool Phase C (S245-S249) landed but Phase D pending |
+| AG-008 | NestGate | `data.open_meteo_weather` not a standard NestGate method | airSpring's `data.weather` handler calls NestGate with a non-standard method name; should use capability-based weather data routing | **Open** — NestGate CLEAR upstream (Session 60, transport parity shipped); standardization is ecosystem-level work |
+| AG-009 | petalTongue | No direct IPC wiring from airSpring | Cell graph includes petalTongue but airspring_primal has no visualization dispatch; petalTongue integration is graph-level only | **Open** — low priority; petalTongue consumes via biomeOS SSE; Tier 3 convergence item |
 | AG-010 | barraCuda | `TensorSession` / `TensorContext` not available | Seasonal GPU pipeline blocked on persistent buffer pooling; documented in `evolution_gaps.rs` | **Open** — barraCuda roadmap item |
 | AG-011 | barraCuda | Anderson coupling needs new WGSL shader | `science.anderson_coupling` runs CPU-only; no upstream shader exists | **Open** — Tier C in GPU promotion map |
-| AG-012 | toadStool | Live Science API not implemented | `toadstool.validate` JSON-RPC method (projectNUCLEUS `LIVE_SCIENCE_API.md`) not yet available — notebooks cannot call validation directly | **Open** — toadStool evolution item |
+| AG-012 | toadStool | Live Science API not implemented | `toadstool.validate` JSON-RPC method not yet available — notebooks cannot call validation directly; `toadstool.list_workloads` IS wired (S245+) | **Open** — Pass 14 convergence item; all 8 springs' Tier 2 depends on this |
 
 ---
 
@@ -46,6 +46,11 @@ Format follows wetSpring/hotSpring `PRIMAL_GAPS.md` pattern.
 | AG-004 | biomeOS | Capability naming drift | Converged metalForge deploy to niche.rs canonical names | 2026-04-27 |
 | AG-013 | projectNUCLEUS | Workload paths hardcoded to ironGate | Migrated to `${AIRSPRING_ROOT}` convention | 2026-05-07 |
 | AG-014 | foundation | Thread 6 targets/workloads missing | 36 targets + 6 workloads created | 2026-05-07 |
+| AG-016 | airSpring | LTEE E3 not started | **COMPLETE:** `validate_ltee_fls2` binary — Python 12/12 + Rust 29/29 PASS (Langmuir/Hill/two-site binding, glycosylation Kd shift, soil-immune coupling) | 2026-05-12 |
+| AG-017 | airSpring | `--format json` not available on validate | **COMPLETE:** `OutputFormat` enum + `harness_to_json()` — structured JSON output for Tier 2 projectNUCLEUS ingestion | 2026-05-12 |
+| AG-018 | airSpring | GPU capability_registry.toml drift (7 methods) | **COMPLETE:** Makkink, Turc, Hamon, Blaney-Criddle, Green-Ampt, autocorrelation, ecology.autocorrelation corrected to `gpu_accelerated = true` | 2026-05-12 |
+| AG-019 | airSpring | projectNUCLEUS workloads incomplete (1/6) | **COMPLETE:** 6 workload TOMLs created in `projectNUCLEUS/workloads/airspring/` (et0-validation, et0-methods, soil-physics, water-balance, atlas-pipeline, full-suite) | 2026-05-12 |
+| AG-020 | foundation | Thread 4 expression missing | **COMPLETE:** `ENVIRONMENTAL_GENOMICS.md` authored — soil-immune coupling, Anderson QS, sentinel microbes, field science; FLS2 target added (13 total) | 2026-05-12 |
 
 ---
 
@@ -64,10 +69,24 @@ These are not primal gaps but internal reconciliation items:
 ## guideStone Evolution Path
 
 ```
-Current:  gS Level 4 (certification L0–L6 engine; **10 UniBin validation scenarios**; Tier 4 IPC-first: **`default = []`**, barraCuda behind `local`, validation bins gated)
-Target:   gS Level 6 (cross-spring pipeline, live NUCLEUS — deploy graphs, registries)
-Next:     Deploy NUCLEUS from plasmidBin; validate live `composition.status` / `method.register` / `compute.dispatch` against running primals
+Current:  gS Level 4 (certification L0–L6 engine; 10 UniBin validation scenarios; Tier 4 IPC-first; 94 binaries; LTEE E3 DONE)
+Target:   gS Level 5 (NUCLEUS composition — composition.status + method.register + compute.dispatch against live primals)
+Next:     gS Level 6 (cross-spring pipeline — deploy graphs, capability registries, scenario registries)
 ```
+
+### L5 Readiness Assessment (May 12, 2026)
+
+airSpring has **all three L5 RPC handlers wired and structurally tested**:
+- `composition.status` — wired (biomeOS v3.51 contract)
+- `method.register` — wired (46 capabilities registered)
+- `compute.dispatch` — wired (toadStool identity_f64 shader)
+
+**Blocker**: L5 requires **live primals** (biomeOS + toadStool at minimum).
+Without running primals, the L5 certification probes print `SKIP`.
+This is a shared blocker across all springs — see Pass 14 (`toadstool.validate`).
+
+**What we can do now**: structural L5 validation with mock responses is in place
+via UniBin scenario `s_composition_parity`. Live L5 awaits biomeOS orchestration.
 
 ### Prerequisites for gS Level 1 (DONE)
 1. ~~Clone primalSpring beside springs/~~ — primalSpring at `springs/primalSpring/`
@@ -102,7 +121,14 @@ Next:     Deploy NUCLEUS from plasmidBin; validate live `composition.status` / `
 - [x] Zero `#[allow]` in production code (`#[expect]` with reason throughout)
 - [x] benchmarks.rs refactored (810→148 + 607 bench_fns.rs, zero >800L files)
 - [x] barraCuda optional = true (Tier 4 IPC-first `default = []`, `local` opt-in, `math.rs` fallbacks, `ipc/barracuda_route.rs`, validation `required-features = ["local"]`)
-- [ ] guideStone L6 / live NUCLEUS validation (deploy NUCLEUS from plasmidBin)
+- [x] LTEE E3 complete: `validate_ltee_fls2` (Python 12/12 + Rust 29/29 PASS, 94th binary)
+- [x] `--format json` on UniBin `validate` subcommand (Tier 2 projectNUCLEUS ingestion)
+- [x] GPU capability_registry.toml drift fix (7 methods corrected)
+- [x] 6 projectNUCLEUS workload TOMLs (was 1)
+- [x] Foundation Thread 4 expression authored (`ENVIRONMENTAL_GENOMICS.md`)
+- [x] lithoSpore handoff README for LTEE E3 (`control/ltee_fls2_plant_immunity/README.md`)
+- [ ] guideStone L5 / live NUCLEUS validation (blocked on live biomeOS + toadStool — Pass 14)
+- [ ] guideStone L6 / cross-spring pipeline (deploy graphs validated against live NUCLEUS)
 
 ---
 

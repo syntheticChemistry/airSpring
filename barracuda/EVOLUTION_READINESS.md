@@ -1,7 +1,7 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: May 11, 2026 (v0.10.0 — Eukaryotic UniBin evolution, deep debt resolution, post-interstadial. Certification engine **L0–L6** (L4+ cross-atomic provenance; L5 NUCLEUS composition; L6 cross-spring pipeline), scenario registry (**10 UniBin validation scenarios** incl. **`s_tier4_math_parity`**), **Tier 4 rewiring complete** (`barracuda` optional + `local` default, `math.rs` dual-path, `ipc/barracuda_route.rs`, `--no-default-features` without barraCuda tree). Dead standalone-http removed, 6 test failures fixed, hardcoded primals→constants, zero clippy warnings. **guideStone L4+** (targeting L6).)
-**barraCuda**: v0.3.7 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry, SpringDomain newtype, F64BuiltinCapabilities DF64 fields)
+**Last Updated**: May 12, 2026 (v0.10.0 — 94 binaries, LTEE E3 29/29 PASS, `--format json` on validate, GPU registry drift fixed, 6 projectNUCLEUS workloads, Thread 4 expression authored. Certification engine **L0–L6** (L4 achieved; L5 structurally ready, blocked on live primals). **Tier 4 IPC-first** (`default = []`, barraCuda optional). **guideStone L4** (targeting L5+).)
+**barraCuda**: v0.3.13 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry, SpringDomain newtype, F64BuiltinCapabilities DF64 fields)
 **ToadStool**: S147+ (20,015 tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient, hw-learn, spirv_codegen_safety)
 **coralReef**: Phase 10 Iteration 44 sovereign Rust GPU compiler (NVIDIA + AMD, 1669+48 tests, VFIO dispatch)
 **Handoff**: V0.10.0 (eukaryotic UniBin + deep debt zero-warnings + certification organelle + scenario registry + deny.toml aws-lc-sys ban + **1,011 lib tests**)
@@ -25,7 +25,7 @@ not through ToadStool.
 
 | Module | Absorbed Into | When | Status |
 |--------|--------------|------|--------|
-| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all **93 binaries** use upstream |
+| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all **94 binaries** use upstream |
 | `van_genuchten` | `barracuda::pde::richards::SoilParams` | S40 | **Leaning** — `gpu::richards` bridges to upstream |
 | `isotherm NM` | `barracuda::optimize::nelder_mead` | S62 | **Leaning** — `gpu::isotherm` bridges to upstream |
 | `StatefulPipeline` | `barracuda::pipeline::stateful::StatefulPipeline` | S80 | **Leaning** — `WaterBalanceState` day-over-day |
@@ -152,7 +152,7 @@ BarraCuda (while still embedded in ToadStool) underwent massive evolution since 
 | Capability | Module | Wired In | Status |
 |-----------|--------|----------|--------|
 | `barracuda::tolerances` | `tolerances` | v0.3.7 | **LEANING** — re-exported |
-| `barracuda::validation::ValidationHarness` | `validation` | v0.3.7 | **LEANING** — all 93 binaries (84 validation + 4 bench + 3 operational + 1 UniBin + 1 guidestone; incl. validate_atlas, 1393 checks) |
+| `barracuda::validation::ValidationHarness` | `validation` | v0.3.13 | **LEANING** — all 94 binaries (85 validation + 4 bench + 3 operational + 1 UniBin + 1 guidestone; incl. validate_atlas, validate_ltee_fls2) |
 | `pde::richards::solve_richards` | `pde` | v0.4.0 | **WIRED** — `gpu::richards` |
 | `pde::crank_nicolson::CrankNicolson1D` | `pde` | v0.4.4 | **WIRED** — CN f64 diffusion cross-val |
 | `optimize::nelder_mead` | `optimize` | v0.4.1 | **WIRED** — isotherm fitting |
@@ -237,7 +237,7 @@ neuralSpring (architecture), airSpring (domain science).
 | `moving_window_stats` | wetSpring | IoT stream smoothing |
 | `ridge_regression` | wetSpring | Sensor correction pipeline |
 | `nelder_mead`, `multi_start` | neuralSpring | Isotherm fitting |
-| `ValidationHarness` | neuralSpring | All 93 binaries (84 validation + 4 bench + 3 operational + 1 UniBin + 1 guidestone) |
+| `ValidationHarness` | neuralSpring | All 94 binaries (85 validation + 4 bench + 3 operational + 1 UniBin + 1 guidestone) |
 | `norm_ppf` (Moro 1995) | hotSpring | MC ET₀ parametric confidence intervals |
 | `brent` (Brent 1973) | neuralSpring | VG pressure head inversion (θ→h) |
 | `pde::richards` | airSpring → upstream | 1D Richards equation (absorbed S40) |

@@ -1,0 +1,74 @@
+# LTEE E3 — FLS2 Plant Immunity Sentinel (Dolgikh et al. 2025)
+
+**Spring**: airSpring
+**LTEE ID**: E3
+**Domain**: Plant immunity / soil-microbe-immune coupling
+**Status**: **COMPLETE** — Python 12/12 PASS + Rust 29/29 PASS
+**lithoSpore Module**: `ltee-immunity` (candidate)
+
+---
+
+## Artifacts
+
+| File | Purpose | Consumed by |
+|------|---------|-------------|
+| `expected_values.json` | Ground truth: Kd values, model parameters, tolerances | lithoSpore `fetch_and_hash.sh` |
+| `benchmark_ltee_fls2.json` | Full benchmark: binding fits, coupling checks, Python PASS results | Rust validator (`include_str!`) |
+| `ltee_fls2_plant_immunity.py` | Phase-0 Python baseline (generates both JSON files) | Reference only |
+
+## Rust Validator
+
+Binary: `validate_ltee_fls2` (in `barracuda/src/bin/validate_ltee_fls2.rs`)
+
+```
+cargo build --release --features local --bin validate_ltee_fls2
+./target/release/validate_ltee_fls2
+# 29/29 PASS
+```
+
+Build requires `--features local` (validation binary is gated via `required-features = ["local"]`).
+
+## What This Reproduces
+
+Dolgikh et al. 2025 (bioRxiv) — FLS2 receptor binding kinetics and the
+effect of glycosylation on pathogen recognition in *Arabidopsis*. airSpring's
+unique angle is the **soil-immune coupling model** connecting soil moisture,
+temperature, and microbial ecology to plant immune activation thresholds.
+
+### Binding Models (Pure Rust, matching Python)
+
+| Model | Parameters | Description |
+|-------|-----------|-------------|
+| Langmuir | Bmax, Kd | Single-site equilibrium binding |
+| Hill | Bmax, Kd, n | Cooperative binding with Hill coefficient |
+| Two-site | B1, K1, B2, K2 | Dual-affinity binding model |
+
+### Validated Checks (29 total)
+
+1. **Benchmark structure** (5 checks) — JSON schema, required keys, model metadata
+2. **Model fits** (5 checks) — R² > 0.95 for all three models, Kd recovery within 5 nM
+3. **Rust binding models** (8 checks) — Independent Rust calculations match formula predictions at 1e-12 tolerance
+4. **Glycosylation shift** (5 checks) — Kd 28→15 nM, sensitivity ratio 1.867, monotonicity
+5. **Soil-immune coupling** (6 checks) — Moisture factor, Q10 temperature factor, microbial activity, flagellin exposure, Python parity
+
+### Soil-Immune Coupling Model
+
+Deterministic coupling connecting soil physics to plant immune activation:
+
+- **Moisture factor**: `max(0, min(1, (VWC - 0.1) / 0.2))` — threshold at field capacity
+- **Temperature factor**: Q10 model (`2.0^((T - 25) / 10)`) — microbial activity scaling
+- **Microbial activity**: `density × moisture_factor × temp_factor / 1e6`
+- **Flagellin exposure**: `activity × (1 - e^(-activity × 10))`
+
+## For lithoSpore Team
+
+1. `expected_values.json` contains provenance metadata, model parameters, and tolerance bounds
+2. `benchmark_ltee_fls2.json` contains the full Python-generated reference values
+3. The Rust validator independently recomputes all models and cross-validates against the benchmark
+4. BLAKE3-hash both JSON files for NestGate content storage anchoring
+5. The soil-immune coupling model is unique to airSpring — no other spring has this domain intersection
+
+## Paper Reference
+
+Dolgikh, V. V. et al. (2025). "FLS2-Mediated Perception of Microbial Patterns
+in Soil-Plant Systems." *bioRxiv*. doi: pending.

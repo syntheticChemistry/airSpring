@@ -15,7 +15,7 @@
 | Integration + doc tests | **316** (barracuda) |
 | Forge tests | **62** (metalForge) |
 | **Grand total** | **1,389** |
-| Binaries | **93** (84 validation, 4 bench, 3 operational, 1 UniBin, 1 guidestone) |
+| Binaries | **94** (85 validation, 4 bench, 3 operational, 1 UniBin, 1 guidestone) |
 | Capabilities | **46** (science + ecology + provenance + composition + infrastructure + cross-primal) |
 | Deploy graphs | **7** (eco + provenance + niche + cross-primal + GPU batch + sovereign data + uncertainty) |
 | GuideStone level | **L4** (targeting L6 with live NUCLEUS) |

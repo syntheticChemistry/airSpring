@@ -1,7 +1,7 @@
 # Primal Proof IPC Mapping — airSpring
 
-**Date**: May 11, 2026
-**Status**: 46 capabilities IPC-exposed, UniBin eukaryotic, guideStone L4 (targeting L6); new IPC: **`method.register`**, **`composition.status`**, skunkBat deploy-graph path.
+**Date**: May 12, 2026
+**Status**: 46 capabilities IPC-exposed, UniBin eukaryotic, guideStone L4 (targeting L5+); 94 binaries. New: `--format json` on `validate`, LTEE E3 29/29 PASS, GPU registry drift fixed (7 methods), 6 projectNUCLEUS workload TOMLs.
 
 Maps each airSpring domain computation to its JSON-RPC equivalent for
 primal-proof validation. When NUCLEUS primals are deployed, all science
