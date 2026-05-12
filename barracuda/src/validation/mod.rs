@@ -106,6 +106,38 @@ pub fn init_tracing() {
         .init();
 }
 
+/// Serialize a [`ValidationHarness`] to structured JSON for Tier 2 projectNUCLEUS ingestion.
+#[must_use]
+pub fn harness_to_json(harness: &ValidationHarness) -> serde_json::Value {
+    let checks: Vec<serde_json::Value> = harness
+        .checks
+        .iter()
+        .map(|c| {
+            let mut obj = serde_json::json!({
+                "label": c.label,
+                "passed": c.passed,
+                "observed": c.observed,
+                "expected": c.expected,
+                "tolerance": c.tolerance,
+                "mode": c.mode.to_string(),
+            });
+            if let Some(rel_tol) = c.rel_tolerance {
+                obj["rel_tolerance"] = serde_json::json!(rel_tol);
+            }
+            obj
+        })
+        .collect();
+
+    serde_json::json!({
+        "suite": harness.name,
+        "passed": harness.passed_count(),
+        "total": harness.total_count(),
+        "failed": harness.total_count() - harness.passed_count(),
+        "all_passed": harness.all_passed(),
+        "checks": checks,
+    })
+}
+
 /// Print a section header for visual grouping in validation output.
 pub fn section(name: &str) {
     println!("── {name} ──");

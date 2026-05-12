@@ -32,7 +32,14 @@ fn main() {
             ref scenario,
             ref tier,
             list,
-        } => cmd_validate(track.as_deref(), scenario.as_deref(), tier.as_deref(), list),
+            format,
+        } => cmd_validate(
+            track.as_deref(),
+            scenario.as_deref(),
+            tier.as_deref(),
+            list,
+            format,
+        ),
         cli::Commands::Serve => cmd_serve(),
         cli::Commands::Status => cmd_status(),
         cli::Commands::Version => cmd_version(),
@@ -54,27 +61,58 @@ fn cmd_certify(layer: Option<u8>, bare: bool) {
     }
 }
 
-fn cmd_validate(track: Option<&str>, scenario_id: Option<&str>, tier: Option<&str>, list: bool) {
+#[expect(clippy::too_many_lines, reason = "single dispatch path; splitting obscures flow")]
+fn cmd_validate(
+    track: Option<&str>,
+    scenario_id: Option<&str>,
+    tier: Option<&str>,
+    list: bool,
+    format: cli::OutputFormat,
+) {
     use airspring_barracuda::validation::scenarios::{Tier, Track, build_registry};
 
     let registry = build_registry();
+    let json_mode = matches!(format, cli::OutputFormat::Json);
 
     if list {
-        println!(
-            "airSpring Validation Scenarios ({} registered)\n",
-            registry.len()
-        );
-        let hdr_scenario = "SCENARIO";
-        let hdr_track = "TRACK";
-        let hdr_tier = "TIER";
-        let hdr_provenance = "PROVENANCE";
-        println!("{hdr_scenario:<30} {hdr_track:<20} {hdr_tier:<6} {hdr_provenance}");
-        println!("{}", "-".repeat(80));
-        for s in registry.all() {
+        if json_mode {
+            let items: Vec<serde_json::Value> = registry
+                .all()
+                .iter()
+                .map(|s| {
+                    serde_json::json!({
+                        "id": s.meta.id,
+                        "track": s.meta.track.to_string(),
+                        "tier": s.meta.tier.to_string(),
+                        "provenance_crate": s.meta.provenance_crate,
+                    })
+                })
+                .collect();
             println!(
-                "{:<30} {:<20} {:<6} {}",
-                s.meta.id, s.meta.track, s.meta.tier, s.meta.provenance_crate
+                "{}",
+                serde_json::to_string_pretty(&serde_json::json!({
+                    "scenarios": items,
+                    "count": items.len(),
+                }))
+                .unwrap_or_default()
             );
+        } else {
+            println!(
+                "airSpring Validation Scenarios ({} registered)\n",
+                registry.len()
+            );
+            let hdr_scenario = "SCENARIO";
+            let hdr_track = "TRACK";
+            let hdr_tier = "TIER";
+            let hdr_provenance = "PROVENANCE";
+            println!("{hdr_scenario:<30} {hdr_track:<20} {hdr_tier:<6} {hdr_provenance}");
+            println!("{}", "-".repeat(80));
+            for s in registry.all() {
+                println!(
+                    "{:<30} {:<20} {:<6} {}",
+                    s.meta.id, s.meta.track, s.meta.tier, s.meta.provenance_crate
+                );
+            }
         }
         return;
     }
@@ -99,7 +137,10 @@ fn cmd_validate(track: Option<&str>, scenario_id: Option<&str>, tier: Option<&st
     let mut v = airspring_barracuda::validation::ValidationHarness::new(
         "airSpring Validation — Scenario Runner",
     );
-    airspring_barracuda::validation::banner("airSpring Validation — Scenario Runner");
+
+    if !json_mode {
+        airspring_barracuda::validation::banner("airSpring Validation — Scenario Runner");
+    }
 
     let mut ran = 0usize;
     for s in registry.all() {
@@ -121,20 +162,42 @@ fn cmd_validate(track: Option<&str>, scenario_id: Option<&str>, tier: Option<&st
             continue;
         }
 
-        airspring_barracuda::validation::section(&format!(
-            "Scenario: {} [{}] ({})",
-            s.meta.id, s.meta.track, s.meta.tier
-        ));
+        if !json_mode {
+            airspring_barracuda::validation::section(&format!(
+                "Scenario: {} [{}] ({})",
+                s.meta.id, s.meta.track, s.meta.tier
+            ));
+        }
         (s.run)(&mut v);
         ran += 1;
     }
 
     if ran == 0 {
-        eprintln!("no scenarios matched the filter criteria");
+        if json_mode {
+            println!(
+                "{}",
+                serde_json::json!({"error": "no scenarios matched the filter criteria"})
+            );
+        } else {
+            eprintln!("no scenarios matched the filter criteria");
+        }
         std::process::exit(1);
     }
 
-    v.finish();
+    if json_mode {
+        let report = airspring_barracuda::validation::harness_to_json(&v);
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&report).unwrap_or_default()
+        );
+        if v.all_passed() {
+            std::process::exit(0);
+        } else {
+            std::process::exit(1);
+        }
+    } else {
+        v.finish();
+    }
 }
 
 fn dispatch_serve(
