@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-Full deep debt audit executed per primalSpring directive. **Zero actionable debt remaining** in core library. Two micro-fixes applied this sprint (9 `#[must_use]` clippy pedantic attrs, last `/tmp/` hardcoded path eliminated). All audit dimensions green.
+Full deep debt audit executed per primalSpring directive. **Zero actionable debt remaining** in core library. Fixes this sprint: 9 `#[must_use]` clippy pedantic attrs, last `/tmp/` hardcoded path eliminated, `unused_must_use` in binary resolved. AG-005 (Squirrel science path) fully resolved — `inference.embed/complete/models` wired through `dispatch_science`. All audit dimensions green.
 
 ---
 
@@ -73,7 +73,7 @@ Full deep debt audit executed per primalSpring directive. **Zero actionable debt
 
 | Gap | Status |
 |-----|--------|
-| AG-005: Squirrel science path | IPC wired, dispatch pending |
+| AG-005: Squirrel science path | **Resolved** — `inference.embed/complete/models` wired through `dispatch_science` with 7 new tests |
 | AG-006: coralReef shader compile | Open |
 | AG-007: compute.dispatch typing | Open |
 | AG-010: TensorSession | Open (barraCuda roadmap) |
@@ -101,11 +101,11 @@ Full deep debt audit executed per primalSpring directive. **Zero actionable debt
 
 | Metric | Value |
 |--------|-------|
-| Lib tests | **1,051** |
-| Total tests | **1,429** (1,051 lib + 316 integration + 62 forge) |
+| Lib tests | **1,057** |
+| Total tests | **1,435** (1,057 lib + 316 integration + 62 forge) |
 | IPC modules | **13** |
 | Method constants | **61** |
-| Capabilities | **46** |
+| Capabilities | **49** |
 | CPU vs Python parity | **25/25** |
 | Python control checks | **1,284** |
 | UniBin validation scenarios | **10** |

@@ -187,7 +187,7 @@ fn register_methods_with_biomeos(our_socket: &Path) {
 }
 
 fn emit_startup_audit() {
-    airspring_barracuda::ipc::skunkbat::audit_startup(niche::CAPABILITIES.len());
+    let _ = airspring_barracuda::ipc::skunkbat::audit_startup(niche::CAPABILITIES.len());
 }
 
 fn init_tracing() {
