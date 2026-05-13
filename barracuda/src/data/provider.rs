@@ -165,8 +165,8 @@ impl SongbirdTransport {
     ///
     /// Search order:
     /// 1. `SONGBIRD_SOCKET` env var
-    /// 2. `XDG_RUNTIME_DIR/primal/songbird/songbird.sock`
-    /// 3. `/tmp/songbird-{FAMILY_ID}.sock`
+    /// 2. biomeOS standard discovery (XDG runtime, capability scan)
+    /// 3. `XDG_RUNTIME_DIR/primal/songbird/songbird.sock`
     #[must_use]
     pub fn discover() -> Option<Self> {
         let env_key = primal_names::socket_env_var(primal_names::SONGBIRD);
@@ -177,22 +177,16 @@ impl SongbirdTransport {
             }
         }
 
+        if let Some(p) = crate::biomeos::discover_primal_socket(primal_names::SONGBIRD) {
+            return Some(Self { socket_path: p });
+        }
+
         let sock_name = primal_names::socket_filename(primal_names::SONGBIRD);
         if let Ok(xdg) = std::env::var("XDG_RUNTIME_DIR") {
             let p = std::path::PathBuf::from(xdg)
                 .join("primal")
                 .join(primal_names::SONGBIRD)
                 .join(&sock_name);
-            if p.exists() {
-                return Some(Self { socket_path: p });
-            }
-        }
-
-        if let Ok(fam) = std::env::var("FAMILY_ID") {
-            let p = std::path::PathBuf::from(format!(
-                "/tmp/{}-{fam}.sock",
-                primal_names::SONGBIRD
-            ));
             if p.exists() {
                 return Some(Self { socket_path: p });
             }

@@ -22,6 +22,7 @@ fn epoch_secs() -> u64 {
 }
 
 /// Discover the skunkBat socket via biomeOS primal discovery.
+#[must_use]
 pub fn discover() -> Option<std::path::PathBuf> {
     biomeos::discover_primal_socket(primal_names::SKUNKBAT)
 }
@@ -29,6 +30,7 @@ pub fn discover() -> Option<std::path::PathBuf> {
 /// Emit an audit event to skunkBat via `security.audit_log`.
 ///
 /// Returns the response on success, `None` if skunkBat is unavailable.
+#[must_use]
 pub fn audit_log(event_type: &str, payload: &serde_json::Value) -> Option<serde_json::Value> {
     let socket = discover()?;
     audit_log_to(&socket, event_type, payload)
@@ -62,6 +64,7 @@ pub fn audit_log_to(
 }
 
 /// Emit a certification audit event (layer completion).
+#[must_use]
 pub fn audit_certification(tier: u8, passed: u32, failed: u32) -> Option<serde_json::Value> {
     audit_log(
         "certification",
@@ -74,6 +77,7 @@ pub fn audit_certification(tier: u8, passed: u32, failed: u32) -> Option<serde_j
 }
 
 /// Emit a startup audit event.
+#[must_use]
 pub fn audit_startup(capabilities: usize) -> Option<serde_json::Value> {
     audit_log(
         "startup",

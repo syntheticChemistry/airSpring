@@ -7,7 +7,8 @@
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.10.0** | [AIRSPRING_NICHE_ATOMIC_CONVERGENCE_MAY13_2026.md](handoffs/AIRSPRING_NICHE_ATOMIC_CONVERGENCE_MAY13_2026.md) | 2026-05-13 | **Canonical** — Niche Atomic Convergence: NestGate CAS client (AG-008 RESOLVED), Squirrel inference client (AG-005 IPC wired), `data.weather` handler evolved to `capability.call`, composition-parity extended, 1,051 lib tests / 1,429 total |
+| **V0.10.0** | [AIRSPRING_DEEP_DEBT_SPRINT_MAY13_2026.md](handoffs/AIRSPRING_DEEP_DEBT_SPRINT_MAY13_2026.md) | 2026-05-13 | **Canonical** — Deep debt sprint: zero debt across all audit dimensions, clippy pedantic+nursery clean, last `/tmp/` hardcoding eliminated, full audit answers for primalSpring |
+| **V0.10.0** | [AIRSPRING_NICHE_ATOMIC_CONVERGENCE_MAY13_2026.md](handoffs/AIRSPRING_NICHE_ATOMIC_CONVERGENCE_MAY13_2026.md) | 2026-05-13 | Niche Atomic Convergence: NestGate CAS + Squirrel inference IPC clients, AG-008 RESOLVED |
 | **≤V0.10.0** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 
 ## Cross-Spring Documents

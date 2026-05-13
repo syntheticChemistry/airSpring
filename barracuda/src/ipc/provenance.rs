@@ -107,6 +107,7 @@ impl ProvenanceConfig {
 /// (e.g., `NestGateProvider`) that need to route through the Neural API.
 ///
 /// Returns a platform-agnostic [`Transport`] (Unix or TCP).
+#[must_use]
 pub fn resolve_neural_api_transport() -> Option<Transport> {
     resolve_neural_api_transport_with(&ProvenanceConfig::from_env())
 }

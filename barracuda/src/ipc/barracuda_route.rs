@@ -12,6 +12,7 @@ use crate::rpc;
 ///
 /// Returns `Some(result)` on success, `None` on any failure (no primal,
 /// transport error, RPC error).
+#[must_use]
 pub fn try_forward(method: &str, params: &serde_json::Value) -> Option<serde_json::Value> {
     let transport = rpc::resolve_transport(primal_names::BARRACUDA).ok()?;
     rpc::send_to(&transport, method, params)

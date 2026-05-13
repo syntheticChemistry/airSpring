@@ -6,6 +6,7 @@
 
 /// Arithmetic mean of a slice.
 #[inline]
+#[must_use]
 pub fn mean(data: &[f64]) -> f64 {
     #[cfg(feature = "local")]
     {
@@ -22,6 +23,7 @@ pub fn mean(data: &[f64]) -> f64 {
 
 /// Pearson correlation coefficient.
 #[inline]
+#[must_use]
 pub fn pearson_r(x: &[f64], y: &[f64]) -> f64 {
     #[cfg(feature = "local")]
     {
@@ -48,6 +50,7 @@ pub fn pearson_r(x: &[f64], y: &[f64]) -> f64 {
 
 /// Standard deviation (population).
 #[inline]
+#[must_use]
 pub fn std_dev(data: &[f64]) -> f64 {
     #[cfg(feature = "local")]
     {

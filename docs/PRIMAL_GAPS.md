@@ -156,8 +156,51 @@ Structural L5 validation with TCP mock round-trip tests passes (1,051 lib tests)
 - [x] `ipc/squirrel_inference.rs` — Squirrel inference typed client (`inference.embed`, `inference.complete`, `inference.models`; 8 tests)
 - [x] `data.weather` handler evolved: `data.open_meteo_weather` → `capability.call` (AG-008 RESOLVED)
 - [x] `methods.rs` — 6 new constants (NestGate CAS + Squirrel inference)
+- [x] Clippy pedantic+nursery zero warnings: 9 `#[must_use]` attrs added (`barracuda_route`, `provenance`, `skunkbat` ×4, `math` ×3)
+- [x] Last `/tmp/` hardcoded path eliminated: `data/provider.rs` `SongbirdTransport::discover` → biomeOS standard discovery
 - [ ] guideStone L5 / live NUCLEUS validation (blocked on live biomeOS + toadStool — Pass 14)
 - [ ] guideStone L6 / cross-spring pipeline (deploy graphs validated against live NUCLEUS)
+
+### Deep Debt Audit Results (May 13, 2026 — Sprint)
+
+| Category | Finding |
+|----------|---------|
+| TODO/FIXME/HACK/XXX | **0** in production code |
+| `unsafe` blocks (non-test) | **0** (`#![forbid(unsafe_code)]` enforced) |
+| `unsafe fn` | **0** |
+| Production mocks | **0** (all `Mock` types confined to `#[cfg(test)]`) |
+| Files >800 LOC | **0** (largest: `validate_gpu_rewire_support.rs` at 775) |
+| Hardcoded primal paths | **0** (last `/tmp/` in `provider.rs` eliminated this sprint) |
+| `#[allow(` in production | **0** (all evolved to `#[expect()]` with reasons) |
+| `todo!()` / `unimplemented!()` | **0** |
+| `.unwrap()` in lib | **0** (only in `bin/` validation CLIs and test code) |
+| Clippy pedantic+nursery | **0** warnings |
+| External C deps | **0** (serde, clap, thiserror, toml, tracing — all pure Rust) |
+| Edition | **2024** (Rust 1.92+) |
+
+### Audit Questions — Answers
+
+**Python baselines for barraCuda CPU parity:**
+- **25/25** algorithms in `bench_cpu_vs_python` (ET₀ ×6, Soil ×5, Hydrology ×3, Crop ×4, Ecology ×5, Pipeline ×2)
+- **1,284** Python control checks from `control/` scripts
+- **Missing from 25-bench harness**: Turc, Hamon, SPI, MC ET₀, bootstrap/jackknife, kriging, autocorrelation, CN+GA coupled — these are validated elsewhere but not in the speed parity table
+
+**Industry GPU benchmarks:**
+- **Kokkos**: documented gap — Tier 1 Kokkos/Cabana performance reference not started (groundSpring V74 has 3.5×-2669× dispatch overhead data)
+- **LAMMPS/SciPy/Galaxy**: referenced as methodology baselines, not as integrated GPU benchmark harnesses
+- **GPU coverage is internal**: 21/21 CPU-GPU parity, 46/46 validate_gpu_math, 25 Tier A upstream ops
+
+**Not implemented / tested:**
+- AG-005: Squirrel `inference.*` not called from science path (IPC client wired, dispatch pending)
+- AG-006: coralReef sovereign shader compile not wired
+- AG-007: `compute.dispatch` opaque JSON (no typed response contract)
+- AG-010/011: TensorSession and Anderson WGSL shader
+- L5/L6 certification: blocked on live primals
+- Kokkos Tier 1 performance harness
+
+**Unreviewed papers:** Papers #6, #7 (Tier 1, awaiting field data), #16 (Tier 3), #23/#24 (Tier 4/Future)
+
+**Datasets to examine:** NOAA CDO, OpenWeatherMap (keyed access), Dong lab multi-sensor IoT + lysimeter (awaiting 2026), NCBI 16S (~50 GB 16S budget for metagenome pipeline)
 
 ---
 
