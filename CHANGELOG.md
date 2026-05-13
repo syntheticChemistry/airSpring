@@ -2,7 +2,14 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased] - 2026-05-12
+## [Unreleased] - 2026-05-13
+
+### Tier 2 convergence wave (2026-05-13)
+
+- **`precision.route` full field consumption**: `PrecisionAdvice` now includes `requires_compiler` and `adapter` fields from upstream barraCuda response (previously dropped on the floor).
+- **lithoSpore LTEE module packaging**: `fetch_data.sh` + `tolerances.toml` added to `control/ltee_fls2_plant_immunity/` — follows lithoSpore standard module layout (`fetch_data.sh` + `run_baseline.py` + `run_validation` + `tolerances.toml`).
+- **musl static binary**: `rust-toolchain.toml` includes `x86_64-unknown-linux-musl` target. `airspring` UniBin builds as a 3.3 MB static-pie binary (verified `version` + `validate --list`). plasmidBin harvestable.
+- **Convergence wave handoff**: `AIRSPRING_TIER2_CONVERGENCE_HANDOFF_MAY13_2026.md` — all 5 audit items addressed, gaps surfaced upstream.
 
 ### Deep debt audit: Songbird hardcoding + Tier 2 (2026-05-12 evening)
 

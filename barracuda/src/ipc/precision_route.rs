@@ -20,8 +20,12 @@ pub struct PrecisionAdvice {
     pub fma_safe: bool,
     /// Whether sovereign (coralReef) compilation is needed.
     pub needs_sovereign_compile: bool,
+    /// Whether a shader compiler is required (from `requires_compiler`).
+    pub requires_compiler: bool,
     /// Hardware hint returned by barraCuda (e.g. "compute", "integrated").
     pub hardware_hint: String,
+    /// GPU adapter name (e.g. "NVIDIA TITAN V"), empty if not reported.
+    pub adapter: String,
     /// Human-readable rationale for the recommendation.
     pub rationale: String,
 }
@@ -103,6 +107,17 @@ fn parse_result(resp: &serde_json::Value) -> Result<PrecisionAdvice, PrecisionEr
         .unwrap_or("unknown")
         .to_owned();
 
+    let requires_compiler = r
+        .and_then(|v| v.get("requires_compiler"))
+        .and_then(serde_json::Value::as_bool)
+        .unwrap_or(false);
+
+    let adapter = r
+        .and_then(|v| v.get("adapter"))
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or("")
+        .to_owned();
+
     let rationale = r
         .and_then(|v| v.get("rationale"))
         .and_then(serde_json::Value::as_str)
@@ -113,7 +128,9 @@ fn parse_result(resp: &serde_json::Value) -> Result<PrecisionAdvice, PrecisionEr
         recommended_tier,
         fma_safe,
         needs_sovereign_compile,
+        requires_compiler,
         hardware_hint,
+        adapter,
         rationale,
     })
 }
@@ -209,7 +226,9 @@ mod tests {
         assert_eq!(pa.recommended_tier, "f64");
         assert!(pa.fma_safe);
         assert!(!pa.needs_sovereign_compile);
+        assert!(!pa.requires_compiler);
         assert_eq!(pa.hardware_hint, "compute");
+        assert_eq!(pa.adapter, "NVIDIA TITAN V");
         assert!(pa.rationale.contains("Titan V"));
     }
 
@@ -266,7 +285,9 @@ mod tests {
         assert_eq!(pa.recommended_tier, "df64");
         assert!(!pa.fma_safe);
         assert!(pa.needs_sovereign_compile);
+        assert!(!pa.requires_compiler);
         assert_eq!(pa.hardware_hint, "integrated");
+        assert!(pa.adapter.is_empty());
     }
 
     #[test]

@@ -1,6 +1,6 @@
 # Primal Gaps — airSpring v0.10.0
 
-**Date**: May 12, 2026 (downstream seeding sprint)
+**Date**: May 13, 2026 (Tier 2 convergence wave)
 **Spring**: airSpring (ecology / agriculture)
 **guideStone Level**: **L4** (cross-atomic pipeline / provenance tier) → targeting **L5+** (NUCLEUS composition, live primals)
 **License**: AGPL-3.0-or-later
@@ -74,7 +74,7 @@ Target:   gS Level 5 (NUCLEUS composition — composition.status + method.regist
 Next:     gS Level 6 (cross-spring pipeline — deploy graphs, capability registries, scenario registries)
 ```
 
-### L5 Readiness Assessment (May 12, 2026)
+### L5 Readiness Assessment (May 13, 2026)
 
 airSpring has **all five L5 RPC handlers wired and structurally tested**:
 - `composition.status` — wired (biomeOS v3.51 contract)
@@ -90,6 +90,16 @@ scenario with graceful skip when primals are absent.
 **Remaining L5 blocker**: Live primals (biomeOS + toadStool at minimum).
 Without running primals, the L5 certification probes print `SKIP`.
 Structural L5 validation with TCP mock round-trip tests passes (1,027 lib tests).
+
+### plasmidBin Deployment Readiness (May 13, 2026)
+
+- `rust-toolchain.toml` includes `x86_64-unknown-linux-musl` target
+- `cargo build --release --target x86_64-unknown-linux-musl --features local --bin airspring` produces a **3.3 MB static-pie** binary
+- `airspring version` → `airspring 0.10.0 (UniBin)`
+- `airspring validate --list` → 10 scenarios
+- Binary is self-contained (statically linked, no glibc dependency)
+- `infra/plasmidBin/manifest.toml` lists airSpring (org: syntheticChemistry)
+- `sources.toml` excludes springs by design (primal-only harvest); spring binaries are staged manually or via CI
 
 ### Prerequisites for gS Level 1 (DONE)
 1. ~~Clone primalSpring beside springs/~~ — primalSpring at `springs/primalSpring/`
@@ -130,6 +140,9 @@ Structural L5 validation with TCP mock round-trip tests passes (1,027 lib tests)
 - [x] 6 projectNUCLEUS workload TOMLs (was 1)
 - [x] Foundation Thread 4 expression authored (`ENVIRONMENTAL_GENOMICS.md`)
 - [x] lithoSpore handoff README for LTEE E3 (`control/ltee_fls2_plant_immunity/README.md`)
+- [x] `precision.route` now consumes all upstream fields (`requires_compiler`, `adapter` in addition to existing)
+- [x] lithoSpore module packaging: `fetch_data.sh` + `tolerances.toml` added to LTEE E3
+- [x] musl target (`x86_64-unknown-linux-musl`) in `rust-toolchain.toml`; static-pie 3.3 MB binary verified standalone
 - [ ] guideStone L5 / live NUCLEUS validation (blocked on live biomeOS + toadStool — Pass 14)
 - [ ] guideStone L6 / cross-spring pipeline (deploy graphs validated against live NUCLEUS)
 

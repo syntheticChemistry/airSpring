@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# lithoSpore module tolerances for LTEE E3 — FLS2 Plant Immunity
+# Used by lithoSpore ingestion to validate Rust repro against Python baseline.
+
+[metadata]
+ltee_id = "E3"
+spring = "airSpring"
+paper = "Dolgikh et al. 2025"
+domain = "plant_immunity_fls2"
+module_name = "ltee-immunity"
+
+[binding]
+kd_tolerance_nm = 5.0
+r2_minimum = 0.95
+# Rust model calculations match formula predictions within this tolerance
+model_calculation_tolerance = 1e-12
+
+[glycosylation]
+kd_wild_type_nm = 28.0
+kd_engineered_nm = 15.0
+sensitivity_ratio = 1.867
+sensitivity_tolerance = 0.01
+
+[soil_immune_coupling]
+moisture_threshold_vwc = 0.1
+moisture_range_vwc = 0.2
+q10_base = 2.0
+q10_reference_temp_c = 25.0
+q10_interval_c = 10.0
+coupling_tolerance = 1e-6
+python_parity_tolerance = 1e-10

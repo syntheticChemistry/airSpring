@@ -1,13 +1,14 @@
 # airSpring wateringHole
 
-**Updated**: May 12, 2026 | **Version**: v0.10.0 (post-interstadial, 46 capabilities)
+**Updated**: May 13, 2026 | **Version**: v0.10.0 (Tier 2 convergence, 46 capabilities)
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.10.0** | [AIRSPRING_DOWNSTREAM_SEEDING_HANDOFF_MAY12_2026.md](handoffs/AIRSPRING_DOWNSTREAM_SEEDING_HANDOFF_MAY12_2026.md) | 2026-05-12 | **Canonical** — LTEE E3 Rust 29/29 PASS, `--format json`, 6 projectNUCLEUS workloads, GPU registry fix, barraCuda 0.4.0, primal_names:: zero hardcoded strings, deep debt clean, guideStone L5-ready, 94 binaries |
+| **V0.10.0** | [AIRSPRING_TIER2_CONVERGENCE_HANDOFF_MAY13_2026.md](handoffs/AIRSPRING_TIER2_CONVERGENCE_HANDOFF_MAY13_2026.md) | 2026-05-13 | **Canonical** — Tier 2 convergence wave: all 5 audit items resolved, `precision.route` full fields, LTEE lithoSpore module packaged, musl static binary 3.3 MB, gaps surfaced |
+| **V0.10.0** | [AIRSPRING_DOWNSTREAM_SEEDING_HANDOFF_MAY12_2026.md](handoffs/AIRSPRING_DOWNSTREAM_SEEDING_HANDOFF_MAY12_2026.md) | 2026-05-12 | Downstream seeding — LTEE E3, `--format json`, projectNUCLEUS workloads, barraCuda 0.4.0, Tier 2 IPC wiring, deep debt clean |
 | **≤V0.10.0** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 
 ## Cross-Spring Documents
