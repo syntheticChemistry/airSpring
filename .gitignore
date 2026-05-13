@@ -26,9 +26,8 @@ control/**/data/
 *.csv.gz
 *.nc
 
-# Generated benchmark artifacts
-scripts/bench_python_results.json
-scripts/bench_comparison.json
+# Generated benchmark artifacts (archived scripts produced these; kept for safety)
+# bench_cpu_vs_python streams JSON via stdout, no file output.
 
 # OS
 .DS_Store

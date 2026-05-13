@@ -7,8 +7,7 @@
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.10.0** | [AIRSPRING_TIER2_CONVERGENCE_HANDOFF_MAY13_2026.md](handoffs/AIRSPRING_TIER2_CONVERGENCE_HANDOFF_MAY13_2026.md) | 2026-05-13 | **Canonical** — Tier 2 convergence wave: all 5 audit items resolved, `precision.route` full fields, LTEE lithoSpore module packaged, musl static binary 3.3 MB, gaps surfaced |
-| **V0.10.0** | [AIRSPRING_DOWNSTREAM_SEEDING_HANDOFF_MAY12_2026.md](handoffs/AIRSPRING_DOWNSTREAM_SEEDING_HANDOFF_MAY12_2026.md) | 2026-05-12 | Downstream seeding — LTEE E3, `--format json`, projectNUCLEUS workloads, barraCuda 0.4.0, Tier 2 IPC wiring, deep debt clean |
+| **V0.10.0** | [AIRSPRING_TIER2_CONVERGENCE_HANDOFF_MAY13_2026.md](handoffs/AIRSPRING_TIER2_CONVERGENCE_HANDOFF_MAY13_2026.md) | 2026-05-13 | **Canonical** — Tier 2 convergence wave: all 5 audit items resolved, deep debt audit clean, `precision.route` full fields, Freundlich bench (25/25), LTEE lithoSpore module, musl static 3.3 MB, barracuda_route hardcoding fixed, 1,035 lib tests |
 | **≤V0.10.0** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 
 ## Cross-Spring Documents
@@ -34,6 +33,7 @@
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_DOWNSTREAM_SEEDING_HANDOFF_MAY12_2026.md` | v0.10.0: Downstream seeding sprint — LTEE E3, `--format json`, projectNUCLEUS workloads, barraCuda 0.4.0, Tier 2 IPC wiring, deep debt clean (superseded by May13 convergence) |
 | `handoffs/archive/AIRSPRING_V010_POST_INTERSTADIAL_UPSTREAM_HANDOFF_MAY10_2026.md` | v0.10.0: Post-interstadial technical inventory — Tier 4, L5-L6 cert, 10 UniBin scenarios, foundation 36/36 (superseded by May12 downstream seeding) |
 | `handoffs/archive/AIRSPRING_DEEP_DEBT_TIER4_HANDOFF_MAY11_2026.md` | v0.10.0: Deep debt + Tier 4 — primal_names, deny.toml, IPC-first, guideStone L4, barraCuda 0.4.0 (superseded by May12 downstream seeding) |
 | `handoffs/archive/AIRSPRING_ECOSYSTEM_EVOLUTION_HANDOFF_MAY11_2026.md` | v0.10.0: Ecosystem evolution — Python→Rust→Primal, composition patterns, NUCLEUS/Neural API, NestGate priority (superseded by May12 downstream seeding) |

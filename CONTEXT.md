@@ -1,6 +1,6 @@
 # Context — airSpring
 
-**Doc sync:** 2026-05-12 (v0.10.0; eukaryotic UniBin; post-interstadial; all CI gates green).
+**Doc sync:** 2026-05-13 (v0.10.0; eukaryotic UniBin; Tier 2 convergence; all CI gates green).
 
 ## What This Is
 
@@ -38,11 +38,11 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - **Architecture:** Two workspace crates (`airspring-barracuda` library + `airspring-forge` dispatch)
 - **Communication:** JSON-RPC 2.0 over Unix sockets + TCP (biomeOS capability routing, Songbird sovereign transport)
 - **License:** AGPL-3.0-or-later
-- **Lib tests:** 1,027 (barracuda, `cargo test --features local,testutil --lib`)
+- **Lib tests:** 1,035 (barracuda, `cargo test --features local,testutil --lib`)
 - **Integration + doc tests:** 316 (barracuda)
-- **Barracuda total:** 1,343 (1,027 lib + 316 integration/doc)
+- **Barracuda total:** 1,351 (1,035 lib + 316 integration/doc)
 - **Forge tests:** 62 (metalForge)
-- **Grand total:** 1,405 (both crates)
+- **Grand total:** 1,413 (both crates)
 - **Binaries:** 94 (85 validation, 4 bench, 3 operational, 1 UniBin, 1 guidestone)
 - **Proptest invariants:** 7 (SVP, delta, Hargreaves, TAW, RAW, Ks)
 - **Line coverage:** 90.56% (cargo llvm-cov --lib --fail-under-lines 90)

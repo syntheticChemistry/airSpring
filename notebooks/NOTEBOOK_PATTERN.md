@@ -11,7 +11,7 @@ airSpring/
     NOTEBOOK_PATTERN.md          <- this file
     01-composition-validation.ipynb   <- primal composition & capability validation
     02-benchmark-comparison.ipynb     <- Python vs Rust vs GPU performance
-    03-ecosystem-evidence.ipynb       <- 87 experiments, tolerances, provenance
+    03-ecosystem-evidence.ipynb       <- 90 experiments, tolerances, provenance
     04-cross-spring-connections.ipynb <- barraCuda integration, shader evolution
     05-domain-deep-dive.ipynb         <- Michigan Atlas, seasonal pipeline, Penny vision
 ```
@@ -48,11 +48,11 @@ This means they work without primals running.
 | File | Contents |
 |------|----------|
 | `composition_validation.json` | 46 capabilities, deploy graphs, primal composition, gaps |
-| `test_suite_report.json` | Module-level test counts (1,405 total), coverage, quality gates |
-| `experiment_catalog.json` | All 87 experiments categorized by focus area |
+| `test_suite_report.json` | Module-level test counts (1,413 total), coverage, quality gates |
+| `experiment_catalog.json` | All 90 experiments categorized by focus area |
 | `security_convergence.json` | Safety lints, cargo-deny, IPC security, CI gates |
 | `cross_spring_matrix.json` | barraCuda integration, shader families, primal consumption |
-| `benchmark_timing.json` | 24-algorithm Rust vs Python timing, GPU tiers, atlas scale |
+| `benchmark_timing.json` | 25-algorithm Rust vs Python timing, GPU tiers, atlas scale |
 
 ## Visualization Standards
 
