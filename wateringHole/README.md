@@ -1,13 +1,13 @@
 # airSpring wateringHole
 
-**Updated**: May 13, 2026 | **Version**: v0.10.0 (Tier 2 convergence, 46 capabilities)
+**Updated**: May 13, 2026 | **Version**: v0.10.0 (Niche Atomic Convergence, 46 capabilities)
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.10.0** | [AIRSPRING_TIER2_CONVERGENCE_HANDOFF_MAY13_2026.md](handoffs/AIRSPRING_TIER2_CONVERGENCE_HANDOFF_MAY13_2026.md) | 2026-05-13 | **Canonical** — Tier 2 convergence wave: all 5 audit items resolved, deep debt audit clean, `precision.route` full fields, Freundlich bench (25/25), LTEE lithoSpore module, musl static 3.3 MB, barracuda_route hardcoding fixed, 1,035 lib tests |
+| **V0.10.0** | [AIRSPRING_NICHE_ATOMIC_CONVERGENCE_MAY13_2026.md](handoffs/AIRSPRING_NICHE_ATOMIC_CONVERGENCE_MAY13_2026.md) | 2026-05-13 | **Canonical** — Niche Atomic Convergence: NestGate CAS client (AG-008 RESOLVED), Squirrel inference client (AG-005 IPC wired), `data.weather` handler evolved to `capability.call`, composition-parity extended, 1,051 lib tests / 1,429 total |
 | **≤V0.10.0** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 
 ## Cross-Spring Documents
@@ -33,6 +33,7 @@
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_TIER2_CONVERGENCE_HANDOFF_MAY13_2026.md` | v0.10.0: Tier 2 convergence wave — deep debt audit, precision.route full fields, Freundlich bench (25/25), LTEE lithoSpore module, musl static 3.3 MB, 1,035 lib tests (superseded by May13 Niche Atomic) |
 | `handoffs/archive/AIRSPRING_DOWNSTREAM_SEEDING_HANDOFF_MAY12_2026.md` | v0.10.0: Downstream seeding sprint — LTEE E3, `--format json`, projectNUCLEUS workloads, barraCuda 0.4.0, Tier 2 IPC wiring, deep debt clean (superseded by May13 convergence) |
 | `handoffs/archive/AIRSPRING_V010_POST_INTERSTADIAL_UPSTREAM_HANDOFF_MAY10_2026.md` | v0.10.0: Post-interstadial technical inventory — Tier 4, L5-L6 cert, 10 UniBin scenarios, foundation 36/36 (superseded by May12 downstream seeding) |
 | `handoffs/archive/AIRSPRING_DEEP_DEBT_TIER4_HANDOFF_MAY11_2026.md` | v0.10.0: Deep debt + Tier 4 — primal_names, deny.toml, IPC-first, guideStone L4, barraCuda 0.4.0 (superseded by May12 downstream seeding) |

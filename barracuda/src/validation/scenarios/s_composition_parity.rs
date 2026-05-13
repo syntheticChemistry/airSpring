@@ -9,7 +9,7 @@
 use crate::validation::ValidationHarness;
 use crate::validation::scenarios::registry::{Scenario, ScenarioMeta, Tier, Track};
 use crate::{biomeos, ipc, methods as m, niche, primal_names, rpc};
-use crate::ipc::{precision_route, toadstool_validate};
+use crate::ipc::{nestgate_data, precision_route, squirrel_inference, toadstool_validate};
 
 /// Scenario metadata and entry point.
 pub const SCENARIO: Scenario = Scenario {
@@ -80,6 +80,8 @@ fn tier2_ipc(v: &mut ValidationHarness) {
 
     tier2_toadstool_validate(v);
     tier2_precision_route(v);
+    tier2_nestgate_cas(v);
+    tier2_squirrel_inference(v);
 }
 
 fn tier2_toadstool_validate(v: &mut ValidationHarness) {
@@ -117,6 +119,45 @@ fn tier2_precision_route(v: &mut ValidationHarness) {
         }
         Err(e) => {
             println!("  SKIP: precision.route — {e}");
+        }
+    }
+}
+
+fn tier2_nestgate_cas(v: &mut ValidationHarness) {
+    match nestgate_data::storage_status() {
+        Ok(ss) => {
+            v.check_bool("nestgate.storage.status: responds", true);
+            println!(
+                "  nestgate storage: healthy={}, backend={}, free={}",
+                ss.healthy, ss.backend, ss.free_bytes
+            );
+        }
+        Err(nestgate_data::NestGateError::NoPrimal) => {
+            println!("  SKIP: nestgate storage — NestGate not available");
+        }
+        Err(e) => {
+            println!("  SKIP: nestgate storage — {e}");
+        }
+    }
+}
+
+fn tier2_squirrel_inference(v: &mut ValidationHarness) {
+    match squirrel_inference::list_models() {
+        Ok(models) => {
+            v.check_bool("squirrel.inference.models: responds", true);
+            println!("  squirrel models: {} available", models.len());
+            for m in &models {
+                println!(
+                    "    {} (embed={}, complete={})",
+                    m.id, m.supports_embed, m.supports_complete
+                );
+            }
+        }
+        Err(squirrel_inference::InferenceError::NoPrimal) => {
+            println!("  SKIP: squirrel inference — Squirrel not available");
+        }
+        Err(e) => {
+            println!("  SKIP: squirrel inference — {e}");
         }
     }
 }

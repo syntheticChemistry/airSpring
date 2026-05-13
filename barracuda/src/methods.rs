@@ -169,3 +169,21 @@ pub const TOADSTOOL_VALIDATE: &str = "toadstool.validate";
 pub const TOADSTOOL_LIST_WORKLOADS: &str = "toadstool.list_workloads";
 /// `barraCuda` precision routing advisory.
 pub const PRECISION_ROUTE: &str = "precision.route";
+
+// ── NestGate — Content-Addressed Storage ────────────────────────────────────
+
+/// Store content in `NestGate` CAS.
+pub const CONTENT_STORE: &str = "content.store";
+/// Retrieve content from `NestGate` by hash.
+pub const CONTENT_GET: &str = "content.get";
+/// Query `NestGate` storage health and capacity.
+pub const STORAGE_STATUS: &str = "storage.status";
+
+// ── Squirrel — Inference ────────────────────────────────────────────────────
+
+/// Embed text for similarity search via Squirrel.
+pub const INFERENCE_EMBED: &str = "inference.embed";
+/// Request structured completion via Squirrel.
+pub const INFERENCE_COMPLETE: &str = "inference.complete";
+/// List available inference models from Squirrel.
+pub const INFERENCE_MODELS: &str = "inference.models";

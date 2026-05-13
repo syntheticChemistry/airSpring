@@ -4,6 +4,15 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [Unreleased] - 2026-05-13
 
+### Niche Atomic Convergence (2026-05-13 afternoon)
+
+- **NestGate CAS typed client** (`ipc::nestgate_data`): `content.store`, `content.get`, `storage.status` — typed results, standard transport discovery, 8 TCP round-trip tests. AG-008 RESOLVED.
+- **Squirrel inference typed client** (`ipc::squirrel_inference`): `inference.embed`, `inference.complete`, `inference.models` — ecology-domain embedding + completion + model discovery, 8 TCP round-trip tests. AG-005 IPC wired (science path call pending).
+- **`data.weather` handler evolved**: Non-standard `data.open_meteo_weather` RPC → standard `capability.call` routing. NestGate does not implement `data.*` — the handler now correctly routes through NestGate's actual wire surface.
+- **6 new method constants** in `methods.rs`: `CONTENT_STORE`, `CONTENT_GET`, `STORAGE_STATUS`, `INFERENCE_EMBED`, `INFERENCE_COMPLETE`, `INFERENCE_MODELS`.
+- **Composition-parity scenario extended**: NestGate `storage.status` and Squirrel `inference.models` probes added (Tier 2 skip-if-absent).
+- **1,051 lib tests** (was 1,035), **1,429 total** (was 1,413), 0 clippy warnings.
+
 ### Deep debt audit + Tier 2 convergence wave (2026-05-13)
 
 - **`ipc/barracuda_route.rs` hardcoding eliminated**: Replaced hardcoded `/tmp/barracuda.sock` fallback with `resolve_transport(primal_names::BARRACUDA)` — standard XDG/env/biomeOS discovery pipeline. Added 2 unit tests (was 0).

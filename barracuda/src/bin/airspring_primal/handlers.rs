@@ -329,10 +329,17 @@ pub fn handle_data_weather(params: &serde_json::Value) -> serde_json::Value {
             "transport": "standalone",
         });
     };
-    rpc::send(&socket, "data.open_meteo_weather", params).map_or_else(
+    // NestGate is a storage primal — it does not implement `data.*` methods.
+    // Route through `capability.call` with the standard NestGate operations.
+    let call_params = serde_json::json!({
+        "capability": "storage",
+        "operation": "weather.daily",
+        "params": params,
+    });
+    rpc::send(&socket, "capability.call", &call_params).map_or_else(
         |_| {
             serde_json::json!({
-                "error": "data.open_meteo_weather dispatch failed",
+                "error": "NestGate capability.call dispatch failed",
                 "fallback": "direct_http",
             })
         },
