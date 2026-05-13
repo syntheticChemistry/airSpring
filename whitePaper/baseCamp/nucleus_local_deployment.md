@@ -18,7 +18,7 @@ the minimum viable orchestration layer without requiring LAN HPC.
 | Step | Status | What |
 |------|--------|------|
 | 0 | DONE | metalForge cross-system routing (GPU+NPU+CPU, 27 workloads) |
-| 1 | DONE | airSpring NUCLEUS primal (46 caps, 28/28 cross-primal pipeline) |
+| 1 | DONE | airSpring NUCLEUS primal (49 caps, 28/28 cross-primal pipeline) |
 | 2 | DONE | Local NUCLEUS Tower on Eastgate (7 primals discovered) |
 | 3 | NEXT | NestGate weather provider (replace direct HTTP) |
 | 4 | NEXT | NestGate NCBI 16S (baseCamp 06 extension) |

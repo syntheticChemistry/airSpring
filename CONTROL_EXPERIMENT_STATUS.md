@@ -320,7 +320,7 @@ Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2, Stewart 1977, CW2D media params)
 | validate_gdd | T1 | 26/26 | GDD accumulation, kc_from_gdd, phenology |
 | validate_pedotransfer | T1 | 58/58 | Saxton-Rawls 2006, θs/θr/Ks from texture |
 
-**Total Rust: 651 tests + 1393 atlas checks PASS, 880 lib + 280 integration + 61 forge PASS**
+**Total Rust: 651 tests + 1393 atlas checks PASS, 1,057 lib + 316 integration + 62 forge PASS**
 **Phase 2 cross-validation: 75/75 MATCH (Python↔Rust, tol=1e-5)**
 **Phase 3 NUCLEUS integration: Exp 084 (21/21), Exp 085 (19/19), Exp 086 (17/17), Exp 087 (22/22) — 79/79 ALL PASS**
 **Phase 3 GPU-first: 11 orchestrators wired, 4/4 ToadStool issues RESOLVED**

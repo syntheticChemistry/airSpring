@@ -10,7 +10,7 @@ Every paper reproduced in airSpring follows the same path:
 1. **Python baseline** — digitize paper benchmarks, implement equations, validate (1,284/1,284 PASS)
 2. **Rust proof** — cross-validate to 1e-5, 14.3× speedup, 94 zero-panic binaries (1,057 lib + 316 integration + 62 forge = 1,435 total tests)
 3. **GPU acceleration** — barraCuda 0.4.0 (25 Tier A modules, 21/21 CPU-GPU parity, 767+ WGSL shaders)
-4. **Primal composition** — 46 JSON-RPC capabilities via biomeOS Neural API, 7 deploy graphs, NUCLEUS atomics
+4. **Primal composition** — 49 JSON-RPC capabilities via biomeOS Neural API, 7 deploy graphs, NUCLEUS atomics
 5. **UniBin eukaryotic** — single `airspring` binary (certify/validate/serve/status/version), 10 validation scenarios, guideStone **L4** (targeting L6)
 
 **Status**: 90 experiments, barraCuda 0.4.0 (wgpu 28, DF64), Edition 2024 (rust-toolchain 1.92), all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired, niche architecture (49 capabilities, 7 deploy graphs), `#![cfg_attr(not(test), forbid(unsafe_code))]` + `#![deny(cast_*)]` library-strict + zero clippy pedantic+nursery + `warn(missing_docs)`. 60 tolerances in 5 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies**. Zero `#[allow()]` in production. Platform-agnostic IPC (Transport enum: Unix + TCP). Tier 4 IPC-first: **`[features].default = []`**, barraCuda via `--features local`, validation binaries `required-features = ["local"]`, pure-Rust fallbacks. 90.56% line coverage. cargo-deny 0.19 clean. Full validation pipeline green (2026-05-11)
@@ -40,7 +40,7 @@ Phase 3   GPU live dispatch     — Titan V validated (25/25 PASS, 0.04% seasona
 Phase 3.5 NPU edge             — AKD1000 live: 3 experiments, ~48µs inference, LOCOMOS power budget
 Phase 3.7 metalForge live      — RTX 4070 + Titan V + AKD1000 + i9-12900K discovered, 18 workloads route
 Phase 3.8 Cross-system routing — GPU+NPU+CPU dispatch proven (29/29 PASS), NUCLEUS atomic ready
-Phase 3.9 NUCLEUS primal        — airSpring registered as science primal, 49 capabilities, 29/29 parity
+Phase 3.9 NUCLEUS primal        — airSpring registered as science primal, 49 capabilities (incl. inference.*), 29/29 parity
 Phase 4.0 Cross-primal pipeline — ecology domain, capability_call routing, 28/28 PASS (Exp 063)
 Phase 4.1 Penny Irrigation      — sovereign scheduling on consumer hardware ($600 GPU + $99 NPU)
 Phase 4.2 Nautilus reservoir     — bingoCube/nautilus evolutionary ET₀ prediction + drift detect
@@ -209,7 +209,7 @@ Phase 5.18 Deep debt evolution — 60 tolerances (atlas_annual_et0, atlas_yield_
 | `validate_bootstrap_jackknife` | 20 | Bootstrap CI + Jackknife variance, seasonal ET₀ |
 | `validate_drought_index` | 20 | SPI-1/3/6/12, gamma MLE, WMO classification |
 | `validate_cross_spring_modern` | 36 | Cross-spring modern systems (provenance, ACF, precision routing) |
-| `validate_nucleus_modern` | 43 | NUCLEUS modern deployment (Tower/Node, 46 caps, SPI/ACF/gamma) |
+| `validate_nucleus_modern` | 43 | NUCLEUS modern deployment (Tower/Node, 49 caps, SPI/ACF/gamma) |
 | `validate_cpu_gpu_comprehensive` | 21 | All 18 GPU modules CPU↔GPU parity (Exp 084) |
 | `validate_toadstool_dispatch` | 19 | 14 JSON-RPC science methods, compute.offload (Exp 085) |
 | `validate_mixed_nucleus_live` | 17 | Live NUCLEUS mesh, ecology pipeline, PCIe bypass (Exp 086, forge) |
@@ -296,7 +296,7 @@ $200 sensor, Open-Meteo weather data, and a $600 GPU running BarraCuda.
 ## Extension Explorations
 
 With 90 experiments validated and the full Python → Rust CPU → Titan V GPU live →
-GPU math portability (13 modules, 46/46) → upstream lean (20 ops, `BatchedElementwiseF64`) → metalForge mixed hardware (27 workloads) → NUCLEUS primal (46 caps, 28/28 cross-primal pipeline + 60/60 NUCLEUS routing) → cross-spring provenance (32/32, 5-spring shader tracking) → `PrecisionRoutingAdvice` wired (v0.7.3) → CPU/GPU parity (21/21, Exp 084) → toadStool dispatch (19/19, Exp 085) → NUCLEUS mesh (17/17, Exp 086) → graph coordination (22/22, Exp 087),
+GPU math portability (13 modules, 46/46) → upstream lean (20 ops, `BatchedElementwiseF64`) → metalForge mixed hardware (27 workloads) → NUCLEUS primal (49 caps, 28/28 cross-primal pipeline + 60/60 NUCLEUS routing) → cross-spring provenance (32/32, 5-spring shader tracking) → `PrecisionRoutingAdvice` wired (v0.7.3) → CPU/GPU parity (21/21, Exp 084) → toadStool dispatch (19/19, Exp 085) → NUCLEUS mesh (17/17, Exp 086) → graph coordination (22/22, Exp 087),
 airSpring can now extend beyond reproduction into new science. These explorations use the validated stack to answer
 questions the original papers did not.
 
@@ -447,7 +447,7 @@ with 3-tier routing. Pipeline designed but not wired end-to-end.
 
 ```
 Step 0: ✓ DONE — metalForge cross-system routing (GPU+NPU+CPU, 18 workloads, 29/29)
-Step 1: ✓ DONE — airSpring NUCLEUS primal (46 caps, 28/28 cross-primal pipeline, Exp 063)
+Step 1: ✓ DONE — airSpring NUCLEUS primal (49 caps, 28/28 cross-primal pipeline, Exp 063)
         ecology domain in biomeOS capability_registry.toml
         capability.call routing via neural-api (semantic ecology.et0_fao56 → airSpring)
         Cross-primal forwarding: airSpring → ToadStool/BearDog/Songbird

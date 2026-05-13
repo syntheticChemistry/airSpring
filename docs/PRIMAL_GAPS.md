@@ -78,7 +78,7 @@ Next:     gS Level 6 (cross-spring pipeline — deploy graphs, capability regist
 
 ### L5 Readiness Assessment (May 13, 2026)
 
-airSpring has **all seven L5 RPC handlers wired and structurally tested** (1,051 lib tests):
+airSpring has **all seven L5 RPC handlers wired and structurally tested** (1,057 lib tests):
 - `composition.status` — wired (biomeOS v3.51 contract)
 - `method.register` — wired (49 capabilities registered)
 - `compute.dispatch` — wired (toadStool identity_f64 shader)

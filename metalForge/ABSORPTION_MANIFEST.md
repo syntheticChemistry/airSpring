@@ -136,7 +136,7 @@ These workloads auto-activate GPU dispatch upon ToadStool absorption of ops 5-8.
 ```
 cargo fmt   — clean
 cargo clippy --all-targets — zero warnings (pedantic)
-cargo test  — 62/62 pass (forge), 943/943 pass (barracuda lib)
+cargo test  — 62/62 pass (forge), 1,057/1,057 pass (barracuda lib)
 validate_*  — 84/84 PASS (barracuda) + 3 bench binaries (30/30 cross-spring benchmarks)
 metalForge cross-system routing — 29/29 PASS (18 workloads × dispatch checks)
 ToadStool sync: S68+ (e96576ee) — universal precision, 700 WGSL, 6-Spring provenance

@@ -399,7 +399,7 @@ Experiments follow `NNN_name` format:
 - `080`: Bootstrap & Jackknife CI for seasonal ET₀ (deterministic resampling)
 - `081`: Standardized Precipitation Index (SPI) drought analysis (gamma MLE + normal quantile)
 - `082`: Cross-Spring Modern Systems Validation (provenance, autocorrelation, PrecisionRoutingAdvice)
-- `083`: NUCLEUS Modern Deployment Validation (biomeOS, Tower/Node, 46 JSON-RPC, SPI/ACF/gamma_cdf)
+- `083`: NUCLEUS Modern Deployment Validation (biomeOS, Tower/Node, 49 JSON-RPC, SPI/ACF/gamma_cdf)
 - `084`: CPU vs GPU Comprehensive Parity (18 modules, all GPU ops, tolerance-aware)
 - `085`: toadStool Compute Dispatch (14 methods, compute.offload, 7 primals discovered)
 - `086`: metalForge Mixed Hardware Live NUCLEUS (live probe, NUCLEUS mesh, ecology pipeline)
@@ -589,7 +589,7 @@ pipeline, cross-primal discovery, and GPU precision routing.
 **Binary**: `validate_nucleus_modern`
 
 **Key Result**: biomeOS NUCLEUS integration fully operational. airSpring primal
-serves 46 JSON-RPC capabilities with live Tower/Node Atomic. New v0.7.5
+serves 49 JSON-RPC capabilities with live Tower/Node Atomic. New v0.7.5
 endpoints (SPI, autocorrelation, gamma_cdf) all pass parity with direct Rust calls.
 
 ### Exp 084: CPU vs GPU Comprehensive Parity

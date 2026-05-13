@@ -55,7 +55,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test -p airspring-barracuda --features local,testutil --lib` | **1,035 passed**, 0 failures |
+| `cargo test -p airspring-barracuda --features local,testutil --lib` | **1,057 passed**, 0 failures |
 | `cargo test -p airspring-barracuda --tests --all-features` (or `--features local,testutil` for default-feature-aligned runs) | **316 passed** (integration + doc tests) |
 | `cargo test --lib` (metalForge) | **62 passed**, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **90.56% line coverage** |
@@ -230,7 +230,7 @@ airSpring/
 │   ├── bootstrap_jackknife/     # Bootstrap & Jackknife CI (20/20)
 │   ├── drought_index/           # SPI drought index (20/20)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (1,027 lib + 316 integration/doc = 1,343 tests, 94 binaries, barraCuda 0.4.0 / wgpu 28, Edition 2024)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (1,057 lib + 316 integration/doc = 1,373 tests, 94 binaries, barraCuda 0.4.0 / wgpu 28, Edition 2024)
 │   ├── src/
 │   │   ├── biomeos/                # biomeOS socket resolution + primal discovery (3 sub-modules)
 │   │   ├── eco/                 # Domain modules (22 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine + drought_index)
@@ -309,7 +309,7 @@ AGPL-3.0-or-later
 
 ---
 
-*May 13, 2026 — **Niche Atomic Convergence**: NestGate CAS typed client wired (`ipc::nestgate_data` — `content.store`, `content.get`, `storage.status`; 8 tests); Squirrel inference typed client wired (`ipc::squirrel_inference` — `inference.embed`, `inference.complete`, `inference.models`; 8 tests); `data.weather` handler evolved from non-standard `data.open_meteo_weather` to `capability.call` routing (AG-008 RESOLVED); composition-parity scenario extended with NestGate + Squirrel probes; **1,051 lib tests** (was 1,035), **1,429 total** (was 1,413). Earlier: **Tier 2 Convergence Wave**: `precision.route` client now consumes all upstream fields (`requires_compiler`, `adapter`); LTEE E3 lithoSpore module packaging complete (`fetch_data.sh` + `tolerances.toml`); **musl static-pie binary verified** (3.3 MB, `x86_64-unknown-linux-musl`, plasmidBin harvestable); docs reconciled for convergence wave handoff.
+*May 13, 2026 — **Niche Convergence → Atomic Deployment**: AG-005 RESOLVED (`inference.embed/complete/models` wired through `dispatch_science`, 7 dispatch tests); NestGate CAS typed client (`ipc::nestgate_data` — `content.store/get/status`, 8 tests, AG-008 RESOLVED); Squirrel inference typed client (`ipc::squirrel_inference` — `inference.embed/complete/models`, 8 tests); `data.weather` handler evolved to `capability.call` routing; Deep debt sprint: zero debt across all audit dimensions, clippy pedantic+nursery clean, last `/tmp/` hardcoding eliminated, `unused_must_use` resolved. **1,057 lib tests**, **1,435 total**. Earlier: Tier 2 Convergence Wave: `precision.route` full field consumption; LTEE E3 lithoSpore packaging; musl static-pie binary (3.3 MB, plasmidBin harvestable).
 May 12, 2026 — Deep debt resolution: **barraCuda 0.4.0** upstream absorption (workspace + Forge; from 0.3.13); 12 hardcoded primal tracing targets → `primal_names::` constants; **`primal_names::socket_filename()`** replaces `"biomeos.sock"` path literals; dead **`primal-proof`** Cargo feature removed; zero hardcoded primal name strings in production; **1,027** lib tests, **0** clippy. Earlier same day: hardcoded primal strings scrub, all three `deny.toml` files synced (openssl, sysinfo, aws-lc-sys, aws-lc-rs bans), Forge barraCuda progression **`0.3.7→0.4.0`**, `primal_names::BARRACUDA` added. Tier 4 IPC-first defaults + guideStone convergence (L2+→L4): `default = []`, 7 deploy graphs (GPU batch, sovereign data, uncertainty added), `required-features` on 94 binaries, IPC-only clippy clean. **LTEE E3** Python **12/12** + Rust **29/29** PASS (`validate_ltee_fls2`). UniBin **`validate --format json`** for Tier 2 projectNUCLEUS ingestion. Post-interstadial evolution: **`method.register`**, **`composition.status`**, skunkBat deploy-graph, capability cross-sync vs canonical **413**, CONTEXT.md reconciled, certification engine **L0–L6** (L4 cross-atomic; L5 NUCLEUS composition; L6 cross-spring pipeline), **10 UniBin validation scenarios** (incl. `s_tier4_math_parity`). **Tier 2 IPC wiring:** `ipc::toadstool_validate` + `ipc::precision_route` (16 TCP round-trip lib tests); **AG-012** resolved (Tier 2 unblocked); `TOADSTOOL_VALIDATE`, `TOADSTOOL_LIST_WORKLOADS`, `PRECISION_ROUTE` in `methods.rs`; composition-parity scenario extended with Tier 2 probes.
 May 9 — Deep debt resolution + eukaryotic evolution. Dead standalone-http feature
 removed (ureq code paths, broken dep). Unused bytemuck dep removed. .gitignore data/ bug

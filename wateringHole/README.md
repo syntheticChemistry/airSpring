@@ -1,14 +1,14 @@
 # airSpring wateringHole
 
-**Updated**: May 13, 2026 | **Version**: v0.10.0 (Niche Atomic Convergence, 46 capabilities)
+**Updated**: May 13, 2026 | **Version**: v0.10.0 (Niche Convergence → Atomic Deployment, 49 capabilities)
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.10.0** | [AIRSPRING_DEEP_DEBT_SPRINT_MAY13_2026.md](handoffs/AIRSPRING_DEEP_DEBT_SPRINT_MAY13_2026.md) | 2026-05-13 | **Canonical** — Deep debt sprint: zero debt across all audit dimensions, clippy pedantic+nursery clean, last `/tmp/` hardcoding eliminated, full audit answers for primalSpring |
-| **V0.10.0** | [AIRSPRING_NICHE_ATOMIC_CONVERGENCE_MAY13_2026.md](handoffs/AIRSPRING_NICHE_ATOMIC_CONVERGENCE_MAY13_2026.md) | 2026-05-13 | Niche Atomic Convergence: NestGate CAS + Squirrel inference IPC clients, AG-008 RESOLVED |
+| **V0.10.0** | [AIRSPRING_ATOMIC_DEPLOYMENT_HANDOFF_MAY13_2026.md](handoffs/AIRSPRING_ATOMIC_DEPLOYMENT_HANDOFF_MAY13_2026.md) | 2026-05-13 | **Canonical** — Comprehensive upstream handoff: primal consumption map (10/13), composition patterns (5), wire hygiene learnings, NUCLEUS deployment, neuralAPI, atomic readiness |
+| **V0.10.0** | [AIRSPRING_DEEP_DEBT_SPRINT_MAY13_2026.md](handoffs/AIRSPRING_DEEP_DEBT_SPRINT_MAY13_2026.md) | 2026-05-13 | Deep debt sprint: zero debt, clippy pedantic+nursery clean, full audit answers |
 | **≤V0.10.0** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 
 ## Cross-Spring Documents
