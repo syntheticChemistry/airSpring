@@ -319,6 +319,27 @@ pub fn bench_langmuir_fit(n: usize) -> (f64, f64, String) {
     )
 }
 
+pub fn bench_freundlich_fit(n: usize) -> (f64, f64, String) {
+    let ce = [1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0, 200.0, 300.0];
+    let qe = [2.8, 4.9, 8.5, 11.2, 14.0, 16.1, 17.0, 17.6, 17.8];
+    let t0 = Instant::now();
+    let mut r2 = 0.0_f64;
+    for _ in 0..n {
+        if let Some(fit) = black_box(isotherm::fit_freundlich(black_box(&ce), black_box(&qe))) {
+            r2 = fit.r_squared;
+        }
+    }
+    let elapsed = t0.elapsed().as_secs_f64();
+    let python_ref: f64 = 0.985;
+    let diff = (r2 - python_ref).abs();
+    let ok = r2 > 0.97;
+    (
+        elapsed,
+        r2,
+        format!("Rust R²={r2:.6}, Python≈{python_ref:.3}, diff={diff:.2e}, ok={ok}"),
+    )
+}
+
 pub fn bench_priestley_taylor(n: usize) -> (f64, f64, String) {
     let t0 = Instant::now();
     let mut result = 0.0_f64;

@@ -76,7 +76,7 @@ Next:     gS Level 6 (cross-spring pipeline — deploy graphs, capability regist
 
 ### L5 Readiness Assessment (May 13, 2026)
 
-airSpring has **all five L5 RPC handlers wired and structurally tested**:
+airSpring has **all five L5 RPC handlers wired and structurally tested** (1,035 lib tests):
 - `composition.status` — wired (biomeOS v3.51 contract)
 - `method.register` — wired (46 capabilities registered)
 - `compute.dispatch` — wired (toadStool identity_f64 shader)
@@ -89,7 +89,7 @@ scenario with graceful skip when primals are absent.
 
 **Remaining L5 blocker**: Live primals (biomeOS + toadStool at minimum).
 Without running primals, the L5 certification probes print `SKIP`.
-Structural L5 validation with TCP mock round-trip tests passes (1,027 lib tests).
+Structural L5 validation with TCP mock round-trip tests passes (1,035 lib tests).
 
 ### plasmidBin Deployment Readiness (May 13, 2026)
 
@@ -143,6 +143,11 @@ Structural L5 validation with TCP mock round-trip tests passes (1,027 lib tests)
 - [x] `precision.route` now consumes all upstream fields (`requires_compiler`, `adapter` in addition to existing)
 - [x] lithoSpore module packaging: `fetch_data.sh` + `tolerances.toml` added to LTEE E3
 - [x] musl target (`x86_64-unknown-linux-musl`) in `rust-toolchain.toml`; static-pie 3.3 MB binary verified standalone
+- [x] `ipc/barracuda_route.rs` hardcoded `/tmp/barracuda.sock` → `resolve_transport(BARRACUDA)` standard discovery
+- [x] `bench_cpu_vs_python` Freundlich gap closed (25/25 parity, was 24)
+- [x] `math.rs` unit tests (mean, pearson_r, std_dev — 6 tests, was 0)
+- [x] `ipc/barracuda_route.rs` unit tests (2 tests, was 0)
+- [x] `BARRACUDA_REQUIREMENTS.md` benchmark count drift fixed (25/25, was "18/18")
 - [ ] guideStone L5 / live NUCLEUS validation (blocked on live biomeOS + toadStool — Pass 14)
 - [ ] guideStone L6 / cross-spring pipeline (deploy graphs validated against live NUCLEUS)
 

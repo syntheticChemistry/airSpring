@@ -78,6 +78,12 @@ fn soil_benchmarks() -> Vec<BenchEntry> {
             10_000,
             bench_fns::bench_langmuir_fit
         ),
+        entry!(
+            "freundlich_fit",
+            "Freundlich Isotherm Fit",
+            10_000,
+            bench_fns::bench_freundlich_fit
+        ),
     ]
 }
 
@@ -186,7 +192,7 @@ fn pipeline_benchmarks() -> Vec<BenchEntry> {
 }
 
 pub fn build_benchmarks() -> Vec<BenchEntry> {
-    let mut all = Vec::with_capacity(24);
+    let mut all = Vec::with_capacity(25);
     all.extend(et0_benchmarks());
     all.extend(soil_benchmarks());
     all.extend(hydrology_benchmarks());

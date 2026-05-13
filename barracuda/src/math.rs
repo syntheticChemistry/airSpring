@@ -61,3 +61,50 @@ pub fn std_dev(data: &[f64]) -> f64 {
         var.sqrt()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn mean_basic() {
+        let data = [1.0, 2.0, 3.0, 4.0, 5.0];
+        let m = mean(&data);
+        assert!((m - 3.0).abs() < 1e-14, "mean={m}");
+    }
+
+    #[test]
+    fn mean_empty() {
+        assert_eq!(mean(&[]), 0.0);
+    }
+
+    #[test]
+    fn pearson_r_perfect_positive() {
+        let x = [1.0, 2.0, 3.0, 4.0, 5.0];
+        let y = [2.0, 4.0, 6.0, 8.0, 10.0];
+        let r = pearson_r(&x, &y);
+        assert!((r - 1.0).abs() < 1e-12, "r={r}");
+    }
+
+    #[test]
+    fn pearson_r_perfect_negative() {
+        let x = [1.0, 2.0, 3.0, 4.0, 5.0];
+        let y = [10.0, 8.0, 6.0, 4.0, 2.0];
+        let r = pearson_r(&x, &y);
+        assert!((r - (-1.0)).abs() < 1e-12, "r={r}");
+    }
+
+    #[test]
+    fn std_dev_positive_for_varied_data() {
+        let data = [2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0];
+        let sd = std_dev(&data);
+        assert!(sd > 1.9 && sd < 2.2, "std_dev={sd}");
+    }
+
+    #[test]
+    fn std_dev_zero_for_constant() {
+        let data = [5.0, 5.0, 5.0, 5.0];
+        let sd = std_dev(&data);
+        assert!(sd.abs() < 1e-12, "std_dev={sd}");
+    }
+}

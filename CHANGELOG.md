@@ -4,11 +4,15 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [Unreleased] - 2026-05-13
 
-### Tier 2 convergence wave (2026-05-13)
+### Deep debt audit + Tier 2 convergence wave (2026-05-13)
 
+- **`ipc/barracuda_route.rs` hardcoding eliminated**: Replaced hardcoded `/tmp/barracuda.sock` fallback with `resolve_transport(primal_names::BARRACUDA)` — standard XDG/env/biomeOS discovery pipeline. Added 2 unit tests (was 0).
+- **Freundlich added to `bench_cpu_vs_python`**: 25/25 CPU parity benchmarks (was 24). `BARRACUDA_REQUIREMENTS.md` count reconciled from stale "18/18".
+- **`math.rs` unit tests**: 6 new tests covering `mean`, `pearson_r`, `std_dev` (was 0). Both `local` and IPC-only code paths exercised.
 - **`precision.route` full field consumption**: `PrecisionAdvice` now includes `requires_compiler` and `adapter` fields from upstream barraCuda response (previously dropped on the floor).
-- **lithoSpore LTEE module packaging**: `fetch_data.sh` + `tolerances.toml` added to `control/ltee_fls2_plant_immunity/` — follows lithoSpore standard module layout (`fetch_data.sh` + `run_baseline.py` + `run_validation` + `tolerances.toml`).
-- **musl static binary**: `rust-toolchain.toml` includes `x86_64-unknown-linux-musl` target. `airspring` UniBin builds as a 3.3 MB static-pie binary (verified `version` + `validate --list`). plasmidBin harvestable.
+- **lithoSpore LTEE module packaging**: `fetch_data.sh` + `tolerances.toml` added to `control/ltee_fls2_plant_immunity/` — follows lithoSpore standard module layout.
+- **musl static binary**: `rust-toolchain.toml` includes `x86_64-unknown-linux-musl` target. `airspring` UniBin builds as a 3.3 MB static-pie binary. plasmidBin harvestable.
+- **Comprehensive deep debt audit**: Zero files >800L, zero `unsafe` in production, zero `todo!()`/`FIXME`/`HACK`, zero `#[allow()]`, zero `.unwrap()` in lib, zero hardcoded primal paths, mocks confined to `#[cfg(test)]`, all external deps pure Rust. **1,035 lib tests**, 0 clippy warnings.
 - **Convergence wave handoff**: `AIRSPRING_TIER2_CONVERGENCE_HANDOFF_MAY13_2026.md` — all 5 audit items addressed, gaps surfaced upstream.
 
 ### Deep debt audit: Songbird hardcoding + Tier 2 (2026-05-12 evening)

@@ -119,10 +119,10 @@ Verify:    airspring version → "airspring 0.10.0 (UniBin)"
 
 | Metric | Value |
 |--------|-------|
-| Lib tests | 1,027 |
+| Lib tests | 1,035 |
 | Integration tests | 316 |
 | Forge tests | 62 |
-| **Total tests** | **1,405** |
+| **Total tests** | **1,413** |
 | Binaries | 94 |
 | Validation scenarios | 10 |
 | Method constants | 49 |

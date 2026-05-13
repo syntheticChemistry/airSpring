@@ -1,6 +1,6 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: May 12, 2026 (v0.10.0 — 1,027 lib + 316 integration + 62 forge = 1,405 tests, 94 binaries, 90 experiments, barraCuda 0.4.0 (wgpu 28, DeviceCapabilities API), ops 0-19 upstream via `BatchedElementwiseF64`, `PrecisionRoutingAdvice` wired, 46 capabilities, 7 deploy graphs, guideStone L4 (targeting L6), 10 UniBin validation scenarios, Tier 4 IPC-first `default = []`. Exp 084: CPU/GPU parity 21/21, Exp 085: toadStool dispatch 19/19)
+**Last Updated**: May 13, 2026 (v0.10.0 — 1,035 lib + 316 integration + 62 forge = 1,413 tests, 94 binaries, 90 experiments, barraCuda 0.4.0 (wgpu 28, DeviceCapabilities API), ops 0-19 upstream via `BatchedElementwiseF64`, `PrecisionRoutingAdvice` wired, 46 capabilities, 7 deploy graphs, guideStone L4 (targeting L6), 10 UniBin validation scenarios, Tier 4 IPC-first `default = []`, Tier 2 IPC wired (toadstool.validate + precision.route). CPU vs Python 25/25 parity incl. Freundlich)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
 **ToadStool HEAD**: S94b — barraCuda v0.4.0 standalone (wgpu 28, DeviceCapabilities replaces GpuDriverProfile)
 
@@ -78,12 +78,14 @@
 
 ### Layer 1: BarraCuda CPU (validated, complete)
 
-All algorithms implemented in pure Rust. 640 lib tests, 50+ binaries, 651+ total checks.
+All algorithms implemented in pure Rust. 1,035 lib tests, 94 binaries, 1,413 total checks.
 This is the baseline for correctness — GPU and metalForge results must match.
-CPU benchmarks: 22.7× geometric mean speedup vs Python (18/18 parity across
-ET₀, dual Kc, mulched Kc, VG θ, Richards 1D, Langmuir, Freundlich, GDD,
-SCS-CN runoff, Green-Ampt, Saxton-Rawls, Priestley-Taylor, yield response,
-dual Kc step, Makkink, Blaney-Criddle, Hargreaves, sensor calibration).
+CPU benchmarks: 14.3× geometric mean speedup vs Python (25/25 parity across
+ET₀, Thornthwaite, Hargreaves, Priestley-Taylor, Makkink, Blaney-Criddle,
+VG θ, Saxton-Rawls, Richards 1D, Langmuir, Freundlich, water balance step,
+SCS-CN runoff, Green-Ampt, dual Kc step, yield response, sensor calibration,
+Kc climate adjust, Shannon diversity, Anderson coupling, tissue W, barrier
+d_eff, Anderson regime, season simulation, seasonal pipeline).
 
 ```
 eco::evapotranspiration → validated daily_et0(), hargreaves_et0()
