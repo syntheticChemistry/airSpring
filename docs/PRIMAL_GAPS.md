@@ -192,7 +192,7 @@ Structural L5 validation with TCP mock round-trip tests passes (1,057 lib tests)
 - **GPU coverage is internal**: 21/21 CPU-GPU parity, 46/46 validate_gpu_math, 25 Tier A upstream ops
 
 **Not implemented / tested:**
-- AG-005: Squirrel `inference.*` not called from science path (IPC client wired, dispatch pending)
+- ~~AG-005: Squirrel `inference.*`~~ **RESOLVED** — wired through `dispatch_science` (7 dispatch + 8 IPC tests)
 - AG-006: coralReef sovereign shader compile not wired
 - AG-007: `compute.dispatch` opaque JSON (no typed response contract)
 - AG-010/011: TensorSession and Anderson WGSL shader
