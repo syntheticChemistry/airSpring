@@ -325,3 +325,23 @@ method = "data.weather"
 domain = "data"
 description = "Weather data retrieval via NestGate"
 gpu_accelerated = false
+
+# ── Inference (Squirrel) ──
+
+[capabilities.inference_embed]
+method = "inference.embed"
+domain = "inference"
+description = "Embed soil sensor profiles for similarity search via Squirrel"
+gpu_accelerated = false
+
+[capabilities.inference_complete]
+method = "inference.complete"
+domain = "inference"
+description = "Structured completion for crop parameter suggestion via Squirrel"
+gpu_accelerated = false
+
+[capabilities.inference_models]
+method = "inference.models"
+domain = "inference"
+description = "List available inference models from Squirrel"
+gpu_accelerated = false

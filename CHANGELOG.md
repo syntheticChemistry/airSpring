@@ -4,6 +4,12 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [Unreleased] - 2026-05-13
 
+### Niche Convergence → Atomic Deployment (2026-05-13 late afternoon)
+
+- **AG-005 RESOLVED: inference.* wired through science dispatch path**: `inference.embed`, `inference.complete`, `inference.models` now route through `primal_science::dispatch_science` — soil sensor similarity search is the documented embed use case. 7 new dispatch tests. `niche::CAPABILITIES` extended to **49** methods. `capability_registry.toml` updated (49 entries, sync test PASS).
+- **Wire name hygiene verified**: bearDog calls are `health.liveness` only (no crypto payloads from airSpring); skunkBat calls use `security.audit_log` (correct, not `defense.audit`).
+- **1,057 lib tests** (was 1,051), **1,435 total** (was 1,429), 0 clippy.
+
 ### Niche Atomic Convergence (2026-05-13 afternoon)
 
 - **NestGate CAS typed client** (`ipc::nestgate_data`): `content.store`, `content.get`, `storage.status` — typed results, standard transport discovery, 8 TCP round-trip tests. AG-008 RESOLVED.

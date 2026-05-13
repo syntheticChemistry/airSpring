@@ -24,7 +24,7 @@ Format follows wetSpring/hotSpring `PRIMAL_GAPS.md` pattern.
 
 | ID | Primal | Gap | Impact | Status |
 |----|--------|-----|--------|--------|
-| AG-005 | Squirrel | `inference.*` not exercised in science path | IPC client wired (`ipc::squirrel_inference` — embed, complete, models); science path integration pending | **Partial** — IPC typed client wired + tested (8 tests); `ecology.experiment` / `science.*` dispatch does not yet call `inference.embed`/`inference.complete`; Squirrel CLEAR upstream |
+| ~~AG-005~~ | Squirrel | ~~`inference.*` not exercised in science path~~ | Moved to Resolved | **RESOLVED** 2026-05-13 |
 | AG-006 | coralReef | Sovereign shader compile not wired | `discover_shader_compiler()` hook exists but no active usage; all GPU dispatch through barraCuda direct | **Open** — coralReef stability items in Pass 12 (bind_stat timeout, FECS cold init, naga::Module ingest) |
 | AG-007 | ToadStool | `compute.dispatch` returns opaque results | airSpring `compute.offload` forwards raw JSON; no typed response contract for ecology workloads | **Open** — need wire standard; toadStool Phase C (S245-S249) landed but Phase D pending |
 | ~~AG-008~~ | NestGate | ~~`data.open_meteo_weather` non-standard method~~ | Moved to Resolved | **RESOLVED** 2026-05-13 |
@@ -51,6 +51,7 @@ Format follows wetSpring/hotSpring `PRIMAL_GAPS.md` pattern.
 | AG-019 | airSpring | projectNUCLEUS workloads incomplete (1/6) | **COMPLETE:** 6 workload TOMLs created in `projectNUCLEUS/workloads/airspring/` (et0-validation, et0-methods, soil-physics, water-balance, atlas-pipeline, full-suite) | 2026-05-12 |
 | AG-020 | foundation | Thread 4 expression missing | **COMPLETE:** `ENVIRONMENTAL_GENOMICS.md` authored — soil-immune coupling, Anderson QS, sentinel microbes, field science; FLS2 target added (13 total) | 2026-05-12 |
 | AG-012 | toadStool | Live Science API not implemented | **RESOLVED:** `toadstool.validate` implemented upstream (S250) + wired in airSpring `ipc::toadstool_validate`; `precision.route` implemented + wired in `ipc::precision_route`; composition-parity scenario exercises both; Tier 2 unblocked | 2026-05-12 |
+| AG-005 | Squirrel | `inference.*` not on science path | **RESOLVED:** `inference.embed`, `inference.complete`, `inference.models` wired through `dispatch_science` + `niche::CAPABILITIES` (49 caps) + `capability_registry.toml`; 7 dispatch tests + 8 IPC tests; soil sensor similarity search documented use case | 2026-05-13 |
 | AG-008 | NestGate | `data.open_meteo_weather` non-standard method | **RESOLVED:** `data.weather` handler evolved to `capability.call` routing; typed CAS client wired (`ipc::nestgate_data` — `content.store`, `content.get`, `storage.status`; 8 TCP round-trip tests) | 2026-05-13 |
 
 ---
@@ -79,7 +80,7 @@ Next:     gS Level 6 (cross-spring pipeline — deploy graphs, capability regist
 
 airSpring has **all seven L5 RPC handlers wired and structurally tested** (1,051 lib tests):
 - `composition.status` — wired (biomeOS v3.51 contract)
-- `method.register` — wired (46 capabilities registered)
+- `method.register` — wired (49 capabilities registered)
 - `compute.dispatch` — wired (toadStool identity_f64 shader)
 - `toadstool.validate` — wired via `ipc::toadstool_validate` (Tier 2 pre-flight)
 - `precision.route` — wired via `ipc::precision_route` (Tier 2 precision advisory)
@@ -93,7 +94,7 @@ from hardcoded `data.open_meteo_weather` to standard `capability.call` routing.
 
 **Remaining L5 blocker**: Live primals (biomeOS + toadStool at minimum).
 Without running primals, the L5 certification probes print `SKIP`.
-Structural L5 validation with TCP mock round-trip tests passes (1,051 lib tests).
+Structural L5 validation with TCP mock round-trip tests passes (1,057 lib tests).
 
 ### plasmidBin Deployment Readiness (May 13, 2026)
 

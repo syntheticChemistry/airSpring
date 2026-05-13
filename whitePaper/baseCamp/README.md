@@ -8,14 +8,14 @@
 Every paper reproduced in airSpring follows the same path:
 
 1. **Python baseline** — digitize paper benchmarks, implement equations, validate (1,284/1,284 PASS)
-2. **Rust proof** — cross-validate to 1e-5, 14.3× speedup, 94 zero-panic binaries (1,051 lib + 316 integration + 62 forge = 1,429 total tests)
+2. **Rust proof** — cross-validate to 1e-5, 14.3× speedup, 94 zero-panic binaries (1,057 lib + 316 integration + 62 forge = 1,435 total tests)
 3. **GPU acceleration** — barraCuda 0.4.0 (25 Tier A modules, 21/21 CPU-GPU parity, 767+ WGSL shaders)
 4. **Primal composition** — 46 JSON-RPC capabilities via biomeOS Neural API, 7 deploy graphs, NUCLEUS atomics
 5. **UniBin eukaryotic** — single `airspring` binary (certify/validate/serve/status/version), 10 validation scenarios, guideStone **L4** (targeting L6)
 
-**Status**: 90 experiments, barraCuda 0.4.0 (wgpu 28, DF64), Edition 2024 (rust-toolchain 1.92), all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired, niche architecture (46 capabilities, 7 deploy graphs), `#![cfg_attr(not(test), forbid(unsafe_code))]` + `#![deny(cast_*)]` library-strict + zero clippy pedantic+nursery + `warn(missing_docs)`. 60 tolerances in 5 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies**. Zero `#[allow()]` in production. Platform-agnostic IPC (Transport enum: Unix + TCP). Tier 4 IPC-first: **`[features].default = []`**, barraCuda via `--features local`, validation binaries `required-features = ["local"]`, pure-Rust fallbacks. 90.56% line coverage. cargo-deny 0.19 clean. Full validation pipeline green (2026-05-11)
+**Status**: 90 experiments, barraCuda 0.4.0 (wgpu 28, DF64), Edition 2024 (rust-toolchain 1.92), all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired, niche architecture (49 capabilities, 7 deploy graphs), `#![cfg_attr(not(test), forbid(unsafe_code))]` + `#![deny(cast_*)]` library-strict + zero clippy pedantic+nursery + `warn(missing_docs)`. 60 tolerances in 5 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies**. Zero `#[allow()]` in production. Platform-agnostic IPC (Transport enum: Unix + TCP). Tier 4 IPC-first: **`[features].default = []`**, barraCuda via `--features local`, validation binaries `required-features = ["local"]`, pure-Rust fallbacks. 90.56% line coverage. cargo-deny 0.19 clean. Full validation pipeline green (2026-05-11)
 
-**April 27, 2026 evolution**: 60 tolerances (2 new atlas), 46/46 IPC capabilities routable, provenance drift fixed, capability naming converged, docs/PRIMAL_GAPS.md created (11 gaps, gS Level 0→1 path), CI pinned to 1.92, all files <800 LOC.
+**April 27, 2026 evolution**: 60 tolerances (2 new atlas), 49/49 IPC capabilities routable, provenance drift fixed, capability naming converged, docs/PRIMAL_GAPS.md created (11 gaps, gS Level 0→1 path), CI pinned to 1.92, all files <800 LOC.
 
 **May 7-8, 2026 evolution**: First spring with publishable paper notebooks (20 core papers in `notebooks/papers/`). 25 total notebooks (20 paper + 5 sporePrint). Foundation thread06 wired (36 validation targets + 6 toadStool workloads). projectNUCLEUS airspring workload catalog expanded (6 workloads, `${AIRSPRING_ROOT}` portable paths). guideStone Level 0→1 (standalone manifest reader, 16/16 PASS). Provenance drift fully reconciled. PRIMAL_GAPS updated (15 gaps, 5 resolved). Parity audit response: `capability_registry.toml` created (44 methods, CI sync test), `deny.toml` promoted to workspace root (ecoBin v3.0, ring/openssl banned). primalSpring Phase 60 parity score: NEEDS WORK → addressing all targets.
 
@@ -28,7 +28,7 @@ Every paper reproduced in airSpring follows the same path:
 ```
 Phase 0   Python/R baselines    — reproduce paper results with original tools (1284/1284)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (1,051 lib + 1498 atlas, 94 binaries + 146/146 + 32/32 cross-spring benchmarks)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (1,057 lib + 1498 atlas, 94 binaries + 146/146 + 32/32 cross-spring benchmarks)
 Phase 1.5 CPU benchmark         — 14.3× Rust-vs-Python geometric mean (25/25 algorithms, 21/21 CPU-GPU parity modules)
 Phase 2   BarraCuda GPU bridge  — 25 Tier A + 6 GPU-local modules wired (cross-spring S87 fully rewired)
 Phase 2.5 Ops 5-8 GPU-first   — Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed
@@ -40,7 +40,7 @@ Phase 3   GPU live dispatch     — Titan V validated (25/25 PASS, 0.04% seasona
 Phase 3.5 NPU edge             — AKD1000 live: 3 experiments, ~48µs inference, LOCOMOS power budget
 Phase 3.7 metalForge live      — RTX 4070 + Titan V + AKD1000 + i9-12900K discovered, 18 workloads route
 Phase 3.8 Cross-system routing — GPU+NPU+CPU dispatch proven (29/29 PASS), NUCLEUS atomic ready
-Phase 3.9 NUCLEUS primal        — airSpring registered as science primal, 46 capabilities, 29/29 parity
+Phase 3.9 NUCLEUS primal        — airSpring registered as science primal, 49 capabilities, 29/29 parity
 Phase 4.0 Cross-primal pipeline — ecology domain, capability_call routing, 28/28 PASS (Exp 063)
 Phase 4.1 Penny Irrigation      — sovereign scheduling on consumer hardware ($600 GPU + $99 NPU)
 Phase 4.2 Nautilus reservoir     — bingoCube/nautilus evolutionary ET₀ prediction + drift detect
@@ -69,7 +69,7 @@ Phase 5.14 Deep debt evolution — MCP tools/list + tools/call wired in primal d
 Phase 5.15 Deep audit execution — zero #[allow()] in entire codebase (all→#[expect(reason)]), blanket pedantic/nursery allows→specific per-lint expects, deny.toml ecoBin enforcement (barracuda+forge, 14 C-dep bans), CI path deps via symlink (ecoPrimals sparse checkout), MSRV 1.92 documented (Rust 2024 #[expect] dependency), todo!→unimplemented! in doc examples, stale doc counts corrected across 12 files, BatchedDualKc→Tier A in cross-spring evolution, NUCLEUS status→Complete, absorbed shader comments updated (v0.10.0, 938 lib + 316 integration + 62 forge)
 Phase 5.16 Ecosystem absorption — PRIMAL_REGISTRY updated (v0.10.0 + barraCuda 0.3.13), CONTRIBUTING.md + SECURITY.md (neuralSpring S174 pattern), upstream contract pinning (5 tolerance invariant tests), GPU test resilience (barraCuda test_pool delegation), deploy graph metadata ([graph.metadata] on all 7 graphs, primalSpring v0.7.0 pattern), primal name constants in test code, 943 lib + 316 integration + 62 forge = 1,321 total tests (v0.10.0)
 Phase 5.17 Deep audit execution — cargo-deny 0.19 evolution (SPDX AGPL-3.0-or-later, CC0-1.0, blake3 cc wrapper, version-pinned path deps), +43 lib tests (986 lib total), 90.56% coverage (gated at 90), `const { assert!() }` compile-time tolerance contracts, `#[must_use]` on tolerance registry, `#[allow()]` for shared test infra (replaces `#[expect()]` in multi-binary context), evolution_gaps header + tier assignments corrected (v0.10.0, 986 lib + 316 integration + 62 forge = 1,364 total tests)
-Phase 5.18 Deep debt evolution — 60 tolerances (atlas_annual_et0, atlas_yield_ratio centralized), **46/46 IPC** capabilities routable (science.timeseries gap closed), capability naming converged (niche.rs canonical → metalForge/plasmidBin aligned), provenance commit drift fixed (Atlas fad2e1b, Dual Kc 94cc51d), large files refactored (829→45+774, 804→668), 7 unwrap()→expect(), CI 1.92 pinned, docs/PRIMAL_GAPS.md (11 gaps, AG-001 through AG-011), guideStone Level 0 (composition next)
+Phase 5.18 Deep debt evolution — 60 tolerances (atlas_annual_et0, atlas_yield_ratio centralized), **49/49 IPC** capabilities routable (science.timeseries gap closed), capability naming converged (niche.rs canonical → metalForge/plasmidBin aligned), provenance commit drift fixed (Atlas fad2e1b, Dual Kc 94cc51d), large files refactored (829→45+774, 804→668), 7 unwrap()→expect(), CI 1.92 pinned, docs/PRIMAL_GAPS.md (11 gaps, AG-001 through AG-011), guideStone Level 0 (composition next)
 ```
 
 ## Faculty Summary
@@ -204,7 +204,7 @@ Phase 5.18 Deep debt evolution — 60 tolerances (atlas_annual_et0, atlas_yield_
 | `validate_ncbi_diversity` | 63 | Shannon H', Pielou, Bray-Curtis, Anderson coupling |
 | `validate_nucleus` | 29 | NUCLEUS JSON-RPC science parity (7 ET₀ + WB + yield) |
 | `validate_nucleus_pipeline` | 28 | NUCLEUS cross-primal pipeline (ecology domain, neural-api routing) |
-| `airspring_primal` | — | biomeOS NUCLEUS primal (46 capabilities, cross-primal forwarding) |
+| `airspring_primal` | — | biomeOS NUCLEUS primal (49 capabilities, cross-primal forwarding) |
 | `validate_mc_et0` | 26 | MC ET₀ uncertainty propagation, Lehmer LCG, Box-Muller |
 | `validate_bootstrap_jackknife` | 20 | Bootstrap CI + Jackknife variance, seasonal ET₀ |
 | `validate_drought_index` | 20 | SPI-1/3/6/12, gamma MLE, WMO classification |
@@ -268,7 +268,7 @@ S79 modernization: `libc`→`rustix`, `async-trait`→AFIT, universal f64 precis
 
 ### Next Steps (Dong Lab)
 
-- **Audit execution (v0.9.0)**: `#![deny(cast_*)]` library-strict (all production code uses cast helpers). 3 new helpers: `u32_usize`, `u64_usize`, `u64_f64`. soil_moisture refactored (672 LOC → 4 cohesive submodules: topp, texture, saxton_rawls, water). petalTongue 3-tier discovery wired (`discover_visualization_primal`). 14 primal_dispatch integration tests (health/caps/science/provenance/discovery over Unix sockets). Benchmark JSON provenance for all hardcoded validation values. CI lint config consolidated to Cargo.toml (no CLI flag conflicts). Hardcoded socket paths removed from deployment manifests. **1,051** lib + 316 integration tests.
+- **Audit execution (v0.9.0)**: `#![deny(cast_*)]` library-strict (all production code uses cast helpers). 3 new helpers: `u32_usize`, `u64_usize`, `u64_f64`. soil_moisture refactored (672 LOC → 4 cohesive submodules: topp, texture, saxton_rawls, water). petalTongue 3-tier discovery wired (`discover_visualization_primal`). 14 primal_dispatch integration tests (health/caps/science/provenance/discovery over Unix sockets). Benchmark JSON provenance for all hardcoded validation values. CI lint config consolidated to Cargo.toml (no CLI flag conflicts). Hardcoded socket paths removed from deployment manifests. **1,057** lib + 316 integration tests.
 - **Cross-ecosystem evolution (v0.8.9)**: Canonical `PRIMAL_NAME`/`PRIMAL_DOMAIN` constants (healthSpring V34). `OnceLock` GPU probe cache (toadStool S158). `cast` module for safe numeric casts (neuralSpring S162). `DispatchOutcome<T>` library type (wetSpring V126). coralReef/Squirrel capability discovery (healthSpring V34). `mul_add()` FMA at 18 sites (barraCuda Sprint 7). Smart refactors: 4 monoliths → 19 focused modules (evapotranspiration, dual_kc, biomeos, validation). Composition guidance for solo/trio/wider primal combos. 891 lib tests, zero clippy warnings.
 - **Coverage**: target 98%+ (remaining gaps: GPU-dependent code paths)
 - **ToadStool absorption**: All 6 local ops absorbed upstream into `BatchedElementwiseF64` (ops 14-19), `local_dispatch` retired — Write→Absorb→Lean complete (v0.7.2)

@@ -95,6 +95,10 @@ pub const CAPABILITIES: &[&str] = &[
     crate::methods::COMPUTE_OFFLOAD,
     // ── Data (Nest Atomic routing) ──
     crate::methods::DATA_WEATHER,
+    // ── Inference (Squirrel) ──
+    crate::methods::INFERENCE_EMBED,
+    crate::methods::INFERENCE_COMPLETE,
+    crate::methods::INFERENCE_MODELS,
 ];
 
 /// Operation dependency hints for biomeOS Pathway Learner parallelization.

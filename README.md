@@ -19,7 +19,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,284/1,284 PASS** | 60 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB, MC ET₀ uncertainty, bootstrap/jackknife CI, SPI drought index |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **1,051 lib + 316 integration (1,367 barracuda) + 62 forge = 1,429 total** | 94 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
+| Phase 1: Rust validation | **1,057 lib + 316 integration (1,373 barracuda) + 62 forge = 1,435 total** | 94 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (25/25 parity incl. Freundlich) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -33,7 +33,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | Phase 3.5: NPU edge | **AKD1000 live** | 3 experiments, 95/95 NPU checks, ~48µs inference |
 | Phase 3.7: metalForge live | **5 substrates discovered** | RTX 4070 + Titan V + AKD1000 + i9-12900K, 27 workloads route |
 | Phase 3.8: Mixed-hardware pipeline | **66/66 PASS** | 7-stage GPU→NPU PCIe bypass, NUCLEUS mesh routing (Exp 076: 60/60) |
-| Phase 3.9: NUCLEUS primal | **46 capabilities** | airSpring biomeOS primal, 46 capabilities (science + provenance + composition + cross-spring), JSON-RPC incl. **`method.register`** |
+| Phase 3.9: NUCLEUS primal | **49 capabilities** | airSpring biomeOS primal, 49 capabilities (science + provenance + composition + cross-spring + inference), JSON-RPC incl. **`method.register`** |
 | Phase 4.0: Cross-primal pipeline | **28/28 PASS** | ecology domain, capability.call routing, cross-primal forwarding |
 | Phase 4.1: Full dispatch experiment | **51/51 PASS** | CPU vs GPU parity across all domains (Exp 064) |
 | Phase 4.2: biomeOS graph experiment | **35/35 PASS** | Offline ecology pipeline, deployment graph validated (Exp 065) |
@@ -262,7 +262,7 @@ airSpring/
 ├── notebooks/                  # Publishable notebooks (25 total)
 │   ├── papers/                 # 20 paper baseline notebooks (Batch 1)
 │   └── *.ipynb                 # 5 sporePrint summary notebooks
-├── capability_registry.toml    # 46 capabilities (synced with niche.rs, CI tested + cross-sync vs canonical 413)
+├── capability_registry.toml    # 49 capabilities (synced with niche.rs, CI tested + cross-sync vs canonical 413)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
 │   └── handoffs/                # Versioned handoffs (V010 current)
 ├── graphs/                      # biomeOS deployment graphs (7 TOML: eco, provenance, niche, cross-primal, GPU batch, sovereign data, uncertainty)
@@ -298,7 +298,7 @@ airSpring/
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
 | `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V010 current) |
 | `docs/PRIMAL_GAPS.md` | Primal composition gaps for primalSpring handback |
-| `capability_registry.toml` | 46 capabilities — Songbird/biomeOS discovery (sync-tested vs niche.rs + cross-sync vs canonical 413; incl. `method.register`) |
+| `capability_registry.toml` | 49 capabilities — Songbird/biomeOS discovery (sync-tested vs niche.rs + cross-sync vs canonical 413; incl. `method.register`) |
 | `notebooks/papers/PAPER_NOTEBOOK_PATTERN.md` | Paper baseline notebook template |
 | `notebooks/papers/*.ipynb` | 20 publishable paper baseline notebooks |
 | `notebooks/*.ipynb` | 5 sporePrint summary notebooks |

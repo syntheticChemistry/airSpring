@@ -92,9 +92,87 @@ pub fn dispatch_science(method: &str, params: &serde_json::Value) -> Option<serd
                 Err(e) => serde_json::json!({ "error": e.to_string() }),
             }
         }
+        m::INFERENCE_EMBED => inference_embed(params),
+        m::INFERENCE_COMPLETE => inference_complete(params),
+        m::INFERENCE_MODELS => inference_list_models(),
         _ => return None,
     };
     Some(result)
+}
+
+// ── Squirrel inference bridge ────────────────────────────────────────────────
+
+fn inference_embed(params: &serde_json::Value) -> serde_json::Value {
+    let input = params
+        .get("input")
+        .or_else(|| params.get("text"))
+        .or_else(|| params.get("profile"))
+        .map(|v| v.as_str().map_or_else(|| v.to_string(), str::to_owned));
+    let Some(text) = input else {
+        return serde_json::json!({
+            "error": "missing 'input', 'text', or 'profile' parameter",
+            "hint": "provide a text string or JSON profile to embed"
+        });
+    };
+    match crate::ipc::squirrel_inference::embed(&text) {
+        Ok(result) => serde_json::json!({
+            "embedding": result.embedding,
+            "model": result.model,
+            "dimensions": result.dimensions,
+        }),
+        Err(crate::ipc::squirrel_inference::InferenceError::NoPrimal) => serde_json::json!({
+            "error": "Squirrel primal not available",
+            "hint": "start Squirrel for inference; science path works without it"
+        }),
+        Err(e) => serde_json::json!({ "error": e.to_string() }),
+    }
+}
+
+fn inference_complete(params: &serde_json::Value) -> serde_json::Value {
+    let prompt = params
+        .get("prompt")
+        .and_then(serde_json::Value::as_str);
+    let Some(prompt_text) = prompt else {
+        return serde_json::json!({
+            "error": "missing 'prompt' parameter",
+            "hint": "provide a prompt string for completion"
+        });
+    };
+    match crate::ipc::squirrel_inference::complete(prompt_text) {
+        Ok(result) => serde_json::json!({
+            "content": result.content,
+            "model": result.model,
+            "tokens": result.tokens,
+        }),
+        Err(crate::ipc::squirrel_inference::InferenceError::NoPrimal) => serde_json::json!({
+            "error": "Squirrel primal not available",
+            "hint": "start Squirrel for inference; science path works without it"
+        }),
+        Err(e) => serde_json::json!({ "error": e.to_string() }),
+    }
+}
+
+fn inference_list_models() -> serde_json::Value {
+    match crate::ipc::squirrel_inference::list_models() {
+        Ok(models) => {
+            let model_list: Vec<serde_json::Value> = models
+                .iter()
+                .map(|m| {
+                    serde_json::json!({
+                        "id": m.id,
+                        "supports_embed": m.supports_embed,
+                        "supports_complete": m.supports_complete,
+                    })
+                })
+                .collect();
+            serde_json::json!({ "models": model_list })
+        }
+        Err(crate::ipc::squirrel_inference::InferenceError::NoPrimal) => serde_json::json!({
+            "error": "Squirrel primal not available",
+            "hint": "start Squirrel for inference"
+        }),
+        Err(e) => serde_json::json!({ "error": e.to_string() }),
+    }
 }
 
 #[cfg(test)]
@@ -135,6 +213,9 @@ mod tests {
             "science.autocorrelation",
             "science.gamma_cdf",
             "science.timeseries",
+            "inference.embed",
+            "inference.complete",
+            "inference.models",
         ];
         for method in science_methods {
             let params_for_method = if method == "science.shannon_diversity" {
@@ -152,6 +233,10 @@ mod tests {
                     None,
                 );
                 serde_json::json!({ "time_series": ts })
+            } else if method == "inference.embed" {
+                serde_json::json!({"input": "soil: sand 40%"})
+            } else if method == "inference.complete" {
+                serde_json::json!({"prompt": "suggest Kc"})
             } else {
                 params.clone()
             };
@@ -437,5 +522,56 @@ mod tests {
         let params = serde_json::json!({"data": []});
         let r = dispatch_science("science.autocorrelation", &params).unwrap();
         assert!(r.get("error").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_inference_embed_routes() {
+        let params = serde_json::json!({"input": "soil: sand 40%, clay 20%, OM 2.5%"});
+        let r = dispatch_science("inference.embed", &params);
+        assert!(r.is_some(), "inference.embed should route through dispatch");
+        let v = r.unwrap();
+        assert!(
+            v.get("embedding").is_some() || v.get("error").is_some(),
+            "should return embedding or graceful error"
+        );
+    }
+
+    #[test]
+    fn test_dispatch_inference_embed_missing_input() {
+        let params = serde_json::json!({});
+        let r = dispatch_science("inference.embed", &params).unwrap();
+        assert!(r.get("error").is_some());
+        assert!(r["error"].as_str().unwrap().contains("missing"));
+    }
+
+    #[test]
+    fn test_dispatch_inference_embed_accepts_profile_json() {
+        let params = serde_json::json!({
+            "profile": {"sand_pct": 40, "clay_pct": 20, "om_pct": 2.5}
+        });
+        let r = dispatch_science("inference.embed", &params);
+        assert!(r.is_some());
+        let v = r.unwrap();
+        assert!(v.get("embedding").is_some() || v.get("error").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_inference_complete_routes() {
+        let params = serde_json::json!({"prompt": "suggest Kc for corn"});
+        let r = dispatch_science("inference.complete", &params);
+        assert!(r.is_some());
+    }
+
+    #[test]
+    fn test_dispatch_inference_complete_missing_prompt() {
+        let params = serde_json::json!({});
+        let r = dispatch_science("inference.complete", &params).unwrap();
+        assert!(r.get("error").is_some());
+    }
+
+    #[test]
+    fn test_dispatch_inference_models_routes() {
+        let r = dispatch_science("inference.models", &serde_json::json!({}));
+        assert!(r.is_some());
     }
 }
