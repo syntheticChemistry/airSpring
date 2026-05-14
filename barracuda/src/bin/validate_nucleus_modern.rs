@@ -437,7 +437,7 @@ fn main() {
     eprintln!();
     eprintln!("  -- NUCLEUS Topology --");
     eprintln!(
-        "  Tower Atomic (BearDog+Songbird):  {}",
+        "  Tower Atomic (BearDog+Songbird+SkunkBat):  {}",
         if tower_atomic { "LIVE" } else { "offline" }
     );
     eprintln!(

@@ -575,7 +575,7 @@ discovery, JSON-RPC capability enumeration, new science endpoints, full ecology
 pipeline, cross-primal discovery, and GPU precision routing.
 
 **Phase 1 (Rust — 43/43 PASS):**
-- [x] NUCLEUS atomic detection: Tower (BearDog+Songbird) LIVE, Node (+ToadStool) LIVE
+- [x] NUCLEUS atomic detection: Tower (BearDog+Songbird+SkunkBat) LIVE, Node (+ToadStool) LIVE
 - [x] Primal socket discovery and health check (v0.7.5)
 - [x] v0.7.5 capability enumeration: 49 capabilities (SPI, ACF, gamma_cdf + ecology aliases; incl. `method.register`)
 - [x] SPI drought index via JSON-RPC: parity direct-Rust vs RPC, upstream provenance

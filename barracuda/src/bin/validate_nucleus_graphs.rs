@@ -214,8 +214,10 @@ fn main() {
     eprintln!("    beardog:   {has_beardog}");
     eprintln!("    songbird:  {has_songbird}");
 
-    // Tower atomic = beardog + songbird
-    let tower_available = has_beardog && has_songbird;
+    // Tower atomic = beardog + songbird + skunkbat (triple-first per plasmidBin)
+    let has_skunkbat = biomeos::discover_primal_socket(primal_names::SKUNKBAT).is_some();
+    eprintln!("    skunkbat:  {has_skunkbat}");
+    let tower_available = has_beardog && has_songbird && has_skunkbat;
     // Node atomic = tower + toadstool
     let node_available = tower_available && has_toadstool;
 

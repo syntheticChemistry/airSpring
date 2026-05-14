@@ -6,7 +6,7 @@
 //!
 //! | Atomic | Components | Role |
 //! |--------|-----------|------|
-//! | **Tower** | `BearDog` (crypto/TLS) + `Songbird` (mesh/discovery) | Base security and primal discovery |
+//! | **Tower** | `BearDog` (crypto/TLS) + `Songbird` (mesh/discovery) + `SkunkBat` (defense) | Trust boundary — crypto + discovery + defense |
 //! | **Node** | Tower + `ToadStool` (compute/GPU) | Compute dispatch |
 //! | **Nest** | Tower + `NestGate` (storage/provenance) | Data storage and provenance |
 //!
@@ -43,7 +43,7 @@ use crate::substrate::Substrate;
 /// NUCLEUS atomic deployment mode.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum AtomicKind {
-    /// Base layer: crypto (`BearDog`) + mesh discovery (`Songbird`).
+    /// Trust boundary: crypto (`BearDog`) + mesh discovery (`Songbird`) + defense (`SkunkBat`).
     Tower,
     /// Compute layer: Tower + `ToadStool` GPU/CPU dispatch.
     Node,
@@ -56,9 +56,9 @@ impl AtomicKind {
     #[must_use]
     pub const fn capabilities(&self) -> &[&str] {
         match self {
-            Self::Tower => &["crypto.tls", "mesh.discovery"],
-            Self::Node => &["crypto.tls", "mesh.discovery", "compute.dispatch"],
-            Self::Nest => &["crypto.tls", "mesh.discovery", "storage.provenance"],
+            Self::Tower => &["crypto.tls", "mesh.discovery", "defense.audit"],
+            Self::Node => &["crypto.tls", "mesh.discovery", "defense.audit", "compute.dispatch"],
+            Self::Nest => &["crypto.tls", "mesh.discovery", "defense.audit", "storage.provenance"],
         }
     }
 
@@ -66,15 +66,17 @@ impl AtomicKind {
     #[must_use]
     pub const fn component_descriptions(&self) -> &[&str] {
         match self {
-            Self::Tower => &["crypto/TLS provider", "mesh/discovery provider"],
+            Self::Tower => &["crypto/TLS provider", "mesh/discovery provider", "defense/audit sentinel"],
             Self::Node => &[
                 "crypto/TLS provider",
                 "mesh/discovery provider",
+                "defense/audit sentinel",
                 "compute/GPU dispatch",
             ],
             Self::Nest => &[
                 "crypto/TLS provider",
                 "mesh/discovery provider",
+                "defense/audit sentinel",
                 "storage/provenance tracker",
             ],
         }
@@ -344,9 +346,10 @@ mod tests {
 
     #[test]
     fn tower_capabilities() {
-        assert_eq!(AtomicKind::Tower.capabilities().len(), 2);
+        assert_eq!(AtomicKind::Tower.capabilities().len(), 3);
         assert!(AtomicKind::Tower.capabilities().contains(&"crypto.tls"));
         assert!(AtomicKind::Tower.capabilities().contains(&"mesh.discovery"));
+        assert!(AtomicKind::Tower.capabilities().contains(&"defense.audit"));
         assert!(!AtomicKind::Tower.has_compute());
         assert!(!AtomicKind::Tower.has_storage());
         assert!(AtomicKind::Tower.has_mesh());
@@ -355,7 +358,7 @@ mod tests {
     #[test]
     fn node_has_compute() {
         assert!(AtomicKind::Node.has_compute());
-        assert_eq!(AtomicKind::Node.capabilities().len(), 3);
+        assert_eq!(AtomicKind::Node.capabilities().len(), 4);
         assert!(
             AtomicKind::Node
                 .capabilities()
@@ -366,7 +369,7 @@ mod tests {
     #[test]
     fn nest_has_storage() {
         assert!(AtomicKind::Nest.has_storage());
-        assert_eq!(AtomicKind::Nest.capabilities().len(), 3);
+        assert_eq!(AtomicKind::Nest.capabilities().len(), 4);
         assert!(
             AtomicKind::Nest
                 .capabilities()

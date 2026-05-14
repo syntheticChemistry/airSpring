@@ -2,7 +2,16 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased] - 2026-05-13
+## [Unreleased] - 2026-05-14
+
+### Tower Triple-First Evolution (2026-05-14)
+
+- **Tower Atomic → triple-first**: All composition definitions updated from `bearDog + songBird` to `bearDog + songBird + skunkBat` per upstream plasmidBin manifest. Tower = trust boundary (crypto + discovery + defense).
+- **`metalForge/forge/src/nucleus.rs`**: `AtomicKind::Tower` capabilities include `defense.audit`, component descriptions include sentinel. Node and Nest inherit the defense capability. Tests updated (3→3, 4→4 capability counts).
+- **`s_composition_parity.rs`**: skunkBat added to Tower health probe loop (Tier 2 IPC).
+- **`validate_nucleus_graphs.rs`**: Tower detection now requires skunkBat socket discovery.
+- **Docs reconciled**: 8 active files updated, archive untouched (fossil record).
+- **1,057 lib + 62 forge tests**, 0 clippy pedantic+nursery.
 
 ### Niche Convergence → Atomic Deployment (2026-05-13 late afternoon)
 

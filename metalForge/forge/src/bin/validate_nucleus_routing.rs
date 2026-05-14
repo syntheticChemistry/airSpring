@@ -12,7 +12,7 @@
 //! 5. Local WGSL shader workloads route to GPU alongside absorbed workloads
 //!
 //! NUCLEUS atomics:
-//! - **Tower**: `BearDog` (crypto) + `Songbird` (mesh discovery)
+//! - **Tower**: `BearDog` (crypto) + `Songbird` (mesh discovery) + `SkunkBat` (defense)
 //! - **Node**: Tower + `ToadStool` (compute/GPU dispatch)
 //! - **Nest**: Tower + `NestGate` (storage/provenance)
 //!

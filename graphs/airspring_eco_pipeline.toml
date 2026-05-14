@@ -3,7 +3,7 @@
 # through the primal ecosystem: NestGate (data) → airSpring (science) → ToadStool (GPU)
 #
 # STATUS: Experimental (Feb 27, 2026)
-# Requires: Tower (BearDog + Songbird) + NestGate + ToadStool
+# Requires: Tower (BearDog + Songbird + SkunkBat) + NestGate + ToadStool
 # Optional: metalForge (hardware dispatch), AKD1000 NPU
 #
 # Pipeline: Weather fetch → ET₀ compute → Water balance → Yield response → Store results

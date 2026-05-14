@@ -2,7 +2,7 @@
 //! NUCLEUS integration tests — exercises the airSpring primal's JSON-RPC
 //! protocol, cross-primal discovery, and capability-based provider selection.
 //!
-//! These tests run without requiring Tower Atomic (`BearDog` + Songbird).
+//! These tests run without requiring Tower Atomic (`BearDog` + `Songbird` + `SkunkBat`).
 //! They validate the JSON-RPC dispatch, capability registration payloads,
 //! socket resolution, and provider discovery logic.
 

@@ -453,7 +453,7 @@ Step 1: ✓ DONE — airSpring NUCLEUS primal (49 caps, 28/28 cross-primal pipel
         Cross-primal forwarding: airSpring → ToadStool/BearDog/Songbird
         capability_call node type wired in graph executor (fixes all science pipeline graphs)
 Step 2: ✓ DONE — Local NUCLEUS Tower on Eastgate
-        Tower atomic: BearDog + Songbird (healthy, 121 capability translations)
+        Tower atomic: BearDog + Songbird + SkunkBat (healthy, triple-first per plasmidBin)
         7 primals discovered: airspring, beardog, songbird, squirrel, toadstool, neural-api
 Step 3: NestGate weather provider — replace direct HTTP with NestGate-mediated data flow
         NestGate already has: NCBI, Ensembl, HuggingFace, OpenMeteo, NOAA CDO, USDA NASS

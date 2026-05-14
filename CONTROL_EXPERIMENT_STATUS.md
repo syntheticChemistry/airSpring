@@ -1102,7 +1102,7 @@ gamma CDF), full ecology pipeline, cross-primal discovery, and GPU precision
 routing.
 
 **Phase 1 (Rust — 43/43 PASS):**
-- [x] NUCLEUS atomic detection: Tower (BearDog+Songbird) LIVE, Node (+ToadStool) LIVE
+- [x] NUCLEUS atomic detection: Tower (BearDog+Songbird+SkunkBat) LIVE, Node (+ToadStool) LIVE
 - [x] Primal socket discovery and health check
 - [x] v0.7.5 capability enumeration: 35 capabilities (was 30), new SPI/ACF/gamma_cdf
 - [x] SPI drought index via JSON-RPC: parity direct vs RPC, upstream provenance

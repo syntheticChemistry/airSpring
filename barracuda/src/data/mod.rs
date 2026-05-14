@@ -10,7 +10,7 @@
 //! | **Sovereign** | Songbird `network.http_request` | Pure Rust TLS 1.3 via `BearDog` | Active |
 //! | **NUCLEUS** | `capability.call` → `NestGate` | Sovereign (content-addressed cache) | Planned |
 //!
-//! When Tower Atomic is running (`BearDog` + Songbird), HTTPS routes through
+//! When Tower Atomic is running (`BearDog` + `Songbird` + `SkunkBat`), HTTPS routes through
 //! Songbird's pure-Rust TLS 1.3 stack, which delegates crypto to `BearDog` via
 //! JSON-RPC — zero C dependencies in the TLS path.
 //!

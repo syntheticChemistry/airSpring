@@ -107,7 +107,7 @@ Deploy all atomics:
 biomeos nucleus start --mode full --node-id eastgate
 ```
 
-This gives: Tower (BearDog + Songbird) + Node (ToadStool) + Nest
+This gives: Tower (BearDog + Songbird + SkunkBat) + Node (ToadStool) + Nest
 (NestGate) + Squirrel (AI) + Provenance Trio (rhizoCrypt + loamSpine
 + sweetGrass) + airSpring (ecology).
 

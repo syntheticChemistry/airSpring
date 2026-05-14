@@ -193,7 +193,7 @@ invariant across all deployment modes.
 
 ## Quick Start: Eastgate Tower Deployment
 
-### Phase A — Atomic Tower (BearDog + Songbird)
+### Phase A — Atomic Tower (BearDog + Songbird + SkunkBat)
 
 ```bash
 # 1. Build biomeOS

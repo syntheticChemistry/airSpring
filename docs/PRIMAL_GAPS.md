@@ -1,6 +1,6 @@
 # Primal Gaps — airSpring v0.10.0
 
-**Date**: May 13, 2026 (Niche Atomic Convergence wave)
+**Date**: May 14, 2026 (Atomic Deployment — triple-first Tower evolution)
 **Spring**: airSpring (ecology / agriculture)
 **guideStone Level**: **L4** (cross-atomic pipeline / provenance tier) → targeting **L5+** (NUCLEUS composition, live primals)
 **License**: AGPL-3.0-or-later
@@ -161,6 +161,15 @@ Structural L5 validation with TCP mock round-trip tests passes (1,057 lib tests)
 - [x] Last `/tmp/` hardcoded path eliminated: `data/provider.rs` `SongbirdTransport::discover` → biomeOS standard discovery
 - [ ] guideStone L5 / live NUCLEUS validation (blocked on live biomeOS + toadStool — Pass 14)
 - [ ] guideStone L6 / cross-spring pipeline (deploy graphs validated against live NUCLEUS)
+
+### Tower Triple-First Evolution (May 14, 2026)
+
+Per upstream plasmidBin manifest, Tower Atomic is now `bearDog + songBird + skunkBat` (was `bearDog + songBird`). All composition definitions updated:
+- `metalForge/forge/src/nucleus.rs`: `AtomicKind::Tower` capabilities include `defense.audit`, descriptions include sentinel
+- `s_composition_parity.rs`: skunkBat added to Tower health probe loop
+- `validate_nucleus_graphs.rs`: Tower detection now requires skunkBat discovery
+- Deploy graph comments, validation binaries, docs reconciled
+- 1,057 lib + 62 forge tests pass, 0 clippy warnings
 
 ### Deep Debt Audit Results (May 13, 2026 — Sprint)
 

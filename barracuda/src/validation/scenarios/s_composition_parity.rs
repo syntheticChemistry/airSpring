@@ -65,6 +65,7 @@ fn tier2_ipc(v: &mut ValidationHarness) {
         primal_names::TOADSTOOL,
         primal_names::BEARDOG,
         primal_names::SONGBIRD,
+        primal_names::SKUNKBAT,
     ] {
         match rpc::resolve_transport(name) {
             Ok(t) => match rpc::send_to(&t, "health.liveness", &serde_json::json!({})) {
