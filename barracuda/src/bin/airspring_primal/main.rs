@@ -213,8 +213,7 @@ fn run() -> Result<(), String> {
         .map_err(|e| format!("Cannot bind to {}: {e}", socket_path.display()))?;
 
     info!(
-        target: "airspring",
-        niche = niche::NICHE_NAME,
+        target: niche::NICHE_NAME,
         socket = %socket_path.display(),
         family_id,
         version = env!("CARGO_PKG_VERSION"),
@@ -258,7 +257,7 @@ fn run() -> Result<(), String> {
         }
     });
 
-    info!(target: "airspring", "accepting connections");
+    info!(target: niche::NICHE_NAME, "accepting connections");
     for stream in listener.incoming() {
         if !running.load(Ordering::Relaxed) {
             break;
@@ -268,7 +267,7 @@ fn run() -> Result<(), String> {
                 let st = state.clone();
                 std::thread::spawn(move || handle_connection(s, &st));
             }
-            Err(e) => error!(target: "airspring", error = %e, "accept failed"),
+            Err(e) => error!(target: niche::NICHE_NAME, error = %e, "accept failed"),
         }
     }
     Ok(())

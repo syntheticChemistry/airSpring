@@ -241,6 +241,29 @@ def main():
     qe = [2.8, 4.9, 8.5, 11.2, 14.0, 16.1, 17.0, 17.6, 17.8]
     results.append(bench("langmuir_fit", fit_langmuir, N, Ce, qe))
 
+    # Freundlich isotherm fit — 10K
+    def fit_freundlich(Ce, qe):
+        ln_Ce = [math.log(c) for c in Ce if c > 0]
+        ln_qe = [math.log(q) for q, c in zip(qe, Ce) if c > 0 and q > 0]
+        n = len(ln_Ce)
+        if n < 2:
+            return 0.0
+        sx = sum(ln_Ce)
+        sy = sum(ln_qe)
+        sxx = sum(x * x for x in ln_Ce)
+        sxy = sum(x * y for x, y in zip(ln_Ce, ln_qe))
+        denom = n * sxx - sx * sx
+        if abs(denom) < 1e-30:
+            return 0.0
+        slope = (n * sxy - sx * sy) / denom
+        intercept = (sy - slope * sx) / n
+        mean_y = sy / n
+        ss_tot = sum((y - mean_y) ** 2 for y in ln_qe)
+        ss_res = sum((y - (slope * x + intercept)) ** 2 for x, y in zip(ln_Ce, ln_qe))
+        r2 = 1 - ss_res / ss_tot if ss_tot > 0 else 0
+        return r2
+    results.append(bench("freundlich_fit", fit_freundlich, N, Ce, qe))
+
     # Priestley-Taylor ET₀ — 10K
     def priestley_taylor(Rn, G, T, alt):
         P = 101.3 * ((293 - 0.0065 * alt) / 293) ** 5.26
