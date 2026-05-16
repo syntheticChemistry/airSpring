@@ -1,6 +1,6 @@
 # Context — airSpring
 
-**Doc sync:** 2026-05-16 (v0.10.0; Wave 17 signal adoption; 51 capabilities; 451-method registry sync).
+**Doc sync:** 2026-05-16 (v0.10.0; Wave 20 schema standardization; 51 capabilities; 452-method registry sync).
 
 ## What This Is
 

@@ -8,7 +8,8 @@
 | Version | File | Date | Scope |
 |---------|------|------|-------|
 | **V0.10.0** | `infra/wateringHole/AIRSPRING_COMPREHENSIVE_HANDOFF_MAY16_2026.md` | 2026-05-16 | **Canonical** — Comprehensive handoff: primal consumption (10/13), Wave 17 signals, NUCLEUS composition, upstream evolution, science summary |
-| **V0.10.0** | `infra/wateringHole/AIRSPRING_WAVE17_SIGNAL_ADOPTION_MAY16_2026.md` | 2026-05-16 | Wave 17 signal adoption: `primal.announce`, `nest.store`, `nest.commit`, 51 capabilities, 451-method registry sync |
+| **V0.10.0** | `infra/wateringHole/AIRSPRING_WAVE20_SCHEMA_STANDARD_MAY16_2026.md` | 2026-05-16 | Wave 20 schema standardization: `capability.list` canonical envelope, 452-method registry sync, `--provenance-dir` |
+| **V0.10.0** | `infra/wateringHole/AIRSPRING_WAVE17_SIGNAL_ADOPTION_MAY16_2026.md` | 2026-05-16 | Wave 17 signal adoption: `primal.announce`, `nest.store`, `nest.commit`, 51 capabilities |
 | **V0.10.0** | [AIRSPRING_ATOMIC_DEPLOYMENT_HANDOFF_MAY13_2026.md](handoffs/AIRSPRING_ATOMIC_DEPLOYMENT_HANDOFF_MAY13_2026.md) | 2026-05-13 | Comprehensive upstream handoff: primal consumption map (10/13), composition patterns (5), wire hygiene learnings, NUCLEUS deployment, neuralAPI, atomic readiness |
 | **V0.10.0** | [AIRSPRING_DEEP_DEBT_SPRINT_MAY13_2026.md](handoffs/AIRSPRING_DEEP_DEBT_SPRINT_MAY13_2026.md) | 2026-05-13 | Deep debt sprint: zero debt, clippy pedantic+nursery clean, full audit answers |
 | **≤V0.10.0** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |

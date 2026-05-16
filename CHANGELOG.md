@@ -4,11 +4,14 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [Unreleased] - 2026-05-16
 
-### Wave 20 Schema Standardization (2026-05-16)
+### Wave 20 Schema Standardization + Foundation Evolution (2026-05-16)
 
 - **`capability.list` canonical envelope**: Response now includes top-level `"capabilities"` (flat string array of all 51 methods) + `"count"` (array length) per primalSpring schema standard. Enriched fields (`science`, `infrastructure`, `composition`, etc.) retained alongside for domain consumers.
 - **`primal.list` constant**: Added to `methods.rs` — biomeOS method for primal enumeration (airSpring syncs against it, does not serve it).
 - **Registry sync**: Cross-sync test updated for 452-method canonical registry (Wave 20, was 451). New method: `primal.list`.
+- **`--provenance-dir` CLI flag**: `airspring validate --provenance-dir <DIR>` writes `results.json` + `provenance.toml` for projectFOUNDATION Thread 5+6 capture.
+- **Foundation targets numerical parity**: `s_foundation_targets` scenario evolved from dispatch smoke check to full numerical parity validation — asserts `|actual - expected| <= tolerance` for each target in `thread06_ag_targets.toml`.
+- **LTEE E3 tolerance fix**: `tolerances.toml` `moisture_range_vwc` corrected from 0.2 to 0.23 (matches code: `theta_fc - theta_wp = 0.33 - 0.10`).
 - **1,057 lib + 62 forge tests**, 0 clippy pedantic+nursery warnings.
 
 ### Wave 17 Signal Adoption (2026-05-16)
