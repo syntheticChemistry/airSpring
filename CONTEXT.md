@@ -59,7 +59,7 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 
 ## Key Capabilities (JSON-RPC methods)
 
-51 methods registered in `capability_registry.toml` (synced against 451-method canonical, Wave 17):
+51 methods registered in `capability_registry.toml` (synced against 452-method canonical, Wave 20):
 
 - **Evapotranspiration (7):** `science.et0_fao56`, `science.et0_hargreaves`,
   `science.et0_priestley_taylor`, `science.et0_makkink`, `science.et0_turc`,

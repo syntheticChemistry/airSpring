@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 //! Cross-sync: validates airSpring shared-domain method strings against
-//! the primalSpring canonical capability registry (451 methods, Wave 17).
+//! the primalSpring canonical capability registry (452 methods, Wave 20).
 //!
 //! Spring-specific domains (`science.*`, `ecology.*`) are exempt — those are
 //! airSpring-local methods. Shared ecosystem domains (`health`, `capability`,
@@ -80,8 +80,8 @@ fn shared_methods_align_with_canonical() {
     let local = extract_methods(&local_content);
 
     assert!(
-        canonical.len() >= 450,
-        "canonical registry should have ~451 methods (Wave 17), found {}",
+        canonical.len() >= 452,
+        "canonical registry should have ~452 methods (Wave 20), found {}",
         canonical.len()
     );
 

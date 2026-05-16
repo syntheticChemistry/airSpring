@@ -4,6 +4,13 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [Unreleased] - 2026-05-16
 
+### Wave 20 Schema Standardization (2026-05-16)
+
+- **`capability.list` canonical envelope**: Response now includes top-level `"capabilities"` (flat string array of all 51 methods) + `"count"` (array length) per primalSpring schema standard. Enriched fields (`science`, `infrastructure`, `composition`, etc.) retained alongside for domain consumers.
+- **`primal.list` constant**: Added to `methods.rs` — biomeOS method for primal enumeration (airSpring syncs against it, does not serve it).
+- **Registry sync**: Cross-sync test updated for 452-method canonical registry (Wave 20, was 451). New method: `primal.list`.
+- **1,057 lib + 62 forge tests**, 0 clippy pedantic+nursery warnings.
+
 ### Wave 17 Signal Adoption (2026-05-16)
 
 - **`primal.announce` adopted**: Registration now tries single-call `primal.announce` (Wave 17 protocol) first, falling back to legacy 3-call (`lifecycle.register` + `capability.register` + `method.register`) for pre-v3.57 biomeOS. `main.rs` startup collapsed from 2 registration calls to 1.

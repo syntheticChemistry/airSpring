@@ -154,8 +154,12 @@ pub fn handle_capability_list(state: &NicheState) -> serde_json::Value {
         .copied()
         .collect();
 
+    let capabilities: Vec<&str> = niche::CAPABILITIES.to_vec();
+
     serde_json::json!({
-        "niche": niche::NICHE_NAME,
+        "capabilities": capabilities,
+        "count": niche::CAPABILITIES.len(),
+        "primal": niche::NICHE_NAME,
         "version": env!("CARGO_PKG_VERSION"),
         "domain": "ecology",
         "total": niche::CAPABILITIES.len(),

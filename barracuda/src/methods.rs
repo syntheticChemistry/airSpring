@@ -136,6 +136,8 @@ pub const PRIMAL_DISCOVER: &str = "primal.discover";
 pub const PRIMAL_ANNOUNCE: &str = "primal.announce";
 /// Introspection: return primal metadata (version, capabilities, niche).
 pub const PRIMAL_INFO: &str = "primal.info";
+/// List all registered primals (served by biomeOS, synced by springs).
+pub const PRIMAL_LIST: &str = "primal.list";
 
 // ── Composition (biomeOS orchestration) ───────────────────────────
 
