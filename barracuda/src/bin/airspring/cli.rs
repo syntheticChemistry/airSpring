@@ -56,6 +56,10 @@ pub enum Commands {
         /// Output format: text (default) or json (for projectNUCLEUS Tier 2 ingestion).
         #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
         format: OutputFormat,
+        /// Write provenance artifacts (results.json + provenance.toml) to this directory.
+        /// Used by projectFOUNDATION workloads for Thread 5+6 capture.
+        #[arg(long, value_name = "DIR")]
+        provenance_dir: Option<String>,
     },
     /// Start the JSON-RPC 2.0 IPC server (cell membrane).
     Serve,

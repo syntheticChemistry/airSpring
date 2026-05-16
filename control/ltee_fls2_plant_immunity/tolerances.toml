@@ -22,8 +22,9 @@ sensitivity_ratio = 1.867
 sensitivity_tolerance = 0.01
 
 [soil_immune_coupling]
-moisture_threshold_vwc = 0.1
-moisture_range_vwc = 0.2
+moisture_threshold_vwc = 0.10
+# theta_fc - theta_wp = 0.33 - 0.10 = 0.23 (used as denominator in normalization)
+moisture_range_vwc = 0.23
 q10_base = 2.0
 q10_reference_temp_c = 25.0
 q10_interval_c = 10.0
