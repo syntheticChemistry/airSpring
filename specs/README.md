@@ -1,7 +1,7 @@
 # airSpring Specifications
 
 **Last Updated**: May 13, 2026
-**Status**: Phase 0–5 complete — 1284/1284 Python + 1,057 lib + 316 integration + 62 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 94 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.4.0 (wgpu 28) + 14.3× CPU speedup (25/25 algorithms, 21/21 CPU-GPU parity modules) + metalForge 66/66 + niche adapter (49 capabilities, 10 MCP tools) + 90 experiments (v0.10.0). **Deep debt evolution pass** (61 centralized method constants, 60 tolerances, **10 UniBin validation scenarios** incl. **`s_tier4_math_parity`**). Edition 2024, **guideStone L4** (targeting **L6**). **Tier 4 rewiring:** `barracuda` optional with `local` (default), `math.rs` dual-path, `ipc/barracuda_route.rs`, `--no-default-features` without barraCuda source tree. Platform-agnostic IPC. method.register + skunkBat IPC + composition.status wired. Cross-sync vs canonical 413
+**Status**: Phase 0–5 complete — 1284/1284 Python + 1,057 lib + 316 integration + 62 forge tests + 381/381 validation + 146/146 evolution + 33/33 cross-validation + 94 binaries + ops 0-19 upstream (`BatchedElementwiseF64`) + `PrecisionRoutingAdvice` + upstream provenance registry + barraCuda 0.4.0 (wgpu 28) + 14.3× CPU speedup (25/25 algorithms, 21/21 CPU-GPU parity modules) + metalForge 66/66 + niche adapter (51 capabilities, 10 MCP tools) + 90 experiments (v0.10.0). **Deep debt evolution pass** (61 centralized method constants, 60 tolerances, **10 UniBin validation scenarios** incl. **`s_tier4_math_parity`**). Edition 2024, **guideStone L4** (targeting **L6**). **Tier 4 rewiring:** `barracuda` optional with `local` (default), `math.rs` dual-path, `ipc/barracuda_route.rs`, `--no-default-features` without barraCuda source tree. Platform-agnostic IPC. method.register + skunkBat IPC + composition.status wired. Cross-sync vs canonical 451 (Wave 17)
 **Domain**: Precision agriculture, ET₀, soil moisture, irrigation scheduling, Anderson coupling
 
 ---
@@ -23,7 +23,7 @@
 | Phase 3.2 (Cross-spring rewire) | 68/68 PASS — 5/5 springs validated (Exp 073) |
 | Phase 3.5 (NPU edge) | AKD1000 live, 95/95 NPU checks |
 | Phase 3.8 (Cross-system) | metalForge 27 workloads, 66/66 cross-system (GPU→NPU→CPU) + Exp 076 NUCLEUS routing (60/60) |
-| Phase 3.9 (Niche adapter) | 49 capabilities, ecology domain in biomeOS registry (method.register + composition.status + skunkBat IPC) |
+| Phase 3.9 (Niche adapter) | 51 capabilities, ecology domain in biomeOS registry (`primal.announce` Wave 17, `nest.store`/`nest.commit` signal dispatch) |
 | Phase 4.0 (Cross-primal) | 28/28 PASS — capability.call routing, cross-primal forwarding |
 | Faculty | Dong (BAE, MSU — new lab 2026) |
 | Handoff | V010 in `wateringHole/handoffs/` |

@@ -1,8 +1,8 @@
 # airSpring — Ecological & Agricultural Sciences
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
-**Date**: May 13, 2026
-**Version**: v0.10.0 (eukaryotic UniBin)
+**Date**: May 16, 2026
+**Version**: v0.10.0 (eukaryotic UniBin, Wave 17 signal adoption)
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -262,7 +262,7 @@ airSpring/
 ├── notebooks/                  # Publishable notebooks (25 total)
 │   ├── papers/                 # 20 paper baseline notebooks (Batch 1)
 │   └── *.ipynb                 # 5 sporePrint summary notebooks
-├── capability_registry.toml    # 49 capabilities (synced with niche.rs, CI tested + cross-sync vs canonical 413)
+├── capability_registry.toml    # 51 capabilities (synced with niche.rs, CI tested + cross-sync vs canonical 451)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
 │   └── handoffs/                # Versioned handoffs (V010 current)
 ├── graphs/                      # biomeOS deployment graphs (7 TOML: eco, provenance, niche, cross-primal, GPU batch, sovereign data, uncertainty)
@@ -298,7 +298,7 @@ airSpring/
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
 | `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V010 current) |
 | `docs/PRIMAL_GAPS.md` | Primal composition gaps for primalSpring handback |
-| `capability_registry.toml` | 49 capabilities — Songbird/biomeOS discovery (sync-tested vs niche.rs + cross-sync vs canonical 413; incl. `method.register`) |
+| `capability_registry.toml` | 51 capabilities — Songbird/biomeOS discovery (sync-tested vs niche.rs + cross-sync vs canonical 451; incl. `primal.announce` Wave 17) |
 | `notebooks/papers/PAPER_NOTEBOOK_PATTERN.md` | Paper baseline notebook template |
 | `notebooks/papers/*.ipynb` | 20 publishable paper baseline notebooks |
 | `notebooks/*.ipynb` | 5 sporePrint summary notebooks |

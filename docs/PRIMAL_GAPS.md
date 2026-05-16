@@ -80,7 +80,7 @@ Next:     gS Level 6 (cross-spring pipeline — deploy graphs, capability regist
 
 airSpring has **all seven L5 RPC handlers wired and structurally tested** (1,057 lib tests):
 - `composition.status` — wired (biomeOS v3.51 contract)
-- `method.register` — wired (49 capabilities registered)
+- `primal.announce` — Wave 17 single-call registration (51 capabilities); `method.register` legacy fallback
 - `compute.dispatch` — wired (toadStool identity_f64 shader)
 - `toadstool.validate` — wired via `ipc::toadstool_validate` (Tier 2 pre-flight)
 - `precision.route` — wired via `ipc::precision_route` (Tier 2 precision advisory)
