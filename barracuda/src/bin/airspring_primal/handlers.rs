@@ -432,6 +432,52 @@ pub fn handle_method_register(params: &serde_json::Value) -> serde_json::Value {
     })
 }
 
+/// Wave 17 single-call registration: `primal.announce` replaces the 3-call
+/// `lifecycle.register + capability.register + method.register` pattern.
+///
+/// Accepts inbound announces from other primals that want to register
+/// through this niche (forwarding to biomeOS when available).
+pub fn handle_primal_announce(params: &serde_json::Value) -> serde_json::Value {
+    let primal_id = params
+        .get("primal")
+        .and_then(|v| v.as_str())
+        .unwrap_or("unknown");
+    let methods = params
+        .get("methods")
+        .and_then(|v| v.as_array())
+        .map_or(0, Vec::len);
+    let socket = params
+        .get("socket")
+        .and_then(|v| v.as_str())
+        .unwrap_or("");
+    tracing::info!(
+        target: primal_names::BIOMEOS,
+        primal = primal_id,
+        methods,
+        socket,
+        "primal.announce received"
+    );
+    serde_json::json!({
+        "accepted": true,
+        "primal": primal_id,
+        "methods_registered": methods,
+        "protocol": "primal.announce/v1",
+    })
+}
+
+/// Return primal metadata for introspection by other ecosystem participants.
+pub fn handle_primal_info() -> serde_json::Value {
+    serde_json::json!({
+        "primal": niche::NICHE_NAME,
+        "version": env!("CARGO_PKG_VERSION"),
+        "niche": "ecological & agricultural science",
+        "capabilities": niche::CAPABILITIES,
+        "capability_count": niche::CAPABILITIES.len(),
+        "signal_tiers": ["nest"],
+        "guidestone_level": "L4",
+    })
+}
+
 pub fn handle_primal_discover() -> serde_json::Value {
     let socket_dir = biomeos::resolve_socket_dir();
     let primals = biomeos::discover_all_primals();

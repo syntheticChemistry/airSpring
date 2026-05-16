@@ -1,13 +1,14 @@
 # airSpring wateringHole
 
-**Updated**: May 13, 2026 | **Version**: v0.10.0 (Niche Convergence → Atomic Deployment, 49 capabilities)
+**Updated**: May 16, 2026 | **Version**: v0.10.0 (Wave 17 Signal Adoption — primal.announce + nest.store/nest.commit, 51 capabilities)
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.10.0** | [AIRSPRING_ATOMIC_DEPLOYMENT_HANDOFF_MAY13_2026.md](handoffs/AIRSPRING_ATOMIC_DEPLOYMENT_HANDOFF_MAY13_2026.md) | 2026-05-13 | **Canonical** — Comprehensive upstream handoff: primal consumption map (10/13), composition patterns (5), wire hygiene learnings, NUCLEUS deployment, neuralAPI, atomic readiness |
+| **V0.10.0** | `infra/wateringHole/AIRSPRING_WAVE17_SIGNAL_ADOPTION_MAY16_2026.md` | 2026-05-16 | **Canonical** — Wave 17 signal adoption: `primal.announce`, `nest.store`, `nest.commit`, 51 capabilities, 451-method registry sync |
+| **V0.10.0** | [AIRSPRING_ATOMIC_DEPLOYMENT_HANDOFF_MAY13_2026.md](handoffs/AIRSPRING_ATOMIC_DEPLOYMENT_HANDOFF_MAY13_2026.md) | 2026-05-13 | Comprehensive upstream handoff: primal consumption map (10/13), composition patterns (5), wire hygiene learnings, NUCLEUS deployment, neuralAPI, atomic readiness |
 | **V0.10.0** | [AIRSPRING_DEEP_DEBT_SPRINT_MAY13_2026.md](handoffs/AIRSPRING_DEEP_DEBT_SPRINT_MAY13_2026.md) | 2026-05-13 | Deep debt sprint: zero debt, clippy pedantic+nursery clean, full audit answers |
 | **≤V0.10.0** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 

@@ -2,7 +2,19 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased] - 2026-05-14
+## [Unreleased] - 2026-05-16
+
+### Wave 17 Signal Adoption (2026-05-16)
+
+- **`primal.announce` adopted**: Registration now tries single-call `primal.announce` (Wave 17 protocol) first, falling back to legacy 3-call (`lifecycle.register` + `capability.register` + `method.register`) for pre-v3.57 biomeOS. `main.rs` startup collapsed from 2 registration calls to 1.
+- **`nest.store` signal dispatch**: `record_experiment_step()` tries `nest.store` signal first (biomeOS manages content.put → dag.event.append → spine.seal graph), graceful fallback to legacy `capability.call("dag", "append_event")`.
+- **`nest.commit` signal dispatch**: `complete_experiment()` tries `nest.commit` signal first (biomeOS manages dehydrate → commit → attribute graph), graceful fallback to legacy 3-phase pipeline.
+- **`primal.info` handler**: Returns niche metadata (version, capabilities, signal tiers, guidestone level) for ecosystem introspection.
+- **Dispatch table**: `primal.announce` + `primal.info` added to `airspring_primal` binary.
+- **Capability count**: 49 → **51** methods (`primal.announce`, `primal.info`).
+- **Registry sync**: Cross-sync test updated for 451-method canonical registry (Wave 17, was 413).
+- **L5 certification**: `validate_primal_announce` replaces `validate_method_register` (with automatic fallback).
+- **1,057 lib + 62 forge tests**, 0 clippy pedantic+nursery warnings.
 
 ### Tower Triple-First Evolution (2026-05-14)
 

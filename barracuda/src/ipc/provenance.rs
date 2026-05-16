@@ -255,9 +255,10 @@ pub fn begin_experiment_session_with(
 
 /// Record an experiment step in the provenance DAG.
 ///
-/// Appends a vertex to the rhizoCrypt DAG for this session. The step
-/// payload should include domain-specific data (method name, parameters,
-/// result summary, tolerances).
+/// Tries Wave 17 `nest.store` signal dispatch first (biomeOS manages the
+/// content put → DAG append → spine seal graph). Falls back to the legacy
+/// `capability.call("dag", "append_event", ...)` when `nest.store` is
+/// unavailable.
 #[must_use]
 pub fn record_experiment_step(session_id: &str, step: &serde_json::Value) -> ProvenanceResult {
     record_experiment_step_with(session_id, step, &ProvenanceConfig::from_env())
@@ -278,13 +279,64 @@ pub fn record_experiment_step_with(
         };
     };
 
+    if let Some(result) = try_nest_store_signal(&transport, session_id, step) {
+        return result;
+    }
+
+    record_experiment_step_legacy(&transport, session_id, step)
+}
+
+/// Attempt `nest.store` signal dispatch (Wave 17 composition collapse).
+///
+/// biomeOS decomposes `nest.store` into: NestGate.content.put →
+/// rhizoCrypt.dag.event.append → loamSpine.spine.seal → sweetGrass.braid.create.
+/// Returns `None` if the signal is not available.
+fn try_nest_store_signal(
+    transport: &Transport,
+    session_id: &str,
+    content: &serde_json::Value,
+) -> Option<ProvenanceResult> {
+    let params = serde_json::json!({
+        "content": content,
+        "author": format!("{}:experiment", crate::niche::NICHE_NAME),
+        "session_id": session_id,
+    });
+
+    let result = rpc::send_to(transport, "nest.store", &params).ok()?;
+
+    if result.get("error").is_some() {
+        return None;
+    }
+
+    let r = result.get("result").unwrap_or(&result);
+    let vertex_id = r
+        .get("vertex_id")
+        .or_else(|| r.get("hash"))
+        .or_else(|| r.get("id"))
+        .and_then(|v| v.as_str())
+        .unwrap_or("unknown")
+        .to_string();
+
+    Some(ProvenanceResult {
+        id: vertex_id.clone(),
+        available: true,
+        data: serde_json::json!({ "vertex_id": vertex_id, "signal": "nest.store" }),
+    })
+}
+
+/// Legacy provenance recording (pre-Wave 17).
+fn record_experiment_step_legacy(
+    transport: &Transport,
+    session_id: &str,
+    step: &serde_json::Value,
+) -> ProvenanceResult {
     let args = serde_json::json!({
         "session_id": session_id,
         "event": step,
     });
 
     capability_call(
-        &transport,
+        transport,
         crate::primal_names::domains::DAG,
         "append_event",
         &args,
@@ -313,10 +365,10 @@ pub fn record_experiment_step_with(
 
 /// Complete an experiment: dehydrate → commit → attribute.
 ///
-/// Executes the three-phase provenance pipeline:
-/// 1. **Dehydrate** (rhizoCrypt) — content-addressed Merkle root
-/// 2. **Commit** (loamSpine) — immutable ledger entry
-/// 3. **Attribute** (sweetGrass) — W3C PROV-O braid (best-effort)
+/// Tries Wave 17 `nest.commit` signal dispatch first (single RPC call that
+/// lets biomeOS manage the dehydrate → commit → attribute graph). Falls back
+/// to the legacy three-phase provenance pipeline when `nest.commit` is
+/// unavailable (pre-v3.57 biomeOS or signal dispatch not yet deployed).
 ///
 /// Returns a [`ProvenanceCompletion`] with status indicating how far
 /// the pipeline progressed. Domain logic always succeeds regardless.
@@ -340,8 +392,68 @@ pub fn complete_experiment_with(
         };
     };
 
+    if let Some(completion) = try_nest_commit_signal(&transport, session_id) {
+        return completion;
+    }
+
+    complete_experiment_legacy(&transport, session_id)
+}
+
+/// Attempt `nest.commit` signal dispatch (Wave 17 composition collapse).
+///
+/// biomeOS decomposes `nest.commit` into: rhizoCrypt.dehydrate → bearDog.sign
+/// → NestGate.store → loamSpine.seal. Returns `None` if the signal is not
+/// available (caller should fall back to legacy).
+fn try_nest_commit_signal(
+    transport: &Transport,
+    session_id: &str,
+) -> Option<ProvenanceCompletion> {
+    let params = serde_json::json!({
+        "session_id": session_id,
+        "author": format!("{}:experiment", crate::niche::NICHE_NAME),
+        "agents": [{
+            "did": niche_did(),
+            "role": "author",
+            "contribution": 1.0,
+        }],
+    });
+
+    let result = rpc::send_to(transport, "nest.commit", &params).ok()?;
+
+    if result.get("error").is_some() {
+        return None;
+    }
+
+    let r = result.get("result").unwrap_or(&result);
+    Some(ProvenanceCompletion {
+        merkle_root: r
+            .get("merkle_root")
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_string(),
+        commit_id: r
+            .get("commit_id")
+            .or_else(|| r.get("entry_id"))
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_string(),
+        braid_id: r
+            .get("braid_id")
+            .or_else(|| r.get("id"))
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_string(),
+        status: "complete".to_string(),
+    })
+}
+
+/// Legacy three-phase provenance pipeline (pre-Wave 17).
+fn complete_experiment_legacy(
+    transport: &Transport,
+    session_id: &str,
+) -> ProvenanceCompletion {
     let Ok(dehydration) = capability_call(
-        &transport,
+        transport,
         crate::primal_names::domains::DAG,
         "dehydration.trigger",
         &serde_json::json!({ "session_id": session_id }),
@@ -361,7 +473,7 @@ pub fn complete_experiment_with(
         .to_string();
 
     let Ok(commit_result) = capability_call(
-        &transport,
+        transport,
         crate::primal_names::domains::COMMIT,
         "session",
         &serde_json::json!({
@@ -385,7 +497,7 @@ pub fn complete_experiment_with(
         .to_string();
 
     let braid_id = capability_call(
-        &transport,
+        transport,
         crate::primal_names::domains::PROVENANCE,
         "create_braid",
         &serde_json::json!({

@@ -11,7 +11,7 @@
 //! | 2     | Health | discovered primals respond to `health.liveness` |
 //! | 3     | Capability Parity | science IPC calls produce correct results |
 //! | 4     | Cross-Atomic Pipeline | provenance trio roundtrip |
-//! | 5     | NUCLEUS Composition | `composition.status`, `method.register`, `compute.dispatch` |
+//! | 5     | NUCLEUS Composition | `composition.status`, `primal.announce`, `compute.dispatch` |
 //! | 6     | Cross-Spring Pipeline | deploy graphs, capability registry, scenario registry |
 //!
 //! Originally evolved as the `airspring_guidestone` binary.

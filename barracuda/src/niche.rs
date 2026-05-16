@@ -82,6 +82,8 @@ pub const CAPABILITIES: &[&str] = &[
     // ── Cross-primal ──
     crate::methods::PRIMAL_FORWARD,
     crate::methods::PRIMAL_DISCOVER,
+    crate::methods::PRIMAL_ANNOUNCE,
+    crate::methods::PRIMAL_INFO,
     // ── Composition (biomeOS orchestration) ──
     crate::methods::COMPOSITION_STATUS,
     crate::methods::METHOD_REGISTER,
@@ -183,11 +185,42 @@ pub fn ecology_semantic_mappings() -> serde_json::Value {
     })
 }
 
-/// Register all niche capability domains with a biomeOS target socket.
+/// Register the niche with biomeOS using `primal.announce` (Wave 17 signal API).
+///
+/// Tries the single-call `primal.announce` protocol first. If the target
+/// responds with an error (pre-v3.57 biomeOS), falls back to the legacy
+/// 3-call pattern (`lifecycle.register` + `capability.register` + `method.register`).
+pub fn register_with_target(target: &Path, our_socket: &Path) {
+    let methods: Vec<&str> = CAPABILITIES.to_vec();
+    let announce_params = serde_json::json!({
+        "primal": NICHE_NAME,
+        "socket": our_socket.to_string_lossy(),
+        "capabilities": ["agriculture", "ecology", "provenance"],
+        "methods": methods,
+        "signal_tiers": ["nest"],
+        "version": env!("CARGO_PKG_VERSION"),
+    });
+
+    if crate::rpc::send(target, "primal.announce", &announce_params).is_ok() {
+        info!(
+            target: crate::primal_names::BIOMEOS,
+            methods = CAPABILITIES.len(),
+            "primal.announce accepted"
+        );
+    } else {
+        info!(
+            target: crate::primal_names::BIOMEOS,
+            "primal.announce unavailable — falling back to legacy registration"
+        );
+        register_with_target_legacy(target, our_socket);
+    }
+}
+
+/// Legacy 3-call registration pattern for pre-v3.57 biomeOS.
 ///
 /// Sends `lifecycle.register` followed by per-domain `capability.register`
 /// calls and individual capability advertisements.
-pub fn register_with_target(target: &Path, our_socket: &Path) {
+fn register_with_target_legacy(target: &Path, our_socket: &Path) {
     let reg_result = crate::rpc::send(
         target,
         "lifecycle.register",
@@ -262,12 +295,14 @@ pub fn register_with_target(target: &Path, our_socket: &Path) {
         }
     }
 
+    crate::ipc::method_register::register_methods(target, our_socket);
+
     info!(
         target: crate::primal_names::BIOMEOS,
         registered,
         total = CAPABILITIES.len(),
         domains = domains.len(),
-        "capabilities + domains registered",
+        "legacy capabilities + domains registered",
     );
 }
 

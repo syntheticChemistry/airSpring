@@ -1,6 +1,6 @@
 # Primal Gaps — airSpring v0.10.0
 
-**Date**: May 14, 2026 (Atomic Deployment — triple-first Tower evolution)
+**Date**: May 16, 2026 (Wave 17 Signal Adoption — primal.announce + nest.store/nest.commit)
 **Spring**: airSpring (ecology / agriculture)
 **guideStone Level**: **L4** (cross-atomic pipeline / provenance tier) → targeting **L5+** (NUCLEUS composition, live primals)
 **License**: AGPL-3.0-or-later
@@ -161,6 +161,19 @@ Structural L5 validation with TCP mock round-trip tests passes (1,057 lib tests)
 - [x] Last `/tmp/` hardcoded path eliminated: `data/provider.rs` `SongbirdTransport::discover` → biomeOS standard discovery
 - [ ] guideStone L5 / live NUCLEUS validation (blocked on live biomeOS + toadStool — Pass 14)
 - [ ] guideStone L6 / cross-spring pipeline (deploy graphs validated against live NUCLEUS)
+
+### Wave 17 Signal Adoption (May 16, 2026)
+
+Per primalSpring Wave 17 (451-method registry, Neural API Signal Elevation):
+- `primal.announce` adopted: `register_with_target()` now tries single-call `primal.announce` first, falls back to legacy 3-call (`lifecycle.register` + `capability.register` + `method.register`) for pre-v3.57 biomeOS
+- `nest.store` signal: `record_experiment_step()` tries `nest.store` dispatch first (biomeOS manages content.put → dag.event.append → spine.seal graph), falls back to legacy `capability.call("dag", "append_event")`
+- `nest.commit` signal: `complete_experiment()` tries `nest.commit` dispatch first (biomeOS manages dehydrate → commit → attribute), falls back to legacy 3-phase pipeline
+- `primal.info` handler added: returns niche metadata for ecosystem introspection
+- Dispatch table: `primal.announce` + `primal.info` added to `airspring_primal` binary
+- Capability count: 49 → 51 methods (added `primal.announce`, `primal.info`)
+- Registry sync: cross-sync test updated for 451-method canonical (was 413)
+- L5 certification: `validate_primal_announce` replaces `validate_method_register` (with fallback)
+- 1,057 lib + 62 forge tests pass, 0 clippy warnings
 
 ### Tower Triple-First Evolution (May 14, 2026)
 

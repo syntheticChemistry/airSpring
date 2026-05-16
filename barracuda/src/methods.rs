@@ -132,6 +132,10 @@ pub const PROVENANCE_STATUS: &str = "provenance.status";
 pub const PRIMAL_FORWARD: &str = "primal.forward";
 /// Discover available primals.
 pub const PRIMAL_DISCOVER: &str = "primal.discover";
+/// Single-call registration: replaces lifecycle.register + capability.register + method.register.
+pub const PRIMAL_ANNOUNCE: &str = "primal.announce";
+/// Introspection: return primal metadata (version, capabilities, niche).
+pub const PRIMAL_INFO: &str = "primal.info";
 
 // ── Composition (biomeOS orchestration) ───────────────────────────
 

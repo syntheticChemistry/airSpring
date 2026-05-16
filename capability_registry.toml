@@ -268,6 +268,18 @@ domain = "coordination"
 description = "Discover available primals and their capabilities"
 gpu_accelerated = false
 
+[capabilities.primal_announce]
+method = "primal.announce"
+domain = "coordination"
+description = "Single-call registration replacing lifecycle.register + capability.register + method.register"
+gpu_accelerated = false
+
+[capabilities.primal_info]
+method = "primal.info"
+domain = "coordination"
+description = "Primal metadata introspection (version, capabilities, niche, signal tiers)"
+gpu_accelerated = false
+
 # ── Health probes (biomeOS orchestration) ──
 
 [capabilities.health_liveness]

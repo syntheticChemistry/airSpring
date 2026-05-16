@@ -3,7 +3,8 @@
 //! Layers 5-6: NUCLEUS composition and cross-spring pipeline validation.
 //!
 //! Layer 5 validates that airSpring can participate in biomeOS composition:
-//! `composition.status`, `method.register`, and `compute.dispatch` over IPC.
+//! `composition.status`, `primal.announce` (or fallback `method.register`),
+//! and `compute.dispatch` over IPC.
 //!
 //! Layer 6 validates cross-spring pipeline correctness: deploy graph parsing,
 //! capability registry completeness, and cross-spring data exchange readiness.
@@ -14,7 +15,7 @@ use crate::{biomeos, methods as m, niche, rpc};
 /// Layer 5: NUCLEUS composition — biomeOS integration probes.
 pub fn validate_composition(v: &mut ValidationHarness) {
     validate_composition_status(v);
-    validate_method_register(v);
+    validate_primal_announce(v);
     validate_compute_dispatch(v);
 }
 
@@ -43,29 +44,45 @@ fn validate_composition_status(v: &mut ValidationHarness) {
     }
 }
 
-fn validate_method_register(v: &mut ValidationHarness) {
+fn validate_primal_announce(v: &mut ValidationHarness) {
     let biomeos_socket = biomeos::discover_primal_socket(crate::primal_names::BIOMEOS);
     let Some(socket) = biomeos_socket else {
-        println!("  SKIP: biomeOS not available for method.register");
+        println!("  SKIP: biomeOS not available for primal.announce");
         return;
     };
 
     let caps: Vec<&str> = niche::CAPABILITIES.to_vec();
-    let payload = serde_json::json!({
+    let announce_payload = serde_json::json!({
         "primal": crate::PRIMAL_NAME,
-        "transport": "unix",
+        "socket": "unix",
+        "capabilities": ["agriculture", "ecology", "provenance"],
         "methods": caps,
+        "signal_tiers": ["nest"],
+        "version": env!("CARGO_PKG_VERSION"),
     });
 
-    match rpc::call_unix(&socket, m::METHOD_REGISTER, &payload) {
-        Ok(resp) => {
+    if let Ok(resp) = rpc::call_unix(&socket, m::PRIMAL_ANNOUNCE, &announce_payload) {
+        let accepted = resp
+            .get("accepted")
+            .and_then(serde_json::Value::as_bool)
+            .unwrap_or(false);
+        v.check_bool("primal.announce accepted", accepted);
+    } else {
+        println!("  primal.announce unavailable, falling back to method.register");
+        let register_payload = serde_json::json!({
+            "primal": crate::PRIMAL_NAME,
+            "transport": "unix",
+            "methods": caps,
+        });
+        if let Ok(resp) = rpc::call_unix(&socket, m::METHOD_REGISTER, &register_payload) {
             let accepted = resp
                 .get("accepted")
                 .and_then(serde_json::Value::as_u64)
                 .unwrap_or(0);
-            v.check_bool("method.register accepted >= 1", accepted >= 1);
+            v.check_bool("method.register fallback accepted >= 1", accepted >= 1);
+        } else {
+            println!("  SKIP: method.register fallback also failed");
         }
-        Err(_) => println!("  SKIP: method.register call failed"),
     }
 }
 

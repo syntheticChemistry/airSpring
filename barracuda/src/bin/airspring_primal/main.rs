@@ -176,16 +176,6 @@ fn emit_metrics(operation: &str, latency_ms: f64, success: bool) {
     }
 }
 
-fn register_methods_with_biomeos(our_socket: &Path) {
-    if let Some(orchestrator) = discovery::discover_orchestrator_socket() {
-        airspring_barracuda::ipc::method_register::register_methods(&orchestrator, our_socket);
-    } else if let Some(fallback_name) = biomeos::fallback_registration_primal()
-        && let Some(ref fallback_sock) = biomeos::discover_primal_socket(&fallback_name)
-    {
-        airspring_barracuda::ipc::method_register::register_methods(fallback_sock, our_socket);
-    }
-}
-
 fn emit_startup_audit() {
     let _ = airspring_barracuda::ipc::skunkbat::audit_startup(niche::CAPABILITIES.len());
 }
@@ -233,7 +223,6 @@ fn run() -> Result<(), String> {
     );
 
     register_with_biomeos(&socket_path);
-    register_methods_with_biomeos(&socket_path);
     emit_startup_audit();
 
     let running = Arc::new(AtomicBool::new(true));

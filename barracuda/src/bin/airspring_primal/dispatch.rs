@@ -60,6 +60,8 @@ pub fn dispatch(
         }
         "primal.forward" => DispatchOutcome::Ok(handlers::handle_primal_forward(params)),
         "primal.discover" => DispatchOutcome::Ok(handlers::handle_primal_discover()),
+        "primal.announce" => DispatchOutcome::Ok(handlers::handle_primal_announce(params)),
+        "primal.info" => DispatchOutcome::Ok(handlers::handle_primal_info()),
         "composition.status" => DispatchOutcome::Ok(handlers::handle_composition_status(state)),
         "method.register" => DispatchOutcome::Ok(handlers::handle_method_register(params)),
         "compute.offload" => DispatchOutcome::Ok(handlers::handle_compute_offload(params)),
