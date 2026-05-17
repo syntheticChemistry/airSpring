@@ -2,7 +2,7 @@
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
 **Date**: May 17, 2026
-**Version**: v0.10.0 (eukaryotic UniBin, Wave 17 signal adoption)
+**Version**: v0.10.0 (eukaryotic UniBin, Wave 20 schema standardization)
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -19,7 +19,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,284/1,284 PASS** | 60 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB, MC ET₀ uncertainty, bootstrap/jackknife CI, SPI drought index |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **1,057 lib + 316 integration (1,373 barracuda) + 62 forge = 1,435 total** | 94 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
+| Phase 1: Rust validation | **1,057 lib + 316 integration (1,373 barracuda) + 69 forge = 1,442 total** | 94 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (25/25 parity incl. Freundlich) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -57,7 +57,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|
 | `cargo test -p airspring-barracuda --features local,testutil --lib` | **1,057 passed**, 0 failures |
 | `cargo test -p airspring-barracuda --tests --all-features` (or `--features local,testutil` for default-feature-aligned runs) | **316 passed** (integration + doc tests) |
-| `cargo test --lib` (metalForge) | **62 passed**, 0 failures |
+| `cargo test --lib` (metalForge) | **69 passed**, 0 failures |
 | `cargo llvm-cov --lib --fail-under-lines 90` | **90.56% line coverage** |
 | `cargo clippy (pedantic + nursery, -D warnings)` | **0 warnings** (both crates) |
 | `cargo fmt --check` | **Clean** |
@@ -223,8 +223,8 @@ Richards equation (unsaturated flow — open-source alternative to HYDRUS), bioc
 
 ```
 airSpring/
-├── control/                     # Phase 0: Python baselines (1284/1284, 47 scripts)
-│   ├── fao56/ ... drought_index/  # 47 paper controls
+├── control/                     # Phase 0: Python baselines (1284/1284, 65 scripts)
+│   ├── fao56/ ... drought_index/  # 65 paper controls
 │   ├── coupled_runoff_infiltration/   # Coupled SCS-CN + Green-Ampt (292/292)
 │   ├── mc_et0/                  # Monte Carlo ET₀ uncertainty propagation (47/47)
 │   ├── bootstrap_jackknife/     # Bootstrap & Jackknife CI (20/20)
@@ -309,7 +309,8 @@ AGPL-3.0-or-later
 
 ---
 
-*May 16, 2026 — **Wave 20 Schema Standardization + Foundation Evolution**: `capability.list` canonical envelope (flat `capabilities` array + `count`); registry synced to 452-method canonical (Wave 20, `primal.list`); `--provenance-dir` flag on `airspring validate` (Thread 5+6 capture for projectFOUNDATION); `s_foundation_targets` evolved from dispatch smoke check to full numerical parity validation (expected_value ± tolerance); LTEE E3 `tolerances.toml` moisture_range corrected (0.2→0.23). **Wave 17 Signal Adoption**: `primal.announce` replaces 3-call registration; `nest.store` + `nest.commit` signal dispatch; `primal.info` introspection handler; **57 capabilities**. **1,057 lib + 62 forge tests**, 0 clippy. May 14: Tower triple-first (bearDog + songBird + skunkBat).
+*May 17, 2026 — **Experiment Buildout + Control Validation**: 174/174 UniBin scenario PASS; 3 new control experiments (autocorrelation, gamma_cdf, soil_moisture_topp — 65 scripts total); metalForge NUCLEUS atomic assertions updated (Tower 3, Node 4, Nest 4 capabilities; 20/0 absorbed/local workloads); 7 new NUCLEUS composition tests (69 forge tests); CPU-GPU parity 37/37; toadStool dispatch 19/19; NUCLEUS graphs 22/22; mixed pipeline 66/66; nucleus routing 60/60. Wave 20 debt resolution: 6 ecology aliases registered (57 capabilities), unsafe consolidation via EnvGuard RAII, stale lint cleanup, paper queue arithmetic.
+May 16, 2026 — **Wave 20 Schema Standardization + Foundation Evolution**: `capability.list` canonical envelope (flat `capabilities` array + `count`); registry synced to 452-method canonical (Wave 20, `primal.list`); `--provenance-dir` flag on `airspring validate` (Thread 5+6 capture for projectFOUNDATION); `s_foundation_targets` evolved from dispatch smoke check to full numerical parity validation (expected_value ± tolerance); LTEE E3 `tolerances.toml` moisture_range corrected (0.2→0.23). **Wave 17 Signal Adoption**: `primal.announce` replaces 3-call registration; `nest.store` + `nest.commit` signal dispatch; `primal.info` introspection handler; **57 capabilities**. **1,057 lib + 62 forge tests**, 0 clippy. May 14: Tower triple-first (bearDog + songBird + skunkBat).
 May 13, 2026 — **Niche Convergence → Atomic Deployment**: AG-005 RESOLVED (`inference.embed/complete/models` wired through `dispatch_science`, 7 dispatch tests); NestGate CAS typed client; Squirrel inference typed client; deep debt sprint: zero debt across all audit dimensions. **1,057 lib tests**, **1,435 total**. Earlier: Tier 2 Convergence Wave: `precision.route` full field consumption; LTEE E3 lithoSpore packaging; musl static-pie binary (3.3 MB, plasmidBin harvestable).
 May 12, 2026 — Deep debt resolution: **barraCuda 0.4.0** upstream absorption (workspace + Forge; from 0.3.13); 12 hardcoded primal tracing targets → `primal_names::` constants; **`primal_names::socket_filename()`** replaces `"biomeos.sock"` path literals; dead **`primal-proof`** Cargo feature removed; zero hardcoded primal name strings in production; **1,027** lib tests, **0** clippy. Earlier same day: hardcoded primal strings scrub, all three `deny.toml` files synced (openssl, sysinfo, aws-lc-sys, aws-lc-rs bans), Forge barraCuda progression **`0.3.7→0.4.0`**, `primal_names::BARRACUDA` added. Tier 4 IPC-first defaults + guideStone convergence (L2+→L4): `default = []`, 7 deploy graphs (GPU batch, sovereign data, uncertainty added), `required-features` on 94 binaries, IPC-only clippy clean. **LTEE E3** Python **12/12** + Rust **29/29** PASS (`validate_ltee_fls2`). UniBin **`validate --format json`** for Tier 2 projectNUCLEUS ingestion. Post-interstadial evolution: **`method.register`**, **`composition.status`**, skunkBat deploy-graph, capability cross-sync vs canonical **413**, CONTEXT.md reconciled, certification engine **L0–L6** (L4 cross-atomic; L5 NUCLEUS composition; L6 cross-spring pipeline), **10 UniBin validation scenarios** (incl. `s_tier4_math_parity`). **Tier 2 IPC wiring:** `ipc::toadstool_validate` + `ipc::precision_route` (16 TCP round-trip lib tests); **AG-012** resolved (Tier 2 unblocked); `TOADSTOOL_VALIDATE`, `TOADSTOOL_LIST_WORKLOADS`, `PRECISION_ROUTE` in `methods.rs`; composition-parity scenario extended with Tier 2 probes.
 May 9 — Deep debt resolution + eukaryotic evolution. Dead standalone-http feature

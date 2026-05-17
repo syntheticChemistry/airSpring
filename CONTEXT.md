@@ -1,6 +1,6 @@
 # Context — airSpring
 
-**Doc sync:** 2026-05-16 (v0.10.0; Wave 20 schema standardization; 57 capabilities; 452-method registry sync).
+**Doc sync:** 2026-05-17 (v0.10.0; Wave 20 schema standardization; 57 capabilities; 452-method registry sync).
 
 ## What This Is
 
@@ -41,8 +41,8 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - **Lib tests:** 1,057 (barracuda, `cargo test --features local,testutil --lib`)
 - **Integration + doc tests:** 316 (barracuda)
 - **Barracuda total:** 1,373 (1,057 lib + 316 integration/doc)
-- **Forge tests:** 62 (metalForge)
-- **Grand total:** 1,435 (both crates)
+- **Forge tests:** 69 (metalForge)
+- **Grand total:** 1,442 (both crates)
 - **Binaries:** 94 (85 validation, 4 bench, 3 operational, 1 UniBin, 1 guidestone)
 - **Proptest invariants:** 7 (SVP, delta, Hargreaves, TAW, RAW, Ks)
 - **Line coverage:** 90.56% (cargo llvm-cov --lib --fail-under-lines 90)

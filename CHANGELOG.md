@@ -4,6 +4,15 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [Unreleased] - 2026-05-17
 
+### Experiment Buildout + Control Validation (2026-05-17)
+
+- **174/174 UniBin validation scenarios PASS**: Fixed sample vs population std_dev discrepancy in `s_tier4_math_parity` (barraCuda uses sample when `local` active).
+- **3 new control experiments**: `control/autocorrelation/` (ACF on AR(1) + white noise), `control/gamma_cdf/` (regularised incomplete gamma vs analytical), `control/soil_moisture_topp/` (Topp 1980 polynomial + inverse roundtrip) — 65 control scripts total.
+- **metalForge NUCLEUS atomics evolved**: Tower 2→3, Node 3→4, Nest 4→4 capability counts (defense.audit added); absorbed/local workload counts 14/6 → 20/0 (all GPU workloads now absorbed by barraCuda); eco pipeline graph capabilities updated to canonical wire names.
+- **7 new NUCLEUS composition tests**: full trio (Tower+Node+Nest), multi-node heterogeneous mesh, NPU→GPU→GPU single-node pipeline, cross-node capability split, Nest non-dispatch invariant, capability superset chain, large mesh sticky routing.
+- **Validation sweep**: CPU-GPU parity 37/37, toadStool dispatch 19/19, NUCLEUS graphs 22/22, mixed pipeline 66/66, nucleus routing 60/60.
+- **1,057 lib + 69 forge tests**, 0 clippy warnings.
+
 ### Wave 20 Debt Resolution (2026-05-17)
 
 - **6 ecology aliases registered**: `ecology.et0_priestley_taylor`, `ecology.et0_makkink`, `ecology.et0_turc`, `ecology.et0_hamon`, `ecology.et0_blaney_criddle`, `ecology.timeseries` — dispatch routing existed but capability discovery was incomplete. Capability count: 51 → **57**.
@@ -11,7 +20,7 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 - **Test mock canonical envelope**: `primal_dispatch.rs` capability.list mock now returns `"capabilities"` + `"count"` + `"primal"` (Wave 20 canonical shape).
 - **Paper queue arithmetic**: Fixed "All 61" → "All 62", "All 41" → "All 62" in `PAPER_REVIEW_QUEUE.md`.
 - **Stale lint expectations removed**: `#[expect(clippy::too_many_lines)]` removed from `richards.rs` and `multi_field.rs` (functions no longer exceed threshold).
-- **1,057 lib + 62 forge tests**, 0 clippy pedantic+nursery warnings.
+- **1,057 lib + 69 forge tests**, 0 clippy pedantic+nursery warnings.
 
 ### Wave 20 Schema Standardization + Foundation Evolution (2026-05-16)
 

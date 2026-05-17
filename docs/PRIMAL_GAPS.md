@@ -179,7 +179,7 @@ Per primalSpring Wave 20 (452-method registry, Schema Standardization + E2E Vali
 - `primal.list` constant added to `methods.rs` (biomeOS serves primal enumeration)
 - `capability.list` canonical envelope: added top-level `"capabilities"` flat string array + `"count"` field (canonical subset per standard; enriched fields retained alongside)
 - Registry sync: cross-sync test updated for 452-method canonical (was 451)
-- 1,057 lib + 62 forge tests pass, 0 clippy warnings
+- 1,057 lib + 69 forge tests pass, 0 clippy warnings
 - [x] `--provenance-dir` implemented: `airspring validate --provenance-dir <DIR>` writes `results.json` + `provenance.toml` (Thread 5+6 capture). E3 LTEE activation is the remaining step.
 
 ### Wave 17 Signal Adoption (May 16, 2026)
@@ -193,7 +193,7 @@ Per primalSpring Wave 17 (451-method registry, Neural API Signal Elevation):
 - Capability count: 49 → 51 methods (added `primal.announce`, `primal.info`); later 51 → 57 (Wave 20 Debt: 6 ecology aliases registered)
 - Registry sync: cross-sync test updated for 451-method canonical (was 413)
 - L5 certification: `validate_primal_announce` replaces `validate_method_register` (with fallback)
-- 1,057 lib + 62 forge tests pass, 0 clippy warnings
+- 1,057 lib + 69 forge tests pass, 0 clippy warnings
 
 ### Tower Triple-First Evolution (May 14, 2026)
 
@@ -202,7 +202,7 @@ Per upstream plasmidBin manifest, Tower Atomic is now `bearDog + songBird + skun
 - `s_composition_parity.rs`: skunkBat added to Tower health probe loop
 - `validate_nucleus_graphs.rs`: Tower detection now requires skunkBat discovery
 - Deploy graph comments, validation binaries, docs reconciled
-- 1,057 lib + 62 forge tests pass, 0 clippy warnings
+- 1,057 lib + 69 forge tests pass, 0 clippy warnings
 
 ### Deep Debt Audit Results (May 13, 2026 — Sprint)
 

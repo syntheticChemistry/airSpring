@@ -1,6 +1,6 @@
 # airSpring NUCLEUS Integration
 
-**Date:** May 16, 2026
+**Date:** May 17, 2026
 **Status:** Complete — deployment graph + capability spec + Neural API bridge operational, 28/28 pipeline PASS (Exp 084-087)
 **Gate:** Eastgate (i9-12900K, RTX 4070, 32GB DDR5, 2TB NVMe, BrainChip Akida NPU)
 **Invariant:** 1,057 Rust lib tests + 46/46 GPU math + 75/75 cross-validation + 1393 atlas must pass regardless of deployment mode

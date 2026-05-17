@@ -1,7 +1,7 @@
 +++
 title = "airSpring Validation Summary"
-description = "Precision agriculture & irrigation — 1,435 Rust tests, 90 experiments (87 + 3 composition), 10 UniBin validation scenarios, 14.3× speedup, 51/57 capabilities routable, 25 notebooks, UniBin eukaryotic, zero failures"
-date = 2026-05-16
+description = "Precision agriculture & irrigation — 1,442 Rust tests, 90 experiments (87 + 3 composition), 10 UniBin validation scenarios, 14.3× speedup, 51/57 capabilities routable, 25 notebooks, UniBin eukaryotic, zero failures"
+date = 2026-05-17
 
 [taxonomies]
 primals = ["barracuda", "toadstool", "biomeos", "nestgate", "squirrel", "coralreef", "petaltongue", "beardog", "songbird"]
@@ -10,12 +10,12 @@ springs = ["airspring", "hotspring", "wetspring", "neuralspring", "groundspring"
 
 ## Status
 
-- **1,435 Rust tests** passing (1,057 lib + 316 integration + 62 forge), 0 failed
+- **1,442 Rust tests** passing (1,057 lib + 316 integration + 69 forge), 0 failed
 - **1,284 Python baseline checks** (60 papers reproduced)
 - **90 experiments** across 12 categories + 3 composition crates (exp001 local parity, exp002 composition parity, exp003 foundation targets)
 - **14.3× geometric mean** Rust-vs-Python speedup (25/25 algorithms, 21/21 CPU-GPU parity)
 - **51/51 IPC capabilities** routable (science + ecology + provenance + composition + coordination + inference)
-- **61 centralized method constants** in `methods.rs` (drift-proof, single source of truth)
+- **64 centralized method constants** in `methods.rs` (drift-proof, single source of truth)
 - **94 validation binaries** (all zero-panic, OrExit pattern, UniBin consolidation)
 - **90.56% line coverage** (gated at 90%)
 - **60 named tolerances** in 5 submodules (Rust + Python mirror, zero inline magic numbers)

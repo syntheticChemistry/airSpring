@@ -81,7 +81,7 @@ Tier 4 IPC-first: barracuda is opt-in via `--features local` (validation binarie
 cd barracuda && cargo test --features local,testutil --lib              # 1,057 lib tests
 cd barracuda && cargo test --features local,testutil --tests            # 316 integration tests
 # or: cd barracuda && cargo test --all-features
-cd metalForge/forge && cargo test             # 62 forge tests
+cd metalForge/forge && cargo test             # 69 forge tests
 cd barracuda && cargo llvm-cov --lib --fail-under-lines 90  # 90.56% line coverage
 cd barracuda && cargo clippy --all-targets -- -D warnings -W clippy::pedantic -W clippy::nursery
 cd barracuda && cargo deny check              # cargo-deny 0.19 (SPDX, ecoBin bans)
