@@ -8,6 +8,11 @@
 # Canonical source: niche.rs CAPABILITIES array.
 # CI sync: tests/capabilities_match_registry.rs checks this file
 # matches the Rust constant exactly.
+#
+# Stability tiers (primalSpring Wave 20):
+#   stable   — deployed consumers depend on these names; do not rename
+#   evolving — name may change between major waves; notify downstream
+#   internal — test fixture or internal-only; no stability guarantee
 
 [primal]
 name = "airspring"
@@ -23,42 +28,49 @@ method = "science.et0_fao56"
 domain = "ecology.evapotranspiration"
 description = "FAO-56 Penman-Monteith reference evapotranspiration (Allen et al. 1998)"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.et0_hargreaves]
 method = "science.et0_hargreaves"
 domain = "ecology.evapotranspiration"
 description = "Hargreaves-Samani temperature-based ET₀ (1985)"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.et0_priestley_taylor]
 method = "science.et0_priestley_taylor"
 domain = "ecology.evapotranspiration"
 description = "Priestley-Taylor radiation-based ET₀ (1972)"
 gpu_accelerated = false
+stability = "stable"
 
 [capabilities.et0_makkink]
 method = "science.et0_makkink"
 domain = "ecology.evapotranspiration"
 description = "Makkink radiation-based ET₀ (1957)"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.et0_turc]
 method = "science.et0_turc"
 domain = "ecology.evapotranspiration"
 description = "Turc temperature-radiation ET₀ (1961)"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.et0_hamon]
 method = "science.et0_hamon"
 domain = "ecology.evapotranspiration"
 description = "Hamon temperature-based PET (1961)"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.et0_blaney_criddle]
 method = "science.et0_blaney_criddle"
 domain = "ecology.evapotranspiration"
 description = "Blaney-Criddle temperature-based PET (1950)"
 gpu_accelerated = true
+stability = "stable"
 
 # ── Water balance & yield ──
 
@@ -67,12 +79,14 @@ method = "science.water_balance"
 domain = "ecology.irrigation"
 description = "FAO-56 Chapter 8 daily soil water balance scheduling"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.yield_response]
 method = "science.yield_response"
 domain = "ecology.crop"
 description = "Stewart (1977) yield response to water stress"
 gpu_accelerated = true
+stability = "stable"
 
 # ── Soil physics ──
 
@@ -81,30 +95,35 @@ method = "science.richards_1d"
 domain = "ecology.soil_physics"
 description = "Richards equation 1D (van Genuchten-Mualem retention + Picard iteration)"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.scs_cn_runoff]
 method = "science.scs_cn_runoff"
 domain = "ecology.hydrology"
 description = "SCS curve number rainfall-runoff (USDA 1972)"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.green_ampt_infiltration]
 method = "science.green_ampt_infiltration"
 domain = "ecology.hydrology"
 description = "Green-Ampt infiltration with Newton-Raphson (1911)"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.soil_moisture_topp]
 method = "science.soil_moisture_topp"
 domain = "ecology.sensors"
 description = "Topp equation soil moisture from dielectric permittivity"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.pedotransfer_saxton_rawls]
 method = "science.pedotransfer_saxton_rawls"
 domain = "ecology.soil_physics"
 description = "Saxton-Rawls 2006 pedotransfer functions (texture → hydraulic properties)"
 gpu_accelerated = true
+stability = "stable"
 
 # ── Crop & irrigation ──
 
@@ -113,18 +132,21 @@ method = "science.dual_kc"
 domain = "ecology.irrigation"
 description = "FAO-56 Chapter 7 dual crop coefficient (Kcb + Ke partitioning)"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.sensor_calibration]
 method = "science.sensor_calibration"
 domain = "ecology.sensors"
 description = "CS616/EC5/SoilWatch 10 sensor calibration (Dong et al. 2020/2024)"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.gdd]
 method = "science.gdd"
 domain = "ecology.crop"
 description = "Growing degree days accumulation and Kc-from-GDD mapping"
 gpu_accelerated = true
+stability = "stable"
 
 # ── Biodiversity ──
 
@@ -133,12 +155,14 @@ method = "science.shannon_diversity"
 domain = "ecology.diversity"
 description = "Shannon H' diversity index with evenness"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.bray_curtis]
 method = "science.bray_curtis"
 domain = "ecology.diversity"
 description = "Bray-Curtis dissimilarity for community comparison"
 gpu_accelerated = true
+stability = "stable"
 
 # ── Geophysics coupling ──
 
@@ -147,6 +171,7 @@ method = "science.anderson_coupling"
 domain = "ecology.geophysics"
 description = "Anderson localization coupling (θ → S_e → d_eff → QS regime)"
 gpu_accelerated = false
+stability = "stable"
 
 # ── Monthly ET ──
 
@@ -155,6 +180,7 @@ method = "science.thornthwaite"
 domain = "ecology.evapotranspiration"
 description = "Thornthwaite monthly ET₀ from temperature heat index (1948)"
 gpu_accelerated = true
+stability = "stable"
 
 # ── Drought & Stochastic ──
 
@@ -163,18 +189,21 @@ method = "science.spi_drought_index"
 domain = "ecology.climatology"
 description = "Standardized Precipitation Index (gamma MLE → normal quantile)"
 gpu_accelerated = false
+stability = "stable"
 
 [capabilities.autocorrelation]
 method = "science.autocorrelation"
 domain = "ecology.timeseries"
 description = "Autocorrelation function for time series analysis"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.gamma_cdf]
 method = "science.gamma_cdf"
 domain = "ecology.statistics"
 description = "Gamma CDF via regularized incomplete gamma function"
 gpu_accelerated = false
+stability = "stable"
 
 # ── Ecology aliases ──
 
@@ -183,78 +212,91 @@ method = "ecology.et0_fao56"
 domain = "ecology.evapotranspiration"
 description = "Alias: FAO-56 PM ET₀ via ecology domain"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.ecology_et0_hargreaves]
 method = "ecology.et0_hargreaves"
 domain = "ecology.evapotranspiration"
 description = "Alias: Hargreaves-Samani ET₀ via ecology domain"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.ecology_water_balance]
 method = "ecology.water_balance"
 domain = "ecology.irrigation"
 description = "Alias: water balance via ecology domain"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.ecology_yield_response]
 method = "ecology.yield_response"
 domain = "ecology.crop"
 description = "Alias: Stewart yield response via ecology domain"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.ecology_full_pipeline]
 method = "ecology.full_pipeline"
 domain = "ecology.pipeline"
 description = "Full ecology pipeline: weather → ET₀ → Kc → WB → yield"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.ecology_spi_drought]
 method = "ecology.spi_drought_index"
 domain = "ecology.climatology"
 description = "Alias: SPI drought index via ecology domain"
 gpu_accelerated = false
+stability = "stable"
 
 [capabilities.ecology_autocorrelation]
 method = "ecology.autocorrelation"
 domain = "ecology.timeseries"
 description = "Alias: autocorrelation via ecology domain"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.ecology_et0_priestley_taylor]
 method = "ecology.et0_priestley_taylor"
 domain = "ecology.evapotranspiration"
 description = "Alias: Priestley-Taylor ET₀ via ecology domain"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.ecology_et0_makkink]
 method = "ecology.et0_makkink"
 domain = "ecology.evapotranspiration"
 description = "Alias: Makkink ET₀ via ecology domain"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.ecology_et0_turc]
 method = "ecology.et0_turc"
 domain = "ecology.evapotranspiration"
 description = "Alias: Turc ET₀ via ecology domain"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.ecology_et0_hamon]
 method = "ecology.et0_hamon"
 domain = "ecology.evapotranspiration"
 description = "Alias: Hamon ET₀ via ecology domain"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.ecology_et0_blaney_criddle]
 method = "ecology.et0_blaney_criddle"
 domain = "ecology.evapotranspiration"
 description = "Alias: Blaney-Criddle ET₀ via ecology domain"
 gpu_accelerated = true
+stability = "stable"
 
 [capabilities.ecology_timeseries]
 method = "ecology.timeseries"
 domain = "ecology.timeseries"
 description = "Alias: time-series operations via ecology domain"
 gpu_accelerated = false
+stability = "stable"
 
 # ── Provenance trio (biomeOS composition) ──
 
@@ -263,24 +305,28 @@ method = "provenance.begin"
 domain = "provenance"
 description = "Start a provenance session for experiment tracking"
 gpu_accelerated = false
+stability = "stable"
 
 [capabilities.provenance_record]
 method = "provenance.record"
 domain = "provenance"
 description = "Record a step in the provenance chain"
 gpu_accelerated = false
+stability = "stable"
 
 [capabilities.provenance_complete]
 method = "provenance.complete"
 domain = "provenance"
 description = "Complete and seal a provenance session"
 gpu_accelerated = false
+stability = "stable"
 
 [capabilities.provenance_status]
 method = "provenance.status"
 domain = "provenance"
 description = "Query provenance session status"
 gpu_accelerated = false
+stability = "stable"
 
 # ── Cross-spring time series ──
 
@@ -289,6 +335,7 @@ method = "science.timeseries"
 domain = "ecology.timeseries"
 description = "Cross-spring time series exchange (weather, soil moisture)"
 gpu_accelerated = false
+stability = "stable"
 
 # ── Cross-primal ──
 
@@ -297,24 +344,28 @@ method = "primal.forward"
 domain = "coordination"
 description = "Forward requests to upstream primals by capability"
 gpu_accelerated = false
+stability = "stable"
 
 [capabilities.primal_discover]
 method = "primal.discover"
 domain = "coordination"
 description = "Discover available primals and their capabilities"
 gpu_accelerated = false
+stability = "stable"
 
 [capabilities.primal_announce]
 method = "primal.announce"
 domain = "coordination"
 description = "Single-call registration replacing lifecycle.register + capability.register + method.register"
 gpu_accelerated = false
+stability = "stable"
 
 [capabilities.primal_info]
 method = "primal.info"
 domain = "coordination"
 description = "Primal metadata introspection (version, capabilities, niche, signal tiers)"
 gpu_accelerated = false
+stability = "stable"
 
 # ── Health probes (biomeOS orchestration) ──
 
@@ -323,12 +374,14 @@ method = "health.liveness"
 domain = "health"
 description = "biomeOS liveness probe"
 gpu_accelerated = false
+stability = "stable"
 
 [capabilities.health_readiness]
 method = "health.readiness"
 domain = "health"
 description = "biomeOS readiness probe"
 gpu_accelerated = false
+stability = "stable"
 
 # ── Composition (biomeOS orchestration) ──
 
@@ -337,12 +390,14 @@ method = "composition.status"
 domain = "composition"
 description = "biomeOS composition status: active_users, primal_health, resource_pressure"
 gpu_accelerated = false
+stability = "stable"
 
 [capabilities.method_register]
 method = "method.register"
 domain = "composition"
 description = "biomeOS v3.51 dynamic method registration for semantic routing"
 gpu_accelerated = false
+stability = "stable"
 
 # ── Niche deployment (biomeOS graph composition) ──
 
@@ -351,12 +406,14 @@ method = "capability.list"
 domain = "coordination"
 description = "List all capabilities this niche provides"
 gpu_accelerated = false
+stability = "stable"
 
 [capabilities.data_cross_spring_weather]
 method = "data.cross_spring_weather"
 domain = "data"
 description = "Cross-spring weather data exchange"
 gpu_accelerated = false
+stability = "stable"
 
 # ── Compute offload (Node Atomic) ──
 
@@ -365,6 +422,7 @@ method = "compute.offload"
 domain = "compute"
 description = "Offload compute to toadStool via Node Atomic"
 gpu_accelerated = true
+stability = "evolving"
 
 # ── Data (Nest Atomic routing) ──
 
@@ -373,6 +431,7 @@ method = "data.weather"
 domain = "data"
 description = "Weather data retrieval via NestGate"
 gpu_accelerated = false
+stability = "stable"
 
 # ── Inference (Squirrel) ──
 
@@ -381,15 +440,18 @@ method = "inference.embed"
 domain = "inference"
 description = "Embed soil sensor profiles for similarity search via Squirrel"
 gpu_accelerated = false
+stability = "evolving"
 
 [capabilities.inference_complete]
 method = "inference.complete"
 domain = "inference"
 description = "Structured completion for crop parameter suggestion via Squirrel"
 gpu_accelerated = false
+stability = "evolving"
 
 [capabilities.inference_models]
 method = "inference.models"
 domain = "inference"
 description = "List available inference models from Squirrel"
 gpu_accelerated = false
+stability = "evolving"

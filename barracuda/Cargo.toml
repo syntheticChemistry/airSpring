@@ -210,6 +210,20 @@ path = "src/bin/validate_thornthwaite.rs"
 required-features = ["local"]
 
 [[bin]]
+name = "validate_autocorrelation"
+path = "src/bin/validate_autocorrelation.rs"
+required-features = ["local"]
+
+[[bin]]
+name = "validate_gamma_cdf"
+path = "src/bin/validate_gamma_cdf.rs"
+
+[[bin]]
+name = "validate_soil_moisture_topp"
+path = "src/bin/validate_soil_moisture_topp.rs"
+required-features = ["local"]
+
+[[bin]]
 name = "validate_gdd"
 path = "src/bin/validate_gdd.rs"
 required-features = ["local"]

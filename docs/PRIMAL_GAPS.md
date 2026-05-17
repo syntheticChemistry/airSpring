@@ -162,6 +162,17 @@ Structural L5 validation with TCP mock round-trip tests passes (1,057 lib tests)
 - [ ] guideStone L5 / live NUCLEUS validation (blocked on live biomeOS + toadStool — Pass 14)
 - [ ] guideStone L6 / cross-spring pipeline (deploy graphs validated against live NUCLEUS)
 
+### Wave 20 PM — lithoSpore Audit Absorption (May 17, 2026)
+
+Per primalSpring lithoSpore downstream audit + ecosystem evolution directive:
+- [x] **Stability tier annotations**: All 57 capabilities annotated with `stability` in `capability_registry.toml` (53 stable, 4 evolving)
+- [x] **Degradation behavior documented**: `docs/DEGRADATION_BEHAVIOR.md` — per-primal degradation table, trio partial completion states, degradation patterns
+- [x] **Trio transaction semantics**: `ProvenanceCompletion` now reports `primals_reached` (which trio primals were successfully contacted); legacy pipeline correctly reports `"partial"` when braid creation fails (was incorrectly `"complete"`)
+- [x] **Cross-tier parity validators**: 3 new `validate_*` binaries — `validate_autocorrelation`, `validate_gamma_cdf`, `validate_soil_moisture_topp` (closes parity gap for all methods with Python baselines)
+- [x] **Cross-tier parity documented**: `docs/CROSS_TIER_PARITY.md` — per-method parity matrix (17 full, 7 Tier 2)
+- [x] **Thread 4 expression**: confirmed present in foundation (`ENVIRONMENTAL_GENOMICS.md`, 12+1 targets). airSpring targets: FAO-56 ET₀ 36/36 validated, FLS2 soil-immune 29/29 validated, no-till Anderson pending field data
+- [x] **Dead code audit**: `ipc/barracuda_route.rs` confirmed inactive — retained for future absorption, documented in degradation table
+
 ### Wave 20 Debt Resolution (May 17, 2026)
 
 Per primalSpring audit — Wave 20 residual debt:

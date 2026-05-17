@@ -78,12 +78,14 @@ fn provenance_completion_to_json() {
         commit_id: "commit-456".to_string(),
         braid_id: "braid-789".to_string(),
         status: "complete".to_string(),
+        primals_reached: vec!["rhizoCrypt", "loamSpine", "sweetGrass"],
     };
     let j = c.to_json();
     assert_eq!(j["provenance"], "complete");
     assert_eq!(j["merkle_root"], "abc123");
     assert_eq!(j["commit_id"], "commit-456");
     assert_eq!(j["braid_id"], "braid-789");
+    assert_eq!(j["primals_reached"].as_array().unwrap().len(), 3);
 }
 
 #[test]
@@ -93,11 +95,13 @@ fn partial_completion_to_json() {
         commit_id: String::new(),
         braid_id: String::new(),
         status: "partial".to_string(),
+        primals_reached: vec!["rhizoCrypt"],
     };
     let j = c.to_json();
     assert_eq!(j["provenance"], "partial");
     assert!(!j["merkle_root"].as_str().unwrap().is_empty());
     assert!(j["commit_id"].as_str().unwrap().is_empty());
+    assert_eq!(j["primals_reached"].as_array().unwrap().len(), 1);
 }
 
 #[test]

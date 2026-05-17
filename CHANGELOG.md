@@ -4,6 +4,16 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [Unreleased] - 2026-05-17
 
+### Wave 20 PM — lithoSpore Audit Absorption (2026-05-17)
+
+- **Stability tier annotations**: All 57 capabilities annotated in `capability_registry.toml` (53 stable, 4 evolving per primalSpring Wave 20 tier system).
+- **Degradation behavior documented**: New `docs/DEGRADATION_BEHAVIOR.md` — per-primal degradation table (12 IPC modules), trio partial completion states, design principle: science never gates behind provenance.
+- **Trio transaction semantics fix**: `ProvenanceCompletion` now reports `primals_reached` field. Legacy pipeline bug fixed — `create_braid` failure now correctly reports `status: "partial"` (was `"complete"` with empty `braid_id`).
+- **3 cross-tier parity validators**: `validate_autocorrelation` (ACF parity), `validate_gamma_cdf` (regularised gamma), `validate_soil_moisture_topp` (Topp 1980 polynomial + inverse roundtrip). Closes all Python↔Rust parity gaps.
+- **Cross-tier parity documented**: New `docs/CROSS_TIER_PARITY.md` — 17 methods full parity, 7 methods Tier 2 parity.
+- **Thread 4 confirmed**: Foundation `ENVIRONMENTAL_GENOMICS.md` present (12+1 targets; FAO-56 36/36 validated, FLS2 29/29 validated, no-till pending field data).
+- **Upstream handoff**: `wateringHole/handoffs/AIRSPRING_WAVE20PM_LITHOSPORE_ABSORPTION_MAY17_2026.md`.
+
 ### Experiment Buildout + Control Validation (2026-05-17)
 
 - **174/174 UniBin validation scenarios PASS**: Fixed sample vs population std_dev discrepancy in `s_tier4_math_parity` (barraCuda uses sample when `local` active).

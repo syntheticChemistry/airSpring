@@ -51,6 +51,10 @@ pub struct ProvenanceResult {
 }
 
 /// Summary of a completed provenance pipeline.
+///
+/// Per the Provenance Trio Integration Guide, trio commits are **not atomic**.
+/// Partial states are valid: DAG without braid, braid without spine, etc.
+/// Domain logic must never fail on partial provenance.
 #[derive(Debug, Clone)]
 pub struct ProvenanceCompletion {
     /// rhizoCrypt Merkle root.
@@ -61,6 +65,8 @@ pub struct ProvenanceCompletion {
     pub braid_id: String,
     /// Pipeline status: `"complete"`, `"partial"`, or `"unavailable"`.
     pub status: String,
+    /// Which trio primals were successfully reached during this pipeline.
+    pub primals_reached: Vec<&'static str>,
 }
 
 /// Configuration for provenance transport discovery (DI pattern).
@@ -389,6 +395,7 @@ pub fn complete_experiment_with(
             commit_id: String::new(),
             braid_id: String::new(),
             status: "unavailable".to_string(),
+            primals_reached: Vec::new(),
         };
     };
 
@@ -425,6 +432,13 @@ fn try_nest_commit_signal(
     }
 
     let r = result.get("result").unwrap_or(&result);
+    let braid_id = r
+        .get("braid_id")
+        .or_else(|| r.get("id"))
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
+    let status = if braid_id.is_empty() { "partial" } else { "complete" };
     Some(ProvenanceCompletion {
         merkle_root: r
             .get("merkle_root")
@@ -437,13 +451,9 @@ fn try_nest_commit_signal(
             .and_then(|v| v.as_str())
             .unwrap_or("")
             .to_string(),
-        braid_id: r
-            .get("braid_id")
-            .or_else(|| r.get("id"))
-            .and_then(|v| v.as_str())
-            .unwrap_or("")
-            .to_string(),
-        status: "complete".to_string(),
+        braid_id,
+        status: status.to_string(),
+        primals_reached: vec!["rhizoCrypt", "loamSpine", "sweetGrass"],
     })
 }
 
@@ -463,6 +473,7 @@ fn complete_experiment_legacy(
             commit_id: String::new(),
             braid_id: String::new(),
             status: "unavailable".to_string(),
+            primals_reached: Vec::new(),
         };
     };
 
@@ -486,6 +497,7 @@ fn complete_experiment_legacy(
             commit_id: String::new(),
             braid_id: String::new(),
             status: "partial".to_string(),
+            primals_reached: vec!["rhizoCrypt"],
         };
     };
 
@@ -518,11 +530,17 @@ fn complete_experiment_legacy(
     })
     .unwrap_or_default();
 
+    let mut reached = vec!["rhizoCrypt", "loamSpine"];
+    if !braid_id.is_empty() {
+        reached.push("sweetGrass");
+    }
+    let status = if braid_id.is_empty() { "partial" } else { "complete" };
     ProvenanceCompletion {
         merkle_root,
         commit_id,
         braid_id,
-        status: "complete".to_string(),
+        status: status.to_string(),
+        primals_reached: reached,
     }
 }
 
@@ -599,6 +617,7 @@ impl ProvenanceCompletion {
             "merkle_root": self.merkle_root,
             "commit_id": self.commit_id,
             "braid_id": self.braid_id,
+            "primals_reached": self.primals_reached,
         })
     }
 }

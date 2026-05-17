@@ -1,13 +1,14 @@
 # airSpring wateringHole
 
-**Updated**: May 17, 2026 | **Version**: v0.10.0 (Wave 20 Schema Standardization, 57 capabilities, 452-method registry sync)
+**Updated**: May 17, 2026 (PM) | **Version**: v0.10.0 (Wave 20 PM lithoSpore Absorption, 57 capabilities, 452-method registry sync, stability tiers)
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.10.0** | [AIRSPRING_WAVE20_EXPERIMENT_BUILDOUT_MAY17_2026.md](handoffs/AIRSPRING_WAVE20_EXPERIMENT_BUILDOUT_MAY17_2026.md) | 2026-05-17 | **Canonical** — Wave 20 experiment buildout: 174/174 scenarios, NUCLEUS atomics evolved, 3 new controls, metalForge composition, mixed hardware, primal/spring team handoff |
+| **V0.10.0** | [AIRSPRING_WAVE20PM_LITHOSPORE_ABSORPTION_MAY17_2026.md](handoffs/AIRSPRING_WAVE20PM_LITHOSPORE_ABSORPTION_MAY17_2026.md) | 2026-05-17 PM | **Canonical** — lithoSpore audit: stability tiers, degradation docs, trio semantics fix, 3 cross-tier validators, Thread 4 status |
+| **V0.10.0** | [AIRSPRING_WAVE20_EXPERIMENT_BUILDOUT_MAY17_2026.md](handoffs/AIRSPRING_WAVE20_EXPERIMENT_BUILDOUT_MAY17_2026.md) | 2026-05-17 | Wave 20 experiment buildout: 174/174 scenarios, NUCLEUS atomics evolved, 3 new controls, metalForge composition, mixed hardware, primal/spring team handoff |
 | **V0.10.0** | [AIRSPRING_ATOMIC_DEPLOYMENT_HANDOFF_MAY13_2026.md](handoffs/AIRSPRING_ATOMIC_DEPLOYMENT_HANDOFF_MAY13_2026.md) | 2026-05-13 | Comprehensive upstream handoff: primal consumption map (10/13), composition patterns (5), wire hygiene learnings, NUCLEUS deployment, neuralAPI, atomic readiness |
 | **V0.10.0** | [AIRSPRING_DEEP_DEBT_SPRINT_MAY13_2026.md](handoffs/AIRSPRING_DEEP_DEBT_SPRINT_MAY13_2026.md) | 2026-05-13 | Deep debt sprint: zero debt, clippy pedantic+nursery clean, full audit answers |
 | **≤V0.10.0** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
