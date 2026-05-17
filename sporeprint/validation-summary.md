@@ -1,6 +1,6 @@
 +++
 title = "airSpring Validation Summary"
-description = "Precision agriculture & irrigation — 1,435 Rust tests, 90 experiments (87 + 3 composition), 10 UniBin validation scenarios, 14.3× speedup, 51/51 capabilities routable, 25 notebooks, UniBin eukaryotic, zero failures"
+description = "Precision agriculture & irrigation — 1,435 Rust tests, 90 experiments (87 + 3 composition), 10 UniBin validation scenarios, 14.3× speedup, 51/57 capabilities routable, 25 notebooks, UniBin eukaryotic, zero failures"
 date = 2026-05-16
 
 [taxonomies]
@@ -38,7 +38,7 @@ springs = ["airspring", "hotspring", "wetspring", "neuralspring", "groundspring"
 - `validate_dispatch_experiment` — CPU/GPU/batch parity (51/51)
 - `bench_cross_spring_evolution` — 146/146 cross-spring checks
 - `validate_cross_spring_provenance` — 5-spring shader provenance (32/32)
-- `airspring_primal` — NUCLEUS primal binary (51 capabilities, JSON-RPC 2.0, `primal.announce` Wave 17)
+- `airspring_primal` — NUCLEUS primal binary (57 capabilities, JSON-RPC 2.0, `primal.announce` Wave 17)
 
 ## Notebooks (25)
 
@@ -46,7 +46,7 @@ springs = ["airspring", "hotspring", "wetspring", "neuralspring", "groundspring"
 
 | # | Notebook | Focus |
 |---|----------|-------|
-| 01 | Composition Validation | 51 capabilities, deploy graphs, primal composition, gaps |
+| 01 | Composition Validation | 57 capabilities, deploy graphs, primal composition, gaps |
 | 02 | Benchmark Comparison | Python vs Rust vs GPU timing, 14.3× speedup, GPU tiers |
 | 03 | Ecosystem Evidence | 90 experiments, 60 tolerances, quality gates, provenance |
 | 04 | Cross-Spring Connections | barraCuda integration, shader families, primal consumption |

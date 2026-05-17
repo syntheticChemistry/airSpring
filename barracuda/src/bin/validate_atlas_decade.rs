@@ -214,10 +214,6 @@ fn compute_et0(row: &DayRow, lat_deg: f64, elevation_m: f64) -> f64 {
     et::daily_et0(&input).et0.max(0.0)
 }
 
-#[expect(
-    clippy::too_many_lines,
-    reason = "validation binary sequentially checks many baseline comparisons"
-)]
 fn main() {
     tracing_subscriber::fmt().with_env_filter("info").init();
 

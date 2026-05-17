@@ -81,10 +81,6 @@ fn generate_synthetic_comparison(n_days: usize) -> (Vec<f64>, Vec<f64>) {
     (et0, et_lys)
 }
 
-#[expect(
-    clippy::too_many_lines,
-    reason = "lysimeter validation covers hourly and sub-hourly data points"
-)]
 fn main() {
     validation::init_tracing();
     validation::banner("Lysimeter ET Direct Measurement (Exp 016)");

@@ -37,10 +37,6 @@ impl SeasonalPipeline {
     /// `weather_per_field` slices have unequal lengths, or
     /// [`ShaderDispatch`](crate::gpu::seasonal_pipeline::PipelineError::ShaderDispatch) if GPU
     /// water balance dispatch fails irrecoverably.
-    #[expect(
-        clippy::too_many_lines,
-        reason = "multi-field orchestration batches ET₀, Kc, and daily WB without splitting hot path"
-    )]
     pub fn run_multi_field(
         &self,
         weather_per_field: &[&[super::WeatherDay]],

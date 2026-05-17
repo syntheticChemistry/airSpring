@@ -47,7 +47,7 @@ This means they work without primals running.
 
 | File | Contents |
 |------|----------|
-| `composition_validation.json` | 51 capabilities, deploy graphs, primal composition, gaps |
+| `composition_validation.json` | 57 capabilities, deploy graphs, primal composition, gaps |
 | `test_suite_report.json` | Module-level test counts (1,435 total), coverage, quality gates |
 | `experiment_catalog.json` | All 90 experiments categorized by focus area |
 | `security_convergence.json` | Safety lints, cargo-deny, IPC security, CI gates |

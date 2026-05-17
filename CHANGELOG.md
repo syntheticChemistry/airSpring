@@ -2,11 +2,20 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased] - 2026-05-16
+## [Unreleased] - 2026-05-17
+
+### Wave 20 Debt Resolution (2026-05-17)
+
+- **6 ecology aliases registered**: `ecology.et0_priestley_taylor`, `ecology.et0_makkink`, `ecology.et0_turc`, `ecology.et0_hamon`, `ecology.et0_blaney_criddle`, `ecology.timeseries` — dispatch routing existed but capability discovery was incomplete. Capability count: 51 → **57**.
+- **`unsafe` consolidation**: `testutil::EnvGuard` RAII guard replaces scattered `unsafe { env::set_var/remove_var }` blocks in `usda_nass.rs` and `provider.rs` test modules. One consolidated `unsafe` location with automatic env restoration on drop.
+- **Test mock canonical envelope**: `primal_dispatch.rs` capability.list mock now returns `"capabilities"` + `"count"` + `"primal"` (Wave 20 canonical shape).
+- **Paper queue arithmetic**: Fixed "All 61" → "All 62", "All 41" → "All 62" in `PAPER_REVIEW_QUEUE.md`.
+- **Stale lint expectations removed**: `#[expect(clippy::too_many_lines)]` removed from `richards.rs` and `multi_field.rs` (functions no longer exceed threshold).
+- **1,057 lib + 62 forge tests**, 0 clippy pedantic+nursery warnings.
 
 ### Wave 20 Schema Standardization + Foundation Evolution (2026-05-16)
 
-- **`capability.list` canonical envelope**: Response now includes top-level `"capabilities"` (flat string array of all 51 methods) + `"count"` (array length) per primalSpring schema standard. Enriched fields (`science`, `infrastructure`, `composition`, etc.) retained alongside for domain consumers.
+- **`capability.list` canonical envelope**: Response now includes top-level `"capabilities"` (flat string array) + `"count"` (array length) per primalSpring schema standard. Enriched fields (`science`, `infrastructure`, `composition`, etc.) retained alongside for domain consumers.
 - **`primal.list` constant**: Added to `methods.rs` — biomeOS method for primal enumeration (airSpring syncs against it, does not serve it).
 - **Registry sync**: Cross-sync test updated for 452-method canonical registry (Wave 20, was 451). New method: `primal.list`.
 - **`--provenance-dir` CLI flag**: `airspring validate --provenance-dir <DIR>` writes `results.json` + `provenance.toml` for projectFOUNDATION Thread 5+6 capture.

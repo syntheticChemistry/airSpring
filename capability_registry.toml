@@ -220,6 +220,42 @@ domain = "ecology.timeseries"
 description = "Alias: autocorrelation via ecology domain"
 gpu_accelerated = true
 
+[capabilities.ecology_et0_priestley_taylor]
+method = "ecology.et0_priestley_taylor"
+domain = "ecology.evapotranspiration"
+description = "Alias: Priestley-Taylor ET₀ via ecology domain"
+gpu_accelerated = true
+
+[capabilities.ecology_et0_makkink]
+method = "ecology.et0_makkink"
+domain = "ecology.evapotranspiration"
+description = "Alias: Makkink ET₀ via ecology domain"
+gpu_accelerated = true
+
+[capabilities.ecology_et0_turc]
+method = "ecology.et0_turc"
+domain = "ecology.evapotranspiration"
+description = "Alias: Turc ET₀ via ecology domain"
+gpu_accelerated = true
+
+[capabilities.ecology_et0_hamon]
+method = "ecology.et0_hamon"
+domain = "ecology.evapotranspiration"
+description = "Alias: Hamon ET₀ via ecology domain"
+gpu_accelerated = true
+
+[capabilities.ecology_et0_blaney_criddle]
+method = "ecology.et0_blaney_criddle"
+domain = "ecology.evapotranspiration"
+description = "Alias: Blaney-Criddle ET₀ via ecology domain"
+gpu_accelerated = true
+
+[capabilities.ecology_timeseries]
+method = "ecology.timeseries"
+domain = "ecology.timeseries"
+description = "Alias: time-series operations via ecology domain"
+gpu_accelerated = false
+
 # ── Provenance trio (biomeOS composition) ──
 
 [capabilities.provenance_begin]

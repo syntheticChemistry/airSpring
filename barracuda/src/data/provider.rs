@@ -276,12 +276,9 @@ pub fn discover_transport() -> Option<Box<dyn HttpTransport>> {
 
 #[cfg(test)]
 #[expect(clippy::unwrap_used, reason = "test assertions use unwrap for clarity")]
-#[expect(
-    unsafe_code,
-    reason = "Rust 2024: env::set_var/remove_var require unsafe in test cleanup"
-)]
 mod tests {
     use super::*;
+    use crate::testutil::EnvGuard;
     use serial_test::serial;
     use std::error::Error;
 
@@ -388,28 +385,20 @@ mod tests {
     #[test]
     #[serial]
     fn songbird_discover_returns_none_when_no_env() {
-        unsafe {
-            std::env::remove_var("SONGBIRD_SOCKET");
-        }
+        let _g = EnvGuard::remove("SONGBIRD_SOCKET");
         assert!(SongbirdTransport::discover().is_none());
     }
 
     #[test]
     #[serial]
     fn songbird_discover_returns_none_when_socket_path_not_exists() {
-        unsafe {
-            std::env::remove_var("XDG_RUNTIME_DIR");
-            std::env::remove_var("FAMILY_ID");
-            std::env::set_var(
-                "SONGBIRD_SOCKET",
-                "/tmp/nonexistent_songbird_provider_test_xyz.sock",
-            );
-        }
-        let result = SongbirdTransport::discover();
-        unsafe {
-            std::env::remove_var("SONGBIRD_SOCKET");
-        }
-        assert!(result.is_none());
+        let _g1 = EnvGuard::remove("XDG_RUNTIME_DIR");
+        let _g2 = EnvGuard::remove("FAMILY_ID");
+        let _g3 = EnvGuard::set(
+            "SONGBIRD_SOCKET",
+            "/tmp/nonexistent_songbird_provider_test_xyz.sock",
+        );
+        assert!(SongbirdTransport::discover().is_none());
     }
 
     #[test]
@@ -439,10 +428,8 @@ mod tests {
     #[test]
     #[serial]
     fn discover_transport_returns_none_without_songbird() {
-        unsafe {
-            std::env::remove_var("SONGBIRD_SOCKET");
-            std::env::remove_var("FAMILY_ID");
-        }
+        let _g1 = EnvGuard::remove("SONGBIRD_SOCKET");
+        let _g2 = EnvGuard::remove("FAMILY_ID");
         assert!(discover_transport().is_none());
     }
 

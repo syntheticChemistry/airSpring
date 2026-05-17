@@ -21,7 +21,6 @@ pub fn try_forward(method: &str, params: &serde_json::Value) -> Option<serde_jso
 }
 
 #[cfg(test)]
-#[expect(clippy::unwrap_used, reason = "test code")]
 mod tests {
     use super::*;
 

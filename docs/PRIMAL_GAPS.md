@@ -1,6 +1,6 @@
 # Primal Gaps — airSpring v0.10.0
 
-**Date**: May 16, 2026 (Wave 17 Signal Adoption — primal.announce + nest.store/nest.commit)
+**Date**: May 17, 2026 (Wave 20 Debt Resolution — 57 capabilities, 452-method registry)
 **Spring**: airSpring (ecology / agriculture)
 **guideStone Level**: **L4** (cross-atomic pipeline / provenance tier) → targeting **L5+** (NUCLEUS composition, live primals)
 **License**: AGPL-3.0-or-later
@@ -80,7 +80,7 @@ Next:     gS Level 6 (cross-spring pipeline — deploy graphs, capability regist
 
 airSpring has **all seven L5 RPC handlers wired and structurally tested** (1,057 lib tests):
 - `composition.status` — wired (biomeOS v3.51 contract)
-- `primal.announce` — Wave 17 single-call registration (51 capabilities); `method.register` legacy fallback
+- `primal.announce` — Wave 17 single-call registration (57 capabilities); `method.register` legacy fallback
 - `compute.dispatch` — wired (toadStool identity_f64 shader)
 - `toadstool.validate` — wired via `ipc::toadstool_validate` (Tier 2 pre-flight)
 - `precision.route` — wired via `ipc::precision_route` (Tier 2 precision advisory)
@@ -162,6 +162,17 @@ Structural L5 validation with TCP mock round-trip tests passes (1,057 lib tests)
 - [ ] guideStone L5 / live NUCLEUS validation (blocked on live biomeOS + toadStool — Pass 14)
 - [ ] guideStone L6 / cross-spring pipeline (deploy graphs validated against live NUCLEUS)
 
+### Wave 20 Debt Resolution (May 17, 2026)
+
+Per primalSpring audit — Wave 20 residual debt:
+- [x] Test mock canonical `count`: `primal_dispatch.rs` capability.list mock now returns `"capabilities"` + `"count"` + `"primal"` (canonical envelope); assertion updated to validate `result["count"]`
+- [x] `PRIMAL_GAPS` `--provenance-dir` status: marked as implemented (was stale "Remaining")
+- [x] 6 missing ecology aliases registered: `ecology.et0_priestley_taylor`, `ecology.et0_makkink`, `ecology.et0_turc`, `ecology.et0_hamon`, `ecology.et0_blaney_criddle`, `ecology.timeseries` — capability count 51 → **57** (dispatch routing existed, but discovery was incomplete)
+- [x] `unsafe` consolidation: `usda_nass.rs` and `provider.rs` test modules refactored — scattered `unsafe { env::set_var/remove_var }` consolidated into `testutil::EnvGuard` RAII guard; test modules no longer require `#[expect(unsafe_code)]`
+- [x] Unfulfilled lint expectations: removed stale `#[expect(clippy::too_many_lines)]` from `eco/richards.rs` and `gpu/seasonal_pipeline/multi_field.rs`
+- [x] Paper queue arithmetic: fixed "All 61" → "All 62", "All 41" → "All 62" in `PAPER_REVIEW_QUEUE.md`
+- Zero deep debt remaining: 0 `todo!()`, 0 `unimplemented!()`, 0 `FIXME`, 0 `HACK`, 0 production mocks, 0 unsafe in production, 0 files >800 LOC
+
 ### Wave 20 Schema Standardization (May 16, 2026)
 
 Per primalSpring Wave 20 (452-method registry, Schema Standardization + E2E Validation):
@@ -179,7 +190,7 @@ Per primalSpring Wave 17 (451-method registry, Neural API Signal Elevation):
 - `nest.commit` signal: `complete_experiment()` tries `nest.commit` dispatch first (biomeOS manages dehydrate → commit → attribute), falls back to legacy 3-phase pipeline
 - `primal.info` handler added: returns niche metadata for ecosystem introspection
 - Dispatch table: `primal.announce` + `primal.info` added to `airspring_primal` binary
-- Capability count: 49 → 51 methods (added `primal.announce`, `primal.info`)
+- Capability count: 49 → 51 methods (added `primal.announce`, `primal.info`); later 51 → 57 (Wave 20 Debt: 6 ecology aliases registered)
 - Registry sync: cross-sync test updated for 451-method canonical (was 413)
 - L5 certification: `validate_primal_announce` replaces `validate_method_register` (with fallback)
 - 1,057 lib + 62 forge tests pass, 0 clippy warnings

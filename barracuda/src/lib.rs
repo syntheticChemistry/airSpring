@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
-// `forbid(unsafe_code)` is lifted under `cfg(test)` so Rust 2024 test cleanup can
-// call `unsafe` `env::set_var` / `remove_var`; release builds remain forbid.
+// `forbid(unsafe_code)` is lifted under `cfg(test)` so `testutil::EnvGuard` can
+// call `env::set_var` / `remove_var` (unsafe in Rust 2024); release builds remain forbid.
 #![cfg_attr(not(test), forbid(unsafe_code))]
 #![deny(clippy::unwrap_used, clippy::expect_used)]
 #![deny(

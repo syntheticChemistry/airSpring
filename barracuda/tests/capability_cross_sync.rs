@@ -166,8 +166,8 @@ fn local_capability_count() {
 
     assert_eq!(
         local.len(),
-        51,
-        "expected 51 capabilities, found {}",
+        57,
+        "expected 57 capabilities, found {}",
         local.len()
     );
 }

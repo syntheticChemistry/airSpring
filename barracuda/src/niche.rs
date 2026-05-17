@@ -64,14 +64,20 @@ pub const CAPABILITIES: &[&str] = &[
     crate::methods::SPI_DROUGHT_INDEX,
     crate::methods::AUTOCORRELATION,
     crate::methods::GAMMA_CDF,
-    // ── Ecology aliases ──
+    // ── Ecology aliases (13 — mirror science.* into ecology.* domain) ──
     crate::methods::ECO_ET0_FAO56,
     crate::methods::ECO_ET0_HARGREAVES,
+    crate::methods::ECO_ET0_PRIESTLEY_TAYLOR,
+    crate::methods::ECO_ET0_MAKKINK,
+    crate::methods::ECO_ET0_TURC,
+    crate::methods::ECO_ET0_HAMON,
+    crate::methods::ECO_ET0_BLANEY_CRIDDLE,
     crate::methods::ECO_WATER_BALANCE,
     crate::methods::ECO_YIELD_RESPONSE,
     crate::methods::ECO_FULL_PIPELINE,
     crate::methods::ECO_SPI_DROUGHT_INDEX,
     crate::methods::ECO_AUTOCORRELATION,
+    crate::methods::ECO_TIMESERIES,
     // ── Provenance trio (biomeOS composition) ──
     crate::methods::PROVENANCE_BEGIN,
     crate::methods::PROVENANCE_RECORD,

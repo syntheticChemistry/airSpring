@@ -1,8 +1,8 @@
 # airSpring — Paper Review Queue
 
-**Last Updated**: May 12, 2026
+**Last Updated**: May 17, 2026
 **Purpose**: Track papers for reproduction/review, ordered by priority
-**Status**: 90 experiments (1284/1284 Python + 1,057 Rust lib + 316 integration + 62 forge tests = 1,435 total + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.4.0 (wgpu 28), Edition 2024 (MSRV 1.92), 94 binaries. 14.3× Rust-vs-Python geometric mean speedup (25/25 algorithms, 21/21 CPU-GPU parity modules). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired. metalForge 66/66 mixed pipeline. biomeOS niche: 51 capabilities, **7 deploy graphs**, 10 MCP tools. 61 centralized method constants (`methods.rs`). 10 validation scenarios (UniBin). guideStone **L4** (targeting L6). Tier 4 IPC-first: `default = []`. `primal_names::` constants (zero hardcoded strings). All `deny.toml` synced. `primal.announce` (Wave 17) + skunkBat IPC wired. AG-001 manifest read resolved (proto-nucleation). **AG-012** Tier 2 IPC wiring resolved. AG-005 + AG-008 resolved. LTEE E3 (FLS2) **Python 12/12 + Rust 29/29 PASS**.
+**Status**: 90 experiments (1284/1284 Python + 1,057 Rust lib + 316 integration + 62 forge tests = 1,435 total + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation). barraCuda 0.4.0 (wgpu 28), Edition 2024 (MSRV 1.92), 94 binaries. 14.3× Rust-vs-Python geometric mean speedup (25/25 algorithms, 21/21 CPU-GPU parity modules). All 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired. metalForge 66/66 mixed pipeline. biomeOS niche: **57 capabilities**, **7 deploy graphs**, 10 MCP tools. 61 centralized method constants (`methods.rs`). 10 validation scenarios (UniBin). guideStone **L4** (targeting L6). Tier 4 IPC-first: `default = []`. `primal_names::` constants (zero hardcoded strings). All `deny.toml` synced. `primal.announce` (Wave 17) + skunkBat IPC wired. AG-001 manifest read resolved (proto-nucleation). **AG-012** Tier 2 IPC wiring resolved. AG-005 + AG-008 resolved. LTEE E3 (FLS2) **Python 12/12 + Rust 29/29 PASS**. 452-method canonical registry (Wave 20).
 
 ---
 
@@ -75,14 +75,14 @@
 
 ### Controls Audit
 
-All 61 completed papers have:
+All 62 completed reproductions have:
 - **Digitized benchmarks** in `control/*/benchmark_*.json` (59 benchmark JSONs, 59 control directories)
 - **Python control scripts** that validate against benchmarks (1284/1284 Python checks)
 - **Rust validation binaries** (94 total: 85 validation + 4 bench + 5 operational) that load the same benchmarks
 - **Open or published data** (no institutional access required)
 - **Cross-validation** (33/33 Python↔Rust match at 1e-5; 690 crop-station yield pairs within 0.01; PT↔PM cross-validated)
 - **GPU wiring**: 25 Tier A modules + fused Welford (SeasonalReducer) + fused Pearson (pairwise_correlation_gpu) + `BrentGpu` (VG inverse) + `RichardsGpu` (Picard)
-- **CPU benchmarks**: 14.3× geometric mean speedup vs Python (24/24 algorithms, 21/21 CPU-GPU parity modules), 13,000× atlas-scale
+- **CPU benchmarks**: 14.3× geometric mean speedup vs Python (25/25 algorithms, 21/21 CPU-GPU parity modules), 13,000× atlas-scale
 - **GPU pipeline**: Local GPU 6/6 ops parity (<0.002 error). 27 GPU dispatch failures (upstream wgpu 28 NVK).
 - **Cross-spring provenance**: 146/146 evolution benchmarks across 5 springs (barraCuda 0.4.0)
 
@@ -279,7 +279,7 @@ wetSpring 16S pipeline (OTU table, Shannon H′) → airSpring Anderson coupling
 - Queue items 12-16 (Tier 3) support baseCamp Sub-thesis 06 (no-till Anderson QS)
 - Queue items 19-22 (Tier 3.5) extend baseCamp 06 with NCBI 16S data — NestGate providers validated
 - Queue items 23-24 (Tier 4) are longer-horizon explorations (evolutionary optimization, microbiome)
-- All 41 paper reproductions use **open data** — zero institutional access, zero proprietary sensors
+- All 62 paper reproductions use **open data** — zero institutional access, zero proprietary sensors
 - Every completed paper has been validated through the full pipeline: Python → Rust CPU → GPU/NPU
 - Three compute tiers verified: 40+ control dirs, 94 Rust binaries, 25 Tier A + 2 Tier B GPU modules, 3 NPU experiments
 - CPU parity chain: Paper → Python control → Barracuda CPU → Barracuda GPU → Pure GPU workload → metalForge cross-system

@@ -19,10 +19,14 @@
 //! - [`bootstrap`] — Bootstrap confidence intervals
 
 pub mod bootstrap;
+#[cfg(test)]
+pub mod env_guard;
 pub mod generators;
 pub mod stats;
 
 pub use bootstrap::bootstrap_rmse;
+#[cfg(test)]
+pub use env_guard::EnvGuard;
 pub use generators::generate_synthetic_iot_data;
 pub use stats::{
     coefficient_of_determination, dot, hit_rate, index_of_agreement, l2_norm, mbe, mean,

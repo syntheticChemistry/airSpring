@@ -257,11 +257,7 @@ pub fn solve_richards_1d(
 /// # Errors
 ///
 /// Returns `AirSpringError::InvalidInput` if inputs are invalid.
-#[expect(
-    clippy::too_many_arguments,
-    clippy::too_many_lines,
-    reason = "PDE API mirrors physics params"
-)]
+#[expect(clippy::too_many_arguments, reason = "PDE API mirrors physics params")]
 #[expect(
     clippy::many_single_char_names,
     clippy::similar_names,

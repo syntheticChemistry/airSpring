@@ -173,13 +173,10 @@ impl YieldProvider for NassProvider {
     clippy::expect_used,
     reason = "test assertions use unwrap/expect for clarity"
 )]
-#[expect(
-    unsafe_code,
-    reason = "Rust 2024: env::set_var/remove_var require unsafe in test cleanup"
-)]
 mod tests {
     use super::*;
     use crate::data::provider::HttpResponse;
+    use crate::testutil::EnvGuard;
     use std::cell::RefCell;
     use std::path::Path;
     use std::rc::Rc;
@@ -231,9 +228,7 @@ mod tests {
 
     #[test]
     fn from_env_missing() {
-        unsafe {
-            std::env::remove_var("NASS_API_KEY");
-        }
+        let _g = EnvGuard::remove("NASS_API_KEY");
         assert!(NassProvider::from_env().is_err());
     }
 

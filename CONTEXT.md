@@ -1,6 +1,6 @@
 # Context — airSpring
 
-**Doc sync:** 2026-05-16 (v0.10.0; Wave 20 schema standardization; 51 capabilities; 452-method registry sync).
+**Doc sync:** 2026-05-16 (v0.10.0; Wave 20 schema standardization; 57 capabilities; 452-method registry sync).
 
 ## What This Is
 
@@ -51,7 +51,7 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - **Crate count:** 2 workspace crates
 - **GPU backend:** barraCuda 0.4.0 (wgpu 28, Vulkan, DeviceCapabilities API)
 - **Experiments:** 90 (all PASS)
-- **Capabilities:** 51 (science + ecology + provenance + composition + coordination + health + inference)
+- **Capabilities:** 57 (science + ecology aliases + provenance + composition + coordination + health + inference)
 - **Deploy graphs:** 7 (eco + provenance + niche + cross-primal + GPU batch + sovereign data + uncertainty)
 - **GuideStone level:** L4 (targeting L6 with live NUCLEUS; **10 UniBin validation scenarios**)
 - **Tier 4 IPC-first:** `[features].default = []` (was `["local", "testutil"]`). Opt in with **`--features local`** for in-tree barraCuda + GPU; **`testutil`** extends `local` for dev helpers. All validation binaries use **`required-features = ["local"]`**. `gpu` is feature-gated; `math.rs` dual-path dispatch; `ipc/barracuda_route.rs` IPC forwarding. Default feature set builds without linking barraCuda.
@@ -59,7 +59,7 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 
 ## Key Capabilities (JSON-RPC methods)
 
-51 methods registered in `capability_registry.toml` (synced against 452-method canonical, Wave 20):
+57 methods registered in `capability_registry.toml` (synced against 452-method canonical, Wave 20):
 
 - **Evapotranspiration (7):** `science.et0_fao56`, `science.et0_hargreaves`,
   `science.et0_priestley_taylor`, `science.et0_makkink`, `science.et0_turc`,
