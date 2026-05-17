@@ -116,8 +116,8 @@ fn main() {
 
         // Capability references
         let known_caps = [
-            "ecology.fetch_weather",
-            "ecology.et0_compute",
+            "data.weather",
+            "science.et0_fao56",
             "ecology.water_balance",
             "ecology.yield_response",
         ];

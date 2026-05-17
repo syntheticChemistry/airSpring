@@ -293,16 +293,16 @@ fn validate_nucleus_mesh(v: &mut ValidationHarness) {
     v.check_bool("Nest has storage", AtomicKind::Nest.has_storage());
 
     v.check_bool(
-        "Tower: 2 capabilities",
-        AtomicKind::Tower.capabilities().len() == 2,
+        "Tower: 3 capabilities",
+        AtomicKind::Tower.capabilities().len() == 3,
     );
     v.check_bool(
-        "Node: 3 capabilities",
-        AtomicKind::Node.capabilities().len() == 3,
+        "Node: 4 capabilities",
+        AtomicKind::Node.capabilities().len() == 4,
     );
     v.check_bool(
-        "Nest: 3 capabilities",
-        AtomicKind::Nest.capabilities().len() == 3,
+        "Nest: 4 capabilities",
+        AtomicKind::Nest.capabilities().len() == 4,
     );
 }
 

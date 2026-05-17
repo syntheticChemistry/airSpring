@@ -1,0 +1,146 @@
+{
+  "experiment": "soil_moisture_topp",
+  "checks": [
+    {
+      "name": "topp_dry_sand_ka3.0",
+      "dielectric_constant": 3.0,
+      "value": 0.0297661,
+      "description": "Topp VWC at Ka=3.0 (dry_sand)"
+    },
+    {
+      "name": "topp_moist_sand_ka5.0",
+      "dielectric_constant": 5.0,
+      "value": 0.0797875,
+      "description": "Topp VWC at Ka=5.0 (moist_sand)"
+    },
+    {
+      "name": "topp_loam_field_capacity_ka10.0",
+      "dielectric_constant": 10.0,
+      "value": 0.1883,
+      "description": "Topp VWC at Ka=10.0 (loam_field_capacity)"
+    },
+    {
+      "name": "topp_clay_field_capacity_ka15.0",
+      "dielectric_constant": 15.0,
+      "value": 0.27576249999999997,
+      "description": "Topp VWC at Ka=15.0 (clay_field_capacity)"
+    },
+    {
+      "name": "topp_near_saturation_ka20.0",
+      "dielectric_constant": 20.0,
+      "value": 0.34539999999999993,
+      "description": "Topp VWC at Ka=20.0 (near_saturation)"
+    },
+    {
+      "name": "topp_saturated_clay_ka40.0",
+      "dielectric_constant": 40.0,
+      "value": 0.5102,
+      "description": "Topp VWC at Ka=40.0 (saturated_clay)"
+    },
+    {
+      "name": "monotonicity_3_to_20",
+      "value": true,
+      "expected": true,
+      "description": "VWC increases with dielectric in typical soil range"
+    },
+    {
+      "name": "oven_dry_near_zero",
+      "value": 0.024345699999999998,
+      "expected_range": [
+        0.0,
+        0.05
+      ],
+      "description": "At Ka=1 (oven-dry), VWC near zero"
+    },
+    {
+      "name": "roundtrip_ka5.0",
+      "value": 4.999999999999741,
+      "expected": 5.0,
+      "tolerance": 1e-06,
+      "description": "Topp \u2192 inverse roundtrip at Ka=5.0"
+    },
+    {
+      "name": "roundtrip_ka10.0",
+      "value": 10.000000000000188,
+      "expected": 10.0,
+      "tolerance": 1e-06,
+      "description": "Topp \u2192 inverse roundtrip at Ka=10.0"
+    },
+    {
+      "name": "roundtrip_ka15.0",
+      "value": 15.000000000000075,
+      "expected": 15.0,
+      "tolerance": 1e-06,
+      "description": "Topp \u2192 inverse roundtrip at Ka=15.0"
+    },
+    {
+      "name": "roundtrip_ka25.0",
+      "value": 24.999999999999847,
+      "expected": 25.0,
+      "tolerance": 1e-06,
+      "description": "Topp \u2192 inverse roundtrip at Ka=25.0"
+    },
+    {
+      "name": "published_ka15",
+      "value": 0.27576249999999997,
+      "expected_range": [
+        0.27,
+        0.34
+      ],
+      "description": "Ka=15 \u2192 VWC \u2248 0.30 (published range)"
+    }
+  ],
+  "reference": {
+    "equation": "theta = -5.3e-2 + 2.92e-2*Ka - 5.5e-4*Ka^2 + 4.3e-6*Ka^3",
+    "source": "Topp et al. (1980) WRR 16(3):574-582",
+    "ka_to_vwc_table": {
+      "1": -0.024345699999999998,
+      "2": 0.003234400000000002,
+      "3": 0.0297661,
+      "4": 0.0552752,
+      "5": 0.0797875,
+      "6": 0.1033288,
+      "7": 0.1259249,
+      "8": 0.1476016,
+      "9": 0.16838469999999997,
+      "10": 0.1883,
+      "11": 0.20737329999999998,
+      "12": 0.2256304,
+      "13": 0.2430971,
+      "14": 0.2597992,
+      "15": 0.27576249999999997,
+      "16": 0.29101279999999996,
+      "17": 0.3055759,
+      "18": 0.3194776,
+      "19": 0.3327436999999999,
+      "20": 0.34539999999999993,
+      "21": 0.35747229999999985,
+      "22": 0.36898639999999994,
+      "23": 0.3799680999999999,
+      "24": 0.3904431999999999,
+      "25": 0.40043749999999995,
+      "26": 0.4099767999999999,
+      "27": 0.41908689999999993,
+      "28": 0.42779359999999994,
+      "29": 0.4361227,
+      "30": 0.44409999999999994,
+      "31": 0.45175129999999986,
+      "32": 0.4591023999999999,
+      "33": 0.46617909999999996,
+      "34": 0.47300719999999996,
+      "35": 0.4796124999999999,
+      "36": 0.4860207999999999,
+      "37": 0.49225790000000014,
+      "38": 0.49834959999999995,
+      "39": 0.5043217000000001,
+      "40": 0.5102
+    }
+  },
+  "pass_count": 4,
+  "total_checks": 13,
+  "_provenance": {
+    "content_sha256": "1dcad4a2e492ef89917107ac45d3672828c8ace2b2bac435b7a78d0dfc3aa4f4",
+    "python_version": "3.10.12 (main, Mar  3 2026, 11:56:32) [GCC 11.4.0]",
+    "generation_date": "2026-05-17T14:38:04.330819+00:00"
+  }
+}

@@ -128,12 +128,12 @@ fn main() {
     );
     check!(
         "absorbed_count",
-        absorbed == 14,
+        absorbed == 20,
         format!("{absorbed} absorbed by BarraCuda")
     );
     check!(
         "local_count",
-        local == 6,
+        local == 0,
         format!("{local} local WGSL shaders")
     );
     check!(
@@ -379,18 +379,18 @@ fn main() {
 
     check!(
         "tower_capabilities",
-        AtomicKind::Tower.capabilities().len() == 2,
-        "crypto.tls + mesh.discovery"
+        AtomicKind::Tower.capabilities().len() == 3,
+        "crypto.tls + mesh.discovery + defense.audit"
     );
     check!(
         "node_capabilities",
-        AtomicKind::Node.capabilities().len() == 3,
-        "crypto.tls + mesh.discovery + compute.dispatch"
+        AtomicKind::Node.capabilities().len() == 4,
+        "crypto.tls + mesh.discovery + defense.audit + compute.dispatch"
     );
     check!(
         "nest_capabilities",
-        AtomicKind::Nest.capabilities().len() == 3,
-        "crypto.tls + mesh.discovery + storage.provenance"
+        AtomicKind::Nest.capabilities().len() == 4,
+        "crypto.tls + mesh.discovery + defense.audit + storage.provenance"
     );
     check!(
         "node_has_compute",

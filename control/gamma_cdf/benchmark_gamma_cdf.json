@@ -1,0 +1,91 @@
+{
+  "experiment": "gamma_cdf_validation",
+  "checks": [
+    {
+      "name": "exponential_x0.5",
+      "value": 0.3934693402873665,
+      "expected": 0.3934693402873666,
+      "tolerance": 1e-10,
+      "description": "Gamma(1,1) = exponential: CDF(0.5) = 1-exp(-0.5)"
+    },
+    {
+      "name": "exponential_x1.0",
+      "value": 0.6321205588285578,
+      "expected": 0.6321205588285577,
+      "tolerance": 1e-10,
+      "description": "Gamma(1,1) = exponential: CDF(1.0) = 1-exp(-1.0)"
+    },
+    {
+      "name": "exponential_x2.0",
+      "value": 0.8646647167633872,
+      "expected": 0.8646647167633873,
+      "tolerance": 1e-10,
+      "description": "Gamma(1,1) = exponential: CDF(2.0) = 1-exp(-2.0)"
+    },
+    {
+      "name": "exponential_x5.0",
+      "value": 0.9932620530009151,
+      "expected": 0.9932620530009145,
+      "tolerance": 1e-10,
+      "description": "Gamma(1,1) = exponential: CDF(5.0) = 1-exp(-5.0)"
+    },
+    {
+      "name": "chi2_df2_x2",
+      "value": 0.6321205588285578,
+      "expected": 0.6321205588285577,
+      "tolerance": 1e-10,
+      "description": "Chi-squared(df=2) at x=2: same as exponential(rate=0.5)"
+    },
+    {
+      "name": "gamma_2_1_at_1",
+      "value": 0.2642411176571153,
+      "expected": 0.26424111765711533,
+      "tolerance": 1e-10,
+      "description": "Gamma(2,1) CDF at x=1"
+    },
+    {
+      "name": "boundary_x0",
+      "value": 0.0,
+      "expected": 0.0,
+      "tolerance": 1e-15,
+      "description": "CDF at x=0 is always 0"
+    },
+    {
+      "name": "large_x_near_1",
+      "value": 1.000000000000001,
+      "expected": 1.0,
+      "tolerance": 1e-10,
+      "description": "Gamma(2,1) CDF at x=50 \u2248 1.0"
+    },
+    {
+      "name": "spi_typical_median",
+      "value": 0.5627258110861328,
+      "expected_range": [
+        0.4,
+        0.6
+      ],
+      "description": "SPI-typical Gamma(4.5,12) at x=54 \u2248 median"
+    },
+    {
+      "name": "large_alpha_median",
+      "value": 0.51329879827916,
+      "expected_range": [
+        0.45,
+        0.55
+      ],
+      "description": "Gamma(100,1) at x=100 near 0.5 (CLT)"
+    }
+  ],
+  "reference": {
+    "exponential_cdf_x1": 0.6321205588285577,
+    "gamma_2_1_cdf_x1": 0.26424111765711533,
+    "method": "regularised_incomplete_gamma_series"
+  },
+  "pass_count": 8,
+  "total_checks": 10,
+  "_provenance": {
+    "content_sha256": "b456fa82c5f4a004835debc3439bc2c04c8f7c36fb5c7243381c8e15cc9d1e63",
+    "python_version": "3.10.12 (main, Mar  3 2026, 11:56:32) [GCC 11.4.0]",
+    "generation_date": "2026-05-17T14:37:57.556186+00:00"
+  }
+}

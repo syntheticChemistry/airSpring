@@ -604,4 +604,226 @@ mod tests {
         assert!(pipeline.is_single_node(), "should stay on same node");
         assert_eq!(pipeline.stages[0].node_id, pipeline.stages[1].node_id);
     }
+
+    // ── Mixed NUCLEUS Composition Tests ──
+
+    #[test]
+    fn full_nucleus_trio_tower_node_nest() {
+        let mut mesh = NucleusMesh::new();
+        let tower = NucleusAtomic::new(AtomicKind::Tower, "tower-01", vec![]);
+        let node = NucleusAtomic::new(
+            AtomicKind::Node,
+            "node-01",
+            vec![gpu("TITAN V"), npu(), cpu()],
+        );
+        let nest = NucleusAtomic::new(AtomicKind::Nest, "nest-01", vec![]);
+
+        mesh.register(tower);
+        mesh.register(node);
+        mesh.register(nest);
+
+        assert_eq!(mesh.count_by_kind(AtomicKind::Tower), 1);
+        assert_eq!(mesh.count_by_kind(AtomicKind::Node), 1);
+        assert_eq!(mesh.count_by_kind(AtomicKind::Nest), 1);
+        assert_eq!(mesh.atomics.len(), 3);
+
+        assert_eq!(mesh.all_substrates().len(), 3);
+
+        let gpu_wl = crate::dispatch::Workload::new(
+            "et0_batch",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        );
+        let npu_wl = crate::dispatch::Workload::new(
+            "crop_stress",
+            vec![Capability::QuantizedInference { bits: 8 }],
+        );
+
+        let gpu_nodes = mesh.find_capable_nodes(&gpu_wl);
+        let npu_nodes = mesh.find_capable_nodes(&npu_wl);
+        assert_eq!(gpu_nodes.len(), 1);
+        assert_eq!(npu_nodes.len(), 1);
+        assert_eq!(gpu_nodes[0].node_id, "node-01");
+        assert_eq!(npu_nodes[0].node_id, "node-01");
+    }
+
+    #[test]
+    fn multi_node_mesh_heterogeneous_hardware() {
+        let mut mesh = NucleusMesh::new();
+
+        mesh.register(NucleusAtomic::new(
+            AtomicKind::Node,
+            "gpu-dense",
+            vec![gpu("TITAN V"), gpu("RTX 4070"), cpu()],
+        ));
+        mesh.register(NucleusAtomic::new(
+            AtomicKind::Node,
+            "npu-edge",
+            vec![npu(), cpu()],
+        ));
+        mesh.register(NucleusAtomic::new(
+            AtomicKind::Node,
+            "cpu-only",
+            vec![cpu()],
+        ));
+        mesh.register(NucleusAtomic::new(AtomicKind::Tower, "tower-gw", vec![]));
+        mesh.register(NucleusAtomic::new(AtomicKind::Nest, "nest-store", vec![]));
+
+        assert_eq!(mesh.count_by_kind(AtomicKind::Node), 3);
+        assert_eq!(mesh.all_substrates().len(), 6);
+
+        let f64_wl = crate::dispatch::Workload::new(
+            "richards_pde",
+            vec![Capability::F64Compute, Capability::ShaderDispatch],
+        );
+        let capable = mesh.find_capable_nodes(&f64_wl);
+        assert_eq!(capable.len(), 1, "only gpu-dense has ShaderDispatch");
+        assert_eq!(capable[0].node_id, "gpu-dense");
+
+        let cpu_wl = crate::dispatch::Workload::new(
+            "validation",
+            vec![Capability::F64Compute],
+        );
+        let capable = mesh.find_capable_nodes(&cpu_wl);
+        assert_eq!(capable.len(), 3, "gpu-dense, npu-edge (has CPU), cpu-only have F64Compute");
+    }
+
+    #[test]
+    fn mixed_pipeline_npu_gpu_gpu_stays_single_node() {
+        let mut mesh = NucleusMesh::new();
+        mesh.register(NucleusAtomic::new(
+            AtomicKind::Node,
+            "mixed-hw",
+            vec![gpu("TITAN V"), npu(), cpu()],
+        ));
+
+        let workloads = [
+            crate::dispatch::Workload::new(
+                "crop_stress",
+                vec![Capability::QuantizedInference { bits: 8 }],
+            )
+            .prefer(SubstrateKind::Npu),
+            crate::dispatch::Workload::new(
+                "et0_batch",
+                vec![Capability::F64Compute, Capability::ShaderDispatch],
+            ),
+            crate::dispatch::Workload::new(
+                "water_balance",
+                vec![Capability::F64Compute, Capability::ShaderDispatch],
+            ),
+            crate::dispatch::Workload::new(
+                "yield_response",
+                vec![Capability::F64Compute, Capability::ShaderDispatch],
+            ),
+        ];
+
+        let pipeline = mesh.route_pipeline(&workloads).expect("should route");
+        assert_eq!(pipeline.stage_count(), 4);
+        assert!(pipeline.is_single_node());
+        assert_eq!(pipeline.cross_node_hops, 0);
+
+        assert_eq!(pipeline.stages[0].substrate_kind, SubstrateKind::Npu);
+        assert_eq!(pipeline.stages[1].substrate_kind, SubstrateKind::Gpu);
+        assert_eq!(pipeline.stages[2].substrate_kind, SubstrateKind::Gpu);
+        assert_eq!(pipeline.stages[3].substrate_kind, SubstrateKind::Gpu);
+    }
+
+    #[test]
+    fn cross_node_forced_by_capability_split() {
+        let mut mesh = NucleusMesh::new();
+
+        mesh.register(NucleusAtomic::new(
+            AtomicKind::Node,
+            "gpu-compute",
+            vec![gpu("TITAN V"), cpu()],
+        ));
+        mesh.register(NucleusAtomic::new(
+            AtomicKind::Node,
+            "npu-inference",
+            vec![npu(), cpu()],
+        ));
+
+        let workloads = [
+            crate::dispatch::Workload::new(
+                "et0_batch",
+                vec![Capability::F64Compute, Capability::ShaderDispatch],
+            ),
+            crate::dispatch::Workload::new(
+                "crop_stress",
+                vec![Capability::QuantizedInference { bits: 8 }],
+            ),
+            crate::dispatch::Workload::new(
+                "water_balance",
+                vec![Capability::F64Compute, Capability::ShaderDispatch],
+            ),
+        ];
+
+        let pipeline = mesh.route_pipeline(&workloads).expect("should route");
+        assert_eq!(pipeline.stage_count(), 3);
+        assert!(!pipeline.is_single_node());
+        assert!(pipeline.cross_node_hops >= 1);
+
+        assert_eq!(pipeline.stages[0].node_id, "gpu-compute");
+        assert_eq!(pipeline.stages[1].node_id, "npu-inference");
+        assert_eq!(pipeline.stages[2].node_id, "gpu-compute");
+    }
+
+    #[test]
+    fn nest_cannot_dispatch_workloads() {
+        let nest = NucleusAtomic::new(AtomicKind::Nest, "nest-01", vec![gpu("GPU"), cpu()]);
+        let wl = crate::dispatch::Workload::new("et0", vec![Capability::F64Compute]);
+        assert!(!nest.can_route(&wl), "Nest lacks compute dispatch role");
+    }
+
+    #[test]
+    fn atomic_capabilities_superset_chain() {
+        let tower_caps = AtomicKind::Tower.capabilities();
+        let node_caps = AtomicKind::Node.capabilities();
+        let nest_caps = AtomicKind::Nest.capabilities();
+
+        for cap in tower_caps {
+            assert!(
+                node_caps.contains(cap),
+                "Node must include all Tower capabilities"
+            );
+            assert!(
+                nest_caps.contains(cap),
+                "Nest must include all Tower capabilities"
+            );
+        }
+
+        assert!(node_caps.contains(&"compute.dispatch"));
+        assert!(!node_caps.contains(&"storage.provenance"));
+        assert!(nest_caps.contains(&"storage.provenance"));
+        assert!(!nest_caps.contains(&"compute.dispatch"));
+    }
+
+    #[test]
+    fn large_mesh_routing_performance() {
+        let mut mesh = NucleusMesh::new();
+        for i in 0..10 {
+            mesh.register(NucleusAtomic::new(
+                AtomicKind::Node,
+                format!("node-{i}"),
+                vec![gpu(&format!("GPU-{i}")), cpu()],
+            ));
+        }
+        mesh.register(NucleusAtomic::new(
+            AtomicKind::Node,
+            "npu-node",
+            vec![npu(), cpu()],
+        ));
+
+        let workloads: Vec<_> = (0..20)
+            .map(|i| {
+                crate::dispatch::Workload::new(
+                    format!("batch_{i}"),
+                    vec![Capability::F64Compute, Capability::ShaderDispatch],
+                )
+            })
+            .collect();
+
+        let pipeline = mesh.route_pipeline(&workloads).expect("should route");
+        assert_eq!(pipeline.stage_count(), 20);
+        assert!(pipeline.is_single_node(), "sticky routing keeps all on node-0");
+    }
 }

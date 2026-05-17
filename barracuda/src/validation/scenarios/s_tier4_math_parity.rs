@@ -35,7 +35,11 @@ pub fn run(harness: &mut ValidationHarness) {
     harness.check_bool("math::pearson_r > 0.99", computed_r > 0.99);
 
     let computed_sd = crate::math::std_dev(data);
-    let expected_sd = (2.0_f64).sqrt();
+    // barraCuda (local feature) uses sample std dev (N-1); fallback uses population (N).
+    #[cfg(feature = "local")]
+    let expected_sd = (2.5_f64).sqrt(); // sample: sum((xi-3)^2)/4 = 10/4 = 2.5
+    #[cfg(not(feature = "local"))]
+    let expected_sd = (2.0_f64).sqrt(); // population: sum((xi-3)^2)/5 = 10/5 = 2.0
     harness.check_abs("math::std_dev([1..5])", computed_sd, expected_sd, 1e-10);
 
     #[cfg(feature = "local")]
