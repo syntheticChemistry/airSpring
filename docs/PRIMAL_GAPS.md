@@ -169,7 +169,7 @@ Per primalSpring Wave 20 (452-method registry, Schema Standardization + E2E Vali
 - `capability.list` canonical envelope: added top-level `"capabilities"` flat string array + `"count"` field (canonical subset per standard; enriched fields retained alongside)
 - Registry sync: cross-sync test updated for 452-method canonical (was 451)
 - 1,057 lib + 62 forge tests pass, 0 clippy warnings
-- Remaining: `--provenance-dir` for Thread 5+6 capture (when E3 LTEE starts)
+- [x] `--provenance-dir` implemented: `airspring validate --provenance-dir <DIR>` writes `results.json` + `provenance.toml` (Thread 5+6 capture). E3 LTEE activation is the remaining step.
 
 ### Wave 17 Signal Adoption (May 16, 2026)
 

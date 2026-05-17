@@ -63,10 +63,11 @@ fn dispatch_niche(method: &str, params: &serde_json::Value) -> DispatchOutcome<s
             "version": env!("CARGO_PKG_VERSION"),
         })),
         "capability.list" => DispatchOutcome::Ok(serde_json::json!({
-            "niche": niche::NICHE_NAME,
+            "capabilities": niche::CAPABILITIES,
+            "count": niche::CAPABILITIES.len(),
+            "primal": niche::NICHE_NAME,
             "domain": "ecology",
             "total": niche::CAPABILITIES.len(),
-            "capabilities": niche::CAPABILITIES,
             "operation_dependencies": niche::operation_dependencies(),
             "cost_estimates": niche::cost_estimates(),
         })),
@@ -288,8 +289,9 @@ fn dispatch_capability_list_returns_full_inventory() {
     let resp =
         rpc::send(&path, "capability.list", &serde_json::json!({})).expect("capability.list");
     let result = &resp["result"];
-    assert_eq!(result["niche"], "airspring");
+    assert_eq!(result["primal"], "airspring");
     assert_eq!(result["domain"], "ecology");
+    assert!(result["count"].as_u64().unwrap() > 20);
     assert!(result["total"].as_u64().unwrap() > 20);
     assert!(result.get("capabilities").is_some());
     assert!(result.get("operation_dependencies").is_some());
