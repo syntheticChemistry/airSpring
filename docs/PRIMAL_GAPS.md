@@ -1,6 +1,6 @@
 # Primal Gaps — airSpring v0.10.0
 
-**Date**: May 17, 2026 (Wave 20 Debt Resolution — 57 capabilities, 452-method registry)
+**Date**: May 17, 2026 (Wave 20 Debt Resolution — 57 capabilities, 445-method registry)
 **Spring**: airSpring (ecology / agriculture)
 **guideStone Level**: **L4** (cross-atomic pipeline / provenance tier) → targeting **L5+** (NUCLEUS composition, live primals)
 **License**: AGPL-3.0-or-later
@@ -186,10 +186,10 @@ Per primalSpring audit — Wave 20 residual debt:
 
 ### Wave 20 Schema Standardization (May 16, 2026)
 
-Per primalSpring Wave 20 (452-method registry, Schema Standardization + E2E Validation):
+Per primalSpring Wave 20 (445-method registry, Schema Standardization + E2E Validation):
 - `primal.list` constant added to `methods.rs` (biomeOS serves primal enumeration)
 - `capability.list` canonical envelope: added top-level `"capabilities"` flat string array + `"count"` field (canonical subset per standard; enriched fields retained alongside)
-- Registry sync: cross-sync test updated for 452-method canonical (was 451)
+- Registry sync: cross-sync test updated for 445-method canonical (was 451)
 - 1,057 lib + 69 forge tests pass, 0 clippy warnings
 - [x] `--provenance-dir` implemented: `airspring validate --provenance-dir <DIR>` writes `results.json` + `provenance.toml` (Thread 5+6 capture). E3 LTEE activation is the remaining step.
 

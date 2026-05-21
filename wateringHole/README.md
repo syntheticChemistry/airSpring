@@ -1,6 +1,6 @@
 # airSpring wateringHole
 
-**Updated**: May 17, 2026 (PM) | **Version**: v0.10.0 (Wave 20 PM lithoSpore Absorption, 57 capabilities, 452-method registry sync, stability tiers)
+**Updated**: May 17, 2026 (PM) | **Version**: v0.10.0 (Wave 20 PM lithoSpore Absorption, 57 capabilities, 445-method registry sync, stability tiers)
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
