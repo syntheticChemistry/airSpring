@@ -13,7 +13,8 @@
       "Quenouille MH (1956) Notes on bias in estimation",
       "Allen RG et al. (1998) FAO-56 Crop Evapotranspiration"
     ],
-    "reproduction_note": "Deterministic RNG seed=42; fully reproducible"
+    "reproduction_note": "Deterministic RNG seed=42; fully reproducible",
+    "blake3": "01c84e945e34bfcc3ac959349c9c5cc397d00e81ab00dd4064dade471e5e275d"
   },
   "season_params": {
     "n_days": 153,

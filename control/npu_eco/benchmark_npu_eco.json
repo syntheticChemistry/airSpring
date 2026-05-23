@@ -3,20 +3,21 @@
     "method": "int8 quantization round-trip + NPU feature validation",
     "baseline_type": "analytical",
     "baseline_script": null,
-    "baseline_commit": "n/a — analytical expected values from quantization math",
-    "baseline_command": "n/a — expected values are mathematically derived",
+    "baseline_commit": "n/a \u2014 analytical expected values from quantization math",
+    "baseline_command": "n/a \u2014 expected values are mathematically derived",
     "created": "2026-02-26",
     "references": [
-      "BrainChip AKD1000 Datasheet (int8 quantization: val → i8 → f64 round-trip)",
+      "BrainChip AKD1000 Datasheet (int8 quantization: val \u2192 i8 \u2192 f64 round-trip)",
       "Dong et al. (2024) Smart Ag Tech 4:100147 (crop stress features)",
       "FAO-56 Allen et al. (1998) (irrigation decision features)"
     ],
     "notes": [
       "Exp 028: NPU Edge Inference for Agriculture",
-      "Expected values are analytical — quantization error bounded by 1/127 of range",
+      "Expected values are analytical \u2014 quantization error bounded by 1/127 of range",
       "Hardware tests (AKD1000 DMA) conditional on --features npu",
       "Feature ranges from npu.rs: CropStressInput, IrrigationInput, MultiSensorInput"
-    ]
+    ],
+    "blake3": "31c2c3de23ce7860d05e43183ae4043695144efc6b89c0e2ca8a85d93c91c660"
   },
   "experiments": {
     "028": {
@@ -48,7 +49,7 @@
       "binary": "validate_npu_high_cadence",
       "checks": 21,
       "sections": [
-        "multi-sensor fusion (θ + T + EC)",
+        "multi-sensor fusion (\u03b8 + T + EC)",
         "cadence scaling (1-min to 10-sec burst)",
         "seasonal transition detection (crop swap latency)",
         "energy budget (active + sleep cycle)"

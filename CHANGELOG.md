@@ -2,7 +2,18 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased] - 2026-05-17
+## [Unreleased] - 2026-05-23
+
+### Wave 46 Absorption (2026-05-23)
+
+- **Registry sync to 458**: Cross-sync test updated from `>= 452` to `>= 458` (6 new `neural_api.*` methods: routing_weights, route_explain, composition_patterns, plan_tier, utilization, weight_health).
+- **Doc sweep**: 11 `.md` files updated from stale 445-method count to 458.
+- **NeuralBridge observatory module**: New `ipc/neural_bridge.rs` — `capability_call_instrumented()`, `routing_weights()`, `route_explain()`, `utilization()`, `weight_health()`, `composition_patterns()` for biomeOS v3.67+ adaptive routing feedback loop.
+- **composition.status observatory**: Handler now reports `observatory.neural_api_v3_67` health when biomeOS available.
+- **BLAKE3 provenance backfill**: All 62 benchmark JSONs now have `blake3` hash in `_provenance` blocks (FN-1 / SP-4 alignment; replaces SHA-256 as primary).
+- **SP-4 sovereign publish pipeline**: New `tools/publish_sporeprint.sh` — base64 + BLAKE3 content.put to NestGate (adapted from primalSpring Wave 37).
+- **BLAKE3 backfill tool**: New `tools/blake3_backfill.sh` — idempotent BLAKE3 hashing of all control/ benchmark JSONs.
+- **Degradation docs updated**: Neural API observatory degradation table added to `docs/DEGRADATION_BEHAVIOR.md`.
 
 ### Wave 20 PM — lithoSpore Audit Absorption (2026-05-17)
 

@@ -2,9 +2,10 @@
 
 > When an upstream primal is unreachable, what does the consumer see?
 
-**Date**: May 17, 2026
+**Date**: May 23, 2026 (Wave 46 Absorption)
 **Context**: lithoSpore R1 — primalSpring documented `CompositionContext`
-degradation; each spring documents its own.
+degradation; each spring documents its own. Updated for `NeuralBridge`
+observatory (v3.67+).
 
 ---
 
@@ -88,6 +89,20 @@ can distinguish from real results:
 ```
 
 ---
+
+## Neural API Observatory (v3.67+)
+
+| Method | On Unreachable | Impact |
+|--------|----------------|--------|
+| `neural_api.routing_weights` | `Err(NoPrimal)` | No routing weight visibility |
+| `neural_api.route_explain` | `Err(NoPrimal)` | No routing decision explanation |
+| `neural_api.utilization` | `Err(NoPrimal)` | No utilization metrics |
+| `neural_api.weight_health` | `Err(NoPrimal)` | No convergence diagnostics |
+| `capability_call_instrumented` | `(Err, BridgeOutcome { success: false })` | Fallback to direct dispatch |
+
+All observatory methods are informational — science dispatch never depends
+on observatory availability. `composition.status` handler reports
+`observatory.neural_api_v3_67: false` when biomeOS is unavailable.
 
 ## Inactive Modules
 

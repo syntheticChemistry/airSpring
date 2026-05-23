@@ -107,5 +107,8 @@
     "ec50_native_nm": 28.0,
     "ec50_engineered_nm": 15.0,
     "activation_improvement_pct": 86.66666666666667
+  },
+  "_provenance": {
+    "blake3": "23e6df802a66f15455399b219ac6f83585fd50dc42f3538846faf9f83455e6cc"
   }
 }

@@ -12,35 +12,83 @@
     "baseline_commit": "97e7533213e92a248db04a47cab2a00fde87c4cc",
     "baseline_command": "python control/green_ampt/green_ampt_infiltration.py",
     "baseline_date": "2026-02-28",
-    "baseline_result": "37/37 PASS"
+    "baseline_result": "37/37 PASS",
+    "blake3": "282213a858973d2808e28a08e0498892173339ecd6baa2b3cf015e3d4f021a01"
   },
   "equation": {
-    "cumulative": "F(t) = Ks × t + ψ × Δθ × ln(1 + F(t)/(ψ × Δθ))  [implicit]",
-    "rate": "f(t) = Ks × (1 + ψ × Δθ / F(t))  [from cumulative]",
-    "ponding_time": "tp = Ks × ψ × Δθ / (i × (i - Ks))  where i = rainfall intensity",
+    "cumulative": "F(t) = Ks \u00d7 t + \u03c8 \u00d7 \u0394\u03b8 \u00d7 ln(1 + F(t)/(\u03c8 \u00d7 \u0394\u03b8))  [implicit]",
+    "rate": "f(t) = Ks \u00d7 (1 + \u03c8 \u00d7 \u0394\u03b8 / F(t))  [from cumulative]",
+    "ponding_time": "tp = Ks \u00d7 \u03c8 \u00d7 \u0394\u03b8 / (i \u00d7 (i - Ks))  where i = rainfall intensity",
     "units": {
       "F": "cm (cumulative infiltration)",
       "f": "cm/hr (infiltration rate)",
       "Ks": "cm/hr (saturated hydraulic conductivity)",
       "psi": "cm (wetting front suction head, positive)",
-      "delta_theta": "dimensionless (θs - θi, moisture deficit)"
+      "delta_theta": "dimensionless (\u03b8s - \u03b8i, moisture deficit)"
     }
   },
   "soil_parameters": {
     "description": "Green-Ampt parameters from Rawls et al. (1983) Table 1",
-    "sand": {"Ks_cm_hr": 11.78, "psi_cm": 4.95, "porosity": 0.437, "theta_e": 0.417, "theta_r": 0.020},
-    "loamy_sand": {"Ks_cm_hr": 2.99, "psi_cm": 6.13, "porosity": 0.437, "theta_e": 0.401, "theta_r": 0.036},
-    "sandy_loam": {"Ks_cm_hr": 1.09, "psi_cm": 11.01, "porosity": 0.453, "theta_e": 0.412, "theta_r": 0.041},
-    "loam": {"Ks_cm_hr": 0.34, "psi_cm": 8.89, "porosity": 0.463, "theta_e": 0.434, "theta_r": 0.029},
-    "silt_loam": {"Ks_cm_hr": 0.65, "psi_cm": 16.68, "porosity": 0.501, "theta_e": 0.486, "theta_r": 0.015},
-    "clay_loam": {"Ks_cm_hr": 0.10, "psi_cm": 20.88, "porosity": 0.464, "theta_e": 0.309, "theta_r": 0.155},
-    "clay": {"Ks_cm_hr": 0.03, "psi_cm": 31.63, "porosity": 0.475, "theta_e": 0.385, "theta_r": 0.090}
+    "sand": {
+      "Ks_cm_hr": 11.78,
+      "psi_cm": 4.95,
+      "porosity": 0.437,
+      "theta_e": 0.417,
+      "theta_r": 0.02
+    },
+    "loamy_sand": {
+      "Ks_cm_hr": 2.99,
+      "psi_cm": 6.13,
+      "porosity": 0.437,
+      "theta_e": 0.401,
+      "theta_r": 0.036
+    },
+    "sandy_loam": {
+      "Ks_cm_hr": 1.09,
+      "psi_cm": 11.01,
+      "porosity": 0.453,
+      "theta_e": 0.412,
+      "theta_r": 0.041
+    },
+    "loam": {
+      "Ks_cm_hr": 0.34,
+      "psi_cm": 8.89,
+      "porosity": 0.463,
+      "theta_e": 0.434,
+      "theta_r": 0.029
+    },
+    "silt_loam": {
+      "Ks_cm_hr": 0.65,
+      "psi_cm": 16.68,
+      "porosity": 0.501,
+      "theta_e": 0.486,
+      "theta_r": 0.015
+    },
+    "clay_loam": {
+      "Ks_cm_hr": 0.1,
+      "psi_cm": 20.88,
+      "porosity": 0.464,
+      "theta_e": 0.309,
+      "theta_r": 0.155
+    },
+    "clay": {
+      "Ks_cm_hr": 0.03,
+      "psi_cm": 31.63,
+      "porosity": 0.475,
+      "theta_e": 0.385,
+      "theta_r": 0.09
+    }
   },
   "analytical_benchmarks": [
     {
       "name": "sandy_loam_1hr",
-      "description": "Sandy loam infiltration, initially dry (θi = 0.1), t=1hr",
-      "inputs": {"Ks_cm_hr": 1.09, "psi_cm": 11.01, "delta_theta": 0.312, "t_hr": 1.0},
+      "description": "Sandy loam infiltration, initially dry (\u03b8i = 0.1), t=1hr",
+      "inputs": {
+        "Ks_cm_hr": 1.09,
+        "psi_cm": 11.01,
+        "delta_theta": 0.312,
+        "t_hr": 1.0
+      },
       "expected_F_cm": 3.51,
       "expected_f_cm_hr": 2.16,
       "tolerance": 0.15,
@@ -49,7 +97,12 @@
     {
       "name": "sandy_loam_4hr",
       "description": "Sandy loam, t=4hr",
-      "inputs": {"Ks_cm_hr": 1.09, "psi_cm": 11.01, "delta_theta": 0.312, "t_hr": 4.0},
+      "inputs": {
+        "Ks_cm_hr": 1.09,
+        "psi_cm": 11.01,
+        "delta_theta": 0.312,
+        "t_hr": 4.0
+      },
       "expected_F_cm": 8.69,
       "expected_f_cm_hr": 1.52,
       "tolerance": 0.2,
@@ -57,8 +110,13 @@
     },
     {
       "name": "sand_1hr",
-      "description": "Sand, θi=0.05, t=1hr — fast infiltration",
-      "inputs": {"Ks_cm_hr": 11.78, "psi_cm": 4.95, "delta_theta": 0.367, "t_hr": 1.0},
+      "description": "Sand, \u03b8i=0.05, t=1hr \u2014 fast infiltration",
+      "inputs": {
+        "Ks_cm_hr": 11.78,
+        "psi_cm": 4.95,
+        "delta_theta": 0.367,
+        "t_hr": 1.0
+      },
       "expected_F_cm": 15.92,
       "expected_f_cm_hr": 13.12,
       "tolerance": 0.3,
@@ -66,8 +124,13 @@
     },
     {
       "name": "clay_1hr",
-      "description": "Clay, θi=0.1, t=1hr — slow infiltration",
-      "inputs": {"Ks_cm_hr": 0.03, "psi_cm": 31.63, "delta_theta": 0.285, "t_hr": 1.0},
+      "description": "Clay, \u03b8i=0.1, t=1hr \u2014 slow infiltration",
+      "inputs": {
+        "Ks_cm_hr": 0.03,
+        "psi_cm": 31.63,
+        "delta_theta": 0.285,
+        "t_hr": 1.0
+      },
       "expected_F_cm": 0.76,
       "expected_f_cm_hr": 0.39,
       "tolerance": 0.1,
@@ -75,42 +138,77 @@
     },
     {
       "name": "loam_ponding_time",
-      "description": "Loam under 2 cm/hr rain intensity — when does ponding start?",
-      "inputs": {"Ks_cm_hr": 0.34, "psi_cm": 8.89, "delta_theta": 0.405, "rain_intensity_cm_hr": 2.0},
+      "description": "Loam under 2 cm/hr rain intensity \u2014 when does ponding start?",
+      "inputs": {
+        "Ks_cm_hr": 0.34,
+        "psi_cm": 8.89,
+        "delta_theta": 0.405,
+        "rain_intensity_cm_hr": 2.0
+      },
       "expected_tp_hr": 0.37,
       "tolerance": 0.05,
-      "notes": "tp = Ks × ψ × Δθ / (i × (i - Ks)) = 0.34 × 8.89 × 0.405 / (2.0 × 1.66) = 0.369"
+      "notes": "tp = Ks \u00d7 \u03c8 \u00d7 \u0394\u03b8 / (i \u00d7 (i - Ks)) = 0.34 \u00d7 8.89 \u00d7 0.405 / (2.0 \u00d7 1.66) = 0.369"
     },
     {
       "name": "silt_loam_ponding_time",
-      "description": "Silt loam under 3 cm/hr rain — ponding time",
-      "inputs": {"Ks_cm_hr": 0.65, "psi_cm": 16.68, "delta_theta": 0.471, "rain_intensity_cm_hr": 3.0},
+      "description": "Silt loam under 3 cm/hr rain \u2014 ponding time",
+      "inputs": {
+        "Ks_cm_hr": 0.65,
+        "psi_cm": 16.68,
+        "delta_theta": 0.471,
+        "rain_intensity_cm_hr": 3.0
+      },
       "expected_tp_hr": 0.73,
       "tolerance": 0.05,
-      "notes": "tp = 0.65 × 16.68 × 0.471 / (3.0 × 2.35) = 0.724"
+      "notes": "tp = 0.65 \u00d7 16.68 \u00d7 0.471 / (3.0 \u00d7 2.35) = 0.724"
     },
     {
       "name": "asymptotic_rate",
-      "description": "At large t, infiltration rate → Ks",
-      "inputs": {"Ks_cm_hr": 1.09, "psi_cm": 11.01, "delta_theta": 0.312, "t_hr": 100.0},
+      "description": "At large t, infiltration rate \u2192 Ks",
+      "inputs": {
+        "Ks_cm_hr": 1.09,
+        "psi_cm": 11.01,
+        "delta_theta": 0.312,
+        "t_hr": 100.0
+      },
       "expected_f_approaches_Ks": true,
       "tolerance_ratio": 0.05,
       "notes": "f/Ks should be within 5% of 1.0 at t=100hr"
     },
     {
       "name": "zero_time",
-      "description": "At t=0, F=0 and f → infinity (theoretical)",
-      "inputs": {"Ks_cm_hr": 1.09, "psi_cm": 11.01, "delta_theta": 0.312, "t_hr": 0.0},
+      "description": "At t=0, F=0 and f \u2192 infinity (theoretical)",
+      "inputs": {
+        "Ks_cm_hr": 1.09,
+        "psi_cm": 11.01,
+        "delta_theta": 0.312,
+        "t_hr": 0.0
+      },
       "expected_F_cm": 0.0,
       "expected_f_infinite": true,
       "notes": "The rate is infinite at t=0 (soil can absorb any amount initially)"
     }
   ],
   "monotonicity_checks": [
-    {"name": "cumulative_monotonic", "description": "F(t) is strictly increasing with t"},
-    {"name": "rate_decreasing", "description": "f(t) is strictly decreasing with t"},
-    {"name": "higher_Ks_more_infiltration", "description": "Higher Ks → more F(t) at constant t"},
-    {"name": "higher_suction_more_early", "description": "Higher ψ → more F(t) early, same Ks asymptote"},
-    {"name": "rate_bounded_below_by_Ks", "description": "f(t) ≥ Ks for all t > 0"}
+    {
+      "name": "cumulative_monotonic",
+      "description": "F(t) is strictly increasing with t"
+    },
+    {
+      "name": "rate_decreasing",
+      "description": "f(t) is strictly decreasing with t"
+    },
+    {
+      "name": "higher_Ks_more_infiltration",
+      "description": "Higher Ks \u2192 more F(t) at constant t"
+    },
+    {
+      "name": "higher_suction_more_early",
+      "description": "Higher \u03c8 \u2192 more F(t) early, same Ks asymptote"
+    },
+    {
+      "name": "rate_bounded_below_by_Ks",
+      "description": "f(t) \u2265 Ks for all t > 0"
+    }
   ]
 }

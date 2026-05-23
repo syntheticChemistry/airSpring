@@ -13,7 +13,8 @@
       "Gong L et al. (2006) Sensitivity of Penman-Monteith ET\u2080",
       "groundSpring Exp 003: Humidity dominates ET\u2080 uncertainty at 66%"
     ],
-    "reproduction_note": "Deterministic Lehmer LCG seed=42; fully reproducible"
+    "reproduction_note": "Deterministic Lehmer LCG seed=42; fully reproducible",
+    "blake3": "034f030b14214c3dd0fad626f854ee13768996437a48417025b955f85c16fa7d"
   },
   "base_input": {
     "description": "FAO-56 Example 18 (Uccle, Belgium, July 6)",

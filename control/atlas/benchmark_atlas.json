@@ -8277,6 +8277,7 @@
       "Allen RG et al. (1998) FAO-56: Crop Evapotranspiration",
       "Stewart JI et al. (1977) Water Production Functions, ICID"
     ],
-    "_tolerance_justification": "Mass balance tol 0.01 mm (FAO-56 Ch 8 conservation); ET0 R² > 0.85 vs PM baseline; per-station yield ratio within Stewart (1977) Ky bounds"
+    "_tolerance_justification": "Mass balance tol 0.01 mm (FAO-56 Ch 8 conservation); ET0 R\u00b2 > 0.85 vs PM baseline; per-station yield ratio within Stewart (1977) Ky bounds",
+    "blake3": "55b02b49169abb3668c7ca8da73005b1743b41c2ec2578cda5f18fed19714f18"
   }
 }

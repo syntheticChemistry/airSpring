@@ -8,17 +8,40 @@
     "baseline_commit": "1c11763",
     "python_version": "3.10.12",
     "repository": "ecoPrimals/airSpring",
-    "reproduction_note": "Synthetic CMIP6-like delta-T offsets on Michigan baseline; deterministic"
+    "reproduction_note": "Synthetic CMIP6-like delta-T offsets on Michigan baseline; deterministic",
+    "blake3": "781484bf2cff287fe0ed3f0fb0aab40681eac5ac31776f383024fea11a04070d"
   },
   "scenarios": [
-    {"name": "baseline", "delta_t": 0.0},
-    {"name": "ssp245_2050", "delta_t": 1.5},
-    {"name": "ssp370_2050", "delta_t": 2.5},
-    {"name": "ssp585_2050", "delta_t": 4.0}
+    {
+      "name": "baseline",
+      "delta_t": 0.0
+    },
+    {
+      "name": "ssp245_2050",
+      "delta_t": 1.5
+    },
+    {
+      "name": "ssp370_2050",
+      "delta_t": 2.5
+    },
+    {
+      "name": "ssp585_2050",
+      "delta_t": 4.0
+    }
   ],
-  "crops": ["corn", "soybean", "winter_wheat"],
-  "soil": {"field_capacity": 0.28, "wilting_point": 0.14},
+  "crops": [
+    "corn",
+    "soybean",
+    "winter_wheat"
+  ],
+  "soil": {
+    "field_capacity": 0.28,
+    "wilting_point": 0.14
+  },
   "season_days": 153,
-  "et0_pct_increase_per_degC": {"lo": 2.0, "hi": 8.0},
+  "et0_pct_increase_per_degC": {
+    "lo": 2.0,
+    "hi": 8.0
+  },
   "tolerance_mass_balance_mm": 1.0
 }

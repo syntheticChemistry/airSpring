@@ -13,24 +13,55 @@
       "USDA NASS Quick Stats: https://quickstats.nass.usda.gov/"
     ],
     "data_source": "FAO-56 Table 24 (Ky), synthetic Michigan weather (reproducible RNG)",
-    "_tolerance_justification": "Stewart model is empirical (Ky from field trials); yield ratios validated to 0.01 precision against analytical expectations"
+    "_tolerance_justification": "Stewart model is empirical (Ky from field trials); yield ratios validated to 0.01 precision against analytical expectations",
+    "blake3": "1240a24029fc1b87e248232aa17b0be75f6da86b90e7297a4dc0fac39e2dbb21"
   },
   "ky_table": {
-    "corn":         {"ky_total": 1.25, "ky_flower": 1.50},
-    "soybean":      {"ky_total": 0.85, "ky_flower": 0.80},
-    "winter_wheat": {"ky_total": 1.00, "ky_flower": 0.60},
-    "alfalfa":      {"ky_total": 1.10, "ky_flower": 0.70},
-    "dry_bean":     {"ky_total": 1.15, "ky_flower": 1.10}
+    "corn": {
+      "ky_total": 1.25,
+      "ky_flower": 1.5
+    },
+    "soybean": {
+      "ky_total": 0.85,
+      "ky_flower": 0.8
+    },
+    "winter_wheat": {
+      "ky_total": 1.0,
+      "ky_flower": 0.6
+    },
+    "alfalfa": {
+      "ky_total": 1.1,
+      "ky_flower": 0.7
+    },
+    "dry_bean": {
+      "ky_total": 1.15,
+      "ky_flower": 1.1
+    }
   },
   "multi_year": {
-    "mean_yr_range": [0.30, 0.70],
-    "cv_range": [0.02, 0.35],
-    "mean_stress_range": [60.0, 140.0],
-    "_note": "20 years of rainfed corn on loam with variable drought. Low yield ratios are expected for rainfed conditions with no irrigation — Michigan corn achieves ~0.85-0.95 Ya/Ymax only with irrigation or in exceptionally wet years. Rainfed stress days are high because cumulative ET exceeds rainfall over the full 150-day season."
+    "mean_yr_range": [
+      0.3,
+      0.7
+    ],
+    "cv_range": [
+      0.02,
+      0.35
+    ],
+    "mean_stress_range": [
+      60.0,
+      140.0
+    ],
+    "_note": "20 years of rainfed corn on loam with variable drought. Low yield ratios are expected for rainfed conditions with no irrigation \u2014 Michigan corn achieves ~0.85-0.95 Ya/Ymax only with irrigation or in exceptionally wet years. Rainfed stress days are high because cumulative ET exceeds rainfall over the full 150-day season."
   },
   "thresholds": {
-    "yield_ratio_range": [0.0, 1.0],
-    "eta_etc_ratio_range": [0.0, 1.0],
+    "yield_ratio_range": [
+      0.0,
+      1.0
+    ],
+    "eta_etc_ratio_range": [
+      0.0,
+      1.0
+    ],
     "_tolerance_justification": "Physical bounds from Stewart equation: Ya/Ymax in [0,1], ETa/ETc in [0,1]"
   }
 }

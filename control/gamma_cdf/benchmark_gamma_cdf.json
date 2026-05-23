@@ -86,6 +86,7 @@
   "_provenance": {
     "content_sha256": "b456fa82c5f4a004835debc3439bc2c04c8f7c36fb5c7243381c8e15cc9d1e63",
     "python_version": "3.10.12 (main, Mar  3 2026, 11:56:32) [GCC 11.4.0]",
-    "generation_date": "2026-05-17T14:37:57.556186+00:00"
+    "generation_date": "2026-05-17T14:37:57.556186+00:00",
+    "blake3": "3db38904683ee5c5a66886430be81126087da585b0b8faae2dcd2962ab34c397"
   }
 }

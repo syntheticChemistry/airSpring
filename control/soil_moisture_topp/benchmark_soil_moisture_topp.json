@@ -141,6 +141,7 @@
   "_provenance": {
     "content_sha256": "1dcad4a2e492ef89917107ac45d3672828c8ace2b2bac435b7a78d0dfc3aa4f4",
     "python_version": "3.10.12 (main, Mar  3 2026, 11:56:32) [GCC 11.4.0]",
-    "generation_date": "2026-05-17T14:38:04.330819+00:00"
+    "generation_date": "2026-05-17T14:38:04.330819+00:00",
+    "blake3": "3206e58f75d2e361bffd87eeef52ec6a3f516e8345cd20c60857987977c5df02"
   }
 }

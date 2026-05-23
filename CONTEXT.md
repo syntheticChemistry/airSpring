@@ -1,6 +1,6 @@
 # Context — airSpring
 
-**Doc sync:** 2026-05-21 (v0.10.0; Wave 37 alignment; 57 capabilities; 445-method registry sync).
+**Doc sync:** 2026-05-21 (v0.10.0; Wave 37 alignment; 57 capabilities; 458-method registry sync).
 
 ## What This Is
 
@@ -59,7 +59,7 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 
 ## Key Capabilities (JSON-RPC methods)
 
-57 methods registered in `capability_registry.toml` (synced against 445-method canonical, Wave 36):
+57 methods registered in `capability_registry.toml` (synced against 458-method canonical, Wave 36):
 
 - **Evapotranspiration (7):** `science.et0_fao56`, `science.et0_hargreaves`,
   `science.et0_priestley_taylor`, `science.et0_makkink`, `science.et0_turc`,

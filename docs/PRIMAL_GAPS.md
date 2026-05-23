@@ -1,6 +1,6 @@
 # Primal Gaps — airSpring v0.10.0
 
-**Date**: May 17, 2026 (Wave 20 Debt Resolution — 57 capabilities, 445-method registry)
+**Date**: May 23, 2026 (Wave 46 Absorption — 57 capabilities, 458-method registry)
 **Spring**: airSpring (ecology / agriculture)
 **guideStone Level**: **L4** (cross-atomic pipeline / provenance tier) → targeting **L5+** (NUCLEUS composition, live primals)
 **License**: AGPL-3.0-or-later
@@ -161,6 +161,20 @@ Structural L5 validation with TCP mock round-trip tests passes (1,057 lib tests)
 - [x] Last `/tmp/` hardcoded path eliminated: `data/provider.rs` `SongbirdTransport::discover` → biomeOS standard discovery
 - [ ] guideStone L5 / live NUCLEUS validation (blocked on live biomeOS + toadStool — Pass 14)
 - [ ] guideStone L6 / cross-spring pipeline (deploy graphs validated against live NUCLEUS)
+
+### Wave 46 Absorption (May 23, 2026)
+
+Per primalSpring v0.9.27 Wave 46 — Ready for Absorption:
+- [x] **Registry sync**: Cross-sync test updated from `>= 452` to `>= 458` (6 new `neural_api.*` methods)
+- [x] **Doc sweep**: 11 files updated from stale 445-method count to 458 (445 was Wave 36 recount, never swept)
+- [x] **NeuralBridge observatory module**: New `ipc/neural_bridge.rs` — `capability_call_instrumented`, `routing_weights`, `route_explain`, `utilization`, `weight_health`, `composition_patterns` (biomeOS v3.67+)
+- [x] **composition.status observatory**: Handler now reports `observatory.neural_api_v3_67` health status
+- [x] **BLAKE3 backfill**: All 62 benchmark JSONs now have `blake3` hash in `_provenance` block (FN-1 / SP-4 alignment)
+- [x] **SP-4 sovereign publish**: `tools/publish_sporeprint.sh` — content.put pipeline to NestGate (base64 + BLAKE3, bearDog-signed)
+- [x] **Degradation docs updated**: Neural API observatory degradation table added
+- [ ] IonicContractRegistry: **Deferred** — not needed for core science; healthSpring is reference for cross-gate bonding
+- [ ] Dark Forest gate scenario: **Deferred** — PENDING per DOWNSTREAM_PATTERN_GUIDE
+- [ ] guideStone Tier 4 rewiring: **Deferred** — G column PENDING per scorecard
 
 ### Wave 20 PM — lithoSpore Audit Absorption (May 17, 2026)
 

@@ -10,7 +10,8 @@
     "references": [
       "Allen et al. (1998) FAO-56 Penman-Monteith reference evapotranspiration",
       "Open-Meteo ERA5 reanalysis (historical daily station extracts)"
-    ]
+    ],
+    "blake3": "eee8094cf9498bb0cc59c9b1a8c4def6a746891893a8ae4af6b0d0579affcde3"
   },
   "experiment": "Exp 059: Atlas 80yr Decade Analysis",
   "season": "May 1 \u2013 Sep 30 (DOY 121\u2013273)",

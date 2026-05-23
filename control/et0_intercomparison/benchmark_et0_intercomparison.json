@@ -204,6 +204,7 @@
     "baseline_commit": "9a84ae5",
     "python_version": "3.10.12",
     "data_source": "Open-Meteo ERA5 reanalysis (2023 growing season, free API)",
-    "_tolerance_justification": "PM vs Open-Meteo R\u00b2 > 0.90: our PM matches ERA5-based PM closely. PT vs PM R\u00b2 > 0.70: radiation methods have reduced correlation at Lake Michigan coastal stations with lake-effect variability (Xu & Singh 2002 report 0.60-0.95). Hargreaves vs PM R\u00b2 > 0.55: temperature-only methods have largest scatter at coastal sites where wind/cloud effects dominate (Droogers & Allen 2002 report R\u00b2 0.50-0.85). Mean ratio ranges: wide to accommodate seasonal and station variability (Jensen et al. 1990, Tabari et al. 2013)."
+    "_tolerance_justification": "PM vs Open-Meteo R\u00b2 > 0.90: our PM matches ERA5-based PM closely. PT vs PM R\u00b2 > 0.70: radiation methods have reduced correlation at Lake Michigan coastal stations with lake-effect variability (Xu & Singh 2002 report 0.60-0.95). Hargreaves vs PM R\u00b2 > 0.55: temperature-only methods have largest scatter at coastal sites where wind/cloud effects dominate (Droogers & Allen 2002 report R\u00b2 0.50-0.85). Mean ratio ranges: wide to accommodate seasonal and station variability (Jensen et al. 1990, Tabari et al. 2013).",
+    "blake3": "af944c12d76fd3897b518dd21332137ce97a4f5a54a3973119c4ce58926b2437"
   }
 }

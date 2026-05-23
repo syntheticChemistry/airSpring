@@ -9,7 +9,8 @@
     "references": [
       "McMaster GS, Wilhelm WW (1997) Ag Forest Met 87:291-300",
       "FAO-56 Allen et al. (1998) Table 11"
-    ]
+    ],
+    "blake3": "c795f9d265afa92221198d83669661fd6ca96cc6bb288cf0b18827fc45a99ffe"
   },
   "analytical": {
     "gdd_avg": [

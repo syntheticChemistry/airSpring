@@ -17,21 +17,38 @@
       "Stewart (1977) 'Optimizing crop production through control of water and salinity'",
       "FAO-56 Table 24: Ky values by crop"
     ],
-    "_tolerance_justification": "Mass balance: 0.01 mm (floating-point accumulation). Yield ratio: 0.001 (Stewart equation is exact for given inputs). WUE: 0.1 kg/ha/mm (sensitivity to strategy)."
+    "_tolerance_justification": "Mass balance: 0.01 mm (floating-point accumulation). Yield ratio: 0.001 (Stewart equation is exact for given inputs). WUE: 0.1 kg/ha/mm (sensitivity to strategy).",
+    "blake3": "f080ff26a4ef95e272954150344a46a44d98a9833f54b22e7d7d66fd0e10c518"
   },
   "crop_parameters": {
     "_source": "FAO-56 Table 12 (corn, grain), Table 24 (Ky)",
     "crop": "corn",
     "ky_total": 1.25,
     "ky_stages": [
-      {"stage": "initial", "ky": 0.4, "length_days": 30},
-      {"stage": "development", "ky": 0.4, "length_days": 40},
-      {"stage": "mid_season", "ky": 1.3, "length_days": 50},
-      {"stage": "late_season", "ky": 0.5, "length_days": 30}
+      {
+        "stage": "initial",
+        "ky": 0.4,
+        "length_days": 30
+      },
+      {
+        "stage": "development",
+        "ky": 0.4,
+        "length_days": 40
+      },
+      {
+        "stage": "mid_season",
+        "ky": 1.3,
+        "length_days": 50
+      },
+      {
+        "stage": "late_season",
+        "ky": 0.5,
+        "length_days": 30
+      }
     ],
-    "kc_ini": 0.30,
-    "kc_mid": 1.20,
-    "kc_end": 0.60,
+    "kc_ini": 0.3,
+    "kc_mid": 1.2,
+    "kc_end": 0.6,
     "max_root_depth_mm": 1000
   },
   "soil_parameters": {
@@ -53,22 +70,22 @@
   },
   "scheduling_strategies": {
     "rainfed": {
-      "description": "No irrigation — rainfed baseline",
+      "description": "No irrigation \u2014 rainfed baseline",
       "irrigation_rule": "none"
     },
     "mad_50": {
       "description": "Irrigate when depletion exceeds 50% of TAW (conservative)",
-      "mad_fraction": 0.50,
+      "mad_fraction": 0.5,
       "irrigation_depth_mm": 25.0
     },
     "mad_60": {
       "description": "Irrigate when depletion exceeds 60% of TAW (moderate)",
-      "mad_fraction": 0.60,
+      "mad_fraction": 0.6,
       "irrigation_depth_mm": 25.0
     },
     "mad_70": {
       "description": "Irrigate when depletion exceeds 70% of TAW (aggressive deficit)",
-      "mad_fraction": 0.70,
+      "mad_fraction": 0.7,
       "irrigation_depth_mm": 25.0
     },
     "growth_stage": {
@@ -81,23 +98,50 @@
   },
   "validation_checks": {
     "mass_balance": {
-      "description": "Mass balance closure for each strategy (P + I = ET + DP + ΔS)",
+      "description": "Mass balance closure for each strategy (P + I = ET + DP + \u0394S)",
       "tolerance_mm": 0.01,
-      "strategies": ["rainfed", "mad_50", "mad_60", "mad_70", "growth_stage"]
+      "strategies": [
+        "rainfed",
+        "mad_50",
+        "mad_60",
+        "mad_70",
+        "growth_stage"
+      ]
     },
     "yield_ordering": {
-      "description": "More irrigation → less stress → higher yield (monotonic relationship)",
-      "expected_order": ["rainfed", "mad_70", "growth_stage", "mad_60", "mad_50"],
+      "description": "More irrigation \u2192 less stress \u2192 higher yield (monotonic relationship)",
+      "expected_order": [
+        "rainfed",
+        "mad_70",
+        "growth_stage",
+        "mad_60",
+        "mad_50"
+      ],
       "note": "rainfed has most stress, mad_50 least stress. growth_stage targets critical period but allows stress outside it, so yield is between mad_70 and mad_60."
     },
     "irrigation_totals": {
       "description": "Total irrigation in realistic range for Michigan corn",
       "strategies": {
-        "rainfed": {"expected_mm": 0.0, "tolerance_mm": 0.0},
-        "mad_50": {"min_mm": 50.0, "max_mm": 400.0},
-        "mad_60": {"min_mm": 25.0, "max_mm": 350.0},
-        "mad_70": {"min_mm": 0.0, "max_mm": 250.0},
-        "growth_stage": {"min_mm": 0.0, "max_mm": 300.0}
+        "rainfed": {
+          "expected_mm": 0.0,
+          "tolerance_mm": 0.0
+        },
+        "mad_50": {
+          "min_mm": 50.0,
+          "max_mm": 400.0
+        },
+        "mad_60": {
+          "min_mm": 25.0,
+          "max_mm": 350.0
+        },
+        "mad_70": {
+          "min_mm": 0.0,
+          "max_mm": 250.0
+        },
+        "growth_stage": {
+          "min_mm": 0.0,
+          "max_mm": 300.0
+        }
       }
     },
     "stress_days": {
@@ -117,9 +161,27 @@
     "analytical_checks": {
       "description": "Verify Stewart equation: Ya/Ym = 1 - Ky(1 - ETa/ETc)",
       "test_cases": [
-        {"label": "no_stress", "ky": 1.25, "eta_etc": 1.0, "expected_yield_ratio": 1.0, "tolerance": 0.001},
-        {"label": "half_stress", "ky": 1.25, "eta_etc": 0.5, "expected_yield_ratio": 0.375, "tolerance": 0.001},
-        {"label": "full_stress", "ky": 1.25, "eta_etc": 0.0, "expected_yield_ratio": 0.0, "tolerance": 0.001}
+        {
+          "label": "no_stress",
+          "ky": 1.25,
+          "eta_etc": 1.0,
+          "expected_yield_ratio": 1.0,
+          "tolerance": 0.001
+        },
+        {
+          "label": "half_stress",
+          "ky": 1.25,
+          "eta_etc": 0.5,
+          "expected_yield_ratio": 0.375,
+          "tolerance": 0.001
+        },
+        {
+          "label": "full_stress",
+          "ky": 1.25,
+          "eta_etc": 0.0,
+          "expected_yield_ratio": 0.0,
+          "tolerance": 0.001
+        }
       ]
     }
   }

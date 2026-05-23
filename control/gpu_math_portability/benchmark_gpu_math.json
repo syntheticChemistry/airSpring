@@ -5,7 +5,8 @@
     "baseline_commit": "87df5f6",
     "rust_binary": "validate_gpu_math",
     "date": "2026-02-28",
-    "methodology": "Each GPU module tested against its CPU path with known-value or cross-check validation"
+    "methodology": "Each GPU module tested against its CPU path with known-value or cross-check validation",
+    "blake3": "17a328c1f9c11f2b964ee5a7db52b242108da98c465d5cf428e70917138b5131"
   },
   "modules_tested": [
     {
@@ -82,7 +83,7 @@
       "module": "gpu::isotherm",
       "api": "fit_langmuir_nm() + fit_freundlich_nm()",
       "tier": "A",
-      "check_type": "R² goodness of fit",
+      "check_type": "R\u00b2 goodness of fit",
       "checks": 4
     },
     {
@@ -103,10 +104,13 @@
   "validation_thresholds": {
     "et0_batch_tolerance": 0.3,
     "mass_balance_tolerance_mm": 0.01,
-    "hargreaves_plausible_range_mm": [5.0, 8.0],
+    "hargreaves_plausible_range_mm": [
+      5.0,
+      8.0
+    ],
     "kc_climate_standard_tol": 0.02,
     "vwc_10000_expected": 0.1323,
-    "kriging_at_sensor_tol": 1e-6,
+    "kriging_at_sensor_tol": 1e-06,
     "langmuir_r2_min": 0.99,
     "freundlich_r2_min": 0.95,
     "mc_mean_central_tol_mm": 0.5,

@@ -11,7 +11,8 @@
     "baseline_commit": "d8959c9",
     "baseline_command": "python control/coupled_runoff_infiltration/coupled_runoff_infiltration.py",
     "baseline_date": "2026-02-28",
-    "baseline_result": "292/292 PASS"
+    "baseline_result": "292/292 PASS",
+    "blake3": "dc531dcb5b001a6b22071e38c450de694e5e3d5fbc2402a0792141403e347249"
   },
   "storm_matrix": [
     {

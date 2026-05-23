@@ -10,6 +10,7 @@
 //! | [`method_register`] | biomeOS v3.51 `method.register` for dynamic semantic routing |
 //! | [`skunkbat`] | Audit event emission via `security.audit_log` (JH-5 forwarding) |
 //! | [`mcp`] | MCP tool definitions for Squirrel AI integration (10 ecology tools) |
+//! | [`neural_bridge`] | biomeOS v3.67+ observatory: routing weights, instrumented dispatch |
 //! | [`provenance`] | Provenance trio (rhizoCrypt + loamSpine + sweetGrass) |
 //! | [`resilience`] | Circuit breaker + retry with exponential backoff |
 //! | [`timeseries`] | Cross-spring time series exchange (`ecoPrimals/time-series/v1`) |
@@ -23,6 +24,7 @@ pub mod compute_dispatch;
 pub mod dispatch_outcome;
 pub mod mcp;
 pub mod method_register;
+pub mod neural_bridge;
 pub mod nestgate_data;
 pub mod precision_route;
 pub mod provenance;

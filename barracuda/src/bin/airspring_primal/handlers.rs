@@ -384,6 +384,8 @@ pub fn handle_composition_status(state: &NicheState) -> serde_json::Value {
     let nestgate = discover_data_primal().is_some();
     let toadstool = discover_compute_primal().is_some();
     let skunkbat = biomeos::discover_primal_socket(primal_names::SKUNKBAT).is_some();
+    let neural_api_healthy =
+        airspring_barracuda::ipc::neural_bridge::weight_health().is_ok();
 
     let healthy_count = u32::from(trio_available)
         + u32::from(nestgate)
@@ -404,6 +406,9 @@ pub fn handle_composition_status(state: &NicheState) -> serde_json::Value {
             (primal_names::NESTGATE): nestgate,
             (primal_names::TOADSTOOL): toadstool,
             (primal_names::SKUNKBAT): skunkbat,
+        },
+        "observatory": {
+            "neural_api_v3_67": neural_api_healthy,
         },
         "resource_pressure": {
             "uptime_secs": state.start_time.elapsed().as_secs(),

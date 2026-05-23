@@ -7,7 +7,8 @@
     "baseline_commit": "d8959c9",
     "baseline_command": "python control/vg_inverse/vg_inverse_fitting.py",
     "baseline_date": "2026-02-28",
-    "baseline_result": "84/84 PASS"
+    "baseline_result": "84/84 PASS",
+    "blake3": "256f0a421c8da973e573f2c9f1270076cb4f5027485f7db617bf5ae3107836ad"
   },
   "forward_checks": [
     {

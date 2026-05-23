@@ -217,6 +217,7 @@
     "baseline_command": "python control/priestley_taylor/priestley_taylor_et0.py",
     "baseline_commit": "9a84ae5",
     "python_version": "3.10.12",
-    "_tolerance_justification": "Analytical tests: 0.001 mm/day (floating-point rounding). PM cross-validation: 0.15 mm/day (FAO-56 Example 18 digitization tolerance, same as Exp 001). PT tolerance: 0.01 mm/day (self-consistent). PT/PM ratio range [0.85, 1.25]: literature reports 0.85-1.35 for humid climates (Xu & Singh 2002, Tabari 2010). Climate gradient: PT/PM decreasing from humid to arid is established by Jensen et al. (1990) \u2014 PT overestimates in humid, underestimates in arid relative to PM due to missing advection term."
+    "_tolerance_justification": "Analytical tests: 0.001 mm/day (floating-point rounding). PM cross-validation: 0.15 mm/day (FAO-56 Example 18 digitization tolerance, same as Exp 001). PT tolerance: 0.01 mm/day (self-consistent). PT/PM ratio range [0.85, 1.25]: literature reports 0.85-1.35 for humid climates (Xu & Singh 2002, Tabari 2010). Climate gradient: PT/PM decreasing from humid to arid is established by Jensen et al. (1990) \u2014 PT overestimates in humid, underestimates in arid relative to PM due to missing advection term.",
+    "blake3": "613ffa5ea5f08935ee8e2c24e35be9507580e911d8f0cf6c7d12e1fac701abac"
   }
 }

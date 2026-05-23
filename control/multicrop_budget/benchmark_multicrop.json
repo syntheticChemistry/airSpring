@@ -11,14 +11,33 @@
       "Doorenbos J, Kassam AH (1979) FAO-33 Yield Response to Water",
       "Stewart JI et al. (1977) Optimizing crop production through control of water"
     ],
-    "crops": ["Corn", "Soybean", "WinterWheat", "DryBean", "Potato"],
+    "crops": [
+      "Corn",
+      "Soybean",
+      "WinterWheat",
+      "DryBean",
+      "Potato"
+    ],
     "weather_seed": 42,
-    "soil": "silt_loam (FC=0.30, WP=0.12)"
+    "soil": "silt_loam (FC=0.30, WP=0.12)",
+    "blake3": "e6a47f6b2e5b7f211146bc9c39831f4cd12300fa508a4a96d170aef4c6e93350"
   },
   "validation_thresholds": {
-    "irrigated_yield_range": [0.75, 1.0],
-    "rainfed_yield_range": [0.10, 0.95],
-    "water_productivity_range_mm": [200, 1200],
-    "dual_kc_yield_range": [0.60, 1.0]
+    "irrigated_yield_range": [
+      0.75,
+      1.0
+    ],
+    "rainfed_yield_range": [
+      0.1,
+      0.95
+    ],
+    "water_productivity_range_mm": [
+      200,
+      1200
+    ],
+    "dual_kc_yield_range": [
+      0.6,
+      1.0
+    ]
   }
 }

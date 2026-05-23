@@ -7,7 +7,8 @@
     "baseline_commit": "d8959c9",
     "baseline_command": "python control/season_water_budget/season_water_budget.py",
     "baseline_date": "2026-02-28",
-    "baseline_result": "34/34 PASS"
+    "baseline_result": "34/34 PASS",
+    "blake3": "a478617859a4d767cea6480ea6e36196d6cae5fcd35089318900adb93bcbbafd"
   },
   "crops": [
     {

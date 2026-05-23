@@ -1,68 +1,157 @@
 {
-    "_provenance": {
-        "method": "Synthetic 365-day station weather; FAO-56 PM ET\u2080 via BatchedEt0 GPU path vs Python seasonal_batch_et0.py",
-        "baseline_script": "control/seasonal_batch_et0/seasonal_batch_et0.py",
-        "baseline_command": "python3 control/seasonal_batch_et0/seasonal_batch_et0.py",
-        "baseline_commit": "97e7533",
-        "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
-        "python_version": "3.13",
-        "created": "2026-02-28",
-        "references": [
-            "Allen et al. (1998) FAO-56",
-            "ToadStool BatchedElementwiseF64 (op=0)",
-            "ToadStool FusedMapReduceF64"
-        ]
-    },
-    "experiment": "Exp 042 — Seasonal Batch ET₀ at GPU Scale",
-    "description": "Validates seasonal ET₀ computation across 365 days × N stations, proving GPU batch dispatch produces correct multi-month aggregates. Tests the full pipeline: station-day input → BatchedEt0 → seasonal reduction → statistics. Uses synthetic seasonal weather curves (sinusoidal temperature/radiation) to verify physical realism of batch outputs.",
+  "_provenance": {
+    "method": "Synthetic 365-day station weather; FAO-56 PM ET\u2080 via BatchedEt0 GPU path vs Python seasonal_batch_et0.py",
+    "baseline_script": "control/seasonal_batch_et0/seasonal_batch_et0.py",
+    "baseline_command": "python3 control/seasonal_batch_et0/seasonal_batch_et0.py",
+    "baseline_commit": "97e7533",
+    "reproduction_note": "Re-run baseline_command at baseline_commit to regenerate expected values",
+    "python_version": "3.13",
+    "created": "2026-02-28",
     "references": [
-        "Allen et al. (1998) FAO-56",
-        "ToadStool BatchedElementwiseF64 (op=0)",
-        "ToadStool FusedMapReduceF64"
+      "Allen et al. (1998) FAO-56",
+      "ToadStool BatchedElementwiseF64 (op=0)",
+      "ToadStool FusedMapReduceF64"
     ],
-    "stations": [
-        {
-            "label": "Michigan (humid continental)",
-            "latitude": 42.7, "elevation": 280.0,
-            "tmax_range": [-5.0, 32.0], "tmin_range": [-15.0, 20.0],
-            "rh_max_range": [70.0, 95.0], "rh_min_range": [25.0, 65.0],
-            "wind_2m": 2.5, "rs_range": [5.0, 25.0],
-            "expected_annual_et0_mm": {"min": 700, "max": 1200},
-            "peak_month": 7
-        },
-        {
-            "label": "Arizona (hot arid)",
-            "latitude": 33.0, "elevation": 350.0,
-            "tmax_range": [15.0, 45.0], "tmin_range": [5.0, 30.0],
-            "rh_max_range": [20.0, 50.0], "rh_min_range": [5.0, 20.0],
-            "wind_2m": 3.0, "rs_range": [10.0, 30.0],
-            "expected_annual_et0_mm": {"min": 1400, "max": 2600},
-            "peak_month": 7
-        },
-        {
-            "label": "Pacific NW (maritime)",
-            "latitude": 47.6, "elevation": 50.0,
-            "tmax_range": [5.0, 28.0], "tmin_range": [-2.0, 16.0],
-            "rh_max_range": [75.0, 98.0], "rh_min_range": [40.0, 75.0],
-            "wind_2m": 2.0, "rs_range": [3.0, 22.0],
-            "expected_annual_et0_mm": {"min": 500, "max": 1000},
-            "peak_month": 7
-        },
-        {
-            "label": "Gulf Coast (subtropical humid)",
-            "latitude": 30.0, "elevation": 10.0,
-            "tmax_range": [15.0, 35.0], "tmin_range": [5.0, 25.0],
-            "rh_max_range": [80.0, 98.0], "rh_min_range": [50.0, 80.0],
-            "wind_2m": 2.2, "rs_range": [8.0, 26.0],
-            "expected_annual_et0_mm": {"min": 1000, "max": 1800},
-            "peak_month": 7
-        }
-    ],
-    "validation_checks": {
-        "seasonal_shape": "Summer ET₀ > Winter ET₀ for all NH stations",
-        "annual_total": "Annual sum within expected range",
-        "daily_range": "All daily ET₀ in [0, 15] mm/day",
-        "batch_consistency": "Single-station results match when computed in a 4-station batch",
-        "reduction_accuracy": "Mean/sum computed from batch matches manual aggregation"
+    "blake3": "1b33b8dac07aa1faccb89bf15c2b3c4f4ab02037e939d1584f3a176f2dd57fd7"
+  },
+  "experiment": "Exp 042 \u2014 Seasonal Batch ET\u2080 at GPU Scale",
+  "description": "Validates seasonal ET\u2080 computation across 365 days \u00d7 N stations, proving GPU batch dispatch produces correct multi-month aggregates. Tests the full pipeline: station-day input \u2192 BatchedEt0 \u2192 seasonal reduction \u2192 statistics. Uses synthetic seasonal weather curves (sinusoidal temperature/radiation) to verify physical realism of batch outputs.",
+  "references": [
+    "Allen et al. (1998) FAO-56",
+    "ToadStool BatchedElementwiseF64 (op=0)",
+    "ToadStool FusedMapReduceF64"
+  ],
+  "stations": [
+    {
+      "label": "Michigan (humid continental)",
+      "latitude": 42.7,
+      "elevation": 280.0,
+      "tmax_range": [
+        -5.0,
+        32.0
+      ],
+      "tmin_range": [
+        -15.0,
+        20.0
+      ],
+      "rh_max_range": [
+        70.0,
+        95.0
+      ],
+      "rh_min_range": [
+        25.0,
+        65.0
+      ],
+      "wind_2m": 2.5,
+      "rs_range": [
+        5.0,
+        25.0
+      ],
+      "expected_annual_et0_mm": {
+        "min": 700,
+        "max": 1200
+      },
+      "peak_month": 7
+    },
+    {
+      "label": "Arizona (hot arid)",
+      "latitude": 33.0,
+      "elevation": 350.0,
+      "tmax_range": [
+        15.0,
+        45.0
+      ],
+      "tmin_range": [
+        5.0,
+        30.0
+      ],
+      "rh_max_range": [
+        20.0,
+        50.0
+      ],
+      "rh_min_range": [
+        5.0,
+        20.0
+      ],
+      "wind_2m": 3.0,
+      "rs_range": [
+        10.0,
+        30.0
+      ],
+      "expected_annual_et0_mm": {
+        "min": 1400,
+        "max": 2600
+      },
+      "peak_month": 7
+    },
+    {
+      "label": "Pacific NW (maritime)",
+      "latitude": 47.6,
+      "elevation": 50.0,
+      "tmax_range": [
+        5.0,
+        28.0
+      ],
+      "tmin_range": [
+        -2.0,
+        16.0
+      ],
+      "rh_max_range": [
+        75.0,
+        98.0
+      ],
+      "rh_min_range": [
+        40.0,
+        75.0
+      ],
+      "wind_2m": 2.0,
+      "rs_range": [
+        3.0,
+        22.0
+      ],
+      "expected_annual_et0_mm": {
+        "min": 500,
+        "max": 1000
+      },
+      "peak_month": 7
+    },
+    {
+      "label": "Gulf Coast (subtropical humid)",
+      "latitude": 30.0,
+      "elevation": 10.0,
+      "tmax_range": [
+        15.0,
+        35.0
+      ],
+      "tmin_range": [
+        5.0,
+        25.0
+      ],
+      "rh_max_range": [
+        80.0,
+        98.0
+      ],
+      "rh_min_range": [
+        50.0,
+        80.0
+      ],
+      "wind_2m": 2.2,
+      "rs_range": [
+        8.0,
+        26.0
+      ],
+      "expected_annual_et0_mm": {
+        "min": 1000,
+        "max": 1800
+      },
+      "peak_month": 7
     }
+  ],
+  "validation_checks": {
+    "seasonal_shape": "Summer ET\u2080 > Winter ET\u2080 for all NH stations",
+    "annual_total": "Annual sum within expected range",
+    "daily_range": "All daily ET\u2080 in [0, 15] mm/day",
+    "batch_consistency": "Single-station results match when computed in a 4-station batch",
+    "reduction_accuracy": "Mean/sum computed from batch matches manual aggregation"
+  }
 }

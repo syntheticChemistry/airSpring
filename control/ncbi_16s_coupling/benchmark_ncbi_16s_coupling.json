@@ -4,13 +4,14 @@
     "description": "Couples real NCBI 16S metagenome study site to airSpring moisture-driven Anderson QS model",
     "bioproject": "PRJNA481146",
     "study": "16S amplicon sequences of soil microbiome after different tillage managements",
-    "site": "Ein Harod Meuhad, Israel (32.5978°N, 35.501°E)",
+    "site": "Ein Harod Meuhad, Israel (32.5978\u00b0N, 35.501\u00b0E)",
     "date": "2026-02-28",
-    "cross_spring": "airSpring (θ, ET₀, Anderson) × wetSpring (16S) × NestGate (NCBI)",
+    "cross_spring": "airSpring (\u03b8, ET\u2080, Anderson) \u00d7 wetSpring (16S) \u00d7 NestGate (NCBI)",
     "baseline_commit": "97e7533213e92a248db04a47cab2a00fde87c4cc",
     "baseline_script": "control/ncbi_16s_coupling/ncbi_16s_coupling.py",
     "baseline_command": "python control/ncbi_16s_coupling/ncbi_16s_coupling.py",
-    "methodology": "Real Open-Meteo weather → FAO-56 ET₀ → water balance θ(t) → Anderson d_eff(t) → QS regime prediction"
+    "methodology": "Real Open-Meteo weather \u2192 FAO-56 ET\u2080 \u2192 water balance \u03b8(t) \u2192 Anderson d_eff(t) \u2192 QS regime prediction",
+    "blake3": "f5944ac5a58c3d2f6d590f7eb0609c6d3e303929aec0f643ea6fc8f581b67bac"
   },
   "site": {
     "lat": 32.5978,
@@ -18,7 +19,10 @@
     "elevation_m": 80,
     "climate": "Mediterranean (hot-summer, Csa)",
     "soil_texture": "clay loam",
-    "collection_dates": ["2014-02-02", "2014-04-11"],
+    "collection_dates": [
+      "2014-02-02",
+      "2014-04-11"
+    ],
     "sra_runs": 194,
     "platform": "Illumina MiSeq",
     "library_strategy": "AMPLICON"
@@ -51,20 +55,75 @@
     "rationale": "Growing season containing both collection dates (Feb + Apr 2014)"
   },
   "validation_checks": [
-    {"name": "weather_fetch_ok", "type": "bool"},
-    {"name": "et0_positive_all_days", "type": "bool"},
-    {"name": "et0_mean_plausible_1_8mm", "type": "range", "min": 1.0, "max": 8.0},
-    {"name": "water_balance_mass_conserved", "type": "tolerance", "tol_mm": 0.1},
-    {"name": "theta_in_range", "type": "range", "min": 0.095, "max": 0.41},
-    {"name": "theta_feb_wetter_than_apr", "type": "bool", "rationale": "Mediterranean winter rain"},
-    {"name": "anderson_S_e_in_01", "type": "range", "min": 0.0, "max": 1.0},
-    {"name": "anderson_d_eff_positive", "type": "bool"},
-    {"name": "anderson_d_eff_feb_higher", "type": "bool", "rationale": "Wetter → higher connectivity → higher d_eff"},
-    {"name": "anderson_W_feb_lower", "type": "bool", "rationale": "Wetter → lower disorder"},
-    {"name": "anderson_regime_feb_classifiable", "type": "bool", "rationale": "Mediterranean semi-arid: low θ → localized is physically correct; regime must be classifiable"},
-    {"name": "anderson_regime_dry_more_localized", "type": "bool"},
-    {"name": "coupling_chain_monotonic", "type": "bool", "rationale": "Higher θ → higher d_eff → more delocalized"},
-    {"name": "diversity_prediction_consistent", "type": "bool", "rationale": "QS-active regime predicts higher diversity"}
+    {
+      "name": "weather_fetch_ok",
+      "type": "bool"
+    },
+    {
+      "name": "et0_positive_all_days",
+      "type": "bool"
+    },
+    {
+      "name": "et0_mean_plausible_1_8mm",
+      "type": "range",
+      "min": 1.0,
+      "max": 8.0
+    },
+    {
+      "name": "water_balance_mass_conserved",
+      "type": "tolerance",
+      "tol_mm": 0.1
+    },
+    {
+      "name": "theta_in_range",
+      "type": "range",
+      "min": 0.095,
+      "max": 0.41
+    },
+    {
+      "name": "theta_feb_wetter_than_apr",
+      "type": "bool",
+      "rationale": "Mediterranean winter rain"
+    },
+    {
+      "name": "anderson_S_e_in_01",
+      "type": "range",
+      "min": 0.0,
+      "max": 1.0
+    },
+    {
+      "name": "anderson_d_eff_positive",
+      "type": "bool"
+    },
+    {
+      "name": "anderson_d_eff_feb_higher",
+      "type": "bool",
+      "rationale": "Wetter \u2192 higher connectivity \u2192 higher d_eff"
+    },
+    {
+      "name": "anderson_W_feb_lower",
+      "type": "bool",
+      "rationale": "Wetter \u2192 lower disorder"
+    },
+    {
+      "name": "anderson_regime_feb_classifiable",
+      "type": "bool",
+      "rationale": "Mediterranean semi-arid: low \u03b8 \u2192 localized is physically correct; regime must be classifiable"
+    },
+    {
+      "name": "anderson_regime_dry_more_localized",
+      "type": "bool"
+    },
+    {
+      "name": "coupling_chain_monotonic",
+      "type": "bool",
+      "rationale": "Higher \u03b8 \u2192 higher d_eff \u2192 more delocalized"
+    },
+    {
+      "name": "diversity_prediction_consistent",
+      "type": "bool",
+      "rationale": "QS-active regime predicts higher diversity"
+    }
   ],
   "total_checks": 14,
   "pass_criteria": "14/14 PASS, exit code 0"

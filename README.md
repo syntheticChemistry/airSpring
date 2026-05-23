@@ -262,7 +262,7 @@ airSpring/
 ├── notebooks/                  # Publishable notebooks (25 total)
 │   ├── papers/                 # 20 paper baseline notebooks (Batch 1)
 │   └── *.ipynb                 # 5 sporePrint summary notebooks
-├── capability_registry.toml    # 57 capabilities (synced with niche.rs, CI tested + cross-sync vs canonical 445)
+├── capability_registry.toml    # 57 capabilities (synced with niche.rs, CI tested + cross-sync vs canonical 458)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
 │   └── handoffs/                # Versioned handoffs (V010 current)
 ├── graphs/                      # biomeOS deployment graphs (7 TOML: eco, provenance, niche, cross-primal, GPU batch, sovereign data, uncertainty)
@@ -298,7 +298,7 @@ airSpring/
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
 | `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V010 current) |
 | `docs/PRIMAL_GAPS.md` | Primal composition gaps for primalSpring handback |
-| `capability_registry.toml` | 57 capabilities — Songbird/biomeOS discovery (sync-tested vs niche.rs + cross-sync vs canonical 445; `primal.announce` Wave 17, `capability.list` canonical envelope Wave 20) |
+| `capability_registry.toml` | 57 capabilities — Songbird/biomeOS discovery (sync-tested vs niche.rs + cross-sync vs canonical 458; `primal.announce` Wave 17, `capability.list` canonical envelope Wave 20) |
 | `notebooks/papers/PAPER_NOTEBOOK_PATTERN.md` | Paper baseline notebook template |
 | `notebooks/papers/*.ipynb` | 20 publishable paper baseline notebooks |
 | `notebooks/*.ipynb` | 5 sporePrint summary notebooks |

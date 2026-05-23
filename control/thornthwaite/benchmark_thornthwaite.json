@@ -9,7 +9,8 @@
     "references": [
       "Thornthwaite C.W. (1948) Geographical Review 38(1):55-94",
       "Willmott C.J. et al. (1985) Physical Climatology"
-    ]
+    ],
+    "blake3": "c5dd46a0e932b5e50af4a044dd2559bae8486cb3aa23d302fee3a7fc2fc37e66"
   },
   "analytical": {
     "heat_index_25C": 11.435116,

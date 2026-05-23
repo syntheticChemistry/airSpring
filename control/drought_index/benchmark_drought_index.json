@@ -394,6 +394,7 @@
     ],
     "reproduction_note": "Deterministic RNG seed=42; fully reproducible",
     "content_sha256": "c8bbbaaf111e6fa2832dab1b32532441bb98ddf109f0d9dde345d2b34e6f3ace",
-    "generation_date": "2026-03-23T17:36:14.423346+00:00"
+    "generation_date": "2026-03-23T17:36:14.423346+00:00",
+    "blake3": "c228020858419fa8bb50b6aab0e6b88e21d34cbd1f41be285075008276ebec1a"
   }
 }

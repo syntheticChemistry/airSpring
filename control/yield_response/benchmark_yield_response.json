@@ -18,7 +18,8 @@
       "Doorenbos & Kassam (1979) FAO Irrigation and Drainage Paper 33",
       "Ali, Dong & Lavely (2024) Ag Water Mgmt 306:109148"
     ],
-    "_tolerance_justification": "Ky values digitized to 2 decimal places from FAO-56 Table 24. Yield ratio tolerance 0.001 covers IEEE-754 rounding in product-form multi-stage computation."
+    "_tolerance_justification": "Ky values digitized to 2 decimal places from FAO-56 Table 24. Yield ratio tolerance 0.001 covers IEEE-754 rounding in product-form multi-stage computation.",
+    "blake3": "7e78f61019bd03d7aa738654b60ca856bd31486bdd201d8e38b9dbd1c74a934d"
   },
   "stewart_equation": {
     "single_stage": "Ya/Ymax = 1 - Ky * (1 - ETa/ETc)",
@@ -30,81 +31,110 @@
     "corn": {
       "ky_total": 1.25,
       "stages": {
-        "vegetative": 0.40,
-        "flowering": 1.50,
-        "yield_formation": 0.50,
-        "ripening": 0.20
+        "vegetative": 0.4,
+        "flowering": 1.5,
+        "yield_formation": 0.5,
+        "ripening": 0.2
       },
-      "stage_lengths_fraction": [0.25, 0.25, 0.25, 0.25],
+      "stage_lengths_fraction": [
+        0.25,
+        0.25,
+        0.25,
+        0.25
+      ],
       "source": "FAO-56 Table 24"
     },
     "wheat_spring": {
       "ky_total": 1.15,
       "stages": {
-        "vegetative": 0.20,
+        "vegetative": 0.2,
         "flowering": 0.65,
         "yield_formation": 0.55,
         "ripening": 0.25
       },
-      "stage_lengths_fraction": [0.25, 0.20, 0.30, 0.25],
+      "stage_lengths_fraction": [
+        0.25,
+        0.2,
+        0.3,
+        0.25
+      ],
       "source": "FAO-56 Table 24"
     },
     "soybean": {
       "ky_total": 0.85,
       "stages": {
-        "vegetative": 0.20,
-        "flowering": 0.80,
-        "yield_formation": 1.00,
+        "vegetative": 0.2,
+        "flowering": 0.8,
+        "yield_formation": 1.0,
         "ripening": null
       },
-      "stage_lengths_fraction": [0.30, 0.30, 0.40],
+      "stage_lengths_fraction": [
+        0.3,
+        0.3,
+        0.4
+      ],
       "source": "FAO-56 Table 24"
     },
     "potato": {
-      "ky_total": 1.10,
+      "ky_total": 1.1,
       "stages": {
         "vegetative": 0.45,
-        "flowering": 0.80,
-        "yield_formation": 0.70,
-        "ripening": 0.20
+        "flowering": 0.8,
+        "yield_formation": 0.7,
+        "ripening": 0.2
       },
-      "stage_lengths_fraction": [0.25, 0.25, 0.30, 0.20],
+      "stage_lengths_fraction": [
+        0.25,
+        0.25,
+        0.3,
+        0.2
+      ],
       "source": "FAO-56 Table 24"
     },
     "tomato": {
       "ky_total": 1.05,
       "stages": {
-        "vegetative": 0.40,
-        "flowering": 1.10,
-        "yield_formation": 0.80,
-        "ripening": 0.40
+        "vegetative": 0.4,
+        "flowering": 1.1,
+        "yield_formation": 0.8,
+        "ripening": 0.4
       },
-      "stage_lengths_fraction": [0.20, 0.25, 0.30, 0.25],
+      "stage_lengths_fraction": [
+        0.2,
+        0.25,
+        0.3,
+        0.25
+      ],
       "source": "FAO-56 Table 24"
     },
     "alfalfa": {
-      "ky_total": 1.10,
+      "ky_total": 1.1,
       "stages": null,
       "source": "FAO-56 Table 24"
     },
     "sugarcane": {
-      "ky_total": 1.20,
+      "ky_total": 1.2,
       "stages": {
         "vegetative": 0.75,
-        "flowering": 0.50,
-        "yield_formation": 1.00,
-        "ripening": 0.10
+        "flowering": 0.5,
+        "yield_formation": 1.0,
+        "ripening": 0.1
       },
-      "stage_lengths_fraction": [0.35, 0.15, 0.35, 0.15],
+      "stage_lengths_fraction": [
+        0.35,
+        0.15,
+        0.35,
+        0.15
+      ],
       "source": "FAO-56 Table 24"
     },
     "apple": {
-      "ky_total": 1.00,
+      "ky_total": 1.0,
       "stages": null,
-      "source": "Literature composite — Ali, Dong & Lavely (2024)"
+      "source": "Literature composite \u2014 Ali, Dong & Lavely (2024)"
     },
     "blueberry": {
-      "ky_total": 0.80,
+      "ky_total": 0.8,
       "stages": null,
       "source": "Literature estimate for small fruit"
     }
@@ -113,26 +143,102 @@
     "ky_table_values": {
       "description": "FAO-56 Table 24 Ky values match published data",
       "test_cases": [
-        {"crop": "corn", "ky_total": 1.25, "tolerance": 0.01},
-        {"crop": "wheat_spring", "ky_total": 1.15, "tolerance": 0.01},
-        {"crop": "soybean", "ky_total": 0.85, "tolerance": 0.01},
-        {"crop": "potato", "ky_total": 1.10, "tolerance": 0.01},
-        {"crop": "tomato", "ky_total": 1.05, "tolerance": 0.01},
-        {"crop": "alfalfa", "ky_total": 1.10, "tolerance": 0.01},
-        {"crop": "sugarcane", "ky_total": 1.20, "tolerance": 0.01}
+        {
+          "crop": "corn",
+          "ky_total": 1.25,
+          "tolerance": 0.01
+        },
+        {
+          "crop": "wheat_spring",
+          "ky_total": 1.15,
+          "tolerance": 0.01
+        },
+        {
+          "crop": "soybean",
+          "ky_total": 0.85,
+          "tolerance": 0.01
+        },
+        {
+          "crop": "potato",
+          "ky_total": 1.1,
+          "tolerance": 0.01
+        },
+        {
+          "crop": "tomato",
+          "ky_total": 1.05,
+          "tolerance": 0.01
+        },
+        {
+          "crop": "alfalfa",
+          "ky_total": 1.1,
+          "tolerance": 0.01
+        },
+        {
+          "crop": "sugarcane",
+          "ky_total": 1.2,
+          "tolerance": 0.01
+        }
       ]
     },
     "single_stage_analytical": {
       "description": "Stewart single-stage yield response: Ya/Ymax = 1 - Ky*(1-ETa/ETc)",
       "test_cases": [
-        {"label": "no_stress", "ky": 1.25, "eta_etc": 1.0, "expected_ratio": 1.0, "tolerance": 0.001},
-        {"label": "mild_stress_10pct", "ky": 1.25, "eta_etc": 0.9, "expected_ratio": 0.875, "tolerance": 0.001},
-        {"label": "moderate_stress_25pct", "ky": 1.25, "eta_etc": 0.75, "expected_ratio": 0.6875, "tolerance": 0.001},
-        {"label": "severe_stress_50pct", "ky": 1.25, "eta_etc": 0.5, "expected_ratio": 0.375, "tolerance": 0.001},
-        {"label": "total_stress", "ky": 1.25, "eta_etc": 0.0, "expected_ratio": -0.25, "tolerance": 0.001},
-        {"label": "wheat_mild", "ky": 1.15, "eta_etc": 0.9, "expected_ratio": 0.885, "tolerance": 0.001},
-        {"label": "soybean_moderate", "ky": 0.85, "eta_etc": 0.75, "expected_ratio": 0.7875, "tolerance": 0.001},
-        {"label": "tomato_severe", "ky": 1.05, "eta_etc": 0.5, "expected_ratio": 0.475, "tolerance": 0.001}
+        {
+          "label": "no_stress",
+          "ky": 1.25,
+          "eta_etc": 1.0,
+          "expected_ratio": 1.0,
+          "tolerance": 0.001
+        },
+        {
+          "label": "mild_stress_10pct",
+          "ky": 1.25,
+          "eta_etc": 0.9,
+          "expected_ratio": 0.875,
+          "tolerance": 0.001
+        },
+        {
+          "label": "moderate_stress_25pct",
+          "ky": 1.25,
+          "eta_etc": 0.75,
+          "expected_ratio": 0.6875,
+          "tolerance": 0.001
+        },
+        {
+          "label": "severe_stress_50pct",
+          "ky": 1.25,
+          "eta_etc": 0.5,
+          "expected_ratio": 0.375,
+          "tolerance": 0.001
+        },
+        {
+          "label": "total_stress",
+          "ky": 1.25,
+          "eta_etc": 0.0,
+          "expected_ratio": -0.25,
+          "tolerance": 0.001
+        },
+        {
+          "label": "wheat_mild",
+          "ky": 1.15,
+          "eta_etc": 0.9,
+          "expected_ratio": 0.885,
+          "tolerance": 0.001
+        },
+        {
+          "label": "soybean_moderate",
+          "ky": 0.85,
+          "eta_etc": 0.75,
+          "expected_ratio": 0.7875,
+          "tolerance": 0.001
+        },
+        {
+          "label": "tomato_severe",
+          "ky": 1.05,
+          "eta_etc": 0.5,
+          "expected_ratio": 0.475,
+          "tolerance": 0.001
+        }
       ]
     },
     "multi_stage_analytical": {
@@ -140,40 +246,90 @@
       "test_cases": [
         {
           "label": "corn_uniform_10pct_deficit",
-          "stages_ky": [0.40, 1.50, 0.50, 0.20],
-          "stages_eta_etc": [0.9, 0.9, 0.9, 0.9],
+          "stages_ky": [
+            0.4,
+            1.5,
+            0.5,
+            0.2
+          ],
+          "stages_eta_etc": [
+            0.9,
+            0.9,
+            0.9,
+            0.9
+          ],
           "expected_ratio": 0.7597,
           "tolerance": 0.001,
           "note": "(1-0.04)*(1-0.15)*(1-0.05)*(1-0.02) = 0.96*0.85*0.95*0.98 = 0.7597"
         },
         {
           "label": "corn_flower_only_deficit",
-          "stages_ky": [0.40, 1.50, 0.50, 0.20],
-          "stages_eta_etc": [1.0, 0.7, 1.0, 1.0],
-          "expected_ratio": 0.550,
+          "stages_ky": [
+            0.4,
+            1.5,
+            0.5,
+            0.2
+          ],
+          "stages_eta_etc": [
+            1.0,
+            0.7,
+            1.0,
+            1.0
+          ],
+          "expected_ratio": 0.55,
           "tolerance": 0.001,
           "note": "Only flowering stage is stressed: 1*1*(1-1.5*0.3)*1*1 = 0.55"
         },
         {
           "label": "corn_veg_only_deficit",
-          "stages_ky": [0.40, 1.50, 0.50, 0.20],
-          "stages_eta_etc": [0.5, 1.0, 1.0, 1.0],
-          "expected_ratio": 0.800,
+          "stages_ky": [
+            0.4,
+            1.5,
+            0.5,
+            0.2
+          ],
+          "stages_eta_etc": [
+            0.5,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "expected_ratio": 0.8,
           "tolerance": 0.001,
           "note": "(1-0.4*0.5)*1*1*1 = 0.8"
         },
         {
           "label": "wheat_flowering_stress",
-          "stages_ky": [0.20, 0.65, 0.55, 0.25],
-          "stages_eta_etc": [1.0, 0.6, 1.0, 1.0],
-          "expected_ratio": 0.740,
+          "stages_ky": [
+            0.2,
+            0.65,
+            0.55,
+            0.25
+          ],
+          "stages_eta_etc": [
+            1.0,
+            0.6,
+            1.0,
+            1.0
+          ],
+          "expected_ratio": 0.74,
           "tolerance": 0.001,
           "note": "1*(1-0.65*0.4)*1*1 = 0.74"
         },
         {
           "label": "potato_all_stages_mild",
-          "stages_ky": [0.45, 0.80, 0.70, 0.20],
-          "stages_eta_etc": [0.85, 0.85, 0.85, 0.85],
+          "stages_ky": [
+            0.45,
+            0.8,
+            0.7,
+            0.2
+          ],
+          "stages_eta_etc": [
+            0.85,
+            0.85,
+            0.85,
+            0.85
+          ],
           "expected_ratio": 0.7124,
           "tolerance": 0.001,
           "note": "(1-0.0675)*(1-0.12)*(1-0.105)*(1-0.03) = 0.9325*0.88*0.895*0.97 = 0.7124"
@@ -181,12 +337,36 @@
       ]
     },
     "water_use_efficiency": {
-      "description": "WUE = yield / ETa [kg/m³ or kg/ha per mm]",
+      "description": "WUE = yield / ETa [kg/m\u00b3 or kg/ha per mm]",
       "test_cases": [
-        {"label": "corn_irrigated", "yield_kg_ha": 12000, "eta_mm": 500, "expected_wue_kg_m3": 2.40, "tolerance": 0.01},
-        {"label": "corn_rainfed", "yield_kg_ha": 8000, "eta_mm": 380, "expected_wue_kg_m3": 2.105, "tolerance": 0.01},
-        {"label": "wheat_irrigated", "yield_kg_ha": 5000, "eta_mm": 400, "expected_wue_kg_m3": 1.25, "tolerance": 0.01},
-        {"label": "tomato_irrigated", "yield_kg_ha": 60000, "eta_mm": 600, "expected_wue_kg_m3": 10.0, "tolerance": 0.01}
+        {
+          "label": "corn_irrigated",
+          "yield_kg_ha": 12000,
+          "eta_mm": 500,
+          "expected_wue_kg_m3": 2.4,
+          "tolerance": 0.01
+        },
+        {
+          "label": "corn_rainfed",
+          "yield_kg_ha": 8000,
+          "eta_mm": 380,
+          "expected_wue_kg_m3": 2.105,
+          "tolerance": 0.01
+        },
+        {
+          "label": "wheat_irrigated",
+          "yield_kg_ha": 5000,
+          "eta_mm": 400,
+          "expected_wue_kg_m3": 1.25,
+          "tolerance": 0.01
+        },
+        {
+          "label": "tomato_irrigated",
+          "yield_kg_ha": 60000,
+          "eta_mm": 600,
+          "expected_wue_kg_m3": 10.0,
+          "tolerance": 0.01
+        }
       ]
     },
     "scheduling_comparison": {
@@ -205,25 +385,43 @@
       },
       "strategies": {
         "no_irrigation": {
-          "description": "Rainfed only — precipitation from Open-Meteo 2023 East Lansing pattern",
+          "description": "Rainfed only \u2014 precipitation from Open-Meteo 2023 East Lansing pattern",
           "precip_mean_mm_day": 2.5,
-          "precip_prob": 0.30,
-          "expected_yield_ratio_range": [0.0, 0.80],
-          "expected_stress_days_range": [20, 140]
+          "precip_prob": 0.3,
+          "expected_yield_ratio_range": [
+            0.0,
+            0.8
+          ],
+          "expected_stress_days_range": [
+            20,
+            140
+          ]
         },
         "threshold_50pct": {
           "description": "Irrigate when Dr > 50% TAW (reactive)",
-          "irrigation_threshold_frac": 0.50,
+          "irrigation_threshold_frac": 0.5,
           "irrigation_depth_mm": 25,
-          "expected_yield_ratio_range": [0.75, 1.00],
-          "expected_stress_days_range": [0, 20]
+          "expected_yield_ratio_range": [
+            0.75,
+            1.0
+          ],
+          "expected_stress_days_range": [
+            0,
+            20
+          ]
         },
         "threshold_mad": {
-          "description": "Irrigate at MAD (Dr > RAW) — FAO-56 standard",
+          "description": "Irrigate at MAD (Dr > RAW) \u2014 FAO-56 standard",
           "irrigation_threshold_frac": 0.55,
           "irrigation_depth_mm": 25,
-          "expected_yield_ratio_range": [0.85, 1.00],
-          "expected_stress_days_range": [0, 30]
+          "expected_yield_ratio_range": [
+            0.85,
+            1.0
+          ],
+          "expected_stress_days_range": [
+            0,
+            30
+          ]
         }
       }
     }
