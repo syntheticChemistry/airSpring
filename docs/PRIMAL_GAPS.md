@@ -1,7 +1,8 @@
 # Primal Gaps — airSpring v0.10.0
 
-**Date**: May 23, 2026 (Wave 46 Absorption — 57 capabilities, 458-method registry)
+**Date**: May 23, 2026 (Wave 46+ Post-Primordial — 57 capabilities, 458-method registry)
 **Spring**: airSpring (ecology / agriculture)
+**Gate Assignment**: **strandGate** (Dual EPYC 7452, 256GB ECC, RTX 3090 + RX 6950 XT) — co-tenant: wetSpring
 **guideStone Level**: **L4** (cross-atomic pipeline / provenance tier) → targeting **L5+** (NUCLEUS composition, live primals)
 **License**: AGPL-3.0-or-later
 
@@ -161,6 +162,19 @@ Structural L5 validation with TCP mock round-trip tests passes (1,057 lib tests)
 - [x] Last `/tmp/` hardcoded path eliminated: `data/provider.rs` `SongbirdTransport::discover` → biomeOS standard discovery
 - [ ] guideStone L5 / live NUCLEUS validation (blocked on live biomeOS + toadStool — Pass 14)
 - [ ] guideStone L6 / cross-spring pipeline (deploy graphs validated against live NUCLEUS)
+
+### Wave 46+ Post-Primordial Gate Deployment (May 23, 2026)
+
+Per primalSpring Wave 46+ covalent gate deployment directive:
+- [x] **Gate composition validator**: `validate_gate_composition` binary (Exp 094-AS) — probes all 10 primals in niche-airspring NUCLEUS + biomeOS + Neural API observatory + provenance trio + NestGate CAS + airSpring composition.status
+- [x] **Proto-nucleate understood**: `downstream_manifest.toml` entry analyzed — 9 primals (beardog, songbird, skunkbat, toadstool, barracuda, coralreef, nestgate, rhizocrypt, loamspine, sweetgrass)
+- [x] **Deployment pipeline mapped**: `fetch_primals.sh` → `nucleus_launcher.sh` → `validate_gate_composition` → `airspring validate`
+- [x] **Co-tenant coordination**: wetSpring shares strandGate — NestGate CAS namespace + provenance session coordination documented
+- [x] **Gate deployment handoff**: First ecosystem-wide gate deployment handoff posted
+- [ ] **strandGate deployment**: Blocked on hardware access + plasmidBin binary fetch — hardware ready, deploy order #3
+- [ ] **Live NUCLEUS validation**: Blocked on strandGate deployment — `validate_gate_composition` built but primals not yet running
+- [ ] **guideStone L5**: Live primal proof — structural tests pass, live probes SKIP without NUCLEUS
+- [ ] **Cross-gate mesh**: Covalent linking with ironGate/eastGate — blocked on multi-gate infrastructure
 
 ### Wave 46 Absorption (May 23, 2026)
 

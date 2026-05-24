@@ -461,6 +461,11 @@ path = "src/bin/validate_nucleus_pipeline.rs"
 required-features = ["local"]
 
 [[bin]]
+name = "validate_gate_composition"
+path = "src/bin/validate_gate_composition.rs"
+required-features = ["local"]
+
+[[bin]]
 name = "bench_cross_spring_evolution"
 path = "src/bin/bench_cross_spring_evolution/main.rs"
 required-features = ["local"]

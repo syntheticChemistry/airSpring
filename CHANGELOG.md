@@ -4,6 +4,14 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [Unreleased] - 2026-05-23
 
+### Wave 46+ Post-Primordial Gate Deployment (2026-05-23 PM)
+
+- **strandGate assignment confirmed**: Dual EPYC 7452 (64c/128t), 256GB ECC, RTX 3090 + RX 6950 XT; co-tenant: wetSpring.
+- **Gate composition validator**: New `validate_gate_composition` binary (Exp 094-AS) — 6-phase live NUCLEUS probe: 10 primals + biomeOS discovery/health, capability domain routing, provenance trio, NeuralBridge observatory, NestGate CAS, airSpring composition.status.
+- **Proto-nucleate analyzed**: `niche-airspring` = 10 primals (beardog, songbird, skunkbat, toadstool, barracuda, coralreef, nestgate, rhizocrypt, loamspine, sweetgrass) from `downstream_manifest.toml`.
+- **Gate deployment handoff**: First ecosystem-wide `*GATE_DEPLOYMENT*` handoff — `AIRSPRING_GATE_DEPLOYMENT_MAY23_2026.md`.
+- **Deployment pipeline mapped**: `fetch_primals.sh` → `nucleus_launcher.sh` → `validate_gate_composition` → `airspring validate` → `validate_nucleus_pipeline`.
+
 ### Wave 46 Absorption (2026-05-23)
 
 - **Registry sync to 458**: Cross-sync test updated from `>= 452` to `>= 458` (6 new `neural_api.*` methods: routing_weights, route_explain, composition_patterns, plan_tier, utilization, weight_health).
