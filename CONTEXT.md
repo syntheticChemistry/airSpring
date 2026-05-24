@@ -1,6 +1,6 @@
 # Context — airSpring
 
-**Doc sync:** 2026-05-21 (v0.10.0; Wave 37 alignment; 57 capabilities; 458-method registry sync).
+**Doc sync:** 2026-05-23 (v0.10.0; Wave 46+ Post-Primordial; 57 capabilities; 458-method registry sync).
 
 ## What This Is
 
@@ -43,7 +43,7 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - **Barracuda total:** 1,373 (1,057 lib + 316 integration/doc)
 - **Forge tests:** 69 (metalForge)
 - **Grand total:** 1,442 (both crates)
-- **Binaries:** 94 (85 validation, 4 bench, 3 operational, 1 UniBin, 1 guidestone)
+- **Binaries:** 98 (89 validation, 4 bench, 3 operational, 1 UniBin, 1 guidestone)
 - **Proptest invariants:** 7 (SVP, delta, Hargreaves, TAW, RAW, Ks)
 - **Line coverage:** 90.56% (cargo llvm-cov --lib --fail-under-lines 90)
 - **MSRV:** 1.92
@@ -59,7 +59,7 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 
 ## Key Capabilities (JSON-RPC methods)
 
-57 methods registered in `capability_registry.toml` (synced against 458-method canonical, Wave 36):
+57 methods registered in `capability_registry.toml` (synced against 458-method canonical, Wave 46+):
 
 - **Evapotranspiration (7):** `science.et0_fao56`, `science.et0_hargreaves`,
   `science.et0_priestley_taylor`, `science.et0_makkink`, `science.et0_turc`,

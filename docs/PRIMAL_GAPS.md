@@ -2,7 +2,7 @@
 
 **Date**: May 23, 2026 (Wave 46+ Post-Primordial — 57 capabilities, 458-method registry)
 **Spring**: airSpring (ecology / agriculture)
-**Gate Assignment**: **strandGate** (Dual EPYC 7452, 256GB ECC, RTX 3090 + RX 6950 XT) — co-tenant: wetSpring
+**Gate Assignment**: **eastGate** (i9-12900, RTX 4070, Akida NPU) — co-tenant: primalSpring (coord), neuralSpring
 **guideStone Level**: **L4** (cross-atomic pipeline / provenance tier) → targeting **L5+** (NUCLEUS composition, live primals)
 **License**: AGPL-3.0-or-later
 
@@ -72,7 +72,7 @@ These are not primal gaps but internal reconciliation items:
 ## guideStone Evolution Path
 
 ```
-Current:  gS Level 4 (certification L0–L6 engine; 10 UniBin validation scenarios; Tier 4 IPC-first; 94 binaries; LTEE E3 DONE)
+Current:  gS Level 4 (certification L0–L6 engine; 10 UniBin validation scenarios; Tier 4 IPC-first; 98 binaries; LTEE E3 DONE)
 Target:   gS Level 5 (NUCLEUS composition — composition.status + method.register + compute.dispatch against live primals)
 Next:     gS Level 6 (cross-spring pipeline — deploy graphs, capability registries, scenario registries)
 ```
@@ -169,12 +169,14 @@ Per primalSpring Wave 46+ covalent gate deployment directive:
 - [x] **Gate composition validator**: `validate_gate_composition` binary (Exp 094-AS) — probes all 10 primals in niche-airspring NUCLEUS + biomeOS + Neural API observatory + provenance trio + NestGate CAS + airSpring composition.status
 - [x] **Proto-nucleate understood**: `downstream_manifest.toml` entry analyzed — 9 primals (beardog, songbird, skunkbat, toadstool, barracuda, coralreef, nestgate, rhizocrypt, loamspine, sweetgrass)
 - [x] **Deployment pipeline mapped**: `fetch_primals.sh` → `nucleus_launcher.sh` → `validate_gate_composition` → `airspring validate`
-- [x] **Co-tenant coordination**: wetSpring shares strandGate — NestGate CAS namespace + provenance session coordination documented
+- [x] **Co-tenant coordination**: primalSpring (coord) + neuralSpring share eastGate — NestGate CAS namespace + Akida NPU scheduling documented
 - [x] **Gate deployment handoff**: First ecosystem-wide gate deployment handoff posted
-- [ ] **strandGate deployment**: Blocked on hardware access + plasmidBin binary fetch — hardware ready, deploy order #3
-- [ ] **Live NUCLEUS validation**: Blocked on strandGate deployment — `validate_gate_composition` built but primals not yet running
-- [ ] **guideStone L5**: Live primal proof — structural tests pass, live probes SKIP without NUCLEUS
-- [ ] **Cross-gate mesh**: Covalent linking with ironGate/eastGate — blocked on multi-gate infrastructure
+- [x] **NUCLEUS deployed LIVE**: 12/12 primals ALIVE via `nucleus_launcher.sh` (zero TCP, UDS-only)
+- [x] **Live validation run**: Exp 094-AS **23/32 PASS** — 4/4 capability routing, 8/10 primal health, NestGate CAS responding
+- [ ] **Discovery convention gaps**: skunkBat socket naming, coralReef `coralreef-core-*` prefix, biomeOS `neural-api` vs `biomeos` — **upstream issues for plasmidBin/primalSpring**
+- [ ] **Provenance trio env config**: Trio sockets alive but `is_available()` requires env vars, not socket scan — **airSpring fix needed**
+- [ ] **guideStone L5**: Live primal proof in progress — 23/32 baseline established
+- [ ] **Cross-gate mesh**: Covalent linking with ironGate/strandGate — blocked on multi-gate infrastructure
 
 ### Wave 46 Absorption (May 23, 2026)
 
@@ -212,12 +214,12 @@ Per primalSpring audit — Wave 20 residual debt:
 - [x] Paper queue arithmetic: fixed "All 61" → "All 62", "All 41" → "All 62" in `PAPER_REVIEW_QUEUE.md`
 - Zero deep debt remaining: 0 `todo!()`, 0 `unimplemented!()`, 0 `FIXME`, 0 `HACK`, 0 production mocks, 0 unsafe in production, 0 files >800 LOC
 
-### Wave 20 Schema Standardization (May 16, 2026)
+### Wave 20 Schema Standardization (May 16, 2026) — *historical; canonical registry is now 458 methods (Wave 46+)*
 
-Per primalSpring Wave 20 (445-method registry, Schema Standardization + E2E Validation):
+Per primalSpring Wave 20 (445-method registry at the time, Schema Standardization + E2E Validation):
 - `primal.list` constant added to `methods.rs` (biomeOS serves primal enumeration)
 - `capability.list` canonical envelope: added top-level `"capabilities"` flat string array + `"count"` field (canonical subset per standard; enriched fields retained alongside)
-- Registry sync: cross-sync test updated for 445-method canonical (was 451)
+- Registry sync: cross-sync test updated for 445-method canonical at Wave 20 (was 451; **now 458**, Wave 46+)
 - 1,057 lib + 69 forge tests pass, 0 clippy warnings
 - [x] `--provenance-dir` implemented: `airspring validate --provenance-dir <DIR>` writes `results.json` + `provenance.toml` (Thread 5+6 capture). E3 LTEE activation is the remaining step.
 

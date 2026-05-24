@@ -1,6 +1,6 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: May 17, 2026 (v0.10.0 — 94 binaries, LTEE E3 29/29 PASS, `--format json` on validate, GPU registry drift fixed, 6 projectNUCLEUS workloads, Thread 4 expression authored. Certification engine **L0–L6** (L4 achieved; L5 structurally ready, blocked on live primals). **Tier 4 IPC-first** (`default = []`, barraCuda optional). **guideStone L4** (targeting L5+).)
+**Last Updated**: May 23, 2026 (Wave 46+ Post-Primordial — v0.10.0 — 98 binaries, LTEE E3 29/29 PASS, `--format json` on validate, GPU registry drift fixed, 6 projectNUCLEUS workloads, Thread 4 expression authored. Certification engine **L0–L6** (L4 achieved; L5 structurally ready, blocked on live primals). **Tier 4 IPC-first** (`default = []`, barraCuda optional). **guideStone L4** (targeting L5+).)
 **barraCuda**: v0.4.0 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry, SpringDomain newtype, F64BuiltinCapabilities DF64 fields)
 **ToadStool**: S147+ (20,015 tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient, hw-learn, spirv_codegen_safety)
 **coralReef**: Phase 10 Iteration 44 sovereign Rust GPU compiler (NVIDIA + AMD, 1669+48 tests, VFIO dispatch)
@@ -19,13 +19,13 @@ validate against papers, hand off to barraCuda, lean on upstream.
 barraCuda provides universal math primitives. Springs depend on barraCuda directly,
 not through ToadStool.
 
-**Tier 4 rewiring (2026-05-11) — airSpring**: The workspace `barracuda` crate is now an **optional** path dependency with a **`local`** feature (**default on**). The **`gpu`** module is feature-gated; **`math.rs`** implements dual-path dispatch with **pure-Rust fallbacks** when barraCuda/GPU paths are off; **`ipc/barracuda_route.rs`** forwards IPC for barraCuda-backed calls when needed. **`cargo build -p airspring-barracuda --no-default-features`** compiles **without** the barraCuda source tree.
+**Tier 4 rewiring (2026-05-11) — airSpring**: The workspace `barracuda` crate is now an **optional** path dependency with a **`local`** feature (**default = []**, opt-in via `local` feature). The **`gpu`** module is feature-gated; **`math.rs`** implements dual-path dispatch with **pure-Rust fallbacks** when barraCuda/GPU paths are off; **`ipc/barracuda_route.rs`** forwards IPC for barraCuda-backed calls when needed. **`cargo build -p airspring-barracuda --no-default-features`** compiles **without** the barraCuda source tree.
 
 ### Already Absorbed (Lean)
 
 | Module | Absorbed Into | When | Status |
 |--------|--------------|------|--------|
-| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all **94 binaries** use upstream |
+| `ValidationRunner` | `barracuda::validation::ValidationHarness` | S59 | **Leaning** — all **98 binaries** use upstream |
 | `van_genuchten` | `barracuda::pde::richards::SoilParams` | S40 | **Leaning** — `gpu::richards` bridges to upstream |
 | `isotherm NM` | `barracuda::optimize::nelder_mead` | S62 | **Leaning** — `gpu::isotherm` bridges to upstream |
 | `StatefulPipeline` | `barracuda::pipeline::stateful::StatefulPipeline` | S80 | **Leaning** — `WaterBalanceState` day-over-day |
@@ -152,7 +152,7 @@ BarraCuda (while still embedded in ToadStool) underwent massive evolution since 
 | Capability | Module | Wired In | Status |
 |-----------|--------|----------|--------|
 | `barracuda::tolerances` | `tolerances` | v0.4.0 | **LEANING** — re-exported |
-| `barracuda::validation::ValidationHarness` | `validation` | v0.4.0 | **LEANING** — all 94 binaries (85 validation + 4 bench + 3 operational + 1 UniBin + 1 guidestone; incl. validate_atlas, validate_ltee_fls2) |
+| `barracuda::validation::ValidationHarness` | `validation` | v0.4.0 | **LEANING** — all 98 binaries (89 validation + 4 bench + 3 operational + 1 UniBin + 1 guidestone; incl. validate_atlas, validate_ltee_fls2, validate_gate_composition) |
 | `pde::richards::solve_richards` | `pde` | v0.4.0 | **WIRED** — `gpu::richards` |
 | `pde::crank_nicolson::CrankNicolson1D` | `pde` | v0.4.4 | **WIRED** — CN f64 diffusion cross-val |
 | `optimize::nelder_mead` | `optimize` | v0.4.1 | **WIRED** — isotherm fitting |
@@ -237,7 +237,7 @@ neuralSpring (architecture), airSpring (domain science).
 | `moving_window_stats` | wetSpring | IoT stream smoothing |
 | `ridge_regression` | wetSpring | Sensor correction pipeline |
 | `nelder_mead`, `multi_start` | neuralSpring | Isotherm fitting |
-| `ValidationHarness` | neuralSpring | All 94 binaries (85 validation + 4 bench + 3 operational + 1 UniBin + 1 guidestone) |
+| `ValidationHarness` | neuralSpring | All 98 binaries (89 validation + 4 bench + 3 operational + 1 UniBin + 1 guidestone) |
 | `norm_ppf` (Moro 1995) | hotSpring | MC ET₀ parametric confidence intervals |
 | `brent` (Brent 1973) | neuralSpring | VG pressure head inversion (θ→h) |
 | `pde::richards` | airSpring → upstream | 1D Richards equation (absorbed S40) |

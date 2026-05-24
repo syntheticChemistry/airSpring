@@ -1,6 +1,6 @@
 # airSpring Cross-Tier Parity Status
 
-**Date**: May 17, 2026 (Wave 20 PM — lithoSpore absorption)
+**Date**: May 23, 2026 (Wave 46+ Post-Primordial)
 **Pattern**: primalSpring `docs/VALIDATION_TIERS.md` — Tier 1 (Python), Tier 2 (Rust), Tier 3 (provenance)
 
 ---

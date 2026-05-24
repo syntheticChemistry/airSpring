@@ -1,18 +1,15 @@
 # airSpring wateringHole
 
-**Updated**: May 23, 2026 (PM) | **Version**: v0.10.0 (Wave 46+ Post-Primordial, strandGate assignment, gate composition validator, 98 validation binaries)
+**Updated**: May 23, 2026 (PM) | **Version**: v0.10.0 (Wave 46+ Post-Primordial, eastGate assignment, gate composition validator, 98 validation binaries)
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.10.0** | [AIRSPRING_GATE_DEPLOYMENT_MAY23_2026.md](handoffs/AIRSPRING_GATE_DEPLOYMENT_MAY23_2026.md) | 2026-05-23 PM | **Canonical** — strandGate gate deployment: 10-primal NUCLEUS composition, Exp 094-AS validator, co-tenant coordination, deployment flow |
+| **V0.10.0** | [AIRSPRING_GATE_DEPLOYMENT_MAY23_2026.md](handoffs/AIRSPRING_GATE_DEPLOYMENT_MAY23_2026.md) | 2026-05-23 PM | **Canonical** — eastGate gate deployment: 10-primal NUCLEUS composition, Exp 094-AS validator, co-tenant coordination, deployment flow |
 | **V0.10.0** | [AIRSPRING_WAVE46_ABSORPTION_MAY23_2026.md](handoffs/AIRSPRING_WAVE46_ABSORPTION_MAY23_2026.md) | 2026-05-23 | Wave 46: 458-method sync, NeuralBridge observatory, BLAKE3 backfill (62 benchmarks), SP-4 publish pipeline |
 | **V0.10.0** | [AIRSPRING_WAVE20PM_LITHOSPORE_ABSORPTION_MAY17_2026.md](handoffs/AIRSPRING_WAVE20PM_LITHOSPORE_ABSORPTION_MAY17_2026.md) | 2026-05-17 PM | lithoSpore audit: stability tiers, degradation docs, trio semantics fix, 3 cross-tier validators, Thread 4 status |
-| **V0.10.0** | [AIRSPRING_WAVE20_EXPERIMENT_BUILDOUT_MAY17_2026.md](handoffs/AIRSPRING_WAVE20_EXPERIMENT_BUILDOUT_MAY17_2026.md) | 2026-05-17 | Wave 20 experiment buildout: 174/174 scenarios, NUCLEUS atomics evolved, 3 new controls, metalForge composition, mixed hardware, primal/spring team handoff |
-| **V0.10.0** | [AIRSPRING_ATOMIC_DEPLOYMENT_HANDOFF_MAY13_2026.md](handoffs/AIRSPRING_ATOMIC_DEPLOYMENT_HANDOFF_MAY13_2026.md) | 2026-05-13 | Comprehensive upstream handoff: primal consumption map (10/13), composition patterns (5), wire hygiene learnings, NUCLEUS deployment, neuralAPI, atomic readiness |
-| **V0.10.0** | [AIRSPRING_DEEP_DEBT_SPRINT_MAY13_2026.md](handoffs/AIRSPRING_DEEP_DEBT_SPRINT_MAY13_2026.md) | 2026-05-13 | Deep debt sprint: zero debt, clippy pedantic+nursery clean, full audit answers |
 | **≤V0.10.0** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 
 ## Cross-Spring Documents
@@ -38,6 +35,9 @@
 
 | File | Scope |
 |------|-------|
+| `handoffs/archive/AIRSPRING_WAVE20_EXPERIMENT_BUILDOUT_MAY17_2026.md` | v0.10.0: Wave 20 experiment buildout — 174/174 scenarios, NUCLEUS atomics evolved, 3 new controls, metalForge composition (superseded by Wave 46+ gate deployment) |
+| `handoffs/archive/AIRSPRING_ATOMIC_DEPLOYMENT_HANDOFF_MAY13_2026.md` | v0.10.0: Comprehensive upstream handoff — primal consumption map, composition patterns, NUCLEUS deployment, neuralAPI (superseded by May 23 gate deployment) |
+| `handoffs/archive/AIRSPRING_DEEP_DEBT_SPRINT_MAY13_2026.md` | v0.10.0: Deep debt sprint — zero debt, clippy pedantic+nursery clean (superseded by May 23 gate deployment) |
 | `handoffs/archive/AIRSPRING_TIER2_CONVERGENCE_HANDOFF_MAY13_2026.md` | v0.10.0: Tier 2 convergence wave — deep debt audit, precision.route full fields, Freundlich bench (25/25), LTEE lithoSpore module, musl static 3.3 MB, 1,035 lib tests (superseded by May13 Niche Atomic) |
 | `handoffs/archive/AIRSPRING_DOWNSTREAM_SEEDING_HANDOFF_MAY12_2026.md` | v0.10.0: Downstream seeding sprint — LTEE E3, `--format json`, projectNUCLEUS workloads, barraCuda 0.4.0, Tier 2 IPC wiring, deep debt clean (superseded by May13 convergence) |
 | `handoffs/archive/AIRSPRING_V010_POST_INTERSTADIAL_UPSTREAM_HANDOFF_MAY10_2026.md` | v0.10.0: Post-interstadial technical inventory — Tier 4, L5-L6 cert, 10 UniBin scenarios, foundation 36/36 (superseded by May12 downstream seeding) |

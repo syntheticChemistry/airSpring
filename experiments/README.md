@@ -1,7 +1,7 @@
 # airSpring Experiments
 
-**Updated**: May 17, 2026
-**Status**: 90 experiments (87 numbered + 3 composition crates), barraCuda 0.4.0 (wgpu 28), v0.10.0, Edition 2024 (rust-toolchain 1.92). 1284/1284 Python + 1,057 lib + 316 integration + 69 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (25/25 parity). 21/21 CPU-GPU parity modules. UniBin eukaryotic evolution: `airspring` binary with `certify`/`validate`/`serve`/`status`/`version`. Composition experiments (exp001-003) absorbed into `barracuda/src/validation/scenarios/` (**10 UniBin validation scenarios** total, 174/174 PASS, incl. `s_tier4_math_parity`) — originals kept as reference. guideStone **L4** (targeting L6). 94 binaries. 57 capabilities (Wave 20 canonical envelope + Wave 17 `primal.announce` + `nest.store`/`nest.commit`). 458-method canonical registry sync (Wave 36). `--provenance-dir` for Thread 5+6 capture. Foundation targets scenario: numerical parity (expected_value ± tolerance). 65 control scripts, 62 benchmark JSONs. Zero clippy warnings. Zero test failures. cargo-deny 0.19 clean. Zero C dependencies. Full validation pipeline green (2026-05-16).
+**Updated**: May 23, 2026 (Wave 46+ Post-Primordial)
+**Status**: 90 experiments (87 numbered + 3 composition crates), barraCuda 0.4.0 (wgpu 28), v0.10.0, Edition 2024 (rust-toolchain 1.92). 1284/1284 Python + 1,057 lib + 316 integration + 69 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (25/25 parity). 21/21 CPU-GPU parity modules. UniBin eukaryotic evolution: `airspring` binary with `certify`/`validate`/`serve`/`status`/`version`. Composition experiments (exp001-003) absorbed into `barracuda/src/validation/scenarios/` (**10 UniBin validation scenarios** total, 174/174 PASS, incl. `s_tier4_math_parity`) — originals kept as reference. guideStone **L4** (targeting L6). 98 binaries. 57 capabilities (Wave 20 canonical envelope + Wave 17 `primal.announce` + `nest.store`/`nest.commit`). 458-method canonical registry sync (Wave 46+). `--provenance-dir` for Thread 5+6 capture. Foundation targets scenario: numerical parity (expected_value ± tolerance). 65 control scripts, 62 benchmark JSONs. Zero clippy warnings. Zero test failures. cargo-deny 0.19 clean. Zero C dependencies. Full validation pipeline green (2026-05-23).
 
 ---
 
@@ -97,7 +97,7 @@
 | 086 | metalForge Mixed Hardware Live NUCLEUS | Hardware | **Complete** | Rust | Live probe (RTX 4070 + Titan V + i9-12900K), NUCLEUS mesh (Tower+Node), 23/27 workload routing, ecology pipeline (3 stages GPU), PCIe bypass, transfer matrix | 17/17 |
 | 087 | NUCLEUS Graph Coordination | Integration | **Complete** | Rust | biomeOS TOML graph parsing, DAG validation, capability refs, dependency ordering, prerequisite checks, Tower/Node atomic detection, 7 primals | 22/22 |
 
-**Grand Total**: 1284 Python + **1,057 lib + 316 integration + 69 forge** (1,373 barracuda + 69 forge = **1,442** project tests) + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 3 composition crates (exp001: 55/55, exp002: 10/10, exp003: 4/4) + **10 UniBin validation scenarios** (174/174 PASS) + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (57 capabilities) + 94 binaries + barraCuda 0.4.0 (wgpu 28, DF64 precision tier) + 14.3× CPU speedup (25/25 parity) + 21/21 CPU-GPU parity modules + 90 experiments (v0.10.0). 64 centralized method constants (`methods.rs`). guideStone **L4** (targeting L6). **7 deploy graphs**; Tier 4 IPC-first (`default = []`, `local` opt-in, validation **required-features = ["local"]**). Zero C deps. Zero hardcoded primals. Zero `#[allow()]`. Platform-agnostic IPC (Transport: Unix + TCP). Full validation pipeline green (2026-05-13).
+**Grand Total**: 1284 Python + **1,057 lib + 316 integration + 69 forge** (1,373 barracuda + 69 forge = **1,442** project tests) + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 3 composition crates (exp001: 55/55, exp002: 10/10, exp003: 4/4) + **10 UniBin validation scenarios** (174/174 PASS) + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (57 capabilities) + 98 binaries + barraCuda 0.4.0 (wgpu 28, DF64 precision tier) + 14.3× CPU speedup (25/25 parity) + 21/21 CPU-GPU parity modules + 90 experiments (v0.10.0). 64 centralized method constants (`methods.rs`). guideStone **L4** (targeting L6). **7 deploy graphs**; Tier 4 IPC-first (`default = []`, `local` opt-in, validation **required-features = ["local"]**). Zero C deps. Zero hardcoded primals. Zero `#[allow()]`. Platform-agnostic IPC (Transport: Unix + TCP). Full validation pipeline green (2026-05-23).
 
 ---
 
@@ -107,8 +107,8 @@
 |----------|:-----:|--------|
 | Barracuda lib | 1,057 | `cargo test --features local,testutil --lib` |
 | Barracuda integration | 316 | `cargo test --features local,testutil --tests` or `--all-features` |
-| Barracuda validation binaries | 94 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
-| Forge | 62 | `metalForge/forge/` (substrate, dispatch, probe, workloads, cross-system routing) |
+| Barracuda validation binaries | 98 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
+| Forge | 69 | `metalForge/forge/` (substrate, dispatch, probe, workloads, cross-system routing) |
 | Forge binaries | 6 | `validate_dispatch`, `validate_live_hardware`, `validate_dispatch_routing`, `validate_mixed_pipeline`, `validate_mixed_nucleus_live`, `validate_nucleus_routing` |
 | **Total project tests** | **1,442** (1,057 lib + 316 integration + 69 forge) | |
 | Validation checks | 381/381 | 10 validation binaries |
@@ -716,7 +716,7 @@ cycles. Both ecology and cross-primal pipelines ready for live NUCLEUS dispatch.
 6. Add row to experiment index above
 7. Update counts in README, CHANGELOG, whitePaper docs
 
-## CPU Benchmark: Rust vs Python (25.9× geometric mean, 8/8 parity)
+## CPU Benchmark: Rust vs Python (14.3× geometric mean, 25/25 parity — current canonical; historical 8-algorithm subset was 25.9×)
 
 Formal 8-algorithm benchmark with Python timing subprocess and Rust `black_box`.
 Same algorithms, same f64 precision, same inputs, same outputs.

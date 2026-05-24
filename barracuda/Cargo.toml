@@ -25,7 +25,7 @@ npu = ["dep:akida-driver"]
 guidestone = ["dep:primalspring"]
 
 [dependencies]
-# BarraCuda 0.3.13: standalone sovereign math engine (ecoPrimals/barraCuda).
+# BarraCuda 0.4.0: standalone sovereign math engine (ecoPrimals/barraCuda).
 # Extracted from ToadStool S89 — universal math, precision per hardware.
 # v0.4.0: wgpu 28, DF64 precision tier, linalg module, MethodGate pattern,
 # MLP training, Nautilus server sessions, GPU pooling resilience.
@@ -55,7 +55,7 @@ bingocube-nautilus = { version = "0.1.0", path = "../../primalTools/bingoCube/na
 # Serde: needed for Nautilus brain serialization (observations, shell state).
 serde = { version = "1", features = ["derive"] }
 
-# wgpu 28 — matches barraCuda 0.3.7's pinned version for type compatibility.
+# wgpu 28 — matches barraCuda 0.4.0's pinned version for type compatibility.
 wgpu = { version = "28", default-features = false, features = ["wgsl", "vulkan", "vulkan-portability"], optional = true }
 
 # BrainChip AKD1000 NPU driver — pure Rust, optional.

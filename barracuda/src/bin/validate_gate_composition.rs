@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-//! Exp 094-AS: `strandGate` NUCLEUS Composition Validation
+//! Exp 094-AS: `eastGate` NUCLEUS Composition Validation
 //!
 //! Validates that the `niche-airspring` 9-primal NUCLEUS composition is
-//! alive and healthy on `strandGate`. Each primal is probed individually
+//! alive and healthy on `eastGate`. Each primal is probed individually
 //! via direct socket discovery — no routing through `airSpring`'s primal.
 //!
 //! ## Composition (`niche-airspring`)
@@ -103,7 +103,7 @@ fn probe_capabilities(sock: &std::path::Path) -> Vec<String> {
 fn main() {
     tracing_subscriber::fmt().with_env_filter("info").init();
 
-    let mut v = ValidationHarness::new("Exp 094-AS: strandGate NUCLEUS Composition");
+    let mut v = ValidationHarness::new("Exp 094-AS: eastGate NUCLEUS Composition");
     let mut sockets_found: u32 = 0;
     let mut healthy_count: u32 = 0;
 

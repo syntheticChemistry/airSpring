@@ -1,23 +1,22 @@
-# airSpring — strandGate NUCLEUS Deployment
+# airSpring — eastGate NUCLEUS Deployment
 
 **Date**: May 23, 2026
 **Spring**: airSpring v0.10.0 (ecology / agriculture)
-**Gate**: strandGate (Dual EPYC 7452 64-core, 256GB ECC, RTX 3090 + RX 6950 XT)
-**Co-tenant**: wetSpring
+**Gate**: eastGate (i9-12900, RTX 4070, Akida NPU)
+**Co-tenant**: primalSpring (coord), neuralSpring
 **Directive**: Wave 46+ Post-Primordial Covalent Gate Deployment
 
 ---
 
 ## Gate Assignment Confirmed
 
-airSpring confirms **strandGate** as its assigned gate per the Delta Springs
+airSpring confirms **eastGate** as its assigned gate per the Delta Springs
 deployment directive. Hardware characteristics are well-suited for airSpring's
 workload profile:
 
-- **128-thread EPYC**: 16S diversity pipeline (10 studies, ~500K seqs/study)
-- **RTX 3090**: GPU-accelerated ET₀, soil physics, Anderson eigenvalue
-- **RX 6950 XT**: Secondary GPU for mixed-hardware dispatch (metalForge)
-- **256GB ECC**: Large dataset memory residence (NCBI bulk, metagenomics)
+- **i9-12900**: High-clock CPU for seasonal pipeline orchestration, kriging prep, and cross-primal dispatch
+- **RTX 4070**: GPU-accelerated ET₀, soil physics, Richards Picard, seasonal batch workloads
+- **Akida NPU**: Edge inference offload for soil-sensor similarity, neuralSpring co-tenant workloads
 
 ## NUCLEUS Composition (niche-airspring)
 
@@ -90,18 +89,21 @@ cargo run --features local --bin validate_gate_composition
 
 ## Deployment Flow
 
+eastGate deployment is coordinated by primalSpring (gate owner). airSpring
+follows the standard NUCLEUS bootstrap once eastGate hardware is live:
+
 ```sh
-# 1. Fetch plasmidBin binaries (v2026.05.23, 13 primals)
+# 1. Fetch plasmidBin binaries (v2026.05.23, 13 primals) — on eastGate host
 ../../../springs/primalSpring/tools/fetch_primals.sh --all
 
-# 2. Start NUCLEUS composition
+# 2. Start NUCLEUS composition (primalSpring nucleus_launcher on eastGate)
 ../../../springs/primalSpring/tools/nucleus_launcher.sh --composition niche-airspring
 
-# 3. Validate composition health
+# 3. Validate composition health on eastGate
 cargo run --features local --bin validate_gate_composition
 
-# 4. Start airspring_primal
-FAMILY_ID=<gate_family_id> cargo run --release --bin airspring_primal
+# 4. Start airspring_primal (family-scoped to eastGate NUCLEUS)
+FAMILY_ID=<eastgate_family_id> cargo run --release --bin airspring_primal
 
 # 5. Validate airSpring domain science against live primals
 cargo run --features local --bin airspring -- validate
@@ -110,13 +112,19 @@ cargo run --features local --bin airspring -- validate
 cargo run --features local --bin validate_nucleus_pipeline
 ```
 
-## Co-Tenant Coordination (wetSpring)
+**eastGate notes**: RTX 4070 is primary for barraCuda ecology dispatch; Akida
+NPU is shared with neuralSpring — coordinate inference windows via toadStool
+`max_guest_load` and primalSpring deploy schedule.
 
-strandGate hosts both airSpring and wetSpring. The primary cross-spring
-pipeline:
+## Co-Tenant Coordination (primalSpring + neuralSpring)
+
+eastGate hosts airSpring alongside primalSpring (NUCLEUS coordinator) and
+neuralSpring (NPU inference). Cross-spring ecology pipelines that require
+wetSpring 16S diversity run on **strandGate** (wetSpring co-tenant), not
+eastGate:
 
 ```
-NestGate ESearch → EFetch(FASTQ) → [wetSpring DADA2] → airSpring Shannon/Bray-Curtis
+NestGate ESearch → EFetch(FASTQ) → [wetSpring DADA2 on strandGate] → airSpring Shannon/Bray-Curtis
   → groundSpring uncertainty → NestGate store
 ```
 
@@ -124,35 +132,61 @@ NestGate ESearch → EFetch(FASTQ) → [wetSpring DADA2] → airSpring Shannon/B
 
 | Resource | Convention |
 |----------|-----------|
-| NestGate CAS | Namespaced keys: `airspring/` prefix for ecology data, `wetspring/` for metagenomics |
-| Provenance sessions | Separate DAG sessions; shared sweetGrass attribution braid per pipeline run |
-| GPU access | RTX 3090 primary (airSpring ET₀ + wetSpring), RX 6950 XT secondary (metalForge mixed dispatch) |
+| NestGate CAS | Namespaced keys: `airspring/` prefix for ecology data, `neuralspring/` for inference artifacts |
+| Provenance sessions | Separate DAG sessions; shared sweetGrass attribution braid per cross-gate pipeline run |
+| GPU access | RTX 4070 primary (airSpring ET₀ + seasonal batch); neuralSpring defers heavy GPU when ecology batch active |
+| Akida NPU | Shared with neuralSpring — schedule via primalSpring deploy graph; airSpring uses Squirrel embed for soil-sensor similarity |
 | Socket directory | Shared family-scoped UDS: `/run/user/$(id -u)/biomeos/{primal}-{family}.sock` |
-| toadStool dispatch | `max_guest_load` respected; owner foreground priority |
+| toadStool dispatch | `max_guest_load` respected; primalSpring coord sets owner foreground priority |
 
 ## Current Status
 
 | Item | Status |
 |------|--------|
-| Gate assignment | **Confirmed**: strandGate |
+| Gate assignment | **Confirmed**: eastGate |
 | IPC wiring | **Complete**: All 13 primals wired in `primal_names.rs` |
 | Typed clients | **Complete**: 10/13 primals have typed IPC clients |
 | Observatory | **Complete**: NeuralBridge module (v3.67+ routing weights, weight health) |
 | BLAKE3 provenance | **Complete**: 62/62 benchmark JSONs hashed |
 | Gate validator | **Complete**: `validate_gate_composition` (Exp 094-AS) |
-| Deployment | **Blocked**: strandGate hardware ready, deploy order #3 |
-| Live validation | **Blocked**: Waiting for NUCLEUS deployment on strandGate |
-| guideStone L5 | **Blocked**: Requires live primals |
+| Deployment | **LIVE**: NUCLEUS launched via `nucleus_launcher.sh` — 12/12 primals ALIVE |
+| Live validation | **23/32 PASS** — Exp 094-AS first live run against real NUCLEUS |
+| guideStone L5 | **In progress**: Live primals running; discovery convention gaps remaining |
+
+## Live Validation Results (May 23, 2026)
+
+First live NUCLEUS run — **23/32 PASS, 9 FAIL**:
+
+| Phase | Result | Detail |
+|-------|--------|--------|
+| Primal Discovery | 9/10 sockets, 8/10 healthy | skunkBat: socket not found (non-standard naming); coralReef: health probe failed (uses `coralreef-core-*` socket) |
+| Capability Routing | **4/4 PASS** | stats.mean, compute.dispatch, storage.store, crypto.hash all routed via neural-api |
+| Provenance Trio | FAIL | rhizoCrypt/loamSpine/sweetGrass sockets alive but `is_available()` requires env config |
+| Observatory | FAIL | biomeOS neural-api alive but observatory methods not exposed in cleartext bootstrap |
+| NestGate CAS | **PASS** | storage.status responding |
+| airSpring Composition | SKIP | airspring_primal not started during this run |
+
+### Discovery Convention Gaps (upstream issues for plasmidBin/primalSpring)
+
+| Issue | Detail | Suggested Fix |
+|-------|--------|---------------|
+| skunkBat socket naming | No `skunkbat-{family}.sock` created; launcher doesn't start skunkBat separately | plasmidBin launcher: add skunkBat to Phase 1 Tower startup |
+| coralReef socket naming | Uses `coralreef-core-{family}.sock` instead of `coralreef-{family}.sock` | Either coralReef normalize or airSpring discovery add `coralreef-core` prefix |
+| biomeOS socket | `neural-api-{family}.sock` not discoverable as `biomeos` | airSpring discovery: add `neural-api` as biomeOS alias |
+| Provenance trio config | `is_available()` checks env vars, not socket directory scan | airSpring: wire `ProvenanceConfig` from socket discovery, not env-only |
+| Observatory methods | neural-api cleartext bootstrap doesn't expose `neural_api.routing_weights` | biomeOS: enable observatory in all modes, or airSpring: probe with BTSP |
 
 ## Gaps Discovered
 
 | Gap | Impact | Owner |
 |-----|--------|-------|
-| strandGate NUCLEUS not deployed | All live validation blocked | ops / projectNUCLEUS |
-| AG-006: coralReef shader not wired | GPU shader dispatch uses barraCuda direct; no sovereign shader compile | coralReef + airSpring |
-| AG-007: toadStool opaque dispatch | No typed ecology response contract for compute.dispatch | toadStool + airSpring |
-| AG-009: petalTongue no direct IPC | Graph-level only; no visualization dispatch from airspring_primal | low priority |
-| Cross-gate mesh | Covalent linking with ironGate/eastGate pending | biomeOS + songBird |
+| skunkBat not started by launcher | Tower defense layer missing from NUCLEUS | plasmidBin / primalSpring |
+| coralReef socket naming convention | `coralreef-core-*` vs `coralreef-*` prefix mismatch | coralReef upstream |
+| AG-006: coralReef shader not wired | GPU shader dispatch uses barraCuda direct | coralReef + airSpring |
+| AG-007: toadStool opaque dispatch | No typed ecology response contract | toadStool + airSpring |
+| AG-009: petalTongue no direct IPC | Graph-level only | low priority |
+| Provenance env-only discovery | Trio alive but not discovered via socket scan | airSpring |
+| Cross-gate mesh | Covalent linking with ironGate/strandGate pending | biomeOS + songBird |
 
 ---
 
@@ -161,7 +195,8 @@ NestGate ESearch → EFetch(FASTQ) → [wetSpring DADA2] → airSpring Shannon/B
 ```bash
 cargo check --features local                         # zero errors
 cargo clippy --features local -- -D warnings         # zero warnings
-cargo test --lib --features local neural_bridge       # 4/4 pass
+cargo test --lib --features local                     # 1061/1061 pass
+FAMILY_ID=nucleus01 cargo run --features local --bin validate_gate_composition  # 23/32 PASS (live)
 ./tools/blake3_backfill.sh                           # 62/62 hashed
 ./tools/publish_sporeprint.sh --dry-run              # 2 files, 0 failed
 ```

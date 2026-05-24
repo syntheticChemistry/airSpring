@@ -5,8 +5,8 @@
 > The forge crate is now the **dispatch + integration layer**: substrate
 > discovery, capability-based routing, and biomeOS Neural API bridge.
 
-**Date**: May 17, 2026
-**Crate**: `airspring-forge` v0.1.0 (dispatch layer: 62 tests + 1 binary)
+**Date**: May 23, 2026 (Wave 46+ Post-Primordial)
+**Crate**: `airspring-forge` v0.1.0 (dispatch layer: 69 tests + 6 binaries)
 **License**: AGPL-3.0-or-later
 
 ---

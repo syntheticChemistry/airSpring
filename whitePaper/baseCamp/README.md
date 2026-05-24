@@ -1,6 +1,6 @@
 # baseCamp: Peer-Reviewed Science Validation — Python → Rust (UniBin) → Primal (NUCLEUS)
 
-**Updated**: May 17, 2026
+**Updated**: May 23, 2026 (Wave 46+ Post-Primordial)
 **Project**: airSpring — Ecological & Agricultural Sciences (v0.10.0)
 
 ## Validation Evolution
@@ -8,12 +8,12 @@
 Every paper reproduced in airSpring follows the same path:
 
 1. **Python baseline** — digitize paper benchmarks, implement equations, validate (1,284/1,284 PASS)
-2. **Rust proof** — cross-validate to 1e-5, 14.3× speedup, 94 zero-panic binaries (1,057 lib + 316 integration + 69 forge = 1,442 total tests)
+2. **Rust proof** — cross-validate to 1e-5, 14.3× speedup, 98 zero-panic binaries (1,057 lib + 316 integration + 69 forge = 1,442 total tests)
 3. **GPU acceleration** — barraCuda 0.4.0 (25 Tier A modules, 21/21 CPU-GPU parity, 767+ WGSL shaders)
 4. **Primal composition** — 57 JSON-RPC capabilities via biomeOS Neural API (Wave 20 `capability.list` canonical envelope, Wave 17 `primal.announce` + `nest.store`/`nest.commit` signal dispatch), 7 deploy graphs, NUCLEUS atomics
 5. **UniBin eukaryotic** — single `airspring` binary (certify/validate/serve/status/version), 10 validation scenarios, guideStone **L4** (targeting L6)
 
-**Status**: 90 experiments, barraCuda 0.4.0 (wgpu 28, DF64), Edition 2024 (rust-toolchain 1.92), all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired, niche architecture (57 capabilities, 7 deploy graphs, 458-method canonical sync, Wave 20), `#![cfg_attr(not(test), forbid(unsafe_code))]` + `#![deny(cast_*)]` library-strict + zero clippy pedantic+nursery + `warn(missing_docs)`. 60 tolerances in 5 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies**. Zero `#[allow()]` in production. Platform-agnostic IPC (Transport enum: Unix + TCP). Tier 4 IPC-first: **`[features].default = []`**, barraCuda via `--features local`, validation binaries `required-features = ["local"]`, pure-Rust fallbacks. 90.56% line coverage. cargo-deny 0.19 clean. Full validation pipeline green (2026-05-16). **Wave 20**: `capability.list` canonical envelope; `--provenance-dir` for Thread 5+6 capture; foundation targets scenario evolved to numerical parity (expected_value ± tolerance)
+**Status**: 90 experiments, barraCuda 0.4.0 (wgpu 28, DF64), Edition 2024 (rust-toolchain 1.92), all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired, niche architecture (57 capabilities, 7 deploy graphs, 458-method canonical sync, Wave 46+), `#![cfg_attr(not(test), forbid(unsafe_code))]` + `#![deny(cast_*)]` library-strict + zero clippy pedantic+nursery + `warn(missing_docs)`. 60 tolerances in 5 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies**. Zero `#[allow()]` in production. Platform-agnostic IPC (Transport enum: Unix + TCP). Tier 4 IPC-first: **`[features].default = []`**, barraCuda via `--features local`, validation binaries `required-features = ["local"]`, pure-Rust fallbacks. 90.56% line coverage. cargo-deny 0.19 clean. Full validation pipeline green (2026-05-23). **Wave 46+**: 458-method canonical registry; gate composition validator (Exp 094-AS); **`capability.list`** canonical envelope; `--provenance-dir` for Thread 5+6 capture; foundation targets scenario evolved to numerical parity (expected_value ± tolerance)
 
 **April 27, 2026 evolution**: 60 tolerances (2 new atlas), 51/51 IPC capabilities routable, provenance drift fixed, capability naming converged, docs/PRIMAL_GAPS.md created (11 gaps, gS Level 0→1 path), CI pinned to 1.92, all files <800 LOC.
 
@@ -28,7 +28,7 @@ Every paper reproduced in airSpring follows the same path:
 ```
 Phase 0   Python/R baselines    — reproduce paper results with original tools (1284/1284)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (1,057 lib + 1498 atlas, 94 binaries + 146/146 + 32/32 cross-spring benchmarks)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (1,057 lib + 1498 atlas, 98 binaries + 146/146 + 32/32 cross-spring benchmarks)
 Phase 1.5 CPU benchmark         — 14.3× Rust-vs-Python geometric mean (25/25 algorithms, 21/21 CPU-GPU parity modules)
 Phase 2   BarraCuda GPU bridge  — 25 Tier A + 6 GPU-local modules wired (cross-spring S87 fully rewired)
 Phase 2.5 Ops 5-8 GPU-first   — Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed
@@ -154,7 +154,7 @@ Phase 5.18 Deep debt evolution — 60 tolerances (atlas_annual_et0, atlas_yield_
 | 65 | Bootstrap & Jackknife CI for Seasonal ET₀ — Exp 080 | 0→CPU | 20+20 | Deterministic bootstrap resampling + jackknife LOO variance |
 | 66 | Standardized Precipitation Index (SPI) — Exp 081 | 0→CPU | 20+20 | Gamma MLE + regularized incomplete gamma + normal quantile, multi-scale drought |
 
-### Rust Validation (Phase 1+3+5) — 94 binaries + 146/146 + 32/32 cross-spring benchmarks
+### Rust Validation (Phase 1+3+5) — 98 binaries + 146/146 + 32/32 cross-spring benchmarks
 
 | Binary | Checks | Modules Exercised |
 |--------|:------:|-------------------|
