@@ -1,6 +1,6 @@
 # Primal Gaps — airSpring v0.10.0
 
-**Date**: May 25, 2026 (Wave 49 Post-Primordial + Covalent Mesh — plasmidBin-only, LAN federation, 46 niche capabilities)
+**Date**: May 25, 2026 (Wave 50 Covalent HPC — plasmidBin-only, mesh seeded, Akida explored, 46 niche capabilities)
 **Spring**: airSpring (ecology / agriculture)
 **Gate Assignment**: **eastGate** (i9-12900, RTX 4070 + Akida NPU, 32GB DDR5) — co-residents: primalSpring (coord), neuralSpring, groundSpring
 **guideStone Level**: **L4** (cross-atomic pipeline / provenance tier) → targeting **L5+** (NUCLEUS composition, live primals)
@@ -32,6 +32,7 @@ Format follows wetSpring/hotSpring `PRIMAL_GAPS.md` pattern.
 | AG-009 | petalTongue | No direct IPC wiring from airSpring | Cell graph includes petalTongue but airspring_primal has no visualization dispatch; petalTongue integration is graph-level only | **Open** — low priority; petalTongue consumes via biomeOS SSE; Tier 3 convergence item |
 | AG-010 | barraCuda | `TensorSession` / `TensorContext` not available | Seasonal GPU pipeline blocked on persistent buffer pooling; documented in `evolution_gaps.rs` | **Open** — barraCuda roadmap item |
 | AG-011 | barraCuda | Anderson coupling needs new WGSL shader | `science.anderson_coupling` runs CPU-only; no upstream shader exists | **Open** — Tier C in GPU promotion map |
+| AG-021 | toadStool / hardware | Akida AKD1000 not enabled | PCIe 07:00.0 present but BAR disabled, no kernel driver, no `/dev/akida*`. toadStool `neural_compute` workload type ready but 0 NPU devices. | **Open** — hardware driver gap; BrainChip firmware/driver installation needed |
 
 ---
 
@@ -162,6 +163,17 @@ Structural L5 validation with TCP mock round-trip tests passes (1,057 lib tests)
 - [x] Last `/tmp/` hardcoded path eliminated: `data/provider.rs` `SongbirdTransport::discover` → biomeOS standard discovery
 - [ ] guideStone L5 / live NUCLEUS validation (blocked on live biomeOS + toadStool — Pass 14)
 - [ ] guideStone L6 / cross-spring pipeline (deploy graphs validated against live NUCLEUS)
+
+### Wave 50 Post-Primordial Absorption + Covalent HPC (May 25, 2026 PM)
+
+Per primalSpring Wave 50 — post-primordial absorption + covalent HPC evolution:
+- [x] **Post-primordial audit**: Zero `target/release/` primal hardcodes in tools/scripts/code. All stale PATH binaries removed (beardog, toadstool).
+- [x] **Songbird mesh seeded**: `mesh.init` with `node_id=eastGate` + bootstrap peer `192.168.1.238:7700` (ironGate). ironGate TCP reachable.
+- [x] **Cross-gate probed**: ironGate responds to `capability.list` and `discovery.peers` on TCP :7700. `capability.call` confirmed to route via biomeOS mesh dispatch, not direct Songbird HTTP.
+- [x] **Akida neuromorphic explored**: BrainChip AKD1000 on PCIe 07:00.0, IOMMU group 21. toadStool supports `neural_compute` workload type.
+- [ ] **AG-021 Akida driver**: AKD1000 BAR regions disabled, no kernel module loaded, no `/dev/akida*`. Need BrainChip driver/firmware to enable neuromorphic dispatch. **Upstream hardware gap.**
+- [ ] **Cross-gate live peers**: `discovery.peers` returns 0 — ironGate not yet seeded with eastGate address. Bilateral seeding needed.
+- [ ] **Cross-gate capability.call smoke**: Waiting for bilateral mesh seeding to test `science.et0_fao56` via biomeOS mesh dispatch on remote gate.
 
 ### Wave 49 Post-Primordial + Covalent Mesh (May 25, 2026)
 

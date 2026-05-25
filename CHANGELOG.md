@@ -4,6 +4,13 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [Unreleased] - 2026-05-25
 
+### Wave 50 Post-Primordial Absorption + Covalent HPC (2026-05-25 PM)
+
+- **Post-primordial verified**: Zero `target/release/` primal hardcodes in airSpring code, tools, or scripts. All NUCLEUS primal binaries from plasmidBin exclusively.
+- **Songbird mesh seeded**: `mesh.init` with `node_id=eastGate`, bootstrap peer `192.168.1.238:7700` (ironGate). ironGate TCP reachable — `discovery.peers` returns 0 peers (async seeding, ironGate not yet seeded with eastGate).
+- **Cross-gate capability.call explored**: ironGate Songbird TCP endpoint responds to `capability.list` and `discovery.peers`. `capability.call` routes through biomeOS mesh dispatch (not direct Songbird HTTP) — architecture confirmed.
+- **Neuromorphic Akida explored**: BrainChip AKD1000 present on PCIe 07:00.0 (IOMMU group 21). BAR regions disabled, no kernel driver loaded, no `/dev/akida*`. toadStool reports `neural_compute` workload type supported but 0 VFIO devices. **Blocker**: Akida driver/firmware installation needed before toadStool can dispatch neuromorphic workloads.
+
 ### Wave 49 Post-Primordial Deployment + Covalent Mesh (2026-05-25)
 
 - **Primordial patterns cut**: Removed stale `beardog` from `~/.cargo/bin/`. `toadstool` in `/usr/local/bin/` flagged (needs sudo). Zero primordial deployment patterns in airSpring code — all primal binaries sourced from plasmidBin exclusively.

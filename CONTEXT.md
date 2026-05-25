@@ -1,6 +1,6 @@
 # Context — airSpring
 
-**Doc sync:** 2026-05-25 (v0.10.0; Wave 49 Post-Primordial + Covalent Mesh; eastGate operational; plasmidBin-only).
+**Doc sync:** 2026-05-25 (v0.10.0; Wave 50 Covalent HPC; eastGate 12/12 + cell; Songbird mesh seeded; plasmidBin-only).
 
 ## What This Is
 
