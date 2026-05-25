@@ -1,6 +1,6 @@
 # Primal Gaps — airSpring v0.10.0
 
-**Date**: May 25, 2026 (Wave 48 Covalent Mesh — 46 niche capabilities, 458-method registry, eastGate operational)
+**Date**: May 25, 2026 (Wave 49 Post-Primordial + Covalent Mesh — plasmidBin-only, LAN federation, 46 niche capabilities)
 **Spring**: airSpring (ecology / agriculture)
 **Gate Assignment**: **eastGate** (i9-12900, RTX 4070 + Akida NPU, 32GB DDR5) — co-residents: primalSpring (coord), neuralSpring, groundSpring
 **guideStone Level**: **L4** (cross-atomic pipeline / provenance tier) → targeting **L5+** (NUCLEUS composition, live primals)
@@ -162,6 +162,17 @@ Structural L5 validation with TCP mock round-trip tests passes (1,057 lib tests)
 - [x] Last `/tmp/` hardcoded path eliminated: `data/provider.rs` `SongbirdTransport::discover` → biomeOS standard discovery
 - [ ] guideStone L5 / live NUCLEUS validation (blocked on live biomeOS + toadStool — Pass 14)
 - [ ] guideStone L6 / cross-spring pipeline (deploy graphs validated against live NUCLEUS)
+
+### Wave 49 Post-Primordial + Covalent Mesh (May 25, 2026)
+
+Per primalSpring Wave 49 — cut primordial patterns, plasmidBin-only deployment:
+- [x] **Primordial audit**: Zero primordial deploy patterns in airSpring code (`which`, `cargo install`, `target/release/`, `~/.local/bin/`). Stale `beardog` removed from `~/.cargo/bin/`. Stale `toadstool` in `/usr/local/bin/` flagged (needs sudo to remove).
+- [x] **NUCLEUS 12/12**: All primals ALIVE from plasmidBin (petalTongue fixed via stale socket cleanup). plasmidBin auto-detect confirmed — no `NUCLEUS_BIN_DIR` env var needed.
+- [x] **Federation LAN bind**: Songbird TCP `0.0.0.0:7700` (was `127.0.0.1:7700`). LAN IP 192.168.1.144:7700 verified.
+- [x] **Discovery verified**: `discovery.peers` responds on UDS + localhost TCP + LAN TCP (0 peers — other gates offline)
+- [ ] **toadstool /usr/local/bin/**: Stale binary needs sudo removal — **manual action**
+- [ ] **loamSpine Tokio panic**: Known upstream — does not block mesh
+- [ ] **Cross-gate live peers**: Waiting for ironGate/southGate/biomeGate to come online simultaneously
 
 ### Wave 48 Covalent Mesh — Sound Off (May 25, 2026)
 

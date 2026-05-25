@@ -1,6 +1,6 @@
 # airSpring wateringHole
 
-**Updated**: May 25, 2026 | **Version**: v0.10.0 (Wave 48 Covalent Mesh, eastGate operational, Songbird federation, 46 niche capabilities)
+**Updated**: May 25, 2026 | **Version**: v0.10.0 (Wave 49 Post-Primordial + Covalent Mesh, plasmidBin-only, LAN federation 0.0.0.0:7700)
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs

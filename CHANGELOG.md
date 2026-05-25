@@ -4,6 +4,13 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [Unreleased] - 2026-05-25
 
+### Wave 49 Post-Primordial Deployment + Covalent Mesh (2026-05-25)
+
+- **Primordial patterns cut**: Removed stale `beardog` from `~/.cargo/bin/`. `toadstool` in `/usr/local/bin/` flagged (needs sudo). Zero primordial deployment patterns in airSpring code — all primal binaries sourced from plasmidBin exclusively.
+- **NUCLEUS 12/12 ALIVE**: All primals healthy including petalTongue (stale socket cleanup). plasmidBin auto-detect working — no env vars needed.
+- **Federation LAN-reachable**: Songbird TCP federation now binds `0.0.0.0:7700` (was `127.0.0.1:7700` in Wave 48). LAN IP 192.168.1.144:7700 verified reachable. `discovery.peers` responds on UDS, localhost TCP, and LAN TCP.
+- **Known pipeline debt documented**: petalTongue `--family-id` env workaround, stale socket cleanup, loamSpine Tokio panic, Songbird sled DB corruption — all per Wave 49 advisory.
+
 ### Wave 48 Covalent Mesh — Sound Off (2026-05-25)
 
 - **eastGate self-report**: Gate Deployment section in CONTEXT.md updated — eastGate, i9-12900 / RTX 4070 / Akida NPU / 32GB, co-residents primalSpring (coord) + neuralSpring + groundSpring.
