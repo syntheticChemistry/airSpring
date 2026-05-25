@@ -1,8 +1,8 @@
 # Local NUCLEUS Deployment on Eastgate
 
-**Date**: May 17, 2026 (updated from March 17)
-**Status**: Steps 0-2 complete, Step 3 next — prerequisite for all baseCamp extensions
-**Hardware**: Eastgate (i9-12900K, RTX 4070, AKD1000, 64 GB DDR5-5101, 2 TB NVMe)
+**Date**: May 25, 2026 (Wave 50 — updated from May 17)
+**Status**: Steps 0-6 complete. Full NUCLEUS operational on eastGate (12/12 ALIVE + airspring cell, plasmidBin-only). Step 7 (LAN HPC) in progress via Songbird federation.
+**Hardware**: eastGate (i9-12900, RTX 4070, AKD1000 (driver gap AG-021), 32 GB DDR5, 2 TB NVMe)
 
 ---
 
@@ -18,13 +18,13 @@ the minimum viable orchestration layer without requiring LAN HPC.
 | Step | Status | What |
 |------|--------|------|
 | 0 | DONE | metalForge cross-system routing (GPU+NPU+CPU, 27 workloads) |
-| 1 | DONE | airSpring NUCLEUS primal (57 caps, Wave 20 canonical envelope, 28/28 cross-primal pipeline) |
-| 2 | DONE | Local NUCLEUS Tower on Eastgate (7 primals discovered) |
-| 3 | NEXT | NestGate weather provider (replace direct HTTP) |
+| 1 | DONE | airSpring NUCLEUS primal (57 registered / 46 live capabilities) |
+| 2 | DONE | Local NUCLEUS Tower on eastGate (12/12 primals ALIVE) |
+| 3 | DONE | NestGate weather provider (IPC wired, `data.weather` via `capability.call`) |
 | 4 | NEXT | NestGate NCBI 16S (baseCamp 06 extension) |
-| 5 | LATER | ToadStool compute offload through NUCLEUS mesh |
-| 6 | LATER | Full NUCLEUS on Eastgate |
-| 7 | LATER | LAN HPC (Plasmodium across gates via 10G backbone) |
+| 5 | DONE | ToadStool compute offload through NUCLEUS mesh |
+| 6 | DONE | Full NUCLEUS on eastGate (plasmidBin-only, 12/12 + airspring cell) |
+| 7 | IN PROGRESS | LAN HPC — Songbird federation on 0.0.0.0:7700, mesh seeded, 4 gates operational |
 
 ---
 

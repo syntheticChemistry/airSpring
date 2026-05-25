@@ -139,7 +139,7 @@ All experiments run on a single consumer workstation:
 | Component | Specification |
 |-----------|--------------|
 | CPU | Intel i9-12900K (8P+8E, 24 threads) |
-| RAM | 64 GB DDR5-4800 |
+| RAM | 32 GB DDR5-4800 |
 | OS | Pop!_OS 22.04 (Linux 6.17) |
 | Python | 3.x (numpy, scipy, pandas, requests) |
 | R | 4.x (planned — for ANOVA matching paper) |

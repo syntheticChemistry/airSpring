@@ -1,7 +1,7 @@
 # airSpring Study: Precision Agriculture on Consumer Hardware
 
 **Status**: Working draft
-**Date**: May 23, 2026 (Wave 46+ Post-Primordial)
+**Date**: May 25, 2026 (Wave 50 Covalent HPC)
 **See also**: [METHODOLOGY.md](METHODOLOGY.md) for validation protocol
 
 ---

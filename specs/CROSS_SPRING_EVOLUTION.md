@@ -1,6 +1,6 @@
 # Cross-Spring Shader Evolution — airSpring Provenance
 
-**Updated**: May 23, 2026 (Wave 46+ Post-Primordial, v0.10.0, 1,057 lib + 316 integration + 69 forge = 1,442 tests, barraCuda 0.4.0 / wgpu 28, 90 experiments, Tier 4 IPC-first)
+**Updated**: May 25, 2026 (Wave 50 Covalent HPC, v0.10.0, 1,057 lib + 316 integration + 69 forge = 1,442 tests, barraCuda 0.4.0 / wgpu 28, 90 experiments, Tier 4 IPC-first)
 
 ## Summary
 

@@ -1,7 +1,7 @@
 # Primal Proof IPC Mapping — airSpring
 
-**Date**: May 23, 2026 (Wave 46+ Post-Primordial)
-**Status**: 57 capabilities IPC-exposed, UniBin eukaryotic, guideStone L4 (targeting L5+); 98 binaries. New: `--format json` on `validate`, LTEE E3 29/29 PASS, GPU registry drift fixed (7 methods), 6 projectNUCLEUS workload TOMLs.
+**Date**: May 25, 2026 (Wave 50 Covalent HPC)
+**Status**: 57 registered / 46 live capabilities IPC-exposed, UniBin eukaryotic, guideStone L4 (targeting L5+); 98 binaries. eastGate operational (12/12 NUCLEUS + airspring cell, plasmidBin-only).
 
 Maps each airSpring domain computation to its JSON-RPC equivalent for
 IPC-backed cross-primal validation. When NUCLEUS primals are deployed, all science

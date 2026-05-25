@@ -1,6 +1,6 @@
 # airSpring Cross-Tier Parity Status
 
-**Date**: May 23, 2026 (Wave 46+ Post-Primordial)
+**Date**: May 25, 2026 (Wave 50 Covalent HPC)
 **Pattern**: primalSpring `docs/VALIDATION_TIERS.md` — Tier 1 (Python), Tier 2 (Rust), Tier 3 (provenance)
 
 ---

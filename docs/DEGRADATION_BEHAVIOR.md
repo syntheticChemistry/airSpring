@@ -2,7 +2,7 @@
 
 > When an upstream primal is unreachable, what does the consumer see?
 
-**Date**: May 23, 2026 (Wave 46 Absorption)
+**Date**: May 25, 2026 (Wave 50 Covalent HPC)
 **Context**: lithoSpore R1 — primalSpring documented `CompositionContext`
 degradation; each spring documents its own. Updated for `NeuralBridge`
 observatory (v3.67+).

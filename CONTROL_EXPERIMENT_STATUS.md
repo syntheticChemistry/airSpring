@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-05-23 (v0.10.0 — Wave 46+ Post-Primordial, 90 experiments (87 numbered + 3 composition crates), barraCuda 0.4.0 (wgpu 28), 1284/1284 Python + 1,057 lib + 316 integration + 69 forge = 1,442 total tests + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (25/25 algorithms, 21/21 CPU-GPU parity modules). **64 centralized method constants** (`methods.rs`). **10 UniBin validation scenarios** (174/174 PASS). guideStone Level 4 (targeting L6, certification L0-L6). **57 capabilities** registered (science + ecology aliases + provenance + composition + coordination + inference). Wave 46+: 458-method canonical registry sync, gate composition validator (Exp 094-AS). NUCLEUS atomics: Tower 3, Node 4, Nest 4 capabilities. `capability_registry.toml` + `deny.toml` at workspace root. 25 publishable notebooks (20 paper + 5 sporePrint). 65 control scripts, 62 benchmark JSONs. Platform-agnostic IPC. musl static binary 3.3 MB. **98 validation binaries**.)
+**Updated**: 2026-05-25 (v0.10.0 — Wave 50 Covalent HPC, eastGate operational, plasmidBin-only, 12/12 NUCLEUS + airspring cell. 90 experiments, barraCuda 0.4.0 (wgpu 28), 1284/1284 Python + 1,057 lib + 316 integration + 69 forge = 1,442 total tests. **57 registered / 46 live capabilities**. 458-method canonical registry sync. **98 validation binaries**. Songbird mesh seeded, Akida explored (AG-021).)
 **Gate**: eastGate (i9-12900, RTX 4070, Akida NPU)
 **License**: AGPL-3.0-or-later
 
@@ -100,7 +100,7 @@ All tools are open source. Zero synthetic data in the default pipeline.
 | Component | Specification |
 |-----------|--------------|
 | CPU | Intel i9-12900K (16C/24T, 5.2 GHz) |
-| RAM | 64 GB DDR5-4800 |
+| RAM | 32 GB DDR5-4800 |
 | GPU | NVIDIA GeForce RTX 4070 (12 GB VRAM) |
 | Storage | 1 TB NVMe SSD |
 | OS | Pop!_OS 22.04 (Ubuntu-based) |

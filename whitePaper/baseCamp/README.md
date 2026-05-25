@@ -1,6 +1,6 @@
 # baseCamp: Peer-Reviewed Science Validation — Python → Rust (UniBin) → Primal (NUCLEUS)
 
-**Updated**: May 23, 2026 (Wave 46+ Post-Primordial)
+**Updated**: May 25, 2026 (Wave 50 Covalent HPC)
 **Project**: airSpring — Ecological & Agricultural Sciences (v0.10.0)
 
 ## Validation Evolution

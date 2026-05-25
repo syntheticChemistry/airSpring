@@ -33,7 +33,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | Phase 3.5: NPU edge | **AKD1000 live** | 3 experiments, 95/95 NPU checks, ~48µs inference |
 | Phase 3.7: metalForge live | **5 substrates discovered** | RTX 4070 + Titan V + AKD1000 + i9-12900K, 27 workloads route |
 | Phase 3.8: Mixed-hardware pipeline | **66/66 PASS** | 7-stage GPU→NPU PCIe bypass, NUCLEUS mesh routing (Exp 076: 60/60) |
-| Phase 3.9: NUCLEUS primal | **57 capabilities** | airSpring biomeOS primal, 57 capabilities (science + provenance + composition + cross-spring + inference), JSON-RPC incl. **`primal.announce`** (Wave 17) |
+| Phase 3.9: NUCLEUS primal | **57 registered / 46 live** | airSpring biomeOS primal, 57 registered capabilities (46 live via `capability.list`), JSON-RPC incl. **`primal.announce`** (Wave 17) |
 | Phase 4.0: Cross-primal pipeline | **28/28 PASS** | ecology domain, capability.call routing, cross-primal forwarding |
 | Phase 4.1: Full dispatch experiment | **51/51 PASS** | CPU vs GPU parity across all domains (Exp 064) |
 | Phase 4.2: biomeOS graph experiment | **35/35 PASS** | Offline ecology pipeline, deployment graph validated (Exp 065) |
@@ -75,8 +75,8 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 | CPU | Intel i9-12900K (16C/24T, AVX2) | **Live** — all CPU paths |
 | GPU #1 | NVIDIA RTX 4070 (12 GB, Vulkan, f64) | **Live** — wgpu adapter 0 |
 | GPU #2 | NVIDIA TITAN V (GV100, NVK/Mesa, f64) | **Live** — 24/24 PASS, `BARRACUDA_GPU_ADAPTER=titan` |
-| NPU | BrainChip AKD1000 (`/dev/akida0`) | **Live** — 95/95 NPU checks |
-| RAM | 64 GB DDR5-4800 | |
+| NPU | BrainChip AKD1000 (PCIe 07:00.0) | **Present** — driver gap (AG-021), BAR disabled |
+| RAM | 32 GB DDR5-4800 | |
 | OS | Pop!_OS 22.04 (kernel 6.17.9) | |
 
 ## Evolution Architecture: Write → Absorb → Lean

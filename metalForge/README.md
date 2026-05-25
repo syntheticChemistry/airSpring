@@ -5,7 +5,7 @@
 > The forge crate is now the **dispatch + integration layer**: substrate
 > discovery, capability-based routing, and biomeOS Neural API bridge.
 
-**Date**: May 23, 2026 (Wave 46+ Post-Primordial)
+**Date**: May 25, 2026 (Wave 50 Covalent HPC)
 **Crate**: `airspring-forge` v0.1.0 (dispatch layer: 69 tests + 6 binaries)
 **License**: AGPL-3.0-or-later
 
@@ -31,7 +31,7 @@ Write locally → Validate → Hand off → Absorb → Lean on upstream → Disp
 
 ### `forge/` — Rust crate (`airspring-forge`)
 
-Active dispatch layer + absorbed domain modules. 62/62 tests pass, zero clippy warnings.
+Active dispatch layer + absorbed domain modules. 69/69 tests pass, zero clippy warnings.
 
 #### Active Modules (dispatch + integration)
 
@@ -113,6 +113,6 @@ These airSpring patterns may benefit other springs:
 ```
 cargo fmt   — clean
 cargo clippy --all-targets — zero warnings (pedantic + nursery)
-cargo test  — 62/62 pass (incl. dispatch, neural, probe, substrate, workloads, inventory, nucleus)
+cargo test  — 69/69 pass (incl. dispatch, neural, probe, substrate, workloads, inventory, nucleus)
 unsafe code — 0 (uid discovery via /proc/self/status, not libc::getuid)
 ```

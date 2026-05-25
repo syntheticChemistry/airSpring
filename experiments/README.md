@@ -1,7 +1,7 @@
 # airSpring Experiments
 
-**Updated**: May 23, 2026 (Wave 46+ Post-Primordial)
-**Status**: 90 experiments (87 numbered + 3 composition crates), barraCuda 0.4.0 (wgpu 28), v0.10.0, Edition 2024 (rust-toolchain 1.92). 1284/1284 Python + 1,057 lib + 316 integration + 69 forge + 381/381 validation checks + 146/146 cross-spring evolution + 33/33 cross-validation. **14.3× Rust-vs-Python speedup** (25/25 parity). 21/21 CPU-GPU parity modules. UniBin eukaryotic evolution: `airspring` binary with `certify`/`validate`/`serve`/`status`/`version`. Composition experiments (exp001-003) absorbed into `barracuda/src/validation/scenarios/` (**10 UniBin validation scenarios** total, 174/174 PASS, incl. `s_tier4_math_parity`) — originals kept as reference. guideStone **L4** (targeting L6). 98 binaries. 57 capabilities (Wave 20 canonical envelope + Wave 17 `primal.announce` + `nest.store`/`nest.commit`). 458-method canonical registry sync (Wave 46+). `--provenance-dir` for Thread 5+6 capture. Foundation targets scenario: numerical parity (expected_value ± tolerance). 65 control scripts, 62 benchmark JSONs. Zero clippy warnings. Zero test failures. cargo-deny 0.19 clean. Zero C dependencies. Full validation pipeline green (2026-05-23).
+**Updated**: May 25, 2026 (Wave 50 Covalent HPC)
+**Status**: 90 experiments, barraCuda 0.4.0 (wgpu 28), v0.10.0, Edition 2024 (MSRV 1.92). 1284/1284 Python + 1,057 lib + 316 integration + 69 forge = 1,442 total. 98 binaries. 57 registered / 46 live capabilities. 458-method canonical registry sync. eastGate operational (12/12 NUCLEUS + airspring cell, plasmidBin-only).
 
 ---
 
