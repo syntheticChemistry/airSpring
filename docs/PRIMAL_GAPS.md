@@ -1,8 +1,8 @@
 # Primal Gaps — airSpring v0.10.0
 
-**Date**: May 23, 2026 (Wave 46+ Post-Primordial — 57 capabilities, 458-method registry)
+**Date**: May 25, 2026 (Wave 48 Covalent Mesh — 46 niche capabilities, 458-method registry, eastGate operational)
 **Spring**: airSpring (ecology / agriculture)
-**Gate Assignment**: **eastGate** (i9-12900, RTX 4070, Akida NPU) — co-tenant: primalSpring (coord), neuralSpring
+**Gate Assignment**: **eastGate** (i9-12900, RTX 4070 + Akida NPU, 32GB DDR5) — co-residents: primalSpring (coord), neuralSpring, groundSpring
 **guideStone Level**: **L4** (cross-atomic pipeline / provenance tier) → targeting **L5+** (NUCLEUS composition, live primals)
 **License**: AGPL-3.0-or-later
 
@@ -163,6 +163,19 @@ Structural L5 validation with TCP mock round-trip tests passes (1,057 lib tests)
 - [ ] guideStone L5 / live NUCLEUS validation (blocked on live biomeOS + toadStool — Pass 14)
 - [ ] guideStone L6 / cross-spring pipeline (deploy graphs validated against live NUCLEUS)
 
+### Wave 48 Covalent Mesh — Sound Off (May 25, 2026)
+
+Per primalSpring Wave 48 delta spring covalent mesh directive:
+- [x] **Gate self-report**: CONTEXT.md `## Gate Deployment` updated — eastGate, i9-12900 / RTX 4070 / Akida NPU / 32GB DDR5, co-residents primalSpring (coord) + neuralSpring + groundSpring
+- [x] **NUCLEUS + Songbird federation**: 11/12 primals ALIVE (petalTongue socket-only), Songbird TCP federation on port 7700 active, 7/10 BTSP handshake, 9 primals seeded in Songbird registry
+- [x] **Cell deployed**: `cell_launcher.sh airspring start` — `airspring-nucleus01.sock`, family `nucleus01`, 46 capabilities, health ALIVE
+- [x] **Discovery mesh verified**: `discovery.peers` operational on UDS + TCP (port 7700 `/jsonrpc`); 0 peers (other gates offline on current LAN segment)
+- [x] **Handoff posted**: `AIRSPRING_WAVE48_COVALENT_MESH_MAY25_2026.md`
+- [ ] **Cross-gate capability.call**: Waiting for ironGate/southGate/biomeGate to come online for end-to-end validation
+- [ ] **Plasmodium status**: Need 3+ meshed gates for `biomeos plasmodium status`
+- [ ] **toadStool S274 yield-to-owner**: GPU workload yield testing with co-tenant neuralSpring pending
+- [ ] **Songbird federation TCP path**: Federation endpoint is `/jsonrpc` (not root `/`); upstream docs discrepancy
+
 ### Wave 46+ Post-Primordial Gate Deployment (May 23, 2026)
 
 Per primalSpring Wave 46+ covalent gate deployment directive:
@@ -176,7 +189,7 @@ Per primalSpring Wave 46+ covalent gate deployment directive:
 - [ ] **Discovery convention gaps**: skunkBat socket naming, coralReef `coralreef-core-*` prefix, biomeOS `neural-api` vs `biomeos` — **upstream issues for plasmidBin/primalSpring**
 - [ ] **Provenance trio env config**: Trio sockets alive but `is_available()` requires env vars, not socket scan — **airSpring fix needed**
 - [ ] **guideStone L5**: Live primal proof in progress — 23/32 baseline established
-- [ ] **Cross-gate mesh**: Covalent linking with ironGate/strandGate — blocked on multi-gate infrastructure
+- [x] **Cross-gate mesh**: Songbird federation deployed Wave 48 — `discovery.peers` operational, cross-gate `capability.call` ready via biomeOS v3.75
 
 ### Wave 46 Absorption (May 23, 2026)
 

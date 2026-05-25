@@ -1,6 +1,6 @@
 # Context — airSpring
 
-**Doc sync:** 2026-05-23 (v0.10.0; Wave 46+ Post-Primordial; 57 capabilities; 458-method registry sync).
+**Doc sync:** 2026-05-25 (v0.10.0; Wave 48 Covalent Mesh; eastGate operational; 46 niche + 458-method registry sync).
 
 ## What This Is
 
@@ -121,11 +121,13 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 
 | Field | Value |
 |-------|-------|
-| **Gate** | pending — declare your gate |
-| **Composition** | Node Atomic (6 primals) |
-| **NUCLEUS status** | pending |
+| **Gate** | eastGate |
+| **Hardware** | i9-12900, RTX 4070 + Akida NPU, 32GB DDR5 |
+| **Composition** | Full NUCLEUS (13/13 primals) |
+| **NUCLEUS status** | operational (11/12 primals ALIVE + airspring cell; Songbird federation active) |
+| **Co-residents** | primalSpring (coord), neuralSpring, groundSpring |
 | **Songbird federation** | port 7700 |
-| **LAN mesh** | ready when NUCLEUS deployed |
+| **LAN mesh** | eastGate ↔ ironGate ↔ southGate ↔ biomeGate |
 | **Cell graph** | `plasmidBin/cells/airspring_cell.toml` |
 | **Launch** | `SONGBIRD_FEDERATION_PORT=7700 ./tools/nucleus_launcher.sh start` then `./tools/cell_launcher.sh airspring start` |
 

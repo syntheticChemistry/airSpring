@@ -2,7 +2,15 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased] - 2026-05-23
+## [Unreleased] - 2026-05-25
+
+### Wave 48 Covalent Mesh — Sound Off (2026-05-25)
+
+- **eastGate self-report**: Gate Deployment section in CONTEXT.md updated — eastGate, i9-12900 / RTX 4070 / Akida NPU / 32GB, co-residents primalSpring (coord) + neuralSpring + groundSpring.
+- **NUCLEUS + federation live**: 11/12 primals ALIVE (petalTongue socket-only), Songbird TCP federation on port 7700 active. `SONGBIRD_FEDERATION_PORT=7700` nucleus_launcher.sh start.
+- **airSpring cell deployed**: `cell_launcher.sh airspring start` — `airspring_primal` running on `airspring-nucleus01.sock`, family `nucleus01`, 46 capabilities. Binary built from local Rust source, symlinked into plasmidBin.
+- **Discovery mesh verified**: `discovery.peers` via Songbird UDS + TCP (port 7700 `/jsonrpc`) confirmed operational. 0 peers (expected — other gates offline on current LAN segment).
+- **Cross-gate ready**: biomeOS v3.75 mesh dispatch, toadStool S274 yield-to-owner, Songbird Wave 211–214 federation all available on eastGate.
 
 ### Wave 46+ Post-Primordial Gate Deployment (2026-05-23 PM)
 

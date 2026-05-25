@@ -1,15 +1,15 @@
 # airSpring wateringHole
 
-**Updated**: May 23, 2026 (PM) | **Version**: v0.10.0 (Wave 46+ Post-Primordial, eastGate assignment, gate composition validator, 98 validation binaries)
+**Updated**: May 25, 2026 | **Version**: v0.10.0 (Wave 48 Covalent Mesh, eastGate operational, Songbird federation, 46 niche capabilities)
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.10.0** | [AIRSPRING_GATE_DEPLOYMENT_MAY23_2026.md](handoffs/AIRSPRING_GATE_DEPLOYMENT_MAY23_2026.md) | 2026-05-23 PM | **Canonical** — eastGate gate deployment: 10-primal NUCLEUS composition, Exp 094-AS validator, co-tenant coordination, deployment flow |
+| **V0.10.0** | [AIRSPRING_WAVE48_COVALENT_MESH_MAY25_2026.md](handoffs/AIRSPRING_WAVE48_COVALENT_MESH_MAY25_2026.md) | 2026-05-25 | **Canonical** — Wave 48 sound off: eastGate self-report, NUCLEUS + federation live (11/12 ALIVE), airSpring cell deployed (46 caps), discovery mesh verified |
+| **V0.10.0** | [AIRSPRING_GATE_DEPLOYMENT_MAY23_2026.md](handoffs/AIRSPRING_GATE_DEPLOYMENT_MAY23_2026.md) | 2026-05-23 PM | eastGate gate deployment: 10-primal NUCLEUS composition, Exp 094-AS validator, co-tenant coordination, deployment flow |
 | **V0.10.0** | [AIRSPRING_WAVE46_ABSORPTION_MAY23_2026.md](handoffs/AIRSPRING_WAVE46_ABSORPTION_MAY23_2026.md) | 2026-05-23 | Wave 46: 458-method sync, NeuralBridge observatory, BLAKE3 backfill (62 benchmarks), SP-4 publish pipeline |
-| **V0.10.0** | [AIRSPRING_WAVE20PM_LITHOSPORE_ABSORPTION_MAY17_2026.md](handoffs/AIRSPRING_WAVE20PM_LITHOSPORE_ABSORPTION_MAY17_2026.md) | 2026-05-17 PM | lithoSpore audit: stability tiers, degradation docs, trio semantics fix, 3 cross-tier validators, Thread 4 status |
 | **≤V0.10.0** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |
 
 ## Cross-Spring Documents
