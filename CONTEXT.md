@@ -117,6 +117,18 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - [projectNUCLEUS](https://github.com/sporeGarden/projectNUCLEUS) — deployable NUCLEUS infrastructure
 - [foundation](https://github.com/sporeGarden/foundation) — scientific knowledge layer
 
+## Gate Deployment
+
+| Field | Value |
+|-------|-------|
+| **Gate** | pending — declare your gate |
+| **Composition** | Node Atomic (6 primals) |
+| **NUCLEUS status** | pending |
+| **Songbird federation** | port 7700 |
+| **LAN mesh** | ready when NUCLEUS deployed |
+| **Cell graph** | `plasmidBin/cells/airspring_cell.toml` |
+| **Launch** | `SONGBIRD_FEDERATION_PORT=7700 ./tools/nucleus_launcher.sh start` then `./tools/cell_launcher.sh airspring start` |
+
 ## Design Philosophy
 
 These binaries are built using AI-assisted constrained evolution. Rust's
