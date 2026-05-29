@@ -1,6 +1,6 @@
 +++
 title = "airSpring Validation Summary"
-description = "Precision agriculture & irrigation — 1,442 Rust tests, 90 experiments, 10 UniBin validation scenarios, 14.3× speedup, 57 registered / 46 live capabilities, eastGate operational, zero failures"
+description = "Precision agriculture & irrigation — 1,446 Rust tests, 90 experiments, 10 UniBin validation scenarios, 14.3× speedup, 57 registered / 46 live capabilities, eastGate operational, zero failures"
 date = 2026-05-25
 
 [taxonomies]
@@ -10,7 +10,7 @@ springs = ["airspring", "hotspring", "wetspring", "neuralspring", "groundspring"
 
 ## Status
 
-- **1,442 Rust tests** passing (1,057 lib + 316 integration + 69 forge), 0 failed
+- **1,446 Rust tests** passing (1,061 lib + 316 integration + 69 forge), 0 failed
 - **1,284 Python baseline checks** (60 papers reproduced)
 - **90 experiments** across 12 categories + 3 composition crates (exp001 local parity, exp002 composition parity, exp003 foundation targets)
 - **14.3× geometric mean** Rust-vs-Python speedup (25/25 algorithms, 21/21 CPU-GPU parity)

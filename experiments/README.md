@@ -1,7 +1,7 @@
 # airSpring Experiments
 
 **Updated**: May 25, 2026 (Wave 50 Covalent HPC)
-**Status**: 90 experiments, barraCuda 0.4.0 (wgpu 28), v0.10.0, Edition 2024 (MSRV 1.92). 1284/1284 Python + 1,057 lib + 316 integration + 69 forge = 1,442 total. 98 binaries. 57 registered / 46 live capabilities. 474-method canonical registry sync (Wave 60). eastGate operational (12/12 NUCLEUS + airspring cell, plasmidBin-only).
+**Status**: 90 experiments, barraCuda 0.4.0 (wgpu 28), v0.10.0, Edition 2024 (MSRV 1.92). 1284/1284 Python + 1,061 lib + 316 integration + 69 forge = 1,446 total. 98 binaries. 57 registered / 46 live capabilities. 474-method canonical registry sync (Wave 60). eastGate operational (12/12 NUCLEUS + airspring cell, plasmidBin-only).
 
 ---
 
@@ -97,7 +97,7 @@
 | 086 | metalForge Mixed Hardware Live NUCLEUS | Hardware | **Complete** | Rust | Live probe (RTX 4070 + Titan V + i9-12900K), NUCLEUS mesh (Tower+Node), 23/27 workload routing, ecology pipeline (3 stages GPU), PCIe bypass, transfer matrix | 17/17 |
 | 087 | NUCLEUS Graph Coordination | Integration | **Complete** | Rust | biomeOS TOML graph parsing, DAG validation, capability refs, dependency ordering, prerequisite checks, Tower/Node atomic detection, 7 primals | 22/22 |
 
-**Grand Total**: 1284 Python + **1,057 lib + 316 integration + 69 forge** (1,373 barracuda + 69 forge = **1,442** project tests) + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 3 composition crates (exp001: 55/55, exp002: 10/10, exp003: 4/4) + **10 UniBin validation scenarios** (174/174 PASS) + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (57 capabilities) + 98 binaries + barraCuda 0.4.0 (wgpu 28, DF64 precision tier) + 14.3× CPU speedup (25/25 parity) + 21/21 CPU-GPU parity modules + 90 experiments (v0.10.0). 64 centralized method constants (`methods.rs`). guideStone **L4** (targeting L6). **7 deploy graphs**; Tier 4 IPC-first (`default = []`, `local` opt-in, validation **required-features = ["local"]**). Zero C deps. Zero hardcoded primals. Zero `#[allow()]`. Platform-agnostic IPC (Transport: Unix + TCP). Full validation pipeline green (2026-05-23).
+**Grand Total**: 1284 Python + **1,061 lib + 316 integration + 69 forge** (1,373 barracuda + 69 forge = **1,446** project tests) + 381/381 validation + 146/146 cross-spring evolution + 33/33 cross-validation + 3 composition crates (exp001: 55/55, exp002: 10/10, exp003: 4/4) + **10 UniBin validation scenarios** (174/174 PASS) + 25 Tier A (ops 0-19 upstream) + `local_dispatch` retired + `PrecisionRoutingAdvice` + upstream provenance registry + 4 GPU orchestrators + `BrentGpu` + `RichardsGpu` + seasonal pipeline GPU Stages 1-3 + metalForge 66/66 cross-system + NUCLEUS primal (57 capabilities) + 98 binaries + barraCuda 0.4.0 (wgpu 28, DF64 precision tier) + 14.3× CPU speedup (25/25 parity) + 21/21 CPU-GPU parity modules + 90 experiments (v0.10.0). 64 centralized method constants (`methods.rs`). guideStone **L4** (targeting L6). **7 deploy graphs**; Tier 4 IPC-first (`default = []`, `local` opt-in, validation **required-features = ["local"]**). Zero C deps. Zero hardcoded primals. Zero `#[allow()]`. Platform-agnostic IPC (Transport: Unix + TCP). Full validation pipeline green (2026-05-23).
 
 ---
 
@@ -105,12 +105,12 @@
 
 | Category | Tests | Source |
 |----------|:-----:|--------|
-| Barracuda lib | 1,057 | `cargo test --features local,testutil --lib` |
+| Barracuda lib | 1,061 | `cargo test --features local,testutil --lib` |
 | Barracuda integration | 316 | `cargo test --features local,testutil --tests` or `--all-features` |
 | Barracuda validation binaries | 98 | `validate_*`, `bench_*`, `cross_validate`, `simulate_season` |
 | Forge | 69 | `metalForge/forge/` (substrate, dispatch, probe, workloads, cross-system routing) |
 | Forge binaries | 6 | `validate_dispatch`, `validate_live_hardware`, `validate_dispatch_routing`, `validate_mixed_pipeline`, `validate_mixed_nucleus_live`, `validate_nucleus_routing` |
-| **Total project tests** | **1,442** (1,057 lib + 316 integration + 69 forge) | |
+| **Total project tests** | **1,446** (1,061 lib + 316 integration + 69 forge) | |
 | Validation checks | 381/381 | 10 validation binaries |
 | Cross-spring evolution | 146/146 | `bench_cross_spring` (34 provenance entries, 6 origin Springs) |
 | Cross-validation | 33/33 | Python↔Rust match (tol=1e-5) |

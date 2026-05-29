@@ -8,7 +8,7 @@
 Every paper reproduced in airSpring follows the same path:
 
 1. **Python baseline** — digitize paper benchmarks, implement equations, validate (1,284/1,284 PASS)
-2. **Rust proof** — cross-validate to 1e-5, 14.3× speedup, 98 zero-panic binaries (1,057 lib + 316 integration + 69 forge = 1,442 total tests)
+2. **Rust proof** — cross-validate to 1e-5, 14.3× speedup, 98 zero-panic binaries (1,061 lib + 316 integration + 69 forge = 1,446 total tests)
 3. **GPU acceleration** — barraCuda 0.4.0 (25 Tier A modules, 21/21 CPU-GPU parity, 767+ WGSL shaders)
 4. **Primal composition** — 57 JSON-RPC capabilities via biomeOS Neural API (Wave 20 `capability.list` canonical envelope, Wave 17 `primal.announce` + `nest.store`/`nest.commit` signal dispatch), 7 deploy graphs, NUCLEUS atomics
 5. **UniBin eukaryotic** — single `airspring` binary (certify/validate/serve/status/version), 10 validation scenarios, guideStone **L4** (targeting L6)
@@ -28,7 +28,7 @@ Every paper reproduced in airSpring follows the same path:
 ```
 Phase 0   Python/R baselines    — reproduce paper results with original tools (1284/1284)
 Phase 0+  Real open data        — compute on Open-Meteo, NOAA, USDA (no institutional access)
-Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (1,057 lib + 1498 atlas, 98 binaries + 146/146 + 32/32 cross-spring benchmarks)
+Phase 1   Rust BarraCuda CPU    — cross-validated to 1e-5 vs Python (1,061 lib + 1498 atlas, 98 binaries + 146/146 + 32/32 cross-spring benchmarks)
 Phase 1.5 CPU benchmark         — 14.3× Rust-vs-Python geometric mean (25/25 algorithms, 21/21 CPU-GPU parity modules)
 Phase 2   BarraCuda GPU bridge  — 25 Tier A + 6 GPU-local modules wired (cross-spring S87 fully rewired)
 Phase 2.5 Ops 5-8 GPU-first   — Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed
@@ -268,7 +268,7 @@ S79 modernization: `libc`→`rustix`, `async-trait`→AFIT, universal f64 precis
 
 ### Next Steps (Dong Lab)
 
-- **Audit execution (v0.9.0)**: `#![deny(cast_*)]` library-strict (all production code uses cast helpers). 3 new helpers: `u32_usize`, `u64_usize`, `u64_f64`. soil_moisture refactored (672 LOC → 4 cohesive submodules: topp, texture, saxton_rawls, water). petalTongue 3-tier discovery wired (`discover_visualization_primal`). 14 primal_dispatch integration tests (health/caps/science/provenance/discovery over Unix sockets). Benchmark JSON provenance for all hardcoded validation values. CI lint config consolidated to Cargo.toml (no CLI flag conflicts). Hardcoded socket paths removed from deployment manifests. **1,057** lib + 316 integration tests.
+- **Audit execution (v0.9.0)**: `#![deny(cast_*)]` library-strict (all production code uses cast helpers). 3 new helpers: `u32_usize`, `u64_usize`, `u64_f64`. soil_moisture refactored (672 LOC → 4 cohesive submodules: topp, texture, saxton_rawls, water). petalTongue 3-tier discovery wired (`discover_visualization_primal`). 14 primal_dispatch integration tests (health/caps/science/provenance/discovery over Unix sockets). Benchmark JSON provenance for all hardcoded validation values. CI lint config consolidated to Cargo.toml (no CLI flag conflicts). Hardcoded socket paths removed from deployment manifests. **1,061** lib + 316 integration tests.
 - **Cross-ecosystem evolution (v0.8.9)**: Canonical `PRIMAL_NAME`/`PRIMAL_DOMAIN` constants (healthSpring V34). `OnceLock` GPU probe cache (toadStool S158). `cast` module for safe numeric casts (neuralSpring S162). `DispatchOutcome<T>` library type (wetSpring V126). coralReef/Squirrel capability discovery (healthSpring V34). `mul_add()` FMA at 18 sites (barraCuda Sprint 7). Smart refactors: 4 monoliths → 19 focused modules (evapotranspiration, dual_kc, biomeos, validation). Composition guidance for solo/trio/wider primal combos. 891 lib tests, zero clippy warnings.
 - **Coverage**: target 98%+ (remaining gaps: GPU-dependent code paths)
 - **ToadStool absorption**: All 6 local ops absorbed upstream into `BatchedElementwiseF64` (ops 14-19), `local_dispatch` retired — Write→Absorb→Lean complete (v0.7.2)

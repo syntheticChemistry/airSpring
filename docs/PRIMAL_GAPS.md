@@ -80,7 +80,7 @@ Next:     gS Level 6 (cross-spring pipeline — deploy graphs, capability regist
 
 ### L5 Readiness Assessment (May 13, 2026)
 
-airSpring has **all seven L5 RPC handlers wired and structurally tested** (1,057 lib tests):
+airSpring has **all seven L5 RPC handlers wired and structurally tested** (1,061 lib tests):
 - `composition.status` — wired (biomeOS v3.51 contract)
 - `primal.announce` — Wave 17 single-call registration (57 capabilities); `method.register` legacy fallback
 - `compute.dispatch` — wired (toadStool identity_f64 shader)
@@ -96,7 +96,7 @@ from hardcoded `data.open_meteo_weather` to standard `capability.call` routing.
 
 **Remaining L5 blocker**: Live primals (biomeOS + toadStool at minimum).
 Without running primals, the L5 certification probes print `SKIP`.
-Structural L5 validation with TCP mock round-trip tests passes (1,057 lib tests).
+Structural L5 validation with TCP mock round-trip tests passes (1,061 lib tests).
 
 ### plasmidBin Deployment Readiness (May 13, 2026)
 
@@ -271,7 +271,7 @@ Per primalSpring Wave 20 (445-method registry at the time, Schema Standardizatio
 - `primal.list` constant added to `methods.rs` (biomeOS serves primal enumeration)
 - `capability.list` canonical envelope: added top-level `"capabilities"` flat string array + `"count"` field (canonical subset per standard; enriched fields retained alongside)
 - Registry sync: cross-sync test updated for 445-method canonical at Wave 20 (was 451; **now 458**, Wave 46+)
-- 1,057 lib + 69 forge tests pass, 0 clippy warnings
+- 1,061 lib + 69 forge tests pass, 0 clippy warnings
 - [x] `--provenance-dir` implemented: `airspring validate --provenance-dir <DIR>` writes `results.json` + `provenance.toml` (Thread 5+6 capture). E3 LTEE activation is the remaining step.
 
 ### Wave 17 Signal Adoption (May 16, 2026)
@@ -285,7 +285,7 @@ Per primalSpring Wave 17 (451-method registry, Neural API Signal Elevation):
 - Capability count: 49 → 51 methods (added `primal.announce`, `primal.info`); later 51 → 57 (Wave 20 Debt: 6 ecology aliases registered)
 - Registry sync: cross-sync test updated for 451-method canonical (was 413)
 - L5 certification: `validate_primal_announce` replaces `validate_method_register` (with fallback)
-- 1,057 lib + 69 forge tests pass, 0 clippy warnings
+- 1,061 lib + 69 forge tests pass, 0 clippy warnings
 
 ### Tower Triple-First Evolution (May 14, 2026)
 
@@ -294,7 +294,7 @@ Per upstream plasmidBin manifest, Tower Atomic is now `bearDog + songBird + skun
 - `s_composition_parity.rs`: skunkBat added to Tower health probe loop
 - `validate_nucleus_graphs.rs`: Tower detection now requires skunkBat discovery
 - Deploy graph comments, validation binaries, docs reconciled
-- 1,057 lib + 69 forge tests pass, 0 clippy warnings
+- 1,061 lib + 69 forge tests pass, 0 clippy warnings
 
 ### Deep Debt Audit Results (May 13, 2026 — Sprint)
 

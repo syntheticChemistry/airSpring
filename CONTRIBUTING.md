@@ -78,7 +78,7 @@ socket path, or capability set. Discover at runtime via:
 Tier 4 IPC-first: barracuda is opt-in via `--features local` (validation binaries are gated). From `barracuda/`:
 
 ```bash
-cd barracuda && cargo test --features local,testutil --lib              # 1,057 lib tests
+cd barracuda && cargo test --features local,testutil --lib              # 1,061 lib tests
 cd barracuda && cargo test --features local,testutil --tests            # 316 integration tests
 # or: cd barracuda && cargo test --all-features
 cd metalForge/forge && cargo test             # 69 forge tests

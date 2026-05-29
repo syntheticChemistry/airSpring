@@ -1,7 +1,7 @@
 # airSpring Control Experiment — Status Report
 
 **Date**: 2026-02-16 (Project initialized)
-**Updated**: 2026-05-29 (v0.10.0 — Wave 60 Eukaryotic / Pre-Covalent, eastGate operational, plasmidBin-only, 12/12 NUCLEUS + airspring cell. 90 experiments, barraCuda 0.4.0 (wgpu 28), 1284/1284 Python + 1,057 lib + 316 integration + 69 forge = 1,442 total tests. **57 registered / 46 live capabilities**. 474-method canonical registry sync (Wave 60). **98 validation binaries**. Forgejo periplasm, 38-repo manifest-driven sync.)
+**Updated**: 2026-05-29 (v0.10.0 — Wave 60 Eukaryotic / Pre-Covalent, eastGate operational, plasmidBin-only, 12/12 NUCLEUS + airspring cell. 90 experiments, barraCuda 0.4.0 (wgpu 28), 1284/1284 Python + 1,061 lib + 316 integration + 69 forge = 1,446 total tests. **57 registered / 46 live capabilities**. 474-method canonical registry sync (Wave 60). **98 validation binaries**. Forgejo periplasm, 38-repo manifest-driven sync.)
 **Gate**: eastGate (i9-12900, RTX 4070, Akida NPU)
 **License**: AGPL-3.0-or-later
 
@@ -320,7 +320,7 @@ Dong 2020 Tables 3-4, Dong 2024 Eq 5 + Table 2, Stewart 1977, CW2D media params)
 | validate_gdd | T1 | 26/26 | GDD accumulation, kc_from_gdd, phenology |
 | validate_pedotransfer | T1 | 58/58 | Saxton-Rawls 2006, θs/θr/Ks from texture |
 
-**Total Rust: 651 tests + 1393 atlas checks PASS, 1,057 lib + 316 integration + 69 forge PASS**
+**Total Rust: 651 tests + 1393 atlas checks PASS, 1,061 lib + 316 integration + 69 forge PASS**
 **Phase 2 cross-validation: 75/75 MATCH (Python↔Rust, tol=1e-5)**
 **Phase 3 NUCLEUS integration: Exp 084 (21/21), Exp 085 (19/19), Exp 086 (17/17), Exp 087 (22/22) — 79/79 ALL PASS**
 **Phase 3 GPU-first: 11 orchestrators wired, 4/4 ToadStool issues RESOLVED**
@@ -1123,7 +1123,7 @@ routing.
 Track 1 (Precision Agriculture):
   Phase 0  [COMPLETE]: Python baselines — 1284/1284 PASS (57 experiments)
   Phase 0+ [COMPLETE]: Real data pipeline — 15,300 station-days, ET₀ R²=0.97
-  Phase 1  [COMPLETE]: Rust validation — 1,057 lib + 316 integration/doc (1,373 barracuda) + 69 forge = 1,442 total tests, 98 binaries
+  Phase 1  [COMPLETE]: Rust validation — 1,061 lib + 316 integration/doc (1,373 barracuda) + 69 forge = 1,446 total tests, 98 binaries
   Phase 1.5[COMPLETE]: CPU benchmark — Rust 14.3× faster than Python (24/24 parity)
   Phase 2  [COMPLETE]: Cross-validation — 75/75 MATCH (Python↔Rust, tol=1e-5)
   Phase 2.5[COMPLETE]: Ops 5-8 GPU-first — 4 orchestrators rewired (ToadStool S70+ absorbed)
@@ -1198,7 +1198,7 @@ wetSpring and airSpring share the same agricultural/environmental ecosystem:
 ---
 
 *Initialized: February 16, 2026 — Updated: May 23, 2026 (v0.10.0, Wave 46+ Post-Primordial)*
-*90 experiments (87 + 3 composition crates), 1284/1284 Python, 1,057 lib + 316 integration/doc + 69 forge = 1,442 total tests, 98 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 14.3× CPU speedup (25/25 algorithms, 21/21 CPU-GPU parity modules), barraCuda 0.4.0 (wgpu 28), Rust Edition 2024. biomeOS niche: 57 capabilities, 7 deploy graphs (incl. skunkBat). 61 centralized method constants (methods.rs). **10 UniBin validation scenarios.** guideStone Level 4 (targeting L6, certification L0-L6). Wave 60: 474-method canonical registry sync. 60 tolerances in 5 submodules. 90.56% line coverage (fail-under-lines 90). cargo-deny 0.19 clean. 25 notebooks (20 paper + 5 sporePrint). capability_registry.toml + deny.toml at workspace root. musl static 3.3 MB. May 23, 2026.*
+*90 experiments (87 + 3 composition crates), 1284/1284 Python, 1,061 lib + 316 integration/doc + 69 forge = 1,446 total tests, 98 binaries, 381/381 validation, 146/146 evolution, 33/33 cross-validation, 14.3× CPU speedup (25/25 algorithms, 21/21 CPU-GPU parity modules), barraCuda 0.4.0 (wgpu 28), Rust Edition 2024. biomeOS niche: 57 capabilities, 7 deploy graphs (incl. skunkBat). 61 centralized method constants (methods.rs). **10 UniBin validation scenarios.** guideStone Level 4 (targeting L6, certification L0-L6). Wave 60: 474-method canonical registry sync. 60 tolerances in 5 submodules. 90.56% line coverage (fail-under-lines 90). cargo-deny 0.19 clean. 25 notebooks (20 paper + 5 sporePrint). capability_registry.toml + deny.toml at workspace root. musl static 3.3 MB. May 23, 2026.*
 *8 ET₀ methods + SCS-CN runoff + Green-Ampt infiltration + coupled runoff-infiltration + VG inverse + full-season WB + Exp 058 Climate Scenario (46/46).*
 *Niche adapter (57 capabilities, Wave 17 `primal.announce` + `nest.store`/`nest.commit` signal dispatch). Atlas decade 80yr (102/102). NASS real (99/99). NCBI diversity (63/63).*
 *25 Tier A + 6 GPU-local modules. Ops 5-8 GPU-first (ToadStool S87). GPU stats (neuralSpring S69).*

@@ -48,7 +48,7 @@ This means they work without primals running.
 | File | Contents |
 |------|----------|
 | `composition_validation.json` | 57 capabilities, deploy graphs, primal composition, gaps |
-| `test_suite_report.json` | Module-level test counts (1,442 total), coverage, quality gates |
+| `test_suite_report.json` | Module-level test counts (1,446 total), coverage, quality gates |
 | `experiment_catalog.json` | All 90 experiments categorized by focus area |
 | `security_convergence.json` | Safety lints, cargo-deny, IPC security, CI gates |
 | `cross_spring_matrix.json` | barraCuda integration, shader families, primal consumption |

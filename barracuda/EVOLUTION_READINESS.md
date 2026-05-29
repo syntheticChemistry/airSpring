@@ -4,7 +4,7 @@
 **barraCuda**: v0.4.0 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry, SpringDomain newtype, F64BuiltinCapabilities DF64 fields)
 **ToadStool**: S147+ (20,015 tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient, hw-learn, spirv_codegen_safety)
 **coralReef**: Phase 10 Iteration 44 sovereign Rust GPU compiler (NVIDIA + AMD, 1669+48 tests, VFIO dispatch)
-**Handoff**: V0.10.0 (eukaryotic UniBin + deep debt zero-warnings + certification organelle + scenario registry + deny.toml aws-lc-sys ban + Tier 2 IPC wiring + **1,057 lib tests**)
+**Handoff**: V0.10.0 (eukaryotic UniBin + deep debt zero-warnings + certification organelle + scenario registry + deny.toml aws-lc-sys ban + Tier 2 IPC wiring + **1,061 lib tests**)
 **License**: AGPL-3.0-or-later
 
 ---
@@ -414,7 +414,7 @@ metalForge forge migrated from wgpu 22 to wgpu 28 (eliminated duplicate wgpu com
 |------|--------|
 | `cargo fmt --check` | **PASS** (both crates) |
 | `cargo clippy --all-targets -- -W clippy::pedantic -W clippy::nursery -D warnings` | **PASS** — 0 warnings |
-| `cargo test --lib` | **1,057 lib pass**, 0 fail |
+| `cargo test --lib` | **1,061 lib pass**, 0 fail |
 | `cargo test --tests` | **316 integration pass**, 0 fail |
 | Cross-spring evolution | **11/11 pass** |
 | CPU vs Python | **25/25 algorithms**, 21.0× geometric mean speedup |
