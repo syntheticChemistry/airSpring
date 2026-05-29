@@ -164,6 +164,21 @@ Structural L5 validation with TCP mock round-trip tests passes (1,057 lib tests)
 - [ ] guideStone L5 / live NUCLEUS validation (blocked on live biomeOS + toadStool — Pass 14)
 - [ ] guideStone L6 / cross-spring pipeline (deploy graphs validated against live NUCLEUS)
 
+### Wave 60 Eukaryotic Unicellular — After Action Report (May 29, 2026)
+
+Per primalSpring Wave 60 — Forgejo periplasm, cascade sync, fresh-gate stress test:
+- [x] **Cascade-pull executed**: 25/30 repos synced from Forgejo. 2 failed (wetSpring, healthSpring — merge conflicts). 3 skipped (not cloned).
+- [x] **Missing repos cloned**: `primals/songBird`, `primals/nestGate` from Forgejo; `gardens/foundation` from GitHub (not on Forgejo).
+- [x] **Dangling symlink found + fixed**: plasmidBin symlink pointed to `barracuda/target/release/` but workspace `target-dir` resolves to `ecoPrimals/target/release/`. Fixed to correct path.
+- [x] **Binary rebuilt**: `target/` cleaned by co-tenant. Rebuilt `airspring_primal`, re-linked to plasmidBin.
+- [x] **Forgejo round-trip verified**: Push + pull, HEAD == forgejo/main, SSH auth zero friction.
+- [x] **Full AAR posted**: `AIRSPRING_WAVE60_AAR_EUKARYOTIC_DEPLOY_MAY29_2026.md` — 8 blocking issues, 6 enhancement proposals for cascade-pull + plasmidBin tooling.
+- [ ] **cascade-pull --clone-missing**: Script can't clone repos, only pull existing. Fresh gate would stall.
+- [ ] **Gate identity file**: Hostname `pop-os` doesn't match `east*` pattern. Need `.gate` config file.
+- [ ] **Shared target dir isolation**: Co-tenant `cargo clean` wipes all binaries. Need copy-to-plasmidBin or per-crate target dirs.
+- [ ] **skunkBat missing from CORE**: In `COMP_TOWER` but not in cascade-pull `CORE` profile.
+- [ ] **gardens/foundation not on Forgejo**: `sporeGarden/foundation` returns 404 on Forgejo.
+
 ### Wave 50 Post-Primordial Absorption + Covalent HPC (May 25, 2026 PM)
 
 Per primalSpring Wave 50 — post-primordial absorption + covalent HPC evolution:

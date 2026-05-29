@@ -1,13 +1,14 @@
 # airSpring wateringHole
 
-**Updated**: May 29, 2026 | **Version**: v0.10.0 (Wave 60 Eukaryotic Unicellular, Forgejo periplasm, plasmidBin-only)
+**Updated**: May 29, 2026 | **Version**: v0.10.0 (Wave 60 Eukaryotic Unicellular, eastGate Forgejo periplasm, cascade-pull AAR, plasmidBin-only)
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
 
 | Version | File | Date | Scope |
 |---------|------|------|-------|
-| **V0.10.0** | [AIRSPRING_WAVE48_COVALENT_MESH_MAY25_2026.md](handoffs/AIRSPRING_WAVE48_COVALENT_MESH_MAY25_2026.md) | 2026-05-25 | **Canonical** — Wave 48 sound off: eastGate self-report, NUCLEUS + federation live (11/12 ALIVE), airSpring cell deployed (46 caps), discovery mesh verified |
+| **V0.10.0** | [AIRSPRING_WAVE60_AAR_EUKARYOTIC_DEPLOY_MAY29_2026.md](handoffs/AIRSPRING_WAVE60_AAR_EUKARYOTIC_DEPLOY_MAY29_2026.md) | 2026-05-29 | **Canonical** — Wave 60 AAR: fresh-gate stress test, cascade-pull audit (25/30 pulled, 3 cloned, 2 conflicts), 8 blocking issues, 6 enhancement proposals, symlink/target-dir fix, multi-tenant coordination gaps |
+| **V0.10.0** | [AIRSPRING_WAVE48_COVALENT_MESH_MAY25_2026.md](handoffs/AIRSPRING_WAVE48_COVALENT_MESH_MAY25_2026.md) | 2026-05-25 | Wave 48 sound off: eastGate self-report, NUCLEUS + federation live (11/12 ALIVE), airSpring cell deployed (46 caps), discovery mesh verified |
 | **V0.10.0** | [AIRSPRING_GATE_DEPLOYMENT_MAY23_2026.md](handoffs/AIRSPRING_GATE_DEPLOYMENT_MAY23_2026.md) | 2026-05-23 PM | eastGate gate deployment: 10-primal NUCLEUS composition, Exp 094-AS validator, co-tenant coordination, deployment flow |
 | **V0.10.0** | [AIRSPRING_WAVE46_ABSORPTION_MAY23_2026.md](handoffs/AIRSPRING_WAVE46_ABSORPTION_MAY23_2026.md) | 2026-05-23 | Wave 46: 458-method sync, NeuralBridge observatory, BLAKE3 backfill (62 benchmarks), SP-4 publish pipeline |
 | **≤V0.10.0** | *Archived* — see `handoffs/archive/` | | Superseded (fossil record) |

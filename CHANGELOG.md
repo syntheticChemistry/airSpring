@@ -4,12 +4,14 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [Unreleased] - 2026-05-29
 
-### Wave 60 Eukaryotic Unicellular (2026-05-29)
+### Wave 60 Eukaryotic Unicellular + AAR (2026-05-29)
 
 - **golgiBody periplasm live**: Sovereign Forgejo at `git.primals.eco` (SSH :2222). airSpring remote configured as `forgejo`. WaterFall sync via `cascade-pull.sh --gate eastGate --source forgejo` pulls 30-repo eastGate profile.
 - **Cascade sync verified**: 25/30 repos synced from Forgejo (3 not cloned locally, 2 merge conflicts in other springs — not ours).
-- **barracuda rebuilt**: 156G target was cleaned upstream. Release binary rebuilt, plasmidBin symlink restored.
-- **Eukaryotic state**: eastGate operates as independent eukaryotic cell — NUCLEUS (12/12), airspring cell (46 capabilities), syncing through VPS periplasm. Next evolution: colonial (Songbird mesh discovers cross-gate capabilities).
+- **3 missing repos cloned**: `primals/songBird`, `primals/nestGate` from Forgejo; `gardens/foundation` from GitHub (not on Forgejo — `sporeGarden/foundation` returns 404).
+- **barracuda rebuilt**: Target directory cleaned by co-tenant. Release binary rebuilt. **Dangling symlink discovered**: plasmidBin symlink pointed to `barracuda/target/release/` but workspace `target-dir` resolves to `ecoPrimals/target/release/`. Fixed.
+- **AAR filed**: Full After Action Report for fresh-gate deployment stress test. 8 blocking issues, 6 enhancement proposals. Key gaps: cascade-pull can't clone missing repos, hostname auto-detection fails (`pop-os` ≠ `east*`), shared target directory causes dangling symlinks and co-tenant contamination.
+- **Eukaryotic state**: eastGate operates as independent eukaryotic cell — NUCLEUS (12/12), airspring cell (46 capabilities), syncing through VPS periplasm.
 
 ### Wave 50 Post-Primordial Absorption + Covalent HPC (2026-05-25 PM)
 
