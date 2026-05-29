@@ -12,7 +12,7 @@
 
 Treated eastGate as a "somewhat fresh gate" to stress-test the new Wave 60 eukaryotic sync pattern — VPS-based Forgejo as the single source of truth, `cascade-pull.sh` for gate-aware repo sync, and `plasmidBin` for binary deployment. The exercise exposed **8 blocking or near-blocking issues** and **6 improvement opportunities** across the cascade-pull, binary deployment, and multi-tenant coordination layers.
 
-**Bottom line**: The pattern works but is not yet turnkey. A truly fresh gate would stall at missing clones, dangling symlinks, and hostname detection. Each issue is fixable with focused tooling work.
+**Bottom line**: The pattern works but was not yet turnkey at the time of testing. A truly fresh gate would have stalled at missing clones, dangling symlinks, and hostname detection. **UPDATE (Wave 60 PM):** Upstream primalSpring addressed 3 of our P0 findings — `cascade-pull.sh` is now manifest-driven (`ecosystem_manifest.toml`), supports `--clone-missing`, and reads `.gate` identity files. Re-tested: 36/38 repos synced (2 known merge conflicts). The symlink and shared-target issues remain open.
 
 ---
 

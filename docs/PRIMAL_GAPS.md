@@ -1,6 +1,6 @@
 # Primal Gaps — airSpring v0.10.0
 
-**Date**: May 29, 2026 (Wave 60 Eukaryotic Unicellular — Forgejo periplasm, plasmidBin-only, 46 niche capabilities)
+**Date**: May 29, 2026 (Wave 60 Eukaryotic / Pre-Covalent — Forgejo periplasm, 474-method canonical, 38-repo manifest, plasmidBin-only, 46 niche live / 57 registered)
 **Spring**: airSpring (ecology / agriculture)
 **Gate Assignment**: **eastGate** (i9-12900, RTX 4070 + Akida NPU, 32GB DDR5) — co-residents: primalSpring (coord), neuralSpring, groundSpring
 **guideStone Level**: **L4** (cross-atomic pipeline / provenance tier) → targeting **L5+** (NUCLEUS composition, live primals)
@@ -265,7 +265,7 @@ Per primalSpring audit — Wave 20 residual debt:
 - [x] Paper queue arithmetic: fixed "All 61" → "All 62", "All 41" → "All 62" in `PAPER_REVIEW_QUEUE.md`
 - Zero deep debt remaining: 0 `todo!()`, 0 `unimplemented!()`, 0 `FIXME`, 0 `HACK`, 0 production mocks, 0 unsafe in production, 0 files >800 LOC
 
-### Wave 20 Schema Standardization (May 16, 2026) — *historical; canonical registry is now 458 methods (Wave 46+)*
+### Wave 20 Schema Standardization (May 16, 2026) — *historical; canonical registry is now 474 methods (Wave 60)*
 
 Per primalSpring Wave 20 (445-method registry at the time, Schema Standardization + E2E Validation):
 - `primal.list` constant added to `methods.rs` (biomeOS serves primal enumeration)

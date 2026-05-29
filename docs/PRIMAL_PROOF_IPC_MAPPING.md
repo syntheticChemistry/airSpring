@@ -1,6 +1,6 @@
 # Primal Proof IPC Mapping — airSpring
 
-**Date**: May 25, 2026 (Wave 50 Covalent HPC)
+**Date**: May 29, 2026 (Wave 60 Eukaryotic / Pre-Covalent)
 **Status**: 57 registered / 46 live capabilities IPC-exposed, UniBin eukaryotic, guideStone L4 (targeting L5+); 98 binaries. eastGate operational (12/12 NUCLEUS + airspring cell, plasmidBin-only).
 
 Maps each airSpring domain computation to its JSON-RPC equivalent for

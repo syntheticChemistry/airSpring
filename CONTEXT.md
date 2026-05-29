@@ -1,6 +1,6 @@
 # Context — airSpring
 
-**Doc sync:** 2026-05-29 (v0.10.0; Wave 60 Eukaryotic Unicellular; eastGate 12/12 + cell; Forgejo periplasm; plasmidBin-only).
+**Doc sync:** 2026-05-29 (v0.10.0; Wave 60 Eukaryotic / Pre-Covalent; eastGate 12/12 + cell; Forgejo periplasm; 474-method canonical; 38-repo manifest; plasmidBin-only).
 
 ## What This Is
 
@@ -59,7 +59,7 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 
 ## Key Capabilities (JSON-RPC methods)
 
-57 methods registered in `capability_registry.toml` (synced against 458-method canonical, Wave 46+):
+57 methods registered in `capability_registry.toml` (synced against 474-method canonical, Wave 60):
 
 - **Evapotranspiration (7):** `science.et0_fao56`, `science.et0_hargreaves`,
   `science.et0_priestley_taylor`, `science.et0_makkink`, `science.et0_turc`,
@@ -128,10 +128,10 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 | **Co-residents** | primalSpring (coord), groundSpring |
 | **Songbird federation** | `0.0.0.0:7700` (LAN-reachable at 192.168.1.144:7700) |
 | **Periplasm** | golgiBody VPS — Forgejo at `git.primals.eco` (SSH :2222) |
-| **Sync** | `cascade-pull.sh --gate eastGate --source forgejo` (30-repo profile) |
+| **Sync** | `cascade-pull.sh --gate eastGate --source forgejo` (38-repo manifest-driven profile) |
 | **LAN mesh** | eastGate ↔ ironGate ↔ southGate ↔ biomeGate (eukaryotic unicellular) |
 | **Cell graph** | `plasmidBin/cells/airspring_cell.toml` |
-| **Launch** | `SONGBIRD_FEDERATION_PORT=7700 ../primalSpring/tools/nucleus_launcher.sh start` then `FAMILY_ID=nucleus01 target/release/airspring_primal server` |
+| **Launch** | `SONGBIRD_FEDERATION_PORT=7700 nucleus_launcher.sh --family-id nucleus01 start` then `cell_launcher.sh airspring start` |
 
 ## Design Philosophy
 

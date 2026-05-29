@@ -22,7 +22,7 @@ springs = ["airspring", "hotspring", "wetspring", "neuralspring", "groundspring"
 - **25 Tier A GPU modules** (20 upstream batched ops, local_dispatch retired)
 - **Zero C dependencies**, zero unsafe, zero `#[allow()]`, Edition 2024
 - **guideStone Level 4** (targeting L6 with live NUCLEUS; IPC-wired, **10 UniBin validation scenarios**)
-- **57-method `niche::CAPABILITIES`** (sync-tested vs 458-method canonical cross-sync, Wave 46+, stability tiers annotated)
+- **57-method `niche::CAPABILITIES`** (sync-tested vs 474-method canonical cross-sync, Wave 60, stability tiers annotated)
 - **36 foundation targets** + **6 toadStool workloads** (thread06_ag)
 - **deny.toml** promoted to workspace root (ecoBin v3.0, ring/openssl banned)
 - **3 largest files refactored** (provenance 747→496, rpc 650→341, seasonal_pipeline 738→539)

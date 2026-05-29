@@ -4,14 +4,14 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 ## [Unreleased] - 2026-05-29
 
-### Wave 60 Eukaryotic Unicellular + AAR (2026-05-29)
+### Wave 60 Eukaryotic / Pre-Covalent + Triad Alignment (2026-05-29)
 
-- **golgiBody periplasm live**: Sovereign Forgejo at `git.primals.eco` (SSH :2222). airSpring remote configured as `forgejo`. WaterFall sync via `cascade-pull.sh --gate eastGate --source forgejo` pulls 30-repo eastGate profile.
-- **Cascade sync verified**: 25/30 repos synced from Forgejo (3 not cloned locally, 2 merge conflicts in other springs — not ours).
-- **3 missing repos cloned**: `primals/songBird`, `primals/nestGate` from Forgejo; `gardens/foundation` from GitHub (not on Forgejo — `sporeGarden/foundation` returns 404).
-- **barracuda rebuilt**: Target directory cleaned by co-tenant. Release binary rebuilt. **Dangling symlink discovered**: plasmidBin symlink pointed to `barracuda/target/release/` but workspace `target-dir` resolves to `ecoPrimals/target/release/`. Fixed.
-- **AAR filed**: Full After Action Report for fresh-gate deployment stress test. 8 blocking issues, 6 enhancement proposals. Key gaps: cascade-pull can't clone missing repos, hostname auto-detection fails (`pop-os` ≠ `east*`), shared target directory causes dangling symlinks and co-tenant contamination.
-- **Eukaryotic state**: eastGate operates as independent eukaryotic cell — NUCLEUS (12/12), airspring cell (46 capabilities), syncing through VPS periplasm.
+- **Canonical registry sync 458→474**: Cross-sync test now validates against 474-method canonical registry (Wave 60 triad expansion: rootPulse, ecosystem, coordination domains). Test path fixed — was silently skipping canonical validation due to wrong `../../../primalSpring/` path (should be `../../../springs/primalSpring/`). 12 doc files updated.
+- **Manifest-driven cascade-pull**: `ecosystem_manifest.toml` (38 repos, v2.0.0) + `.gate` identity file + `--clone-missing` all working. Re-ran: 36/38 synced from Forgejo (2 known merge conflicts in wetSpring/healthSpring). Symlinked manifest into `scripts/` to fix SCRIPT_DIR resolution.
+- **Neural API Coordination Triad absorbed**: quorumSignal (sense) / rootPulse (action) / waterFall (sync) — airSpring consumes triad graphs, does not implement them. 23 signal graphs (5 rootPulse + 3 ecosystem + 15 existing) documented. New upstream methods noted: `dag.branch/merge/diff/federate`, `content.sync/replicate`, `mesh.discover_remotes/mirror/publish`.
+- **1061 lib tests pass**, 0 clippy warnings, cross-sync validates live against canonical 474.
+- **golgiBody periplasm live**: Sovereign Forgejo at `git.primals.eco` (SSH :2222). WaterFall sync via `cascade-pull.sh --gate eastGate --source forgejo` pulls 38-repo manifest profile.
+- **AAR updated**: Earlier AAR findings (hostname, missing clone, .gate file) addressed by upstream primalSpring Wave 60 manifest-driven refactor. Remaining gaps: shared target directory, co-tenant contamination.
 
 ### Wave 50 Post-Primordial Absorption + Covalent HPC (2026-05-25 PM)
 

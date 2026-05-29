@@ -1,6 +1,6 @@
 # airSpring BarraCuda — Evolution Readiness
 
-**Last Updated**: May 25, 2026 (Wave 50 Covalent HPC — v0.10.0 — 98 binaries, eastGate 12/12 NUCLEUS + airspring cell, plasmidBin-only. Certification engine **L0–L6** (L4 achieved; L5 structurally ready). **Tier 4 IPC-first** (`default = []`, barraCuda optional). **guideStone L4** (targeting L5+).)
+**Last Updated**: May 29, 2026 (Wave 60 Eukaryotic / Pre-Covalent — v0.10.0 — 98 binaries, eastGate 12/12 NUCLEUS + airspring cell, plasmidBin-only, 474-method canonical sync. Certification engine **L0–L6** (L4 achieved; L5 structurally ready). **Tier 4 IPC-first** (`default = []`, barraCuda optional). **guideStone L4** (targeting L5+).)
 **barraCuda**: v0.4.0 standalone primal (`ecoPrimals/barraCuda` — wgpu 28, DF64 precision tier, ops 0-19, PrecisionRoutingAdvice, provenance registry, SpringDomain newtype, F64BuiltinCapabilities DF64 fields)
 **ToadStool**: S147+ (20,015 tests, shader.compile.* proxy, toadstool.provenance, CoralReefClient, hw-learn, spirv_codegen_safety)
 **coralReef**: Phase 10 Iteration 44 sovereign Rust GPU compiler (NVIDIA + AMD, 1669+48 tests, VFIO dispatch)
