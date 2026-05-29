@@ -1,6 +1,6 @@
 # Primal Gaps — airSpring v0.10.0
 
-**Date**: May 25, 2026 (Wave 50 Covalent HPC — plasmidBin-only, mesh seeded, Akida explored, 46 niche capabilities)
+**Date**: May 29, 2026 (Wave 60 Eukaryotic Unicellular — Forgejo periplasm, plasmidBin-only, 46 niche capabilities)
 **Spring**: airSpring (ecology / agriculture)
 **Gate Assignment**: **eastGate** (i9-12900, RTX 4070 + Akida NPU, 32GB DDR5) — co-residents: primalSpring (coord), neuralSpring, groundSpring
 **guideStone Level**: **L4** (cross-atomic pipeline / provenance tier) → targeting **L5+** (NUCLEUS composition, live primals)

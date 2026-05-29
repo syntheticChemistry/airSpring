@@ -1,6 +1,6 @@
 # Context — airSpring
 
-**Doc sync:** 2026-05-25 (v0.10.0; Wave 50 Covalent HPC; eastGate 12/12 + cell; Songbird mesh seeded; plasmidBin-only).
+**Doc sync:** 2026-05-29 (v0.10.0; Wave 60 Eukaryotic Unicellular; eastGate 12/12 + cell; Forgejo periplasm; plasmidBin-only).
 
 ## What This Is
 
@@ -51,7 +51,7 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - **Crate count:** 2 workspace crates
 - **GPU backend:** barraCuda 0.4.0 (wgpu 28, Vulkan, DeviceCapabilities API)
 - **Experiments:** 90 (all PASS)
-- **Capabilities:** 57 registered / 46 live (science + 13 ecology aliases + provenance + composition + coordination + health + inference)
+- **Capabilities:** 57 (science + ecology aliases + provenance + composition + coordination + health + inference)
 - **Deploy graphs:** 7 (eco + provenance + niche + cross-primal + GPU batch + sovereign data + uncertainty)
 - **GuideStone level:** L4 (targeting L6 with live NUCLEUS; **10 UniBin validation scenarios**)
 - **Tier 4 IPC-first:** `[features].default = []` (was `["local", "testutil"]`). Opt in with **`--features local`** for in-tree barraCuda + GPU; **`testutil`** extends `local` for dev helpers. All validation binaries use **`required-features = ["local"]`**. `gpu` is feature-gated; `math.rs` dual-path dispatch; `ipc/barracuda_route.rs` IPC forwarding. Default feature set builds without linking barraCuda.
@@ -59,7 +59,7 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 
 ## Key Capabilities (JSON-RPC methods)
 
-57 methods registered in `niche::CAPABILITIES` (46 live via `capability.list`; synced against 458-method canonical, Wave 46+):
+57 methods registered in `capability_registry.toml` (synced against 458-method canonical, Wave 46+):
 
 - **Evapotranspiration (7):** `science.et0_fao56`, `science.et0_hargreaves`,
   `science.et0_priestley_taylor`, `science.et0_makkink`, `science.et0_turc`,
@@ -74,11 +74,9 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - **Monthly ET/drought (4):** `science.thornthwaite`, `science.spi_drought_index`,
   `science.autocorrelation`, `science.gamma_cdf`
 - **Time series (1):** `science.timeseries`
-- **Ecology aliases (13):** `ecology.et0_fao56`, `ecology.et0_hargreaves`,
-  `ecology.et0_priestley_taylor`, `ecology.et0_makkink`, `ecology.et0_turc`,
-  `ecology.et0_hamon`, `ecology.et0_blaney_criddle`,
+- **Ecology aliases (7):** `ecology.et0_fao56`, `ecology.et0_hargreaves`,
   `ecology.water_balance`, `ecology.yield_response`, `ecology.full_pipeline`,
-  `ecology.spi_drought_index`, `ecology.autocorrelation`, `ecology.timeseries`
+  `ecology.spi_drought_index`, `ecology.autocorrelation`
 - **Provenance (4):** `provenance.begin`, `provenance.record`,
   `provenance.complete`, `provenance.status`
 - **Composition (1):** `composition.status`
@@ -127,9 +125,11 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 | **Hardware** | i9-12900, RTX 4070 + Akida NPU, 32GB DDR5 |
 | **Composition** | Full NUCLEUS (13/13 primals) |
 | **NUCLEUS status** | operational (12/12 primals ALIVE + airspring cell; plasmidBin-only) |
-| **Co-residents** | primalSpring (coord), neuralSpring, groundSpring |
+| **Co-residents** | primalSpring (coord), groundSpring |
 | **Songbird federation** | `0.0.0.0:7700` (LAN-reachable at 192.168.1.144:7700) |
-| **LAN mesh** | eastGate ↔ ironGate ↔ southGate ↔ biomeGate |
+| **Periplasm** | golgiBody VPS — Forgejo at `git.primals.eco` (SSH :2222) |
+| **Sync** | `cascade-pull.sh --gate eastGate --source forgejo` (30-repo profile) |
+| **LAN mesh** | eastGate ↔ ironGate ↔ southGate ↔ biomeGate (eukaryotic unicellular) |
 | **Cell graph** | `plasmidBin/cells/airspring_cell.toml` |
 | **Launch** | `SONGBIRD_FEDERATION_PORT=7700 ../primalSpring/tools/nucleus_launcher.sh start` then `FAMILY_ID=nucleus01 target/release/airspring_primal server` |
 
