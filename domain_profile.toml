@@ -1,0 +1,156 @@
+# Domain Profile: Agricultural Meteorology & Irrigation Science
+# Covers FAO-56 reference evapotranspiration (8 methods), soil physics,
+# water balance modeling, and large-scale crop water atlas production.
+
+[profile]
+id = "agricultural-meteorology-irrigation"
+version = "1.0.0"
+domain = "agricultural-meteorology"
+subdomain = ["evapotranspiration", "soil-physics", "water-balance", "crop-water-atlas"]
+tools = ["Rust", "Python (baselines)"]
+methods = ["penman-monteith-fao56", "priestley-taylor", "hargreaves-samani", "richards-equation", "green-ampt", "scs-curve-number", "saxton-rawls-pedotransfer", "stewart-yield-response"]
+
+[translation]
+
+[[translation.entity_groups]]
+name = "et0_reference"
+domain_description = "FAO-56 reference evapotranspiration — Penman-Monteith standardized against 75 Python cross-validated benchmarks"
+computation = "PM equation with altitude-adjusted psychrometric constant, net radiation, and soil heat flux"
+modules = ["module1_et0"]
+
+[[translation.entity_groups]]
+name = "et0_methods"
+domain_description = "8 ET₀ methods: PM, Priestley-Taylor, Thornthwaite, Hargreaves, Makkink, Turc, Hamon, Blaney-Criddle"
+computation = "Method-specific empirical and physically-based ET₀ equations cross-compared"
+modules = ["module2_et0_methods"]
+
+[[translation.entity_groups]]
+name = "soil_physics"
+domain_description = "Richards equation unsaturated flow, Green-Ampt infiltration, SCS curve number runoff, Saxton-Rawls pedotransfer functions"
+computation = "Numerical PDE (Richards), analytical infiltration (Green-Ampt), empirical pedotransfer"
+modules = ["module3_soil_physics"]
+
+[[translation.entity_groups]]
+name = "water_balance"
+domain_description = "FAO-56 daily soil water balance with dual crop coefficient (Kcb + Ke) and Stewart yield-response integration"
+computation = "Daily time-stepping water balance with layered soil moisture accounting"
+modules = ["module4_water_balance"]
+
+[[translation.entity_groups]]
+name = "atlas_pipeline"
+domain_description = "Michigan Crop Water Atlas — 100 NOAA stations, 80 years of climate data, multi-crop FAO-56 integration"
+computation = "Batch ET₀ + yield pipeline across station × year × crop parameter space"
+modules = ["module5_atlas"]
+
+[[translation.entity_groups]]
+name = "full_suite"
+domain_description = "Complete airSpring validation — all scenarios with structured JSON output for Tier 2 ingestion"
+computation = "Unified validation harness aggregating all module outputs"
+modules = ["module6_full_suite"]
+
+[derivation]
+
+[[derivation.pipeline]]
+name = "et0_penman_monteith"
+description = "FAO-56 PM reference evapotranspiration from daily weather station data"
+input = "weather station records (temperature, humidity, wind, radiation)"
+output = "et0_pm_values.json"
+tool = "airspring Tier 2 (Rust)"
+
+[[derivation.pipeline]]
+name = "et0_multi_method"
+description = "Cross-comparison of 8 ET₀ estimation methods against benchmark datasets"
+input = "standardized weather data"
+output = "et0_methods_comparison.json"
+tool = "airspring Tier 2 (Rust)"
+
+[[derivation.pipeline]]
+name = "soil_infiltration"
+description = "Richards equation, Green-Ampt, SCS-CN runoff, and Saxton-Rawls hydraulic properties"
+input = "soil texture and hydraulic parameters"
+output = "soil_physics_results.json"
+tool = "airspring Tier 2 (Rust)"
+
+[[derivation.pipeline]]
+name = "daily_water_balance"
+description = "FAO-56 dual crop coefficient water balance with yield integration"
+input = "daily weather + crop coefficients + soil parameters"
+output = "water_balance_timeseries.json"
+tool = "airspring Tier 2 (Rust)"
+
+[[derivation.pipeline]]
+name = "crop_water_atlas"
+description = "Multi-station, multi-year crop water requirement atlas for Michigan"
+input = "100 NOAA stations × 80 years × crop parameter tables"
+output = "atlas_results.json"
+tool = "airspring Tier 2 (Rust)"
+
+[audit]
+
+[[audit.checks]]
+name = "python_rust_parity"
+description = "Rust ET₀ output matches Python reference within 1e-5 relative tolerance"
+applies_to = ["module1_et0"]
+
+[[audit.checks]]
+name = "method_cross_comparison"
+description = "All 8 ET₀ methods produce physically plausible results and rank correctly for reference conditions"
+applies_to = ["module2_et0_methods"]
+
+[[audit.checks]]
+name = "mass_conservation"
+description = "Richards equation conserves water mass; infiltration ≤ precipitation"
+applies_to = ["module3_soil_physics"]
+
+[[audit.checks]]
+name = "water_balance_closure"
+description = "Daily P = ET + RO + ΔS closes within tolerance"
+applies_to = ["module4_water_balance"]
+
+[[audit.checks]]
+name = "atlas_station_coverage"
+description = "100 stations × 80 years processed without gaps"
+applies_to = ["module5_atlas"]
+
+[[audit.checks]]
+name = "cross_tier_parity"
+description = "Tier 2 (Rust) output matches Tier 1 (Python) golden values within documented tolerance"
+applies_to = "all"
+
+[figures]
+auto_generate = false
+
+[[figures.plot]]
+name = "et0_timeseries"
+module = "module1_et0"
+type = "1d_line"
+x_axis = "Day of year"
+y_axis = "ET₀ (mm/day)"
+
+[[figures.plot]]
+name = "et0_method_comparison"
+module = "module2_et0_methods"
+type = "1d_multi_line"
+x_axis = "Day of year"
+y_axis = "ET₀ (mm/day)"
+
+[[figures.plot]]
+name = "soil_moisture_profile"
+module = "module3_soil_physics"
+type = "1d_line"
+x_axis = "Depth (cm)"
+y_axis = "Volumetric water content"
+
+[[figures.plot]]
+name = "water_balance_components"
+module = "module4_water_balance"
+type = "1d_multi_line"
+x_axis = "Day"
+y_axis = "mm/day"
+
+[[figures.plot]]
+name = "atlas_et0_map"
+module = "module5_atlas"
+type = "scatter"
+x_axis = "Longitude"
+y_axis = "Latitude"
