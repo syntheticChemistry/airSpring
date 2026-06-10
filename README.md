@@ -1,8 +1,8 @@
 # airSpring — Ecological & Agricultural Sciences
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
-**Date**: May 29, 2026
-**Version**: v0.10.0 (Wave 60 Eukaryotic / Pre-Covalent — eastGate, Forgejo periplasm, 474-method canonical, plasmidBin-only, 12/12 NUCLEUS)
+**Date**: June 10, 2026
+**Version**: v0.10.0 (Wave 107 — 4-gate mesh collective; eastGate 13/13 FULL; Forgejo periplasm; 491-method canonical; topology-aware routing LIVE)
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -262,7 +262,7 @@ airSpring/
 ├── notebooks/                  # Publishable notebooks (25 total)
 │   ├── papers/                 # 20 paper baseline notebooks (Batch 1)
 │   └── *.ipynb                 # 5 sporePrint summary notebooks
-├── capability_registry.toml    # 57 capabilities (synced with niche.rs, CI tested + cross-sync vs canonical 474)
+├── capability_registry.toml    # 57 capabilities (synced with niche.rs, CI tested + cross-sync vs canonical 491)
 ├── wateringHole/                # Spring-local handoffs to ToadStool/BarraCuda
 │   └── handoffs/                # Versioned handoffs (V010 current)
 ├── graphs/                      # biomeOS deployment graphs (7 TOML: eco, provenance, niche, cross-primal, GPU batch, sovereign data, uncertainty)
@@ -298,7 +298,7 @@ airSpring/
 | `whitePaper/baseCamp/README.md` | Faculty research briefings + baseCamp extensions |
 | `wateringHole/handoffs/` | ToadStool/BarraCuda handoffs (V010 current) |
 | `docs/PRIMAL_GAPS.md` | Primal composition gaps for primalSpring handback |
-| `capability_registry.toml` | 57 capabilities — Songbird/biomeOS discovery (sync-tested vs niche.rs + cross-sync vs canonical 474; `primal.announce` Wave 17, `capability.list` canonical envelope Wave 20) |
+| `capability_registry.toml` | 57 capabilities — Songbird/biomeOS discovery (sync-tested vs niche.rs + cross-sync vs canonical 491; `primal.announce` Wave 17, `capability.list` canonical envelope Wave 20) |
 | `notebooks/papers/PAPER_NOTEBOOK_PATTERN.md` | Paper baseline notebook template |
 | `notebooks/papers/*.ipynb` | 20 publishable paper baseline notebooks |
 | `notebooks/*.ipynb` | 5 sporePrint summary notebooks |
@@ -310,7 +310,7 @@ AGPL-3.0-or-later
 ---
 
 *May 17, 2026 — **Experiment Buildout + Control Validation**: 174/174 UniBin scenario PASS; 3 new control experiments (autocorrelation, gamma_cdf, soil_moisture_topp — 65 scripts total); metalForge NUCLEUS atomic assertions updated (Tower 3, Node 4, Nest 4 capabilities; 20/0 absorbed/local workloads); 7 new NUCLEUS composition tests (69 forge tests); CPU-GPU parity 37/37; toadStool dispatch 19/19; NUCLEUS graphs 22/22; mixed pipeline 66/66; nucleus routing 60/60. Wave 20 debt resolution: 6 ecology aliases registered (57 capabilities), unsafe consolidation via EnvGuard RAII, stale lint cleanup, paper queue arithmetic.
-May 16, 2026 — **Wave 20 Schema Standardization + Foundation Evolution**: `capability.list` canonical envelope (flat `capabilities` array + `count`); registry synced to 474-method canonical (Wave 60); `--provenance-dir` flag on `airspring validate` (Thread 5+6 capture for projectFOUNDATION); `s_foundation_targets` evolved from dispatch smoke check to full numerical parity validation (expected_value ± tolerance); LTEE E3 `tolerances.toml` moisture_range corrected (0.2→0.23). **Wave 17 Signal Adoption**: `primal.announce` replaces 3-call registration; `nest.store` + `nest.commit` signal dispatch; `primal.info` introspection handler; **57 capabilities**. **1,061 lib + 69 forge tests**, 0 clippy. May 14: Tower triple-first (bearDog + songBird + skunkBat).
+May 16, 2026 — **Wave 20 Schema Standardization + Foundation Evolution**: `capability.list` canonical envelope (flat `capabilities` array + `count`); registry synced to 491-method canonical (Wave 107); `--provenance-dir` flag on `airspring validate` (Thread 5+6 capture for projectFOUNDATION); `s_foundation_targets` evolved from dispatch smoke check to full numerical parity validation (expected_value ± tolerance); LTEE E3 `tolerances.toml` moisture_range corrected (0.2→0.23). **Wave 17 Signal Adoption**: `primal.announce` replaces 3-call registration; `nest.store` + `nest.commit` signal dispatch; `primal.info` introspection handler; **57 capabilities**. **1,061 lib + 69 forge tests**, 0 clippy. May 14: Tower triple-first (bearDog + songBird + skunkBat).
 May 13, 2026 — **Niche Convergence → Atomic Deployment**: AG-005 RESOLVED (`inference.embed/complete/models` wired through `dispatch_science`, 7 dispatch tests); NestGate CAS typed client; Squirrel inference typed client; deep debt sprint: zero debt across all audit dimensions. **1,061 lib tests**, **1,435 total**. Earlier: Tier 2 Convergence Wave: `precision.route` full field consumption; LTEE E3 lithoSpore packaging; musl static-pie binary (3.3 MB, plasmidBin harvestable).
 May 12, 2026 — Deep debt resolution: **barraCuda 0.4.0** upstream absorption (workspace + Forge; from 0.3.13); 12 hardcoded primal tracing targets → `primal_names::` constants; **`primal_names::socket_filename()`** replaces `"biomeos.sock"` path literals; dead **`primal-proof`** Cargo feature removed; zero hardcoded primal name strings in production; **1,027** lib tests, **0** clippy. Earlier same day: hardcoded primal strings scrub, all three `deny.toml` files synced (openssl, sysinfo, aws-lc-sys, aws-lc-rs bans), Forge barraCuda progression **`0.3.7→0.4.0`**, `primal_names::BARRACUDA` added. Tier 4 IPC-first defaults + guideStone convergence (L2+→L4): `default = []`, 7 deploy graphs (GPU batch, sovereign data, uncertainty added), `required-features` on 94 binaries, IPC-only clippy clean. **LTEE E3** Python **12/12** + Rust **29/29** PASS (`validate_ltee_fls2`). UniBin **`validate --format json`** for Tier 2 projectNUCLEUS ingestion. Post-interstadial evolution: **`method.register`**, **`composition.status`**, skunkBat deploy-graph, capability cross-sync vs canonical **413**, CONTEXT.md reconciled, certification engine **L0–L6** (L4 cross-atomic; L5 NUCLEUS composition; L6 cross-spring pipeline), **10 UniBin validation scenarios** (incl. `s_tier4_math_parity`). **Tier 2 IPC wiring:** `ipc::toadstool_validate` + `ipc::precision_route` (16 TCP round-trip lib tests); **AG-012** resolved (Tier 2 unblocked); `TOADSTOOL_VALIDATE`, `TOADSTOOL_LIST_WORKLOADS`, `PRECISION_ROUTE` in `methods.rs`; composition-parity scenario extended with Tier 2 probes.
 May 9 — Deep debt resolution + eukaryotic evolution. Dead standalone-http feature

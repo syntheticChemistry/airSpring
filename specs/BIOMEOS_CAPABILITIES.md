@@ -1,7 +1,7 @@
 # airSpring — biomeOS Capability Registration
 
-**Updated**: May 29, 2026 (Wave 60 Eukaryotic / Pre-Covalent)
-**Status**: Active — ecology domain registered, 57 registered / 46 live capabilities (v0.10.0). Wave 17 `primal.announce` adopted; `nest.store`/`nest.commit` signal dispatch. 474-method canonical registry sync (Wave 60). eastGate operational (12/12 NUCLEUS).
+**Updated**: June 10, 2026 (Wave 107)
+**Status**: Active — ecology domain registered, 57 registered / 46 live capabilities (v0.10.0). Wave 17 `primal.announce` adopted; `nest.store`/`nest.commit` signal dispatch. 491-method canonical registry sync (Wave 107). eastGate 13/13 FULL. Topology-aware routing LIVE.
 **Requires**: biomeOS Tower Node (stable), ToadStool (compute), NestGate (storage)
 
 ---

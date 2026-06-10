@@ -1,6 +1,6 @@
 # baseCamp: Peer-Reviewed Science Validation — Python → Rust (UniBin) → Primal (NUCLEUS)
 
-**Updated**: May 25, 2026 (Wave 50 Covalent HPC)
+**Updated**: June 10, 2026 (Wave 107)
 **Project**: airSpring — Ecological & Agricultural Sciences (v0.10.0)
 
 ## Validation Evolution
@@ -13,7 +13,7 @@ Every paper reproduced in airSpring follows the same path:
 4. **Primal composition** — 57 JSON-RPC capabilities via biomeOS Neural API (Wave 20 `capability.list` canonical envelope, Wave 17 `primal.announce` + `nest.store`/`nest.commit` signal dispatch), 7 deploy graphs, NUCLEUS atomics
 5. **UniBin eukaryotic** — single `airspring` binary (certify/validate/serve/status/version), 10 validation scenarios, guideStone **L4** (targeting L6)
 
-**Status**: 90 experiments, barraCuda 0.4.0 (wgpu 28, DF64), Edition 2024 (rust-toolchain 1.92), all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired, niche architecture (57 capabilities, 7 deploy graphs, 474-method canonical sync, Wave 60), `#![cfg_attr(not(test), forbid(unsafe_code))]` + `#![deny(cast_*)]` library-strict + zero clippy pedantic+nursery + `warn(missing_docs)`. 60 tolerances in 5 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies**. Zero `#[allow()]` in production. Platform-agnostic IPC (Transport enum: Unix + TCP). Tier 4 IPC-first: **`[features].default = []`**, barraCuda via `--features local`, validation binaries `required-features = ["local"]`, pure-Rust fallbacks. 90.56% line coverage. cargo-deny 0.19 clean. Full validation pipeline green (2026-05-23). **Wave 60**: 474-method canonical registry; gate composition validator (Exp 094-AS); **`capability.list`** canonical envelope; `--provenance-dir` for Thread 5+6 capture; foundation targets scenario evolved to numerical parity (expected_value ± tolerance)
+**Status**: 90 experiments, barraCuda 0.4.0 (wgpu 28, DF64), Edition 2024 (rust-toolchain 1.92), all 20 ops upstream (`BatchedElementwiseF64`), `local_dispatch` retired, niche architecture (57 capabilities, 7 deploy graphs, 491-method canonical sync, Wave 107), `#![cfg_attr(not(test), forbid(unsafe_code))]` + `#![deny(cast_*)]` library-strict + zero clippy pedantic+nursery + `warn(missing_docs)`. 60 tolerances in 5 submodules (Rust + Python mirror). JSON-RPC 2.0 protocol compliant. **Zero C dependencies**. Zero `#[allow()]` in production. Platform-agnostic IPC (Transport enum: Unix + TCP). Tier 4 IPC-first: **`[features].default = []`**, barraCuda via `--features local`, validation binaries `required-features = ["local"]`, pure-Rust fallbacks. 90.56% line coverage. cargo-deny 0.19 clean. Full validation pipeline green (2026-05-23). **Wave 60**: 474-method canonical registry; gate composition validator (Exp 094-AS); **`capability.list`** canonical envelope; `--provenance-dir` for Thread 5+6 capture; foundation targets scenario evolved to numerical parity (expected_value ± tolerance)
 
 **April 27, 2026 evolution**: 60 tolerances (2 new atlas), 51/51 IPC capabilities routable, provenance drift fixed, capability naming converged, docs/PRIMAL_GAPS.md created (11 gaps, gS Level 0→1 path), CI pinned to 1.92, all files <800 LOC.
 

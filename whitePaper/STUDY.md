@@ -1,7 +1,7 @@
 # airSpring Study: Precision Agriculture on Consumer Hardware
 
 **Status**: Working draft
-**Date**: May 25, 2026 (Wave 50 Covalent HPC)
+**Date**: June 10, 2026 (Wave 107)
 **See also**: [METHODOLOGY.md](METHODOLOGY.md) for validation protocol
 
 ---
@@ -266,4 +266,4 @@ The same BarraCuda/ToadStool infrastructure supports both domains. The key share
 
 ---
 
-*May 23, 2026 — 1,284 Python + 1,061 lib + 316 integration + 69 forge = 1,446 total tests, 98 binaries, 57 capabilities, 7 deploy graphs, 10 UniBin validation scenarios, guideStone L4 (targeting L6). Wave 60: 474-method canonical registry sync. Tier 2 IPC wiring: `ipc::toadstool_validate`, `ipc::precision_route`; AG-012 resolved; `TOADSTOOL_VALIDATE`, `TOADSTOOL_LIST_WORKLOADS`, `PRECISION_ROUTE`; composition-parity scenario Tier 2 probes. 15,300 station-days (100 stations) real data, 75/75 cross-validation match, 14.3× Rust-vs-Python speedup (25/25 algorithms, 21/21 CPU-GPU parity modules), zero synthetic. barraCuda 0.4.0 (wgpu 28), Tier 4 IPC-first (`default = []`), Edition 2024 (MSRV 1.92), zero C deps, zero `#[allow()]`, primal_names:: constants. AGPL-3.0-or-later.*
+*May 23, 2026 — 1,284 Python + 1,061 lib + 316 integration + 69 forge = 1,446 total tests, 98 binaries, 57 capabilities, 7 deploy graphs, 10 UniBin validation scenarios, guideStone L4 (targeting L6). Wave 107: 491-method canonical registry sync. Tier 2 IPC wiring: `ipc::toadstool_validate`, `ipc::precision_route`; AG-012 resolved; `TOADSTOOL_VALIDATE`, `TOADSTOOL_LIST_WORKLOADS`, `PRECISION_ROUTE`; composition-parity scenario Tier 2 probes. 15,300 station-days (100 stations) real data, 75/75 cross-validation match, 14.3× Rust-vs-Python speedup (25/25 algorithms, 21/21 CPU-GPU parity modules), zero synthetic. barraCuda 0.4.0 (wgpu 28), Tier 4 IPC-first (`default = []`), Edition 2024 (MSRV 1.92), zero C deps, zero `#[allow()]`, primal_names:: constants. AGPL-3.0-or-later.*

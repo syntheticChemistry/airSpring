@@ -9,7 +9,7 @@
 # CI sync: tests/capabilities_match_registry.rs checks this file
 # matches the Rust constant exactly.
 #
-# Stability tiers (primalSpring Wave 20):
+# Stability tiers (primalSpring Wave 20, canonical 491 methods Wave 107):
 #   stable   — deployed consumers depend on these names; do not rename
 #   evolving — name may change between major waves; notify downstream
 #   internal — test fixture or internal-only; no stability guarantee

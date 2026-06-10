@@ -1,7 +1,7 @@
 # airSpring Experiments
 
-**Updated**: May 25, 2026 (Wave 50 Covalent HPC)
-**Status**: 90 experiments, barraCuda 0.4.0 (wgpu 28), v0.10.0, Edition 2024 (MSRV 1.92). 1284/1284 Python + 1,061 lib + 316 integration + 69 forge = 1,446 total. 98 binaries. 57 registered / 46 live capabilities. 474-method canonical registry sync (Wave 60). eastGate operational (12/12 NUCLEUS + airspring cell, plasmidBin-only).
+**Updated**: June 10, 2026 (Wave 107)
+**Status**: 90 experiments, barraCuda 0.4.0 (wgpu 28), v0.10.0, Edition 2024 (MSRV 1.92). 1284/1284 Python + 1,061 lib + 316 integration + 69 forge = 1,446 total. 98 binaries. 57 registered / 46 live capabilities. 491-method canonical registry sync (Wave 107). eastGate 13/13 FULL + airspring cell, plasmidBin-only. Topology-aware routing LIVE.
 
 ---
 

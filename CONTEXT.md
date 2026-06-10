@@ -1,6 +1,6 @@
 # Context — airSpring
 
-**Doc sync:** 2026-05-29 (v0.10.0; Wave 60 Eukaryotic / Pre-Covalent; eastGate 12/12 + cell; Forgejo periplasm; 474-method canonical; 38-repo manifest; plasmidBin-only).
+**Doc sync:** 2026-06-10 (v0.10.0; Wave 107 — 4-gate mesh collective; eastGate 13/13 FULL; Forgejo periplasm; 491-method canonical; 39-repo manifest; plasmidBin-only; topology-aware routing LIVE).
 
 ## What This Is
 
@@ -59,7 +59,7 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 
 ## Key Capabilities (JSON-RPC methods)
 
-57 methods registered in `capability_registry.toml` (synced against 474-method canonical, Wave 60):
+57 methods registered in `capability_registry.toml` (synced against 491-method canonical, Wave 107):
 
 - **Evapotranspiration (7):** `science.et0_fao56`, `science.et0_hargreaves`,
   `science.et0_priestley_taylor`, `science.et0_makkink`, `science.et0_turc`,
@@ -113,7 +113,7 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - [wateringHole](https://github.com/ecoPrimals/wateringHole) — ecosystem standards and registry
 - [barraCuda](https://github.com/ecoPrimals/barraCuda) — GPU math library (767+ WGSL shaders)
 - [toadStool](https://github.com/ecoPrimals/toadStool) — hardware discovery and compute orchestration
-- [bingoCube](https://github.com/ecoPrimals/primalTools/bingoCube) — evolutionary reservoir computing
+- [bingoCube](https://github.com/ecoPrimals/bingoCube) — evolutionary reservoir computing
 - [projectNUCLEUS](https://github.com/sporeGarden/projectNUCLEUS) — deployable NUCLEUS infrastructure
 - [foundation](https://github.com/sporeGarden/foundation) — scientific knowledge layer
 
@@ -124,12 +124,12 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 | **Gate** | eastGate |
 | **Hardware** | i9-12900, RTX 4070 + Akida NPU, 32GB DDR5 |
 | **Composition** | Full NUCLEUS (13/13 primals) |
-| **NUCLEUS status** | operational (12/12 primals ALIVE + airspring cell; plasmidBin-only) |
+| **NUCLEUS status** | operational (13/13 primals ALIVE + airspring cell; plasmidBin-only) |
 | **Co-residents** | primalSpring (coord), groundSpring |
 | **Songbird federation** | `0.0.0.0:7700` (LAN-reachable at 192.168.1.144:7700) |
 | **Periplasm** | golgiBody VPS — Forgejo at `git.primals.eco` (SSH :2222) |
-| **Sync** | `cascade-pull.sh --gate eastGate --source forgejo` (38-repo manifest-driven profile) |
-| **LAN mesh** | eastGate ↔ ironGate ↔ southGate ↔ biomeGate (eukaryotic unicellular) |
+| **Sync** | `cascade-pull.sh --gate eastGate --source forgejo` (39-repo manifest-driven profile) |
+| **LAN mesh** | 4-gate collective: eastGate (hub) ↔ ironGate ↔ southGate ↔ golgiBody VPS; topology-aware routing LIVE |
 | **Cell graph** | `plasmidBin/cells/airspring_cell.toml` |
 | **Launch** | `SONGBIRD_FEDERATION_PORT=7700 nucleus_launcher.sh --family-id nucleus01 start` then `cell_launcher.sh airspring start` |
 

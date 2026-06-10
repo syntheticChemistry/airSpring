@@ -2,7 +2,18 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased] - 2026-05-29
+## [Unreleased] - 2026-06-10
+
+### Wave 107 — 4-Gate Mesh Collective Sync (2026-06-10)
+
+- **Canonical registry sync 474→491**: 17 new upstream methods since Wave 60 (topology-aware routing, `method.describe`, socket cleanup). Cross-sync assertion updated to `>= 491`.
+- **NUCLEUS 13/13 FULL**: eastGate elevated from 12/12 to 13/13 (skunkBat now clean — TCP 9750 resolved upstream). All primals operational from plasmidBin.
+- **bingoCube path dep fix**: `primalTools/bingoCube/nautilus` → `infra/bingoCube/nautilus` (repo relocated to infra/).
+- **4-gate collective operational**: eastGate (hub, :7700), golgiBody VPS, ironGate, southGate. Topology-aware routing via Songbird `ipc.resolve` MeshRelay endpoints.
+- **barraCuda `method.describe` SHIPPED**: 97 methods, runtime introspection available for composition debugging.
+- **Primal socket cleanup**: 4/5 primals (sweetGrass, barraCuda, coralReef, squirrel) now have zero `/tmp` artifacts — 3-tier socket resolution. toadStool last to migrate.
+- **1,061 lib tests pass**, 2 clippy warnings (pre-existing `too_many_lines`), cross-sync validates live against canonical 491.
+- **20-file doc sweep**: All active documentation updated for Wave 107 metrics (canonical 491, NUCLEUS 13/13, 39-repo manifest, topology-aware routing).
 
 ### Wave 60 Eukaryotic / Pre-Covalent + Triad Alignment (2026-05-29)
 

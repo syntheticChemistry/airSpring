@@ -1,6 +1,6 @@
 # Primal Gaps — airSpring v0.10.0
 
-**Date**: May 29, 2026 (Wave 60 Eukaryotic / Pre-Covalent — Forgejo periplasm, 474-method canonical, 38-repo manifest, plasmidBin-only, 46 niche live / 57 registered)
+**Date**: June 10, 2026 (Wave 107 — 4-gate mesh collective, 491-method canonical, 39-repo manifest, plasmidBin-only, 46 niche live / 57 registered)
 **Spring**: airSpring (ecology / agriculture)
 **Gate Assignment**: **eastGate** (i9-12900, RTX 4070 + Akida NPU, 32GB DDR5) — co-residents: primalSpring (coord), neuralSpring, groundSpring
 **guideStone Level**: **L4** (cross-atomic pipeline / provenance tier) → targeting **L5+** (NUCLEUS composition, live primals)
@@ -164,6 +164,21 @@ Structural L5 validation with TCP mock round-trip tests passes (1,061 lib tests)
 - [ ] guideStone L5 / live NUCLEUS validation (blocked on live biomeOS + toadStool — Pass 14)
 - [ ] guideStone L6 / cross-spring pipeline (deploy graphs validated against live NUCLEUS)
 
+### Wave 107 — 4-Gate Mesh Collective Sync (June 10, 2026)
+
+Per primalSpring Wave 107 — topology-aware routing, `method.describe`, socket cleanup:
+- [x] **Canonical sync 474→491**: 17 new upstream methods absorbed. Cross-sync assertion updated (`>= 491`).
+- [x] **NUCLEUS 13/13 FULL**: eastGate elevated from 12/12 to 13/13 (skunkBat TCP 9750 resolved upstream).
+- [x] **bingoCube path dep fix**: `primalTools/bingoCube/nautilus` → `infra/bingoCube/nautilus` (repo relocated).
+- [x] **4-gate collective live**: eastGate (hub :7700), golgiBody VPS, ironGate, southGate. Topology-aware mesh routing via Songbird `ipc.resolve` MeshRelay endpoints.
+- [x] **barraCuda `method.describe` SHIPPED**: 97 methods with runtime introspection.
+- [x] **Primal socket cleanup**: 4/5 primals zero `/tmp` artifacts (sweetGrass, barraCuda, coralReef, squirrel). toadStool last.
+- [x] **39-repo manifest**: Ecosystem grew from 38 to 39 repos (Forgejo mirrored).
+- [x] **1,061 lib tests pass**, cross-sync validates live against canonical 491.
+- [ ] **AG-010 TensorSession**: Still open — barraCuda roadmap for seasonal GPU pipeline.
+- [ ] **AG-021 Akida**: Still open — AKD1000 BAR disabled, no driver. Hardware gap.
+- [ ] **gS L5 pathway**: Needs live biomeOS + toadStool minimum on eastGate for L5 certification.
+
 ### Wave 60 Eukaryotic Unicellular — After Action Report (May 29, 2026)
 
 Per primalSpring Wave 60 — Forgejo periplasm, cascade sync, fresh-gate stress test:
@@ -265,7 +280,7 @@ Per primalSpring audit — Wave 20 residual debt:
 - [x] Paper queue arithmetic: fixed "All 61" → "All 62", "All 41" → "All 62" in `PAPER_REVIEW_QUEUE.md`
 - Zero deep debt remaining: 0 `todo!()`, 0 `unimplemented!()`, 0 `FIXME`, 0 `HACK`, 0 production mocks, 0 unsafe in production, 0 files >800 LOC
 
-### Wave 20 Schema Standardization (May 16, 2026) — *historical; canonical registry is now 474 methods (Wave 60)*
+### Wave 20 Schema Standardization (May 16, 2026) — *historical; canonical registry is now 491 methods (Wave 107)*
 
 Per primalSpring Wave 20 (445-method registry at the time, Schema Standardization + E2E Validation):
 - `primal.list` constant added to `methods.rs` (biomeOS serves primal enumeration)

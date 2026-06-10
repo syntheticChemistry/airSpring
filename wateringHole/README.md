@@ -1,6 +1,6 @@
 # airSpring wateringHole
 
-**Updated**: May 29, 2026 | **Version**: v0.10.0 (Wave 60 Eukaryotic / Pre-Covalent, eastGate Forgejo periplasm, 474-method canonical, 38-repo manifest, triad alignment, plasmidBin-only)
+**Updated**: June 10, 2026 | **Version**: v0.10.0 (Wave 107 — 4-gate mesh collective, eastGate 13/13 FULL, 491-method canonical, 39-repo manifest, topology-aware routing LIVE, plasmidBin-only)
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs
