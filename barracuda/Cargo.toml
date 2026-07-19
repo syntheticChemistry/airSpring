@@ -50,7 +50,7 @@ tracing-subscriber = { version = "0.3", features = ["fmt", "env-filter"] }
 # Nautilus Shell: evolutionary reservoir computing via BingoCube board populations.
 # Domain-agnostic feed-forward reservoir — no temporal recurrence needed.
 # Provides DriftMonitor, EdgeSeeder, NautilusShell, and NautilusBrain APIs.
-bingocube-nautilus = { version = "0.1.0", path = "../../../infra/bingoCube/nautilus", features = ["json"] }
+bingocube-nautilus = { version = "0.1.0", path = "../../../primals/bingoCube/nautilus", features = ["json"] }
 
 # Serde: needed for Nautilus brain serialization (observations, shell state).
 serde = { version = "1", features = ["derive"] }
