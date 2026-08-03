@@ -22,9 +22,6 @@ use barracuda::optimize::brent_gpu::BrentGpu;
 
 use crate::tolerances::POSITIVE_DATA_GUARD;
 
-#[cfg(test)]
-use super::device_info::try_f64_device;
-
 /// Batched van Genuchten θ(h) and K(h) GPU orchestrator.
 ///
 /// Dispatches to `BatchedElementwiseF64` ops 9 and 10 when a GPU engine
@@ -216,17 +213,11 @@ pub fn compute_k_cpu(
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
-
-    fn try_device() -> Option<Arc<WgpuDevice>> {
-        try_f64_device()
-    }
+    use crate::testutil::gpu_or_skip;
 
     #[test]
     fn test_gpu_theta_matches_cpu() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedVanGenuchten");
-            return;
-        };
+        gpu_or_skip!(device);
         let vg = BatchedVanGenuchten::gpu(device).unwrap();
         let theta_r = 0.065;
         let theta_s = 0.41;
@@ -247,10 +238,7 @@ mod tests {
 
     #[test]
     fn test_gpu_k_matches_cpu() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedVanGenuchten");
-            return;
-        };
+        gpu_or_skip!(device);
         let vg = BatchedVanGenuchten::gpu(device).unwrap();
         let k_s = 10.0;
         let theta_r = 0.065;
@@ -273,10 +261,7 @@ mod tests {
 
     #[test]
     fn test_gpu_inverse_matches_cpu() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedVanGenuchten inverse");
-            return;
-        };
+        gpu_or_skip!(device);
         let vg = BatchedVanGenuchten::gpu(device).unwrap();
         let theta_r = 0.065;
         let theta_s = 0.41;

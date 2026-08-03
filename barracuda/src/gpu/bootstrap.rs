@@ -15,9 +15,6 @@ use barracuda::device::WgpuDevice;
 use barracuda::stats::bootstrap::BootstrapMeanGpu;
 use barracuda::stats::{bootstrap_ci, mean, percentile};
 
-#[cfg(test)]
-use super::device_info::try_f64_device;
-
 /// Bootstrap mean estimate with confidence interval.
 #[derive(Debug, Clone)]
 pub struct BootstrapEstimate {
@@ -152,11 +149,7 @@ fn bootstrap_mean_cpu(
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
-
-    fn try_device() -> Option<Arc<WgpuDevice>> {
-        try_f64_device()
-    }
-
+    use crate::testutil::gpu_or_skip;
     #[test]
     fn test_known_mean() {
         let engine = GpuBootstrap::cpu();
@@ -169,10 +162,7 @@ mod tests {
 
     #[test]
     fn test_gpu_matches_cpu() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for GpuBootstrap");
-            return;
-        };
+        gpu_or_skip!(device);
         let Ok(gpu_engine) = GpuBootstrap::gpu(device) else {
             eprintln!("SKIP: GpuBootstrap::gpu init failed");
             return;

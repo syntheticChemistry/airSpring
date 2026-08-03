@@ -173,10 +173,7 @@ mod tests {
     )]
 
     use super::*;
-
-    fn try_device() -> Option<Arc<WgpuDevice>> {
-        crate::gpu::device_info::try_f64_device()
-    }
+    use crate::testutil::gpu_or_skip;
 
     #[test]
     fn predict_vwc_linear() {
@@ -199,10 +196,7 @@ mod tests {
 
     #[test]
     fn sensor_regression_gpu_linear() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No f64-capable GPU");
-            return;
-        };
+        gpu_or_skip!(device);
         let raw: Vec<f64> = (0..50)
             .map(|i| f64::from(i).mul_add(200.0, 1000.0))
             .collect();
@@ -237,10 +231,7 @@ mod tests {
 
     #[test]
     fn soil_correlation_gpu_identity_diagonal() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No f64-capable GPU");
-            return;
-        };
+        gpu_or_skip!(device);
         let n = 100;
         let p = 3;
         let mut data = Vec::with_capacity(n * p);

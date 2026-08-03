@@ -52,9 +52,11 @@ fn soil_immune_coupling(
     const T_REF: f64 = 25.0;
     const Q10: f64 = 2.0;
 
-    let moisture_factor =
-        ((soil_moisture_vwc - THETA_WP) / (THETA_FC - THETA_WP)).clamp(0.0, 1.0);
-    #[expect(clippy::suboptimal_flops, reason = "Q10 is a domain constant, not literal 2")]
+    let moisture_factor = ((soil_moisture_vwc - THETA_WP) / (THETA_FC - THETA_WP)).clamp(0.0, 1.0);
+    #[expect(
+        clippy::suboptimal_flops,
+        reason = "Q10 is a domain constant, not literal 2"
+    )]
     let temp_factor = Q10.powf((soil_temp_c - T_REF) / 10.0);
     let activity = moisture_factor * temp_factor;
     let flagellin_relative = activity * microbial_density_cfu_g / 1e7;
@@ -74,10 +76,7 @@ fn validate_benchmark_structure(v: &mut ValidationHarness, bm: &serde_json::Valu
         "benchmark has checks array",
         bm.get("checks").and_then(|c| c.as_array()).is_some(),
     );
-    v.check_bool(
-        "benchmark has model_fits",
-        bm.get("model_fits").is_some(),
-    );
+    v.check_bool("benchmark has model_fits", bm.get("model_fits").is_some());
     v.check_bool(
         "benchmark pass_count == 12",
         bm.get("pass_count").and_then(serde_json::Value::as_u64) == Some(12),
@@ -99,10 +98,7 @@ fn validate_model_fits(v: &mut ValidationHarness, bm: &serde_json::Value) {
     let lang_aic = fits["langmuir"]["aic"].as_f64().unwrap_or(f64::MAX);
     let hill_aic = fits["hill"]["aic"].as_f64().unwrap_or(f64::MAX);
     let two_site_aic = fits["two_site"]["aic"].as_f64().unwrap_or(f64::MAX);
-    v.check_bool(
-        "Langmuir AIC <= Hill AIC + 2",
-        lang_aic <= hill_aic + 2.0,
-    );
+    v.check_bool("Langmuir AIC <= Hill AIC + 2", lang_aic <= hill_aic + 2.0);
     v.check_bool(
         "Langmuir AIC <= two_site AIC + 2",
         lang_aic <= two_site_aic + 2.0,
@@ -159,7 +155,10 @@ fn validate_glycosylation_shift(v: &mut ValidationHarness, bm: &serde_json::Valu
 
     let rust_ratio = 28.0_f64 / 15.0;
     v.check_abs("Rust glycosylation ratio", rust_ratio, ratio, 1e-12);
-    v.check_bool("sensitivity ratio in (1.5, 2.5)", ratio > 1.5 && ratio < 2.5);
+    v.check_bool(
+        "sensitivity ratio in (1.5, 2.5)",
+        ratio > 1.5 && ratio < 2.5,
+    );
     v.check_abs(
         "activation improvement %",
         gs["activation_improvement_pct"].as_f64().unwrap_or(0.0),
@@ -208,10 +207,20 @@ fn validate_soil_coupling_rust(v: &mut ValidationHarness, bm: &serde_json::Value
     v.check_bool("flagellin increases with temperature", f_warm > f_cool);
 
     let extreme = soil_immune_coupling(0.0, -10.0, 1e7);
-    v.check_abs("frozen soil → zero moisture factor", extreme.moisture_factor, 0.0, 1e-15);
+    v.check_abs(
+        "frozen soil → zero moisture factor",
+        extreme.moisture_factor,
+        0.0,
+        1e-15,
+    );
 
     let fc = soil_immune_coupling(0.33, 25.0, 1e7);
-    v.check_abs("field capacity → moisture factor = 1.0", fc.moisture_factor, 1.0, 1e-15);
+    v.check_abs(
+        "field capacity → moisture factor = 1.0",
+        fc.moisture_factor,
+        1.0,
+        1e-15,
+    );
     v.check_abs(
         "field capacity @ 25°C → activity = moisture × temp",
         fc.microbial_activity,
@@ -220,7 +229,12 @@ fn validate_soil_coupling_rust(v: &mut ValidationHarness, bm: &serde_json::Value
     );
 
     let ref_temp = soil_immune_coupling(0.25, 25.0, 1e7);
-    v.check_abs("reference temp → Q10 factor = 1.0", ref_temp.temp_factor, 1.0, 1e-15);
+    v.check_abs(
+        "reference temp → Q10 factor = 1.0",
+        ref_temp.temp_factor,
+        1.0,
+        1e-15,
+    );
 }
 
 fn main() {

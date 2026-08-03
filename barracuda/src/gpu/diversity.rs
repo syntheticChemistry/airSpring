@@ -18,9 +18,6 @@ use barracuda::ops::bio::diversity_fusion::{
     DiversityFusionGpu, DiversityResult, diversity_fusion_cpu,
 };
 
-#[cfg(test)]
-use super::device_info::try_f64_device;
-
 /// Alpha diversity metrics for a single sample.
 #[derive(Debug, Clone, Copy)]
 pub struct DiversityMetrics {
@@ -124,11 +121,7 @@ fn compute_diversity_cpu(abundances: &[f64], n_species: usize) -> Vec<DiversityM
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
-
-    fn try_device() -> Option<Arc<WgpuDevice>> {
-        try_f64_device()
-    }
-
+    use crate::testutil::gpu_or_skip;
     #[test]
     fn test_uniform_distribution() {
         let engine = GpuDiversity::cpu();
@@ -143,10 +136,7 @@ mod tests {
 
     #[test]
     fn test_gpu_matches_cpu() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for GpuDiversity");
-            return;
-        };
+        gpu_or_skip!(device);
         let gpu_engine = GpuDiversity::gpu(device).unwrap();
         let cpu_engine = GpuDiversity::cpu();
 

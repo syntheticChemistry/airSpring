@@ -208,6 +208,10 @@ fn run_hargreaves_benchmarks(pass: &mut u32, fail: &mut u32) {
     );
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "benchmark binary — sequential GPU dispatch checks"
+)]
 fn run_ops_5_8_gpu_benchmarks(device: Option<&Arc<WgpuDevice>>, pass: &mut u32, fail: &mut u32) {
     use barracuda::ops::batched_elementwise_f64::{self as bef64, BatchedElementwiseF64, Op};
 

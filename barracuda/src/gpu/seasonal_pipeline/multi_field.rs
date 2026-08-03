@@ -53,16 +53,7 @@ impl SeasonalPipeline {
             });
         }
 
-        let n_days = weather_per_field[0].len();
-        for (idx, w) in weather_per_field.iter().enumerate() {
-            if w.len() != n_days {
-                return Err(PipelineError::InvalidConfig(format!(
-                    "all fields must have the same number of days (expected {n_days} from field 0, field {idx} has {})",
-                    w.len()
-                ))
-                .into());
-            }
-        }
+        let n_days = validate_uniform_days(weather_per_field)?;
 
         let et0_per_field: Vec<Vec<f64>> = weather_per_field
             .iter()
@@ -82,20 +73,7 @@ impl SeasonalPipeline {
         let gpu_wb_used = wb_gpu.is_some();
         let mut gpu_wb_dispatches = 0_usize;
 
-        let mut states: Vec<WaterBalanceState> = configs
-            .iter()
-            .map(|c| {
-                let kc = c.crop_type.coefficients();
-                let root_mm = kc.root_depth_m * 1000.0;
-                WaterBalanceState::new(
-                    c.field_capacity,
-                    c.wilting_point,
-                    root_mm,
-                    c.irrigation_trigger,
-                )
-            })
-            .collect();
-
+        let mut states = init_wb_states(configs);
         let mut wb_outputs: Vec<Vec<DailyOutput>> =
             (0..m).map(|_| Vec::with_capacity(n_days)).collect();
         let mut wb_inputs: Vec<Vec<DailyInput>> =
@@ -155,6 +133,40 @@ impl SeasonalPipeline {
             gpu_wb_used,
         })
     }
+}
+
+/// Verify all field weather slices have the same number of days.
+fn validate_uniform_days(
+    weather_per_field: &[&[super::WeatherDay]],
+) -> crate::error::Result<usize> {
+    let n_days = weather_per_field[0].len();
+    for (idx, w) in weather_per_field.iter().enumerate() {
+        if w.len() != n_days {
+            return Err(PipelineError::InvalidConfig(format!(
+                "all fields must have the same number of days (expected {n_days} from field 0, field {idx} has {})",
+                w.len()
+            ))
+            .into());
+        }
+    }
+    Ok(n_days)
+}
+
+/// Initialize water-balance states from crop configs.
+fn init_wb_states(configs: &[CropConfig]) -> Vec<WaterBalanceState> {
+    configs
+        .iter()
+        .map(|c| {
+            let kc = c.crop_type.coefficients();
+            let root_mm = kc.root_depth_m * 1000.0;
+            WaterBalanceState::new(
+                c.field_capacity,
+                c.wilting_point,
+                root_mm,
+                c.irrigation_trigger,
+            )
+        })
+        .collect()
 }
 
 #[expect(

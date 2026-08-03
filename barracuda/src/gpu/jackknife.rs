@@ -15,9 +15,6 @@ use std::sync::Arc;
 use barracuda::device::WgpuDevice;
 use barracuda::stats::jackknife::{JackknifeMeanGpu, jackknife_mean_variance};
 
-#[cfg(test)]
-use super::device_info::try_f64_device;
-
 /// Jackknife estimate result.
 #[derive(Debug, Clone, Copy)]
 pub struct JackknifeEstimate {
@@ -107,11 +104,7 @@ fn jackknife_cpu(data: &[f64]) -> crate::error::Result<JackknifeEstimate> {
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
-
-    fn try_device() -> Option<Arc<WgpuDevice>> {
-        try_f64_device()
-    }
-
+    use crate::testutil::gpu_or_skip;
     #[test]
     fn test_small_sample() {
         let engine = GpuJackknife::cpu();
@@ -124,10 +117,7 @@ mod tests {
 
     #[test]
     fn test_gpu_matches_cpu() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for GpuJackknife");
-            return;
-        };
+        gpu_or_skip!(device);
         let gpu_engine = GpuJackknife::gpu(device).unwrap();
         let cpu_engine = GpuJackknife::cpu();
 

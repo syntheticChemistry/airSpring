@@ -28,6 +28,10 @@ use airspring_barracuda::validation::ValidationHarness;
 
 const BENCHMARK_JSON: &str = include_str!("../../../control/nass_real/benchmark_nass_real.json");
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "validation binary — sequential experiment script"
+)]
 fn main() {
     tracing_subscriber::fmt().with_env_filter("info").init();
 

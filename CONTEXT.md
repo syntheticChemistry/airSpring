@@ -1,6 +1,6 @@
 # Context — airSpring
 
-**Doc sync:** 2026-06-10 (v0.10.0; Wave 107 — 4-gate mesh collective; eastGate 13/13 FULL; Forgejo periplasm; 491-method canonical; 39-repo manifest; plasmidBin-only; topology-aware routing LIVE).
+**Doc sync:** 2026-08-03 (v0.10.0; Wave 156b — westGate Data NAS; 519 GB / 130 datasets; workspace Cargo.toml; deep debt CLEAN; 1,157 tests).
 
 ## What This Is
 
@@ -34,27 +34,26 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 
 ## Technical Facts
 
-- **Language:** 100% Rust, zero C dependencies
-- **Architecture:** Two workspace crates (`airspring-barracuda` library + `airspring-forge` dispatch)
+- **Language:** 100% Rust, zero C dependencies, `#![forbid(unsafe_code)]` in release builds
+- **Architecture:** 5-member workspace (`barracuda`, `metalForge/forge`, 3 experiment crates)
 - **Communication:** JSON-RPC 2.0 over Unix sockets + TCP (biomeOS capability routing, Songbird sovereign transport)
 - **License:** AGPL-3.0-or-later
-- **Lib tests:** 1,061 (barracuda, `cargo test --features local,testutil --lib`)
-- **Integration + doc tests:** 316 (barracuda)
-- **Barracuda total:** 1,373 (1,061 lib + 316 integration/doc)
-- **Forge tests:** 69 (metalForge)
-- **Grand total:** 1,446 (both crates)
+- **Lib tests:** 1,089 (barracuda, `cargo test --all-features --lib`)
+- **Forge tests:** 68 (metalForge)
+- **Grand total:** 1,157 (workspace)
 - **Binaries:** 98 (89 validation, 4 bench, 3 operational, 1 UniBin, 1 guidestone)
 - **Proptest invariants:** 7 (SVP, delta, Hargreaves, TAW, RAW, Ks)
-- **Line coverage:** 90.56% (cargo llvm-cov --lib --fail-under-lines 90)
+- **Line coverage:** 84.30% line, 87.83% function (cargo llvm-cov)
 - **MSRV:** 1.92
 - **Edition:** 2024
-- **Crate count:** 2 workspace crates
+- **Workspace:** Root `Cargo.toml` with shared deps, shared lints, single `Cargo.lock` (WORKSPACE_DEPENDENCY_STANDARD)
 - **GPU backend:** barraCuda 0.4.0 (wgpu 28, Vulkan, DeviceCapabilities API)
 - **Experiments:** 90 (all PASS)
 - **Capabilities:** 57 (science + ecology aliases + provenance + composition + coordination + health + inference)
 - **Deploy graphs:** 7 (eco + provenance + niche + cross-primal + GPU batch + sovereign data + uncertainty)
 - **GuideStone level:** L4 (targeting L6 with live NUCLEUS; **10 UniBin validation scenarios**)
-- **Tier 4 IPC-first:** `[features].default = []` (was `["local", "testutil"]`). Opt in with **`--features local`** for in-tree barraCuda + GPU; **`testutil`** extends `local` for dev helpers. All validation binaries use **`required-features = ["local"]`**. `gpu` is feature-gated; `math.rs` dual-path dispatch; `ipc/barracuda_route.rs` IPC forwarding. Default feature set builds without linking barraCuda.
+- **Deep debt:** CLEAN — zero TODOs, zero stubs in production, zero hardcoded primal names, zero `todo!()`/`unimplemented!()`, all fitting functions pure-Rust (no feature-gate stubs)
+- **Tier 4 IPC-first:** `[features].default = []`. Opt in with **`--features local`** for in-tree barraCuda + GPU. `math.rs` and `eco/correction.rs` have pure-Rust implementations that work in all builds. Default feature set builds without linking barraCuda.
 - **deny.toml:** workspace-root, `aws-lc-sys` + `aws-lc-rs` banned
 
 ## Key Capabilities (JSON-RPC methods)
@@ -121,17 +120,14 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 
 | Field | Value |
 |-------|-------|
-| **Gate** | eastGate |
-| **Hardware** | i9-12900, RTX 4070 + Akida NPU, 32GB DDR5 |
-| **Composition** | Full NUCLEUS (13/13 primals) |
-| **NUCLEUS status** | operational (13/13 primals ALIVE + airspring cell; plasmidBin-only) |
-| **Co-residents** | primalSpring (coord), groundSpring |
-| **Songbird federation** | `0.0.0.0:7700` (LAN-reachable at 192.168.1.144:7700) |
+| **Gate** | westGate (Data NAS) |
+| **Role** | Phase 4 science spring — boots with local data, no mesh needed |
+| **Data** | 519 GB / 130 datasets on ZFS (NOAA, USGS, USDA, Open-Meteo, ERA5) |
+| **Co-residents** | tideGlass, groundSpring |
+| **Blocker** | biomeOS live deploy (executor shipped, needs ops) |
 | **Periplasm** | golgiBody VPS — Forgejo at `git.primals.eco` (SSH :2222) |
-| **Sync** | `cascade-pull.sh --gate eastGate --source forgejo` (39-repo manifest-driven profile) |
-| **LAN mesh** | 4-gate collective: eastGate (hub) ↔ ironGate ↔ southGate ↔ golgiBody VPS; topology-aware routing LIVE |
-| **Cell graph** | `plasmidBin/cells/airspring_cell.toml` |
-| **Launch** | `SONGBIRD_FEDERATION_PORT=7700 nucleus_launcher.sh --family-id nucleus01 start` then `cell_launcher.sh airspring start` |
+| **Sync** | `cascade-pull.sh` via Forgejo manifest |
+| **Execution phase** | Phase 4 in 5-phase ironGate downstream sequence |
 
 ## Design Philosophy
 

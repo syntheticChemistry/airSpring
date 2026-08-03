@@ -7,7 +7,7 @@ use airspring_barracuda::gpu::kriging::{
     KrigingInterpolator, SensorReading, SoilVariogram, TargetPoint, interpolate_soil_moisture,
 };
 
-use common::try_create_device;
+use crate::common::device_or_skip;
 
 #[test]
 fn test_interpolate_at_sensor() {
@@ -332,20 +332,14 @@ fn test_variance_increases_with_distance() {
 
 #[test]
 fn test_kriging_interpolator_new() {
-    let Some(device) = try_create_device() else {
-        eprintln!("SKIP: No GPU device for KrigingInterpolator");
-        return;
-    };
+    let device = device_or_skip!();
     let interp = KrigingInterpolator::new(device);
     assert!(interp.is_ok(), "KrigingInterpolator::new should succeed");
 }
 
 #[test]
 fn test_kriging_interpolator_interpolate() {
-    let Some(device) = try_create_device() else {
-        eprintln!("SKIP: No GPU device for KrigingInterpolator");
-        return;
-    };
+    let device = device_or_skip!();
     let interp = KrigingInterpolator::new(device).unwrap();
     let sensors = vec![
         SensorReading {
@@ -377,10 +371,7 @@ fn test_kriging_interpolator_interpolate() {
 
 #[test]
 fn test_kriging_interpolator_interpolate_empty_inputs() {
-    let Some(device) = try_create_device() else {
-        eprintln!("SKIP: No GPU device for KrigingInterpolator");
-        return;
-    };
+    let device = device_or_skip!();
     let interp = KrigingInterpolator::new(device).unwrap();
     let variogram = SoilVariogram::Spherical {
         nugget: 0.001,

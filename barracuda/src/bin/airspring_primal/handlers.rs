@@ -384,8 +384,7 @@ pub fn handle_composition_status(state: &NicheState) -> serde_json::Value {
     let nestgate = discover_data_primal().is_some();
     let toadstool = discover_compute_primal().is_some();
     let skunkbat = biomeos::discover_primal_socket(primal_names::SKUNKBAT).is_some();
-    let neural_api_healthy =
-        airspring_barracuda::ipc::neural_bridge::weight_health().is_ok();
+    let neural_api_healthy = airspring_barracuda::ipc::neural_bridge::weight_health().is_ok();
 
     let healthy_count = u32::from(trio_available)
         + u32::from(nestgate)
@@ -455,10 +454,7 @@ pub fn handle_primal_announce(params: &serde_json::Value) -> serde_json::Value {
         .get("methods")
         .and_then(|v| v.as_array())
         .map_or(0, Vec::len);
-    let socket = params
-        .get("socket")
-        .and_then(|v| v.as_str())
-        .unwrap_or("");
+    let socket = params.get("socket").and_then(|v| v.as_str()).unwrap_or("");
     tracing::info!(
         target: primal_names::BIOMEOS,
         primal = primal_id,

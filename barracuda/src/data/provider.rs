@@ -18,6 +18,8 @@ use crate::data::weather::DailyWeather;
 use crate::primal_names;
 use std::fmt;
 
+const SOCKET_DIR_SEGMENT: &str = "primal";
+
 /// Unified error for data acquisition.
 #[derive(Debug)]
 pub enum DataError {
@@ -184,7 +186,7 @@ impl SongbirdTransport {
         let sock_name = primal_names::socket_filename(primal_names::SONGBIRD);
         if let Ok(xdg) = std::env::var("XDG_RUNTIME_DIR") {
             let p = std::path::PathBuf::from(xdg)
-                .join("primal")
+                .join(SOCKET_DIR_SEGMENT)
                 .join(primal_names::SONGBIRD)
                 .join(&sock_name);
             if p.exists() {
@@ -218,7 +220,11 @@ impl HttpTransport for SongbirdTransport {
         let mut stream = UnixStream::connect(&self.socket_path).map_err(|e| {
             DataError::Io(std::io::Error::new(
                 e.kind(),
-                format!("{} socket {}: {e}", primal_names::SONGBIRD, self.socket_path.display()),
+                format!(
+                    "{} socket {}: {e}",
+                    primal_names::SONGBIRD,
+                    self.socket_path.display()
+                ),
             ))
         })?;
 
@@ -385,7 +391,11 @@ mod tests {
     #[test]
     #[serial]
     fn songbird_discover_returns_none_when_no_env() {
-        let _g = EnvGuard::remove("SONGBIRD_SOCKET");
+        let _g1 = EnvGuard::remove("SONGBIRD_SOCKET");
+        let _g2 = EnvGuard::set(
+            "BIOMEOS_SOCKET_DIR",
+            "/tmp/airspring_test_no_sockets_dir_xyz",
+        );
         assert!(SongbirdTransport::discover().is_none());
     }
 
@@ -397,6 +407,10 @@ mod tests {
         let _g3 = EnvGuard::set(
             "SONGBIRD_SOCKET",
             "/tmp/nonexistent_songbird_provider_test_xyz.sock",
+        );
+        let _g4 = EnvGuard::set(
+            "BIOMEOS_SOCKET_DIR",
+            "/tmp/airspring_test_no_sockets_dir_xyz",
         );
         assert!(SongbirdTransport::discover().is_none());
     }
@@ -430,6 +444,10 @@ mod tests {
     fn discover_transport_returns_none_without_songbird() {
         let _g1 = EnvGuard::remove("SONGBIRD_SOCKET");
         let _g2 = EnvGuard::remove("FAMILY_ID");
+        let _g3 = EnvGuard::set(
+            "BIOMEOS_SOCKET_DIR",
+            "/tmp/airspring_test_no_sockets_dir_xyz",
+        );
         assert!(discover_transport().is_none());
     }
 

@@ -80,9 +80,7 @@ fn parse_result(resp: &serde_json::Value) -> Result<ValidateResult, ValidateErro
         return Err(ValidateError::RpcError { code, message });
     }
 
-    let r = resp
-        .get("result")
-        .or(Some(resp));
+    let r = resp.get("result").or(Some(resp));
 
     let valid = r
         .and_then(|v| v.get("valid"))

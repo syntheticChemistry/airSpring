@@ -322,6 +322,7 @@ pub fn compute_seasonal_stats(values: &[f64]) -> SeasonalStats {
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
+    use crate::testutil::gpu_or_skip;
 
     #[test]
     fn test_seasonal_sum() {
@@ -488,16 +489,9 @@ mod tests {
 
     // ── SeasonalReducer (device-backed, skips if no GPU) ────────────────────
 
-    fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
-        crate::gpu::device_info::try_f64_device()
-    }
-
     #[test]
     fn test_seasonal_reducer_new_and_sum() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for SeasonalReducer");
-            return;
-        };
+        gpu_or_skip!(device);
         let reducer = SeasonalReducer::new(device).unwrap();
         let vals = [1.0, 2.0, 3.0, 4.0, 5.0];
         let sum = reducer.sum(&vals).unwrap();
@@ -506,10 +500,7 @@ mod tests {
 
     #[test]
     fn test_seasonal_reducer_max_min_sum_of_squares() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for SeasonalReducer");
-            return;
-        };
+        gpu_or_skip!(device);
         let reducer = SeasonalReducer::new(device).unwrap();
         let vals = [2.0, 4.0, 6.0, 8.0];
         assert!((reducer.max(&vals).unwrap() - 8.0).abs() < 1e-10);
@@ -520,10 +511,7 @@ mod tests {
 
     #[test]
     fn test_seasonal_reducer_compute_stats_empty() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for SeasonalReducer");
-            return;
-        };
+        gpu_or_skip!(device);
         let reducer = SeasonalReducer::new(device).unwrap();
         let stats = reducer.compute_stats(&[]).unwrap();
         assert_eq!(stats.count, 0);
@@ -534,10 +522,7 @@ mod tests {
 
     #[test]
     fn test_seasonal_reducer_compute_stats_single_element() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for SeasonalReducer");
-            return;
-        };
+        gpu_or_skip!(device);
         let reducer = SeasonalReducer::new(device).unwrap();
         let vals = [42.0];
         let stats = reducer.compute_stats(&vals).unwrap();
@@ -549,10 +534,7 @@ mod tests {
 
     #[test]
     fn test_seasonal_reducer_compute_stats_matches_cpu() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for SeasonalReducer");
-            return;
-        };
+        gpu_or_skip!(device);
         let reducer = SeasonalReducer::new(device).unwrap();
         let vals: Vec<f64> = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
             .into_iter()
@@ -570,10 +552,7 @@ mod tests {
     #[test]
     fn test_seasonal_reducer_cpu_path_small_array() {
         // N=10 < 1024 → CPU path in FusedMapReduceF64
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for SeasonalReducer");
-            return;
-        };
+        gpu_or_skip!(device);
         let reducer = SeasonalReducer::new(device).unwrap();
         let vals: Vec<f64> = (0..10).map(f64::from).collect();
         let sum = reducer.sum(&vals).unwrap();
@@ -583,10 +562,7 @@ mod tests {
     #[test]
     fn test_seasonal_reducer_gpu_path_large_array() {
         // N=1024 → GPU dispatch threshold
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for SeasonalReducer");
-            return;
-        };
+        gpu_or_skip!(device);
         let reducer = SeasonalReducer::new(device).unwrap();
         let vals: Vec<f64> = (0..1024).map(f64::from).collect();
         let expected_sum: f64 = (0..1024).map(f64::from).sum();

@@ -225,13 +225,11 @@ impl BatchedSimpleEt0 {
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
+    use crate::testutil::gpu_or_skip;
 
     #[test]
     fn test_gpu_makkink_parity() {
-        let Some(device) = crate::gpu::device_info::try_f64_device() else {
-            eprintln!("SKIP: no GPU for GpuSimpleEt0");
-            return;
-        };
+        gpu_or_skip!(device);
         let gpu_solver = GpuSimpleEt0::new(device).unwrap();
         let inputs = vec![
             MakkinkInput {
@@ -255,10 +253,7 @@ mod tests {
 
     #[test]
     fn test_gpu_turc_parity() {
-        let Some(device) = crate::gpu::device_info::try_f64_device() else {
-            eprintln!("SKIP: no GPU");
-            return;
-        };
+        gpu_or_skip!(device);
         let gpu_solver = GpuSimpleEt0::new(device).unwrap();
         let inputs = vec![
             TurcInput {
@@ -294,10 +289,7 @@ mod tests {
 
     #[test]
     fn test_gpu_hamon_parity() {
-        let Some(device) = crate::gpu::device_info::try_f64_device() else {
-            eprintln!("SKIP: no GPU");
-            return;
-        };
+        gpu_or_skip!(device);
         let gpu_solver = GpuSimpleEt0::new(device).unwrap();
         let lat_rad = 42.7_f64.to_radians();
         let inputs = vec![
@@ -328,10 +320,7 @@ mod tests {
 
     #[test]
     fn test_gpu_blaney_criddle_parity() {
-        let Some(device) = crate::gpu::device_info::try_f64_device() else {
-            eprintln!("SKIP: no GPU");
-            return;
-        };
+        gpu_or_skip!(device);
         let gpu_solver = GpuSimpleEt0::new(device).unwrap();
         let lat_rad = 42.7_f64.to_radians();
         let inputs = vec![

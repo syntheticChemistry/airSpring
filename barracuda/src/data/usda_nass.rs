@@ -210,7 +210,13 @@ mod tests {
     }
 
     #[test]
+    #[serial_test::serial]
     fn try_new_fails_without_transport() {
+        let _g1 = EnvGuard::remove("SONGBIRD_SOCKET");
+        let _g2 = EnvGuard::set(
+            "BIOMEOS_SOCKET_DIR",
+            "/tmp/airspring_test_no_sockets_dir_xyz",
+        );
         let result = NassProvider::try_new("test_key".into());
         assert!(
             result.is_err(),
@@ -250,7 +256,13 @@ mod tests {
     }
 
     #[test]
+    #[serial_test::serial]
     fn from_file_valid_key_no_transport() {
+        let _g1 = EnvGuard::remove("SONGBIRD_SOCKET");
+        let _g2 = EnvGuard::set(
+            "BIOMEOS_SOCKET_DIR",
+            "/tmp/airspring_test_no_sockets_dir_xyz",
+        );
         let dir = std::env::temp_dir();
         let path = dir.join("airspring_test_valid_key.txt");
         std::fs::write(&path, "my_api_key_123").unwrap();

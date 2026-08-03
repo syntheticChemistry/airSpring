@@ -411,10 +411,7 @@ pub fn complete_experiment_with(
 /// biomeOS decomposes `nest.commit` into: rhizoCrypt.dehydrate → bearDog.sign
 /// → NestGate.store → loamSpine.seal. Returns `None` if the signal is not
 /// available (caller should fall back to legacy).
-fn try_nest_commit_signal(
-    transport: &Transport,
-    session_id: &str,
-) -> Option<ProvenanceCompletion> {
+fn try_nest_commit_signal(transport: &Transport, session_id: &str) -> Option<ProvenanceCompletion> {
     let params = serde_json::json!({
         "session_id": session_id,
         "author": format!("{}:experiment", crate::niche::NICHE_NAME),
@@ -438,7 +435,11 @@ fn try_nest_commit_signal(
         .and_then(|v| v.as_str())
         .unwrap_or("")
         .to_string();
-    let status = if braid_id.is_empty() { "partial" } else { "complete" };
+    let status = if braid_id.is_empty() {
+        "partial"
+    } else {
+        "complete"
+    };
     Some(ProvenanceCompletion {
         merkle_root: r
             .get("merkle_root")
@@ -453,15 +454,16 @@ fn try_nest_commit_signal(
             .to_string(),
         braid_id,
         status: status.to_string(),
-        primals_reached: vec!["rhizoCrypt", "loamSpine", "sweetGrass"],
+        primals_reached: vec![
+            crate::primal_names::RHIZOCRYPT,
+            crate::primal_names::LOAMSPINE,
+            crate::primal_names::SWEETGRASS,
+        ],
     })
 }
 
 /// Legacy three-phase provenance pipeline (pre-Wave 17).
-fn complete_experiment_legacy(
-    transport: &Transport,
-    session_id: &str,
-) -> ProvenanceCompletion {
+fn complete_experiment_legacy(transport: &Transport, session_id: &str) -> ProvenanceCompletion {
     let Ok(dehydration) = capability_call(
         transport,
         crate::primal_names::domains::DAG,
@@ -497,7 +499,7 @@ fn complete_experiment_legacy(
             commit_id: String::new(),
             braid_id: String::new(),
             status: "partial".to_string(),
-            primals_reached: vec!["rhizoCrypt"],
+            primals_reached: vec![crate::primal_names::RHIZOCRYPT],
         };
     };
 
@@ -530,11 +532,18 @@ fn complete_experiment_legacy(
     })
     .unwrap_or_default();
 
-    let mut reached = vec!["rhizoCrypt", "loamSpine"];
+    let mut reached = vec![
+        crate::primal_names::RHIZOCRYPT,
+        crate::primal_names::LOAMSPINE,
+    ];
     if !braid_id.is_empty() {
-        reached.push("sweetGrass");
+        reached.push(crate::primal_names::SWEETGRASS);
     }
-    let status = if braid_id.is_empty() { "partial" } else { "complete" };
+    let status = if braid_id.is_empty() {
+        "partial"
+    } else {
+        "complete"
+    };
     ProvenanceCompletion {
         merkle_root,
         commit_id,

@@ -9,9 +9,6 @@ use std::sync::Arc;
 use barracuda::device::WgpuDevice;
 use barracuda::ops::batched_elementwise_f64::{BatchedElementwiseF64, Op};
 
-#[cfg(test)]
-use super::device_info::try_f64_device;
-
 /// Batched GDD GPU orchestrator.
 ///
 /// Dispatches to `BatchedElementwiseF64` op 12 when a GPU engine is configured;
@@ -76,11 +73,7 @@ pub fn compute_gdd_cpu(tmean_values: &[f64], tbase: f64) -> Vec<f64> {
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
-
-    fn try_device() -> Option<Arc<WgpuDevice>> {
-        try_f64_device()
-    }
-
+    use crate::testutil::gpu_or_skip;
     #[test]
     fn test_cpu_gdd_positive() {
         let engine = BatchedGdd::cpu();
@@ -99,10 +92,7 @@ mod tests {
 
     #[test]
     fn test_gpu_matches_cpu() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedGdd");
-            return;
-        };
+        gpu_or_skip!(device);
         let gpu_engine = BatchedGdd::gpu(device).unwrap();
         let cpu_engine = BatchedGdd::cpu();
 

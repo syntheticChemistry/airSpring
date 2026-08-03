@@ -204,6 +204,7 @@ impl BatchedEt0 {
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
+    use crate::testutil::gpu_or_skip;
 
     fn sample_input() -> DailyEt0Input {
         DailyEt0Input {
@@ -399,16 +400,9 @@ mod tests {
         }
     }
 
-    fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
-        crate::gpu::device_info::try_f64_device()
-    }
-
     #[test]
     fn test_batched_et0_gpu_device_empty() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedEt0");
-            return;
-        };
+        gpu_or_skip!(device);
         let engine = BatchedEt0::gpu(device).unwrap();
         let result = engine.compute_gpu(&[]).unwrap();
         assert!(result.et0_values.is_empty());
@@ -417,10 +411,7 @@ mod tests {
 
     #[test]
     fn test_batched_et0_gpu_device_single() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedEt0");
-            return;
-        };
+        gpu_or_skip!(device);
         let engine = BatchedEt0::gpu(device).unwrap();
         let result = engine.compute_gpu(&[sample_station_day()]).unwrap();
         assert_eq!(result.et0_values.len(), 1);
@@ -430,10 +421,7 @@ mod tests {
 
     #[test]
     fn test_batched_et0_gpu_device_matches_cpu() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedEt0");
-            return;
-        };
+        gpu_or_skip!(device);
         let gpu_engine = BatchedEt0::gpu(device).unwrap();
         let cpu_engine = BatchedEt0::cpu();
         let inputs: Vec<StationDay> = (0..50)
@@ -452,10 +440,7 @@ mod tests {
 
     #[test]
     fn test_batched_et0_gpu_device_large_batch() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedEt0");
-            return;
-        };
+        gpu_or_skip!(device);
         let engine = BatchedEt0::gpu(device).unwrap();
         let inputs: Vec<StationDay> = (0..1500)
             .map(|i| StationDay {
@@ -473,10 +458,7 @@ mod tests {
 
     #[test]
     fn test_batched_et0_gpu_debug_format() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedEt0");
-            return;
-        };
+        gpu_or_skip!(device);
         let engine = BatchedEt0::gpu(device).unwrap();
         let dbg = format!("{engine:?}");
         assert!(dbg.contains("BatchedEt0"));

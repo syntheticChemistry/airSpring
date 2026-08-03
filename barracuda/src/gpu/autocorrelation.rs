@@ -120,6 +120,7 @@ pub fn normalised_acf_cpu(data: &[f64], max_lag: usize) -> Vec<f64> {
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
+    use crate::testutil::gpu_or_skip;
 
     #[test]
     fn test_autocorrelation_cpu_known() {
@@ -163,10 +164,7 @@ mod tests {
 
     #[test]
     fn test_gpu_matches_cpu() {
-        let Some(device) = crate::gpu::device_info::try_f64_device() else {
-            eprintln!("SKIP: No GPU device for AutocorrelationF64");
-            return;
-        };
+        gpu_or_skip!(device);
         let engine = HydroAutocorrelation::new(device).unwrap();
 
         let data: Vec<f64> = (0..50).map(|i| f64::from(i).sin()).collect();

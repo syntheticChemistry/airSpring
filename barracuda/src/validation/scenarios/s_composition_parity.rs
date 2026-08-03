@@ -6,10 +6,10 @@
 //! - **Tier 1 (LOCAL)**: Science capabilities resolve correctly (always green)
 //! - **Tier 2 (IPC)**: Tower health, Node parity, Nest storage — skip if absent
 
+use crate::ipc::{nestgate_data, precision_route, squirrel_inference, toadstool_validate};
 use crate::validation::ValidationHarness;
 use crate::validation::scenarios::registry::{Scenario, ScenarioMeta, Tier, Track};
 use crate::{biomeos, ipc, methods as m, niche, primal_names, rpc};
-use crate::ipc::{nestgate_data, precision_route, squirrel_inference, toadstool_validate};
 
 /// Scenario metadata and entry point.
 pub const SCENARIO: Scenario = Scenario {

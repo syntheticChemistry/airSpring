@@ -2,7 +2,18 @@
 
 All notable changes to airSpring follow [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased] - 2026-06-10
+## [Unreleased] - 2026-08-03
+
+### Wave 156b — Deep Debt Resolution + Workspace Consolidation (2026-08-03)
+
+- **Workspace consolidation**: Root `Cargo.toml` with 5 members, shared `[workspace.dependencies]` (16 deps), `[workspace.package]`, `[workspace.lints.clippy]`, single `Cargo.lock`. Optimizes compile times and enforces uniform lint/dep versions.
+- **Stub evolution**: `eco/correction.rs` `cfg(not(feature = "local"))` stubs replaced with pure-Rust implementations (OLS, Cramer's rule, Tikhonov regularization). No feature gates on math functions.
+- **Hardcoding elimination**: `provenance.rs` camelCase literals → `primal_names::*`, `validate_gate_composition.rs` → `PRIMAL_NAME`, `neural.rs` → `BIOMEOS_SOCKET_SUBDIR`/`NEURAL_API_DRIVER`, `provider.rs` → `SOCKET_DIR_SEGMENT`.
+- **GPU test centralization**: `gpu_or_skip!` macro in `testutil/mod.rs` replaces 52/60 inline skip patterns across 23 GPU test modules + 2 integration tests.
+- **File size compliance**: `richards.rs` 826→796L (helper extraction), `nucleus.rs` 829→272+612L (split to `nucleus/{mod,mesh}.rs`). Zero files over 800L.
+- **Stale doc cleanup**: "ureq fallback" → "Songbird IPC" in `open_meteo.rs`.
+- **Gate migration**: westGate Data NAS (519 GB / 130 datasets). Docs updated throughout.
+- **1,089 lib + 68 forge = 1,157 tests**, 0 clippy warnings, clean fmt/doc, 84.30% line coverage.
 
 ### Wave 107 — 4-Gate Mesh Collective Sync (2026-06-10)
 

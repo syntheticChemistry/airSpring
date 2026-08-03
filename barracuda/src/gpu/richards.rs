@@ -276,6 +276,7 @@ impl BatchedRichards {
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
+    use crate::testutil::gpu_or_skip;
 
     fn sand() -> VanGenuchtenParams {
         VanGenuchtenParams {
@@ -426,11 +427,7 @@ mod tests {
 
     #[test]
     fn test_gpu_richards_drainage() {
-        use super::super::device_info::try_f64_device;
-        let Some(device) = try_f64_device() else {
-            eprintln!("SKIP: No GPU device for RichardsGpu");
-            return;
-        };
+        gpu_or_skip!(device);
         let req = RichardsRequest {
             params: sand(),
             depth_cm: 100.0,

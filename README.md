@@ -1,8 +1,8 @@
 # airSpring — Ecological & Agricultural Sciences
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
-**Date**: June 10, 2026
-**Version**: v0.10.0 (Wave 107 — 4-gate mesh collective; eastGate 13/13 FULL; Forgejo periplasm; 491-method canonical; topology-aware routing LIVE)
+**Date**: August 3, 2026
+**Version**: v0.10.0 (Wave 156b — westGate Data NAS; deep debt CLEAN; workspace consolidated; 1,157 tests; pure-Rust fitting; zero stubs)
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -19,7 +19,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,284/1,284 PASS** | 60 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB, MC ET₀ uncertainty, bootstrap/jackknife CI, SPI drought index |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **1,061 lib + 316 integration (1,373 barracuda) + 69 forge = 1,446 total** | 98 binaries + 146/146 + 32/32 provenance cross-spring benchmarks (NVK zero-output detection: CPU fallback) |
+| Phase 1: Rust validation | **1,089 lib (barracuda) + 68 forge = 1,157 total** | 98 binaries, 5-member workspace, deep debt CLEAN |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (25/25 parity incl. Freundlich) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -55,29 +55,24 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test -p airspring-barracuda --features local,testutil --lib` | **1,061 passed**, 0 failures |
-| `cargo test -p airspring-barracuda --tests --all-features` (or `--features local,testutil` for default-feature-aligned runs) | **316 passed** (integration + doc tests) |
-| `cargo test --lib` (metalForge) | **69 passed**, 0 failures |
-| `cargo llvm-cov --lib --fail-under-lines 90` | **90.56% line coverage** |
-| `cargo clippy (pedantic + nursery, -D warnings)` | **0 warnings** (both crates) |
-| `cargo fmt --check` | **Clean** |
-| `cargo doc --no-deps` | **Clean** (both crates) |
-| `cargo-deny check` | **Clean** (AGPL-3.0-or-later, cargo-deny 0.19) |
-| `bench_cross_spring_evolution` | **146/146 PASS** (release, S87 sync) |
-| `validate_cross_spring_provenance` | **32/32 PASS** — CPU↔GPU benchmark, 5-spring shader provenance |
-| `validate_dispatch_experiment` | **51/51 PASS** — CPU/GPU/batch/absorption/pipeline |
-| `validate_biome_graph` | **35/35 PASS** — graph topology, capabilities, offline pipeline |
+| `cargo test -p airspring-barracuda --all-features --lib` | **1,089 passed**, 0 failures |
+| `cargo test -p airspring-forge --lib` | **68 passed**, 0 failures |
+| `cargo llvm-cov` | **84.30% line, 87.83% function** |
+| `cargo clippy --all-features (pedantic + nursery, -D warnings)` | **0 warnings** (workspace) |
+| `cargo fmt --check` | **Clean** (workspace) |
+| `cargo doc --no-deps` | **0 warnings** (workspace) |
+| Deep debt | **CLEAN** — 0 TODOs, 0 stubs, 0 hardcoded primal names, 0 `todo!()`/`unimplemented!()` |
+| Unsafe | **0 in production** — `#![forbid(unsafe_code)]` on release builds; `EnvGuard` test-only |
+| Workspace | **5 members**, shared deps, shared lints, single `Cargo.lock` |
 
-### Hardware Validated
+### Gate
 
-| Component | Specification | Status |
-|-----------|--------------|--------|
-| CPU | Intel i9-12900K (16C/24T, AVX2) | **Live** — all CPU paths |
-| GPU #1 | NVIDIA RTX 4070 (12 GB, Vulkan, f64) | **Live** — wgpu adapter 0 |
-| GPU #2 | NVIDIA TITAN V (GV100, NVK/Mesa, f64) | **Live** — 24/24 PASS, `BARRACUDA_GPU_ADAPTER=titan` |
-| NPU | BrainChip AKD1000 (PCIe 07:00.0) | **Present** — driver gap (AG-021), BAR disabled |
-| RAM | 32 GB DDR5-4800 | |
-| OS | Pop!_OS 22.04 (kernel 6.17.9) | |
+| Field | Value |
+|-------|-------|
+| Gate | **westGate** (Data NAS) |
+| Role | Phase 4 science spring — boots with local data, no mesh needed |
+| Data | 519 GB / 130 datasets on ZFS |
+| Blocker | biomeOS live deploy (executor shipped, needs ops) |
 
 ## Evolution Architecture: Write → Absorb → Lean
 

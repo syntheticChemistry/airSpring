@@ -112,122 +112,59 @@ pub fn evaluate(model: &FittedModel, x: f64) -> f64 {
     }
 }
 
-#[cfg(feature = "local")]
 use crate::len_f64;
 
-// ── Least-squares fitting (R-S66-001: delegates to barracuda::stats::regression) ──
+// ── Least-squares fitting ──────────────────────────────────────────────
+//
+// Pure-Rust normal equations — zero external deps, works in all builds.
+// When `local` feature is enabled, barraCuda GPU paths remain available
+// via the `gpu::*` modules; these CPU fits are always self-contained.
 
-#[cfg(feature = "local")]
-fn fit_result_to_fitted_model(
-    r: barracuda::stats::FitResult,
-    model_type: ModelType,
-) -> FittedModel {
-    FittedModel {
-        model_type,
-        params: r.params,
-        r_squared: r.r_squared,
-        rmse: r.rmse,
-    }
+/// Goodness-of-fit metrics: (R², RMSE).
+fn goodness_of_fit<F: Fn(f64) -> f64>(x: &[f64], y: &[f64], predict: F) -> (f64, f64) {
+    let n = len_f64(y);
+    let mean_y = y.iter().sum::<f64>() / n;
+
+    let ss_res: f64 = x
+        .iter()
+        .zip(y)
+        .map(|(&xi, &yi)| (yi - predict(xi)).powi(2))
+        .sum();
+    let ss_tot: f64 = y.iter().map(|&yi| (yi - mean_y).powi(2)).sum();
+
+    let r2 = if ss_tot > 0.0 {
+        1.0 - ss_res / ss_tot
+    } else {
+        1.0
+    };
+    let rmse = (ss_res / n).sqrt();
+
+    (r2, rmse)
 }
 
-/// Fit a linear model y = a·x + b using normal equations.
+/// Fit a linear model y = a·x + b using 2×2 normal equations.
 ///
-/// Delegates to `barracuda::stats::regression::fit_linear` (R-S66-001).
-/// Returns `Some(FittedModel)` or `None` if the system is singular.
+/// Returns `None` if n < 2 or the system is singular (all x identical).
 #[must_use]
-#[cfg(feature = "local")]
 pub fn fit_linear(x: &[f64], y: &[f64]) -> Option<FittedModel> {
-    barracuda::stats::fit_linear(x, y).map(|r| fit_result_to_fitted_model(r, ModelType::Linear))
-}
-
-/// IPC-only stub: curve fitting requires barraCuda regression primitives.
-#[must_use]
-#[cfg(not(feature = "local"))]
-pub const fn fit_linear(_x: &[f64], _y: &[f64]) -> Option<FittedModel> {
-    None
-}
-
-/// Fit a quadratic model y = a·x² + b·x + c using normal equations.
-///
-/// Delegates to `barracuda::stats::regression::fit_quadratic` (R-S66-001).
-#[must_use]
-#[cfg(feature = "local")]
-pub fn fit_quadratic(xs: &[f64], ys: &[f64]) -> Option<FittedModel> {
-    barracuda::stats::fit_quadratic(xs, ys)
-        .map(|r| fit_result_to_fitted_model(r, ModelType::Quadratic))
-}
-
-/// IPC-only stub: curve fitting requires barraCuda regression primitives.
-#[must_use]
-#[cfg(not(feature = "local"))]
-pub const fn fit_quadratic(_xs: &[f64], _ys: &[f64]) -> Option<FittedModel> {
-    None
-}
-
-/// Fit an exponential model y = a·exp(b·x) via log-linearized least squares.
-///
-/// Delegates to `barracuda::stats::regression::fit_exponential` (R-S66-001).
-/// Transforms to ln(y) = ln(a) + b·x and fits linear. Requires all y > 0.
-#[must_use]
-#[cfg(feature = "local")]
-pub fn fit_exponential(x: &[f64], y: &[f64]) -> Option<FittedModel> {
-    barracuda::stats::fit_exponential(x, y)
-        .map(|r| fit_result_to_fitted_model(r, ModelType::Exponential))
-}
-
-/// IPC-only stub: curve fitting requires barraCuda regression primitives.
-#[must_use]
-#[cfg(not(feature = "local"))]
-pub const fn fit_exponential(_x: &[f64], _y: &[f64]) -> Option<FittedModel> {
-    None
-}
-
-/// Fit a logarithmic model y = a·ln(x) + b via linearized least squares.
-///
-/// Delegates to `barracuda::stats::regression::fit_logarithmic` (R-S66-001).
-/// Transforms to y = a·z + b where z = ln(x). Requires all x > 0.
-#[must_use]
-#[cfg(feature = "local")]
-pub fn fit_logarithmic(x: &[f64], y: &[f64]) -> Option<FittedModel> {
-    barracuda::stats::fit_logarithmic(x, y)
-        .map(|r| fit_result_to_fitted_model(r, ModelType::Logarithmic))
-}
-
-/// IPC-only stub: curve fitting requires barraCuda regression primitives.
-#[must_use]
-#[cfg(not(feature = "local"))]
-pub const fn fit_logarithmic(_x: &[f64], _y: &[f64]) -> Option<FittedModel> {
-    None
-}
-
-/// Fit a regularized linear model using upstream `barracuda::linalg::ridge`.
-///
-/// Ridge regression minimizes ‖y − Xw‖² + λ‖w‖², producing more stable
-/// coefficients when features are correlated or data is noisy. This wraps
-/// the CPU-only `barracuda::linalg::ridge::ridge_regression` (S52+).
-///
-/// Returns `Some(FittedModel)` with `ModelType::Linear` and the ridge-fit
-/// coefficients [slope, intercept], or `None` if the fit fails.
-#[must_use]
-#[cfg(feature = "local")]
-pub fn fit_ridge(x: &[f64], y: &[f64], regularization: f64) -> Option<FittedModel> {
-    if x.len() < 2 || x.len() != y.len() {
+    let n = x.len();
+    if n < 2 || n != y.len() {
         return None;
     }
 
-    let n = x.len();
-    // Build design matrix [x_i, 1.0] for intercept model
-    let mut design = Vec::with_capacity(n * 2);
-    for &xi in x {
-        design.push(xi);
-        design.push(1.0);
+    let nf = len_f64(x);
+    let sx: f64 = x.iter().sum();
+    let sy: f64 = y.iter().sum();
+    let sxx: f64 = x.iter().map(|&xi| xi * xi).sum();
+    let sxy: f64 = x.iter().zip(y).map(|(&xi, &yi)| xi * yi).sum();
+
+    let det = nf.mul_add(sxx, -(sx * sx));
+    if det.abs() < f64::EPSILON {
+        return None;
     }
 
-    let result =
-        barracuda::linalg::ridge::ridge_regression(&design, y, n, 2, 1, regularization).ok()?;
-
-    let slope = result.weights[0];
-    let intercept = result.weights[1];
+    let slope = nf.mul_add(sxy, -(sx * sy)) / det;
+    let intercept = sxx.mul_add(sy, -(sx * sxy)) / det;
 
     let (r2, rmse) = goodness_of_fit(x, y, |xi| slope.mul_add(xi, intercept));
     Some(FittedModel {
@@ -238,11 +175,137 @@ pub fn fit_ridge(x: &[f64], y: &[f64], regularization: f64) -> Option<FittedMode
     })
 }
 
-/// IPC-only stub: ridge regression requires barraCuda `linalg::ridge`.
+/// Fit a quadratic model y = a·x² + b·x + c using 3×3 normal equations.
+///
+/// Returns `None` if n < 3 or the system is singular.
 #[must_use]
-#[cfg(not(feature = "local"))]
-pub const fn fit_ridge(_x: &[f64], _y: &[f64], _regularization: f64) -> Option<FittedModel> {
-    None
+#[expect(
+    clippy::similar_names,
+    clippy::suboptimal_flops,
+    reason = "Cramer's rule: sx2y/sxy are distinct sums, deeply nested mul_add is less readable than algebra"
+)]
+pub fn fit_quadratic(xs: &[f64], ys: &[f64]) -> Option<FittedModel> {
+    let n = xs.len();
+    if n < 3 || n != ys.len() {
+        return None;
+    }
+
+    let nf = len_f64(xs);
+    let sx: f64 = xs.iter().sum();
+    let sx2: f64 = xs.iter().map(|&x| x * x).sum();
+    let sx3: f64 = xs.iter().map(|&x| x * x * x).sum();
+    let sx4: f64 = xs.iter().map(|&x| x.powi(4)).sum();
+    let sy: f64 = ys.iter().sum();
+    let sxy: f64 = xs.iter().zip(ys).map(|(&x, &y)| x * y).sum();
+    let sx2y: f64 = xs.iter().zip(ys).map(|(&x, &y)| x * x * y).sum();
+
+    // 3×3 Cramer's rule
+    let m00 = sx2.mul_add(nf, -(sx * sx));
+    let m01 = sx3.mul_add(nf, -(sx * sx2));
+    let m02 = sx3.mul_add(sx, -(sx2 * sx2));
+    let det = sx4.mul_add(m00, -(sx3 * m01)) + sx2 * m02;
+    if det.abs() < f64::EPSILON {
+        return None;
+    }
+
+    let qa = (sx2y.mul_add(m00, -(sxy * m01)) + sy * m02) / det;
+    let qb = (sx4 * sxy.mul_add(nf, -(sy * sx)) - sx3 * sx2y.mul_add(nf, -(sy * sx2))
+        + sx2 * sx2y.mul_add(sx, -(sxy * sx2)))
+        / det;
+    let qc = (sx4 * sx2.mul_add(sy, -(sx * sxy)) - sx3 * sx3.mul_add(sy, -(sx * sx2y))
+        + sx2 * sx3.mul_add(sxy, -(sx2 * sx2y)))
+        / det;
+
+    let (r2, rmse) = goodness_of_fit(xs, ys, |x| qa.mul_add(x * x, qb.mul_add(x, qc)));
+    Some(FittedModel {
+        model_type: ModelType::Quadratic,
+        params: vec![qa, qb, qc],
+        r_squared: r2,
+        rmse,
+    })
+}
+
+/// Fit an exponential model y = a·exp(b·x) via log-linearized least squares.
+///
+/// Transforms to ln(y) = ln(a) + b·x and fits linear. Requires all y > 0.
+#[must_use]
+pub fn fit_exponential(x: &[f64], y: &[f64]) -> Option<FittedModel> {
+    if x.len() < 2 || x.len() != y.len() || y.iter().any(|&yi| yi <= 0.0) {
+        return None;
+    }
+
+    let log_y: Vec<f64> = y.iter().map(|&yi| yi.ln()).collect();
+    let linear = fit_linear(x, &log_y)?;
+
+    let b = linear.params[0];
+    let a = linear.params[1].exp(); // ln(a) → a
+
+    let (r2, rmse) = goodness_of_fit(x, y, |xi| a * (b * xi).exp());
+    Some(FittedModel {
+        model_type: ModelType::Exponential,
+        params: vec![a, b],
+        r_squared: r2,
+        rmse,
+    })
+}
+
+/// Fit a logarithmic model y = a·ln(x) + b via linearized least squares.
+///
+/// Transforms to y = a·z + b where z = ln(x). Requires all x > 0.
+#[must_use]
+pub fn fit_logarithmic(x: &[f64], y: &[f64]) -> Option<FittedModel> {
+    if x.len() < 2 || x.len() != y.len() || x.iter().any(|&xi| xi <= 0.0) {
+        return None;
+    }
+
+    let log_x: Vec<f64> = x.iter().map(|&xi| xi.ln()).collect();
+    let linear = fit_linear(&log_x, y)?;
+
+    let a = linear.params[0];
+    let b = linear.params[1];
+
+    let (r2, rmse) = goodness_of_fit(x, y, |xi| a.mul_add(xi.ln(), b));
+    Some(FittedModel {
+        model_type: ModelType::Logarithmic,
+        params: vec![a, b],
+        r_squared: r2,
+        rmse,
+    })
+}
+
+/// Fit a regularized linear model via Tikhonov (ridge) regression.
+///
+/// Minimizes ‖y − Xw‖² + λ‖w‖². Pure-Rust 2×2 solve — no feature gate.
+#[must_use]
+pub fn fit_ridge(x: &[f64], y: &[f64], regularization: f64) -> Option<FittedModel> {
+    if x.len() < 2 || x.len() != y.len() {
+        return None;
+    }
+
+    let nf = len_f64(x);
+    let sx: f64 = x.iter().sum();
+    let sy: f64 = y.iter().sum();
+    let sxx: f64 = x.iter().map(|&xi| xi * xi).sum();
+    let sxy: f64 = x.iter().zip(y).map(|(&xi, &yi)| xi * yi).sum();
+
+    let a00 = sxx + regularization;
+    let a11 = nf + regularization;
+
+    let det = a00.mul_add(a11, -(sx * sx));
+    if det.abs() < f64::EPSILON {
+        return None;
+    }
+
+    let slope = a11.mul_add(sxy, -(sx * sy)) / det;
+    let intercept = a00.mul_add(sy, -(sx * sxy)) / det;
+
+    let (r2, rmse) = goodness_of_fit(x, y, |xi| slope.mul_add(xi, intercept));
+    Some(FittedModel {
+        model_type: ModelType::Linear,
+        params: vec![slope, intercept],
+        r_squared: r2,
+        rmse,
+    })
 }
 
 /// Fit all four correction models and return those that converge.
@@ -270,30 +333,6 @@ pub fn fit_correction_equations(
     }
 
     results
-}
-
-// ── Helpers ──────────────────────────────────────────────────────────
-
-#[cfg(feature = "local")]
-fn goodness_of_fit<F: Fn(f64) -> f64>(x: &[f64], y: &[f64], predict: F) -> (f64, f64) {
-    let n = len_f64(y);
-    let mean_y: f64 = crate::math::mean(y);
-
-    let ss_res: f64 = x
-        .iter()
-        .zip(y)
-        .map(|(&xi, &yi)| (yi - predict(xi)).powi(2))
-        .sum();
-    let ss_tot: f64 = y.iter().map(|&yi| (yi - mean_y).powi(2)).sum();
-
-    let r2 = if ss_tot > 0.0 {
-        1.0 - ss_res / ss_tot
-    } else {
-        1.0
-    };
-    let rmse = (ss_res / n).sqrt();
-
-    (r2, rmse)
 }
 
 #[cfg(test)]

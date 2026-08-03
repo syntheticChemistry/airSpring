@@ -92,6 +92,7 @@ pub fn audit_startup(capabilities: usize) -> Option<serde_json::Value> {
 #[expect(clippy::unwrap_used, reason = "test assertions use unwrap for clarity")]
 mod tests {
     use super::*;
+    use crate::testutil::EnvGuard;
 
     #[test]
     fn audit_params_shape() {
@@ -108,7 +109,12 @@ mod tests {
     }
 
     #[test]
+    #[serial_test::serial]
     fn discover_returns_none_when_no_skunkbat() {
+        let _g = EnvGuard::set(
+            "BIOMEOS_SOCKET_DIR",
+            "/tmp/airspring_test_no_sockets_dir_xyz",
+        );
         assert!(discover().is_none());
     }
 }

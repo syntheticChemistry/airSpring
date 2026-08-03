@@ -10,14 +10,9 @@
 
 use crate::error::{AirSpringError, Result};
 
-/// Default pressure head clipping for `richards_rhs`.
 const H_CLIP_MIN: f64 = -10_000.0;
 const H_CLIP_MAX: f64 = 100.0;
-
-/// Near-zero capacity guard for RHS computation.
 const CAPACITY_EPSILON: f64 = 1e-12;
-
-/// Mass balance denominator guard — below this, balance is trivially zero.
 const MASS_BALANCE_EPSILON: f64 = 1e-10;
 
 /// Solver configuration for the implicit Picard iteration.
@@ -67,22 +62,12 @@ pub struct RichardsProfile {
     pub theta: Vec<f64>,
 }
 
-/// Solve tridiagonal system Ax = d via `barracuda::linalg::tridiagonal_solve`.
+/// Solve tridiagonal system Ax = d via Thomas algorithm (pure Rust).
 ///
-/// # Cross-Spring Provenance
+/// Accepts n-length padded arrays (a\[0\]=0, c\[n-1\]=0) matching the Picard
+/// assembly loop, and extracts n−1 sub/super-diagonal slices.
 ///
-/// | Primitive | Origin | Upstream |
-/// |-----------|--------|----------|
-/// | Thomas algorithm | airSpring (pre-v0.5.8) | Local implementation |
-/// | `tridiagonal_solve` | `barracuda::linalg` (S52+) | Shared `BarraCuda` primitive |
-/// | `CyclicReductionF64` | `barracuda::ops` (S62+) | GPU variant for batch PDE |
-///
-/// The local Thomas solver was replaced by the upstream `barracuda::linalg::tridiagonal_solve`
-/// to eliminate duplicate code. The upstream version uses the same Thomas algorithm with
-/// identical numerical properties but exposes `Result` for singularity detection.
-///
-/// Accepts n-length padded arrays (a\[0\]=0, c\[n-1\]=0) matching the Picard assembly
-/// loop, and extracts n-1 sub/super-diagonal slices for the upstream API.
+/// Returns `true` on success, `false` if the system is singular.
 #[expect(
     clippy::many_single_char_names,
     reason = "standard Thomas algorithm notation (a,b,c,d,x)"
@@ -94,33 +79,21 @@ fn tridiag_solve(a: &[f64], b: &[f64], c: &[f64], d: &[f64], x: &mut [f64]) -> b
     }
     let sub = &a[1..];
     let sup = &c[..n - 1];
-    #[cfg(feature = "local")]
-    {
-        barracuda::linalg::tridiagonal_solve(sub, b, sup, d).is_ok_and(|sol| {
-            x[..n].copy_from_slice(&sol);
-            true
-        })
-    }
-    #[cfg(not(feature = "local"))]
-    {
-        #[expect(
-            clippy::unnecessary_map_or,
-            reason = "clippy 1.92 prefers is_some_and; keep map_or for explicit symmetry"
-        )]
-        local_tridiagonal_solve(sub, b, sup, d).map_or(false, |sol| {
-            x[..n].copy_from_slice(&sol);
-            true
-        })
-    }
+    thomas_solve(sub, b, sup, d).is_some_and(|sol| {
+        x[..n].copy_from_slice(&sol);
+        true
+    })
 }
 
-/// Thomas algorithm (matches `barracuda::linalg::tridiagonal_solve` contract).
-#[cfg(not(feature = "local"))]
+/// Thomas algorithm for tridiagonal systems.
+///
+/// Pure-Rust O(n) solver — no feature gate, no external deps.
+/// Numerically identical to `barracuda::linalg::tridiagonal_solve`.
 #[expect(
     clippy::many_single_char_names,
     reason = "a/b/c/d are standard tridiagonal matrix notation"
 )]
-fn local_tridiagonal_solve(a: &[f64], b: &[f64], c: &[f64], d: &[f64]) -> Option<Vec<f64>> {
+fn thomas_solve(a: &[f64], b: &[f64], c: &[f64], d: &[f64]) -> Option<Vec<f64>> {
     let n = b.len();
     if n == 0 {
         return Some(Vec::new());
@@ -129,10 +102,7 @@ fn local_tridiagonal_solve(a: &[f64], b: &[f64], c: &[f64], d: &[f64]) -> Option
         return None;
     }
     if n == 1 {
-        if b[0].abs() < 1e-15 {
-            return None;
-        }
-        return Some(vec![d[0] / b[0]]);
+        return (b[0].abs() >= 1e-15).then(|| vec![d[0] / b[0]]);
     }
     let mut c_prime = vec![0.0; n - 1];
     let mut d_prime = vec![0.0; n];
@@ -258,11 +228,6 @@ pub fn solve_richards_1d(
 ///
 /// Returns `AirSpringError::InvalidInput` if inputs are invalid.
 #[expect(clippy::too_many_arguments, reason = "PDE API mirrors physics params")]
-#[expect(
-    clippy::many_single_char_names,
-    clippy::similar_names,
-    reason = "standard FD notation (h,q,z,i,n)"
-)]
 pub fn solve_richards_1d_with_config(
     params: &VanGenuchtenParams,
     depth_cm: f64,
@@ -287,12 +252,6 @@ pub fn solve_richards_1d_with_config(
     }
 
     let dz = depth_cm / crate::cast::usize_f64(n_nodes);
-    let theta_r = params.theta_r;
-    let theta_s = params.theta_s;
-    let alpha = params.alpha;
-    let n_vg = params.n_vg;
-    let ks = params.ks;
-
     let h_clip_min = config.h_clip_min;
     let h_clip_max = config.h_clip_max;
     let mut h: Vec<f64> = vec![h_initial.clamp(h_clip_min, h_clip_max); n_nodes];
@@ -301,133 +260,53 @@ pub fn solve_richards_1d_with_config(
     let n_steps = crate::cast::f64_usize((duration_days / dt_days).ceil().max(1.0));
     let mut t = 0.0_f64;
 
-    let mut a = vec![0.0_f64; n_nodes];
-    let mut b = vec![0.0_f64; n_nodes];
-    let mut c = vec![0.0_f64; n_nodes];
-    let mut d = vec![0.0_f64; n_nodes];
-    let mut h_prev = vec![0.0_f64; n_nodes];
-    let mut h_old = vec![0.0_f64; n_nodes];
-    let mut q_buf = vec![0.0_f64; n_nodes + 1];
+    let mut scratch = PicardScratch::new(n_nodes);
 
     for _step in 0..n_steps {
         let t_next = (t + dt_days).min(duration_days);
         let dt = t_next - t;
         t = t_next;
 
-        h_prev.copy_from_slice(&h);
-        let mut converged = false;
-        for _picard in 0..config.picard_max_iter {
-            h_old.copy_from_slice(&h);
-
-            a.fill(0.0);
-            b.fill(0.0);
-            c.fill(0.0);
-            d.fill(0.0);
-
-            for i in 0..n_nodes {
-                let hi = h[i].clamp(h_clip_min, h_clip_max);
-                let ci = van_genuchten_capacity(hi, theta_r, theta_s, alpha, n_vg);
-                let ki = van_genuchten_k(hi, ks, theta_r, theta_s, alpha, n_vg);
-
-                let k_im12 = if i == 0 {
-                    if zero_flux_top {
-                        0.0
-                    } else {
-                        let k_top = van_genuchten_k(h_top, ks, theta_r, theta_s, alpha, n_vg);
-                        0.5 * (k_top + ki)
-                    }
-                } else {
-                    let ki_m1 = van_genuchten_k(
-                        h[i - 1].clamp(h_clip_min, h_clip_max),
-                        ks,
-                        theta_r,
-                        theta_s,
-                        alpha,
-                        n_vg,
-                    );
-                    0.5 * (ki_m1 + ki)
-                };
-
-                let k_ip12 = if i == n_nodes - 1 {
-                    0.0
-                } else {
-                    let ki_p1 = van_genuchten_k(
-                        h[i + 1].clamp(h_clip_min, h_clip_max),
-                        ks,
-                        theta_r,
-                        theta_s,
-                        alpha,
-                        n_vg,
-                    );
-                    0.5 * (ki + ki_p1)
-                };
-
-                let dz2 = dz * dz;
-                if i > 0 {
-                    a[i] = -k_im12 / dz2;
-                }
-                b[i] = ci / dt + k_im12 / dz2 + k_ip12 / dz2;
-                if i < n_nodes - 1 {
-                    c[i] = -k_ip12 / dz2;
-                }
-
-                if i == 0 {
-                    if zero_flux_top {
-                        d[i] = (ci / dt).mul_add(h_old[i], -k_ip12 / dz);
-                    } else {
-                        let k_top = van_genuchten_k(h_top, ks, theta_r, theta_s, alpha, n_vg);
-                        let q_top = k_top.mul_add((h_top - h_old[0]) / (0.5 * dz), k_top);
-                        d[i] = (ci / dt).mul_add(h_old[i], q_top / dz - k_ip12 / dz);
-                    }
-                } else if i == n_nodes - 1 && bottom_free_drain {
-                    d[i] = (ci / dt).mul_add(h_old[i], (ki - k_im12) / dz);
-                } else {
-                    d[i] = (ci / dt).mul_add(h_old[i], (k_ip12 - k_im12) / dz);
-                }
-            }
-
-            if !tridiag_solve(&a, &b, &c, &d, &mut h) {
-                break;
-            }
-
-            let omega = config.relaxation;
-            for (hi, h_old_i) in h.iter_mut().zip(h_old.iter()) {
-                *hi = omega
-                    .mul_add(*hi, (1.0 - omega) * *h_old_i)
-                    .clamp(h_clip_min, h_clip_max);
-            }
-
-            let max_diff = h
-                .iter()
-                .zip(h_old.iter())
-                .map(|(a, b)| (a - b).abs())
-                .fold(0.0_f64, f64::max);
-            if max_diff < config.picard_tol {
-                converged = true;
-                break;
-            }
-        }
+        scratch.h_prev.copy_from_slice(&h);
+        let converged = picard_iterate(
+            &mut h,
+            &mut scratch,
+            params,
+            config,
+            dz,
+            dt,
+            h_top,
+            zero_flux_top,
+            bottom_free_drain,
+        );
 
         if !converged {
-            let mut dh_dt = vec![0.0_f64; n_nodes];
-            richards_rhs(
-                &h_prev,
+            explicit_fallback(
+                &mut h,
+                &scratch.h_prev,
                 params,
                 dz,
+                dt,
                 h_top,
                 zero_flux_top,
                 bottom_free_drain,
-                &mut dh_dt,
-                &mut q_buf,
+                h_clip_min,
+                h_clip_max,
+                &mut scratch.q_buf,
             );
-            for (hi, (h_prev_i, dhdti)) in h.iter_mut().zip(h_prev.iter().zip(dh_dt.iter())) {
-                *hi = (*h_prev_i + dt * dhdti).clamp(h_clip_min, h_clip_max);
-            }
         }
 
         let theta: Vec<f64> = h
             .iter()
-            .map(|&hi| van_genuchten_theta(hi, theta_r, theta_s, alpha, n_vg))
+            .map(|&hi| {
+                van_genuchten_theta(
+                    hi,
+                    params.theta_r,
+                    params.theta_s,
+                    params.alpha,
+                    params.n_vg,
+                )
+            })
             .collect();
         let z: Vec<f64> = (0..n_nodes)
             .map(|i| (crate::cast::usize_f64(i) + 0.5) * dz)
@@ -441,6 +320,228 @@ pub fn solve_richards_1d_with_config(
     }
 
     Ok(profiles)
+}
+
+/// Pre-allocated scratch buffers for the Picard iteration loop.
+struct PicardScratch {
+    a: Vec<f64>,
+    b: Vec<f64>,
+    c: Vec<f64>,
+    d: Vec<f64>,
+    h_prev: Vec<f64>,
+    h_old: Vec<f64>,
+    q_buf: Vec<f64>,
+}
+
+impl PicardScratch {
+    fn new(n: usize) -> Self {
+        Self {
+            a: vec![0.0; n],
+            b: vec![0.0; n],
+            c: vec![0.0; n],
+            d: vec![0.0; n],
+            h_prev: vec![0.0; n],
+            h_old: vec![0.0; n],
+            q_buf: vec![0.0; n + 1],
+        }
+    }
+}
+
+/// Run Picard iterations for one time step, assembling and solving the
+/// tridiagonal system until convergence or `picard_max_iter`.
+#[expect(
+    clippy::too_many_arguments,
+    reason = "PDE time-step requires all params"
+)]
+fn picard_iterate(
+    h: &mut [f64],
+    scratch: &mut PicardScratch,
+    params: &VanGenuchtenParams,
+    config: &RichardsConfig,
+    dz: f64,
+    dt: f64,
+    h_top: f64,
+    zero_flux_top: bool,
+    bottom_free_drain: bool,
+) -> bool {
+    let (h_clip_min, h_clip_max) = (config.h_clip_min, config.h_clip_max);
+
+    for _picard in 0..config.picard_max_iter {
+        scratch.h_old.copy_from_slice(h);
+
+        scratch.a.fill(0.0);
+        scratch.b.fill(0.0);
+        scratch.c.fill(0.0);
+        scratch.d.fill(0.0);
+
+        assemble_tridiagonal(
+            h,
+            &scratch.h_old,
+            &mut scratch.a,
+            &mut scratch.b,
+            &mut scratch.c,
+            &mut scratch.d,
+            params,
+            dz,
+            dt,
+            h_top,
+            zero_flux_top,
+            bottom_free_drain,
+            h_clip_min,
+            h_clip_max,
+        );
+
+        if !tridiag_solve(&scratch.a, &scratch.b, &scratch.c, &scratch.d, h) {
+            break;
+        }
+
+        let omega = config.relaxation;
+        for (hi, h_old_i) in h.iter_mut().zip(scratch.h_old.iter()) {
+            *hi = omega
+                .mul_add(*hi, (1.0 - omega) * *h_old_i)
+                .clamp(h_clip_min, h_clip_max);
+        }
+
+        let max_diff = h
+            .iter()
+            .zip(scratch.h_old.iter())
+            .map(|(a, b)| (a - b).abs())
+            .fold(0.0_f64, f64::max);
+        if max_diff < config.picard_tol {
+            return true;
+        }
+    }
+    false
+}
+
+/// Assemble the tridiagonal system (a, b, c, d) for one Picard iteration.
+#[expect(
+    clippy::too_many_arguments,
+    reason = "FD assembly needs all grid/physics params"
+)]
+#[expect(
+    clippy::many_single_char_names,
+    clippy::similar_names,
+    reason = "standard FD notation"
+)]
+fn assemble_tridiagonal(
+    h: &[f64],
+    h_old: &[f64],
+    a: &mut [f64],
+    b: &mut [f64],
+    c: &mut [f64],
+    d: &mut [f64],
+    params: &VanGenuchtenParams,
+    dz: f64,
+    dt: f64,
+    h_top: f64,
+    zero_flux_top: bool,
+    bottom_free_drain: bool,
+    h_clip_min: f64,
+    h_clip_max: f64,
+) {
+    let n_nodes = h.len();
+    let (theta_r, theta_s, alpha, n_vg, ks) = (
+        params.theta_r,
+        params.theta_s,
+        params.alpha,
+        params.n_vg,
+        params.ks,
+    );
+    let dz2 = dz * dz;
+
+    for i in 0..n_nodes {
+        let hi = h[i].clamp(h_clip_min, h_clip_max);
+        let ci = van_genuchten_capacity(hi, theta_r, theta_s, alpha, n_vg);
+        let ki = van_genuchten_k(hi, ks, theta_r, theta_s, alpha, n_vg);
+
+        let k_im12 = if i == 0 {
+            if zero_flux_top {
+                0.0
+            } else {
+                let k_top = van_genuchten_k(h_top, ks, theta_r, theta_s, alpha, n_vg);
+                0.5 * (k_top + ki)
+            }
+        } else {
+            let ki_m1 = van_genuchten_k(
+                h[i - 1].clamp(h_clip_min, h_clip_max),
+                ks,
+                theta_r,
+                theta_s,
+                alpha,
+                n_vg,
+            );
+            0.5 * (ki_m1 + ki)
+        };
+
+        let k_ip12 = if i == n_nodes - 1 {
+            0.0
+        } else {
+            let ki_p1 = van_genuchten_k(
+                h[i + 1].clamp(h_clip_min, h_clip_max),
+                ks,
+                theta_r,
+                theta_s,
+                alpha,
+                n_vg,
+            );
+            0.5 * (ki + ki_p1)
+        };
+
+        if i > 0 {
+            a[i] = -k_im12 / dz2;
+        }
+        b[i] = ci / dt + k_im12 / dz2 + k_ip12 / dz2;
+        if i < n_nodes - 1 {
+            c[i] = -k_ip12 / dz2;
+        }
+
+        if i == 0 {
+            if zero_flux_top {
+                d[i] = (ci / dt).mul_add(h_old[i], -k_ip12 / dz);
+            } else {
+                let k_top = van_genuchten_k(h_top, ks, theta_r, theta_s, alpha, n_vg);
+                let q_top = k_top.mul_add((h_top - h_old[0]) / (0.5 * dz), k_top);
+                d[i] = (ci / dt).mul_add(h_old[i], q_top / dz - k_ip12 / dz);
+            }
+        } else if i == n_nodes - 1 && bottom_free_drain {
+            d[i] = (ci / dt).mul_add(h_old[i], (ki - k_im12) / dz);
+        } else {
+            d[i] = (ci / dt).mul_add(h_old[i], (k_ip12 - k_im12) / dz);
+        }
+    }
+}
+
+/// Explicit Euler fallback when Picard iteration does not converge.
+#[expect(clippy::too_many_arguments, reason = "PDE fallback needs same params")]
+fn explicit_fallback(
+    h: &mut [f64],
+    h_prev: &[f64],
+    params: &VanGenuchtenParams,
+    dz: f64,
+    dt: f64,
+    h_top: f64,
+    zero_flux_top: bool,
+    bottom_free_drain: bool,
+    h_clip_min: f64,
+    h_clip_max: f64,
+    q_buf: &mut [f64],
+) {
+    let n_nodes = h.len();
+    let mut dh_dt = vec![0.0_f64; n_nodes];
+    richards_rhs(
+        h_prev,
+        params,
+        dz,
+        h_top,
+        zero_flux_top,
+        bottom_free_drain,
+        &mut dh_dt,
+        q_buf,
+    );
+    for (hi, (h_prev_i, dhdti)) in h.iter_mut().zip(h_prev.iter().zip(dh_dt.iter())) {
+        *hi = (*h_prev_i + dt * dhdti).clamp(h_clip_min, h_clip_max);
+    }
 }
 
 /// Cumulative drainage at bottom (cm) for a sequence of profiles.

@@ -8,9 +8,7 @@
 
 use airspring_barracuda::cast::usize_f64;
 use airspring_barracuda::eco::soil_moisture::{inverse_topp, topp_equation};
-use airspring_barracuda::validation::{
-    self, ValidationHarness, json_f64, parse_benchmark_json,
-};
+use airspring_barracuda::validation::{self, ValidationHarness, json_f64, parse_benchmark_json};
 use serde_json::Value;
 
 const BENCHMARK_JSON: &str =
@@ -80,7 +78,9 @@ fn validate_oven_dry(v: &mut ValidationHarness, bench: &Value) {
         DIELECTRIC_TOL,
     );
 
-    let range = chk["expected_range"].as_array().expect("expected_range array");
+    let range = chk["expected_range"]
+        .as_array()
+        .expect("expected_range array");
     let lo = range[0].as_f64().expect("oven_dry lower");
     let hi = range[1].as_f64().expect("oven_dry upper");
     v.check_bool(
@@ -100,10 +100,9 @@ fn validate_roundtrips_and_published(v: &mut ValidationHarness, bench: &Value) {
         };
 
         if let Some(suffix) = name.strip_prefix("roundtrip_ka") {
-            let ka_tail =
-                suffix
-                    .parse::<f64>()
-                    .unwrap_or_else(|_| panic!("{name}: expected Ka suffix (e.g. 5.0)"));
+            let ka_tail = suffix
+                .parse::<f64>()
+                .unwrap_or_else(|_| panic!("{name}: expected Ka suffix (e.g. 5.0)"));
             let recovered = inverse_topp(topp_equation(ka_tail));
             let expected = json_f64(c, &["expected"]).expect("expected");
             let tol = json_f64(c, &["tolerance"]).unwrap_or(DIELECTRIC_TOL);
@@ -113,7 +112,9 @@ fn validate_roundtrips_and_published(v: &mut ValidationHarness, bench: &Value) {
 
         if name == "published_ka15" {
             let theta = topp_equation(15.0);
-            let range = c["expected_range"].as_array().expect("expected_range array");
+            let range = c["expected_range"]
+                .as_array()
+                .expect("expected_range array");
             let lo = range[0].as_f64().expect("published_ka15 lower");
             let hi = range[1].as_f64().expect("published_ka15 upper");
             v.check_bool(

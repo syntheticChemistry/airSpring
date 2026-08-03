@@ -44,7 +44,7 @@ pub struct OpenMeteoProvider {
 }
 
 impl OpenMeteoProvider {
-    /// Create with auto-discovered transport (Songbird preferred, ureq fallback).
+    /// Create with auto-discovered transport (Songbird IPC).
     ///
     /// # Errors
     ///
@@ -60,7 +60,7 @@ impl OpenMeteoProvider {
         })
     }
 
-    /// Create with auto-discovered transport (Songbird preferred, ureq fallback).
+    /// Create with auto-discovered transport (Songbird IPC).
     ///
     /// # Panics
     ///
@@ -216,6 +216,8 @@ impl WeatherProvider for OpenMeteoProvider {
 mod tests {
     use super::*;
     use crate::data::provider::{HttpResponse, HttpTransport};
+    use crate::testutil::EnvGuard;
+    use serial_test::serial;
 
     /// Mock transport for testing.
     struct MockTransport {
@@ -243,7 +245,13 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn try_new_fails_without_transport() {
+        let _g1 = EnvGuard::remove("SONGBIRD_SOCKET");
+        let _g2 = EnvGuard::set(
+            "BIOMEOS_SOCKET_DIR",
+            "/tmp/airspring_test_no_sockets_dir_xyz",
+        );
         let result = OpenMeteoProvider::try_new();
         assert!(
             result.is_err(),
@@ -304,7 +312,13 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn default_fails_gracefully() {
+        let _g1 = EnvGuard::remove("SONGBIRD_SOCKET");
+        let _g2 = EnvGuard::set(
+            "BIOMEOS_SOCKET_DIR",
+            "/tmp/airspring_test_no_sockets_dir_xyz",
+        );
         let result = OpenMeteoProvider::try_new();
         assert!(result.is_err(), "Default/new should fail without Songbird");
     }

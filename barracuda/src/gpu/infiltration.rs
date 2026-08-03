@@ -20,9 +20,6 @@ use barracuda::optimize::brent_gpu::BrentGpu;
 use crate::eco::infiltration::{self, GreenAmptParams};
 use crate::tolerances::POSITIVE_DATA_GUARD;
 
-#[cfg(test)]
-use super::device_info::try_f64_device;
-
 /// Batched GPU Green-Ampt infiltration orchestrator.
 ///
 /// Uses `BrentGpu::solve_green_ampt()` to solve the implicit GA cumulative
@@ -121,17 +118,11 @@ pub fn cumulative_cpu(params: &GreenAmptParams, times_hr: &[f64]) -> Vec<f64> {
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
-
-    fn try_device() -> Option<Arc<WgpuDevice>> {
-        try_f64_device()
-    }
+    use crate::testutil::gpu_or_skip;
 
     #[test]
     fn test_gpu_matches_cpu_sandy_loam() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedInfiltration");
-            return;
-        };
+        gpu_or_skip!(device);
         let solver = BatchedInfiltration::new(device);
         let params = GreenAmptParams {
             delta_theta: 0.312,
@@ -150,10 +141,7 @@ mod tests {
 
     #[test]
     fn test_gpu_matches_cpu_clay() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedInfiltration (clay)");
-            return;
-        };
+        gpu_or_skip!(device);
         let solver = BatchedInfiltration::new(device);
         let params = GreenAmptParams {
             delta_theta: 0.285,
@@ -171,10 +159,7 @@ mod tests {
 
     #[test]
     fn test_series_gpu() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for series");
-            return;
-        };
+        gpu_or_skip!(device);
         let solver = BatchedInfiltration::new(device);
         let params = GreenAmptParams::LOAM;
         let times = [0.5, 1.0, 2.0];
@@ -189,10 +174,7 @@ mod tests {
 
     #[test]
     fn test_gpu_monotonic() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for monotonic");
-            return;
-        };
+        gpu_or_skip!(device);
         let solver = BatchedInfiltration::new(device);
         let params = GreenAmptParams {
             delta_theta: 0.312,
@@ -208,10 +190,7 @@ mod tests {
 
     #[test]
     fn test_empty_input() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device");
-            return;
-        };
+        gpu_or_skip!(device);
         let solver = BatchedInfiltration::new(device);
         let result = solver.cumulative_gpu(&GreenAmptParams::LOAM, &[]).unwrap();
         assert!(result.is_empty());

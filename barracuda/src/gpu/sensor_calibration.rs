@@ -161,6 +161,7 @@ fn compute_cpu_batch(inputs: &[SensorReading]) -> Vec<f64> {
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
+    use crate::testutil::gpu_or_skip;
 
     #[test]
     fn reference_point() {
@@ -253,16 +254,9 @@ mod tests {
         assert_eq!(result.backend_used, Backend::Cpu);
     }
 
-    fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
-        crate::gpu::device_info::try_f64_device()
-    }
-
     #[test]
     fn compute_gpu_device_dispatch() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedSensorCal");
-            return;
-        };
+        gpu_or_skip!(device);
         let engine = BatchedSensorCal::gpu(device).unwrap();
         let result = engine
             .compute_gpu(&[SensorReading {
@@ -280,10 +274,7 @@ mod tests {
 
     #[test]
     fn compute_gpu_matches_cpu() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedSensorCal");
-            return;
-        };
+        gpu_or_skip!(device);
         let gpu_engine = BatchedSensorCal::gpu(device).unwrap();
         let cpu_engine = BatchedSensorCal::cpu();
         let inputs: Vec<SensorReading> = (0..50)

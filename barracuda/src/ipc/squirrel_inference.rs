@@ -122,10 +122,7 @@ pub fn embed(text: &str) -> Result<EmbedResult, InferenceError> {
 /// # Errors
 ///
 /// Same as [`embed`].
-pub fn embed_via(
-    transport: &Transport,
-    text: &str,
-) -> Result<EmbedResult, InferenceError> {
+pub fn embed_via(transport: &Transport, text: &str) -> Result<EmbedResult, InferenceError> {
     let resp = rpc::send_to(
         transport,
         "inference.embed",
@@ -177,10 +174,7 @@ pub fn complete(prompt: &str) -> Result<CompleteResult, InferenceError> {
 /// # Errors
 ///
 /// Same as [`embed`].
-pub fn complete_via(
-    transport: &Transport,
-    prompt: &str,
-) -> Result<CompleteResult, InferenceError> {
+pub fn complete_via(transport: &Transport, prompt: &str) -> Result<CompleteResult, InferenceError> {
     let resp = rpc::send_to(
         transport,
         "inference.complete",
@@ -227,11 +221,7 @@ pub fn list_models() -> Result<Vec<InferenceModel>, InferenceError> {
 ///
 /// Same as [`embed`].
 pub fn list_models_via(transport: &Transport) -> Result<Vec<InferenceModel>, InferenceError> {
-    let resp = rpc::send_to(
-        transport,
-        "inference.models",
-        &serde_json::json!({}),
-    )?;
+    let resp = rpc::send_to(transport, "inference.models", &serde_json::json!({}))?;
     check_rpc_error(&resp)?;
 
     let r = resp.get("result").or(Some(&resp));

@@ -27,7 +27,7 @@ pub fn try_create_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevic
 pub fn try_gpu_dispatch<T>(f: impl FnOnce() -> T) -> Option<T> {
     std::panic::catch_unwind(std::panic::AssertUnwindSafe(f)).map_or_else(
         |_| {
-            eprintln!("SKIP: upstream shader regression");
+            eprintln!("SKIP: upstream shader regression — {}", module_path!());
             None
         },
         Some,
@@ -41,7 +41,7 @@ macro_rules! device_or_skip {
         match $crate::common::try_create_device() {
             Some(d) => d,
             None => {
-                eprintln!("SKIP: No GPU device available");
+                eprintln!("SKIP: No f64-capable GPU — {}", module_path!());
                 return;
             }
         }

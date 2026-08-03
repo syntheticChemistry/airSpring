@@ -169,10 +169,7 @@ pub fn content_get(hash: &str) -> Result<GetResult, NestGateError> {
 /// # Errors
 ///
 /// Same as [`content_store`].
-pub fn content_get_via(
-    transport: &Transport,
-    hash: &str,
-) -> Result<GetResult, NestGateError> {
+pub fn content_get_via(transport: &Transport, hash: &str) -> Result<GetResult, NestGateError> {
     let resp = rpc::send_to(
         transport,
         "content.get",
@@ -213,11 +210,7 @@ pub fn storage_status() -> Result<StorageStatus, NestGateError> {
 ///
 /// Same as [`content_store`].
 pub fn storage_status_via(transport: &Transport) -> Result<StorageStatus, NestGateError> {
-    let resp = rpc::send_to(
-        transport,
-        "storage.status",
-        &serde_json::json!({}),
-    )?;
+    let resp = rpc::send_to(transport, "storage.status", &serde_json::json!({}))?;
     check_rpc_error(&resp)?;
 
     let r = resp.get("result").or(Some(&resp));
@@ -407,11 +400,7 @@ mod tests {
         });
 
         let transport = Transport::Tcp(addr);
-        let result = content_store_via(
-            &transport,
-            "test",
-            &serde_json::json!({}),
-        );
+        let result = content_store_via(&transport, "test", &serde_json::json!({}));
         server.join().expect("join");
 
         match result {

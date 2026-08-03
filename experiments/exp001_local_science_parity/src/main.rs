@@ -9,7 +9,7 @@
 
 use airspring_barracuda::methods as m;
 use airspring_barracuda::primal_science::dispatch_science;
-use airspring_barracuda::validation::{ValidationHarness, init_tracing, banner};
+use airspring_barracuda::validation::{ValidationHarness, banner, init_tracing};
 
 fn check_dispatch(v: &mut ValidationHarness, method: &str, params: &serde_json::Value) {
     let result = dispatch_science(method, params);
@@ -33,10 +33,7 @@ fn check_ecology_alias(
 ) {
     let s = dispatch_science(science, params);
     let e = dispatch_science(ecology, params);
-    v.check_bool(
-        &format!("alias parity: {science} == {ecology}"),
-        s == e,
-    );
+    v.check_bool(&format!("alias parity: {science} == {ecology}"), s == e);
 }
 
 fn main() {
@@ -86,15 +83,29 @@ fn main() {
     check_dispatch(&mut v, m::SPI_DROUGHT_INDEX, &spi_params);
     let acf_params = serde_json::json!({"data": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0], "max_lag": 5});
     check_dispatch(&mut v, m::AUTOCORRELATION, &acf_params);
-    check_dispatch(&mut v, m::GAMMA_CDF, &serde_json::json!({"x": 1.0, "alpha": 2.0, "beta": 1.0}));
+    check_dispatch(
+        &mut v,
+        m::GAMMA_CDF,
+        &serde_json::json!({"x": 1.0, "alpha": 2.0, "beta": 1.0}),
+    );
 
     println!("\n── Ecology alias parity ──");
     check_ecology_alias(&mut v, m::ET0_FAO56, m::ECO_ET0_FAO56, &empty);
     check_ecology_alias(&mut v, m::ET0_HARGREAVES, m::ECO_ET0_HARGREAVES, &empty);
     check_ecology_alias(&mut v, m::WATER_BALANCE, m::ECO_WATER_BALANCE, &empty);
     check_ecology_alias(&mut v, m::YIELD_RESPONSE, m::ECO_YIELD_RESPONSE, &empty);
-    check_ecology_alias(&mut v, m::SPI_DROUGHT_INDEX, m::ECO_SPI_DROUGHT_INDEX, &spi_params);
-    check_ecology_alias(&mut v, m::AUTOCORRELATION, m::ECO_AUTOCORRELATION, &acf_params);
+    check_ecology_alias(
+        &mut v,
+        m::SPI_DROUGHT_INDEX,
+        m::ECO_SPI_DROUGHT_INDEX,
+        &spi_params,
+    );
+    check_ecology_alias(
+        &mut v,
+        m::AUTOCORRELATION,
+        m::ECO_AUTOCORRELATION,
+        &acf_params,
+    );
 
     println!("\n── Unknown method rejection ──");
     v.check_bool(

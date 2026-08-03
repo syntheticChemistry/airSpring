@@ -72,6 +72,10 @@ fn main() {
 // Phase 1: CPU Science Baseline
 // ═══════════════════════════════════════════════════════════════════
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "validation phase — sequential experiment checks"
+)]
 fn phase_1_cpu_science(v: &mut ValidationHarness) {
     let et0 = et::daily_et0(&DailyEt0Input {
         tmin: 18.0,

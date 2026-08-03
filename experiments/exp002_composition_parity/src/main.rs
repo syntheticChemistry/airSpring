@@ -18,16 +18,16 @@ use airspring_barracuda::methods as m;
 use airspring_barracuda::niche;
 use airspring_barracuda::primal_names;
 use airspring_barracuda::rpc;
-use airspring_barracuda::validation::{ValidationHarness, init_tracing, banner, section};
+use airspring_barracuda::validation::{ValidationHarness, banner, init_tracing, section};
 
 fn tier1_local(v: &mut ValidationHarness) {
     section("Tier 1: LOCAL CAPABILITIES");
 
-    v.check_bool("niche name is 'airspring'", niche::NICHE_NAME == "airspring");
     v.check_bool(
-        "capabilities >= 40",
-        niche::CAPABILITIES.len() >= 40,
+        "niche name is 'airspring'",
+        niche::NICHE_NAME == "airspring",
     );
+    v.check_bool("capabilities >= 40", niche::CAPABILITIES.len() >= 40);
     v.check_bool(
         "health.liveness registered",
         niche::CAPABILITIES.contains(&m::HEALTH_LIVENESS),
@@ -67,10 +67,7 @@ fn tier2_ipc(v: &mut ValidationHarness) {
 
     let primals_found = biomeos::discover_all_primals();
     println!("  discovered: {} primals", primals_found.len());
-    v.check_bool(
-        "primal discovery returns without error",
-        true,
-    );
+    v.check_bool("primal discovery returns without error", true);
 
     let check_primal = |v: &mut ValidationHarness, name: &str| {
         let transport = rpc::resolve_transport(name);
@@ -110,7 +107,8 @@ fn tier3_nucleus(v: &mut ValidationHarness) {
             "type": "composition_check",
             "method": m::ET0_FAO56,
         });
-        let recorded = airspring_barracuda::ipc::provenance::record_experiment_step(&session.id, &step);
+        let recorded =
+            airspring_barracuda::ipc::provenance::record_experiment_step(&session.id, &step);
         v.check_bool("provenance step recorded", recorded.available);
 
         let completion = airspring_barracuda::ipc::provenance::complete_experiment(&session.id);

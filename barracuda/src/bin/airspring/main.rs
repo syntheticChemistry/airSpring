@@ -63,6 +63,10 @@ fn cmd_certify(layer: Option<u8>, bare: bool) {
     }
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "validation harness dispatch — sequential scenario runner"
+)]
 fn cmd_validate(
     track: Option<&str>,
     scenario_id: Option<&str>,

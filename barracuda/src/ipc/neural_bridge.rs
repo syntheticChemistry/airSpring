@@ -13,6 +13,7 @@
 //!
 //! Non-fatal when biomeOS is unavailable — all methods return typed errors.
 
+use crate::primal_names;
 use crate::rpc::{self, IpcError, Transport};
 
 /// Outcome of a bridge round-trip for adaptive routing feedback.
@@ -65,7 +66,7 @@ impl From<IpcError> for BridgeError {
 }
 
 fn resolve_neural_api() -> Result<Transport, BridgeError> {
-    rpc::resolve_transport("biomeos").map_err(|_| BridgeError::NoPrimal)
+    rpc::resolve_transport(primal_names::BIOMEOS).map_err(|_| BridgeError::NoPrimal)
 }
 
 fn call_neural_api(
@@ -75,7 +76,10 @@ fn call_neural_api(
 ) -> Result<serde_json::Value, BridgeError> {
     let resp = rpc::send_to(transport, method, params).map_err(BridgeError::Ipc)?;
     if let Some(err) = resp.get("error") {
-        let code = err.get("code").and_then(serde_json::Value::as_i64).unwrap_or(-1);
+        let code = err
+            .get("code")
+            .and_then(serde_json::Value::as_i64)
+            .unwrap_or(-1);
         let message = err
             .get("message")
             .and_then(|m| m.as_str())
@@ -83,15 +87,16 @@ fn call_neural_api(
             .to_string();
         return Err(BridgeError::RpcError { code, message });
     }
-    Ok(resp.get("result").cloned().unwrap_or(serde_json::Value::Null))
+    Ok(resp
+        .get("result")
+        .cloned()
+        .unwrap_or(serde_json::Value::Null))
 }
 
 fn epoch_ms() -> u64 {
     std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
-        .map_or(0, |d| {
-            u64::try_from(d.as_millis()).unwrap_or(u64::MAX)
-        })
+        .map_or(0, |d| u64::try_from(d.as_millis()).unwrap_or(u64::MAX))
 }
 
 /// Invoke `capability.call` through biomeOS and record the round-trip.
@@ -248,11 +253,8 @@ mod tests {
 
     #[test]
     fn instrumented_call_produces_outcome() {
-        let (result, outcome) = capability_call_instrumented(
-            "science",
-            "et0_fao56",
-            &serde_json::json!({}),
-        );
+        let (result, outcome) =
+            capability_call_instrumented("science", "et0_fao56", &serde_json::json!({}));
         assert!(result.is_err(), "no biomeOS in test env");
         assert!(!outcome.success);
         assert_eq!(outcome.capability, "science");

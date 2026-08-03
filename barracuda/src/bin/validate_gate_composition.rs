@@ -136,18 +136,8 @@ fn main() {
         }
     }
 
-    v.check_abs(
-        "niche_sockets_found",
-        f64::from(sockets_found),
-        10.0,
-        0.5,
-    );
-    v.check_abs(
-        "niche_primals_healthy",
-        f64::from(healthy_count),
-        10.0,
-        0.5,
-    );
+    v.check_abs("niche_sockets_found", f64::from(sockets_found), 10.0, 0.5);
+    v.check_abs("niche_primals_healthy", f64::from(healthy_count), 10.0, 0.5);
 
     // ── Phase 1b: biomeOS Discovery ──────────────────────────────────
     let biomeos_sock = find_socket(primal_names::BIOMEOS);
@@ -166,10 +156,26 @@ fn main() {
 
     if let Some(ref api_sock) = neural_api_sock {
         let validation_caps = [
-            ("stats", "mean", serde_json::json!({"values": [1.0, 2.0, 3.0]})),
-            ("compute", "dispatch", serde_json::json!({"method": "health", "params": {}})),
-            ("storage", "store", serde_json::json!({"key": "__gate_probe__", "value": "ok"})),
-            ("crypto", "hash", serde_json::json!({"data": "gate_validation_probe"})),
+            (
+                "stats",
+                "mean",
+                serde_json::json!({"values": [1.0, 2.0, 3.0]}),
+            ),
+            (
+                "compute",
+                "dispatch",
+                serde_json::json!({"method": "health", "params": {}}),
+            ),
+            (
+                "storage",
+                "store",
+                serde_json::json!({"key": "__gate_probe__", "value": "ok"}),
+            ),
+            (
+                "crypto",
+                "hash",
+                serde_json::json!({"data": "gate_validation_probe"}),
+            ),
         ];
 
         for (domain, op, args) in &validation_caps {
@@ -233,7 +239,7 @@ fn main() {
     // ── Phase 6: Cross-Primal Forwarding via airSpring ───────────────
     eprintln!("\n━━━ Phase 6: airSpring Cross-Primal Forwarding ━━━");
 
-    let airspring_sock = find_socket("airspring");
+    let airspring_sock = find_socket(airspring_barracuda::PRIMAL_NAME);
     v.check_bool("airspring_primal_socket", airspring_sock.is_some());
 
     if let Some(ref sock) = airspring_sock {
@@ -261,9 +267,7 @@ fn main() {
 
     // ── Summary ──────────────────────────────────────────────────────
     eprintln!("\n━━━ Gate Composition Summary ━━━");
-    eprintln!(
-        "  Primals discovered: {sockets_found}/10 ({healthy_count} healthy)"
-    );
+    eprintln!("  Primals discovered: {sockets_found}/10 ({healthy_count} healthy)");
     eprintln!(
         "  biomeOS: {}",
         if biomeos_sock.is_some() {

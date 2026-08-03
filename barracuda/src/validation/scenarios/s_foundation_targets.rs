@@ -160,7 +160,10 @@ pub fn run(v: &mut ValidationHarness) {
                             parity_pass += 1;
                         }
                     } else {
-                        v.check_bool(&format!("{id}: dispatch succeeds (no numeric extraction)"), true);
+                        v.check_bool(
+                            &format!("{id}: dispatch succeeds (no numeric extraction)"),
+                            true,
+                        );
                         qualitative_pass += 1;
                     }
                 } else {

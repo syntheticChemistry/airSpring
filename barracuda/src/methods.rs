@@ -6,7 +6,7 @@
 //! that references a capability method name should import from here rather
 //! than using inline string literals.
 //!
-//! Synchronized with [`capability_registry.toml`] via the
+//! Synchronized with `capability_registry.toml` via the
 //! `capabilities_match_registry` integration test.
 
 // ── Evapotranspiration (7 methods) ──────────────────────────────────

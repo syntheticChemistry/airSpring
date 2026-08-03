@@ -18,9 +18,6 @@ use std::sync::Arc;
 use barracuda::device::WgpuDevice;
 use barracuda::ops::batched_elementwise_f64::{BatchedElementwiseF64, Op};
 
-#[cfg(test)]
-use super::device_info::try_f64_device;
-
 /// Single pedotransfer polynomial input: coefficients a0..a5 and evaluation point x.
 #[derive(Debug, Clone, Copy)]
 pub struct PedotransferInput {
@@ -118,11 +115,7 @@ fn horner_eval(coeffs: &[f64; 6], x: f64) -> f64 {
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
-
-    fn try_device() -> Option<Arc<WgpuDevice>> {
-        try_f64_device()
-    }
-
+    use crate::testutil::gpu_or_skip;
     #[test]
     fn test_positive_coefficients() {
         let engine = BatchedPedotransfer::cpu();
@@ -150,10 +143,7 @@ mod tests {
 
     #[test]
     fn test_gpu_matches_cpu() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedPedotransfer");
-            return;
-        };
+        gpu_or_skip!(device);
         let gpu_engine = BatchedPedotransfer::gpu(device).unwrap();
         let cpu_engine = BatchedPedotransfer::cpu();
 

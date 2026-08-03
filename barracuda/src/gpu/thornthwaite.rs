@@ -9,9 +9,6 @@ use std::sync::Arc;
 use barracuda::device::WgpuDevice;
 use barracuda::ops::batched_elementwise_f64::{BatchedElementwiseF64, Op, thornthwaite_et0_cpu};
 
-#[cfg(test)]
-use super::device_info::try_f64_device;
-
 /// Per-month input for batched Thornthwaite ET₀.
 ///
 /// Stride-5 layout: `[heat_index_I, exponent_a, daylight_hours_N, days_in_month_d, T_mean]`.
@@ -124,11 +121,7 @@ pub fn compute_thornthwaite_cpu(inputs: &[ThornthwaiteInput]) -> Vec<f64> {
 )]
 mod tests {
     use super::*;
-
-    fn try_device() -> Option<Arc<WgpuDevice>> {
-        try_f64_device()
-    }
-
+    use crate::testutil::gpu_or_skip;
     fn sample_input() -> ThornthwaiteInput {
         ThornthwaiteInput {
             heat_index: 100.0,
@@ -153,10 +146,7 @@ mod tests {
 
     #[test]
     fn test_gpu_matches_cpu() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedThornthwaite");
-            return;
-        };
+        gpu_or_skip!(device);
         let gpu_engine = BatchedThornthwaite::gpu(device).unwrap();
         let cpu_engine = BatchedThornthwaite::cpu();
 

@@ -237,6 +237,7 @@ impl BatchedWaterBalance {
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
+    use crate::testutil::gpu_or_skip;
 
     #[test]
     fn test_season_mass_balance() {
@@ -482,16 +483,9 @@ mod tests {
         );
     }
 
-    fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
-        crate::gpu::device_info::try_f64_device()
-    }
-
     #[test]
     fn test_gpu_step_device_empty() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedWaterBalance");
-            return;
-        };
+        gpu_or_skip!(device);
         let engine = BatchedWaterBalance::with_gpu(0.30, 0.10, 500.0, 0.5, device).unwrap();
         let results = engine.gpu_step(&[]).unwrap();
         assert!(results.is_empty());
@@ -499,10 +493,7 @@ mod tests {
 
     #[test]
     fn test_gpu_step_device_single_field() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedWaterBalance");
-            return;
-        };
+        gpu_or_skip!(device);
         let engine = BatchedWaterBalance::with_gpu(0.30, 0.10, 500.0, 0.5, device).unwrap();
         let fields = vec![FieldDayInput {
             dr_prev: 20.0,
@@ -526,10 +517,7 @@ mod tests {
 
     #[test]
     fn test_gpu_step_device_matches_cpu() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedWaterBalance");
-            return;
-        };
+        gpu_or_skip!(device);
         let gpu_engine = BatchedWaterBalance::with_gpu(0.30, 0.10, 500.0, 0.5, device).unwrap();
         let cpu_engine = BatchedWaterBalance::new(0.30, 0.10, 500.0, 0.5);
         let fields: Vec<FieldDayInput> = (0..100)
@@ -553,10 +541,7 @@ mod tests {
 
     #[test]
     fn test_gpu_step_device_large_batch() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedWaterBalance");
-            return;
-        };
+        gpu_or_skip!(device);
         let engine = BatchedWaterBalance::with_gpu(0.30, 0.10, 500.0, 0.5, device).unwrap();
         let fields: Vec<FieldDayInput> = (0..500)
             .map(|i| FieldDayInput {
@@ -581,10 +566,7 @@ mod tests {
 
     #[test]
     fn test_with_gpu_debug_format() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedWaterBalance");
-            return;
-        };
+        gpu_or_skip!(device);
         let engine = BatchedWaterBalance::with_gpu(0.30, 0.10, 500.0, 0.5, device).unwrap();
         let dbg = format!("{engine:?}");
         assert!(dbg.contains("BatchedWaterBalance"));

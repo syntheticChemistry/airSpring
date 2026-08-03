@@ -163,13 +163,11 @@ impl BatchedYieldResponse {
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
+    use crate::testutil::gpu_or_skip;
 
     #[test]
     fn test_gpu_matches_cpu() {
-        let Some(device) = crate::gpu::device_info::try_f64_device() else {
-            eprintln!("SKIP: no GPU for GpuYieldResponse");
-            return;
-        };
+        gpu_or_skip!(device);
         let gpu_solver = GpuYieldResponse::new(device).unwrap();
         let inputs = vec![
             YieldInput {

@@ -145,6 +145,7 @@ pub fn try_f64_device() -> Option<Arc<WgpuDevice>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::testutil::gpu_or_skip;
 
     #[test]
     fn test_precision_routing_field() {
@@ -186,10 +187,7 @@ mod tests {
 
     #[test]
     fn test_probe_device_if_available() {
-        let Some(device) = try_f64_device() else {
-            eprintln!("SKIP: No f64-capable GPU");
-            return;
-        };
+        gpu_or_skip!(device);
         let report = probe_device(&device);
         assert!(!report.adapter_name.is_empty());
         println!("{report}");

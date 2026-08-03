@@ -208,6 +208,7 @@ impl Default for AtlasStream {
 mod tests {
     use super::*;
     use crate::eco::crop::CropType;
+    use crate::testutil::gpu_or_skip;
 
     fn summer_day(doy: u32) -> WeatherDay {
         WeatherDay {
@@ -389,10 +390,6 @@ mod tests {
         assert_eq!(AtlasStream::simulation_count(&batches, &config), 6);
     }
 
-    fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
-        crate::gpu::device_info::try_f64_device()
-    }
-
     #[test]
     fn unified_matches_per_station() {
         let stream = AtlasStream::new();
@@ -451,10 +448,7 @@ mod tests {
 
     #[test]
     fn gpu_atlas_matches_cpu() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for AtlasStream");
-            return;
-        };
+        gpu_or_skip!(device);
         let gpu_stream = AtlasStream::with_gpu(device).unwrap();
         let cpu_stream = AtlasStream::new();
         let batches = vec![StationBatch {

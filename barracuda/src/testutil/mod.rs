@@ -32,3 +32,24 @@ pub use stats::{
     coefficient_of_determination, dot, hit_rate, index_of_agreement, l2_norm, mbe, mean,
     nash_sutcliffe, pearson_r, percentile, r_squared, rmse, spearman_r, std_deviation, variance,
 };
+
+/// Acquire an f64-capable GPU device or skip the test with a message.
+///
+/// Expands to a `let`-binding: the device is bound to the provided identifier.
+///
+/// ```rust,ignore
+/// gpu_or_skip!(device);
+/// // `device` is now an Arc<WgpuDevice>
+/// ```
+#[cfg(test)]
+macro_rules! gpu_or_skip {
+    ($dev:ident) => {
+        let Some($dev) = $crate::gpu::device_info::try_f64_device() else {
+            eprintln!("SKIP: No f64-capable GPU — {}", ::std::module_path!());
+            return;
+        };
+    };
+}
+
+#[cfg(test)]
+pub(crate) use gpu_or_skip;

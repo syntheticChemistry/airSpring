@@ -126,6 +126,7 @@ pub fn smooth_cpu(data: &[f64], window_size: usize) -> Option<SmoothedSeries> {
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
+    use crate::testutil::gpu_or_skip;
 
     #[test]
     fn test_cpu_constant_signal() {
@@ -318,16 +319,9 @@ mod tests {
 
     // ── StreamSmoother (device-backed, skips if no GPU) ───────────────────────
 
-    fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
-        crate::gpu::device_info::try_f64_device()
-    }
-
     #[test]
     fn test_stream_smoother_new_and_smooth() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for StreamSmoother");
-            return;
-        };
+        gpu_or_skip!(device);
         let smoother = StreamSmoother::new(device);
         let data = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0];
         let result = smoother.smooth(&data, 3).unwrap();
@@ -342,10 +336,7 @@ mod tests {
 
     #[test]
     fn test_stream_smoother_empty_data_error() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for StreamSmoother");
-            return;
-        };
+        gpu_or_skip!(device);
         let smoother = StreamSmoother::new(device);
         let result = smoother.smooth(&[], 5);
         assert!(result.is_err());
@@ -353,10 +344,7 @@ mod tests {
 
     #[test]
     fn test_stream_smoother_window_too_large_error() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for StreamSmoother");
-            return;
-        };
+        gpu_or_skip!(device);
         let smoother = StreamSmoother::new(device);
         let data = vec![1.0, 2.0, 3.0];
         let result = smoother.smooth(&data, 5);
@@ -365,10 +353,7 @@ mod tests {
 
     #[test]
     fn test_stream_smoother_window_size_one() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for StreamSmoother");
-            return;
-        };
+        gpu_or_skip!(device);
         let smoother = StreamSmoother::new(device);
         let data = vec![1.0, 2.0, 3.0];
         let result = smoother.smooth(&data, 1).unwrap();

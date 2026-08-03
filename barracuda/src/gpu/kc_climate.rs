@@ -181,6 +181,7 @@ impl BatchedKcClimate {
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
+    use crate::testutil::gpu_or_skip;
 
     fn sample_day() -> KcClimateDay {
         KcClimateDay {
@@ -264,16 +265,9 @@ mod tests {
         assert_eq!(result.backend_used, Backend::Cpu);
     }
 
-    fn try_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevice>> {
-        crate::gpu::device_info::try_f64_device()
-    }
-
     #[test]
     fn compute_gpu_device_dispatch() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedKcClimate");
-            return;
-        };
+        gpu_or_skip!(device);
         let engine = BatchedKcClimate::gpu(device).unwrap();
         let result = engine.compute_gpu(&[sample_day()]).unwrap();
         assert_eq!(result.kc_values.len(), 1);
@@ -287,10 +281,7 @@ mod tests {
 
     #[test]
     fn compute_gpu_matches_cpu() {
-        let Some(device) = try_device() else {
-            eprintln!("SKIP: No GPU device for BatchedKcClimate");
-            return;
-        };
+        gpu_or_skip!(device);
         let gpu_engine = BatchedKcClimate::gpu(device).unwrap();
         let cpu_engine = BatchedKcClimate::cpu();
         let inputs: Vec<KcClimateDay> = (0..50)

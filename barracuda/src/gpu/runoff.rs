@@ -168,14 +168,11 @@ impl BatchedRunoff {
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
     use super::*;
+    use crate::testutil::gpu_or_skip;
 
     #[test]
     fn test_gpu_matches_cpu() {
-        let device = crate::gpu::device_info::try_f64_device();
-        let Some(device) = device else {
-            eprintln!("SKIP: no GPU for GpuRunoff");
-            return;
-        };
+        gpu_or_skip!(device);
         let gpu_solver = GpuRunoff::new(device).unwrap();
         let inputs = vec![
             RunoffInput {

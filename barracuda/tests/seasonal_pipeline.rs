@@ -6,7 +6,7 @@ mod common;
 use airspring_barracuda::eco::crop::CropType;
 use airspring_barracuda::gpu::seasonal_pipeline::{CropConfig, SeasonalPipeline, WeatherDay};
 
-use common::try_create_device;
+use crate::common::device_or_skip;
 
 const fn summer_day(doy: u32) -> WeatherDay {
     WeatherDay {
@@ -191,10 +191,7 @@ fn debug_format_cpu() {
 fn gpu_pipeline_matches_cpu() {
     use airspring_barracuda::gpu::seasonal_pipeline::Backend;
 
-    let Some(device) = try_create_device() else {
-        eprintln!("SKIP: No GPU device for SeasonalPipeline");
-        return;
-    };
+    let device = device_or_skip!();
     let gpu_pipeline = SeasonalPipeline::gpu(device).unwrap();
     let cpu_pipeline = SeasonalPipeline::cpu();
     let weather = growing_season();
@@ -224,10 +221,7 @@ fn gpu_pipeline_matches_cpu() {
 
 #[test]
 fn gpu_pipeline_mass_balance() {
-    let Some(device) = try_create_device() else {
-        eprintln!("SKIP: No GPU device for SeasonalPipeline");
-        return;
-    };
+    let device = device_or_skip!();
     let pipeline = SeasonalPipeline::gpu(device).unwrap();
     let weather = growing_season();
 
@@ -253,10 +247,7 @@ fn streaming_matches_cpu() {
 
     let cpu_result = cpu_pipeline.run_season(&weather, &config);
 
-    let Some(device) = try_create_device() else {
-        eprintln!("SKIP: No GPU device for streaming_matches_cpu");
-        return;
-    };
+    let device = device_or_skip!();
     let streaming_pipeline = SeasonalPipeline::streaming(device).unwrap();
     let streaming_result = streaming_pipeline.streaming_et0_kc(&weather, &config);
 

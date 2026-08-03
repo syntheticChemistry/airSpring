@@ -129,9 +129,7 @@ fn inference_embed(params: &serde_json::Value) -> serde_json::Value {
 }
 
 fn inference_complete(params: &serde_json::Value) -> serde_json::Value {
-    let prompt = params
-        .get("prompt")
-        .and_then(serde_json::Value::as_str);
+    let prompt = params.get("prompt").and_then(serde_json::Value::as_str);
     let Some(prompt_text) = prompt else {
         return serde_json::json!({
             "error": "missing 'prompt' parameter",

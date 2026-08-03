@@ -86,9 +86,7 @@ fn parse_result(resp: &serde_json::Value) -> Result<PrecisionAdvice, PrecisionEr
     let recommended_tier = r
         .and_then(|v| v.get("recommended_tier"))
         .and_then(serde_json::Value::as_str)
-        .ok_or_else(|| {
-            PrecisionError::MalformedResponse("missing `recommended_tier`".into())
-        })?
+        .ok_or_else(|| PrecisionError::MalformedResponse("missing `recommended_tier`".into()))?
         .to_owned();
 
     let fma_safe = r
@@ -155,10 +153,7 @@ pub fn route(domain: &str) -> Result<PrecisionAdvice, PrecisionError> {
 /// # Errors
 ///
 /// Same as [`route`].
-pub fn route_via(
-    transport: &Transport,
-    domain: &str,
-) -> Result<PrecisionAdvice, PrecisionError> {
+pub fn route_via(transport: &Transport, domain: &str) -> Result<PrecisionAdvice, PrecisionError> {
     let resp = rpc::send_to(
         transport,
         "precision.route",

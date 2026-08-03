@@ -9,7 +9,7 @@
 //! Pattern: primalSpring exp094 + foundation target TOML schema
 
 use airspring_barracuda::primal_science::dispatch_science;
-use airspring_barracuda::validation::{ValidationHarness, init_tracing, banner, section};
+use airspring_barracuda::validation::{ValidationHarness, banner, init_tracing, section};
 
 const DEFAULT_TARGETS_PATH: &str = concat!(
     env!("CARGO_MANIFEST_DIR"),
@@ -42,10 +42,21 @@ fn parse_targets(content: &str) -> Vec<Target> {
             let expected = t.get("expected_value")?.as_float()?;
             Some(Target {
                 id: t.get("id")?.as_str()?.to_string(),
-                paper: t.get("paper").and_then(|p| p.as_str()).unwrap_or("").to_string(),
-                description: t.get("description").and_then(|d| d.as_str()).unwrap_or("").to_string(),
+                paper: t
+                    .get("paper")
+                    .and_then(|p| p.as_str())
+                    .unwrap_or("")
+                    .to_string(),
+                description: t
+                    .get("description")
+                    .and_then(|d| d.as_str())
+                    .unwrap_or("")
+                    .to_string(),
                 expected,
-                tolerance: t.get("tolerance").and_then(|v| v.as_float()).unwrap_or(0.01),
+                tolerance: t
+                    .get("tolerance")
+                    .and_then(|v| v.as_float())
+                    .unwrap_or(0.01),
                 method: map_paper_to_method(
                     t.get("paper").and_then(|p| p.as_str()).unwrap_or(""),
                     t.get("id").and_then(|i| i.as_str()).unwrap_or(""),
@@ -83,7 +94,10 @@ fn map_paper_to_method(paper: &str, id: &str) -> Option<String> {
 
 fn validate_target(v: &mut ValidationHarness, target: &Target) {
     let Some(ref method) = target.method else {
-        println!("  SKIP: {}: no dispatchable method for paper '{}'", target.id, target.paper);
+        println!(
+            "  SKIP: {}: no dispatchable method for paper '{}'",
+            target.id, target.paper
+        );
         return;
     };
 

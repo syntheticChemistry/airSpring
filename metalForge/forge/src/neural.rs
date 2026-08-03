@@ -34,6 +34,9 @@ use std::time::Duration;
 
 use crate::substrate::{Capability, Identity, Properties, Substrate, SubstrateKind};
 
+const BIOMEOS_SOCKET_SUBDIR: &str = "biomeos";
+const NEURAL_API_DRIVER: &str = "biomeos-neural-api";
+
 static REQUEST_ID: AtomicU64 = AtomicU64::new(1);
 
 /// Connection to the biomeOS Neural API.
@@ -217,7 +220,7 @@ pub fn probe_neural() -> Option<Substrate> {
         kind: SubstrateKind::Neural,
         identity: Identity {
             name: format!("biomeOS Neural API ({})", bridge.socket_path().display()),
-            driver: Some(String::from("biomeos-neural-api")),
+            driver: Some(String::from(NEURAL_API_DRIVER)),
             backend: Some(String::from("unix-socket")),
             adapter_index: None,
             device_node: None,
@@ -247,7 +250,7 @@ fn resolve_socket() -> Option<PathBuf> {
     // Tier 2: XDG_RUNTIME_DIR
     if let Ok(xdg) = std::env::var("XDG_RUNTIME_DIR") {
         let p = PathBuf::from(xdg)
-            .join("biomeos")
+            .join(BIOMEOS_SOCKET_SUBDIR)
             .join(format!("neural-api-{family_id}.sock"));
         if p.exists() {
             return Some(p);
@@ -257,7 +260,7 @@ fn resolve_socket() -> Option<PathBuf> {
     // Tier 3: /run/user/{uid} — derive from XDG_RUNTIME_DIR or procfs
     let uid = uid_from_runtime_dir();
     let p = PathBuf::from(format!(
-        "/run/user/{uid}/biomeos/neural-api-{family_id}.sock"
+        "/run/user/{uid}/{BIOMEOS_SOCKET_SUBDIR}/neural-api-{family_id}.sock"
     ));
     if p.exists() {
         return Some(p);
@@ -265,7 +268,7 @@ fn resolve_socket() -> Option<PathBuf> {
 
     // Tier 4: platform temp-dir fallback (no hardcoded /tmp)
     let p = std::env::temp_dir()
-        .join("biomeos")
+        .join(BIOMEOS_SOCKET_SUBDIR)
         .join(format!("neural-api-{family_id}.sock"));
     if p.exists() {
         return Some(p);
