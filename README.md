@@ -19,7 +19,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,284/1,284 PASS** | 60 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB, MC ET₀ uncertainty, bootstrap/jackknife CI, SPI drought index |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **1,089 lib (barracuda) + 68 forge = 1,157 total** | 98 binaries, 5-member workspace, deep debt CLEAN |
+| Phase 1: Rust validation | **1,154 lib (barracuda) + 68 forge = 1,222 total** | 98 binaries, 5-member workspace, deep debt CLEAN |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (25/25 parity incl. Freundlich) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |
@@ -55,7 +55,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test -p airspring-barracuda --all-features --lib` | **1,089 passed**, 0 failures |
+| `cargo test -p airspring-barracuda --all-features --lib` | **1,154 passed**, 0 failures |
 | `cargo test -p airspring-forge --lib` | **68 passed**, 0 failures |
 | `cargo llvm-cov` | **84.30% line, 87.83% function** |
 | `cargo clippy --all-features (pedantic + nursery, -D warnings)` | **0 warnings** (workspace) |
