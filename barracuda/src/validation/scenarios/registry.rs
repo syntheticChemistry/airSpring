@@ -151,3 +151,149 @@ impl Default for ScenarioRegistry {
         Self::new()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn tier_display_roundtrip() {
+        assert_eq!(Tier::Rust.to_string(), "rust");
+        assert_eq!(Tier::Live.to_string(), "live");
+        assert_eq!(Tier::Both.to_string(), "both");
+    }
+
+    #[test]
+    fn track_display_roundtrip() {
+        assert_eq!(Track::ScienceDispatch.to_string(), "science-dispatch");
+        assert_eq!(Track::Composition.to_string(), "composition");
+        assert_eq!(Track::Foundation.to_string(), "foundation");
+        assert_eq!(Track::Provenance.to_string(), "provenance");
+    }
+
+    #[test]
+    fn track_from_str_loose_canonical() {
+        assert_eq!(
+            Track::from_str_loose("science-dispatch"),
+            Some(Track::ScienceDispatch)
+        );
+        assert_eq!(
+            Track::from_str_loose("composition"),
+            Some(Track::Composition)
+        );
+        assert_eq!(Track::from_str_loose("foundation"), Some(Track::Foundation));
+        assert_eq!(Track::from_str_loose("provenance"), Some(Track::Provenance));
+    }
+
+    #[test]
+    fn track_from_str_loose_aliases() {
+        assert_eq!(
+            Track::from_str_loose("science"),
+            Some(Track::ScienceDispatch)
+        );
+        assert_eq!(Track::from_str_loose("comp"), Some(Track::Composition));
+        assert_eq!(Track::from_str_loose("targets"), Some(Track::Foundation));
+        assert_eq!(Track::from_str_loose("prov"), Some(Track::Provenance));
+    }
+
+    #[test]
+    fn track_from_str_loose_unknown() {
+        assert_eq!(Track::from_str_loose("unknown"), None);
+        assert_eq!(Track::from_str_loose(""), None);
+    }
+
+    #[test]
+    fn registry_starts_empty() {
+        let r = ScenarioRegistry::new();
+        assert!(r.is_empty());
+        assert_eq!(r.len(), 0);
+        assert!(r.all().is_empty());
+    }
+
+    #[test]
+    fn registry_default_is_empty() {
+        let r = ScenarioRegistry::default();
+        assert!(r.is_empty());
+    }
+
+    fn dummy_run(_: &mut ValidationHarness) {}
+
+    fn make_scenario(id: &'static str, tier: Tier, track: Track) -> Scenario {
+        Scenario {
+            meta: ScenarioMeta {
+                id,
+                track,
+                tier,
+                provenance_crate: "test",
+                provenance_date: "2026-01-01",
+                description: "test scenario",
+            },
+            run: dummy_run,
+        }
+    }
+
+    #[test]
+    fn register_and_retrieve() {
+        let mut r = ScenarioRegistry::new();
+        r.register(make_scenario("a", Tier::Rust, Track::ScienceDispatch));
+        r.register(make_scenario("b", Tier::Live, Track::Composition));
+        assert_eq!(r.len(), 2);
+        assert!(!r.is_empty());
+        assert_eq!(r.all()[0].meta.id, "a");
+        assert_eq!(r.all()[1].meta.id, "b");
+    }
+
+    #[test]
+    fn filter_by_tier_rust() {
+        let mut r = ScenarioRegistry::new();
+        r.register(make_scenario(
+            "rust-only",
+            Tier::Rust,
+            Track::ScienceDispatch,
+        ));
+        r.register(make_scenario("live-only", Tier::Live, Track::Composition));
+        r.register(make_scenario("both-tiers", Tier::Both, Track::Foundation));
+
+        let rust: Vec<_> = r.filter_by_tier(Tier::Rust).collect();
+        assert_eq!(rust.len(), 2);
+        assert!(rust.iter().any(|s| s.meta.id == "rust-only"));
+        assert!(rust.iter().any(|s| s.meta.id == "both-tiers"));
+    }
+
+    #[test]
+    fn filter_by_tier_live() {
+        let mut r = ScenarioRegistry::new();
+        r.register(make_scenario(
+            "rust-only",
+            Tier::Rust,
+            Track::ScienceDispatch,
+        ));
+        r.register(make_scenario("live-only", Tier::Live, Track::Composition));
+        r.register(make_scenario("both-tiers", Tier::Both, Track::Foundation));
+
+        let live: Vec<_> = r.filter_by_tier(Tier::Live).collect();
+        assert_eq!(live.len(), 2);
+        assert!(live.iter().any(|s| s.meta.id == "live-only"));
+        assert!(live.iter().any(|s| s.meta.id == "both-tiers"));
+    }
+
+    #[test]
+    fn filter_by_tier_both_returns_all() {
+        let mut r = ScenarioRegistry::new();
+        r.register(make_scenario("a", Tier::Rust, Track::ScienceDispatch));
+        r.register(make_scenario("b", Tier::Live, Track::Composition));
+        r.register(make_scenario("c", Tier::Both, Track::Foundation));
+
+        let both: Vec<_> = r.filter_by_tier(Tier::Both).collect();
+        assert_eq!(both.len(), 3);
+    }
+
+    #[test]
+    fn scenario_debug_format() {
+        let s = make_scenario("test-debug", Tier::Rust, Track::Foundation);
+        let dbg = format!("{s:?}");
+        assert!(dbg.contains("test-debug"));
+        assert!(dbg.contains("Rust"));
+        assert!(dbg.contains("Foundation"));
+    }
+}

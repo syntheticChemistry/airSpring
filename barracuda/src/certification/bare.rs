@@ -177,3 +177,148 @@ fn validate_health_caps(v: &mut ValidationHarness) {
         niche_caps.contains("health.readiness"),
     );
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn extract_string_array_present() {
+        let toml: toml::Value =
+            toml::from_str(r#"fruits = ["apple", "banana", "cherry"]"#).unwrap();
+        let result = extract_string_array(&toml, "fruits");
+        assert_eq!(result, vec!["apple", "banana", "cherry"]);
+    }
+
+    #[test]
+    fn extract_string_array_missing() {
+        let toml: toml::Value = toml::from_str(r#"other = 42"#).unwrap();
+        assert!(extract_string_array(&toml, "fruits").is_empty());
+    }
+
+    #[test]
+    fn extract_string_array_mixed_types_filters() {
+        let toml: toml::Value = toml::from_str(r#"data = ["text", 42, "more"]"#).unwrap();
+        let result = extract_string_array(&toml, "data");
+        assert_eq!(result, vec!["text", "more"]);
+    }
+
+    #[test]
+    fn parse_airspring_entry_valid() {
+        let content = r#"
+[[downstream]]
+spring_name = "airspring"
+domain = "ecology_agriculture"
+fragments = ["tower_atomic", "node_atomic", "nest_atomic"]
+depends_on = ["bearDog", "songBird", "coralReef", "toadStool", "barraCuda", "nestGate"]
+validation_capabilities = ["science.et0_fao56", "science.water_balance"]
+"#;
+        let entry = parse_airspring_entry(content).expect("should parse");
+        assert_eq!(entry.spring_name, "airspring");
+        assert_eq!(entry.domain, "ecology_agriculture");
+        assert_eq!(entry.fragments.len(), 3);
+        assert_eq!(entry.depends_on.len(), 6);
+        assert_eq!(entry.validation_capabilities.len(), 2);
+    }
+
+    #[test]
+    fn parse_airspring_entry_missing() {
+        let content = r#"
+[[downstream]]
+spring_name = "hotspring"
+domain = "nuclear_physics"
+"#;
+        assert!(parse_airspring_entry(content).is_none());
+    }
+
+    #[test]
+    fn parse_airspring_entry_multiple_springs() {
+        let content = r#"
+[[downstream]]
+spring_name = "hotspring"
+domain = "nuclear"
+
+[[downstream]]
+spring_name = "airspring"
+domain = "ecology_agriculture"
+fragments = ["tower_atomic"]
+depends_on = ["bearDog"]
+validation_capabilities = ["science.et0_fao56"]
+"#;
+        let entry = parse_airspring_entry(content).expect("should find airspring");
+        assert_eq!(entry.spring_name, "airspring");
+        assert_eq!(entry.fragments, vec!["tower_atomic"]);
+    }
+
+    #[test]
+    fn parse_airspring_entry_invalid_toml() {
+        assert!(parse_airspring_entry("not valid toml {{{}").is_none());
+    }
+
+    #[test]
+    fn parse_airspring_entry_no_downstream_key() {
+        assert!(parse_airspring_entry(r#"[other] key = "val""#).is_none());
+    }
+
+    #[test]
+    fn validate_health_caps_all_present() {
+        let mut h = ValidationHarness::new("test: health caps");
+        validate_health_caps(&mut h);
+        assert!(
+            h.checks.iter().all(|c| c.passed),
+            "health caps missing: {:?}",
+            h.checks
+                .iter()
+                .filter(|c| !c.passed)
+                .map(|c| &c.label)
+                .collect::<Vec<_>>()
+        );
+    }
+
+    #[test]
+    fn validate_identity_correct() {
+        let entry = ManifestEntry {
+            spring_name: crate::PRIMAL_NAME.to_string(),
+            domain: "ecology_agriculture".to_string(),
+            fragments: vec![],
+            depends_on: vec![],
+            validation_capabilities: vec![],
+        };
+        let mut h = ValidationHarness::new("test: identity");
+        validate_identity(&mut h, &entry);
+        assert!(h.checks.iter().all(|c| c.passed));
+    }
+
+    #[test]
+    fn validate_fragments_full() {
+        let entry = ManifestEntry {
+            spring_name: String::new(),
+            domain: String::new(),
+            fragments: vec![
+                "tower_atomic".to_string(),
+                "node_atomic".to_string(),
+                "nest_atomic".to_string(),
+            ],
+            depends_on: vec![],
+            validation_capabilities: vec![],
+        };
+        let mut h = ValidationHarness::new("test: fragments");
+        validate_fragments(&mut h, &entry);
+        assert!(h.checks.iter().all(|c| c.passed));
+    }
+
+    #[test]
+    fn validate_fragments_partial() {
+        let entry = ManifestEntry {
+            spring_name: String::new(),
+            domain: String::new(),
+            fragments: vec!["tower_atomic".to_string()],
+            depends_on: vec![],
+            validation_capabilities: vec![],
+        };
+        let mut h = ValidationHarness::new("test: partial frags");
+        validate_fragments(&mut h, &entry);
+        let failures = h.checks.iter().filter(|c| !c.passed).count();
+        assert_eq!(failures, 2, "missing node_atomic + nest_atomic");
+    }
+}

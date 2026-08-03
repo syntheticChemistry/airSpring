@@ -214,3 +214,213 @@ fn build_params_for_target(target: &toml::Value, method: &str) -> serde_json::Va
         _ => serde_json::json!({}),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn map_paper_known_methods() {
+        assert_eq!(
+            map_paper_to_method("FAO56_PM", ""),
+            Some("science.et0_fao56")
+        );
+        assert_eq!(
+            map_paper_to_method("HARGREAVES_SAMANI", ""),
+            Some("science.et0_hargreaves")
+        );
+        assert_eq!(
+            map_paper_to_method("THORNTHWAITE", ""),
+            Some("science.thornthwaite")
+        );
+        assert_eq!(
+            map_paper_to_method("RICHARDS_VG", ""),
+            Some("science.richards_1d")
+        );
+        assert_eq!(
+            map_paper_to_method("SCS_CN", ""),
+            Some("science.scs_cn_runoff")
+        );
+        assert_eq!(
+            map_paper_to_method("GREEN_AMPT", ""),
+            Some("science.green_ampt_infiltration")
+        );
+        assert_eq!(
+            map_paper_to_method("SAXTON_RAWLS", ""),
+            Some("science.pedotransfer_saxton_rawls")
+        );
+        assert_eq!(
+            map_paper_to_method("FAO56_DUAL_KC", ""),
+            Some("science.dual_kc")
+        );
+        assert_eq!(
+            map_paper_to_method("STEWART_YIELD", ""),
+            Some("science.yield_response")
+        );
+        assert_eq!(
+            map_paper_to_method("SHANNON", ""),
+            Some("science.shannon_diversity")
+        );
+        assert_eq!(map_paper_to_method("GDD", ""), Some("science.gdd"));
+    }
+
+    #[test]
+    fn map_paper_aliases() {
+        assert_eq!(
+            map_paper_to_method("PT1972", ""),
+            Some("science.et0_priestley_taylor")
+        );
+        assert_eq!(
+            map_paper_to_method("HS1985", ""),
+            Some("science.et0_hargreaves")
+        );
+        assert_eq!(
+            map_paper_to_method("TH1948", ""),
+            Some("science.thornthwaite")
+        );
+        assert_eq!(
+            map_paper_to_method("VAN_GENUCHTEN", ""),
+            Some("science.richards_1d")
+        );
+        assert_eq!(
+            map_paper_to_method("DOORENBOS_KASSAM", ""),
+            Some("science.yield_response")
+        );
+        assert_eq!(
+            map_paper_to_method("SPI", ""),
+            Some("science.spi_drought_index")
+        );
+        assert_eq!(
+            map_paper_to_method("MCKEE_SPI", ""),
+            Some("science.spi_drought_index")
+        );
+    }
+
+    #[test]
+    fn map_paper_fallback_spi() {
+        assert_eq!(
+            map_paper_to_method("UNKNOWN", "target_spi_3month"),
+            Some("science.spi_drought_index")
+        );
+        assert_eq!(
+            map_paper_to_method("UNKNOWN", "gamma_fit"),
+            Some("science.spi_drought_index")
+        );
+    }
+
+    #[test]
+    fn map_paper_unknown() {
+        assert_eq!(map_paper_to_method("UNKNOWN", "unrelated"), None);
+    }
+
+    #[test]
+    fn extract_result_et0() {
+        let val = serde_json::json!({"et0_mm": 4.5, "other": 99.0});
+        assert_eq!(extract_result_value(&val, "science.et0_fao56"), Some(4.5));
+        assert_eq!(
+            extract_result_value(&val, "science.et0_hargreaves"),
+            Some(4.5)
+        );
+    }
+
+    #[test]
+    fn extract_result_richards() {
+        let val = serde_json::json!({"theta_surface": 0.32});
+        assert_eq!(
+            extract_result_value(&val, "science.richards_1d"),
+            Some(0.32)
+        );
+    }
+
+    #[test]
+    fn extract_result_thornthwaite_annual() {
+        let val = serde_json::json!({"annual_pet_mm": 850.0});
+        assert_eq!(
+            extract_result_value(&val, "science.thornthwaite"),
+            Some(850.0)
+        );
+    }
+
+    #[test]
+    fn extract_result_fallback_keys() {
+        let val = serde_json::json!({"value": 42.0});
+        assert_eq!(
+            extract_result_value(&val, "science.unknown_method"),
+            Some(42.0)
+        );
+    }
+
+    #[test]
+    fn extract_result_bare_f64() {
+        let val = serde_json::json!(3.14);
+        assert_eq!(extract_result_value(&val, "anything"), Some(3.14));
+    }
+
+    #[test]
+    fn extract_result_no_match() {
+        let val = serde_json::json!({"unrelated": "text"});
+        assert_eq!(extract_result_value(&val, "science.et0_fao56"), None);
+    }
+
+    #[test]
+    fn toml_f64_from_float() {
+        let v = toml::Value::Float(3.14);
+        assert_eq!(toml_f64(Some(&v)), Some(3.14));
+    }
+
+    #[test]
+    fn toml_f64_from_int() {
+        let v = toml::Value::Integer(42);
+        assert_eq!(toml_f64(Some(&v)), Some(42.0));
+    }
+
+    #[test]
+    fn toml_f64_none() {
+        assert_eq!(toml_f64(None), None);
+    }
+
+    #[test]
+    fn toml_f64_string_returns_none() {
+        let v = toml::Value::String("not a number".to_string());
+        assert_eq!(toml_f64(Some(&v)), None);
+    }
+
+    #[test]
+    fn build_params_thornthwaite_east_lansing() {
+        let target: toml::Value = toml::from_str(r#"id = "et0_east_lansing""#).unwrap();
+        let params = build_params_for_target(&target, "science.thornthwaite");
+        assert!(params.get("monthly_temps").is_some());
+        assert!(params.get("latitude_deg").is_some());
+    }
+
+    #[test]
+    fn build_params_thornthwaite_wooster() {
+        let target: toml::Value = toml::from_str(r#"id = "et0_wooster_oh""#).unwrap();
+        let params = build_params_for_target(&target, "science.thornthwaite");
+        assert!(params.get("monthly_temps").is_some());
+        let lat = params["latitude_deg"].as_f64().unwrap();
+        assert!((lat - 40.8).abs() < 0.01);
+    }
+
+    #[test]
+    fn build_params_default_empty() {
+        let target: toml::Value = toml::from_str(r#"id = "generic_target""#).unwrap();
+        let params = build_params_for_target(&target, "science.et0_fao56");
+        assert_eq!(params, serde_json::json!({}));
+    }
+
+    #[test]
+    fn build_params_with_inline_params() {
+        let target: toml::Value = toml::from_str(
+            r#"
+            id = "custom"
+            [params]
+            x = 1.0
+            alpha = 2.0
+            "#,
+        )
+        .unwrap();
+        let params = build_params_for_target(&target, "science.gamma_cdf");
+        assert!(params.get("x").is_some());
+    }
+}

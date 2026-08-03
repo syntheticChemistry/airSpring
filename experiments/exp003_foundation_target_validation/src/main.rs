@@ -24,7 +24,9 @@ struct Target {
     id: String,
     paper: String,
     description: String,
+    #[allow(dead_code)]
     expected: f64,
+    #[allow(dead_code)]
     tolerance: f64,
     method: Option<String>,
 }
@@ -55,7 +57,7 @@ fn parse_targets(content: &str) -> Vec<Target> {
                 expected,
                 tolerance: t
                     .get("tolerance")
-                    .and_then(|v| v.as_float())
+                    .and_then(toml::Value::as_float)
                     .unwrap_or(0.01),
                 method: map_paper_to_method(
                     t.get("paper").and_then(|p| p.as_str()).unwrap_or(""),
@@ -104,21 +106,18 @@ fn validate_target(v: &mut ValidationHarness, target: &Target) {
     let params = serde_json::json!({});
     let result = dispatch_science(method, &params);
 
-    match result {
-        Some(r) => {
-            if r.get("error").is_some() {
-                println!("  SKIP: {}: dispatch returned error", target.id);
-                return;
-            }
-            v.check_bool(
-                &format!("{}: dispatch succeeds ({})", target.id, target.description),
-                true,
-            );
+    if let Some(r) = result {
+        if r.get("error").is_some() {
+            println!("  SKIP: {}: dispatch returned error", target.id);
+            return;
         }
-        None => {
-            println!("  FAIL: {}: method '{}' not recognized", target.id, method);
-            v.check_bool(&format!("{}: dispatch succeeds", target.id), false);
-        }
+        v.check_bool(
+            &format!("{}: dispatch succeeds ({})", target.id, target.description),
+            true,
+        );
+    } else {
+        println!("  FAIL: {}: method '{}' not recognized", target.id, method);
+        v.check_bool(&format!("{}: dispatch succeeds", target.id), false);
     }
 }
 
@@ -138,7 +137,6 @@ fn main() {
             println!("  Set FOUNDATION_TARGETS_PATH or clone foundation repo to gardens/");
             v.check_bool("targets file readable", false);
             v.finish();
-            return;
         }
     };
 

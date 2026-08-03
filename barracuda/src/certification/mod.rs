@@ -122,3 +122,19 @@ fn print_summary(v: &ValidationHarness) {
         );
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn max_layer_constant() {
+        assert_eq!(MAX_LAYER, 6);
+    }
+
+    #[test]
+    fn certify_layer_0_completes() {
+        let v = certify(0);
+        assert!(v.total_count() > 0, "layer 0 should produce checks");
+    }
+}

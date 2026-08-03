@@ -38,3 +38,152 @@ pub fn build_registry() -> ScenarioRegistry {
     r.register(s_tier4_math_parity::SCENARIO);
     r
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::validation::ValidationHarness;
+
+    #[test]
+    fn build_registry_has_10_scenarios() {
+        let r = build_registry();
+        assert_eq!(r.len(), 10);
+        assert!(!r.is_empty());
+    }
+
+    #[test]
+    fn all_scenario_ids_unique() {
+        let r = build_registry();
+        let mut ids: Vec<&str> = r.all().iter().map(|s| s.meta.id).collect();
+        let before = ids.len();
+        ids.sort_unstable();
+        ids.dedup();
+        assert_eq!(ids.len(), before, "duplicate scenario IDs found");
+    }
+
+    #[test]
+    fn all_scenarios_have_provenance() {
+        let r = build_registry();
+        for s in r.all() {
+            assert!(
+                !s.meta.provenance_crate.is_empty(),
+                "{}: missing provenance_crate",
+                s.meta.id
+            );
+            assert!(
+                !s.meta.provenance_date.is_empty(),
+                "{}: missing provenance_date",
+                s.meta.id
+            );
+            assert!(
+                !s.meta.description.is_empty(),
+                "{}: missing description",
+                s.meta.id
+            );
+        }
+    }
+
+    #[test]
+    fn filter_rust_scenarios() {
+        let r = build_registry();
+        let rust_count = r.filter_by_tier(Tier::Rust).count();
+        assert!(
+            rust_count >= 8,
+            "expected >= 8 Tier::Rust scenarios, got {rust_count}"
+        );
+    }
+
+    #[test]
+    fn run_local_science_parity() {
+        let mut h = ValidationHarness::new("test: local-science-parity");
+        (s_local_science_parity::SCENARIO.run)(&mut h);
+        assert!(
+            h.checks.iter().all(|c| c.passed),
+            "local-science-parity had failures: {:?}",
+            h.checks
+                .iter()
+                .filter(|c| !c.passed)
+                .map(|c| &c.label)
+                .collect::<Vec<_>>()
+        );
+        assert!(
+            h.checks.len() >= 30,
+            "expected >=30 checks, got {}",
+            h.checks.len()
+        );
+    }
+
+    #[test]
+    fn run_fao56_et0() {
+        let mut h = ValidationHarness::new("test: fao56-et0");
+        (s_fao56_et0::SCENARIO.run)(&mut h);
+        assert!(
+            h.checks.iter().all(|c| c.passed),
+            "fao56-et0 had failures: {:?}",
+            h.checks
+                .iter()
+                .filter(|c| !c.passed)
+                .map(|c| &c.label)
+                .collect::<Vec<_>>()
+        );
+    }
+
+    #[test]
+    fn run_et0_methods() {
+        let mut h = ValidationHarness::new("test: et0-methods");
+        (s_et0_methods::SCENARIO.run)(&mut h);
+        assert!(h.checks.iter().all(|c| c.passed));
+    }
+
+    #[test]
+    fn run_soil_physics() {
+        let mut h = ValidationHarness::new("test: soil-physics");
+        (s_soil_physics::SCENARIO.run)(&mut h);
+        assert!(h.checks.iter().all(|c| c.passed));
+    }
+
+    #[test]
+    fn run_water_balance() {
+        let mut h = ValidationHarness::new("test: water-balance");
+        (s_water_balance::SCENARIO.run)(&mut h);
+        assert!(h.checks.iter().all(|c| c.passed));
+    }
+
+    #[test]
+    fn run_atlas_pipeline() {
+        let mut h = ValidationHarness::new("test: atlas-pipeline");
+        (s_atlas_pipeline::SCENARIO.run)(&mut h);
+        assert!(h.checks.iter().all(|c| c.passed));
+    }
+
+    #[test]
+    fn run_paper_chain() {
+        let mut h = ValidationHarness::new("test: paper-chain");
+        (s_paper_chain::SCENARIO.run)(&mut h);
+        assert!(h.checks.iter().all(|c| c.passed));
+    }
+
+    #[test]
+    fn run_tier4_math_parity() {
+        let mut h = ValidationHarness::new("test: tier4-math-parity");
+        (s_tier4_math_parity::SCENARIO.run)(&mut h);
+        assert!(h.checks.iter().all(|c| c.passed));
+    }
+
+    #[test]
+    fn run_all_rust_tier_scenarios() {
+        let r = build_registry();
+        for scenario in r.filter_by_tier(Tier::Rust) {
+            let mut h = ValidationHarness::new(&format!("test: {}", scenario.meta.id));
+            (scenario.run)(&mut h);
+            let failures: Vec<_> = h.checks.iter().filter(|c| !c.passed).collect();
+            assert!(
+                failures.is_empty(),
+                "scenario '{}' had {} failures: {:?}",
+                scenario.meta.id,
+                failures.len(),
+                failures.iter().map(|c| &c.label).collect::<Vec<_>>()
+            );
+        }
+    }
+}

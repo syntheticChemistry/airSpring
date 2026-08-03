@@ -6,7 +6,7 @@
 //! - **Tier 2 (IPC)**: Tower health, Node parity, Nest storage — skip if absent
 //! - **Tier 3 (FULL NUCLEUS)**: End-to-end cross-atomic validation
 //!
-//! Pattern: primalSpring exp094_composition_parity / exp095_proto_nucleate_template
+//! Pattern: primalSpring `exp094_composition_parity` / `exp095_proto_nucleate_template`
 //!
 //! Environment:
 //! - `FAMILY_ID` — primal family for socket discovery (default: "default")

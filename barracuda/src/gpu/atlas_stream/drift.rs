@@ -234,3 +234,93 @@ impl Default for MonitoredAtlasStream {
         Self::new()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn monitor_default_state() {
+        let m = FitnessDriftMonitor::default();
+        assert!(!m.is_drifting());
+        assert!((m.latest_ne_s() - 1.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn monitor_no_drift_with_stable_fitness() {
+        let mut m = FitnessDriftMonitor::default();
+        for g in 0..10 {
+            m.record(g, 100, 0.85, 0.92);
+        }
+        assert!(!m.is_drifting());
+    }
+
+    #[test]
+    fn monitor_drift_after_consecutive_drops() {
+        let mut m = FitnessDriftMonitor::default();
+        m.record(0, 100, 1.0, 1.0);
+        m.record(1, 100, 0.95, 1.0);
+        assert!(!m.is_drifting());
+
+        m.record(2, 100, 0.3, 0.35);
+        assert!(!m.is_drifting(), "1 drop should not trigger drift");
+        m.record(3, 100, 0.2, 0.25);
+        assert!(!m.is_drifting(), "2 drops should not trigger drift");
+        m.record(4, 100, 0.1, 0.15);
+        assert!(m.is_drifting(), "3 consecutive drops should trigger drift");
+    }
+
+    #[test]
+    fn monitor_recovery_resets_consecutive() {
+        let mut m = FitnessDriftMonitor::default();
+        m.record(0, 100, 1.0, 1.0);
+        m.record(1, 100, 0.3, 0.35);
+        m.record(2, 100, 0.2, 0.25);
+        m.record(3, 100, 0.9, 0.95);
+        assert!(!m.is_drifting());
+        m.record(4, 100, 0.2, 0.25);
+        assert!(!m.is_drifting(), "recovery resets counter");
+    }
+
+    #[test]
+    fn monitor_ne_s_scales_with_population() {
+        let mut m = FitnessDriftMonitor::default();
+        m.record(0, 50, 1.0, 1.0);
+        m.record(1, 50, 0.5, 0.6);
+        assert!(
+            m.latest_ne_s() > 20.0 && m.latest_ne_s() < 30.0,
+            "N_e*s should be ~25 (0.5/1.0 * 50), got {}",
+            m.latest_ne_s()
+        );
+    }
+
+    #[test]
+    fn monitor_best_historical_tracks_peak() {
+        let mut m = FitnessDriftMonitor::default();
+        m.record(0, 10, 0.5, 0.6);
+        m.record(1, 10, 1.0, 1.2);
+        m.record(2, 10, 0.7, 0.8);
+        let ne_s = m.latest_ne_s();
+        let expected = (0.7 / 1.0) * 10.0;
+        assert!(
+            (ne_s - expected).abs() < 0.01,
+            "N_e*s should track peak mean, expected {expected}, got {ne_s}"
+        );
+    }
+
+    #[test]
+    fn monitored_stream_starts_clean() {
+        let ms = MonitoredAtlasStream::new();
+        assert!(!ms.has_regime_changes());
+        assert!(ms.regime_changes().is_empty());
+        assert!(!ms.is_drifting());
+    }
+
+    #[test]
+    fn monitored_stream_reset() {
+        let mut ms = MonitoredAtlasStream::new();
+        ms.reset();
+        assert!(!ms.has_regime_changes());
+        assert!(!ms.is_drifting());
+    }
+}
