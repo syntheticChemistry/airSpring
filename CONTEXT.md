@@ -38,7 +38,7 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - **Architecture:** 5-member workspace (`barracuda`, `metalForge/forge`, 3 experiment crates)
 - **Communication:** JSON-RPC 2.0 over Unix sockets + TCP (biomeOS capability routing, Songbird sovereign transport)
 - **License:** AGPL-3.0-or-later
-- **Lib tests:** 1,154 (barracuda, `cargo test --all-features --lib`)
+- **Lib tests:** 1,172 (barracuda, `cargo test --all-features --lib`)
 - **Forge tests:** 68 (metalForge)
 - **Grand total:** 1,240 (workspace)
 - **Binaries:** 98 (89 validation, 4 bench, 3 operational, 1 UniBin, 1 guidestone)

@@ -1,9 +1,9 @@
 # airSpring NUCLEUS Integration
 
-**Date:** May 17, 2026
+**Date:** August 3, 2026
 **Status:** Complete — deployment graph + capability spec + Neural API bridge operational, 28/28 pipeline PASS (Exp 084-087)
-**Gate:** Eastgate (i9-12900K, RTX 4070, 32GB DDR5, 2TB NVMe, BrainChip Akida NPU)
-**Invariant:** 1,061 Rust lib tests + 46/46 GPU math + 75/75 cross-validation + 1393 atlas must pass regardless of deployment mode
+**Gate:** westGate (Data NAS, 519 GB / 130 datasets on ZFS)
+**Invariant:** 1,172 Rust lib tests + 68 forge + 46/46 GPU math + 75/75 cross-validation must pass regardless of deployment mode
 
 ---
 
@@ -17,7 +17,7 @@ airSpring (Spring — validation consumer)
     │       └── NestGate providers (Open-Meteo, NOAA, USDA NASS)
     │               download → ZFS store with provenance
     │
-    ├── barracuda/ (Rust validation, 1,061 lib tests, 94 binaries)
+    ├── barracuda/ (Rust validation, 1,172 lib tests, 98 binaries)
     │       │
     │       ├── eco:: modules (CPU validated, 14 domain modules)
     │       │

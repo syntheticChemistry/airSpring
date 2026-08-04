@@ -10,7 +10,7 @@ springs = ["airspring", "hotspring", "wetspring", "neuralspring", "groundspring"
 
 ## Status
 
-- **1,446 Rust tests** passing (1,061 lib + 316 integration + 69 forge), 0 failed
+- **1,240 Rust workspace tests** passing (1,172 lib + 68 forge), 0 failed
 - **1,284 Python baseline checks** (60 papers reproduced)
 - **90 experiments** across 12 categories + 3 composition crates (exp001 local parity, exp002 composition parity, exp003 foundation targets)
 - **14.3× geometric mean** Rust-vs-Python speedup (25/25 algorithms, 21/21 CPU-GPU parity)

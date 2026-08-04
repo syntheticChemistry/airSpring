@@ -80,7 +80,7 @@ The study answers four questions:
 | West Olive (blueberry) | 0.257 | 0.963 | 639.1 mm | 635.2 mm |
 | **Overall** | **0.267** | **0.967** | — | — |
 
-### Phase 1 (Rust BarraCuda): 1,061 lib + 316 integration + 69 forge tests, 98 binaries
+### Phase 1 (Rust BarraCuda): 1,172 lib + 68 forge = 1,240 workspace tests, 98 binaries
 
 | Binary | Checks | Key Validation |
 |--------|:------:|----------------|

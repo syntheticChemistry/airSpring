@@ -1,6 +1,6 @@
 # airSpring wateringHole
 
-**Updated**: August 3, 2026 | **Version**: v0.10.0 (Wave 156b — westGate Data NAS; deep debt CLEAN; workspace consolidated; 1,157 tests)
+**Updated**: August 3, 2026 | **Version**: v0.10.0 (Wave 156b — westGate Data NAS; deep debt CLEAN; workspace consolidated; 1,240 tests; pure-Rust SPI/gamma; zero panicking ctors)
 **Purpose**: Spring-local handoffs to barraCuda (math) / ToadStool (dispatch), biomeOS, and NUCLEUS ecosystem
 
 ## Active Handoffs

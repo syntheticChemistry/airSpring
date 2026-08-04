@@ -1,6 +1,6 @@
 # airSpring — BarraCuda Requirements
 
-**Last Updated**: June 10, 2026 (Wave 107 — 1,061 lib + 316 integration + 69 forge = 1,446 tests, 98 binaries, 90 experiments, barraCuda 0.4.0 (wgpu 28, DeviceCapabilities API), ops 0-19 upstream via `BatchedElementwiseF64`, `PrecisionRoutingAdvice` wired, 57 capabilities, 7 deploy graphs, guideStone L4 (targeting L6), 10 UniBin validation scenarios, Tier 4 IPC-first `default = []`, Tier 2 IPC wired (toadstool.validate + precision.route). CPU vs Python 25/25 parity incl. Freundlich)
+**Last Updated**: August 3, 2026 (Wave 156b — 1,172 lib + 68 forge = 1,240 workspace tests, 98 binaries, 90 experiments, barraCuda 0.4.0 (wgpu 28), deep debt CLEAN, pure-Rust SPI/gamma, zero stubs, zero panicking ctors, Tier 4 IPC-first, westGate Data NAS)
 **Purpose**: GPU kernel requirements, evolution status, and compute pipeline planning
 **ToadStool HEAD**: S94b — barraCuda v0.4.0 standalone (wgpu 28, DeviceCapabilities replaces GpuDriverProfile)
 
@@ -78,7 +78,7 @@
 
 ### Layer 1: BarraCuda CPU (validated, complete)
 
-All algorithms implemented in pure Rust. 1,061 lib tests, 98 binaries, 1,446 total checks.
+All algorithms implemented in pure Rust. 1,172 lib tests, 98 binaries, 1,240 workspace total.
 This is the baseline for correctness — GPU and metalForge results must match.
 CPU benchmarks: 14.3× geometric mean speedup vs Python (25/25 parity across
 ET₀, Thornthwaite, Hargreaves, Priestley-Taylor, Makkink, Blaney-Criddle,
@@ -214,7 +214,7 @@ The wateringHole evolution path defines three validation tiers:
 |------|------|---------------------|
 | **Tier 0** (Python) | Correctness reference | **Complete** — 56 benchmark JSONs, 1284/1284 PASS |
 | **Tier 1** (Kokkos/Cabana) | Performance reference (external) | **Not started** — no Kokkos benchmarks |
-| **Tier 2** (BarraCuda) | Sovereign implementation | **Complete** — 1,061 lib + 316 integration + 69 forge tests, 94 validation binaries |
+| **Tier 2** (BarraCuda) | Sovereign implementation | **Complete** — 1,172 lib + 68 forge = 1,240 workspace tests, 98 validation binaries |
 
 ### Cross-Spring Kokkos Baselines (groundSpring V74)
 

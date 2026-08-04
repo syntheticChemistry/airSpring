@@ -55,7 +55,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 
 | Check | Status |
 |-------|--------|
-| `cargo test -p airspring-barracuda --all-features --lib` | **1,154 passed**, 0 failures |
+| `cargo test -p airspring-barracuda --all-features --lib` | **1,172 passed**, 0 failures |
 | `cargo test -p airspring-forge --lib` | **68 passed**, 0 failures |
 | `cargo llvm-cov` | **84.30% line, 87.83% function** |
 | `cargo clippy --all-features (pedantic + nursery, -D warnings)` | **0 warnings** (workspace) |
@@ -225,7 +225,7 @@ airSpring/
 │   ├── bootstrap_jackknife/     # Bootstrap & Jackknife CI (20/20)
 │   ├── drought_index/           # SPI drought index (20/20)
 │   └── requirements.txt
-├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (1,061 lib + 316 integration/doc = 1,373 tests, 98 binaries, barraCuda 0.4.0 / wgpu 28, Edition 2024)
+├── barracuda/                   # Phase 1+3: Rust validation + GPU dispatch (1,172 lib + 68 forge = 1,240 workspace tests, 98 binaries, barraCuda 0.4.0 / wgpu 28, Edition 2024)
 │   ├── src/
 │   │   ├── biomeos/                # biomeOS socket resolution + primal discovery (3 sub-modules)
 │   │   ├── eco/                 # Domain modules (22 validated, 8 ET₀ + runoff + infiltration + VG + Anderson + tissue + cytokine + drought_index)

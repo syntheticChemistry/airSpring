@@ -17,7 +17,7 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 - **Coverage push**: 1,222 → 1,240 tests. New tests: pure-Rust gamma/norm_ppf/SPI (8), foundation targets run/extract coverage (4), validation sink emit paths (4), extract_result_value branches (2).
 - **Stale doc cleanup**: "ureq fallback" → "Songbird IPC" in `open_meteo.rs`.
 - **Gate migration**: westGate Data NAS (519 GB / 130 datasets). Docs updated throughout.
-- **1,089 lib + 68 forge = 1,157 tests**, 0 clippy warnings, clean fmt/doc, 84.30% line coverage.
+- **1,172 lib + 68 forge = 1,240 tests**, 0 clippy warnings, clean fmt/doc, 84.30% line coverage.
 
 ### Wave 107 — 4-Gate Mesh Collective Sync (2026-06-10)
 
