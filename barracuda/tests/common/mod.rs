@@ -23,7 +23,10 @@ pub fn try_create_device() -> Option<std::sync::Arc<barracuda::device::WgpuDevic
 
 /// Catch panics from upstream shader regressions. Returns `None` on panic,
 /// letting the test SKIP rather than FAIL.
-#[allow(dead_code)]
+#[expect(
+    dead_code,
+    reason = "shared test infra — not every integration test uses this"
+)]
 pub fn try_gpu_dispatch<T>(f: impl FnOnce() -> T) -> Option<T> {
     std::panic::catch_unwind(std::panic::AssertUnwindSafe(f)).map_or_else(
         |_| {
@@ -35,7 +38,10 @@ pub fn try_gpu_dispatch<T>(f: impl FnOnce() -> T) -> Option<T> {
 }
 
 /// Get a device or skip the test.
-#[allow(unused_macros)]
+#[expect(
+    unused_macros,
+    reason = "shared test infra — not every integration test uses this"
+)]
 macro_rules! device_or_skip {
     () => {
         match $crate::common::try_create_device() {
@@ -48,5 +54,8 @@ macro_rules! device_or_skip {
     };
 }
 
-#[allow(unused_imports)]
+#[expect(
+    unused_imports,
+    reason = "shared test infra — re-exported for integration tests"
+)]
 pub(crate) use device_or_skip;

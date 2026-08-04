@@ -24,9 +24,9 @@ struct Target {
     id: String,
     paper: String,
     description: String,
-    #[allow(dead_code)]
+    #[expect(dead_code, reason = "parsed for future numerical parity validation")]
     expected: f64,
-    #[allow(dead_code)]
+    #[expect(dead_code, reason = "parsed for future numerical parity validation")]
     tolerance: f64,
     method: Option<String>,
 }

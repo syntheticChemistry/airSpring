@@ -19,12 +19,7 @@
 //! - WMO (2012) SPI User Guide. WMO-No. 1090.
 //! - Thom HCS (1958) A note on the gamma distribution. Monthly Weather Rev 86(4).
 
-#[cfg(feature = "local")]
 use crate::tolerances::POSITIVE_DATA_GUARD;
-#[cfg(feature = "local")]
-use barracuda::special::gamma::regularized_gamma_p as upstream_gamma_p;
-#[cfg(feature = "local")]
-use barracuda::stats::normal::norm_ppf;
 
 /// WMO drought classification category.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -118,22 +113,137 @@ pub fn gamma_mle_fit(data: &[f64]) -> Option<GammaParams> {
 
 /// Gamma CDF: P(X ≤ x) for X ~ Gamma(α, β).
 ///
-/// Delegates to `barracuda::special::gamma::regularized_gamma_p` (upstream).
-/// Local `gamma_series`/`gamma_cf` removed in v0.7.5 (Write→Absorb→Lean).
-#[cfg(feature = "local")]
+/// Pure-Rust regularized lower incomplete gamma function via series expansion
+/// (small x/α) or continued fraction (large x/α). Matches the Numerical
+/// Recipes approach used by upstream `barracuda::special::gamma`.
 #[must_use]
 pub fn gamma_cdf(x: f64, params: &GammaParams) -> f64 {
     if x <= 0.0 {
         return 0.0;
     }
-    upstream_gamma_p(params.alpha, x / params.beta).unwrap_or(0.0)
+    regularized_gamma_p(params.alpha, x / params.beta)
 }
 
-/// IPC-only build: gamma special functions require barraCuda linkage.
-#[cfg(not(feature = "local"))]
-#[must_use]
-pub const fn gamma_cdf(_x: f64, _params: &GammaParams) -> f64 {
-    f64::NAN
+/// Regularized lower incomplete gamma P(a, x) = γ(a,x) / Γ(a).
+fn regularized_gamma_p(a: f64, x: f64) -> f64 {
+    if x < 0.0 || a <= 0.0 {
+        return 0.0;
+    }
+    if x == 0.0 {
+        return 0.0;
+    }
+    if x < a + 1.0 {
+        gamma_series(a, x)
+    } else {
+        1.0 - gamma_cf(a, x)
+    }
+}
+
+/// Series expansion for P(a, x) when x < a + 1.
+fn gamma_series(a: f64, x: f64) -> f64 {
+    let ln_gamma_a = ln_gamma(a);
+    let mut ap = a;
+    let mut sum = 1.0 / a;
+    let mut del = sum;
+    for _ in 0..200 {
+        ap += 1.0;
+        del *= x / ap;
+        sum += del;
+        if del.abs() < sum.abs() * 3e-14 {
+            break;
+        }
+    }
+    sum * a.mul_add(x.ln(), -x - ln_gamma_a).exp()
+}
+
+/// Continued fraction for Q(a, x) = 1 - P(a, x) when x >= a + 1.
+/// Lentz's modified algorithm.
+#[expect(
+    clippy::many_single_char_names,
+    reason = "Numerical Recipes CF variables"
+)]
+fn gamma_cf(a: f64, x: f64) -> f64 {
+    let ln_gamma_a = ln_gamma(a);
+    let mut b = x + 1.0 - a;
+    let mut c = 1.0 / POSITIVE_DATA_GUARD;
+    let mut d = 1.0 / b;
+    let mut h = d;
+    for i in 1..=200 {
+        let fi = f64::from(i);
+        let an = -fi * (fi - a);
+        b += 2.0;
+        d = an.mul_add(d, b);
+        if d.abs() < POSITIVE_DATA_GUARD {
+            d = POSITIVE_DATA_GUARD;
+        }
+        c = b + an / c;
+        if c.abs() < POSITIVE_DATA_GUARD {
+            c = POSITIVE_DATA_GUARD;
+        }
+        d = 1.0 / d;
+        let del = d * c;
+        h *= del;
+        if (del - 1.0).abs() < 3e-14 {
+            break;
+        }
+    }
+    h * a.mul_add(x.ln(), -x - ln_gamma_a).exp()
+}
+
+/// Lanczos approximation to ln(Γ(x)) for x > 0.
+fn ln_gamma(x: f64) -> f64 {
+    const COEFFS: [f64; 7] = [
+        676.520_368_121_885_1,
+        -1_259.139_216_722_403,
+        771.323_428_777_653_1,
+        -176.615_029_162_140_6,
+        12.507_343_278_686_905,
+        -0.138_571_095_265_720_1,
+        9.984_369_578_019_572e-6,
+    ];
+    const LN_SQRT_2PI: f64 = 0.918_938_533_204_672_8;
+    let y = x - 1.0;
+    let mut s = 0.999_999_999_999_81_f64;
+    for (i, &coeff) in COEFFS.iter().enumerate() {
+        #[expect(clippy::cast_precision_loss, reason = "i < 7, exact")]
+        let idx = i as f64;
+        s += coeff / (y + idx + 1.0);
+    }
+    let t = y + 7.5;
+    (y + 0.5).mul_add(t.ln(), -t) + LN_SQRT_2PI + s.ln()
+}
+
+/// Inverse standard normal CDF (probit function).
+///
+/// Abramowitz & Stegun rational approximation (26.2.23). Accurate to ~4.5e-4
+/// absolute error; adequate for SPI drought classification.
+fn norm_ppf(p: f64) -> f64 {
+    const C0: f64 = 2.515_517;
+    const C1: f64 = 0.802_853;
+    const C2: f64 = 0.010_328;
+    const D1: f64 = 1.432_788;
+    const D2: f64 = 0.189_269;
+    const D3: f64 = 0.001_308;
+
+    if p <= 0.0 {
+        return f64::NEG_INFINITY;
+    }
+    if p >= 1.0 {
+        return f64::INFINITY;
+    }
+    if (p - 0.5).abs() < f64::EPSILON {
+        return 0.0;
+    }
+
+    let half = p < 0.5;
+    let pp = if half { p } else { 1.0 - p };
+    let t = (-2.0 * pp.ln()).sqrt();
+
+    let num = C2.mul_add(t, C1).mul_add(t, C0);
+    let den = D3.mul_add(t, D2).mul_add(t, D1).mul_add(t, 1.0);
+    let z = t - num / den;
+
+    if half { -z } else { z }
 }
 
 /// Compute SPI at a given time scale.
@@ -143,7 +253,6 @@ pub const fn gamma_cdf(_x: f64, _params: &GammaParams) -> f64 {
 ///
 /// Returns a vector of SPI values; `f64::NAN` for months with insufficient
 /// history (first `scale - 1` months).
-#[cfg(feature = "local")]
 #[must_use]
 pub fn compute_spi(monthly_precip: &[f64], scale: usize) -> Vec<f64> {
     let n = monthly_precip.len();
@@ -187,13 +296,6 @@ pub fn compute_spi(monthly_precip: &[f64], scale: usize) -> Vec<f64> {
     spi
 }
 
-/// IPC-only: quantile mapping requires barraCuda normal/gamma specials.
-#[cfg(not(feature = "local"))]
-#[must_use]
-pub fn compute_spi(monthly_precip: &[f64], _scale: usize) -> Vec<f64> {
-    vec![f64::NAN; monthly_precip.len()]
-}
-
 #[cfg(test)]
 #[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
@@ -217,7 +319,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "local")]
     fn test_gamma_cdf_bounds() {
         let params = GammaParams {
             alpha: 2.0,
@@ -229,7 +330,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "local")]
     fn test_spi_basic() {
         let precip = vec![50.0; 24];
         let spi = compute_spi(&precip, 1);
@@ -240,7 +340,6 @@ mod tests {
     }
 
     #[test]
-    #[cfg(feature = "local")]
     fn test_spi_scale_nan_prefix() {
         let precip = vec![50.0; 12];
         let spi3 = compute_spi(&precip, 3);
@@ -258,5 +357,65 @@ mod tests {
         assert_eq!(DroughtClass::from_spi(-1.2), DroughtClass::ModeratelyDry);
         assert_eq!(DroughtClass::from_spi(-1.7), DroughtClass::SeverelyDry);
         assert_eq!(DroughtClass::from_spi(-2.5), DroughtClass::ExtremelyDry);
+    }
+
+    #[test]
+    fn ln_gamma_known_values() {
+        assert!((ln_gamma(1.0)).abs() < 1e-10, "Γ(1) = 1, ln(1) = 0");
+        let ln_g5 = ln_gamma(5.0);
+        let expected = (24.0_f64).ln();
+        assert!((ln_g5 - expected).abs() < 1e-8, "Γ(5) = 24");
+    }
+
+    #[test]
+    fn regularized_gamma_p_known() {
+        let p = regularized_gamma_p(1.0, 1.0);
+        let expected = 1.0 - (-1.0_f64).exp();
+        assert!((p - expected).abs() < 1e-8, "P(1,1) ≈ 1-e⁻¹ ≈ 0.6321");
+    }
+
+    #[test]
+    fn regularized_gamma_p_bounds() {
+        assert!((regularized_gamma_p(2.0, 0.0)).abs() < 1e-15);
+        assert!(regularized_gamma_p(2.0, 100.0) > 0.999);
+    }
+
+    #[test]
+    fn norm_ppf_symmetry() {
+        let z_low = norm_ppf(0.025);
+        let z_high = norm_ppf(0.975);
+        assert!((z_low + z_high).abs() < 0.01, "ppf(0.025) + ppf(0.975) ≈ 0");
+        assert!(z_low < -1.9 && z_low > -2.0, "ppf(0.025) ≈ -1.96");
+    }
+
+    #[test]
+    fn norm_ppf_median() {
+        assert!((norm_ppf(0.5)).abs() < 1e-10, "ppf(0.5) = 0");
+    }
+
+    #[test]
+    fn norm_ppf_extremes() {
+        assert!(norm_ppf(0.0).is_infinite() && norm_ppf(0.0) < 0.0);
+        assert!(norm_ppf(1.0).is_infinite() && norm_ppf(1.0) > 0.0);
+    }
+
+    #[test]
+    fn spi_empty_and_zero_scale() {
+        assert!(compute_spi(&[], 1).is_empty());
+        let spi0 = compute_spi(&[50.0; 12], 0);
+        assert!(spi0.iter().all(|v| v.is_nan()));
+    }
+
+    #[test]
+    fn spi_drought_detection() {
+        let mut precip = vec![80.0; 12];
+        precip.extend_from_slice(&[10.0; 12]);
+        let spi = compute_spi(&precip, 1);
+        let last = spi[23];
+        assert!(last.is_finite());
+        assert!(
+            last < 0.0,
+            "drought months should have negative SPI: {last}"
+        );
     }
 }

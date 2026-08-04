@@ -1,6 +1,6 @@
 # Context — airSpring
 
-**Doc sync:** 2026-08-03 (v0.10.0; Wave 156b — westGate Data NAS; 519 GB / 130 datasets; workspace Cargo.toml; deep debt CLEAN; 1,222 tests).
+**Doc sync:** 2026-08-03 (v0.10.0; Wave 156b — westGate Data NAS; 519 GB / 130 datasets; workspace Cargo.toml; deep debt CLEAN; 1,240 tests; pure-Rust SPI/gamma; zero panicking ctors).
 
 ## What This Is
 
@@ -40,7 +40,7 @@ and mixed-hardware dispatch via metalForge (CPU + GPU + NPU).
 - **License:** AGPL-3.0-or-later
 - **Lib tests:** 1,154 (barracuda, `cargo test --all-features --lib`)
 - **Forge tests:** 68 (metalForge)
-- **Grand total:** 1,222 (workspace)
+- **Grand total:** 1,240 (workspace)
 - **Binaries:** 98 (89 validation, 4 bench, 3 operational, 1 UniBin, 1 guidestone)
 - **Proptest invariants:** 7 (SVP, delta, Hargreaves, TAW, RAW, Ks)
 - **Line coverage:** 84.30% line, 87.83% function (cargo llvm-cov)

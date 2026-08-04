@@ -62,17 +62,11 @@ impl OpenMeteoProvider {
 
     /// Create with auto-discovered transport (Songbird IPC).
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if no HTTP transport is available. Prefer [`Self::try_new`]
-    /// for fallible construction.
-    #[must_use]
-    #[expect(
-        clippy::expect_used,
-        reason = "panicking ctor retained for API compat; prefer try_new()"
-    )]
-    pub fn new() -> Self {
-        Self::try_new().expect("no HTTP transport available")
+    /// Returns `Err` if no HTTP transport is available.
+    pub fn new() -> Result<Self, DataError> {
+        Self::try_new()
     }
 
     /// Create with a specific transport (for testing or explicit tier selection).
@@ -155,12 +149,6 @@ impl OpenMeteoProvider {
             .collect();
 
         Ok(records)
-    }
-}
-
-impl Default for OpenMeteoProvider {
-    fn default() -> Self {
-        Self::new()
     }
 }
 

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
+use crate::primal_names;
 use crate::rpc::Transport;
 
 use super::*;
@@ -78,7 +79,11 @@ fn provenance_completion_to_json() {
         commit_id: "commit-456".to_string(),
         braid_id: "braid-789".to_string(),
         status: "complete".to_string(),
-        primals_reached: vec!["rhizoCrypt", "loamSpine", "sweetGrass"],
+        primals_reached: vec![
+            primal_names::RHIZOCRYPT,
+            primal_names::LOAMSPINE,
+            primal_names::SWEETGRASS,
+        ],
     };
     let j = c.to_json();
     assert_eq!(j["provenance"], "complete");
@@ -95,7 +100,7 @@ fn partial_completion_to_json() {
         commit_id: String::new(),
         braid_id: String::new(),
         status: "partial".to_string(),
-        primals_reached: vec!["rhizoCrypt"],
+        primals_reached: vec![primal_names::RHIZOCRYPT],
     };
     let j = c.to_json();
     assert_eq!(j["provenance"], "partial");

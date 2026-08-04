@@ -216,7 +216,10 @@ fn build_params_for_target(target: &toml::Value, method: &str) -> serde_json::Va
 }
 
 #[cfg(test)]
+#[expect(clippy::unwrap_used, reason = "test code uses unwrap for clarity")]
 mod tests {
+    use serial_test::serial;
+
     use super::*;
 
     #[test]
@@ -422,5 +425,129 @@ mod tests {
         .unwrap();
         let params = build_params_for_target(&target, "science.gamma_cdf");
         assert!(params.get("x").is_some());
+    }
+
+    #[test]
+    fn extract_result_all_method_keys() {
+        let spi = serde_json::json!({"spi": -1.5});
+        assert_eq!(
+            extract_result_value(&spi, "science.spi_drought_index"),
+            Some(-1.5)
+        );
+        let gdd = serde_json::json!({"gdd": 450.0});
+        assert_eq!(extract_result_value(&gdd, "science.gdd"), Some(450.0));
+        let h = serde_json::json!({"h_prime": 2.1});
+        assert_eq!(
+            extract_result_value(&h, "science.shannon_diversity"),
+            Some(2.1)
+        );
+        let runoff = serde_json::json!({"runoff_mm": 12.0});
+        assert_eq!(
+            extract_result_value(&runoff, "science.scs_cn_runoff"),
+            Some(12.0)
+        );
+        let inf = serde_json::json!({"infiltration_mm": 5.5});
+        assert_eq!(
+            extract_result_value(&inf, "science.green_ampt_infiltration"),
+            Some(5.5)
+        );
+        let fc = serde_json::json!({"fc": 0.28});
+        assert_eq!(
+            extract_result_value(&fc, "science.pedotransfer_saxton_rawls"),
+            Some(0.28)
+        );
+        let dual = serde_json::json!({"et_adj_mm": 3.2});
+        assert_eq!(extract_result_value(&dual, "science.dual_kc"), Some(3.2));
+        let ya = serde_json::json!({"ya_fraction": 0.85});
+        assert_eq!(
+            extract_result_value(&ya, "science.yield_response"),
+            Some(0.85)
+        );
+        let pt = serde_json::json!({"pet_mm": 4.1});
+        assert_eq!(
+            extract_result_value(&pt, "science.et0_priestley_taylor"),
+            Some(4.1)
+        );
+    }
+
+    #[test]
+    fn extract_result_secondary_key() {
+        let val = serde_json::json!({"result": 7.0});
+        assert_eq!(
+            extract_result_value(&val, "science.unknown_method"),
+            Some(7.0)
+        );
+    }
+
+    #[test]
+    fn map_paper_additional_methods() {
+        assert_eq!(
+            map_paper_to_method("MAKKINK", ""),
+            Some("science.et0_makkink")
+        );
+        assert_eq!(map_paper_to_method("TURC", ""), Some("science.et0_turc"));
+        assert_eq!(map_paper_to_method("HAMON", ""), Some("science.et0_hamon"));
+        assert_eq!(
+            map_paper_to_method("BLANEY_CRIDDLE", ""),
+            Some("science.et0_blaney_criddle")
+        );
+        assert_eq!(
+            map_paper_to_method("PRIESTLEY_TAYLOR", ""),
+            Some("science.et0_priestley_taylor")
+        );
+    }
+
+    #[test]
+    fn build_params_thornthwaite_unknown_city() {
+        let target: toml::Value = toml::from_str(r#"id = "et0_paris_france""#).unwrap();
+        let params = build_params_for_target(&target, "science.thornthwaite");
+        assert_eq!(params, serde_json::json!({}));
+    }
+
+    #[test]
+    #[serial]
+    fn run_with_missing_targets_file() {
+        let _guard = crate::testutil::EnvGuard::set(
+            "FOUNDATION_TARGETS_PATH",
+            "/tmp/airspring_test_nonexistent_targets.toml",
+        );
+        let mut h = ValidationHarness::new("foundation-test-missing");
+        run(&mut h);
+        assert_eq!(h.total_count(), 0, "no checks when targets file absent");
+    }
+
+    #[test]
+    #[serial]
+    fn run_with_synthetic_targets() {
+        let dir = std::env::temp_dir().join("airspring_ft_test");
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("targets.toml");
+        std::fs::write(
+            &path,
+            r#"
+[[targets]]
+id = "test_gdd"
+paper = "GDD"
+unit = "qualitative_match"
+
+[[targets]]
+id = "test_unknown"
+paper = "NONEXISTENT_PAPER"
+unit = "mm"
+expected_value = 99.0
+tolerance = 0.1
+"#,
+        )
+        .unwrap();
+
+        let _guard =
+            crate::testutil::EnvGuard::set("FOUNDATION_TARGETS_PATH", path.to_str().unwrap());
+        let mut h = ValidationHarness::new("foundation-test-synth");
+        run(&mut h);
+        assert!(
+            h.total_count() >= 1,
+            "at least 1 check for known method target"
+        );
+        std::fs::remove_dir_all(&dir).unwrap();
     }
 }

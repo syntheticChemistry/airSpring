@@ -2,7 +2,7 @@
 
 **Sovereign compute for precision agriculture, irrigation science, and environmental systems.**
 **Date**: August 3, 2026
-**Version**: v0.10.0 (Wave 156b — westGate Data NAS; deep debt CLEAN; workspace consolidated; 1,157 tests; pure-Rust fitting; zero stubs)
+**Version**: v0.10.0 (Wave 156b — westGate Data NAS; deep debt CLEAN; workspace consolidated; 1,240 tests; pure-Rust SPI/gamma; zero stubs; zero panicking ctors)
 **License**: AGPL-3.0-or-later
 
 airSpring is the ecological sciences validation study in the [ecoPrimals](https://github.com/ecoPrimals) ecosystem. Where **hotSpring** validates nuclear physics (clean math, f64) and **wetSpring** validates *points in a system* (microbiome, mass spectra, PFAS), airSpring validates *systems themselves* — agricultural fields, soil-plant-atmosphere continua, irrigation networks, and land-water-energy interactions.
@@ -19,7 +19,7 @@ Paper benchmarks → Python/R baselines → Real open data → Rust (BarraCuda C
 |-------|--------|------------|
 | Phase 0: Paper baselines (Python) | **1,284/1,284 PASS** | 60 papers: FAO-56, soil, IoT, WB, dual Kc, Richards, biochar, yield, CW2D, 8 ET₀ methods, GDD, pedotransfer, ensemble, bias correction, parity, dispatch, Anderson coupling, SCS-CN + Green-Ampt (coupled), VG inverse, full-season WB, MC ET₀ uncertainty, bootstrap/jackknife CI, SPI drought index |
 | Phase 0+: Real data pipeline | **15,300 station-days** | ET₀ R²=0.97 vs Open-Meteo (100 Michigan stations) |
-| Phase 1: Rust validation | **1,154 lib (barracuda) + 68 forge = 1,222 total** | 98 binaries, 5-member workspace, deep debt CLEAN |
+| Phase 1: Rust validation | **1,172 lib (barracuda) + 68 forge = 1,240 total** | 98 binaries, 5-member workspace, deep debt CLEAN |
 | Phase 1.5: CPU Benchmark | **13,000× atlas-scale** | Rust vs Python: 10M ET₀/s, 6.8M field-days/s (25/25 parity incl. Freundlich) |
 | Phase 2: Cross-validation | **75/75 MATCH** | Python↔Rust identical (tol=1e-5), Richards + isotherm included |
 | Phase 2.5: Tier B→A GPU | **4 ops GPU-first** | Hargreaves (op=6), Kc climate (op=7), dual Kc (op=8), sensor cal (op=5) — ToadStool S70+ absorbed |

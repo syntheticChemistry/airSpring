@@ -8,9 +8,13 @@ All notable changes to airSpring follow [Keep a Changelog](https://keepachangelo
 
 - **Workspace consolidation**: Root `Cargo.toml` with 5 members, shared `[workspace.dependencies]` (16 deps), `[workspace.package]`, `[workspace.lints.clippy]`, single `Cargo.lock`. Optimizes compile times and enforces uniform lint/dep versions.
 - **Stub evolution**: `eco/correction.rs` `cfg(not(feature = "local"))` stubs replaced with pure-Rust implementations (OLS, Cramer's rule, Tikhonov regularization). No feature gates on math functions.
-- **Hardcoding elimination**: `provenance.rs` camelCase literals → `primal_names::*`, `validate_gate_composition.rs` → `PRIMAL_NAME`, `neural.rs` → `BIOMEOS_SOCKET_SUBDIR`/`NEURAL_API_DRIVER`, `provider.rs` → `SOCKET_DIR_SEGMENT`.
+- **SPI/gamma pure-Rust**: `eco/drought_index.rs` `cfg(not(feature = "local"))` NaN stubs replaced with pure-Rust regularized gamma function (series + CF), Lanczos `ln_gamma`, and Abramowitz & Stegun inverse normal CDF. All SPI/drought tests now run in IPC-only builds.
+- **Panicking ctor evolution**: `OpenMeteoProvider::new()` and `NassProvider::new()` evolved from `.expect()` panic to fallible `Result<Self, DataError>`. Zero panicking constructors in library code.
+- **Hardcoding elimination**: `provenance.rs` + `provenance_tests.rs` camelCase literals → `primal_names::*`, `validate_gate_composition.rs` → `PRIMAL_NAME`, `neural.rs` → `BIOMEOS_SOCKET_SUBDIR`/`NEURAL_API_DRIVER`, `provider.rs` → `SOCKET_DIR_SEGMENT`.
+- **Lint hygiene**: `#[allow]` → `#[expect(reason)]` in `tests/common/mod.rs` and `exp003`. Consistent `#[expect]` with reasons throughout.
 - **GPU test centralization**: `gpu_or_skip!` macro in `testutil/mod.rs` replaces 52/60 inline skip patterns across 23 GPU test modules + 2 integration tests.
 - **File size compliance**: `richards.rs` 826→796L (helper extraction), `nucleus.rs` 829→272+612L (split to `nucleus/{mod,mesh}.rs`). Zero files over 800L.
+- **Coverage push**: 1,222 → 1,240 tests. New tests: pure-Rust gamma/norm_ppf/SPI (8), foundation targets run/extract coverage (4), validation sink emit paths (4), extract_result_value branches (2).
 - **Stale doc cleanup**: "ureq fallback" → "Songbird IPC" in `open_meteo.rs`.
 - **Gate migration**: westGate Data NAS (519 GB / 130 datasets). Docs updated throughout.
 - **1,089 lib + 68 forge = 1,157 tests**, 0 clippy warnings, clean fmt/doc, 84.30% line coverage.

@@ -41,17 +41,11 @@ impl NassProvider {
 
     /// Create with auto-discovered transport.
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if no HTTP transport is available. Prefer [`Self::try_new`]
-    /// for fallible construction.
-    #[must_use]
-    #[expect(
-        clippy::expect_used,
-        reason = "panicking ctor retained for API compat; prefer try_new()"
-    )]
-    pub fn new(api_key: String) -> Self {
-        Self::try_new(api_key).expect("no HTTP transport available")
+    /// Returns `Err` if no HTTP transport is available.
+    pub fn new(api_key: String) -> Result<Self, DataError> {
+        Self::try_new(api_key)
     }
 
     /// Create with a specific transport.

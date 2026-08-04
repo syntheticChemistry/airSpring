@@ -190,4 +190,36 @@ mod tests {
         assert_eq!(checks[3]["mode"], ">");
         assert_eq!(checks[4]["mode"], "abs|rel");
     }
+
+    #[test]
+    fn json_sink_pretty_ctor() {
+        let s = JsonSink::pretty();
+        assert!(s.pretty);
+    }
+
+    #[test]
+    fn json_sink_default_compact() {
+        let s = JsonSink::default();
+        assert!(!s.pretty);
+    }
+
+    #[test]
+    fn check_to_json_failing_check() {
+        let mut h = ValidationHarness::new("fail");
+        h.check_abs("divergent", 10.0, 1.0, 0.001);
+        let json = JsonSink::check_to_json(&h.checks[0]);
+        assert!(!json["passed"].as_bool().unwrap());
+        assert_eq!(json["observed"].as_f64().unwrap(), 10.0);
+        assert_eq!(json["expected"].as_f64().unwrap(), 1.0);
+    }
+
+    #[test]
+    fn json_sink_emit_to_stdout() {
+        let mut h = ValidationHarness::new("emit_test");
+        h.check_bool("flag", true);
+        let sink = JsonSink::default();
+        sink.emit(&h);
+        let pretty_sink = JsonSink::pretty();
+        pretty_sink.emit(&h);
+    }
 }
