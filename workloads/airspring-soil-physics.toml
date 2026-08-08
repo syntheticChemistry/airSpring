@@ -1,0 +1,19 @@
+# airSpring — soil physics validation
+# Richards equation, Green-Ampt infiltration, SCS curve number, Saxton-Rawls pedotransfer
+
+[metadata]
+name = "airspring-soil-physics"
+description = "Richards equation, Green-Ampt infiltration, SCS curve number, Saxton-Rawls pedotransfer"
+version = "0.1.0"
+
+[execution]
+type = "native"
+command = "$SPRINGS_ROOT/airSpring/target/release/validate_soil_physics"
+working_dir = "$SPRINGS_ROOT/airSpring"
+
+[resources]
+max_memory_bytes = 8589934592
+max_cpu_percent = 80.0
+
+[security]
+isolation_level = "process"

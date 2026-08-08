@@ -1,0 +1,19 @@
+# airSpring — ET₀ multi-method validation suite
+# 8 methods: PM, Priestley-Taylor, Thornthwaite, Hargreaves, Makkink, Turc, Hamon, Blaney-Criddle
+
+[metadata]
+name = "airspring-et0-methods"
+description = "8 ET₀ methods validated against peer-reviewed benchmarks and cross-compared"
+version = "0.1.0"
+
+[execution]
+type = "native"
+command = "$SPRINGS_ROOT/airSpring/target/release/validate_et0_methods"
+working_dir = "$SPRINGS_ROOT/airSpring"
+
+[resources]
+max_memory_bytes = 4294967296
+max_cpu_percent = 80.0
+
+[security]
+isolation_level = "process"

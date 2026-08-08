@@ -1,0 +1,23 @@
+# airSpring — full validation suite (structured JSON output)
+# Complete validation via UniBin — all scenarios, Tier 2 ingestion ready
+
+[metadata]
+name = "airspring-full-suite"
+description = "Complete airSpring validation — all scenarios with structured JSON output for Tier 2 ingestion"
+version = "0.1.0"
+
+[execution]
+type = "native"
+command = "$SPRINGS_ROOT/airSpring/target/release/airspring validate --format json"
+working_dir = "$SPRINGS_ROOT/airSpring"
+
+[output]
+format = "json"
+schema = "toadstool-validate-v1"
+
+[resources]
+max_memory_bytes = 16106127360
+max_cpu_percent = 80.0
+
+[security]
+isolation_level = "process"

@@ -1,0 +1,19 @@
+# airSpring — FAO-56 water balance
+# Daily soil water balance, dual crop coefficient, Stewart yield response
+
+[metadata]
+name = "airspring-water-balance"
+description = "FAO-56 daily soil water balance, dual crop coefficient, and Stewart yield response"
+version = "0.1.0"
+
+[execution]
+type = "native"
+command = "$SPRINGS_ROOT/airSpring/target/release/validate_water_balance"
+working_dir = "$SPRINGS_ROOT/airSpring"
+
+[resources]
+max_memory_bytes = 4294967296
+max_cpu_percent = 80.0
+
+[security]
+isolation_level = "process"

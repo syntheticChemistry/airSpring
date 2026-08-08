@@ -1,0 +1,19 @@
+# airSpring — Michigan Crop Water Atlas pipeline
+# 100 stations, 80 years, FAO-56 + yield integration
+
+[metadata]
+name = "airspring-atlas-pipeline"
+description = "Michigan Crop Water Atlas — 100 stations, 80 years, FAO-56 + yield integration"
+version = "0.1.0"
+
+[execution]
+type = "native"
+command = "$SPRINGS_ROOT/airSpring/target/release/validate_atlas"
+working_dir = "$SPRINGS_ROOT/airSpring"
+
+[resources]
+max_memory_bytes = 8589934592
+max_cpu_percent = 80.0
+
+[security]
+isolation_level = "process"
